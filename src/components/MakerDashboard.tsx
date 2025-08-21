@@ -6,9 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Folder, FileText } from 'lucide-react';
-import FileUpload from './FileUpload';
-import FileViewer from './FileViewer';
+import { Plus, Edit, Trash2, FileText, Map, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface UserProfile {
@@ -40,26 +38,6 @@ interface Event {
   created_at: string;
 }
 
-interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string | null;
-  media_type: string | null;
-  media_url: string | null;
-  is_public: boolean;
-  created_at: string;
-}
-
-interface FileItem {
-  id: string;
-  filename: string;
-  file_path: string;
-  file_type: string;
-  file_size: number;
-  mime_type: string;
-  is_public: boolean;
-  created_at: string;
-}
 
 interface MakerDashboardProps {
   profile: UserProfile;
@@ -68,10 +46,6 @@ interface MakerDashboardProps {
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [portfolioFiles, setPortfolioFiles] = useState<FileItem[]>([]);
-  const [conceptFiles, setConceptFiles] = useState<{ [key: string]: FileItem[] }>({});
-  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [newConcept, setNewConcept] = useState({ title: '', description: '' });
   const [editingConcept, setEditingConcept] = useState<string | null>(null);
@@ -100,26 +74,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         if (eventsError) throw eventsError;
         setEvents(eventsData || []);
 
-        // Fetch portfolio items
-        const { data: portfolioData, error: portfolioError } = await supabase
-          .from('portfolio_items')
-          .select('*')
-          .eq('maker_id', profile.user_id)
-          .order('created_at', { ascending: false });
-
-        if (portfolioError) throw portfolioError;
-        setPortfolioItems(portfolioData || []);
-
-        // Fetch portfolio files
-        const { data: portfolioFilesData, error: portfolioFilesError } = await supabase
-          .from('portfolio_files')
-          .select('*')
-          .eq('user_id', profile.user_id)
-          .order('created_at', { ascending: false });
-
-        if (portfolioFilesError) throw portfolioFilesError;
-        setPortfolioFiles(portfolioFilesData || []);
-
       } catch (error: any) {
         console.error('Error fetching data:', error);
         toast({
@@ -134,30 +88,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
 
     fetchData();
   }, [profile.user_id, toast]);
-
-  const fetchConceptFiles = async (conceptId: string) => {
-    try {
-      const { data: conceptFilesData, error } = await supabase
-        .from('concept_files')
-        .select('*')
-        .eq('concept_id', conceptId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      setConceptFiles(prev => ({
-        ...prev,
-        [conceptId]: conceptFilesData || []
-      }));
-    } catch (error: any) {
-      console.error('Error fetching concept files:', error);
-      toast({
-        title: "Feil ved lasting av konseptfiler",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleCreateConcept = async () => {
     if (!newConcept.title.trim()) return;
@@ -212,11 +142,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       });
 
       setConcepts(prev => prev.filter(c => c.id !== conceptId));
-      
-      // Clear concept files if this concept was selected
-      if (selectedConceptId === conceptId) {
-        setSelectedConceptId(null);
-      }
     } catch (error: any) {
       toast({
         title: "Feil ved sletting av konsept",
@@ -246,9 +171,9 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Oversikt</TabsTrigger>
-            <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
+            <TabsTrigger value="map">Live kart</TabsTrigger>
             <TabsTrigger value="concepts">Konsepter</TabsTrigger>
-            <TabsTrigger value="files">Filhåndtering</TabsTrigger>
+            <TabsTrigger value="profile">Profil</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -267,14 +192,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                     <div className="flex justify-between">
                       <span>Arrangementer:</span>
                       <span className="font-semibold">{events.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Porteføljeprosjekter:</span>
-                      <span className="font-semibold">{portfolioItems.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Porteføljefiler:</span>
-                      <span className="font-semibold">{portfolioFiles.length}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -323,76 +240,31 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
             </div>
           </TabsContent>
 
-          <TabsContent value="portfolio" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6">
-              {/* Portfolio Files Upload */}
-              <FileUpload
-                bucketName="portfolio"
-                folderPath={profile.user_id}
-                onFileUploaded={(file) => {
-                  setPortfolioFiles(prev => [file, ...prev]);
-                }}
-              />
-
-              {/* Portfolio Files Viewer */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Folder className="h-4 w-4" />
-                    Mine porteføljefiler
-                  </CardTitle>
-                  <CardDescription>
-                    Alle dine opplastede porteføljefiler
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FileViewer
-                    files={portfolioFiles}
-                    bucketName="portfolio"
-                    canDelete={true}
-                    onFileDeleted={(fileId) => {
-                      setPortfolioFiles(prev => prev.filter(f => f.id !== fileId));
-                    }}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Legacy Portfolio Items */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Porteføljeprosjekter</CardTitle>
-                  <CardDescription>
-                    Dine porteføljeprosjekter og arbeider
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {portfolioItems.map((item) => (
-                      <div key={item.id} className="p-3 border rounded-lg">
-                        <h3 className="font-semibold">{item.title}</h3>
-                        {item.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {item.description}
-                          </p>
-                        )}
-                        <div className="text-xs text-muted-foreground mt-2">
-                          <p>
-                            Type: {item.media_type || 'Ikke spesifisert'} • 
-                            Synlighet: {item.is_public ? 'Offentlig' : 'Privat'} • 
-                            Opprettet: {new Date(item.created_at).toLocaleDateString('no-NO')}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    {portfolioItems.length === 0 && (
-                      <p className="text-center text-muted-foreground py-4">
-                        Du har ikke lagt til noen porteføljeprosjekter ennå
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="map" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Map className="h-5 w-5" />
+                  Live kart
+                </CardTitle>
+                <CardDescription>
+                  Se alle GIGGEN makere på kartet
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Map className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">
+                    Åpne kartet for å se alle GIGGEN makere som har valgt å være synlige
+                  </p>
+                  <Button asChild>
+                    <Link to="/map">
+                      Åpne kart
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="concepts" className="space-y-6">
@@ -464,17 +336,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setSelectedConceptId(concept.id);
-                              fetchConceptFiles(concept.id);
-                            }}
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
-                            Filer
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => setEditingConcept(concept.id)}
                           >
                             <Edit className="h-3 w-3" />
@@ -498,100 +359,33 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Concept Files Management */}
-            {selectedConceptId && (
-              <div className="space-y-6">
-                <FileUpload
-                  bucketName="concepts"
-                  folderPath={`${profile.user_id}/${selectedConceptId}`}
-                  onFileUploaded={(file) => {
-                    setConceptFiles(prev => ({
-                      ...prev,
-                      [selectedConceptId]: [file, ...(prev[selectedConceptId] || [])]
-                    }));
-                  }}
-                />
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Konseptfiler
-                    </CardTitle>
-                    <CardDescription>
-                      Filer for valgt konsept
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FileViewer
-                      files={conceptFiles[selectedConceptId] || []}
-                      bucketName="concepts"
-                      canDelete={true}
-                      onFileDeleted={(fileId) => {
-                        setConceptFiles(prev => ({
-                          ...prev,
-                          [selectedConceptId]: prev[selectedConceptId]?.filter(f => f.id !== fileId) || []
-                        }));
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </TabsContent>
 
-          <TabsContent value="files" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* All Portfolio Files */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Alle porteføljefiler</CardTitle>
-                  <CardDescription>
-                    Oversikt over alle dine porteføljefiler
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm">Totalt: {portfolioFiles.length} filer</p>
-                    <div className="text-xs text-muted-foreground">
-                      <p>Bilder: {portfolioFiles.filter(f => f.file_type === 'image').length}</p>
-                      <p>Videoer: {portfolioFiles.filter(f => f.file_type === 'video').length}</p>
-                      <p>Lyd: {portfolioFiles.filter(f => f.file_type === 'audio').length}</p>
-                      <p>Dokumenter: {portfolioFiles.filter(f => f.file_type === 'document').length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* All Concept Files */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Alle konseptfiler</CardTitle>
-                  <CardDescription>
-                    Oversikt over alle dine konseptfiler
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {Object.entries(conceptFiles).map(([conceptId, files]) => {
-                      const concept = concepts.find(c => c.id === conceptId);
-                      return (
-                        <div key={conceptId} className="p-2 border rounded">
-                          <p className="font-medium text-sm">{concept?.title || 'Ukjent konsept'}</p>
-                          <p className="text-xs text-muted-foreground">{files.length} filer</p>
-                        </div>
-                      );
-                    })}
-                    {Object.keys(conceptFiles).length === 0 && (
-                      <p className="text-center text-muted-foreground py-4">
-                        Ingen konseptfiler lastet ennå
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Min profil
+                </CardTitle>
+                <CardDescription>
+                  Gå til din profilside for å redigere informasjon og innstillinger
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <User className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">
+                    Se og rediger din profil, portefølje og filhåndtering
+                  </p>
+                  <Button asChild>
+                    <Link to={`/profile/${profile.user_id}`}>
+                      Gå til profil
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       )}
