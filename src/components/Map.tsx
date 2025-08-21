@@ -219,37 +219,41 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           height: 50px;
           border-radius: 50%;
           border: 3px solid #ffffff;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
           cursor: pointer;
           background-size: cover;
           background-position: center;
           background-image: url('${maker.avatar_url}');
           background-color: #f0f0f0;
-          transition: transform 0.2s ease;
+          transition: all 0.2s ease;
+          position: relative;
         `;
         
-        // Add hover effect
+        // Add hover effect for profile pictures
         markerEl.addEventListener('mouseenter', () => {
-          markerEl.style.transform = 'scale(1.1)';
+          markerEl.style.transform = 'scale(1.15)';
+          markerEl.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
         });
         markerEl.addEventListener('mouseleave', () => {
           markerEl.style.transform = 'scale(1)';
+          markerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
         });
       } else {
-        // Standard Mapbox pin style for no profile picture
+        // Red standard pin for makers without profile picture
         markerEl.style.cssText = `
           width: 30px;
           height: 30px;
           border-radius: 50% 50% 50% 0;
-          background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+          background: #dc2626;
           border: 2px solid #ffffff;
           box-shadow: 0 4px 8px rgba(0,0,0,0.3);
           cursor: pointer;
           transform: rotate(-45deg);
           position: relative;
+          transition: transform 0.2s ease;
         `;
         
-        // Add inner dot for standard pin
+        // Add inner white dot for standard red pin
         const innerDot = document.createElement('div');
         innerDot.style.cssText = `
           width: 8px;
@@ -262,9 +266,17 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           transform: translate(-50%, -50%);
         `;
         markerEl.appendChild(innerDot);
+        
+        // Hover effect for red pin
+        markerEl.addEventListener('mouseenter', () => {
+          markerEl.style.transform = 'rotate(-45deg) scale(1.1)';
+        });
+        markerEl.addEventListener('mouseleave', () => {
+          markerEl.style.transform = 'rotate(-45deg) scale(1)';
+        });
       }
 
-      // Create popup with name
+      // Create popup with maker name and info
       const popup = new mapboxgl.Popup({ 
         offset: 25,
         closeButton: true,
@@ -278,14 +290,18 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
               style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 8px; object-fit: cover; border: 2px solid #e0e0e0;"
               onerror="this.style.display='none'"
             />
-          ` : ''}
+          ` : `
+            <div style="width: 40px; height: 40px; background: #dc2626; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
+              ${maker.display_name.charAt(0).toUpperCase()}
+            </div>
+          `}
           <h3 style="margin: 0 0 6px 0; font-weight: bold; font-size: 16px; color: #333;">${maker.display_name}</h3>
           <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">${maker.address}</p>
           <a 
             href="/profile/${maker.id}" 
-            style="display: inline-block; padding: 6px 12px; background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: opacity 0.2s;"
-            onmouseover="this.style.opacity='0.9'"
-            onmouseout="this.style.opacity='1'"
+            style="display: inline-block; padding: 6px 12px; background: #dc2626; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#b91c1c'"
+            onmouseout="this.style.backgroundColor='#dc2626'"
           >
             Se profil
           </a>
