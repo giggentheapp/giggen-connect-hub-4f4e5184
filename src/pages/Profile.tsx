@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import FileViewerByPath from '@/components/FileViewerByPath';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Eye, EyeOff, Settings } from 'lucide-react';
+import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ProfileData {
@@ -131,6 +131,16 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
+      {/* Back button */}
+      <div className="mb-4">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tilbake til oversikt
+          </Link>
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
