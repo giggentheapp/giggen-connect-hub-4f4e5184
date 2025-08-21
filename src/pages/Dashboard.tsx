@@ -8,6 +8,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerDashboard } from '@/components/GoerDashboard';
 import { RLSTestComponent } from '@/components/RLSTestComponent';
+import ProfileTestComponent from '@/components/ProfileTestComponent';
 
 interface UserProfile {
   id: string;
@@ -139,6 +140,21 @@ const Dashboard = () => {
         ) : (
           <GoerDashboard profile={profile} />
         )}
+
+        {/* Profile Test Component */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profil Test Komponent</CardTitle>
+              <CardDescription>
+                Test at profilfunksjonaliteten fungerer som forventet
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileTestComponent />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* RLS Test Component */}
         <div className="mt-12">
