@@ -1,1 +1,7 @@
 project_id = "hkcdyqghfqyrlwjcsrnx"
+
+[functions.geocode-address]
+verify_jwt = false
+
+[functions.get-mapbox-token]
+verify_jwt = false
