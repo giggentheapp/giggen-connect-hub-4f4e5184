@@ -73,11 +73,11 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
     getMapboxToken();
   }, []);
 
-  // Fetch makers with public addresses - runs on every component mount
+  // Fetch makers with public addresses - robust loading with retry
   useEffect(() => {
     console.log('[MAPBOX-MOUNT] Map component mounted, starting fetch process');
     
-    const fetchMakers = async () => {
+    const fetchMakers = async (retryCount = 0) => {
       try {
         console.log('[MAPBOX-FETCH] Starting to fetch makers with public addresses');
         setLoading(true);
@@ -96,7 +96,8 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .eq('is_address_public', true)
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
-          .not('address', 'is', null);
+          .not('address', 'is', null)
+          .order('display_name', { ascending: true });
 
         if (error) {
           console.error('[MAPBOX-ERROR] Database query failed:', error.code, error.message, error.details);
@@ -137,9 +138,17 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         
       } catch (error: any) {
         console.error('[MAPBOX-ERROR] Fetch failed:', error);
+        
+        // Retry logic for reliability
+        if (retryCount < 2) {
+          console.log(`[MAPBOX-RETRY] Retrying fetch (attempt ${retryCount + 2}/3)...`);
+          setTimeout(() => fetchMakers(retryCount + 1), 1000);
+          return;
+        }
+        
         toast({
           title: "Feil ved lasting av kart",
-          description: "Kunne ikke laste makere på kartet",
+          description: "Kunne ikke laste makere på kartet etter flere forsøk",
           variant: "destructive",
         });
       } finally {
@@ -150,7 +159,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
 
     // Always fetch on mount - no conditions
     fetchMakers();
-  }, []); // Empty dependency array to run only on mount/unmount
+  }, []); // Empty dependency array ensures reliable loading
 
   // Initialize map
   useEffect(() => {
@@ -240,9 +249,18 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
 
     console.log(`[MAPBOX-MARKERS] Adding ${makers.length} markers to map`);
 
-    // Clear existing markers first
-    const existingMarkers = document.querySelectorAll('.mapbox-marker');
-    existingMarkers.forEach(marker => marker.remove());
+    // Clear existing markers completely to prevent duplicates
+    const existingMarkers = document.querySelectorAll('.mapbox-marker-container, .mapbox-marker');
+    existingMarkers.forEach(marker => {
+      marker.remove();
+    });
+    
+    // Also clear any Mapbox markers that might be stored
+    if (map.current) {
+      const mapElement = map.current.getCanvasContainer();
+      const allMarkers = mapElement.querySelectorAll('.mapboxgl-marker');
+      allMarkers.forEach(marker => marker.remove());
+    }
 
     // Create markers for each maker
     makers.forEach((maker, index) => {
@@ -255,73 +273,109 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           return;
         }
         
-        // Create custom marker element
+        // Create marker container with name label
+        const markerContainer = document.createElement('div');
+        markerContainer.className = 'mapbox-marker-container';
+        markerContainer.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+          cursor: pointer;
+        `;
+
+        // Create the profile marker element (always circular)
         const markerEl = document.createElement('div');
         markerEl.className = 'mapbox-marker';
-      
-      if (maker.avatar_url) {
-        // Custom profile picture marker
-        markerEl.style.cssText = `
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 3px solid #ffffff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          cursor: pointer;
-          background-size: cover;
-          background-position: center;
-          background-image: url('${maker.avatar_url}');
-          background-color: #f0f0f0;
-          transition: all 0.2s ease;
-          position: relative;
-        `;
         
-        // Add hover effect for profile pictures
-        markerEl.addEventListener('mouseenter', () => {
-          markerEl.style.transform = 'scale(1.15)';
+        if (maker.avatar_url) {
+          // Profile picture marker
+          markerEl.style.cssText = `
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            background-size: cover;
+            background-position: center;
+            background-image: url('${maker.avatar_url}');
+            background-color: #f0f0f0;
+            transition: all 0.2s ease;
+            position: relative;
+          `;
+        } else {
+          // Default avatar marker with initials
+          markerEl.style.cssText = `
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: all 0.2s ease;
+            position: relative;
+          `;
+          
+          // Add initials
+          const initials = maker.display_name
+            .split(' ')
+            .map(name => name.charAt(0))
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+          markerEl.textContent = initials;
+        }
+
+        // Create name label that's always visible
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'mapbox-marker-name';
+        nameLabel.textContent = maker.display_name;
+        nameLabel.style.cssText = `
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 500;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          white-space: nowrap;
+          margin-top: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          max-width: 120px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
+          pointer-events: none;
+        `;
+
+        // Add hover effects for the entire container
+        const addHoverEffects = () => {
+          markerEl.style.transform = 'scale(1.1)';
           markerEl.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
-        });
-        markerEl.addEventListener('mouseleave', () => {
+          nameLabel.style.background = 'rgba(0, 0, 0, 0.9)';
+          nameLabel.style.transform = 'scale(1.05)';
+        };
+
+        const removeHoverEffects = () => {
           markerEl.style.transform = 'scale(1)';
           markerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-        });
-      } else {
-        // Red standard pin for makers without profile picture
-        markerEl.style.cssText = `
-          width: 30px;
-          height: 30px;
-          border-radius: 50% 50% 50% 0;
-          background: #dc2626;
-          border: 2px solid #ffffff;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-          cursor: pointer;
-          transform: rotate(-45deg);
-          position: relative;
-          transition: transform 0.2s ease;
-        `;
-        
-        // Add inner white dot for standard red pin
-        const innerDot = document.createElement('div');
-        innerDot.style.cssText = `
-          width: 8px;
-          height: 8px;
-          background: white;
-          border-radius: 50%;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        `;
-        markerEl.appendChild(innerDot);
-        
-        // Hover effect for red pin
-        markerEl.addEventListener('mouseenter', () => {
-          markerEl.style.transform = 'rotate(-45deg) scale(1.1)';
-        });
-        markerEl.addEventListener('mouseleave', () => {
-          markerEl.style.transform = 'rotate(-45deg) scale(1)';
-        });
-      }
+          nameLabel.style.background = 'rgba(0, 0, 0, 0.8)';
+          nameLabel.style.transform = 'scale(1)';
+        };
+
+        markerContainer.addEventListener('mouseenter', addHoverEffects);
+        markerContainer.addEventListener('mouseleave', removeHoverEffects);
+
+        // Assemble the marker container
+        markerContainer.appendChild(markerEl);
+        markerContainer.appendChild(nameLabel);
 
       // Create popup with maker name and info
       const popup = new mapboxgl.Popup({ 
@@ -359,7 +413,10 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         const markerCoords: [number, number] = [maker.longitude, maker.latitude];
         console.log(`[MAPBOX-MARKER-${index}] Adding marker at coordinates:`, markerCoords);
         
-        const marker = new mapboxgl.Marker(markerEl)
+        const marker = new mapboxgl.Marker({
+          element: markerContainer,
+          anchor: 'bottom'
+        })
           .setLngLat(markerCoords)
           .setPopup(popup)
           .addTo(map.current!);
