@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Folder, FileText } from 'lucide-react';
 import FileUpload from './FileUpload';
 import FileViewer from './FileViewer';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -229,6 +230,11 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">GiggenMaker Dashboard</h2>
+        <Button asChild>
+          <Link to={`/profile/${profile.user_id}`}>
+            Se min profil
+          </Link>
+        </Button>
       </div>
 
       {loading ? (

@@ -232,8 +232,45 @@ export type Database = {
           },
         ]
       }
+      profile_settings: {
+        Row: {
+          created_at: string
+          id: string
+          maker_id: string
+          show_about: boolean
+          show_contact: boolean
+          show_events: boolean
+          show_portfolio: boolean
+          show_techspec: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          maker_id: string
+          show_about?: boolean
+          show_contact?: boolean
+          show_events?: boolean
+          show_portfolio?: boolean
+          show_techspec?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          maker_id?: string
+          show_about?: boolean
+          show_contact?: boolean
+          show_events?: boolean
+          show_portfolio?: boolean
+          show_techspec?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          avatar_url: string | null
           bio: string | null
           contact_info: Json | null
           created_at: string
@@ -244,6 +281,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
@@ -254,6 +292,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
@@ -273,6 +312,16 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_profile_visibility: {
+        Args: { maker_uuid: string }
+        Returns: {
+          show_about: boolean
+          show_contact: boolean
+          show_events: boolean
+          show_portfolio: boolean
+          show_techspec: boolean
+        }[]
       }
       is_maker: {
         Args: { user_uuid: string }
