@@ -77,7 +77,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
   useEffect(() => {
     const fetchMakers = async () => {
       try {
-        console.log('[MAPBOX-ERROR] Starting to fetch makers for map');
+        console.log('[MAPBOX-ERROR] Starting to fetch public makers for map');
         
         const { data, error } = await supabase
           .from('profiles')
@@ -93,14 +93,15 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .eq('role', 'maker')
           .eq('profile_settings.show_on_map', true)
           .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
+          .not('longitude', 'is', null)
+          .not('address', 'is', null);
 
         if (error) {
           console.error('[RLS-DENIED] Error fetching makers:', error.code, error.message, error.details);
           throw error;
         }
 
-        console.log(`[MAPBOX-ERROR] Successfully fetched ${data?.length || 0} makers with map visibility`);
+        console.log(`[MAPBOX-ERROR] Successfully fetched ${data?.length || 0} public makers with address and coordinates`);
 
         const makersData = data?.map(maker => ({
           id: maker.id,
@@ -112,6 +113,10 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         })) || [];
 
         setMakers(makersData);
+        
+        if (makersData.length > 0) {
+          console.log('[MAPBOX-ERROR] Makers ready for map display:', makersData.map(m => ({ name: m.display_name, hasAvatar: !!m.avatar_url })));
+        }
       } catch (error: any) {
         console.error('[MAPBOX-ERROR] Error fetching makers:', error);
         toast({
@@ -148,7 +153,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
 
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/streets-v11', // More colorful and contrasted style
         center: [10.7461, 59.9127], // Oslo, Norway as default center
         zoom: 10,
       });
@@ -162,7 +167,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       );
 
       map.current.on('load', () => {
-        console.log('[MAPBOX-ERROR] Map successfully loaded');
+        console.log('[MAPBOX-ERROR] Map successfully loaded with streets-v11 style');
       });
 
       map.current.on('error', (e) => {
@@ -193,41 +198,94 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
   useEffect(() => {
     if (!map.current || makers.length === 0) return;
 
+    console.log(`[MAPBOX-ERROR] Adding ${makers.length} maker markers to map`);
+
     // Clear existing markers
     const existingMarkers = document.querySelectorAll('.mapbox-marker');
     existingMarkers.forEach(marker => marker.remove());
 
     // Add markers for each maker
-    makers.forEach(maker => {
+    makers.forEach((maker, index) => {
+      console.log(`[MAPBOX-ERROR] Creating marker ${index + 1} for ${maker.display_name}`);
+      
       // Create custom marker element
       const markerEl = document.createElement('div');
       markerEl.className = 'mapbox-marker';
-      markerEl.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        cursor: pointer;
-        background-size: cover;
-        background-position: center;
-        background-image: url('${maker.avatar_url || '/placeholder.svg'}');
-        background-color: #f0f0f0;
-      `;
+      
+      if (maker.avatar_url) {
+        // Custom profile picture marker
+        markerEl.style.cssText = `
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          border: 3px solid #ffffff;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          cursor: pointer;
+          background-size: cover;
+          background-position: center;
+          background-image: url('${maker.avatar_url}');
+          background-color: #f0f0f0;
+          transition: transform 0.2s ease;
+        `;
+        
+        // Add hover effect
+        markerEl.addEventListener('mouseenter', () => {
+          markerEl.style.transform = 'scale(1.1)';
+        });
+        markerEl.addEventListener('mouseleave', () => {
+          markerEl.style.transform = 'scale(1)';
+        });
+      } else {
+        // Standard Mapbox pin style for no profile picture
+        markerEl.style.cssText = `
+          width: 30px;
+          height: 30px;
+          border-radius: 50% 50% 50% 0;
+          background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+          border: 2px solid #ffffff;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          cursor: pointer;
+          transform: rotate(-45deg);
+          position: relative;
+        `;
+        
+        // Add inner dot for standard pin
+        const innerDot = document.createElement('div');
+        innerDot.style.cssText = `
+          width: 8px;
+          height: 8px;
+          background: white;
+          border-radius: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        `;
+        markerEl.appendChild(innerDot);
+      }
 
-      // Create popup content
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div style="text-align: center; padding: 8px;">
-          <img 
-            src="${maker.avatar_url || '/placeholder.svg'}" 
-            alt="${maker.display_name}"
-            style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 8px; object-fit: cover;"
-          />
-          <h3 style="margin: 0 0 4px 0; font-weight: bold;">${maker.display_name}</h3>
-          <p style="margin: 0; font-size: 12px; color: #666;">${maker.address}</p>
+      // Create popup with name
+      const popup = new mapboxgl.Popup({ 
+        offset: 25,
+        closeButton: true,
+        closeOnClick: false
+      }).setHTML(`
+        <div style="text-align: center; padding: 12px; min-width: 200px;">
+          ${maker.avatar_url ? `
+            <img 
+              src="${maker.avatar_url}" 
+              alt="${maker.display_name}"
+              style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 8px; object-fit: cover; border: 2px solid #e0e0e0;"
+              onerror="this.style.display='none'"
+            />
+          ` : ''}
+          <h3 style="margin: 0 0 6px 0; font-weight: bold; font-size: 16px; color: #333;">${maker.display_name}</h3>
+          <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">${maker.address}</p>
           <a 
             href="/profile/${maker.id}" 
-            style="display: inline-block; margin-top: 8px; padding: 4px 8px; background: #007cbf; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;"
+            style="display: inline-block; padding: 6px 12px; background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: opacity 0.2s;"
+            onmouseover="this.style.opacity='0.9'"
+            onmouseout="this.style.opacity='1'"
           >
             Se profil
           </a>
@@ -235,10 +293,12 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       `);
 
       // Add marker to map
-      new mapboxgl.Marker(markerEl)
+      const marker = new mapboxgl.Marker(markerEl)
         .setLngLat([maker.longitude, maker.latitude])
         .setPopup(popup)
         .addTo(map.current!);
+        
+      console.log(`[MAPBOX-ERROR] Marker added for ${maker.display_name} at [${maker.longitude}, ${maker.latitude}]`);
     });
 
     // Fit map to show all markers if we have any
@@ -249,9 +309,12 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       });
       
       map.current.fitBounds(bounds, {
-        padding: 50,
-        maxZoom: 15
+        padding: 60,
+        maxZoom: 14,
+        duration: 1000
       });
+      
+      console.log(`[MAPBOX-ERROR] Map bounds adjusted to show all ${makers.length} markers`);
     }
   }, [makers]);
 
@@ -286,9 +349,11 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       />
       {makers.length === 0 && !loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/80 rounded-lg">
-          <div className="text-center">
-            <p className="text-muted-foreground">Ingen makere er synlige på kartet</p>
-            <p className="text-sm text-muted-foreground mt-1">Makere må aktivere kartsynlighet i sine innstillinger</p>
+          <div className="text-center p-6">
+            <p className="text-muted-foreground font-medium mb-2">Ingen offentlige makere på kartet</p>
+            <p className="text-sm text-muted-foreground">
+              Makere må ha lagt inn adresse og aktivert "Vis meg på kart" i sine profilinnstillinger
+            </p>
           </div>
         </div>
       )}
