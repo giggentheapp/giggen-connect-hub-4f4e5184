@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
 import FileViewerByPath from '@/components/FileViewerByPath';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
 
@@ -157,8 +158,14 @@ const ProfileSettings = () => {
     try {
       let coordinates = null;
       
-      // Geocode address if it has changed and is not empty
-      if (address.trim() && address !== profile.address) {
+      // Use coordinates if already available from autocomplete, otherwise geocode
+      if (profile.latitude && profile.longitude && address === profile.address) {
+        coordinates = {
+          latitude: profile.latitude,
+          longitude: profile.longitude
+        };
+      } else if (address.trim() && address !== profile.address) {
+        // Only geocode if address has changed and we don't have coordinates
         coordinates = await geocodeAddress(address);
       }
 
@@ -173,7 +180,7 @@ const ProfileSettings = () => {
         }
       };
 
-      // Add coordinates if we got them
+      // Add coordinates if we have them
       if (coordinates) {
         profileUpdate.latitude = coordinates.latitude;
         profileUpdate.longitude = coordinates.longitude;
@@ -199,6 +206,9 @@ const ProfileSettings = () => {
         });
 
       if (settingsError) throw settingsError;
+
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, ...profileUpdate } : null);
 
       toast({
         title: "Lagret",
@@ -333,18 +343,22 @@ const ProfileSettings = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="address">Adresse</Label>
-              <Input
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Gate, postnummer, by..."
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Adresse brukes til å vise deg på kartet hvis du aktiverer kartsynlighet
-              </p>
-            </div>
+            <AddressAutocomplete
+              value={address}
+              onChange={(newAddress, coordinates) => {
+                setAddress(newAddress);
+                if (coordinates) {
+                  // Store coordinates for later use in handleSave
+                  setProfile(prev => prev ? {
+                    ...prev,
+                    latitude: coordinates.lat,
+                    longitude: coordinates.lng,
+                    address: newAddress
+                  } : prev);
+                }
+              }}
+              placeholder="Gate, postnummer, by..."
+            />
           </CardContent>
         </Card>
 

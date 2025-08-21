@@ -101,14 +101,14 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           throw error;
         }
 
-        console.log(`[MAPBOX-DEBUG] Successfully fetched ${data?.length || 0} public makers with address and coordinates`);
+        console.log(`[MAPBOX] Successfully fetched ${data?.length || 0} makers with coordinates and show_on_map enabled`);
 
         const makersData = data?.filter(maker => {
           const hasValidCoordinates = maker.latitude && maker.longitude;
           const hasAddress = maker.address;
-          console.log(`[MAPBOX-DEBUG] Processing maker ${maker.display_name}: lat=${maker.latitude}, lng=${maker.longitude}, address=${maker.address}, show_on_map=${maker.profile_settings?.show_on_map}`);
+          
           if (!hasValidCoordinates || !hasAddress) {
-            console.log(`[MAPBOX-FILTER] Skipping maker ${maker.display_name}: missing coordinates (${maker.latitude}, ${maker.longitude}) or address (${maker.address})`);
+            console.log(`[MAPBOX] Skipping maker ${maker.display_name}: missing coordinates or address`);
             return false;
           }
           return true;
@@ -121,18 +121,8 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           address: maker.address
         })) || [];
 
-        console.log(`[MAPBOX-DEBUG] Final filtered makers data:`, makersData);
+        console.log(`[MAPBOX] Displaying ${makersData.length} makers on map`);
         setMakers(makersData);
-        
-        if (makersData.length > 0) {
-          console.log('[MAPBOX-DEBUG] Makers ready for map display:', makersData.map(m => ({ 
-            name: m.display_name, 
-            hasAvatar: !!m.avatar_url, 
-            coordinates: [m.longitude, m.latitude] 
-          })));
-        } else {
-          console.log('[MAPBOX-DEBUG] No makers passed the filter - checking why...');
-        }
       } catch (error: any) {
         console.error('[MAPBOX-ERROR] Error fetching makers:', error);
         toast({
