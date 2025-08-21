@@ -7,11 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerDashboard } from '@/components/GoerDashboard';
-import { RLSTestComponent } from '@/components/RLSTestComponent';
-import ProfileTestComponent from '@/components/ProfileTestComponent';
-import MapTestComponent from '@/components/MapTestComponent';
-import { SystemTestComponent } from '@/components/SystemTestComponent';
-import MapVisualTestComponent from '@/components/MapVisualTestComponent';
 import { Link } from 'react-router-dom';
 
 interface UserProfile {
@@ -170,51 +165,6 @@ const Dashboard = () => {
         ) : (
           <GoerDashboard profile={profile} />
         )}
-
-        {/* Profile Test Component */}
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profil Test Komponent</CardTitle>
-              <CardDescription>
-                Test at profilfunksjonaliteten fungerer som forventet
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProfileTestComponent />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Visual Map Test */}
-        <div className="mt-8">
-          <MapVisualTestComponent />
-        </div>
-
-        {/* System Test Component */}
-        <div className="mt-8">
-          <SystemTestComponent />
-        </div>
-
-        {/* Map Test Component */}
-        <div className="mt-8">
-          <MapTestComponent />
-        </div>
-
-        {/* RLS Test Component */}
-        <div className="mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle>RLS Test Component</CardTitle>
-              <CardDescription>
-                Test at Row Level Security fungerer som forventet
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RLSTestComponent userRole={profile.role} />
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
