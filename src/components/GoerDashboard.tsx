@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Calendar, Folder } from 'lucide-react';
+import { Map, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -10,39 +11,12 @@ interface UserProfile {
   display_name: string;
   bio: string | null;
   role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   updated_at: string;
-}
-
-interface Concept {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string;
-  created_at: string;
-  maker_id: string;
-}
-
-interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string | null;
-  media_url: string | null;
-  media_type: string | null;
-  is_public: boolean;
-  created_at: string;
-  maker_id: string;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  description: string | null;
-  event_date: string | null;
-  location: string | null;
-  is_public: boolean;
-  created_at: string;
-  maker_id: string;
 }
 
 interface GoerDashboardProps {
@@ -50,61 +24,36 @@ interface GoerDashboardProps {
 }
 
 export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
-  const [concepts, setConcepts] = useState<Concept[]>([]);
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [makers, setMakers] = useState<UserProfile[]>([]);
+  const [visibleMakers, setVisibleMakers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadPublicData();
+    loadVisibleMakers();
   }, []);
 
-  const loadPublicData = async () => {
+  const loadVisibleMakers = async () => {
     try {
-      // Load all public concepts
-      const { data: conceptsData, error: conceptsError } = await supabase
-        .from('concepts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (conceptsError) throw conceptsError;
-      setConcepts(conceptsData || []);
-
-      // Load all public portfolio items
-      const { data: portfolioData, error: portfolioError } = await supabase
-        .from('portfolio_items')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
-
-      if (portfolioError) throw portfolioError;
-      setPortfolioItems(portfolioData || []);
-
-      // Load all public events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
-
-      if (eventsError) throw eventsError;
-      setEvents(eventsData || []);
-
-      // Load all makers
+      // Load makers with addresses that are visible on map
       const { data: makersData, error: makersError } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          profile_settings!inner(show_on_map)
+        `)
         .eq('role', 'maker')
+        .eq('profile_settings.show_on_map', true)
+        .not('address', 'is', null)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
         .order('created_at', { ascending: false });
 
       if (makersError) throw makersError;
-      setMakers(makersData || []);
+      setVisibleMakers(makersData || []);
 
     } catch (error: any) {
       toast({
-        title: "Feil ved lasting av data",
+        title: "Feil ved lasting av makere",
         description: error.message,
         variant: "destructive",
       });
@@ -113,181 +62,110 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
     }
   };
 
-  const getMakerName = (makerId: string) => {
-    const maker = makers.find(m => m.user_id === makerId);
-    return maker?.display_name || 'Ukjent maker';
-  };
-
   if (loading) {
-    return <div className="text-center py-8">Laster Goer dashboard...</div>;
+    return <div className="text-center py-8">Laster makere...</div>;
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Goer Dashboard</h2>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-2">Finn GiggenMakers</h2>
         <p className="text-muted-foreground">
-          Utforsk konsepter, porteføljer og arrangementer fra Makers
+          Utforsk makere i ditt område ved å åpne kartet
         </p>
       </div>
 
-      {/* Makers Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            GiggenMakers ({makers.length})
+      {/* Map Quick Action */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2">
+            <Map className="h-6 w-6" />
+            Kart over makere
           </CardTitle>
           <CardDescription>
-            Se alle Makers på plattformen
+            Se alle makere som har valgt å være synlige på kartet
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {makers.map((maker) => (
-              <div key={maker.id} className="p-4 border rounded-lg">
-                <h4 className="font-medium">{maker.display_name}</h4>
-                {maker.bio && (
-                  <p className="text-sm text-muted-foreground mt-1">{maker.bio}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-2">
-                  Medlem siden {new Date(maker.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-            {makers.length === 0 && (
-              <p className="text-muted-foreground text-center py-4 col-span-full">
-                Ingen Makers funnet
-              </p>
-            )}
-          </div>
+        <CardContent className="text-center">
+          <Link 
+            to="/map" 
+            className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+          >
+            <Map className="w-5 h-5 mr-2" />
+            Åpne kart
+          </Link>
+          <p className="text-sm text-muted-foreground mt-3">
+            {visibleMakers.length} makere venter på å bli oppdaget
+          </p>
         </CardContent>
       </Card>
 
-      {/* Concepts Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Folder className="h-5 w-5" />
-            Konsepter ({concepts.length})
-          </CardTitle>
-          <CardDescription>
-            Se alle offentlige konsepter fra Makers
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {concepts.map((concept) => (
-              <div key={concept.id} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium">{concept.title}</h4>
-                  <span className="text-xs text-muted-foreground">
-                    av {getMakerName(concept.maker_id)}
-                  </span>
-                </div>
-                {concept.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
-                )}
-                <div className="flex justify-between items-center mt-3">
-                  <span className="text-xs px-2 py-1 bg-secondary rounded text-secondary-foreground">
-                    {concept.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(concept.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {concepts.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">Ingen konsepter å vise</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Portfolio Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Porteføljer ({portfolioItems.length})
-          </CardTitle>
-          <CardDescription>
-            Se offentlige portefølje-elementer fra Makers
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            {portfolioItems.map((item) => (
-              <div key={item.id} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium">{item.title}</h4>
-                  <span className="text-xs text-muted-foreground">
-                    av {getMakerName(item.maker_id)}
-                  </span>
-                </div>
-                {item.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                )}
-                <div className="flex justify-between items-center mt-3">
-                  {item.media_type && (
-                    <span className="text-xs px-2 py-1 bg-secondary rounded text-secondary-foreground">
-                      {item.media_type}
-                    </span>
+      {/* Visible Makers Preview */}
+      {visibleMakers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Makere på kartet
+            </CardTitle>
+            <CardDescription>
+              Her er noen av makerne du kan finne på kartet
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {visibleMakers.slice(0, 6).map((maker) => (
+                <div key={maker.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-3">
+                    {maker.avatar_url ? (
+                      <img 
+                        src={maker.avatar_url} 
+                        alt={maker.display_name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
+                        {maker.display_name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-medium">{maker.display_name}</h4>
+                      {maker.address && (
+                        <p className="text-xs text-muted-foreground">{maker.address}</p>
+                      )}
+                    </div>
+                  </div>
+                  {maker.bio && (
+                    <p className="text-sm text-muted-foreground">{maker.bio}</p>
                   )}
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
                 </div>
+              ))}
+            </div>
+            {visibleMakers.length > 6 && (
+              <div className="text-center mt-4">
+                <Link 
+                  to="/map" 
+                  className="text-sm text-primary hover:underline"
+                >
+                  Se alle {visibleMakers.length} makere på kartet →
+                </Link>
               </div>
-            ))}
-            {portfolioItems.length === 0 && (
-              <p className="text-muted-foreground text-center py-4 col-span-full">
-                Ingen portefølje-elementer å vise
-              </p>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Events Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Arrangementer ({events.length})
-          </CardTitle>
-          <CardDescription>
-            Se kommende offentlige arrangementer
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {events.map((event) => (
-              <div key={event.id} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium">{event.title}</h4>
-                  <span className="text-xs text-muted-foreground">
-                    av {getMakerName(event.maker_id)}
-                  </span>
-                </div>
-                {event.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                )}
-                {event.location && (
-                  <p className="text-sm mt-2">📍 {event.location}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-3">
-                  Opprettet {new Date(event.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-            {events.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">Ingen arrangementer å vise</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {visibleMakers.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-medium mb-2">Ingen makere på kartet ennå</h3>
+            <p className="text-muted-foreground">
+              Det er ingen makere som har valgt å være synlige på kartet for øyeblikket.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

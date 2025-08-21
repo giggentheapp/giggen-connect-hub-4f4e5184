@@ -20,6 +20,10 @@ interface UserProfile {
   display_name: string;
   bio: string | null;
   role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   updated_at: string;
 }
