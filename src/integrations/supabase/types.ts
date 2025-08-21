@@ -275,7 +275,7 @@ export type Database = {
             columns: ["maker_id"]
             isOneToOne: true
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["user_id"]
           },
         ]
       }
