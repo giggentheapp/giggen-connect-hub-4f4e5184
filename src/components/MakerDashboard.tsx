@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Folder, FileText } from 'lucide-react';
+import FileUpload from './FileUpload';
+import FileViewer from './FileViewer';
 
 interface UserProfile {
   id: string;
@@ -26,22 +28,34 @@ interface Concept {
   created_at: string;
 }
 
-interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string | null;
-  media_url: string | null;
-  media_type: string | null;
-  is_public: boolean;
-  created_at: string;
-}
-
 interface Event {
   id: string;
   title: string;
   description: string | null;
   event_date: string | null;
   location: string | null;
+  max_participants: number | null;
+  is_public: boolean;
+  created_at: string;
+}
+
+interface PortfolioItem {
+  id: string;
+  title: string;
+  description: string | null;
+  media_type: string | null;
+  media_url: string | null;
+  is_public: boolean;
+  created_at: string;
+}
+
+interface FileItem {
+  id: string;
+  filename: string;
+  file_path: string;
+  file_type: string;
+  file_size: number;
+  mime_type: string;
   is_public: boolean;
   created_at: string;
 }
@@ -52,65 +66,99 @@ interface MakerDashboardProps {
 
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [portfolioFiles, setPortfolioFiles] = useState<FileItem[]>([]);
+  const [conceptFiles, setConceptFiles] = useState<{ [key: string]: FileItem[] }>({});
+  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Form states for creating new items
   const [newConcept, setNewConcept] = useState({ title: '', description: '' });
-  const [newPortfolioItem, setNewPortfolioItem] = useState({ title: '', description: '' });
-  const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '' });
-  
+  const [editingConcept, setEditingConcept] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const fetchData = async () => {
+      try {
+        // Fetch concepts
+        const { data: conceptsData, error: conceptsError } = await supabase
+          .from('concepts')
+          .select('*')
+          .eq('maker_id', profile.user_id)
+          .order('created_at', { ascending: false });
 
-  const loadData = async () => {
+        if (conceptsError) throw conceptsError;
+        setConcepts(conceptsData || []);
+
+        // Fetch events
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .eq('maker_id', profile.user_id)
+          .order('created_at', { ascending: false });
+
+        if (eventsError) throw eventsError;
+        setEvents(eventsData || []);
+
+        // Fetch portfolio items
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('portfolio_items')
+          .select('*')
+          .eq('maker_id', profile.user_id)
+          .order('created_at', { ascending: false });
+
+        if (portfolioError) throw portfolioError;
+        setPortfolioItems(portfolioData || []);
+
+        // Fetch portfolio files
+        const { data: portfolioFilesData, error: portfolioFilesError } = await supabase
+          .from('portfolio_files')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .order('created_at', { ascending: false });
+
+        if (portfolioFilesError) throw portfolioFilesError;
+        setPortfolioFiles(portfolioFilesData || []);
+
+      } catch (error: any) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Feil ved lasting av data",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [profile.user_id, toast]);
+
+  const fetchConceptFiles = async (conceptId: string) => {
     try {
-      // Load concepts
-      const { data: conceptsData, error: conceptsError } = await supabase
-        .from('concepts')
+      const { data: conceptFilesData, error } = await supabase
+        .from('concept_files')
         .select('*')
-        .eq('maker_id', profile.user_id)
+        .eq('concept_id', conceptId)
         .order('created_at', { ascending: false });
 
-      if (conceptsError) throw conceptsError;
-      setConcepts(conceptsData || []);
-
-      // Load portfolio items
-      const { data: portfolioData, error: portfolioError } = await supabase
-        .from('portfolio_items')
-        .select('*')
-        .eq('maker_id', profile.user_id)
-        .order('created_at', { ascending: false });
-
-      if (portfolioError) throw portfolioError;
-      setPortfolioItems(portfolioData || []);
-
-      // Load events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .eq('maker_id', profile.user_id)
-        .order('created_at', { ascending: false });
-
-      if (eventsError) throw eventsError;
-      setEvents(eventsData || []);
-
+      if (error) throw error;
+      
+      setConceptFiles(prev => ({
+        ...prev,
+        [conceptId]: conceptFilesData || []
+      }));
     } catch (error: any) {
+      console.error('Error fetching concept files:', error);
       toast({
-        title: "Feil ved lasting av data",
+        title: "Feil ved lasting av konseptfiler",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const createConcept = async () => {
+  const handleCreateConcept = async () => {
     if (!newConcept.title.trim()) return;
 
     try {
@@ -130,7 +178,15 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       });
 
       setNewConcept({ title: '', description: '' });
-      loadData();
+      setEditingConcept(null);
+      
+      // Refresh concepts
+      const { data: conceptsData } = await supabase
+        .from('concepts')
+        .select('*')
+        .eq('maker_id', profile.user_id)
+        .order('created_at', { ascending: false });
+      setConcepts(conceptsData || []);
     } catch (error: any) {
       toast({
         title: "Feil ved opprettelse av konsept",
@@ -140,268 +196,399 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
     }
   };
 
-  const createPortfolioItem = async () => {
-    if (!newPortfolioItem.title.trim()) return;
-
+  const handleDeleteConcept = async (conceptId: string) => {
     try {
       const { error } = await supabase
-        .from('portfolio_items')
-        .insert({
-          maker_id: profile.user_id,
-          title: newPortfolioItem.title,
-          description: newPortfolioItem.description || null,
-          media_type: 'text', // For now, just text items
-          is_public: true,
-        });
+        .from('concepts')
+        .delete()
+        .eq('id', conceptId);
 
       if (error) throw error;
 
       toast({
-        title: "Portefølje-element opprettet",
-        description: "Nytt element ble lagt til porteføljen",
+        title: "Konsept slettet",
+        description: "Konseptet ble slettet",
       });
 
-      setNewPortfolioItem({ title: '', description: '' });
-      loadData();
+      setConcepts(prev => prev.filter(c => c.id !== conceptId));
+      
+      // Clear concept files if this concept was selected
+      if (selectedConceptId === conceptId) {
+        setSelectedConceptId(null);
+      }
     } catch (error: any) {
       toast({
-        title: "Feil ved opprettelse av portefølje-element",
+        title: "Feil ved sletting av konsept",
         description: error.message,
         variant: "destructive",
       });
     }
   };
-
-  const createEvent = async () => {
-    if (!newEvent.title.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('events')
-        .insert({
-          maker_id: profile.user_id,
-          title: newEvent.title,
-          description: newEvent.description || null,
-          location: newEvent.location || null,
-          is_public: true,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Arrangement opprettet",
-        description: "Nytt arrangement ble opprettet",
-      });
-
-      setNewEvent({ title: '', description: '', location: '' });
-      loadData();
-    } catch (error: any) {
-      toast({
-        title: "Feil ved opprettelse av arrangement",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (loading) {
-    return <div className="text-center py-8">Laster Maker dashboard...</div>;
-  }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Maker Dashboard</h2>
-        <p className="text-muted-foreground">
-          Administrer dine konsepter, portefølje og arrangementer
-        </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold">GiggenMaker Dashboard</h2>
       </div>
 
-      {/* Concepts Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Mine Konsepter ({concepts.length})
-          </CardTitle>
-          <CardDescription>
-            Opprett og administrer dine kreative konsepter
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Create new concept */}
-          <div className="grid gap-4 p-4 border rounded-lg">
-            <h4 className="font-medium">Opprett nytt konsept</h4>
-            <div className="grid gap-2">
-              <Label htmlFor="concept-title">Tittel</Label>
-              <Input
-                id="concept-title"
-                value={newConcept.title}
-                onChange={(e) => setNewConcept(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Konsept tittel"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="concept-description">Beskrivelse</Label>
-              <Textarea
-                id="concept-description"
-                value={newConcept.description}
-                onChange={(e) => setNewConcept(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Beskrivelse av konseptet"
-              />
-            </div>
-            <Button onClick={createConcept} disabled={!newConcept.title.trim()}>
-              Opprett konsept
-            </Button>
-          </div>
+      {loading ? (
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Laster dashboard...</p>
+        </div>
+      ) : (
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Oversikt</TabsTrigger>
+            <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
+            <TabsTrigger value="concepts">Konsepter</TabsTrigger>
+            <TabsTrigger value="files">Filhåndtering</TabsTrigger>
+          </TabsList>
 
-          {/* List existing concepts */}
-          <div className="space-y-2">
-            {concepts.map((concept) => (
-              <div key={concept.id} className="p-3 border rounded">
-                <h4 className="font-medium">{concept.title}</h4>
-                {concept.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Quick Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Statistikk</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Konsepter:</span>
+                      <span className="font-semibold">{concepts.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Arrangementer:</span>
+                      <span className="font-semibold">{events.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Porteføljeprosjekter:</span>
+                      <span className="font-semibold">{portfolioItems.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Porteføljefiler:</span>
+                      <span className="font-semibold">{portfolioFiles.length}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Events Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Arrangementer</CardTitle>
+                  <CardDescription>
+                    Dine kommende og tidligere arrangementer
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {events.map((event) => (
+                      <div key={event.id} className="p-3 border rounded-lg">
+                        <h3 className="font-semibold">{event.title}</h3>
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {event.description}
+                          </p>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                          {event.event_date && (
+                            <p>Dato: {new Date(event.event_date).toLocaleDateString('no-NO')}</p>
+                          )}
+                          {event.location && <p>Sted: {event.location}</p>}
+                          {event.max_participants && (
+                            <p>Max deltakere: {event.max_participants}</p>
+                          )}
+                          <p>
+                            Synlighet: {event.is_public ? 'Offentlig' : 'Privat'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {events.length === 0 && (
+                      <p className="text-center text-muted-foreground py-4">
+                        Du har ikke opprettet noen arrangementer ennå
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="space-y-6">
+            <div className="grid grid-cols-1 gap-6">
+              {/* Portfolio Files Upload */}
+              <FileUpload
+                bucketName="portfolio"
+                folderPath={profile.user_id}
+                onFileUploaded={(file) => {
+                  setPortfolioFiles(prev => [file, ...prev]);
+                }}
+              />
+
+              {/* Portfolio Files Viewer */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Folder className="h-4 w-4" />
+                    Mine porteføljefiler
+                  </CardTitle>
+                  <CardDescription>
+                    Alle dine opplastede porteføljefiler
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FileViewer
+                    files={portfolioFiles}
+                    bucketName="portfolio"
+                    canDelete={true}
+                    onFileDeleted={(fileId) => {
+                      setPortfolioFiles(prev => prev.filter(f => f.id !== fileId));
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Legacy Portfolio Items */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Porteføljeprosjekter</CardTitle>
+                  <CardDescription>
+                    Dine porteføljeprosjekter og arbeider
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {portfolioItems.map((item) => (
+                      <div key={item.id} className="p-3 border rounded-lg">
+                        <h3 className="font-semibold">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-2">
+                          <p>
+                            Type: {item.media_type || 'Ikke spesifisert'} • 
+                            Synlighet: {item.is_public ? 'Offentlig' : 'Privat'} • 
+                            Opprettet: {new Date(item.created_at).toLocaleDateString('no-NO')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {portfolioItems.length === 0 && (
+                      <p className="text-center text-muted-foreground py-4">
+                        Du har ikke lagt til noen porteføljeprosjekter ennå
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="concepts" className="space-y-6">
+            {/* Concepts Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Konsepter
+                  <Button 
+                    size="sm"
+                    onClick={() => setEditingConcept('new')}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nytt konsept
+                  </Button>
+                </CardTitle>
+                <CardDescription>
+                  Opprett og administrer dine kreative konsepter
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {editingConcept === 'new' && (
+                  <div className="mb-4 p-4 border rounded-lg">
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Konsepttittel"
+                        value={newConcept.title}
+                        onChange={(e) => setNewConcept(prev => ({ ...prev, title: e.target.value }))}
+                      />
+                      <Textarea
+                        placeholder="Beskrivelse av konseptet"
+                        value={newConcept.description}
+                        onChange={(e) => setNewConcept(prev => ({ ...prev, description: e.target.value }))}
+                      />
+                      <div className="flex gap-2">
+                        <Button onClick={handleCreateConcept} size="sm">
+                          Opprett konsept
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            setEditingConcept(null);
+                            setNewConcept({ title: '', description: '' });
+                          }}
+                          size="sm"
+                        >
+                          Avbryt
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <p className="text-xs text-muted-foreground mt-2">
-                  Status: {concept.status} • {new Date(concept.created_at).toLocaleDateString()}
-                </p>
+                <div className="space-y-3">
+                  {concepts.map((concept) => (
+                    <div key={concept.id} className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{concept.title}</h3>
+                          {concept.description && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {concept.description}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Status: {concept.status} • Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedConceptId(concept.id);
+                              fetchConceptFiles(concept.id);
+                            }}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            Filer
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingConcept(concept.id)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteConcept(concept.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {concepts.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      Du har ikke opprettet noen konsepter ennå
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Concept Files Management */}
+            {selectedConceptId && (
+              <div className="space-y-6">
+                <FileUpload
+                  bucketName="concepts"
+                  folderPath={`${profile.user_id}/${selectedConceptId}`}
+                  onFileUploaded={(file) => {
+                    setConceptFiles(prev => ({
+                      ...prev,
+                      [selectedConceptId]: [file, ...(prev[selectedConceptId] || [])]
+                    }));
+                  }}
+                />
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Konseptfiler
+                    </CardTitle>
+                    <CardDescription>
+                      Filer for valgt konsept
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FileViewer
+                      files={conceptFiles[selectedConceptId] || []}
+                      bucketName="concepts"
+                      canDelete={true}
+                      onFileDeleted={(fileId) => {
+                        setConceptFiles(prev => ({
+                          ...prev,
+                          [selectedConceptId]: prev[selectedConceptId]?.filter(f => f.id !== fileId) || []
+                        }));
+                      }}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-            ))}
-            {concepts.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">Ingen konsepter opprettet ennå</p>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </TabsContent>
 
-      {/* Portfolio Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Edit className="h-5 w-5" />
-            Min Portefølje ({portfolioItems.length})
-          </CardTitle>
-          <CardDescription>
-            Vis frem dine beste arbeider
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Create new portfolio item */}
-          <div className="grid gap-4 p-4 border rounded-lg">
-            <h4 className="font-medium">Legg til i portefølje</h4>
-            <div className="grid gap-2">
-              <Label htmlFor="portfolio-title">Tittel</Label>
-              <Input
-                id="portfolio-title"
-                value={newPortfolioItem.title}
-                onChange={(e) => setNewPortfolioItem(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Prosjekt tittel"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="portfolio-description">Beskrivelse</Label>
-              <Textarea
-                id="portfolio-description"
-                value={newPortfolioItem.description}
-                onChange={(e) => setNewPortfolioItem(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Beskrivelse av prosjektet"
-              />
-            </div>
-            <Button onClick={createPortfolioItem} disabled={!newPortfolioItem.title.trim()}>
-              Legg til i portefølje
-            </Button>
-          </div>
+          <TabsContent value="files" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* All Portfolio Files */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alle porteføljefiler</CardTitle>
+                  <CardDescription>
+                    Oversikt over alle dine porteføljefiler
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm">Totalt: {portfolioFiles.length} filer</p>
+                    <div className="text-xs text-muted-foreground">
+                      <p>Bilder: {portfolioFiles.filter(f => f.file_type === 'image').length}</p>
+                      <p>Videoer: {portfolioFiles.filter(f => f.file_type === 'video').length}</p>
+                      <p>Lyd: {portfolioFiles.filter(f => f.file_type === 'audio').length}</p>
+                      <p>Dokumenter: {portfolioFiles.filter(f => f.file_type === 'document').length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* List existing portfolio items */}
-          <div className="space-y-2">
-            {portfolioItems.map((item) => (
-              <div key={item.id} className="p-3 border rounded">
-                <h4 className="font-medium">{item.title}</h4>
-                {item.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-2">
-                  {item.is_public ? 'Offentlig' : 'Privat'} • {new Date(item.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-            {portfolioItems.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">Ingen portefølje-elementer ennå</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Events Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Mine Arrangementer ({events.length})
-          </CardTitle>
-          <CardDescription>
-            Planlegg og administrer dine arrangementer
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Create new event */}
-          <div className="grid gap-4 p-4 border rounded-lg">
-            <h4 className="font-medium">Opprett nytt arrangement</h4>
-            <div className="grid gap-2">
-              <Label htmlFor="event-title">Tittel</Label>
-              <Input
-                id="event-title"
-                value={newEvent.title}
-                onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Arrangement tittel"
-              />
+              {/* All Concept Files */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alle konseptfiler</CardTitle>
+                  <CardDescription>
+                    Oversikt over alle dine konseptfiler
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(conceptFiles).map(([conceptId, files]) => {
+                      const concept = concepts.find(c => c.id === conceptId);
+                      return (
+                        <div key={conceptId} className="p-2 border rounded">
+                          <p className="font-medium text-sm">{concept?.title || 'Ukjent konsept'}</p>
+                          <p className="text-xs text-muted-foreground">{files.length} filer</p>
+                        </div>
+                      );
+                    })}
+                    {Object.keys(conceptFiles).length === 0 && (
+                      <p className="text-center text-muted-foreground py-4">
+                        Ingen konseptfiler lastet ennå
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="event-description">Beskrivelse</Label>
-              <Textarea
-                id="event-description"
-                value={newEvent.description}
-                onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Beskrivelse av arrangementet"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="event-location">Sted</Label>
-              <Input
-                id="event-location"
-                value={newEvent.location}
-                onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Hvor skal arrangementet holdes?"
-              />
-            </div>
-            <Button onClick={createEvent} disabled={!newEvent.title.trim()}>
-              Opprett arrangement
-            </Button>
-          </div>
-
-          {/* List existing events */}
-          <div className="space-y-2">
-            {events.map((event) => (
-              <div key={event.id} className="p-3 border rounded">
-                <h4 className="font-medium">{event.title}</h4>
-                {event.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                )}
-                {event.location && (
-                  <p className="text-sm mt-1">📍 {event.location}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-2">
-                  {event.is_public ? 'Offentlig' : 'Privat'} • {new Date(event.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-            {events.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">Ingen arrangementer opprettet ennå</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 };
