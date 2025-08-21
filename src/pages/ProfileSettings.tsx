@@ -104,7 +104,7 @@ const ProfileSettings = () => {
         const { data: settingsData } = await supabase
           .from('profile_settings')
           .select('*')
-          .eq('maker_id', userId)
+          .eq('maker_id', profileData.id)
           .single();
 
         if (settingsData) {
@@ -194,7 +194,7 @@ const ProfileSettings = () => {
       const { error: settingsError } = await supabase
         .from('profile_settings')
         .upsert({
-          maker_id: userId,
+          maker_id: profile.id,
           ...settings
         });
 
