@@ -11,6 +11,7 @@ import { RLSTestComponent } from '@/components/RLSTestComponent';
 import ProfileTestComponent from '@/components/ProfileTestComponent';
 import MapTestComponent from '@/components/MapTestComponent';
 import { SystemTestComponent } from '@/components/SystemTestComponent';
+import MapVisualTestComponent from '@/components/MapVisualTestComponent';
 import { Link } from 'react-router-dom';
 
 interface UserProfile {
@@ -179,6 +180,11 @@ const Dashboard = () => {
               <ProfileTestComponent />
             </CardContent>
           </Card>
+        </div>
+
+        {/* Visual Map Test */}
+        <div className="mt-8">
+          <MapVisualTestComponent />
         </div>
 
         {/* System Test Component */}
