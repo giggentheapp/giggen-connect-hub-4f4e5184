@@ -21,7 +21,7 @@ interface PortfolioFile {
 }
 
 interface PortfolioManagerProps {
-  bucketName: 'portfolio' | 'concepts';
+  bucketName: 'portfolio' | 'concepts' | 'avatars';
   folderPath: string;
   userId: string;
   title: string;
@@ -46,6 +46,13 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
   const fetchFiles = async () => {
     setLoading(true);
     try {
+      // Skip database fetch for avatars bucket
+      if (bucketName === 'avatars') {
+        setFiles([]);
+        setLoading(false);
+        return;
+      }
+
       const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
       
       const { data, error } = await supabase
@@ -120,11 +127,24 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
 
       if (uploadError) throw uploadError;
 
-      // Save metadata to database
+      // Save metadata to database (except for avatars)
+      if (bucketName === 'avatars') {
+        toast({
+          title: "Fil lastet opp",
+          description: `${file.name} ble lastet opp successfully`,
+        });
+
+        // Reset form and refresh files
+        setUploadTitle('');
+        setUploadDescription('');
+        (event.target as HTMLInputElement).value = '';
+        fetchFiles();
+        return;
+      }
+
       const fileType = getFileType(file.type);
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
       
-      const fileData = {
+      const baseFileData = {
         user_id: userId,
         file_type: fileType,
         filename: file.name,
@@ -136,19 +156,29 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
         description: uploadDescription || null
       };
 
-      // Add concept_id for concept files
-      if (bucketName === 'concepts') {
-        const conceptId = folderPath.split('/')[1];
-        (fileData as any).concept_id = conceptId;
+      // Insert into appropriate table based on bucket
+      let dbData;
+      if (bucketName === 'portfolio') {
+        const { data, error: dbError } = await supabase
+          .from('portfolio_files')
+          .insert(baseFileData)
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
+      } else if (bucketName === 'concepts') {
+        const conceptFileData = {
+          ...baseFileData,
+          concept_id: userId // Use userId as concept_id for tech spec files
+        };
+        const { data, error: dbError } = await supabase
+          .from('concept_files')
+          .insert(conceptFileData)
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
       }
-
-      const { data: dbData, error: dbError } = await supabase
-        .from(tableName)
-        .insert(fileData)
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
 
       toast({
         title: "Fil lastet opp",
@@ -174,6 +204,16 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
   };
 
   const handleEditSave = async (fileId: string) => {
+    // Skip edit for avatars bucket
+    if (bucketName === 'avatars') {
+      toast({
+        title: "Redigering ikke tilgjengelig",
+        description: "Profilbilder kan ikke redigeres",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
       
@@ -212,14 +252,16 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
 
       if (storageError) throw storageError;
 
-      // Delete from database
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
-      const { error: dbError } = await supabase
-        .from(tableName)
-        .delete()
-        .eq('id', file.id);
+      // Delete from database (except for avatars)
+      if (bucketName !== 'avatars') {
+        const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
+        const { error: dbError } = await supabase
+          .from(tableName)
+          .delete()
+          .eq('id', file.id);
 
-      if (dbError) throw dbError;
+        if (dbError) throw dbError;
+      }
 
       toast({
         title: "Fil slettet",

@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, File, Image, Video, Music } from 'lucide-react';
 
 interface FileUploadProps {
-  bucketName: 'portfolio' | 'concepts';
+  bucketName: 'portfolio' | 'concepts' | 'avatars';
   folderPath: string;
   onFileUploaded: (file: any) => void;
   acceptedTypes?: string;
@@ -60,9 +60,24 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
 
       // Save metadata to database
       const fileType = getFileType(file.type);
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
       
-      const fileData = {
+      // Determine which table to use based on bucket
+      if (bucketName === 'avatars') {
+        // For avatars, we don't save to database tables, just return file info
+        onFileUploaded({ publicUrl });
+        toast({
+          title: "Fil lastet opp",
+          description: `${file.name} ble lastet opp successfully`,
+        });
+        
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      const baseFileData = {
         user_id: (await supabase.auth.getUser()).data.user?.id,
         file_type: fileType,
         filename: file.name,
@@ -72,19 +87,29 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         is_public: true
       };
 
-      // Add concept_id for concept files
-      if (bucketName === 'concepts') {
-        const conceptId = folderPath.split('/')[1]; // Extract concept_id from folderPath
-        (fileData as any).concept_id = conceptId;
+      // Insert into appropriate table based on bucket
+      let dbData;
+      if (bucketName === 'portfolio') {
+        const { data, error: dbError } = await supabase
+          .from('portfolio_files')
+          .insert(baseFileData)
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
+      } else if (bucketName === 'concepts') {
+        const conceptFileData = {
+          ...baseFileData,
+          concept_id: (await supabase.auth.getUser()).data.user?.id || 'tech-spec'
+        };
+        const { data, error: dbError } = await supabase
+          .from('concept_files')
+          .insert(conceptFileData)
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
       }
-
-      const { data: dbData, error: dbError } = await supabase
-        .from(tableName)
-        .insert(fileData)
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
 
       // Call parent callback
       onFileUploaded({ ...dbData, publicUrl });

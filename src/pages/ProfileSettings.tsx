@@ -300,8 +300,8 @@ const ProfileSettings = () => {
                   </AvatarFallback>
                 </Avatar>
                 <FileUpload
-                  bucketName="portfolio"
-                  folderPath={`avatar/${userId}`}
+                  bucketName="avatars"
+                  folderPath={userId}
                   onFileUploaded={handleAvatarUpload}
                   acceptedTypes=".jpg,.jpeg,.png,.gif"
                 />
@@ -446,7 +446,7 @@ const ProfileSettings = () => {
         <div className="lg:col-span-2">
           <PortfolioManager
             bucketName="portfolio"
-            folderPath={`portfolio/${userId}`}
+            folderPath={userId!}
             userId={userId!}
             title="Portefølje"
             description="Last opp bilder, video, lyd og dokumenter til din portefølje. Legg til tittel og beskrivelse for hvert element."
@@ -457,7 +457,7 @@ const ProfileSettings = () => {
         <div className="lg:col-span-2">
           <PortfolioManager
             bucketName="concepts"
-            folderPath={`techspec/${userId}`}
+            folderPath={userId!}
             userId={userId!}
             title="Tech Spec"
             description="Last opp tekniske spesifikasjoner og dokumenter."
