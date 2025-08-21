@@ -106,7 +106,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         console.log(`[MAPBOX-SUCCESS] Raw database response: ${data?.length || 0} records`);
         console.log('[MAPBOX-DATA] Raw data:', JSON.stringify(data, null, 2));
         
-        // Process makers data - ensure coordinates are valid numbers
+        // Process makers data - ensure coordinates are valid numbers and filter out test profiles
         const makersData = data?.map(maker => ({
           id: maker.id,
           display_name: maker.display_name,
@@ -115,21 +115,34 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           longitude: parseFloat(maker.longitude?.toString() || '0'),
           address: maker.address
         })).filter(maker => {
-          // Validate coordinates are valid numbers
-          const isValid = !isNaN(maker.latitude) && !isNaN(maker.longitude) && 
-                         maker.latitude !== 0 && maker.longitude !== 0 && maker.address;
+          // First validate coordinates are valid numbers
+          const hasValidCoords = !isNaN(maker.latitude) && !isNaN(maker.longitude) && 
+                                maker.latitude !== 0 && maker.longitude !== 0 && maker.address;
           
-          if (!isValid) {
-            console.warn(`[MAPBOX-SKIP] Invalid data for maker ${maker.display_name}:`, {
+          // Then filter out test profiles
+          const name = maker.display_name?.toLowerCase() || '';
+          const isTestProfile = name.includes('test') || 
+                              name.includes('dummy') || 
+                              name.includes('sample') ||
+                              name === 'test maker';
+          
+          if (!hasValidCoords) {
+            console.warn(`[MAPBOX-SKIP] Invalid coordinates for maker ${maker.display_name}:`, {
               lat: maker.latitude, lng: maker.longitude, address: maker.address
             });
-          } else {
-            console.log(`[MAPBOX-VALID] Maker ${maker.display_name} ready for map:`, {
-              lat: maker.latitude, lng: maker.longitude
-            });
+            return false;
           }
           
-          return isValid;
+          if (isTestProfile) {
+            console.warn(`[MAPBOX-SKIP] Filtered out test profile: ${maker.display_name}`);
+            return false;
+          }
+          
+          console.log(`[MAPBOX-VALID] Maker ${maker.display_name} ready for map:`, {
+            lat: maker.latitude, lng: maker.longitude
+          });
+          
+          return true;
         }) || [];
 
         console.log(`[MAPBOX-FINAL] Setting ${makersData.length} valid makers to state`);
