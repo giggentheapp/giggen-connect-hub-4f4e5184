@@ -149,6 +149,33 @@ export type Database = {
           },
         ]
       }
+      portfolio: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_url: string | null
+          id: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_url?: string | null
+          id?: never
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_url?: string | null
+          id?: never
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolio_files: {
         Row: {
           created_at: string
@@ -256,6 +283,24 @@ export type Database = {
           file_url?: string | null
           id?: never
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      profile_picture: {
+        Row: {
+          created_at: string | null
+          file_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_url?: string | null
+          user_id?: string
         }
         Relationships: []
       }
