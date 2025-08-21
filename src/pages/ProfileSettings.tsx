@@ -21,6 +21,9 @@ interface ProfileData {
   avatar_url?: string;
   role: string;
   user_id: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface ProfileSettings {
@@ -29,6 +32,7 @@ interface ProfileSettings {
   show_portfolio: boolean;
   show_techspec: boolean;
   show_events: boolean;
+  show_on_map: boolean;
 }
 
 const ProfileSettings = () => {
@@ -39,7 +43,8 @@ const ProfileSettings = () => {
     show_contact: false,
     show_portfolio: false,
     show_techspec: false,
-    show_events: false
+    show_events: false,
+    show_on_map: false
   });
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +56,8 @@ const ProfileSettings = () => {
   const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -87,6 +94,7 @@ const ProfileSettings = () => {
         setProfile(profileData);
         setDisplayName(profileData.display_name || '');
         setBio(profileData.bio || '');
+        setAddress(profileData.address || '');
         
         const contactInfo = profileData.contact_info as any;
         setEmail(contactInfo?.email || '');
@@ -118,22 +126,66 @@ const ProfileSettings = () => {
     fetchData();
   }, [userId, currentUser, toast]);
 
+  const geocodeAddress = async (addressToGeocode: string) => {
+    if (!addressToGeocode.trim()) return null;
+    
+    setGeocoding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('geocode-address', {
+        body: { address: addressToGeocode }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      toast({
+        title: "Feil ved adresseoppslag",
+        description: "Kunne ikke finne koordinater for adressen",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!profile || !currentUser) return;
 
     setSaving(true);
     try {
+      let coordinates = null;
+      
+      // Geocode address if it has changed and is not empty
+      if (address.trim() && address !== profile.address) {
+        coordinates = await geocodeAddress(address);
+      }
+
       // Update profile
+      const profileUpdate: any = {
+        display_name: displayName,
+        bio: bio,
+        address: address || null,
+        contact_info: {
+          email: email,
+          phone: phone
+        }
+      };
+
+      // Add coordinates if we got them
+      if (coordinates) {
+        profileUpdate.latitude = coordinates.latitude;
+        profileUpdate.longitude = coordinates.longitude;
+      } else if (!address.trim()) {
+        // Clear coordinates if address is empty
+        profileUpdate.latitude = null;
+        profileUpdate.longitude = null;
+      }
+
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          display_name: displayName,
-          bio: bio,
-          contact_info: {
-            email: email,
-            phone: phone
-          }
-        })
+        .update(profileUpdate)
         .eq('user_id', userId);
 
       if (profileError) throw profileError;
@@ -280,6 +332,19 @@ const ProfileSettings = () => {
                 onChange={(e) => setPhone(e.target.value)}
               />
             </div>
+
+            <div>
+              <Label htmlFor="address">Adresse</Label>
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Gate, postnummer, by..."
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Adresse brukes til å vise deg på kartet hvis du aktiverer kartsynlighet
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -333,6 +398,15 @@ const ProfileSettings = () => {
                 onCheckedChange={(checked) => handleToggleChange('show_events', checked)}
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="show_on_map">Vis meg på kart</Label>
+              <Switch
+                id="show_on_map"
+                checked={settings.show_on_map}
+                onCheckedChange={(checked) => handleToggleChange('show_on_map', checked)}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -367,9 +441,9 @@ const ProfileSettings = () => {
 
       {/* Save button */}
       <div className="flex justify-end mt-6">
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving || geocoding}>
           <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Lagrer...' : 'Lagre endringer'}
+          {geocoding ? 'Finner koordinater...' : saving ? 'Lagrer...' : 'Lagre endringer'}
         </Button>
       </div>
     </div>

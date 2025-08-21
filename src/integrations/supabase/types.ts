@@ -240,6 +240,7 @@ export type Database = {
           show_about: boolean
           show_contact: boolean
           show_events: boolean
+          show_on_map: boolean
           show_portfolio: boolean
           show_techspec: boolean
           updated_at: string
@@ -251,6 +252,7 @@ export type Database = {
           show_about?: boolean
           show_contact?: boolean
           show_events?: boolean
+          show_on_map?: boolean
           show_portfolio?: boolean
           show_techspec?: boolean
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           show_about?: boolean
           show_contact?: boolean
           show_events?: boolean
+          show_on_map?: boolean
           show_portfolio?: boolean
           show_techspec?: boolean
           updated_at?: string
@@ -270,34 +273,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           bio: string | null
           contact_info: Json | null
           created_at: string
           display_name: string
           id: string
+          latitude: number | null
+          longitude: number | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
           display_name: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
           display_name?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string

@@ -9,6 +9,8 @@ import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerDashboard } from '@/components/GoerDashboard';
 import { RLSTestComponent } from '@/components/RLSTestComponent';
 import ProfileTestComponent from '@/components/ProfileTestComponent';
+import MapTestComponent from '@/components/MapTestComponent';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -134,6 +136,28 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Hurtighandlinger</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <Link 
+                  to="/map" 
+                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  Se makere på kart
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Role-specific dashboard */}
         {profile.role === 'maker' ? (
           <MakerDashboard profile={profile} />
@@ -154,6 +178,11 @@ const Dashboard = () => {
               <ProfileTestComponent />
             </CardContent>
           </Card>
+        </div>
+
+        {/* Map Test Component */}
+        <div className="mt-8">
+          <MapTestComponent />
         </div>
 
         {/* RLS Test Component */}
