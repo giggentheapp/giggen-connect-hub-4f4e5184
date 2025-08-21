@@ -43,6 +43,7 @@ interface MakerDashboardProps {
   profile: UserProfile;
 }
 
+// Fixed: Removed selectedConceptId references - force recompilation
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
