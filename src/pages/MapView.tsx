@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Map from '@/components/Map';
+import MapTestButton from '@/components/MapTestButton';
 
 const MapView = () => {
   return (
@@ -19,6 +20,9 @@ const MapView = () => {
           <h1 className="text-2xl font-bold">Makere på kart</h1>
         </div>
       </div>
+
+      {/* Test Button */}
+      <MapTestButton />
 
       {/* Map */}
       <div className="bg-card rounded-lg p-4 shadow-sm">

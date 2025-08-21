@@ -26,31 +26,47 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
   const [tokenError, setTokenError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Get Mapbox token from edge function
+  // Log environment variables and get Mapbox token
   useEffect(() => {
     const getMapboxToken = async () => {
       try {
-        console.log('[ENV-CHECK] Attempting to fetch Mapbox token from edge function');
+        // Log available environment variables (names only, not values)
+        console.log('[ENV-CHECK] Available environment variables:', Object.keys(import.meta.env));
+        console.log('[ENV-CHECK] VITE_MAPBOX_TOKEN exists:', !!import.meta.env.VITE_MAPBOX_TOKEN);
+        console.log('[ENV-CHECK] VITE_SUPABASE_URL exists:', !!import.meta.env.VITE_SUPABASE_URL);
+        console.log('[ENV-CHECK] VITE_SUPABASE_PUBLISHABLE_KEY exists:', !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
         
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) {
-          console.error('[MAPBOX-ERROR] Failed to get token from edge function:', error.message);
-          setTokenError('Mapbox-token mangler. Legg inn gyldig token i miljøvariabler.');
+        // Try direct environment variable first
+        const directToken = import.meta.env.VITE_MAPBOX_TOKEN;
+        if (directToken && directToken !== 'undefined') {
+          console.log('[ENV-CHECK] Using VITE_MAPBOX_TOKEN from environment variables');
+          setMapboxToken(directToken);
+          mapboxgl.accessToken = directToken;
           return;
         }
         
-        if (data?.token) {
-          console.log('[ENV-CHECK] Mapbox token successfully retrieved from edge function');
+        console.log('[ENV-CHECK] VITE_MAPBOX_TOKEN not found, trying edge function...');
+        
+        // Fallback to edge function for token
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) {
+          console.error('[MAPBOX-ERROR] Edge function failed:', error.message);
+          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+          return;
+        }
+        
+        if (data?.token && data.token !== 'undefined') {
+          console.log('[ENV-CHECK] Got token from edge function successfully');
           setMapboxToken(data.token);
           mapboxgl.accessToken = data.token;
         } else {
-          console.error('[MAPBOX-ERROR] No token returned from edge function');
-          setTokenError('Mapbox-token mangler. Legg inn gyldig token i miljøvariabler.');
+          console.error('[MAPBOX-ERROR] Edge function returned invalid token');
+          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
         }
       } catch (error: any) {
-        console.error('[MAPBOX-ERROR] Error fetching token:', error.message);
-        setTokenError('Mapbox-token mangler. Legg inn gyldig token i miljøvariabler.');
+        console.error('[MAPBOX-ERROR] Token fetch failed:', error.message);
+        setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
       }
     };
     
