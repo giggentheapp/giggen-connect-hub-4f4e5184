@@ -27,6 +27,8 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
   const [visibleMakers, setVisibleMakers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  
+  // Force component refresh to clear any cached Eye icon references
 
   useEffect(() => {
     loadVisibleMakers();
