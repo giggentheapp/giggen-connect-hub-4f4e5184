@@ -14,6 +14,8 @@ interface FileItem {
   mime_type: string;
   is_public: boolean;
   created_at: string;
+  title?: string;
+  description?: string;
   publicUrl?: string;
 }
 
@@ -104,7 +106,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
         return (
           <img 
             src={publicUrl} 
-            alt={file.filename}
+            alt={file.title || file.filename}
             className="w-full h-32 object-cover rounded"
           />
         );
@@ -152,7 +154,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
             <CardTitle className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 {getFileIcon(file.file_type)}
-                <span className="truncate">{file.filename}</span>
+                <span className="truncate">{file.title || file.filename}</span>
               </div>
               {!file.is_public && (
                 <div className="h-4 w-4 text-muted-foreground" title="Private fil">
@@ -160,6 +162,11 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
                 </div>
               )}
             </CardTitle>
+            {file.description && (
+              <CardDescription className="text-xs mt-1">
+                {file.description}
+              </CardDescription>
+            )}
             <CardDescription className="text-xs">
               {formatFileSize(file.file_size)} • {new Date(file.created_at).toLocaleDateString('no-NO')}
             </CardDescription>

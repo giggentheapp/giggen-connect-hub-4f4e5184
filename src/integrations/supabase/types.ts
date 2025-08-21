@@ -152,6 +152,7 @@ export type Database = {
       portfolio_files: {
         Row: {
           created_at: string
+          description: string | null
           file_path: string
           file_size: number | null
           file_type: string
@@ -159,11 +160,13 @@ export type Database = {
           id: string
           is_public: boolean
           mime_type: string | null
+          title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           file_path: string
           file_size?: number | null
           file_type: string
@@ -171,11 +174,13 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           file_path?: string
           file_size?: number | null
           file_type?: string
@@ -183,6 +188,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string
         }

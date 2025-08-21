@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
-import FileViewerByPath from '@/components/FileViewerByPath';
+import PortfolioManager from '@/components/PortfolioManager';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
@@ -442,33 +442,27 @@ const ProfileSettings = () => {
           </CardContent>
         </Card>
 
-        {/* Portefølje filer */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Portefølje filer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileViewerByPath 
-              bucketName="portfolio" 
-              folderPath={`portfolio/${userId}`}
-              showControls={true}
-            />
-          </CardContent>
-        </Card>
+        {/* Portefølje */}
+        <div className="lg:col-span-2">
+          <PortfolioManager
+            bucketName="portfolio"
+            folderPath={`portfolio/${userId}`}
+            userId={userId!}
+            title="Portefølje"
+            description="Last opp bilder, video, lyd og dokumenter til din portefølje. Legg til tittel og beskrivelse for hvert element."
+          />
+        </div>
 
-        {/* Tech spec filer */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tech spec filer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileViewerByPath 
-              bucketName="concepts" 
-              folderPath={`techspec/${userId}`}
-              showControls={true}
-            />
-          </CardContent>
-        </Card>
+        {/* Tech Spec */}
+        <div className="lg:col-span-2">
+          <PortfolioManager
+            bucketName="concepts"
+            folderPath={`techspec/${userId}`}
+            userId={userId!}
+            title="Tech Spec"
+            description="Last opp tekniske spesifikasjoner og dokumenter."
+          />
+        </div>
       </div>
 
       {/* Save button */}

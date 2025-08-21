@@ -12,6 +12,8 @@ interface FileItem {
   mime_type: string;
   is_public: boolean;
   created_at: string;
+  title?: string;
+  description?: string;
 }
 
 interface FileViewerByPathProps {
