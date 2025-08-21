@@ -77,7 +77,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
   useEffect(() => {
     const fetchMakers = async () => {
       try {
-        console.log('[MAPBOX-ERROR] Starting to fetch public makers for map');
+        console.log('[MAPBOX] Fetching makers with public addresses');
         
         const { data, error } = await supabase
           .from('profiles')
@@ -87,11 +87,10 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
             avatar_url,
             latitude,
             longitude,
-            address,
-            profile_settings!inner(show_on_map)
+            address
           `)
           .eq('role', 'maker')
-          .eq('profile_settings.show_on_map', true)
+          .eq('is_address_public', true)
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
           .not('address', 'is', null);
@@ -129,7 +128,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           return isValid;
         }) || [];
 
-        console.log(`[MAPBOX] Displaying ${makersData.length} makers on map`);
+        console.log(`[MAPBOX-SUCCESS] Processed ${makersData.length} valid makers for map display`);
         setMakers(makersData);
       } catch (error: any) {
         console.error('[MAPBOX-ERROR] Error fetching makers:', error);
@@ -143,8 +142,9 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       }
     };
 
+    // Fetch makers immediately when component mounts or when dependencies change
     fetchMakers();
-  }, [toast]);
+  }, [toast]); // Dependencies ensure refetch when needed
 
   // Initialize map
   useEffect(() => {
@@ -399,7 +399,7 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           <div className="text-center p-6">
             <p className="text-muted-foreground font-medium mb-2">Ingen offentlige makere på kartet</p>
             <p className="text-sm text-muted-foreground">
-              Makere må ha lagt inn adresse og aktivert "Vis meg på kart" i sine profilinnstillinger
+              Makere må ha lagt inn adresse og satt den til offentlig i profilinnstillinger
             </p>
           </div>
         </div>

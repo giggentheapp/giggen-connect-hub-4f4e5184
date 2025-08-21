@@ -288,6 +288,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          is_address_public: boolean
           latitude: number | null
           longitude: number | null
           role: Database["public"]["Enums"]["user_role"]
@@ -302,6 +303,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -316,6 +318,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
           role?: Database["public"]["Enums"]["user_role"]
