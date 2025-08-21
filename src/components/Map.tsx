@@ -1,11 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, MapPin } from 'lucide-react';
 
 interface MapProps {
   className?: string;
+  forceRefresh?: number; // Add prop to force refresh from parent
 }
 
 interface MakerLocation {
@@ -17,13 +21,20 @@ interface MakerLocation {
   address: string;
 }
 
-const Map: React.FC<MapProps> = ({ className = '' }) => {
+const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]); // Track markers for cleanup
   const [makers, setMakers] = useState<MakerLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<{total: number, visible: number, errors: string[]}>({
+    total: 0, 
+    visible: 0, 
+    errors: []
+  });
   const { toast } = useToast();
 
   // Log environment variables and get Mapbox token
@@ -73,11 +84,8 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
     getMapboxToken();
   }, []);
 
-  // Fetch makers with public addresses - robust loading with retry
-  useEffect(() => {
-    console.log('[MAPBOX-MOUNT] Map component mounted, starting fetch process');
-    
-    const fetchMakers = async (retryCount = 0) => {
+  // Robust fetch function with retry logic
+  const fetchMakers = useCallback(async (retryCount = 0) => {
       try {
         console.log('[MAPBOX-FETCH] Starting to fetch makers with public addresses');
         setLoading(true);
@@ -136,6 +144,13 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         console.log(`[MAPBOX-FINAL] Setting ${makersData.length} valid makers to state`);
         setMakers(makersData);
         
+        // Update debug info
+        setDebugInfo({
+          total: data?.length || 0,
+          visible: makersData.length,
+          errors: []
+        });
+        
       } catch (error: any) {
         console.error('[MAPBOX-ERROR] Fetch failed:', error);
         
@@ -146,20 +161,28 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           return;
         }
         
+        const errorMsg = `Kunne ikke laste makere på kartet etter flere forsøk: ${error.message}`;
+        setDebugInfo(prev => ({
+          ...prev,
+          errors: [...prev.errors, errorMsg]
+        }));
+        
         toast({
           title: "Feil ved lasting av kart",
-          description: "Kunne ikke laste makere på kartet etter flere forsøk",
+          description: errorMsg,
           variant: "destructive",
         });
       } finally {
         console.log('[MAPBOX-FETCH] Fetch process completed, setting loading to false');
         setLoading(false);
       }
-    };
+    }, [toast]);
 
-    // Always fetch on mount - no conditions
+  // Fetch makers with public addresses - robust loading with retry
+  useEffect(() => {
+    console.log('[MAPBOX-MOUNT] Map component mounted, starting fetch process');
     fetchMakers();
-  }, []); // Empty dependency array ensures reliable loading
+  }, [fetchMakers, forceRefresh]); // Include forceRefresh to enable parent-triggered reloads
 
   // Initialize map
   useEffect(() => {
@@ -206,14 +229,15 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
       );
 
       map.current.on('load', () => {
-        console.log('[MAPBOX-ERROR] Map successfully loaded with streets-v11 style');
+        console.log('[MAPBOX-SUCCESS] Map successfully loaded with streets-v11 style');
+        setMapReady(true);
       });
 
       map.current.on('error', (e) => {
         console.error('[MAPBOX-ERROR] Map error:', e.error);
       });
 
-      console.log('[MAPBOX-ERROR] Map initialization completed');
+      console.log('[MAPBOX-SUCCESS] Map initialization completed');
 
     } catch (error: any) {
       console.error('[MAPBOX-ERROR] Failed to initialize map:', error.message);
@@ -226,9 +250,13 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
 
     return () => {
       if (map.current) {
-        console.log('[MAPBOX-ERROR] Cleaning up map instance');
+        console.log('[MAPBOX-CLEANUP] Cleaning up map instance');
+        // Clean up markers first
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
         map.current.remove();
         map.current = null;
+        setMapReady(false);
       }
     };
   }, [mapboxToken, toast]);
@@ -238,29 +266,26 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
     console.log('[MAPBOX-MARKERS] Marker useEffect triggered');
     console.log('[MAPBOX-MARKERS] Conditions:', {
       hasMap: !!map.current,
+      mapReady,
       makersCount: makers.length,
       markersArray: makers
     });
     
-    if (!map.current || !makers.length) {
-      console.log(`[MAPBOX-MARKERS] Skipping markers: map=${!!map.current}, makers=${makers.length}`);
+    if (!map.current || !mapReady || !makers.length) {
+      console.log(`[MAPBOX-MARKERS] Skipping markers: map=${!!map.current}, ready=${mapReady}, makers=${makers.length}`);
       return;
     }
 
     console.log(`[MAPBOX-MARKERS] Adding ${makers.length} markers to map`);
 
-    // Clear existing markers completely to prevent duplicates
-    const existingMarkers = document.querySelectorAll('.mapbox-marker-container, .mapbox-marker');
-    existingMarkers.forEach(marker => {
+    // Clean up existing markers properly
+    markersRef.current.forEach(marker => {
       marker.remove();
     });
+    markersRef.current = [];
     
-    // Also clear any Mapbox markers that might be stored
-    if (map.current) {
-      const mapElement = map.current.getCanvasContainer();
-      const allMarkers = mapElement.querySelectorAll('.mapboxgl-marker');
-      allMarkers.forEach(marker => marker.remove());
-    }
+    let successCount = 0;
+    const errors: string[] = [];
 
     // Create markers for each maker
     makers.forEach((maker, index) => {
@@ -421,10 +446,16 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .setPopup(popup)
           .addTo(map.current!);
           
+        // Store marker for cleanup
+        markersRef.current.push(marker);
+        successCount++;
+          
         console.log(`[MAPBOX-MARKER-${index}] ✅ Successfully added marker for ${maker.display_name}`);
         
-      } catch (error) {
-        console.error(`[MAPBOX-MARKER-${index}] ❌ Failed to create marker for ${maker.display_name}:`, error);
+      } catch (error: any) {
+        const errorMsg = `Failed to create marker for ${maker.display_name}: ${error.message}`;
+        errors.push(errorMsg);
+        console.error(`[MAPBOX-MARKER-${index}] ❌ ${errorMsg}`, error);
       }
     });
 
@@ -441,9 +472,17 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         duration: 1000
       });
       
-      console.log(`[MAPBOX-ERROR] Map bounds adjusted to show all ${makers.length} markers`);
+      console.log(`[MAPBOX-SUCCESS] Map bounds adjusted to show all ${makers.length} markers`);
     }
-  }, [makers]);
+    
+    // Update debug info
+    setDebugInfo(prev => ({
+      ...prev,
+      visible: successCount,
+      errors
+    }));
+    
+  }, [makers, mapReady]);
 
   if (loading) {
     return (
@@ -468,22 +507,122 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
   }
 
   return (
-    <div className={`relative ${className}`}>
-      <div 
-        ref={mapContainer} 
-        className="w-full h-96 rounded-lg" 
-        style={{ minHeight: '400px' }}
-      />
-      {makers.length === 0 && !loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/80 rounded-lg">
-          <div className="text-center p-6">
-            <p className="text-muted-foreground font-medium mb-2">Ingen offentlige makere på kartet</p>
-            <p className="text-sm text-muted-foreground">
-              Makere må ha lagt inn adresse og satt den til offentlig i profilinnstillinger
-            </p>
+    <div className={`space-y-4 ${className}`}>
+      {/* Map Container */}
+      <div className="relative">
+        <div 
+          ref={mapContainer} 
+          className="w-full h-96 rounded-lg border" 
+          style={{ 
+            minHeight: '400px',
+            zIndex: 1,
+            position: 'relative'
+          }}
+        />
+        {makers.length === 0 && !loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/80 rounded-lg" style={{zIndex: 2}}>
+            <div className="text-center p-6">
+              <p className="text-muted-foreground font-medium mb-2">Ingen offentlige makere på kartet</p>
+              <p className="text-sm text-muted-foreground">
+                Makere må ha lagt inn adresse og satt den til offentlig i profilinnstillinger
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Map Status Indicator */}
+        <div className="absolute top-3 left-3 z-10">
+          <Badge variant={mapReady ? "default" : "secondary"} className="flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {mapReady ? "Kart lastet" : "Laster kart..."}
+          </Badge>
+        </div>
+        
+        {/* Refresh Button */}
+        <div className="absolute top-3 right-3 z-10">
+          <Button
+            variant="outline" 
+            size="sm"
+            onClick={() => fetchMakers()}
+            disabled={loading}
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
+      </div>
+
+      {/* Debug Information Panel */}
+      <div className="bg-card border rounded-lg p-4">
+        <h3 className="font-medium mb-3 flex items-center gap-2">
+          <MapPin className="h-4 w-4" />
+          Kart Debug-informasjon
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Status</div>
+            <div className="text-xs text-muted-foreground">
+              Mapbox Token: {mapboxToken ? '✅' : '❌'}<br/>
+              Kart Ready: {mapReady ? '✅' : '❌'}<br/>
+              Laster: {loading ? '🔄' : '✅'}
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Markører</div>
+            <div className="text-xs text-muted-foreground">
+              Total i DB: {debugInfo.total}<br/>
+              Synlige: {debugInfo.visible}<br/>
+              Aktive: {markersRef.current.length}
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Koordinater</div>
+            <div className="text-xs text-muted-foreground max-h-16 overflow-y-auto">
+              {makers.length > 0 ? (
+                makers.map((maker, i) => (
+                  <div key={i}>
+                    {maker.display_name}: [{maker.longitude.toFixed(4)}, {maker.latitude.toFixed(4)}]
+                  </div>
+                ))
+              ) : (
+                'Ingen markører lastet'
+              )}
+            </div>
           </div>
         </div>
-      )}
+        
+        {/* Errors */}
+        {debugInfo.errors.length > 0 && (
+          <div className="border-t pt-3">
+            <div className="text-sm font-medium text-destructive mb-2">Feil ({debugInfo.errors.length})</div>
+            <div className="text-xs text-destructive space-y-1 max-h-20 overflow-y-auto">
+              {debugInfo.errors.map((error, i) => (
+                <div key={i}>{error}</div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Detailed Maker Information */}
+        {makers.length > 0 && (
+          <div className="border-t pt-3">
+            <div className="text-sm font-medium mb-2">Lastet Makere ({makers.length})</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+              {makers.map((maker, i) => (
+                <div key={i} className="p-2 bg-muted rounded text-muted-foreground">
+                  <div className="font-medium">{maker.display_name}</div>
+                  <div>Pos: {maker.latitude.toFixed(6)}, {maker.longitude.toFixed(6)}</div>
+                  <div>Adresse: {maker.address}</div>
+                  <div>Avatar: {maker.avatar_url ? '✅' : '❌'}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

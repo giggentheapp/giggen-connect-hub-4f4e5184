@@ -93,7 +93,7 @@ const MapVisualTestComponent = () => {
         </CardHeader>
         <CardContent className="p-0">
           <div key={refreshKey}>
-            <Map className="w-full rounded-lg" />
+            <Map className="w-full rounded-lg" forceRefresh={refreshKey} />
           </div>
         </CardContent>
       </Card>
