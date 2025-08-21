@@ -238,6 +238,27 @@ export type Database = {
           },
         ]
       }
+      profile_images: {
+        Row: {
+          created_at: string | null
+          file_url: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_url?: string | null
+          id?: never
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_url?: string | null
+          id?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profile_settings: {
         Row: {
           created_at: string
