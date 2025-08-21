@@ -102,10 +102,19 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         }
 
         console.log(`[MAPBOX] Successfully fetched ${data?.length || 0} makers with coordinates and show_on_map enabled`);
+        console.log('[MAPBOX] Raw data from API:', data);
 
         const makersData = data?.filter(maker => {
           const hasValidCoordinates = maker.latitude && maker.longitude;
           const hasAddress = maker.address;
+          
+          console.log(`[MAPBOX] Processing maker ${maker.display_name}:`, {
+            hasValidCoordinates,
+            hasAddress,
+            latitude: maker.latitude,
+            longitude: maker.longitude,
+            address: maker.address
+          });
           
           if (!hasValidCoordinates || !hasAddress) {
             console.log(`[MAPBOX] Skipping maker ${maker.display_name}: missing coordinates or address`);
@@ -120,6 +129,8 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           longitude: Number(maker.longitude),
           address: maker.address
         })) || [];
+
+        console.log('[MAPBOX] Final makers data for rendering:', makersData);
 
         console.log(`[MAPBOX] Displaying ${makersData.length} makers on map`);
         setMakers(makersData);
