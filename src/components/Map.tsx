@@ -96,6 +96,9 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .not('longitude', 'is', null)
           .not('address', 'is', null);
 
+        console.log('[MAPBOX-DEBUG] Query completed. Error:', error);
+        console.log('[MAPBOX-DEBUG] Raw response data:', JSON.stringify(data, null, 2));
+
         if (error) {
           console.error('[RLS-DENIED] Error fetching makers:', error.code, error.message, error.details);
           throw error;
