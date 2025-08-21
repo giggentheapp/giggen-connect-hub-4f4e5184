@@ -96,44 +96,38 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .not('longitude', 'is', null)
           .not('address', 'is', null);
 
-        console.log('[MAPBOX-DEBUG] Query completed. Error:', error);
-        console.log('[MAPBOX-DEBUG] Raw response data:', JSON.stringify(data, null, 2));
-
         if (error) {
-          console.error('[RLS-DENIED] Error fetching makers:', error.code, error.message, error.details);
+          console.error('[MAPBOX-ERROR] Error fetching makers:', error.code, error.message, error.details);
           throw error;
         }
 
-        console.log(`[MAPBOX] Successfully fetched ${data?.length || 0} makers with coordinates and show_on_map enabled`);
-        console.log('[MAPBOX] Raw data from API:', data);
-
-        const makersData = data?.filter(maker => {
-          const hasValidCoordinates = maker.latitude && maker.longitude;
-          const hasAddress = maker.address;
-          
-          console.log(`[MAPBOX] Processing maker ${maker.display_name}:`, {
-            hasValidCoordinates,
-            hasAddress,
-            latitude: maker.latitude,
-            longitude: maker.longitude,
-            address: maker.address
-          });
-          
-          if (!hasValidCoordinates || !hasAddress) {
-            console.log(`[MAPBOX] Skipping maker ${maker.display_name}: missing coordinates or address`);
-            return false;
-          }
-          return true;
-        }).map(maker => ({
+        console.log(`[MAPBOX-SUCCESS] Fetched ${data?.length || 0} makers from database`);
+        
+        // Process makers data - ensure coordinates are valid numbers
+        const makersData = data?.map(maker => ({
           id: maker.id,
           display_name: maker.display_name,
           avatar_url: maker.avatar_url,
-          latitude: Number(maker.latitude),
-          longitude: Number(maker.longitude),
+          latitude: parseFloat(maker.latitude?.toString() || '0'),
+          longitude: parseFloat(maker.longitude?.toString() || '0'),
           address: maker.address
-        })) || [];
-
-        console.log('[MAPBOX] Final makers data for rendering:', makersData);
+        })).filter(maker => {
+          // Validate coordinates are valid numbers
+          const isValid = !isNaN(maker.latitude) && !isNaN(maker.longitude) && 
+                         maker.latitude !== 0 && maker.longitude !== 0 && maker.address;
+          
+          if (!isValid) {
+            console.warn(`[MAPBOX-SKIP] Invalid data for maker ${maker.display_name}:`, {
+              lat: maker.latitude, lng: maker.longitude, address: maker.address
+            });
+          } else {
+            console.log(`[MAPBOX-VALID] Maker ${maker.display_name} ready for map:`, {
+              lat: maker.latitude, lng: maker.longitude
+            });
+          }
+          
+          return isValid;
+        }) || [];
 
         console.log(`[MAPBOX] Displaying ${makersData.length} makers on map`);
         setMakers(makersData);
@@ -216,21 +210,31 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
 
   // Add markers when makers data is available
   useEffect(() => {
-    if (!map.current || makers.length === 0) return;
+    if (!map.current || !makers.length) {
+      console.log(`[MAPBOX-MARKERS] Skipping markers: map=${!!map.current}, makers=${makers.length}`);
+      return;
+    }
 
-    console.log(`[MAPBOX-ERROR] Adding ${makers.length} maker markers to map`);
+    console.log(`[MAPBOX-MARKERS] Adding ${makers.length} markers to map`);
 
-    // Clear existing markers
+    // Clear existing markers first
     const existingMarkers = document.querySelectorAll('.mapbox-marker');
     existingMarkers.forEach(marker => marker.remove());
 
-    // Add markers for each maker
+    // Create markers for each maker
     makers.forEach((maker, index) => {
-      console.log(`[MAPBOX-ERROR] Creating marker ${index + 1} for ${maker.display_name}`);
-      
-      // Create custom marker element
-      const markerEl = document.createElement('div');
-      markerEl.className = 'mapbox-marker';
+      try {
+        console.log(`[MAPBOX-MARKER-${index}] Creating marker for ${maker.display_name} at [${maker.longitude}, ${maker.latitude}]`);
+        
+        // Validate coordinates before creating marker
+        if (isNaN(maker.latitude) || isNaN(maker.longitude)) {
+          console.error(`[MAPBOX-MARKER-${index}] Invalid coordinates for ${maker.display_name}`);
+          return;
+        }
+        
+        // Create custom marker element
+        const markerEl = document.createElement('div');
+        markerEl.className = 'mapbox-marker';
       
       if (maker.avatar_url) {
         // Custom profile picture marker
@@ -328,13 +332,20 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
         </div>
       `);
 
-      // Add marker to map
-      const marker = new mapboxgl.Marker(markerEl)
-        .setLngLat([maker.longitude, maker.latitude])
-        .setPopup(popup)
-        .addTo(map.current!);
+        // Add marker to map with coordinate validation
+        const markerCoords: [number, number] = [maker.longitude, maker.latitude];
+        console.log(`[MAPBOX-MARKER-${index}] Adding marker at coordinates:`, markerCoords);
         
-      console.log(`[MAPBOX-ERROR] Marker added for ${maker.display_name} at [${maker.longitude}, ${maker.latitude}]`);
+        const marker = new mapboxgl.Marker(markerEl)
+          .setLngLat(markerCoords)
+          .setPopup(popup)
+          .addTo(map.current!);
+          
+        console.log(`[MAPBOX-MARKER-${index}] ✅ Successfully added marker for ${maker.display_name}`);
+        
+      } catch (error) {
+        console.error(`[MAPBOX-MARKER-${index}] ❌ Failed to create marker for ${maker.display_name}:`, error);
+      }
     });
 
     // Fit map to show all markers if we have any
