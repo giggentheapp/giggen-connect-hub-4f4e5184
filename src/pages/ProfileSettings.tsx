@@ -25,6 +25,7 @@ interface ProfileData {
   address?: string;
   latitude?: number;
   longitude?: number;
+  is_address_public?: boolean;
 }
 
 interface ProfileSettings {
@@ -59,6 +60,7 @@ const ProfileSettings = () => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [geocoding, setGeocoding] = useState(false);
+  const [isAddressPublic, setIsAddressPublic] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -96,6 +98,7 @@ const ProfileSettings = () => {
         setDisplayName(profileData.display_name || '');
         setBio(profileData.bio || '');
         setAddress(profileData.address || '');
+        setIsAddressPublic(profileData.is_address_public || false);
         
         const contactInfo = profileData.contact_info as any;
         setEmail(contactInfo?.email || '');
@@ -174,6 +177,7 @@ const ProfileSettings = () => {
         display_name: displayName,
         bio: bio,
         address: address || null,
+        is_address_public: isAddressPublic,
         contact_info: {
           email: email,
           phone: phone
@@ -419,6 +423,20 @@ const ProfileSettings = () => {
                 id="show_on_map"
                 checked={settings.show_on_map}
                 onCheckedChange={(checked) => handleToggleChange('show_on_map', checked)}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="is_address_public">Vis adresse offentlig</Label>
+                <p className="text-sm text-muted-foreground">
+                  Gjør adressen din synlig på kartet for andre brukere
+                </p>
+              </div>
+              <Switch
+                id="is_address_public"
+                checked={isAddressPublic}
+                onCheckedChange={setIsAddressPublic}
               />
             </div>
           </CardContent>

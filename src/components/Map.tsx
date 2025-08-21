@@ -73,11 +73,14 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
     getMapboxToken();
   }, []);
 
-  // Fetch makers with map visibility enabled
+  // Fetch makers with public addresses - runs on every component mount
   useEffect(() => {
+    console.log('[MAPBOX-MOUNT] Map component mounted, starting fetch process');
+    
     const fetchMakers = async () => {
       try {
-        console.log('[MAPBOX] Fetching makers with public addresses');
+        console.log('[MAPBOX-FETCH] Starting to fetch makers with public addresses');
+        setLoading(true);
         
         const { data, error } = await supabase
           .from('profiles')
@@ -96,11 +99,12 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           .not('address', 'is', null);
 
         if (error) {
-          console.error('[MAPBOX-ERROR] Error fetching makers:', error.code, error.message, error.details);
+          console.error('[MAPBOX-ERROR] Database query failed:', error.code, error.message, error.details);
           throw error;
         }
 
-        console.log(`[MAPBOX-SUCCESS] Fetched ${data?.length || 0} makers from database`);
+        console.log(`[MAPBOX-SUCCESS] Raw database response: ${data?.length || 0} records`);
+        console.log('[MAPBOX-DATA] Raw data:', JSON.stringify(data, null, 2));
         
         // Process makers data - ensure coordinates are valid numbers
         const makersData = data?.map(maker => ({
@@ -128,31 +132,43 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
           return isValid;
         }) || [];
 
-        console.log(`[MAPBOX-SUCCESS] Processed ${makersData.length} valid makers for map display`);
+        console.log(`[MAPBOX-FINAL] Setting ${makersData.length} valid makers to state`);
         setMakers(makersData);
+        
       } catch (error: any) {
-        console.error('[MAPBOX-ERROR] Error fetching makers:', error);
+        console.error('[MAPBOX-ERROR] Fetch failed:', error);
         toast({
           title: "Feil ved lasting av kart",
           description: "Kunne ikke laste makere på kartet",
           variant: "destructive",
         });
       } finally {
+        console.log('[MAPBOX-FETCH] Fetch process completed, setting loading to false');
         setLoading(false);
       }
     };
 
-    // Fetch makers immediately when component mounts or when dependencies change
+    // Always fetch on mount - no conditions
     fetchMakers();
-  }, [toast]); // Dependencies ensure refetch when needed
+  }, []); // Empty dependency array to run only on mount/unmount
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    console.log('[MAPBOX-INIT] Map initialization useEffect triggered');
+    console.log('[MAPBOX-INIT] Conditions:', { 
+      hasContainer: !!mapContainer.current, 
+      hasToken: !!mapboxToken,
+      hasMap: !!map.current 
+    });
+    
+    if (!mapContainer.current || !mapboxToken) {
+      console.log('[MAPBOX-INIT] Skipping map init - missing container or token');
+      return;
+    }
     
     // Prevent double initialization
     if (map.current) {
-      console.log('[MAPBOX-ERROR] Map already initialized, skipping');
+      console.log('[MAPBOX-INIT] Map already exists, skipping initialization');
       return;
     }
 
@@ -208,8 +224,15 @@ const Map: React.FC<MapProps> = ({ className = '' }) => {
     };
   }, [mapboxToken, toast]);
 
-  // Add markers when makers data is available
+  // Add markers when makers data is available and map is ready
   useEffect(() => {
+    console.log('[MAPBOX-MARKERS] Marker useEffect triggered');
+    console.log('[MAPBOX-MARKERS] Conditions:', {
+      hasMap: !!map.current,
+      makersCount: makers.length,
+      markersArray: makers
+    });
+    
     if (!map.current || !makers.length) {
       console.log(`[MAPBOX-MARKERS] Skipping markers: map=${!!map.current}, makers=${makers.length}`);
       return;
