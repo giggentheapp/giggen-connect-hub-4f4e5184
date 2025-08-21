@@ -10,6 +10,7 @@ import { GoerDashboard } from '@/components/GoerDashboard';
 import { RLSTestComponent } from '@/components/RLSTestComponent';
 import ProfileTestComponent from '@/components/ProfileTestComponent';
 import MapTestComponent from '@/components/MapTestComponent';
+import { SystemTestComponent } from '@/components/SystemTestComponent';
 import { Link } from 'react-router-dom';
 
 interface UserProfile {
@@ -178,6 +179,11 @@ const Dashboard = () => {
               <ProfileTestComponent />
             </CardContent>
           </Card>
+        </div>
+
+        {/* System Test Component */}
+        <div className="mt-8">
+          <SystemTestComponent />
         </div>
 
         {/* Map Test Component */}
