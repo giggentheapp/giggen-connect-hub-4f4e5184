@@ -53,16 +53,53 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
         return;
       }
 
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
-      
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+      if (bucketName === 'portfolio') {
+        // Portfolio items from portfolio table  
+        const { data, error } = await supabase
+          .from('portfolio')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setFiles(data || []);
+        if (error) throw error;
+
+        const mappedData: PortfolioFile[] = data?.map((item) => ({
+          id: item.id.toString(),
+          filename: item.title || 'Portfolio element',
+          file_path: '', // Portfolio items don't store files in storage
+          file_type: 'document', 
+          file_size: 0,
+          mime_type: 'application/octet-stream',
+          title: item.title,
+          description: item.description,
+          created_at: item.created_at
+        })) || [];
+        
+        setFiles(mappedData);
+      } else {
+        // Concept files from concept_files table
+        const { data, error } = await supabase
+          .from('concept_files')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const mappedData: PortfolioFile[] = data?.map((item) => ({
+          id: item.id,
+          filename: item.filename,
+          file_path: item.file_path,
+          file_type: item.file_type,
+          file_size: item.file_size || 0,
+          mime_type: item.mime_type || 'application/octet-stream',
+          title: item.title,
+          description: item.description,
+          created_at: item.created_at
+        })) || [];
+        
+        setFiles(mappedData);
+      }
     } catch (error: any) {
       console.error('Error fetching files:', error);
       toast({
@@ -127,6 +164,11 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
 
       if (uploadError) throw uploadError;
 
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
       // Save metadata to database (except for avatars)
       if (bucketName === 'avatars') {
         toast({
@@ -144,33 +186,74 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
 
       const fileType = getFileType(file.type);
       
-      const baseFileData = {
-        user_id: userId,
-        file_type: fileType,
-        filename: file.name,
-        file_path: filePath,
-        file_size: file.size,
-        mime_type: file.type,
-        is_public: true,
-        title: uploadTitle,
-        description: uploadDescription || null
-      };
-
       // Insert into appropriate table based on bucket
       let dbData;
       if (bucketName === 'portfolio') {
+        // For portfolio, save to portfolio_files table
+        const portfolioData = {
+          user_id: userId,
+          title: uploadTitle,
+          description: uploadDescription || null,
+          file_url: publicUrl
+        };
+        
         const { data, error: dbError } = await supabase
-          .from('portfolio_files')
-          .insert(baseFileData)
+          .from('portfolio')
+          .insert(portfolioData)
           .select()
           .single();
         if (dbError) throw dbError;
         dbData = data;
       } else if (bucketName === 'concepts') {
+        // For concepts, first ensure a concept exists for the user
+        let conceptId;
+        
+        // Check if user has any existing concept
+        const { data: existingConcept, error: conceptError } = await supabase
+          .from('concepts')
+          .select('id')
+          .eq('maker_id', userId)
+          .limit(1)
+          .single();
+          
+        if (conceptError && conceptError.code !== 'PGRST116') { // PGRST116 = no rows found
+          throw conceptError;
+        }
+        
+        if (existingConcept) {
+          conceptId = existingConcept.id;
+        } else {
+          // Create new concept for the user
+          const { data: newConcept, error: createError } = await supabase
+            .from('concepts')
+            .insert({
+              maker_id: userId,
+              title: 'Nytt konsept',
+              description: 'Automatisk opprettet konsept',
+              status: 'draft'
+            })
+            .select('id')
+            .single();
+            
+          if (createError) throw createError;
+          conceptId = newConcept.id;
+        }
+        
+        // Now save the file with the concept_id
         const conceptFileData = {
-          ...baseFileData,
-          concept_id: userId // Use userId as concept_id for tech spec files
+          concept_id: conceptId,
+          user_id: userId,
+          file_type: fileType,
+          filename: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: file.type,
+          is_public: true,
+          title: uploadTitle,
+          description: uploadDescription || null,
+          file_url: publicUrl
         };
+        
         const { data, error: dbError } = await supabase
           .from('concept_files')
           .insert(conceptFileData)
@@ -215,7 +298,7 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
     }
 
     try {
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
+      const tableName = bucketName === 'portfolio' ? 'portfolio' : 'concept_files';
       
       const { error } = await supabase
         .from(tableName)
@@ -245,16 +328,18 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
 
   const handleDelete = async (file: PortfolioFile) => {
     try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from(bucketName)
-        .remove([file.file_path]);
+      // Delete from storage only if it's a concept file (has file_path)
+      if (file.file_path && bucketName === 'concepts') {
+        const { error: storageError } = await supabase.storage
+          .from(bucketName)
+          .remove([file.file_path]);
 
-      if (storageError) throw storageError;
+        if (storageError) throw storageError;
+      }
 
       // Delete from database (except for avatars)
       if (bucketName !== 'avatars') {
-        const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
+        const tableName = bucketName === 'portfolio' ? 'portfolio' : 'concept_files';
         const { error: dbError } = await supabase
           .from(tableName)
           .delete()
@@ -264,8 +349,8 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
       }
 
       toast({
-        title: "Fil slettet",
-        description: `${file.filename} ble slettet`,
+        title: "Element slettet",
+        description: `${file.title || file.filename} ble slettet`,
       });
 
       fetchFiles();
