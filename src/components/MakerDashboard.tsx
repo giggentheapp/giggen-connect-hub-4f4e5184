@@ -51,6 +51,7 @@ interface MakerDashboardProps {
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [conceptFiles, setConceptFiles] = useState<{[key: string]: any[]}>({});
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
   const [editingConcept, setEditingConcept] = useState<any>(null);
@@ -68,6 +69,30 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
 
         if (conceptsError) throw conceptsError;
         setConcepts(conceptsData || []);
+
+        // Fetch concept files for each concept
+        if (conceptsData && conceptsData.length > 0) {
+          const conceptIds = conceptsData.map(c => c.id);
+          const { data: filesData, error: filesError } = await supabase
+            .from('concept_files')
+            .select('*')
+            .in('concept_id', conceptIds)
+            .like('file_path', `portfolio/${profile.user_id}%`);
+
+          if (filesError) {
+            console.error('Error fetching concept files:', filesError);
+          } else {
+            // Group files by concept_id
+            const filesByConceptId: {[key: string]: any[]} = {};
+            (filesData || []).forEach(file => {
+              if (!filesByConceptId[file.concept_id]) {
+                filesByConceptId[file.concept_id] = [];
+              }
+              filesByConceptId[file.concept_id].push(file);
+            });
+            setConceptFiles(filesByConceptId);
+          }
+        }
 
         // Fetch events
         const { data: eventsData, error: eventsError } = await supabase
@@ -101,6 +126,26 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       .eq('maker_id', profile.user_id)
       .order('created_at', { ascending: false });
     setConcepts(conceptsData || []);
+    
+    // Fetch concept files for refreshed concepts
+    if (conceptsData && conceptsData.length > 0) {
+      const conceptIds = conceptsData.map(c => c.id);
+      const { data: filesData } = await supabase
+        .from('concept_files')
+        .select('*')
+        .in('concept_id', conceptIds)
+        .like('file_path', `portfolio/${profile.user_id}%`);
+
+      // Group files by concept_id
+      const filesByConceptId: {[key: string]: any[]} = {};
+      (filesData || []).forEach(file => {
+        if (!filesByConceptId[file.concept_id]) {
+          filesByConceptId[file.concept_id] = [];
+        }
+        filesByConceptId[file.concept_id].push(file);
+      });
+      setConceptFiles(filesByConceptId);
+    }
   };
 
   const handleDeleteConcept = async (conceptId: string) => {
@@ -287,21 +332,36 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                               {concept.description}
                             </p>
                           )}
-                          <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
-                            {concept.price && (
-                              <div>
-                                <span className="font-medium">Pris:</span> {concept.price} NOK
-                              </div>
-                            )}
-                            {concept.expected_audience && (
-                              <div>
-                                <span className="font-medium">Publikum:</span> {concept.expected_audience} personer
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
-                          </p>
+                           <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                             {concept.price && (
+                               <div>
+                                 <span className="font-medium">Pris:</span> {concept.price} NOK
+                               </div>
+                             )}
+                             {concept.expected_audience && (
+                               <div>
+                                 <span className="font-medium">Publikum:</span> {concept.expected_audience} personer
+                               </div>
+                             )}
+                           </div>
+                           
+                           {/* Portfolio Files Display */}
+                           {conceptFiles[concept.id] && conceptFiles[concept.id].length > 0 && (
+                             <div className="mt-3">
+                               <span className="font-medium text-sm">Portefølje:</span>
+                               <div className="flex flex-wrap gap-2 mt-1">
+                                 {conceptFiles[concept.id].map((file, index) => (
+                                   <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
+                                     {file.filename}
+                                   </span>
+                                 ))}
+                               </div>
+                             </div>
+                           )}
+                           
+                           <p className="text-xs text-muted-foreground mt-2">
+                             Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
+                           </p>
                         </div>
                         <div className="flex gap-2 ml-4">
                           <Button
