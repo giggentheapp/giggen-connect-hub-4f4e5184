@@ -11,7 +11,7 @@ import FileUpload from '@/components/FileUpload';
 interface TechSpecItem {
   id: string;
   creator_id: string;
-  file_name: string;
+  filename: string;
   file_url: string;
   file_type: string;
   created_at: string;
@@ -56,36 +56,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
     }
   };
 
-  const handleFileUploaded = async (fileData: any) => {
-    try {
-      const { data, error } = await supabase
-        .from('profile_tech_specs')
-        .insert({
-          creator_id: userId,
-          file_name: fileData.filename,
-          file_url: fileData.publicUrl,
-          file_path: fileData.file_path,
-          file_type: fileData.file_type,
-          mime_type: fileData.mime_type,
-          file_size: fileData.file_size
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setItems(prev => [data, ...prev]);
-      toast({
-        title: "Tech spec lastet opp",
-        description: "Tech spec filen er klar til bruk i konsepter",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Feil ved opplasting",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const handleFileUploaded = (fileData: any) => {
+    // FileUpload component now handles database insertion directly for tech specs
+    setItems(prev => [fileData, ...prev]);
+    toast({
+      title: "Tech spec lastet opp",
+      description: "Tech spec filen er klar til bruk i konsepter",
+    });
   };
 
   const handleUpdateItem = async (itemId: string) => {
@@ -93,7 +70,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       const { error } = await supabase
         .from('profile_tech_specs')
         .update({
-          file_name: editName
+          filename: editName
         })
         .eq('id', itemId);
 
@@ -101,7 +78,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       setItems(prev => prev.map(item => 
         item.id === itemId 
-          ? { ...item, file_name: editName }
+          ? { ...item, filename: editName }
           : item
       ));
 
@@ -147,7 +124,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   const startEditing = (item: TechSpecItem) => {
     setEditingItem(item.id);
-    setEditName(item.file_name);
+    setEditName(item.filename);
   };
 
   const cancelEditing = () => {
@@ -163,10 +140,11 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       </CardHeader>
       <CardContent className="space-y-6">
         <FileUpload
-          bucketName="concepts"
+          bucketName="portfolio"
           folderPath={`techspec/${userId}`}
           onFileUploaded={handleFileUploaded}
           acceptedTypes=".pdf,.doc,.docx,.txt,.md"
+          targetTable="profile_tech_specs"
         />
 
         {loading ? (
@@ -206,7 +184,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                 ) : (
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h4 className="font-medium">{item.file_name}</h4>
+                      <h4 className="font-medium">{item.filename}</h4>
                       <p className="text-xs text-muted-foreground mt-2">
                         Type: {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                       </p>

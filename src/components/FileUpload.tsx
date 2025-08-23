@@ -11,9 +11,10 @@ interface FileUploadProps {
   folderPath: string;
   onFileUploaded: (file: any) => void;
   acceptedTypes?: string;
+  targetTable?: 'profile_portfolio' | 'profile_tech_specs' | 'concept_files' | null;
 }
 
-const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.docx,.txt" }: FileUploadProps) => {
+const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.docx,.txt", targetTable = null }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -105,9 +106,9 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         is_public: true
       };
 
-      // Insert into appropriate table based on bucket
+      // Insert into appropriate table based on targetTable parameter
       let dbData;
-      if (bucketName === 'portfolio') {
+      if (targetTable === 'profile_portfolio') {
         const { data, error: dbError } = await supabase
           .from('profile_portfolio')
           .insert({
@@ -125,8 +126,24 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           .single();
         if (dbError) throw dbError;
         dbData = data;
-      } else if (bucketName === 'concepts') {
-        // For concepts, don't insert to database here - let the parent component handle it
+      } else if (targetTable === 'profile_tech_specs') {
+        const { data, error: dbError } = await supabase
+          .from('profile_tech_specs')
+          .insert({
+            creator_id: user.id,
+            file_url: publicUrl,
+            file_path: filePath,
+            filename: file.name,
+            file_type: fileType,
+            mime_type: file.type,
+            file_size: file.size
+          })
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
+      } else {
+        // For concept_files or when no targetTable specified, let parent handle database operations
         dbData = {
           ...baseFileData,
           publicUrl,
@@ -135,7 +152,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           file_type: fileType,
           file_size: file.size,
           mime_type: file.type,
-          user_id: user.id
+          creator_id: user.id
         };
       }
 

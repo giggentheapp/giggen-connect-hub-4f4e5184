@@ -30,7 +30,6 @@ export type Database = {
           mime_type: string | null
           title: string | null
           updated_at: string
-          user_id: string
         }
         Insert: {
           concept_id: string
@@ -47,7 +46,6 @@ export type Database = {
           mime_type?: string | null
           title?: string | null
           updated_at?: string
-          user_id: string
         }
         Update: {
           concept_id?: string
@@ -64,7 +62,6 @@ export type Database = {
           mime_type?: string | null
           title?: string | null
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -285,11 +282,11 @@ export type Database = {
         Row: {
           created_at: string
           creator_id: string
-          file_name: string
           file_path: string
           file_size: number | null
           file_type: string
           file_url: string
+          filename: string
           id: string
           mime_type: string | null
           updated_at: string
@@ -297,11 +294,11 @@ export type Database = {
         Insert: {
           created_at?: string
           creator_id: string
-          file_name: string
           file_path: string
           file_size?: number | null
           file_type?: string
           file_url: string
+          filename?: string
           id?: string
           mime_type?: string | null
           updated_at?: string
@@ -309,11 +306,11 @@ export type Database = {
         Update: {
           created_at?: string
           creator_id?: string
-          file_name?: string
           file_path?: string
           file_size?: number | null
           file_type?: string
           file_url?: string
+          filename?: string
           id?: string
           mime_type?: string | null
           updated_at?: string
