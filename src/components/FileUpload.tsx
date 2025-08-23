@@ -98,22 +98,20 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         if (dbError) throw dbError;
         dbData = data;
       } else if (bucketName === 'concepts') {
-        // For concepts, we need a temporary concept_id that will be updated later
-        const conceptFileData = {
+        // For concepts, don't insert to database here - let the parent component handle it
+        dbData = {
           ...baseFileData,
-          concept_id: 'temp-concept-id' // This will be updated when the concept is saved
+          publicUrl,
+          filename: file.name,
+          file_path: filePath,
+          file_type: fileType,
+          file_size: file.size,
+          mime_type: file.type
         };
-        const { data, error: dbError } = await supabase
-          .from('concept_files')
-          .insert(conceptFileData)
-          .select()
-          .single();
-        if (dbError) throw dbError;
-        dbData = data;
       }
 
       // Call parent callback
-      onFileUploaded({ ...dbData, publicUrl });
+      onFileUploaded(dbData);
 
       toast({
         title: "Fil lastet opp",

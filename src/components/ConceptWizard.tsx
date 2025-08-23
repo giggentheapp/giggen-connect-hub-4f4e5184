@@ -91,17 +91,35 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     }
   };
 
-  const handleFileUploaded = (file: any) => {
+  const handleFileUploaded = (fileData: any) => {
+    // Just store the file data, we'll create the concept_files records when saving the concept
     setConceptData(prev => ({
       ...prev,
-      portfolio_files: [...prev.portfolio_files, file]
+      portfolio_files: [...prev.portfolio_files, {
+        ...fileData,
+        tempId: Date.now() + Math.random() // Add a temporary ID for UI purposes
+      }]
     }));
   };
 
-  const removePortfolioFile = (fileId: string) => {
+  const removePortfolioFile = async (fileData: any) => {
+    // Remove from storage if it was uploaded
+    if (fileData.file_path) {
+      try {
+        await supabase.storage
+          .from('concepts')
+          .remove([fileData.file_path]);
+      } catch (error) {
+        console.error('Error removing file from storage:', error);
+      }
+    }
+    
+    // Remove from state
     setConceptData(prev => ({
       ...prev,
-      portfolio_files: prev.portfolio_files.filter(file => file.id !== fileId)
+      portfolio_files: prev.portfolio_files.filter(file => 
+        file.tempId !== fileData.tempId && file.id !== fileData.id
+      )
     }));
   };
 
@@ -154,16 +172,26 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
       if (error) throw error;
 
-      // Update portfolio files with the actual concept ID
+      // Create concept_files records for uploaded files
       if (conceptData.portfolio_files.length > 0 && conceptId) {
-        const fileIds = conceptData.portfolio_files.map(file => file.id);
-        const { error: updateFilesError } = await supabase
+        const fileRecords = conceptData.portfolio_files.map(file => ({
+          user_id: userId,
+          concept_id: conceptId,
+          filename: file.filename,
+          file_path: file.file_path,
+          file_type: file.file_type,
+          file_url: file.publicUrl,
+          mime_type: file.mime_type,
+          file_size: file.file_size,
+          title: file.filename
+        }));
+
+        const { error: filesError } = await supabase
           .from('concept_files')
-          .update({ concept_id: conceptId })
-          .in('id', fileIds);
+          .insert(fileRecords);
         
-        if (updateFilesError) {
-          console.error('Error updating concept files:', updateFilesError);
+        if (filesError) {
+          console.error('Error creating concept files:', filesError);
         }
       }
 
@@ -313,12 +341,12 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                     <Label>Lastede filer:</Label>
                     <div className="space-y-2">
                       {conceptData.portfolio_files.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                        <div key={file.tempId || file.id || index} className="flex items-center justify-between p-2 bg-muted rounded-md">
                           <span className="text-sm">{file.filename}</span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removePortfolioFile(file.id)}
+                            onClick={() => removePortfolioFile(file)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
