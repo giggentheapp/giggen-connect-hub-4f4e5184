@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           concept_id: string
           created_at: string
+          creator_id: string | null
           description: string | null
           file_path: string
           file_size: number | null
@@ -34,6 +35,7 @@ export type Database = {
         Insert: {
           concept_id: string
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           file_path: string
           file_size?: number | null
@@ -50,6 +52,7 @@ export type Database = {
         Update: {
           concept_id?: string
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           file_path?: string
           file_size?: number | null
