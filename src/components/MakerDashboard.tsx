@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, FileText, Map, User } from 'lucide-react';
+import { Plus, Edit, Trash2, Map, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ConceptWizard } from '@/components/ConceptWizard';
 
 interface UserProfile {
   id: string;
@@ -24,6 +23,11 @@ interface Concept {
   title: string;
   description: string | null;
   status: string;
+  price: number | null;
+  expected_audience: number | null;
+  tech_spec: string | null;
+  available_dates: any;
+  is_published: boolean;
   created_at: string;
 }
 
@@ -43,13 +47,12 @@ interface MakerDashboardProps {
   profile: UserProfile;
 }
 
-// Fixed: Removed selectedConceptId references - force recompilation
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newConcept, setNewConcept] = useState({ title: '', description: '' });
-  const [editingConcept, setEditingConcept] = useState<string | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
+  const [editingConcept, setEditingConcept] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,42 +93,13 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
     fetchData();
   }, [profile.user_id, toast]);
 
-  const handleCreateConcept = async () => {
-    if (!newConcept.title.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('concepts')
-        .insert({
-          maker_id: profile.user_id,
-          title: newConcept.title,
-          description: newConcept.description || null,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Konsept opprettet",
-        description: "Nytt konsept ble opprettet",
-      });
-
-      setNewConcept({ title: '', description: '' });
-      setEditingConcept(null);
-      
-      // Refresh concepts
-      const { data: conceptsData } = await supabase
-        .from('concepts')
-        .select('*')
-        .eq('maker_id', profile.user_id)
-        .order('created_at', { ascending: false });
-      setConcepts(conceptsData || []);
-    } catch (error: any) {
-      toast({
-        title: "Feil ved opprettelse av konsept",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const refreshConcepts = async () => {
+    const { data: conceptsData } = await supabase
+      .from('concepts')
+      .select('*')
+      .eq('maker_id', profile.user_id)
+      .order('created_at', { ascending: false });
+    setConcepts(conceptsData || []);
   };
 
   const handleDeleteConcept = async (conceptId: string) => {
@@ -276,10 +250,10 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                   Konsepter
                   <Button 
                     size="sm"
-                    onClick={() => setEditingConcept('new')}
+                    onClick={() => setShowWizard(true)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Nytt konsept
+                    Opprett konsept
                   </Button>
                 </CardTitle>
                 <CardDescription>
@@ -287,57 +261,50 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {editingConcept === 'new' && (
-                  <div className="mb-4 p-4 border rounded-lg">
-                    <div className="space-y-4">
-                      <Input
-                        placeholder="Konsepttittel"
-                        value={newConcept.title}
-                        onChange={(e) => setNewConcept(prev => ({ ...prev, title: e.target.value }))}
-                      />
-                      <Textarea
-                        placeholder="Beskrivelse av konseptet"
-                        value={newConcept.description}
-                        onChange={(e) => setNewConcept(prev => ({ ...prev, description: e.target.value }))}
-                      />
-                      <div className="flex gap-2">
-                        <Button onClick={handleCreateConcept} size="sm">
-                          Opprett konsept
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => {
-                            setEditingConcept(null);
-                            setNewConcept({ title: '', description: '' });
-                          }}
-                          size="sm"
-                        >
-                          Avbryt
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div className="space-y-3">
                   {concepts.map((concept) => (
-                    <div key={concept.id} className="p-3 border rounded-lg">
+                    <div key={concept.id} className="p-4 border rounded-lg">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h3 className="font-semibold">{concept.title}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold">{concept.title}</h3>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              concept.is_published 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {concept.is_published ? 'Publisert' : 'Utkast'}
+                            </span>
+                          </div>
                           {concept.description && (
                             <p className="text-sm text-muted-foreground mt-1">
                               {concept.description}
                             </p>
                           )}
+                          <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                            {concept.price && (
+                              <div>
+                                <span className="font-medium">Pris:</span> {concept.price} NOK
+                              </div>
+                            )}
+                            {concept.expected_audience && (
+                              <div>
+                                <span className="font-medium">Publikum:</span> {concept.expected_audience} personer
+                              </div>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Status: {concept.status} • Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
+                            Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
                           </p>
                         </div>
                         <div className="flex gap-2 ml-4">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditingConcept(concept.id)}
+                            onClick={() => {
+                              setEditingConcept(concept);
+                              setShowWizard(true);
+                            }}
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
@@ -354,7 +321,7 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                   ))}
                   {concepts.length === 0 && (
                     <p className="text-center text-muted-foreground py-4">
-                      Du har ikke opprettet noen konsepter ennå
+                      Du har ikke opprettet noen konsepter ennå. Klikk "Opprett konsept" for å komme i gang.
                     </p>
                   )}
                 </div>
@@ -390,6 +357,17 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
           </TabsContent>
         </Tabs>
       )}
+      
+      <ConceptWizard
+        isOpen={showWizard}
+        onClose={() => {
+          setShowWizard(false);
+          setEditingConcept(null);
+        }}
+        onSuccess={refreshConcepts}
+        userId={profile.user_id}
+        editingConcept={editingConcept}
+      />
     </div>
   );
 };

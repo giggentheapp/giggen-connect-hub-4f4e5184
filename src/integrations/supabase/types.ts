@@ -75,29 +75,44 @@ export type Database = {
       }
       concepts: {
         Row: {
+          available_dates: Json | null
           created_at: string
           description: string | null
+          expected_audience: number | null
           id: string
+          is_published: boolean
           maker_id: string
+          price: number | null
           status: string | null
+          tech_spec: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          available_dates?: Json | null
           created_at?: string
           description?: string | null
+          expected_audience?: number | null
           id?: string
+          is_published?: boolean
           maker_id: string
+          price?: number | null
           status?: string | null
+          tech_spec?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          available_dates?: Json | null
           created_at?: string
           description?: string | null
+          expected_audience?: number | null
           id?: string
+          is_published?: boolean
           maker_id?: string
+          price?: number | null
           status?: string | null
+          tech_spec?: string | null
           title?: string
           updated_at?: string
         }
