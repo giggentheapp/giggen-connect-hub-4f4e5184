@@ -8,12 +8,12 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Upload, Trash2, Video, Music, FileText } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Video, Music, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import FileUpload from '@/components/FileUpload';
+import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
 
 interface ConceptData {
   title: string;
@@ -362,41 +362,12 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
           )}
 
           {currentStep === 2 && (
-            <div className="space-y-4">
-              <div>
-                <Label>Portefølje mediefiler</Label>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Last opp bilder, videoer eller dokumenter som viser konseptet ditt
-                </p>
-                
-                <FileUpload
-                  bucketName="concepts"
-                  folderPath={`portfolio/${userId}`}
-                  onFileUploaded={handleFileUploaded}
-                  acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf"
-                />
-
-                {conceptData.portfolio_files.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <Label>Lastede filer:</Label>
-                    <div className="space-y-2">
-                      {conceptData.portfolio_files.map((file, index) => (
-                        <div key={file.tempId || file.id || index} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                          <span className="text-sm">{file.filename}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removePortfolioFile(file)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <ConceptPortfolioUpload
+              userId={userId}
+              files={conceptData.portfolio_files}
+              onFileUploaded={handleFileUploaded}
+              onFileRemoved={removePortfolioFile}
+            />
           )}
 
           {currentStep === 3 && (

@@ -73,6 +73,7 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
           file_type: fileData.file_type,
           filename: fileData.filename,
           file_path: fileData.file_path,
+          file_url: fileData.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${fileData.file_path}`,
           file_size: fileData.file_size,
           mime_type: fileData.mime_type,
           title: fileData.filename,
