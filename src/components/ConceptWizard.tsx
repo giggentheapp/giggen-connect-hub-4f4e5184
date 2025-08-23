@@ -77,10 +77,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     setLoadingTechSpecs(true);
     try {
       const { data, error } = await supabase
-        .from('portfolio_files')
-        .select('id, title, filename, file_type')
+        .from('concept_files')
+        .select('id, title, filename, file_type, file_path')
         .eq('user_id', userId)
-        .eq('file_type', 'document');
+        .like('file_path', `techspec/${userId}%`);
       
       if (error) throw error;
       setTechSpecFiles(data || []);
@@ -371,7 +371,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                 
                 <FileUpload
                   bucketName="concepts"
-                  folderPath={userId}
+                  folderPath={`portfolio/${userId}`}
                   onFileUploaded={handleFileUploaded}
                   acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf"
                 />

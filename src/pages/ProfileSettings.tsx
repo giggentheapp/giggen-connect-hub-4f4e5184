@@ -457,7 +457,7 @@ const ProfileSettings = () => {
         <div className="lg:col-span-2">
           <PortfolioManager
             bucketName="concepts"
-            folderPath={userId!}
+            folderPath={`techspec/${userId}`}
             userId={userId!}
             title="Tech Spec"
             description="Last opp tekniske spesifikasjoner og dokumenter."
