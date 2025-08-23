@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           concept_id: string
           created_at: string
+          description: string | null
           file_path: string
           file_size: number | null
           file_type: string
@@ -25,12 +26,14 @@ export type Database = {
           id: string
           is_public: boolean
           mime_type: string | null
+          title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           concept_id: string
           created_at?: string
+          description?: string | null
           file_path: string
           file_size?: number | null
           file_type: string
@@ -38,12 +41,14 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           concept_id?: string
           created_at?: string
+          description?: string | null
           file_path?: string
           file_size?: number | null
           file_type?: string
@@ -51,6 +56,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string
         }
