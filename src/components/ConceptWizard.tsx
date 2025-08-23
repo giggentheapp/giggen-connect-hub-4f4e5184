@@ -78,7 +78,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     try {
       const { data, error } = await supabase
         .from('profile_tech_specs')
-        .select('id, file_name, file_url, file_type')
+        .select('id, filename, file_url, file_type')
         .eq('creator_id', userId);
       
       if (error) throw error;
@@ -197,7 +197,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         }
 
         const fileRecords = conceptData.portfolio_files.map(file => ({
-          user_id: user.id,
+          creator_id: user.id,
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
@@ -392,7 +392,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                     ) : (
                       techSpecFiles.map((file) => (
                         <SelectItem key={file.id} value={file.id}>
-                          {file.file_name}
+                          {file.filename}
                         </SelectItem>
                       ))
                     )}

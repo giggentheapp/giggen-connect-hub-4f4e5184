@@ -37,7 +37,7 @@ interface ConceptFile {
 
 interface TechSpecFile {
   id: string;
-  file_name: string;
+  filename: string;
   file_url: string;
   file_type: string;
 }
@@ -69,9 +69,9 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
       if (concept.tech_spec_reference) {
         const { data: techSpecData, error: techSpecError } = await supabase
           .from('profile_tech_specs')
-          .select('id, file_name, file_url, file_type')
+          .select('id, filename, file_url, file_type')
           .eq('id', concept.tech_spec_reference)
-          .single();
+          .maybeSingle();
 
         if (techSpecError) {
           console.error('Error loading tech spec file:', techSpecError);

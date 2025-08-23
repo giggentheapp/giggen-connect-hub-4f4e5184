@@ -59,6 +59,7 @@ export const ConceptPortfolioUpload = ({
           folderPath={`portfolio/${userId}`}
           onFileUploaded={onFileUploaded}
           acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx"
+          targetTable={null}
         />
 
         {files.length > 0 && (
