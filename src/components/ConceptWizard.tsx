@@ -118,7 +118,9 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     setConceptData(prev => ({
       ...prev,
       portfolio_files: prev.portfolio_files.filter(file => 
-        file.tempId !== fileData.tempId && file.id !== fileData.id
+        file.tempId !== fileData.tempId && 
+        file.id !== fileData.id && 
+        file.filename !== fileData.filename
       )
     }));
   };
@@ -331,7 +333,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                 
                 <FileUpload
                   bucketName="concepts"
-                  folderPath={`concept-${userId}`}
+                  folderPath={userId}
                   onFileUploaded={handleFileUploaded}
                   acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf"
                 />

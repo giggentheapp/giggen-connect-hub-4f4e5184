@@ -41,10 +41,23 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
     setUploading(true);
     
     try {
-      // Generate unique filename
+      // Get current user for path structure
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('Must be authenticated to upload files');
+      }
+
+      // Generate unique filename with user ID in path for RLS policies
       const timestamp = Date.now();
       const fileName = `${timestamp}-${file.name}`;
-      const filePath = `${folderPath}/${fileName}`;
+      let filePath: string;
+      
+      if (bucketName === 'concepts') {
+        // For concepts, put user ID first to match RLS policy
+        filePath = `${user.id}/${fileName}`;
+      } else {
+        filePath = `${folderPath}/${fileName}`;
+      }
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -78,7 +91,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       }
 
       const baseFileData = {
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: user.id,
         file_type: fileType,
         filename: file.name,
         file_path: filePath,
@@ -106,7 +119,8 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           file_path: filePath,
           file_type: fileType,
           file_size: file.size,
-          mime_type: file.type
+          mime_type: file.type,
+          user_id: user.id
         };
       }
 
