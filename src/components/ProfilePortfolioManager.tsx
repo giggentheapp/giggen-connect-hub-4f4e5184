@@ -12,10 +12,16 @@ import FileUpload from '@/components/FileUpload';
 interface ProfilePortfolioItem {
   id: string;
   user_id: string;
-  file_url?: string;
+  file_type: string;
+  filename: string;
+  file_path: string;
+  file_size?: number;
+  mime_type?: string;
   title?: string;
   description?: string;
+  is_public: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 interface ProfilePortfolioManagerProps {
@@ -64,7 +70,14 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
         .from('profile_portfolio')
         .insert({
           user_id: userId,
-          title: fileData.filename
+          file_type: fileData.file_type,
+          filename: fileData.filename,
+          file_path: fileData.file_path,
+          file_size: fileData.file_size,
+          mime_type: fileData.mime_type,
+          title: fileData.filename,
+          description: '',
+          is_public: true
         })
         .select()
         .single();
@@ -90,6 +103,7 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
       const { error } = await supabase
         .from('profile_portfolio')
         .update({
+          filename: editTitle || undefined,
           title: editTitle || undefined,
           description: editDescription || undefined
         })
@@ -99,7 +113,12 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
 
       setItems(prev => prev.map(item => 
         item.id === itemId 
-          ? { ...item, title: editTitle || item.title, description: editDescription }
+          ? { 
+              ...item, 
+              filename: editTitle || item.filename,
+              title: editTitle || item.title, 
+              description: editDescription 
+            }
           : item
       ));
 
@@ -146,7 +165,7 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
 
   const startEditing = (item: ProfilePortfolioItem) => {
     setEditingItem(item.id);
-    setEditTitle(item.title || '');
+    setEditTitle(item.title || item.filename);
     setEditDescription(item.description || '');
   };
 
@@ -215,14 +234,14 @@ const ProfilePortfolioManager = ({ userId, title, description }: ProfilePortfoli
                 ) : (
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h4 className="font-medium">{item.title || 'Untitled'}</h4>
+                      <h4 className="font-medium">{item.title || item.filename}</h4>
                       {item.description && (
                         <p className="text-sm text-muted-foreground mt-1">
                           {item.description}
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
-                        {new Date(item.created_at).toLocaleDateString('no-NO')}
+                        {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                       </p>
                     </div>
                     <div className="flex gap-2">

@@ -31,29 +31,33 @@ const FileViewerByPath = ({ bucketName, folderPath, showControls = false }: File
     const fetchFiles = async () => {
       setLoading(true);
       try {
-        const tableName = bucketName === 'portfolio' ? 'profile_portfolio' : 'concept_files';
+        let data: any[] = [];
+        let error: any = null;
         
         // Extract user_id from folderPath for filtering
         const pathParts = folderPath.split('/');
         const userId = pathParts[pathParts.length - 1];
         
-        let query = supabase
-          .from(tableName)
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        // Filter by user_id for portfolio files or by folder path for concept files
         if (bucketName === 'portfolio') {
-          query = query.eq('user_id', userId);
+          const result = await supabase
+            .from('profile_portfolio')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+          data = result.data || [];
+          error = result.error;
         } else {
-          // For concept files, we might need different logic depending on the folder structure
-          query = query.eq('creator_id', userId);
+          const result = await supabase
+            .from('concept_files')
+            .select('*')
+            .eq('creator_id', userId)
+            .order('created_at', { ascending: false });
+          data = result.data || [];
+          error = result.error;
         }
 
-        const { data, error } = await query;
-
         if (error) throw error;
-        setFiles(data || []);
+        setFiles(data);
 
       } catch (error: any) {
         console.error('Error fetching files:', error);
