@@ -22,6 +22,7 @@ export type Database = {
           file_path: string
           file_size: number | null
           file_type: string
+          file_url: string | null
           filename: string
           id: string
           is_public: boolean
@@ -37,6 +38,7 @@ export type Database = {
           file_path: string
           file_size?: number | null
           file_type: string
+          file_url?: string | null
           filename: string
           id?: string
           is_public?: boolean
@@ -52,6 +54,7 @@ export type Database = {
           file_path?: string
           file_size?: number | null
           file_type?: string
+          file_url?: string | null
           filename?: string
           id?: string
           is_public?: boolean
@@ -270,6 +273,30 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      profile_files: {
+        Row: {
+          created_at: string | null
+          file_url: string
+          id: number
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_url: string
+          id?: never
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_url?: string
+          id?: never
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       profile_images: {
         Row: {
