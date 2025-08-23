@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Upload, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import FileUpload from '@/components/FileUpload';
 
 interface ConceptData {
   title: string;
@@ -20,6 +22,8 @@ interface ConceptData {
   expected_audience: string;
   tech_spec: string;
   available_dates: Date[];
+  portfolio_files: any[];
+  selected_tech_spec_file: string;
 }
 
 interface ConceptWizardProps {
@@ -33,7 +37,8 @@ interface ConceptWizardProps {
 const STEPS = [
   { id: 'basic', title: 'Grunnleggende info', description: 'Tittel og beskrivelse' },
   { id: 'details', title: 'Detaljer', description: 'Pris og publikum' },
-  { id: 'technical', title: 'Tekniske krav', description: 'Utstyr og spesifikasjoner' },
+  { id: 'portfolio', title: 'Portefølje', description: 'Last opp mediefiler' },
+  { id: 'technical', title: 'Tekniske krav', description: 'Velg teknisk spesifikasjon' },
   { id: 'dates', title: 'Tilgjengelighet', description: 'Velg tilgjengelige datoer' },
   { id: 'preview', title: 'Forhåndsvisning', description: 'Se over og lagre' },
 ];
@@ -42,6 +47,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [techSpecFiles, setTechSpecFiles] = useState<any[]>([]);
+  const [loadingTechSpecs, setLoadingTechSpecs] = useState(false);
   const { toast } = useToast();
 
   const [conceptData, setConceptData] = useState<ConceptData>(() => ({
@@ -51,10 +58,51 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     expected_audience: editingConcept?.expected_audience?.toString() || '',
     tech_spec: editingConcept?.tech_spec || '',
     available_dates: editingConcept?.available_dates || [],
+    portfolio_files: [],
+    selected_tech_spec_file: '',
   }));
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
     setConceptData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Load tech spec files from user's profile
+  useEffect(() => {
+    if (isOpen && userId) {
+      loadTechSpecFiles();
+    }
+  }, [isOpen, userId]);
+
+  const loadTechSpecFiles = async () => {
+    setLoadingTechSpecs(true);
+    try {
+      const { data, error } = await supabase
+        .from('portfolio_files')
+        .select('id, title, filename, file_type')
+        .eq('user_id', userId)
+        .eq('file_type', 'document');
+      
+      if (error) throw error;
+      setTechSpecFiles(data || []);
+    } catch (error: any) {
+      console.error('Error loading tech spec files:', error);
+    } finally {
+      setLoadingTechSpecs(false);
+    }
+  };
+
+  const handleFileUploaded = (file: any) => {
+    setConceptData(prev => ({
+      ...prev,
+      portfolio_files: [...prev.portfolio_files, file]
+    }));
+  };
+
+  const removePortfolioFile = (fileId: string) => {
+    setConceptData(prev => ({
+      ...prev,
+      portfolio_files: prev.portfolio_files.filter(file => file.id !== fileId)
+    }));
   };
 
   const nextStep = () => {
@@ -78,27 +126,46 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         description: conceptData.description || null,
         price: conceptData.price ? parseFloat(conceptData.price) : null,
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
-        tech_spec: conceptData.tech_spec || null,
+        tech_spec: conceptData.selected_tech_spec_file || conceptData.tech_spec || null,
         available_dates: conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null,
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft'
       };
 
+      let conceptId;
       let error;
+
       if (editingConcept) {
         const { error: updateError } = await supabase
           .from('concepts')
           .update(conceptPayload)
           .eq('id', editingConcept.id);
         error = updateError;
+        conceptId = editingConcept.id;
       } else {
-        const { error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
           .from('concepts')
-          .insert(conceptPayload);
+          .insert(conceptPayload)
+          .select('id')
+          .single();
         error = insertError;
+        conceptId = data?.id;
       }
 
       if (error) throw error;
+
+      // Update portfolio files with the actual concept ID
+      if (conceptData.portfolio_files.length > 0 && conceptId) {
+        const fileIds = conceptData.portfolio_files.map(file => file.id);
+        const { error: updateFilesError } = await supabase
+          .from('concept_files')
+          .update({ concept_id: conceptId })
+          .in('id', fileIds);
+        
+        if (updateFilesError) {
+          console.error('Error updating concept files:', updateFilesError);
+        }
+      }
 
       toast({
         title: isPublished ? "Konsept publisert!" : "Konsept lagret!",
@@ -122,9 +189,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     switch (currentStep) {
       case 0: return conceptData.title.trim().length > 0;
       case 1: return conceptData.price.length > 0 && conceptData.expected_audience.length > 0;
-      case 2: return true; // Tech spec is optional
-      case 3: return conceptData.available_dates.length > 0;
-      case 4: return true; // Preview step
+      case 2: return true; // Portfolio is optional
+      case 3: return true; // Tech spec is optional
+      case 4: return conceptData.available_dates.length > 0;
+      case 5: return true; // Preview step
       default: return false;
     }
   };
@@ -228,19 +296,79 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
           {currentStep === 2 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="techspec">Tekniske krav og utstyr</Label>
-                <Textarea
-                  id="techspec"
-                  placeholder="Beskriv tekniske krav som lydanlegg, scene, strøm, etc."
-                  value={conceptData.tech_spec}
-                  onChange={(e) => updateConceptData('tech_spec', e.target.value)}
-                  className="min-h-[120px]"
+                <Label>Portefølje mediefiler</Label>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Last opp bilder, videoer eller dokumenter som viser konseptet ditt
+                </p>
+                
+                <FileUpload
+                  bucketName="concepts"
+                  folderPath={`concept-${userId}`}
+                  onFileUploaded={handleFileUploaded}
+                  acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf"
                 />
+
+                {conceptData.portfolio_files.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <Label>Lastede filer:</Label>
+                    <div className="space-y-2">
+                      {conceptData.portfolio_files.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                          <span className="text-sm">{file.filename}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removePortfolioFile(file.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {currentStep === 3 && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="techspec">Teknisk spesifikasjon</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Velg en teknisk spesifikasjon fra din profil
+                </p>
+                <Select
+                  value={conceptData.selected_tech_spec_file}
+                  onValueChange={(value) => updateConceptData('selected_tech_spec_file', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg teknisk spesifikasjon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {loadingTechSpecs ? (
+                      <SelectItem value="loading" disabled>Laster...</SelectItem>
+                    ) : techSpecFiles.length === 0 ? (
+                      <SelectItem value="none" disabled>Ingen tech spec filer funnet</SelectItem>
+                    ) : (
+                      techSpecFiles.map((file) => (
+                        <SelectItem key={file.id} value={file.id}>
+                          {file.title || file.filename}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {techSpecFiles.length === 0 && !loadingTechSpecs && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Last opp tech spec dokumenter i din profil for å velge dem her
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
             <div className="space-y-4">
               <div>
                 <Label>Tilgjengelige datoer *</Label>
@@ -290,7 +418,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
             </div>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 5 && (
             <div className="space-y-6">
               <div className="bg-muted/50 p-6 rounded-lg space-y-4">
                 <h3 className="text-lg font-semibold">{conceptData.title}</h3>
@@ -307,10 +435,26 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                   </div>
                 </div>
 
-                {conceptData.tech_spec && (
+                {conceptData.portfolio_files.length > 0 && (
                   <div>
-                    <strong>Tekniske krav:</strong>
-                    <p className="mt-1 text-sm">{conceptData.tech_spec}</p>
+                    <strong>Portefølje filer:</strong>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {conceptData.portfolio_files.map((file, index) => (
+                        <span key={index} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded text-sm">
+                          {file.filename}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {conceptData.selected_tech_spec_file && (
+                  <div>
+                    <strong>Teknisk spesifikasjon:</strong>
+                    <p className="mt-1 text-sm">
+                      {techSpecFiles.find(f => f.id === conceptData.selected_tech_spec_file)?.title || 
+                       techSpecFiles.find(f => f.id === conceptData.selected_tech_spec_file)?.filename}
+                    </p>
                   </div>
                 )}
 
@@ -352,7 +496,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         </CardContent>
 
         {/* Navigation */}
-        {currentStep < 4 && (
+        {currentStep < 5 && (
           <div className="flex justify-between items-center p-6 pt-0">
             <Button
               variant="outline"

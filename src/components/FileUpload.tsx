@@ -98,9 +98,10 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         if (dbError) throw dbError;
         dbData = data;
       } else if (bucketName === 'concepts') {
+        // For concepts, we need a temporary concept_id that will be updated later
         const conceptFileData = {
           ...baseFileData,
-          concept_id: (await supabase.auth.getUser()).data.user?.id || 'tech-spec'
+          concept_id: 'temp-concept-id' // This will be updated when the concept is saved
         };
         const { data, error: dbError } = await supabase
           .from('concept_files')
