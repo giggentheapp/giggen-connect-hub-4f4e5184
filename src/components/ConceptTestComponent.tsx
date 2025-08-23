@@ -133,13 +133,12 @@ export const ConceptTestComponent = () => {
       });
     }
 
-    // Test 5: Check portfolio_files for tech specs
+    // Test 5: Check profile_tech_specs for tech specs
     try {
       const { data, error } = await supabase
-        .from('portfolio_files')
-        .select('id, title, filename')
-        .eq('user_id', userId)
-        .eq('file_type', 'document')
+        .from('profile_tech_specs')
+        .select('id, file_name')
+        .eq('creator_id', userId)
         .limit(5);
         
       if (error) throw error;
@@ -149,7 +148,7 @@ export const ConceptTestComponent = () => {
         status: data && data.length > 0 ? 'success' : 'warning',
         message: data && data.length > 0 
           ? `Found ${data.length} tech spec files` 
-          : 'No tech spec files found in portfolio'
+          : 'No tech spec files found'
       });
     } catch (error: any) {
       results.push({

@@ -65,7 +65,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
       if (storageError) throw storageError;
 
       // Delete from database
-      const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
+      const tableName = bucketName === 'portfolio' ? 'profile_portfolio' : 'concept_files';
       const { error: dbError } = await supabase
         .from(tableName)
         .delete()

@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
-import PortfolioManager from '@/components/PortfolioManager';
+import ProfilePortfolioManager from '@/components/ProfilePortfolioManager';
+import TechSpecManager from '@/components/TechSpecManager';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
@@ -444,23 +445,19 @@ const ProfileSettings = () => {
 
         {/* Portefølje */}
         <div className="lg:col-span-2">
-          <PortfolioManager
-            bucketName="portfolio"
-            folderPath={userId!}
+          <ProfilePortfolioManager
             userId={userId!}
             title="Portefølje"
-            description="Last opp bilder, video, lyd og dokumenter til din portefølje. Legg til tittel og beskrivelse for hvert element."
+            description="Last opp bilder, video, lyd og dokumenter til din portefølje. Disse vises på din profil."
           />
         </div>
 
         {/* Tech Spec */}
         <div className="lg:col-span-2">
-          <PortfolioManager
-            bucketName="concepts"
-            folderPath={`techspec/${userId}`}
+          <TechSpecManager
             userId={userId!}
             title="Tech Spec"
-            description="Last opp tekniske spesifikasjoner og dokumenter."
+            description="Last opp tekniske spesifikasjoner som kan velges når du oppretter konsepter."
           />
         </div>
       </div>

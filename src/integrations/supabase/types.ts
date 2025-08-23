@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           concept_id: string
           created_at: string
+          creator_id: string
           description: string | null
           file_path: string
           file_size: number | null
@@ -34,6 +35,7 @@ export type Database = {
         Insert: {
           concept_id: string
           created_at?: string
+          creator_id: string
           description?: string | null
           file_path: string
           file_size?: number | null
@@ -50,6 +52,7 @@ export type Database = {
         Update: {
           concept_id?: string
           created_at?: string
+          creator_id?: string
           description?: string | null
           file_path?: string
           file_size?: number | null
@@ -85,6 +88,7 @@ export type Database = {
           price: number | null
           status: string | null
           tech_spec: string | null
+          tech_spec_reference: string | null
           title: string
           updated_at: string
         }
@@ -99,6 +103,7 @@ export type Database = {
           price?: number | null
           status?: string | null
           tech_spec?: string | null
+          tech_spec_reference?: string | null
           title: string
           updated_at?: string
         }
@@ -113,6 +118,7 @@ export type Database = {
           price?: number | null
           status?: string | null
           tech_spec?: string | null
+          tech_spec_reference?: string | null
           title?: string
           updated_at?: string
         }
@@ -123,6 +129,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "concepts_tech_spec_reference_fkey"
+            columns: ["tech_spec_reference"]
+            isOneToOne: false
+            referencedRelation: "profile_tech_specs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -196,51 +209,6 @@ export type Database = {
           file_url?: string | null
           id?: never
           title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      portfolio_files: {
-        Row: {
-          created_at: string
-          description: string | null
-          file_path: string
-          file_size: number | null
-          file_type: string
-          filename: string
-          id: string
-          is_public: boolean
-          mime_type: string | null
-          title: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          file_path: string
-          file_size?: number | null
-          file_type: string
-          filename: string
-          id?: string
-          is_public?: boolean
-          mime_type?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          file_path?: string
-          file_size?: number | null
-          file_type?: string
-          filename?: string
-          id?: string
-          is_public?: boolean
-          mime_type?: string | null
-          title?: string | null
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -352,6 +320,51 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_portfolio: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string
+          filename: string
+          id: string
+          is_public: boolean
+          mime_type: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          filename: string
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          filename?: string
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_settings: {
         Row: {
           created_at: string
@@ -398,6 +411,45 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      profile_tech_specs: {
+        Row: {
+          created_at: string
+          creator_id: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          id: string
+          mime_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

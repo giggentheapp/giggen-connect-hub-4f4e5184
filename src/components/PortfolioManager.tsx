@@ -243,6 +243,7 @@ const PortfolioManager = ({ bucketName, folderPath, userId, title, description }
         const conceptFileData = {
           concept_id: conceptId,
           user_id: userId,
+          creator_id: userId,
           file_type: fileType,
           filename: file.name,
           file_path: filePath,

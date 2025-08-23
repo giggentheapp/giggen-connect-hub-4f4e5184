@@ -60,7 +60,7 @@ const FileTestComponent = ({ userRole }: FileTestComponentProps) => {
       updateTestResult('portfolio_read', 'pending', 'Tester lesing av porteføljefiler...');
       
       const { data, error } = await supabase
-        .from('portfolio_files')
+        .from('profile_portfolio')
         .select('*')
         .limit(5);
 
@@ -131,7 +131,7 @@ const FileTestComponent = ({ userRole }: FileTestComponentProps) => {
         };
 
         const { data: insertData, error: insertError } = await supabase
-          .from('portfolio_files')
+          .from('profile_portfolio')
           .insert(testFileData)
           .select()
           .single();
@@ -141,7 +141,7 @@ const FileTestComponent = ({ userRole }: FileTestComponentProps) => {
         } else {
           // Clean up test data
           await supabase
-            .from('portfolio_files')
+            .from('profile_portfolio')
             .delete()
             .eq('id', insertData.id);
           
@@ -166,7 +166,7 @@ const FileTestComponent = ({ userRole }: FileTestComponentProps) => {
         };
 
         const { error: insertError } = await supabase
-          .from('portfolio_files')
+          .from('profile_portfolio')
           .insert(testFileData);
 
         if (insertError) {
@@ -184,8 +184,8 @@ const FileTestComponent = ({ userRole }: FileTestComponentProps) => {
       updateTestResult('cross_user_access', 'pending', 'Tester tilgang til andre brukeres filer...');
       
       // Try to get files from other users
-      const { data, error } = await supabase
-        .from('portfolio_files')
+            const { data, error } = await supabase
+              .from('profile_portfolio')
         .select('*')
         .neq('user_id', user.id)
         .eq('is_public', false)

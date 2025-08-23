@@ -31,7 +31,7 @@ const FileViewerByPath = ({ bucketName, folderPath, showControls = false }: File
     const fetchFiles = async () => {
       setLoading(true);
       try {
-        const tableName = bucketName === 'portfolio' ? 'portfolio_files' : 'concept_files';
+        const tableName = bucketName === 'portfolio' ? 'profile_portfolio' : 'concept_files';
         
         // Extract user_id from folderPath for filtering
         const pathParts = folderPath.split('/');
@@ -47,7 +47,7 @@ const FileViewerByPath = ({ bucketName, folderPath, showControls = false }: File
           query = query.eq('user_id', userId);
         } else {
           // For concept files, we might need different logic depending on the folder structure
-          query = query.eq('user_id', userId);
+          query = query.eq('creator_id', userId);
         }
 
         const { data, error } = await query;

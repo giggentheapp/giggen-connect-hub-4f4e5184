@@ -118,7 +118,7 @@ const ProfileTestComponent = () => {
       updateTestResult('Portfolio filtilgang', 'pending', 'Tester tilgang til egne portfoliofiler...');
       
       const { data: portfolioFiles, error: portfolioError } = await supabase
-        .from('portfolio_files')
+        .from('profile_portfolio')
         .select('*')
         .eq('user_id', user.id);
 
@@ -207,7 +207,7 @@ const ProfileTestComponent = () => {
       updateTestResult('Maker portfolio (offentlig)', 'pending', 'Tester tilgang til offentlige portfoliofiler...');
       
       const { data: publicPortfolio, error: portfolioError } = await supabase
-        .from('portfolio_files')
+        .from('profile_portfolio')
         .select('*')
         .eq('user_id', testMaker.user_id)
         .eq('is_public', true);

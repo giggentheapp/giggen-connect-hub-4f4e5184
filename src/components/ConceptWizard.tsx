@@ -66,7 +66,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     setConceptData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Load tech spec files from user's profile
+  // Load tech spec files from user's profile_tech_specs table
   useEffect(() => {
     if (isOpen && userId) {
       loadTechSpecFiles();
@@ -77,10 +77,9 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
     setLoadingTechSpecs(true);
     try {
       const { data, error } = await supabase
-        .from('concept_files')
-        .select('id, title, filename, file_type, file_path')
-        .eq('user_id', userId)
-        .like('file_path', `techspec/${userId}%`);
+        .from('profile_tech_specs')
+        .select('id, file_name, file_url, file_type')
+        .eq('creator_id', userId);
       
       if (error) throw error;
       setTechSpecFiles(data || []);
@@ -160,7 +159,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         description: conceptData.description || null,
         price: conceptData.price ? parseFloat(conceptData.price) : null,
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
-        tech_spec: conceptData.selected_tech_spec_file || conceptData.tech_spec || null,
+        tech_spec: conceptData.tech_spec || null,
+        tech_spec_reference: conceptData.selected_tech_spec_file || null,
         available_dates: conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null,
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft'
@@ -198,6 +198,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
         const fileRecords = conceptData.portfolio_files.map(file => ({
           user_id: user.id, // Ensure we use authenticated user ID
+          creator_id: user.id, // New field for creator tracking
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
@@ -421,7 +422,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                     ) : (
                       techSpecFiles.map((file) => (
                         <SelectItem key={file.id} value={file.id}>
-                          {file.title || file.filename}
+                          {file.file_name}
                         </SelectItem>
                       ))
                     )}

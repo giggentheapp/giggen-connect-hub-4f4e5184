@@ -109,8 +109,18 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       let dbData;
       if (bucketName === 'portfolio') {
         const { data, error: dbError } = await supabase
-          .from('portfolio_files')
-          .insert(baseFileData)
+          .from('profile_portfolio')
+          .insert({
+            user_id: user.id,
+            file_url: publicUrl,
+            file_path: filePath,
+            filename: file.name,
+            file_type: fileType,
+            mime_type: file.type,
+            file_size: file.size,
+            is_public: true,
+            title: file.name
+          })
           .select()
           .single();
         if (dbError) throw dbError;
