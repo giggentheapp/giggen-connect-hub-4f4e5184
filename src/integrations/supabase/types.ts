@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           concept_id: string
           created_at: string
-          creator_id: string
           description: string | null
           file_path: string
           file_size: number | null
@@ -35,7 +34,6 @@ export type Database = {
         Insert: {
           concept_id: string
           created_at?: string
-          creator_id: string
           description?: string | null
           file_path: string
           file_size?: number | null
@@ -52,7 +50,6 @@ export type Database = {
         Update: {
           concept_id?: string
           created_at?: string
-          creator_id?: string
           description?: string | null
           file_path?: string
           file_size?: number | null
@@ -186,140 +183,6 @@ export type Database = {
           },
         ]
       }
-      portfolio: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          file_url: string | null
-          id: number
-          title: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          file_url?: string | null
-          id?: never
-          title: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          file_url?: string | null
-          id?: never
-          title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      portfolio_items: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_public: boolean | null
-          maker_id: string
-          media_type: string | null
-          media_url: string | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          maker_id: string
-          media_type?: string | null
-          media_url?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          maker_id?: string
-          media_type?: string | null
-          media_url?: string | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portfolio_items_maker_id_fkey"
-            columns: ["maker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      profile_files: {
-        Row: {
-          created_at: string | null
-          file_url: string
-          id: number
-          title: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          file_url: string
-          id?: never
-          title?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          file_url?: string
-          id?: never
-          title?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      profile_images: {
-        Row: {
-          created_at: string | null
-          file_url: string | null
-          id: number
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          file_url?: string | null
-          id?: never
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          file_url?: string | null
-          id?: never
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      profile_picture: {
-        Row: {
-          created_at: string | null
-          file_url: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          file_url?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          file_url?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       profile_portfolio: {
         Row: {
           created_at: string
@@ -327,6 +190,7 @@ export type Database = {
           file_path: string
           file_size: number | null
           file_type: string
+          file_url: string | null
           filename: string
           id: string
           is_public: boolean
@@ -341,6 +205,7 @@ export type Database = {
           file_path: string
           file_size?: number | null
           file_type: string
+          file_url?: string | null
           filename: string
           id?: string
           is_public?: boolean
@@ -355,6 +220,7 @@ export type Database = {
           file_path?: string
           file_size?: number | null
           file_type?: string
+          file_url?: string | null
           filename?: string
           id?: string
           is_public?: boolean

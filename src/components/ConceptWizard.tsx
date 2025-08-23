@@ -197,13 +197,12 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         }
 
         const fileRecords = conceptData.portfolio_files.map(file => ({
-          user_id: user.id, // Ensure we use authenticated user ID
-          creator_id: user.id, // New field for creator tracking
+          user_id: user.id,
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
           file_type: file.file_type,
-          file_url: file.publicUrl,
+          file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
           mime_type: file.mime_type,
           file_size: file.file_size,
           title: file.title || file.filename,

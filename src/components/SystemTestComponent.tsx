@@ -104,9 +104,9 @@ export const SystemTestComponent = () => {
       // Test 6: Portfolio access
       updateTestResult('portfolio', 'pending', 'Tester portefølje...');
       const { data: portfolio, error: portfolioError } = await supabase
-        .from('portfolio_items')
+        .from('profile_portfolio')
         .select('*')
-        .eq('maker_id', user.id);
+        .eq('user_id', user.id);
 
       if (portfolioError) {
         updateTestResult('portfolio', 'error', `Porteføljefeil: ${portfolioError.message}`);

@@ -80,7 +80,7 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
             .from('concept_files')
             .select('*')
             .in('concept_id', conceptIds)
-            .eq('creator_id', profile.user_id);
+            .eq('user_id', profile.user_id);
 
           if (filesError) {
             console.error('Error fetching concept files:', filesError);
@@ -137,7 +137,7 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         .from('concept_files')
         .select('*')
         .in('concept_id', conceptIds)
-        .eq('creator_id', profile.user_id);
+        .eq('user_id', profile.user_id);
 
       // Group files by concept_id
       const filesByConceptId: {[key: string]: any[]} = {};
