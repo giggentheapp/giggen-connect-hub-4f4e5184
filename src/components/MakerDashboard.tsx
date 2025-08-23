@@ -8,6 +8,7 @@ import { Plus, Edit, Trash2, Map, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptTestComponent from '@/components/ConceptTestComponent';
+import ConceptCard from '@/components/ConceptCard';
 
 interface UserProfile {
   id: string;
@@ -27,9 +28,11 @@ interface Concept {
   price: number | null;
   expected_audience: number | null;
   tech_spec: string | null;
+  tech_spec_reference: string | null;
   available_dates: any;
   is_published: boolean;
   created_at: string;
+  maker_id: string;
 }
 
 interface Event {
@@ -312,78 +315,18 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {concepts.map((concept) => (
-                    <div key={concept.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold">{concept.title}</h3>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              concept.is_published 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {concept.is_published ? 'Publisert' : 'Utkast'}
-                            </span>
-                          </div>
-                          {concept.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {concept.description}
-                            </p>
-                          )}
-                           <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
-                             {concept.price && (
-                               <div>
-                                 <span className="font-medium">Pris:</span> {concept.price} NOK
-                               </div>
-                             )}
-                             {concept.expected_audience && (
-                               <div>
-                                 <span className="font-medium">Publikum:</span> {concept.expected_audience} personer
-                               </div>
-                             )}
-                           </div>
-                           
-                           {/* Portfolio Files Display */}
-                           {conceptFiles[concept.id] && conceptFiles[concept.id].length > 0 && (
-                             <div className="mt-3">
-                               <span className="font-medium text-sm">Portefølje:</span>
-                               <div className="flex flex-wrap gap-2 mt-1">
-                                 {conceptFiles[concept.id].map((file, index) => (
-                                   <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
-                                     {file.filename}
-                                   </span>
-                                 ))}
-                               </div>
-                             </div>
-                           )}
-                           
-                           <p className="text-xs text-muted-foreground mt-2">
-                             Opprettet: {new Date(concept.created_at).toLocaleDateString('no-NO')}
-                           </p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setEditingConcept(concept);
-                              setShowWizard(true);
-                            }}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteConcept(concept.id)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <ConceptCard 
+                      key={concept.id}
+                      concept={concept}
+                      showActions={true}
+                      onEdit={() => {
+                        setEditingConcept(concept);
+                        setShowWizard(true);
+                      }}
+                      onDelete={() => handleDeleteConcept(concept.id)}
+                    />
                   ))}
                   {concepts.length === 0 && (
                     <p className="text-center text-muted-foreground py-4">
