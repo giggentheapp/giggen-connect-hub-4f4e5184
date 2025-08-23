@@ -171,47 +171,90 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
           </div>
         )}
 
-        {/* Concept Portfolio Files */}
+        {/* Concept Portfolio Files - Interactive Media Display */}
         {conceptFiles.length > 0 && (
           <div>
-            <h4 className="font-medium mb-2">Konsept portefølje</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <h4 className="font-medium mb-4">Konsept portefølje</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {conceptFiles.map((file) => (
-                <div key={file.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
-                  {getFileIcon(file.file_type)}
-                  <span className="text-sm truncate flex-1">
-                    {file.title || file.filename}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(file.file_url, '_blank')}
-                  >
-                    <Download className="h-3 w-3" />
-                  </Button>
+                <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
+                  {/* Image Display */}
+                  {file.file_type.startsWith('image/') && (
+                    <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={file.file_url} 
+                        alt={file.title || file.filename}
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => window.open(file.file_url, '_blank')}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Video Display */}
+                  {file.file_type.startsWith('video/') && (
+                    <div className="aspect-video bg-black">
+                      <video 
+                        controls 
+                        className="w-full h-full"
+                        preload="metadata"
+                      >
+                        <source src={file.file_url} type={file.file_type} />
+                        Din nettleser støtter ikke video-avspilling.
+                      </video>
+                    </div>
+                  )}
+                  
+                  {/* Audio Display */}
+                  {file.file_type.startsWith('audio/') && (
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Music className="h-5 w-5 text-primary" />
+                        <span className="font-medium text-sm">Lydfil</span>
+                      </div>
+                      <audio 
+                        controls 
+                        className="w-full"
+                        preload="metadata"
+                      >
+                        <source src={file.file_url} type={file.file_type} />
+                        Din nettleser støtter ikke lyd-avspilling.
+                      </audio>
+                    </div>
+                  )}
+                  
+                  {/* Document Display */}
+                  {(file.file_type.includes('pdf') || file.file_type.includes('document') || file.file_type.includes('text')) && (
+                    <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
+                      <FileText className="h-12 w-12 text-primary mb-2" />
+                      <span className="text-sm font-medium text-center">Dokument</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => window.open(file.file_url, '_blank')}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        Åpne
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* File Info */}
+                  <div className="p-3 border-t">
+                    <h5 className="font-medium text-sm truncate">
+                      {file.title || file.filename}
+                    </h5>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {file.file_type.split('/')[0]} • {format(new Date(file.created_at), 'dd.MM.yy')}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Tech Spec */}
-        {techSpecFile && (
-          <div>
-            <h4 className="font-medium mb-2">Teknisk spesifikasjon</h4>
-            <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-md">
-              <FileText className="h-4 w-4 text-primary" />
-              <span className="text-sm flex-1">{techSpecFile.file_name}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open(techSpecFile.file_url, '_blank')}
-              >
-                <Download className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Tech Spec - Hidden from UI as per requirements */}
 
         {/* Loading state */}
         {loading && (
@@ -221,9 +264,9 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
         )}
 
         {/* Empty states */}
-        {!loading && conceptFiles.length === 0 && !techSpecFile && (
+        {!loading && conceptFiles.length === 0 && (
           <div className="text-center py-4 text-muted-foreground">
-            Ingen tilleggsfiler for dette konseptet
+            Ingen porteføljefiler for dette konseptet
           </div>
         )}
 

@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Upload, Trash2 } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Upload, Trash2, Video, Music, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -507,25 +507,52 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                 {conceptData.portfolio_files.length > 0 && (
                   <div>
                     <strong>Portefølje filer:</strong>
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                       {conceptData.portfolio_files.map((file, index) => (
-                        <span key={index} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded text-sm">
-                          {file.filename}
-                        </span>
+                        <div key={index} className="bg-muted/30 rounded-lg overflow-hidden">
+                          {/* Image Thumbnail */}
+                          {file.file_type?.startsWith('image/') && (
+                            <div className="aspect-video bg-muted overflow-hidden">
+                              <img 
+                                src={file.publicUrl} 
+                                alt={file.filename}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Video Thumbnail */}
+                          {file.file_type?.startsWith('video/') && (
+                            <div className="aspect-video bg-black flex items-center justify-center">
+                              <Video className="h-8 w-8 text-white" />
+                            </div>
+                          )}
+                          
+                          {/* Audio Icon */}
+                          {file.file_type?.startsWith('audio/') && (
+                            <div className="aspect-video bg-primary/10 flex items-center justify-center">
+                              <Music className="h-8 w-8 text-primary" />
+                            </div>
+                          )}
+                          
+                          {/* Document Icon */}
+                          {(file.file_type?.includes('pdf') || file.file_type?.includes('document') || file.file_type?.includes('text')) && (
+                            <div className="aspect-video bg-muted flex items-center justify-center">
+                              <FileText className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="p-2">
+                            <p className="text-xs font-medium truncate">{file.filename}</p>
+                            <p className="text-xs text-muted-foreground">{file.file_type?.split('/')[0] || 'fil'}</p>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {conceptData.selected_tech_spec_file && (
-                  <div>
-                    <strong>Teknisk spesifikasjon:</strong>
-                    <p className="mt-1 text-sm">
-                      {techSpecFiles.find(f => f.id === conceptData.selected_tech_spec_file)?.title || 
-                       techSpecFiles.find(f => f.id === conceptData.selected_tech_spec_file)?.filename}
-                    </p>
-                  </div>
-                )}
+                {/* Tech Spec Reference - Hidden from Preview as per requirements */}
 
                 {conceptData.available_dates.length > 0 && (
                   <div>
