@@ -18,7 +18,7 @@ export type Database = {
         Row: {
           concept_id: string
           created_at: string
-          creator_id: string | null
+          creator_id: string
           description: string | null
           file_path: string
           file_size: number | null
@@ -34,7 +34,7 @@ export type Database = {
         Insert: {
           concept_id: string
           created_at?: string
-          creator_id?: string | null
+          creator_id: string
           description?: string | null
           file_path: string
           file_size?: number | null
@@ -50,7 +50,7 @@ export type Database = {
         Update: {
           concept_id?: string
           created_at?: string
-          creator_id?: string | null
+          creator_id?: string
           description?: string | null
           file_path?: string
           file_size?: number | null
@@ -70,6 +70,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "concepts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_concept_files_creator_id"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }

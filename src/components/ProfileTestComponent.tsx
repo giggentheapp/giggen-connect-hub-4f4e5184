@@ -131,7 +131,7 @@ const ProfileTestComponent = () => {
       const { data: conceptFiles, error: conceptError } = await supabase
         .from('concept_files')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('creator_id', user.id);
 
       if (conceptError) throw new Error(`Concept: ${conceptError.message}`);
       updateTestResult('Concept filtilgang', 'success', `Kan lese ${conceptFiles?.length || 0} concept-filer`);
@@ -224,7 +224,7 @@ const ProfileTestComponent = () => {
       const { data: publicConcepts, error: conceptError } = await supabase
         .from('concept_files')
         .select('*')
-        .eq('user_id', testMaker.user_id)
+        .eq('creator_id', testMaker.user_id)
         .eq('is_public', true);
 
       if (conceptError) {

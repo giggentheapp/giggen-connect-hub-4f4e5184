@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import FileViewerByPath from '@/components/FileViewerByPath';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProfilePortfolioViewer from '@/components/ProfilePortfolioViewer';
+import ProfileTechSpecsViewer from '@/components/ProfileTechSpecsViewer';
 
 interface ProfileData {
   id: string;
@@ -225,9 +226,8 @@ const Profile = () => {
               <SectionVisibilityIndicator isVisible={settings?.show_portfolio || false} sectionName="Portefølje" />
             </CardHeader>
             <CardContent>
-              <FileViewerByPath 
-                bucketName="portfolio" 
-                folderPath={`portfolio/${userId}`}
+              <ProfilePortfolioViewer 
+                userId={userId || ''}
                 showControls={isOwnProfile}
               />
             </CardContent>
@@ -242,9 +242,8 @@ const Profile = () => {
               <SectionVisibilityIndicator isVisible={settings?.show_techspec || false} sectionName="Tech Spec" />
             </CardHeader>
             <CardContent>
-              <FileViewerByPath 
-                bucketName="concepts" 
-                folderPath={`techspec/${userId}`}
+              <ProfileTechSpecsViewer 
+                userId={userId || ''}
                 showControls={isOwnProfile}
               />
             </CardContent>

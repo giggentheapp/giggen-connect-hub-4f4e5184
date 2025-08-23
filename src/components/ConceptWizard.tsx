@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
+import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 
 interface ConceptData {
   title: string;
@@ -47,8 +48,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [techSpecFiles, setTechSpecFiles] = useState<any[]>([]);
-  const [loadingTechSpecs, setLoadingTechSpecs] = useState(false);
+  const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
   const { toast } = useToast();
 
   const [conceptData, setConceptData] = useState<ConceptData>(() => ({
@@ -64,30 +64,6 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
     setConceptData(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Load tech spec files from user's profile_tech_specs table
-  useEffect(() => {
-    if (isOpen && userId) {
-      loadTechSpecFiles();
-    }
-  }, [isOpen, userId]);
-
-  const loadTechSpecFiles = async () => {
-    setLoadingTechSpecs(true);
-    try {
-      const { data, error } = await supabase
-        .from('profile_tech_specs')
-        .select('id, filename, file_url, file_type')
-        .eq('creator_id', userId);
-      
-      if (error) throw error;
-      setTechSpecFiles(data || []);
-    } catch (error: any) {
-      console.error('Error loading tech spec files:', error);
-    } finally {
-      setLoadingTechSpecs(false);
-    }
   };
 
   const handleFileUploaded = (fileData: any) => {
@@ -385,12 +361,16 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                     <SelectValue placeholder="Velg teknisk spesifikasjon..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {loadingTechSpecs ? (
-                      <SelectItem value="loading" disabled>Laster...</SelectItem>
-                    ) : techSpecFiles.length === 0 ? (
-                      <SelectItem value="none" disabled>Ingen tech spec filer funnet</SelectItem>
+                    {techSpecsLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Laster...
+                      </SelectItem>
+                    ) : availableTechSpecs.length === 0 ? (
+                      <SelectItem value="none" disabled>
+                        Ingen tech spec filer funnet
+                      </SelectItem>
                     ) : (
-                      techSpecFiles.map((file) => (
+                      availableTechSpecs.map((file) => (
                         <SelectItem key={file.id} value={file.id}>
                           {file.filename}
                         </SelectItem>
@@ -398,7 +378,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                     )}
                   </SelectContent>
                 </Select>
-                {techSpecFiles.length === 0 && !loadingTechSpecs && (
+                {availableTechSpecs.length === 0 && !techSpecsLoading && (
                   <p className="text-sm text-muted-foreground mt-2">
                     Last opp tech spec dokumenter i din profil for å velge dem her
                   </p>
