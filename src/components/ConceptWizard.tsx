@@ -92,14 +92,28 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
   };
 
   const handleFileUploaded = (fileData: any) => {
-    // Just store the file data, we'll create the concept_files records when saving the concept
+    // Add comprehensive validation
+    if (!fileData || !fileData.filename || !fileData.file_path) {
+      toast({
+        title: "Feil",
+        description: "Ugyldig fildata mottatt",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Store the file data with enhanced properties
     setConceptData(prev => ({
       ...prev,
       portfolio_files: [...prev.portfolio_files, {
         ...fileData,
-        tempId: Date.now() + Math.random() // Add a temporary ID for UI purposes
+        tempId: Date.now() + Math.random(), // Add a temporary ID for UI purposes
+        title: fileData.title || fileData.filename,
+        uploadedAt: new Date().toISOString()
       }]
     }));
+
+    console.log('File uploaded successfully:', fileData.filename);
   };
 
   const removePortfolioFile = async (fileData: any) => {
@@ -176,8 +190,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
       // Create concept_files records for uploaded files
       if (conceptData.portfolio_files.length > 0 && conceptId) {
+        // First, ensure we have the authenticated user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          throw new Error('Authentication required to save files');
+        }
+
         const fileRecords = conceptData.portfolio_files.map(file => ({
-          user_id: userId,
+          user_id: user.id, // Ensure we use authenticated user ID
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
@@ -185,7 +205,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
           file_url: file.publicUrl,
           mime_type: file.mime_type,
           file_size: file.file_size,
-          title: file.filename
+          title: file.title || file.filename,
+          is_public: true
         }));
 
         const { error: filesError } = await supabase
@@ -194,6 +215,12 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         
         if (filesError) {
           console.error('Error creating concept files:', filesError);
+          // Don't throw here - concept was created successfully, just log the file error
+          toast({
+            title: "Advarsel",
+            description: "Konsept lagret, men noen filer kunne ikke lagres. Prøv å laste dem opp på nytt.",
+            variant: "destructive",
+          });
         }
       }
 
@@ -205,9 +232,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
       onSuccess();
       onClose();
     } catch (error: any) {
+      console.error('Save error:', error);
       toast({
         title: "Feil ved lagring",
-        description: error.message,
+        description: error.message || "En ukjent feil oppstod",
         variant: "destructive",
       });
     } finally {
@@ -217,13 +245,23 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
   const isStepValid = () => {
     switch (currentStep) {
-      case 0: return conceptData.title.trim().length > 0;
-      case 1: return conceptData.price.length > 0 && conceptData.expected_audience.length > 0;
-      case 2: return true; // Portfolio is optional
-      case 3: return true; // Tech spec is optional
-      case 4: return conceptData.available_dates.length > 0;
-      case 5: return true; // Preview step
-      default: return false;
+      case 0: 
+        return conceptData.title.trim().length > 0;
+      case 1: 
+        return conceptData.price.length > 0 && 
+               conceptData.expected_audience.length > 0 &&
+               parseFloat(conceptData.price) > 0 &&
+               parseInt(conceptData.expected_audience) > 0;
+      case 2: 
+        return true; // Portfolio is optional
+      case 3: 
+        return true; // Tech spec is optional
+      case 4: 
+        return conceptData.available_dates.length > 0;
+      case 5: 
+        return true; // Preview step
+      default: 
+        return false;
     }
   };
 

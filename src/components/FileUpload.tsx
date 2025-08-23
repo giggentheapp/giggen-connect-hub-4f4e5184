@@ -64,7 +64,12 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         .from(bucketName)
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Upload feilet: ${uploadError.message}`);
+      }
+
+      console.log('File uploaded to storage successfully:', filePath);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -139,9 +144,19 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
 
     } catch (error: any) {
       console.error('Upload error:', error);
+      let errorMessage = 'En ukjent feil oppstod';
+      
+      if (error.message?.includes('row-level security policy')) {
+        errorMessage = 'Tilgangsfeil - sjekk at du er logget inn og har rettigheter';
+      } else if (error.message?.includes('file size')) {
+        errorMessage = 'Filen er for stor (maks 50MB)';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Feil ved opplasting",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

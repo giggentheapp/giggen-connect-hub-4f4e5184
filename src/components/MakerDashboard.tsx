@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Map, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConceptWizard } from '@/components/ConceptWizard';
+import ConceptTestComponent from '@/components/ConceptTestComponent';
 
 interface UserProfile {
   id: string;
@@ -208,12 +209,17 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                       <p className="text-center text-muted-foreground py-4">
                         Du har ikke opprettet noen arrangementer ennå
                       </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                   )}
+                 </div>
+               </CardContent>
+             </Card>
+           </div>
+           
+           {/* Test Component Section */}
+           <div className="mt-6">
+             <ConceptTestComponent />
+           </div>
+         </TabsContent>
 
           <TabsContent value="map" className="space-y-6">
             <Card>
