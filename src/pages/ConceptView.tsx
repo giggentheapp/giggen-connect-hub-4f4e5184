@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from 'lucide-react';
 import ConceptCard from '@/components/ConceptCard';
-import ConceptPortfolioGallery from '@/components/ConceptPortfolioGallery';
 
 interface Concept {
   id: string;
@@ -168,10 +167,6 @@ const ConceptView = () => {
 
         {/* Concept Details */}
         <ConceptCard concept={concept} />
-        
-        <div className="mt-6">
-          <ConceptPortfolioGallery conceptId={conceptId || ''} />
-        </div>
       </div>
     </div>
   );

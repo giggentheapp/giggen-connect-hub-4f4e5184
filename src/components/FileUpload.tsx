@@ -20,8 +20,11 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
   const { toast } = useToast();
 
   const getFileType = (mimeType: string): string => {
-    // Return the full MIME type for better file detection
-    return mimeType || 'application/octet-stream';
+    // Categorize MIME types for database constraints
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType.startsWith('audio/')) return 'audio';
+    return 'document';
   };
 
   const getFileIcon = (fileType: string) => {
