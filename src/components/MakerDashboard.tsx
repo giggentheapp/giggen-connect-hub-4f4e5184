@@ -56,7 +56,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [conceptFiles, setConceptFiles] = useState<{[key: string]: any[]}>({});
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
-  const [editingConcept, setEditingConcept] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -306,10 +305,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                       key={concept.id}
                       concept={concept}
                       showActions={true}
-                      onEdit={() => {
-                        setEditingConcept(concept);
-                        setShowWizard(true);
-                      }}
                       onDelete={() => handleDeleteConcept(concept.id)}
                     />
                   ))}
@@ -354,13 +349,9 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       
       <ConceptWizard
         isOpen={showWizard}
-        onClose={() => {
-          setShowWizard(false);
-          setEditingConcept(null);
-        }}
+        onClose={() => setShowWizard(false)}
         onSuccess={refreshConcepts}
         userId={profile.user_id}
-        editingConcept={editingConcept}
       />
     </div>
   );

@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Video, Music, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +27,7 @@ interface ConceptData {
   available_dates: Date[];
   portfolio_files: any[];
   selected_tech_spec_file: string;
+  is_indefinite: boolean;
 }
 
 interface ConceptWizardProps {
@@ -32,7 +35,6 @@ interface ConceptWizardProps {
   onClose: () => void;
   onSuccess: () => void;
   userId: string;
-  editingConcept?: any;
 }
 
 const STEPS = [
@@ -44,22 +46,25 @@ const STEPS = [
   { id: 'preview', title: 'Forhåndsvisning', description: 'Se over og lagre' },
 ];
 
-export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConcept }: ConceptWizardProps) => {
+export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [saveAsPublished, setSaveAsPublished] = useState(false);
   const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
   const { toast } = useToast();
 
   const [conceptData, setConceptData] = useState<ConceptData>(() => ({
-    title: editingConcept?.title || '',
-    description: editingConcept?.description || '',
-    price: editingConcept?.price?.toString() || '',
-    expected_audience: editingConcept?.expected_audience?.toString() || '',
-    tech_spec: editingConcept?.tech_spec || '',
-    available_dates: editingConcept?.available_dates || [],
+    title: '',
+    description: '',
+    price: '',
+    expected_audience: '',
+    tech_spec: '',
+    available_dates: [],
     portfolio_files: [],
     selected_tech_spec_file: '',
+    is_indefinite: false,
   }));
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
@@ -137,32 +142,21 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
         tech_spec: conceptData.tech_spec || null,
         tech_spec_reference: conceptData.selected_tech_spec_file || null,
-        available_dates: conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null,
+        available_dates: conceptData.is_indefinite 
+          ? JSON.stringify({ indefinite: true })
+          : (conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null),
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft'
       };
 
-      let conceptId;
-      let error;
-
-      if (editingConcept) {
-        const { error: updateError } = await supabase
-          .from('concepts')
-          .update(conceptPayload)
-          .eq('id', editingConcept.id);
-        error = updateError;
-        conceptId = editingConcept.id;
-      } else {
-        const { data, error: insertError } = await supabase
-          .from('concepts')
-          .insert(conceptPayload)
-          .select('id')
-          .single();
-        error = insertError;
-        conceptId = data?.id;
-      }
-
-      if (error) throw error;
+      const { data, error: insertError } = await supabase
+        .from('concepts')
+        .insert(conceptPayload)
+        .select('id')
+        .single();
+      
+      if (insertError) throw insertError;
+      const conceptId = data?.id;
 
       // Create concept_files records for uploaded files
       if (conceptData.portfolio_files.length > 0 && conceptId) {
@@ -233,7 +227,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
       case 3: 
         return true; // Tech spec is optional
       case 4: 
-        return conceptData.available_dates.length > 0;
+        return conceptData.available_dates.length > 0 || conceptData.is_indefinite;
       case 5: 
         return true; // Preview step
       default: 
@@ -249,7 +243,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>
-              {editingConcept ? 'Rediger konsept' : 'Opprett nytt konsept'}
+              Opprett nytt konsept
             </CardTitle>
             <CardDescription>
               {STEPS[currentStep].title} - {STEPS[currentStep].description}
@@ -388,51 +382,82 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
           )}
 
           {currentStep === 4 && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <Label>Tilgjengelige datoer *</Label>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Velg datoer når du er tilgjengelig for dette konseptet
+                  Velg enten spesifikke datoer eller "Ubestemt / Ved avtale"
                 </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {conceptData.available_dates.map((date, index) => (
-                    <div key={index} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                      {format(date, 'dd.MM.yyyy')}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-primary"
-                        onClick={() => {
-                          const newDates = conceptData.available_dates.filter((_, i) => i !== index);
-                          updateConceptData('available_dates', newDates);
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
+                
+                <div className="flex items-center space-x-2 mb-4">
+                  <Switch
+                    id="indefinite-mode"
+                    checked={conceptData.is_indefinite}
+                    onCheckedChange={(checked) => {
+                      updateConceptData('is_indefinite', checked);
+                      if (checked) {
+                        updateConceptData('available_dates', []);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="indefinite-mode">
+                    Ubestemt / Ved avtale
+                  </Label>
                 </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      Legg til dato
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      onSelect={(date) => {
-                        if (date && !conceptData.available_dates.find(d => d.getTime() === date.getTime())) {
-                          updateConceptData('available_dates', [...conceptData.available_dates, date]);
-                        }
-                      }}
-                      disabled={(date) => date < new Date() || conceptData.available_dates.some(d => d.getTime() === date.getTime())}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+
+                {conceptData.is_indefinite ? (
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Tilgjengelighet avtales direkte med interesserte parter
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {conceptData.available_dates.map((date, index) => (
+                        <div key={index} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                          {format(date, 'dd.MM.yyyy')}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-primary"
+                            onClick={() => {
+                              const newDates = conceptData.available_dates.filter((_, i) => i !== index);
+                              updateConceptData('available_dates', newDates);
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-[240px] justify-start text-left font-normal"
+                          disabled={conceptData.is_indefinite}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          Legg til dato
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          onSelect={(date) => {
+                            if (date && !conceptData.available_dates.find(d => d.getTime() === date.getTime())) {
+                              updateConceptData('available_dates', [...conceptData.available_dates, date]);
+                            }
+                          }}
+                          disabled={(date) => date < new Date() || conceptData.available_dates.some(d => d.getTime() === date.getTime())}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -504,9 +529,15 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
 
                 {/* Tech Spec Reference - Hidden from Preview as per requirements */}
 
-                {conceptData.available_dates.length > 0 && (
-                  <div>
-                    <strong>Tilgjengelige datoer:</strong>
+                <div>
+                  <strong>Tilgjengelige datoer:</strong>
+                  {conceptData.is_indefinite ? (
+                    <div className="mt-2">
+                      <span className="bg-muted text-muted-foreground px-2 py-1 rounded text-sm">
+                        Ubestemt / Ved avtale
+                      </span>
+                    </div>
+                  ) : conceptData.available_dates.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {conceptData.available_dates.map((date, index) => (
                         <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded text-sm">
@@ -514,13 +545,20 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                         </span>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="mt-2">
+                      <span className="text-muted-foreground text-sm">Ingen datoer valgt</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-4">
                 <Button
-                  onClick={() => handleSave(false)}
+                  onClick={() => {
+                    setSaveAsPublished(false);
+                    setShowConfirmDialog(true);
+                  }}
                   disabled={saving}
                   variant="outline"
                   className="flex-1"
@@ -529,7 +567,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
                   Lagre som utkast
                 </Button>
                 <Button
-                  onClick={() => handleSave(true)}
+                  onClick={() => {
+                    setSaveAsPublished(true);
+                    setShowConfirmDialog(true);
+                  }}
                   disabled={saving}
                   className="flex-1"
                 >
@@ -540,6 +581,32 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editingConce
             </div>
           )}
         </CardContent>
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Når konseptet er opprettet vil det ikke kunne redigeres. Er du sikker på at du vil fortsette?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
+                Avbryt
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setShowConfirmDialog(false);
+                  handleSave(saveAsPublished);
+                }}
+                disabled={saving}
+              >
+                {saveAsPublished ? 'Publiser konsept' : 'Lagre konsept'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Navigation */}
         {currentStep < 5 && (

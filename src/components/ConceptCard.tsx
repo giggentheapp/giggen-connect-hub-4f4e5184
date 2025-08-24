@@ -22,7 +22,6 @@ interface ConceptCardProps {
     maker_id: string;
   };
   showActions?: boolean;
-  onEdit?: () => void;
   onDelete?: () => void;
 }
 
@@ -42,7 +41,7 @@ interface TechSpecFile {
   file_type: string;
 }
 
-const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: ConceptCardProps) => {
+const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProps) => {
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,16 +93,19 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
   };
 
   const parseAvailableDates = (datesData: any) => {
-    if (!datesData) return [];
+    if (!datesData) return { dates: [], isIndefinite: false };
     try {
       const dates = typeof datesData === 'string' ? JSON.parse(datesData) : datesData;
-      return Array.isArray(dates) ? dates : [];
+      if (dates && typeof dates === 'object' && dates.indefinite) {
+        return { dates: [], isIndefinite: true };
+      }
+      return { dates: Array.isArray(dates) ? dates : [], isIndefinite: false };
     } catch {
-      return [];
+      return { dates: [], isIndefinite: false };
     }
   };
 
-  const availableDates = parseAvailableDates(concept.available_dates);
+  const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
 
   return (
     <Card className="w-full">
@@ -122,11 +124,6 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
           </div>
           {showActions && (
             <div className="flex gap-2">
-              {onEdit && (
-                <Button variant="outline" size="sm" onClick={onEdit}>
-                  Rediger
-                </Button>
-              )}
               {onDelete && (
                 <Button variant="destructive" size="sm" onClick={onDelete}>
                   Slett
@@ -155,18 +152,24 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
         </div>
 
         {/* Available Dates */}
-        {availableDates.length > 0 && (
+        {(availableDates.length > 0 || isIndefinite) && (
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <CalendarIcon className="h-4 w-4" />
               Tilgjengelige datoer
             </h4>
             <div className="flex flex-wrap gap-2">
-              {availableDates.map((date: string, index: number) => (
-                <Badge key={index} variant="outline">
-                  {format(new Date(date), 'dd.MM.yyyy')}
+              {isIndefinite ? (
+                <Badge variant="outline">
+                  Ubestemt / Ved avtale
                 </Badge>
-              ))}
+              ) : (
+                availableDates.map((date: string, index: number) => (
+                  <Badge key={index} variant="outline">
+                    {format(new Date(date), 'dd.MM.yyyy')}
+                  </Badge>
+                ))
+              )}
             </div>
           </div>
         )}
