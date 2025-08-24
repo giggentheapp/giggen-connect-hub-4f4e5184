@@ -20,10 +20,8 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
   const { toast } = useToast();
 
   const getFileType = (mimeType: string): string => {
-    if (mimeType.startsWith('image/')) return 'image';
-    if (mimeType.startsWith('video/')) return 'video';
-    if (mimeType.startsWith('audio/')) return 'audio';
-    return 'document';
+    // Return the full MIME type for better file detection
+    return mimeType || 'application/octet-stream';
   };
 
   const getFileIcon = (fileType: string) => {
@@ -142,8 +140,21 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           .single();
         if (dbError) throw dbError;
         dbData = data;
+      } else if (targetTable === 'concept_files') {
+        // This case shouldn't happen as concepts are handled differently
+        // But we'll add it for completeness
+        dbData = {
+          ...baseFileData,
+          publicUrl,
+          filename: file.name,
+          file_path: filePath,
+          file_type: fileType,
+          file_size: file.size,
+          mime_type: file.type,
+          creator_id: user.id
+        };
       } else {
-        // For concept_files or when no targetTable specified, let parent handle database operations
+        // For when no targetTable specified, let parent handle database operations
         dbData = {
           ...baseFileData,
           publicUrl,

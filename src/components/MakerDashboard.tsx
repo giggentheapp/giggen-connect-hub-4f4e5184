@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptTestComponent from '@/components/ConceptTestComponent';
 import ConceptCard from '@/components/ConceptCard';
+import ConceptPortfolioTest from '@/components/ConceptPortfolioTest';
 
 interface UserProfile {
   id: string;
@@ -193,11 +194,12 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         </div>
       ) : (
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Oversikt</TabsTrigger>
             <TabsTrigger value="map">Live kart</TabsTrigger>
             <TabsTrigger value="concepts">Konsepter</TabsTrigger>
             <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="portfolio-test">Portfolio Test</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -363,6 +365,10 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="portfolio-test" className="space-y-6">
+            <ConceptPortfolioTest />
           </TabsContent>
         </Tabs>
       )}

@@ -178,20 +178,25 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {conceptFiles.map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
-                  {/* Image Display */}
-                  {file.file_type.startsWith('image/') && (
+                  {/* Image Display - jpg, png, jpeg, gif, webp */}
+                  {(file.file_type === 'image' || file.file_type.startsWith('image/') || 
+                   file.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
                     <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
                       <img 
                         src={file.file_url} 
                         alt={file.title || file.filename}
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                         onClick={() => window.open(file.file_url, '_blank')}
+                        onError={(e) => {
+                          console.error('Failed to load image:', file.file_url);
+                        }}
                       />
                     </div>
                   )}
                   
-                  {/* Video Display */}
-                  {file.file_type.startsWith('video/') && (
+                  {/* Video Display - mp4, webm, mov */}
+                  {(file.file_type === 'video' || file.file_type.startsWith('video/') || 
+                   file.filename.match(/\.(mp4|webm|mov)$/i)) && (
                     <div className="aspect-video bg-black">
                       <video 
                         controls 
@@ -204,8 +209,9 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
                     </div>
                   )}
                   
-                  {/* Audio Display */}
-                  {file.file_type.startsWith('audio/') && (
+                  {/* Audio Display - mp3, wav */}
+                  {(file.file_type === 'audio' || file.file_type.startsWith('audio/') || 
+                   file.filename.match(/\.(mp3|wav|ogg)$/i)) && (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Music className="h-5 w-5 text-primary" />
@@ -222,19 +228,41 @@ const ConceptCard = ({ concept, showActions = false, onEdit, onDelete }: Concept
                     </div>
                   )}
                   
-                  {/* Document Display */}
-                  {(file.file_type.includes('pdf') || file.file_type.includes('document') || file.file_type.includes('text')) && (
+                  {/* Document Display - PDF and other documents */}
+                  {((file.file_type === 'document' || file.file_type.includes('pdf') || file.file_type.includes('document') || 
+                    file.file_type.includes('text') || file.file_type.includes('application/') || 
+                    file.filename.match(/\.(pdf|doc|docx|txt)$/i)) &&
+                   !file.file_type.startsWith('image/') && !file.file_type.startsWith('video/') && !file.file_type.startsWith('audio/') &&
+                   !file.filename.match(/\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|mp3|wav|ogg)$/i)) && (
                     <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
                       <FileText className="h-12 w-12 text-primary mb-2" />
-                      <span className="text-sm font-medium text-center">Dokument</span>
+                      <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2"
                         onClick={() => window.open(file.file_url, '_blank')}
                       >
                         <Download className="h-3 w-3 mr-1" />
-                        Åpne
+                        Last ned
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Unknown file type - fallback */}
+                  {!file.file_type.startsWith('image/') && !file.file_type.startsWith('video/') && !file.file_type.startsWith('audio/') &&
+                   file.file_type !== 'image' && file.file_type !== 'video' && file.file_type !== 'audio' && file.file_type !== 'document' &&
+                   !file.file_type.includes('pdf') && !file.file_type.includes('document') && !file.file_type.includes('text') && !file.file_type.includes('application/') &&
+                   !file.filename.match(/\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|mp3|wav|ogg|pdf|doc|docx|txt)$/i) && (
+                    <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
+                      <FileText className="h-12 w-12 text-muted-foreground mb-2" />
+                      <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(file.file_url, '_blank')}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        Last ned
                       </Button>
                     </div>
                   )}
