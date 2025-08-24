@@ -288,7 +288,6 @@ export type Database = {
       profile_tech_specs: {
         Row: {
           created_at: string
-          creator_id: string
           file_path: string
           file_size: number | null
           file_type: string
@@ -296,11 +295,11 @@ export type Database = {
           filename: string
           id: string
           mime_type: string | null
+          profile_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          creator_id: string
           file_path: string
           file_size?: number | null
           file_type?: string
@@ -308,11 +307,11 @@ export type Database = {
           filename?: string
           id?: string
           mime_type?: string | null
+          profile_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          creator_id?: string
           file_path?: string
           file_size?: number | null
           file_type?: string
@@ -320,9 +319,18 @@ export type Database = {
           filename?: string
           id?: string
           mime_type?: string | null
+          profile_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profile_tech_specs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       profiles: {
         Row: {
