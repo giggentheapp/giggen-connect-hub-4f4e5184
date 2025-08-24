@@ -32,6 +32,7 @@ interface ConceptFile {
   file_url: string;
   title?: string;
   created_at: string;
+  mime_type?: string;
 }
 
 interface TechSpecFile {
@@ -55,7 +56,7 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
       // Load concept files (portfolio)
       const { data: filesData, error: filesError } = await supabase
         .from('concept_files')
-        .select('id, filename, file_type, file_url, title, created_at')
+        .select('id, filename, file_type, file_url, title, created_at, mime_type')
         .eq('concept_id', concept.id);
 
       if (filesError) {
@@ -181,40 +182,53 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {conceptFiles.map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
-                  {/* Image Display - jpg, png, jpeg, gif, webp */}
-                  {(file.file_type === 'image' || file.file_type.startsWith('image/') || 
-                   file.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
-                    <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={file.file_url} 
-                        alt={file.title || file.filename}
-                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                        onClick={() => window.open(file.file_url, '_blank')}
-                        onError={(e) => {
-                          console.error('Failed to load image:', file.file_url);
-                        }}
-                      />
-                    </div>
-                  )}
                   
-                  {/* Video Display - mp4, webm, mov */}
-                  {(file.file_type === 'video' || file.file_type.startsWith('video/') || 
-                   file.filename.match(/\.(mp4|webm|mov)$/i)) && (
+                  {/* Video Display */}
+                  {(file.file_type === 'video' || file.mime_type?.startsWith('video/') || 
+                   file.filename.match(/\.(mp4|webm|mov|avi)$/i)) && (
                     <div className="aspect-video bg-black">
                       <video 
                         controls 
                         className="w-full h-full"
                         preload="metadata"
+                        crossOrigin="anonymous"
+                        onError={(e) => {
+                          console.error('Failed to load video:', file.file_url, e);
+                        }}
+                        onLoadStart={() => {
+                          console.log('Loading video:', file.filename, file.file_url);
+                        }}
                       >
-                        <source src={file.file_url} type={file.file_type} />
+                        <source src={file.file_url} type={file.mime_type || 'video/mp4'} />
+                        <source src={file.file_url} type="video/mp4" />
                         Din nettleser støtter ikke video-avspilling.
                       </video>
                     </div>
                   )}
                   
-                  {/* Audio Display - mp3, wav */}
-                  {(file.file_type === 'audio' || file.file_type.startsWith('audio/') || 
-                   file.filename.match(/\.(mp3|wav|ogg)$/i)) && (
+                  {/* Image Display */}
+                  {(file.file_type === 'image' || file.mime_type?.startsWith('image/') || 
+                   file.filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) && (
+                     <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
+                       <img 
+                         src={file.file_url} 
+                         alt={file.title || file.filename}
+                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                         crossOrigin="anonymous"
+                         onClick={() => window.open(file.file_url, '_blank')}
+                         onError={(e) => {
+                           console.error('Failed to load image:', file.file_url, e);
+                         }}
+                         onLoad={() => {
+                           console.log('Image loaded:', file.filename);
+                         }}
+                       />
+                     </div>
+                   )}
+                  
+                  {/* Audio Display */}
+                  {(file.file_type === 'audio' || file.mime_type?.startsWith('audio/') || 
+                   file.filename.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) && (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Music className="h-5 w-5 text-primary" />
@@ -224,51 +238,38 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                         controls 
                         className="w-full"
                         preload="metadata"
+                        crossOrigin="anonymous"
+                        onError={(e) => {
+                          console.error('Failed to load audio:', file.file_url, e);
+                        }}
                       >
-                        <source src={file.file_url} type={file.file_type} />
+                        <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
                         Din nettleser støtter ikke lyd-avspilling.
                       </audio>
                     </div>
                   )}
                   
-                  {/* Document Display - PDF and other documents */}
-                  {((file.file_type === 'document' || file.file_type.includes('pdf') || file.file_type.includes('document') || 
-                    file.file_type.includes('text') || file.file_type.includes('application/') || 
-                    file.filename.match(/\.(pdf|doc|docx|txt)$/i)) &&
-                   !file.file_type.startsWith('image/') && !file.file_type.startsWith('video/') && !file.file_type.startsWith('audio/') &&
-                   !file.filename.match(/\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|mp3|wav|ogg)$/i)) && (
-                    <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
-                      <FileText className="h-12 w-12 text-primary mb-2" />
-                      <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(file.file_url, '_blank')}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Last ned
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {/* Unknown file type - fallback */}
-                  {!file.file_type.startsWith('image/') && !file.file_type.startsWith('video/') && !file.file_type.startsWith('audio/') &&
-                   file.file_type !== 'image' && file.file_type !== 'video' && file.file_type !== 'audio' && file.file_type !== 'document' &&
-                   !file.file_type.includes('pdf') && !file.file_type.includes('document') && !file.file_type.includes('text') && !file.file_type.includes('application/') &&
-                   !file.filename.match(/\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|mp3|wav|ogg|pdf|doc|docx|txt)$/i) && (
-                    <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
-                      <FileText className="h-12 w-12 text-muted-foreground mb-2" />
-                      <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(file.file_url, '_blank')}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Last ned
-                      </Button>
-                    </div>
-                  )}
+                  {/* Document Display */}
+                  {(file.file_type === 'document' || 
+                   file.mime_type?.includes('pdf') || 
+                   file.mime_type?.includes('document') || 
+                   file.mime_type?.includes('text') || 
+                   file.mime_type?.includes('application/') || 
+                   file.filename.match(/\.(pdf|doc|docx|txt)$/i)) && 
+                   file.file_type !== 'image' && file.file_type !== 'video' && file.file_type !== 'audio' && (
+                     <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
+                       <FileText className="h-12 w-12 text-primary mb-2" />
+                       <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => window.open(file.file_url, '_blank')}
+                       >
+                         <Download className="h-3 w-3 mr-1" />
+                         Last ned
+                       </Button>
+                     </div>
+                   )}
                   
                   {/* File Info */}
                   <div className="p-3 border-t">
@@ -276,7 +277,7 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                       {file.title || file.filename}
                     </h5>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {file.file_type.split('/')[0]} • {format(new Date(file.created_at), 'dd.MM.yy')}
+                      {file.file_type} • {format(new Date(file.created_at), 'dd.MM.yy')}
                     </p>
                   </div>
                 </div>
