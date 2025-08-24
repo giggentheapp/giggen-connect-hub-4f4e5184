@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface ProfileTechSpecFile {
   id: string;
-  creator_id: string;
+  profile_id: string;
   filename: string;
   file_path: string;
   file_url: string;
@@ -33,7 +33,7 @@ export const useProfileTechSpecs = (userId: string | undefined) => {
       const { data, error: fetchError } = await supabase
         .from('profile_tech_specs')
         .select('*')
-        .eq('creator_id', userId)
+        .eq('profile_id', userId)
         .order('created_at', { ascending: true });
 
       if (fetchError) throw fetchError;

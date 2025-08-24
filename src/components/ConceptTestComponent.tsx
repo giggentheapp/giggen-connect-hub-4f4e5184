@@ -137,8 +137,8 @@ export const ConceptTestComponent = () => {
     try {
       const { data, error } = await supabase
         .from('profile_tech_specs')
-        .select('id, file_name')
-        .eq('creator_id', userId)
+        .select('id, filename')
+        .eq('profile_id', userId)
         .limit(5);
         
       if (error) throw error;

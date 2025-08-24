@@ -130,7 +130,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         const { data, error: dbError } = await supabase
           .from('profile_tech_specs')
           .insert({
-            creator_id: user.id,
+            profile_id: user.id,
             file_url: publicUrl,
             file_path: filePath,
             filename: file.name,

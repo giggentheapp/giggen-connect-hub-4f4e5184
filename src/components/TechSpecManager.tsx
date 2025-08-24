@@ -10,7 +10,7 @@ import FileUpload from '@/components/FileUpload';
 
 interface TechSpecItem {
   id: string;
-  creator_id: string;
+  profile_id: string;
   filename: string;
   file_url: string;
   file_type: string;
@@ -39,7 +39,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       const { data, error } = await supabase
         .from('profile_tech_specs')
         .select('*')
-        .eq('creator_id', userId)
+        .eq('profile_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
