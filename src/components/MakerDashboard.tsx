@@ -7,9 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Map, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConceptWizard } from '@/components/ConceptWizard';
-import ConceptTestComponent from '@/components/ConceptTestComponent';
 import ConceptCard from '@/components/ConceptCard';
-import ConceptPortfolioTest from '@/components/ConceptPortfolioTest';
 
 interface UserProfile {
   id: string;
@@ -178,15 +176,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">GiggenMaker Dashboard</h2>
-        <Button asChild>
-          <Link to={`/profile/${profile.user_id}`}>
-            Se min profil
-          </Link>
-        </Button>
-      </div>
-
       {loading ? (
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -194,12 +183,11 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         </div>
       ) : (
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Oversikt</TabsTrigger>
             <TabsTrigger value="map">Live kart</TabsTrigger>
             <TabsTrigger value="concepts">Konsepter</TabsTrigger>
             <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="portfolio-test">Portfolio Test</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -263,13 +251,8 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                  </div>
                </CardContent>
              </Card>
-           </div>
-           
-           {/* Test Component Section */}
-           <div className="mt-6">
-             <ConceptTestComponent />
-           </div>
-         </TabsContent>
+            </div>
+          </TabsContent>
 
           <TabsContent value="map" className="space-y-6">
             <Card>
@@ -365,10 +348,6 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="portfolio-test" className="space-y-6">
-            <ConceptPortfolioTest />
           </TabsContent>
         </Tabs>
       )}
