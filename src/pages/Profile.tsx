@@ -188,14 +188,6 @@ const Profile = () => {
     }
   }, []);
 
-  if (loading) {
-    return <div className="flex justify-center p-8">Laster profil...</div>;
-  }
-
-  if (!profile) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   const SectionVisibilityIndicator = useCallback(({ isVisible, sectionName }: { isVisible: boolean, sectionName: string }) => (
     isOwnProfile ? (
       <div className="flex items-center gap-2 mb-2">
@@ -213,6 +205,14 @@ const Profile = () => {
       </div>
     ) : null
   ), [isOwnProfile]);
+
+  if (loading) {
+    return <div className="flex justify-center p-8">Laster profil...</div>;
+  }
+
+  if (!profile) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
