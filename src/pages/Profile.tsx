@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,7 +42,7 @@ const Profile = () => {
   const { concepts, loading: conceptsLoading } = useUserConcepts(userId);
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
 
-  const isOwnProfile = currentUser?.id === userId;
+  const isOwnProfile = useMemo(() => currentUser?.id === userId, [currentUser?.id, userId]);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -150,7 +150,7 @@ const Profile = () => {
     }
   }, [userId, currentUser, settings?.show_events]);
 
-  const renderFilePreview = (file: any) => {
+  const renderFilePreview = useCallback((file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;
     
     if (file.file_type === 'image') {
@@ -186,7 +186,7 @@ const Profile = () => {
         </div>
       );
     }
-  };
+  }, []);
 
   if (loading) {
     return <div className="flex justify-center p-8">Laster profil...</div>;
@@ -196,7 +196,7 @@ const Profile = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const SectionVisibilityIndicator = ({ isVisible, sectionName }: { isVisible: boolean, sectionName: string }) => (
+  const SectionVisibilityIndicator = useCallback(({ isVisible, sectionName }: { isVisible: boolean, sectionName: string }) => (
     isOwnProfile ? (
       <div className="flex items-center gap-2 mb-2">
         {isVisible ? (
@@ -212,7 +212,7 @@ const Profile = () => {
         )}
       </div>
     ) : null
-  );
+  ), [isOwnProfile]);
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
