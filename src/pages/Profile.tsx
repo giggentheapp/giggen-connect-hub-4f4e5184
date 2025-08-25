@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft } from 'lucide-react';
+import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ProfilePortfolioViewer from '@/components/ProfilePortfolioViewer';
-import ProfileTechSpecsViewer from '@/components/ProfileTechSpecsViewer';
+import ConceptCard from '@/components/ConceptCard';
+import { useUserConcepts } from '@/hooks/useUserConcepts';
 
 interface ProfileData {
   id: string;
@@ -36,6 +36,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<any[]>([]);
   const { toast } = useToast();
+  const { concepts, loading: conceptsLoading } = useUserConcepts(userId);
 
   const isOwnProfile = currentUser?.id === userId;
 
@@ -218,34 +219,31 @@ const Profile = () => {
           </Card>
         )}
 
-        {/* Portefølje */}
-        {(settings?.show_portfolio || isOwnProfile) && (
+        {/* Konsepter */}
+        {profile.role === 'maker' && (
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Portefølje</CardTitle>
-              <SectionVisibilityIndicator isVisible={settings?.show_portfolio || false} sectionName="Portefølje" />
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" />
+                Konsepter
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ProfilePortfolioViewer 
-                userId={userId || ''}
-                showControls={isOwnProfile}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Tech Spec */}
-        {(settings?.show_techspec || isOwnProfile) && (
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Tech Spec</CardTitle>
-              <SectionVisibilityIndicator isVisible={settings?.show_techspec || false} sectionName="Tech Spec" />
-            </CardHeader>
-            <CardContent>
-              <ProfileTechSpecsViewer 
-                userId={userId || ''}
-                showControls={isOwnProfile}
-              />
+              {conceptsLoading ? (
+                <p className="text-muted-foreground">Laster konsepter...</p>
+              ) : concepts.length > 0 ? (
+                <div className="space-y-4">
+                  {concepts.map((concept) => (
+                    <ConceptCard 
+                      key={concept.id}
+                      concept={concept}
+                      showActions={false}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Ingen publiserte konsepter</p>
+              )}
             </CardContent>
           </Card>
         )}
