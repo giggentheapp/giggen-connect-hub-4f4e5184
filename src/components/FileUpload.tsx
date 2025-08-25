@@ -67,11 +67,8 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error('Storage upload error:', uploadError);
         throw new Error(`Upload feilet: ${uploadError.message}`);
       }
-
-      console.log('File uploaded to storage successfully:', filePath);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage

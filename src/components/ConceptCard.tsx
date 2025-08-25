@@ -217,10 +217,10 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                         preload="metadata"
                         crossOrigin="anonymous"
                         onError={(e) => {
-                          console.error('Failed to load video:', file.file_url, e);
+                          // Video loading failed
                         }}
                         onLoadStart={() => {
-                          console.log('Loading video:', file.filename, file.file_url);
+                          // Video started loading
                         }}
                       >
                         <source src={file.file_url} type={file.mime_type || 'video/mp4'} />
@@ -240,12 +240,12 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                          className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                          crossOrigin="anonymous"
                          onClick={() => window.open(file.file_url, '_blank')}
-                         onError={(e) => {
-                           console.error('Failed to load image:', file.file_url, e);
-                         }}
-                         onLoad={() => {
-                           console.log('Image loaded:', file.filename);
-                         }}
+                          onError={(e) => {
+                            // Image loading failed
+                          }}
+                          onLoad={() => {
+                            // Image loaded successfully
+                          }}
                        />
                      </div>
                    )}

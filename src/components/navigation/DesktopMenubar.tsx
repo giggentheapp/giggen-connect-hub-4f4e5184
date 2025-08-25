@@ -12,7 +12,6 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
 
   const handleNavigation = (section: string) => {
-    console.log('Navigating to section:', section);
     onSectionChange(section);
     setIsExpanded(false);
     setExpandedSubmenu(null);

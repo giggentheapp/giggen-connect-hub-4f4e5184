@@ -151,7 +151,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
       });
 
       map.current.on('error', (e) => {
-        console.error('Map error:', e.error);
+        // Map error occurred
       });
 
     } catch (error: any) {
@@ -338,7 +338,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         markersRef.current.push(marker);
         
       } catch (error: any) {
-        console.error(`Failed to create marker for ${maker.display_name}:`, error);
+        // Failed to create marker - continue with other markers
       }
     });
 

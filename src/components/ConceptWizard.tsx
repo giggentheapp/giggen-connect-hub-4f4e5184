@@ -96,8 +96,6 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         uploadedAt: new Date().toISOString()
       }]
     }));
-
-    console.log('File uploaded successfully:', fileData.filename);
   };
 
   const removePortfolioFile = async (fileData: any) => {
