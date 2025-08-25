@@ -19,6 +19,8 @@ interface UserProfile {
   address: string | null;
   latitude: number | null;
   longitude: number | null;
+  is_address_public: boolean;
+  contact_info: any;
   created_at: string;
   updated_at: string;
 }
@@ -134,11 +136,6 @@ const Dashboard = () => {
             <Button variant="outline" onClick={handleSignOut}>
               Logg ut
             </Button>
-            <Link to="/files">
-              <Button variant="outline">
-                Filer
-              </Button>
-            </Link>
           </div>
         </div>
       </header>

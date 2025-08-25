@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useParams, Navigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,24 +8,22 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
-import ProfilePortfolioManager from '@/components/ProfilePortfolioManager';
-import TechSpecManager from '@/components/TechSpecManager';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User, Mail, Phone, Save } from 'lucide-react';
+import { User, Save } from 'lucide-react';
 
-interface ProfileData {
+interface UserProfile {
   id: string;
-  display_name: string;
-  bio?: string;
-  contact_info?: any;
-  avatar_url?: string;
-  role: string;
   user_id: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  is_address_public?: boolean;
+  display_name: string;
+  bio: string | null;
+  role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
+  contact_info: any;
 }
 
 interface ProfileSettings {
@@ -38,9 +35,12 @@ interface ProfileSettings {
   show_on_map: boolean;
 }
 
-const ProfileSettings = () => {
-  const { userId } = useParams();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+interface SettingsSectionProps {
+  profile: UserProfile;
+  onProfileUpdate: (updatedProfile: UserProfile) => void;
+}
+
+export const SettingsSection = ({ profile, onProfileUpdate }: SettingsSectionProps) => {
   const [settings, setSettings] = useState<ProfileSettings>({
     show_about: false,
     show_contact: false,
@@ -49,87 +49,38 @@ const ProfileSettings = () => {
     show_events: false,
     show_on_map: false
   });
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
   const { toast } = useToast();
 
   // Form states
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
+  const [displayName, setDisplayName] = useState(profile.display_name || '');
+  const [bio, setBio] = useState(profile.bio || '');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [geocoding, setGeocoding] = useState(false);
-  const [isAddressPublic, setIsAddressPublic] = useState(false);
+  const [address, setAddress] = useState(profile.address || '');
+  const [isAddressPublic, setIsAddressPublic] = useState(profile.is_address_public || false);
 
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-    getCurrentUser();
-  }, []);
+    const contactInfo = profile.contact_info as any;
+    setEmail(contactInfo?.email || '');
+    setPhone(contactInfo?.phone || '');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userId || !currentUser) return;
-      
-      // Check if user is accessing their own profile
-      if (currentUser.id !== userId) {
-        toast({
-          title: "Ingen tilgang",
-          description: "Du kan kun redigere din egen profil",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Fetch privacy settings
+    const fetchSettings = async () => {
+      const { data: settingsData } = await supabase
+        .from('profile_settings')
+        .select('*')
+        .eq('maker_id', profile.user_id)
+        .single();
 
-      try {
-        // Fetch profile data
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-
-        if (profileError) throw profileError;
-        
-        setProfile(profileData);
-        setDisplayName(profileData.display_name || '');
-        setBio(profileData.bio || '');
-        setAddress(profileData.address || '');
-        setIsAddressPublic(profileData.is_address_public || false);
-        
-        const contactInfo = profileData.contact_info as any;
-        setEmail(contactInfo?.email || '');
-        setPhone(contactInfo?.phone || '');
-
-        // Fetch privacy settings
-        const { data: settingsData } = await supabase
-          .from('profile_settings')
-          .select('*')
-          .eq('maker_id', userId)
-          .single();
-
-        if (settingsData) {
-          setSettings(settingsData);
-        }
-
-      } catch (error: any) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Feil",
-          description: "Kunne ikke laste profildata",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+      if (settingsData) {
+        setSettings(settingsData);
       }
     };
 
-    fetchData();
-  }, [userId, currentUser, toast]);
+    fetchSettings();
+  }, [profile]);
 
   const geocodeAddress = async (addressToGeocode: string) => {
     if (!addressToGeocode.trim()) return null;
@@ -156,20 +107,17 @@ const ProfileSettings = () => {
   };
 
   const handleSave = async () => {
-    if (!profile || !currentUser) return;
-
     setSaving(true);
     try {
       let coordinates = null;
       
-      // Use coordinates if already available from autocomplete, otherwise geocode
+      // Use coordinates if already available, otherwise geocode
       if (profile.latitude && profile.longitude && address === profile.address) {
         coordinates = {
           latitude: profile.latitude,
           longitude: profile.longitude
         };
       } else if (address.trim() && address !== profile.address) {
-        // Only geocode if address has changed and we don't have coordinates
         coordinates = await geocodeAddress(address);
       }
 
@@ -190,7 +138,6 @@ const ProfileSettings = () => {
         profileUpdate.latitude = coordinates.latitude;
         profileUpdate.longitude = coordinates.longitude;
       } else if (!address.trim()) {
-        // Clear coordinates if address is empty
         profileUpdate.latitude = null;
         profileUpdate.longitude = null;
       }
@@ -198,7 +145,7 @@ const ProfileSettings = () => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update(profileUpdate)
-        .eq('user_id', userId);
+        .eq('user_id', profile.user_id);
 
       if (profileError) throw profileError;
 
@@ -206,14 +153,14 @@ const ProfileSettings = () => {
       const { error: settingsError } = await supabase
         .from('profile_settings')
         .upsert({
-          maker_id: userId,
+          maker_id: profile.user_id,
           ...settings
         });
 
       if (settingsError) throw settingsError;
 
-      // Update local profile state
-      setProfile(prev => prev ? { ...prev, ...profileUpdate } : null);
+      // Update parent component
+      onProfileUpdate({ ...profile, ...profileUpdate });
 
       toast({
         title: "Lagret",
@@ -244,11 +191,11 @@ const ProfileSettings = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ avatar_url: file.publicUrl })
-        .eq('user_id', userId);
+        .eq('user_id', profile.user_id);
 
       if (error) throw error;
 
-      setProfile(prev => prev ? { ...prev, avatar_url: file.publicUrl } : null);
+      onProfileUpdate({ ...profile, avatar_url: file.publicUrl });
       
       toast({
         title: "Profilbilde oppdatert",
@@ -263,27 +210,8 @@ const ProfileSettings = () => {
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center p-8">Laster...</div>;
-  }
-
-  if (!profile || currentUser?.id !== userId) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="sm" asChild>
-          <Link to={`/profile/${userId}`}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake til profil
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold">Profilinnstillinger</h1>
-      </div>
-
+    <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Grunnleggende info */}
         <Card>
@@ -302,7 +230,7 @@ const ProfileSettings = () => {
                 </Avatar>
                 <FileUpload
                   bucketName="avatars"
-                  folderPath={userId}
+                  folderPath={profile.user_id}
                   onFileUploaded={handleAvatarUpload}
                   acceptedTypes=".jpg,.jpeg,.png,.gif"
                 />
@@ -352,15 +280,6 @@ const ProfileSettings = () => {
               value={address}
               onChange={(newAddress, coordinates) => {
                 setAddress(newAddress);
-                if (coordinates) {
-                  // Store coordinates for later use in handleSave
-                  setProfile(prev => prev ? {
-                    ...prev,
-                    latitude: coordinates.lat,
-                    longitude: coordinates.lng,
-                    address: newAddress
-                  } : prev);
-                }
               }}
               placeholder="Gate, postnummer, by..."
             />
@@ -442,28 +361,10 @@ const ProfileSettings = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Portefølje */}
-        <div className="lg:col-span-2">
-          <ProfilePortfolioManager
-            userId={userId!}
-            title="Portefølje"
-            description="Last opp bilder, video, lyd og dokumenter til din portefølje. Disse vises på din profil."
-          />
-        </div>
-
-        {/* Tech Spec */}
-        <div className="lg:col-span-2">
-          <TechSpecManager
-            userId={userId!}
-            title="Tech Spec"
-            description="Last opp tekniske spesifikasjoner som kan velges når du oppretter konsepter."
-          />
-        </div>
       </div>
 
       {/* Save button */}
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving || geocoding}>
           <Save className="h-4 w-4 mr-2" />
           {geocoding ? 'Finner koordinater...' : saving ? 'Lagrer...' : 'Lagre endringer'}
@@ -472,5 +373,3 @@ const ProfileSettings = () => {
     </div>
   );
 };
-
-export default ProfileSettings;

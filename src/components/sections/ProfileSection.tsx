@@ -9,6 +9,12 @@ interface UserProfile {
   display_name: string;
   bio: string | null;
   role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
+  contact_info: any;
 }
 
 interface ProfileSectionProps {
@@ -28,10 +34,10 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Offentlig profil
+              Vis som Maker
             </CardTitle>
             <CardDescription>
-              Slik ser andre makere din profil
+              Forhåndsvis profilen slik andre Makere ser den
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -54,7 +60,7 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
               <Button asChild className="w-full">
                 <Link to={`/profile/${profile.user_id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  Se full profil
+                  Vis som Maker
                 </Link>
               </Button>
             </div>
@@ -63,9 +69,9 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Forhåndsvisning som Goer</CardTitle>
+            <CardTitle>Vis som Goer</CardTitle>
             <CardDescription>
-              Slik ser Goere din profil når de søker etter tjenester
+              Forhåndsvis profilen slik Goere ser den
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -76,28 +82,7 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
               </p>
               <Button asChild variant="outline" className="w-full">
                 <Link to={`/profile/${profile.user_id}?view=goer`}>
-                  Forhåndsvis som Goer
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Synlighetsinnstillinger</CardTitle>
-            <CardDescription>
-              Kontroller hva som vises på din offentlige profil
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                Gå til profilinnstillinger for å kontrollere synlighet
-              </p>
-              <Button asChild>
-                <Link to={`/profile/${profile.user_id}/settings`}>
-                  Åpne innstillinger
+                  Vis som Goer
                 </Link>
               </Button>
             </div>

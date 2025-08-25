@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FileText, Lightbulb, Settings, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptCard from '@/components/ConceptCard';
 import ProfilePortfolioManager from '@/components/ProfilePortfolioManager';
 import TechSpecManager from '@/components/TechSpecManager';
 import HospitalityRiderManager from '@/components/HospitalityRiderManager';
+import { SettingsSection } from '@/components/sections/SettingsSection';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 
 interface UserProfile {
@@ -18,6 +18,12 @@ interface UserProfile {
   display_name: string;
   bio: string | null;
   role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
+  contact_info: any;
 }
 
 interface AdminSectionProps {
@@ -26,6 +32,7 @@ interface AdminSectionProps {
 
 export const AdminSection = ({ profile }: AdminSectionProps) => {
   const [showWizard, setShowWizard] = useState(false);
+  const [updatedProfile, setUpdatedProfile] = useState(profile);
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
   const isMobile = useIsMobile();
 
@@ -142,27 +149,10 @@ export const AdminSection = ({ profile }: AdminSectionProps) => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profilinnstillinger</CardTitle>
-              <CardDescription>
-                Kontroller synlighet, kontaktinformasjon og preferanser
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
-                  Administrer alle profilinnstillinger og synlighetsvalg
-                </p>
-                <Button asChild>
-                  <Link to={`/profile/${profile.user_id}/settings`}>
-                    Åpne innstillinger
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SettingsSection 
+            profile={updatedProfile} 
+            onProfileUpdate={setUpdatedProfile}
+          />
         </TabsContent>
       </Tabs>
 
