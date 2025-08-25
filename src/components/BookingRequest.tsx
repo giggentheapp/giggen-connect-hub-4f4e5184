@@ -128,44 +128,46 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
-                {concepts.map((concept) => (
-                  <Card 
-                    key={concept.id} 
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedConcepts.includes(concept.id) 
-                        ? "border-primary bg-primary/5" 
-                        : "hover:border-muted-foreground"
-                    )}
-                    onClick={() => toggleConceptSelection(concept.id)}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
-                        <Checkbox 
-                          checked={selectedConcepts.includes(concept.id)}
-                          onChange={() => toggleConceptSelection(concept.id)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium">{concept.title}</h4>
-                          {concept.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {concept.description}
-                            </p>
-                          )}
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            <Badge variant="outline">
-                              {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
-                            </Badge>
-                            {concept.status && (
-                              <Badge variant="secondary">{concept.status}</Badge>
+                {concepts && concepts.length > 0 && concepts.map((concept) => 
+                  concept && concept.id ? (
+                    <Card 
+                      key={concept.id} 
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        selectedConcepts.includes(concept.id) 
+                          ? "border-primary bg-primary/5" 
+                          : "hover:border-muted-foreground"
+                      )}
+                      onClick={() => toggleConceptSelection(concept.id)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <Checkbox 
+                            checked={selectedConcepts.includes(concept.id)}
+                            onChange={() => toggleConceptSelection(concept.id)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
+                            {concept.description && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {concept.description}
+                              </p>
                             )}
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              <Badge variant="outline">
+                                {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
+                              </Badge>
+                              {concept.status && (
+                                <Badge variant="secondary">{concept.status}</Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ) : null
+                )}
               </div>
             )}
           </div>

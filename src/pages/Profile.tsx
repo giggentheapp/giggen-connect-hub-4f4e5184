@@ -322,15 +322,17 @@ const Profile = () => {
                 <p className="text-muted-foreground">Laster portefølje...</p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {portfolioFiles.map((file) => (
-                    <div 
-                      key={file.id} 
-                      className="aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => window.open(`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`, '_blank')}
-                    >
-                      {renderFilePreview(file)}
-                    </div>
-                  ))}
+                  {portfolioFiles && portfolioFiles.length > 0 && portfolioFiles.map((file) => 
+                    file && file.id ? (
+                      <div 
+                        key={file.id} 
+                        className="aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-shadow cursor-pointer"
+                        onClick={() => window.open(`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`, '_blank')}
+                      >
+                        {renderFilePreview(file)}
+                      </div>
+                    ) : null
+                  )}
                 </div>
               )}
             </CardContent>
@@ -351,13 +353,15 @@ const Profile = () => {
                 <p className="text-muted-foreground">Laster konsepter...</p>
               ) : concepts.length > 0 ? (
                 <div className="space-y-4">
-                  {concepts.map((concept) => (
-                    <ConceptCard 
-                      key={concept.id}
-                      concept={concept}
-                      showActions={false}
-                    />
-                  ))}
+                  {concepts && concepts.length > 0 && concepts.map((concept) => 
+                    concept && concept.id ? (
+                      <ConceptCard 
+                        key={concept.id}
+                        concept={concept}
+                        showActions={false}
+                      />
+                    ) : null
+                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground">Ingen publiserte konsepter</p>
@@ -376,32 +380,34 @@ const Profile = () => {
             <CardContent>
               {events.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {events.map((event) => (
-                    <Card key={event.id}>
-                      <CardHeader>
-                        <CardTitle className="text-lg">{event.title}</CardTitle>
-                        {event.event_date && (
-                          <CardDescription>
-                            {new Date(event.event_date).toLocaleDateString('no-NO', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </CardDescription>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm">{event.description}</p>
-                        {event.location && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            📍 {event.location}
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {events && events.length > 0 && events.map((event) => 
+                    event && event.id ? (
+                      <Card key={event.id}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{event.title || 'Untitled Event'}</CardTitle>
+                          {event.event_date && (
+                            <CardDescription>
+                              {new Date(event.event_date).toLocaleDateString('no-NO', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm">{event.description || 'No description'}</p>
+                          {event.location && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              📍 {event.location}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ) : null
+                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground">Ingen kommende arrangementer</p>

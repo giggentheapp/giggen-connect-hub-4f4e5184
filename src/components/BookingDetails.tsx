@@ -302,35 +302,39 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                     <SelectValue placeholder="Velg konsept..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {concepts.map((concept) => (
-                      <SelectItem key={concept.id} value={concept.id}>
-                        {concept.title} - {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
-                      </SelectItem>
-                    ))}
+                    {concepts && concepts.length > 0 && concepts.map((concept) => 
+                      concept && concept.id ? (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          {concept.title || 'Untitled'} - {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
+                        </SelectItem>
+                      ) : null
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             ) : (
               <div className="space-y-3">
-                {concepts.map((concept) => (
-                  <div 
-                    key={concept.id}
-                    className={cn(
-                      "p-3 border rounded",
-                      concept.id === booking.selected_concept_id && "border-primary bg-primary/5"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">{concept.title}</h4>
-                      {concept.id === booking.selected_concept_id && (
-                        <Badge>Valgt konsept</Badge>
+                {concepts && concepts.length > 0 && concepts.map((concept) => 
+                  concept && concept.id ? (
+                    <div 
+                      key={concept.id}
+                      className={cn(
+                        "p-3 border rounded",
+                        concept.id === booking.selected_concept_id && "border-primary bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
+                        {concept.id === booking.selected_concept_id && (
+                          <Badge>Valgt konsept</Badge>
+                        )}
+                      </div>
+                      {concept.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
                       )}
                     </div>
-                    {concept.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
-                    )}
-                  </div>
-                ))}
+                  ) : null
+                )}
               </div>
             )}
           </CardContent>
