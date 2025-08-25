@@ -148,7 +148,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {files.map((file) => (
+      {Array.isArray(files) ? files.filter(file => file && file.id).map((file) => (
         <Card key={file.id}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between text-sm">
@@ -196,7 +196,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
             </div>
           </CardContent>
         </Card>
-      ))}
+      )) : <></>}
     </div>
   );
 };

@@ -182,9 +182,9 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              receivedBookings.map((booking) => (
+              Array.isArray(receivedBookings) ? receivedBookings.filter(booking => booking && booking.id).map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
-              ))
+              )) : <></>
             )}
           </>
         )}
@@ -199,9 +199,9 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              sentBookings.map((booking) => (
+              Array.isArray(sentBookings) ? sentBookings.filter(booking => booking && booking.id).map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
-              ))
+              )) : <></>
             )}
           </>
         )}
@@ -216,9 +216,9 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              confirmedBookings.map((booking) => (
+              Array.isArray(confirmedBookings) ? confirmedBookings.filter(booking => booking && booking.id).map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
-              ))
+              )) : <></>
             )}
           </>
         )}

@@ -169,7 +169,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           throw new Error('Authentication required to save files');
         }
 
-        const fileRecords = conceptData.portfolio_files.map(file => ({
+        const fileRecords = Array.isArray(conceptData.portfolio_files) 
+          ? conceptData.portfolio_files.filter(file => file && file.filename).map(file => ({
           creator_id: user.id,
           concept_id: conceptId,
           filename: file.filename,
@@ -180,7 +181,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           file_size: file.file_size,
           title: file.title || file.filename,
           is_public: true
-        }));
+        }))
+          : [];
 
         const { error: filesError } = await supabase
           .from('concept_files')
@@ -260,8 +262,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         <CardContent className="space-y-6 max-h-[calc(90vh-8rem)] overflow-y-auto">
           {/* Progress indicator */}
           <div className="flex justify-between items-center">
-            {STEPS.map((step, index) => (
-              <div key={step.id} className="flex items-center">
+            {Array.isArray(STEPS) ? STEPS.map((step, index) => (
+              <div key={step.id || `step-${index}`} className="flex items-center">
                 <div
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
@@ -279,7 +281,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   />
                 )}
               </div>
-            ))}
+            )) : <></>}
           </div>
 
           <Separator />
@@ -366,13 +368,13 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       <SelectItem value="none" disabled>
                         Ingen tech spec filer funnet
                       </SelectItem>
-                    ) : (
-                      availableTechSpecs.map((file) => (
-                        <SelectItem key={file.id} value={file.id}>
-                          {file.filename}
-                        </SelectItem>
-                      ))
-                    )}
+                     ) : (
+                       Array.isArray(availableTechSpecs) ? availableTechSpecs.filter(file => file && file.id).map((file) => (
+                         <SelectItem key={file.id} value={file.id}>
+                           {file.filename || 'Unnamed file'}
+                         </SelectItem>
+                       )) : <></>
+                     )}
                   </SelectContent>
                 </Select>
                 {availableTechSpecs.length === 0 && !techSpecsLoading && (
@@ -403,13 +405,13 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       <SelectItem value="none" disabled>
                         Ingen hospitality rider filer funnet
                       </SelectItem>
-                    ) : (
-                      availableHospitalityRiders.map((file) => (
-                        <SelectItem key={file.id} value={file.id}>
-                          {file.filename}
-                        </SelectItem>
-                      ))
-                    )}
+                     ) : (
+                       Array.isArray(availableHospitalityRiders) ? availableHospitalityRiders.filter(file => file && file.id).map((file) => (
+                         <SelectItem key={file.id} value={file.id}>
+                           {file.filename || 'Unnamed file'}
+                         </SelectItem>
+                       )) : <></>
+                     )}
                   </SelectContent>
                 </Select>
                 {availableHospitalityRiders.length === 0 && !hospitalityRidersLoading && (
@@ -454,8 +456,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 ) : (
                   <>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {conceptData.available_dates.map((date, index) => (
-                        <div key={index} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                      {Array.isArray(conceptData.available_dates) ? conceptData.available_dates.filter(date => date).map((date, index) => (
+                        <div key={date.toISOString() || `date-${index}`} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
                           {format(date, 'dd.MM.yyyy')}
                           <Button
                             variant="ghost"
@@ -469,7 +471,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                             <X className="h-3 w-3" />
                           </Button>
                         </div>
-                      ))}
+                      )) : <></>}
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -522,48 +524,48 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 {conceptData.portfolio_files.length > 0 && (
                   <div>
                     <strong>Portefølje filer:</strong>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                      {conceptData.portfolio_files.map((file, index) => (
-                        <div key={index} className="bg-muted/30 rounded-lg overflow-hidden">
-                          {/* Image Thumbnail */}
-                          {file.file_type?.startsWith('image/') && (
-                            <div className="aspect-video bg-muted overflow-hidden">
-                              <img 
-                                src={file.publicUrl} 
-                                alt={file.filename}
-                                className="w-full h-full object-cover"
-                              />
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                        {Array.isArray(conceptData.portfolio_files) ? conceptData.portfolio_files.filter(file => file && (file.tempId || file.id || file.filename)).map((file, index) => (
+                          <div key={file.tempId || file.id || file.filename || `file-${index}`} className="bg-muted/30 rounded-lg overflow-hidden">
+                            {/* Image Thumbnail */}
+                            {file.file_type?.startsWith('image/') && (
+                              <div className="aspect-video bg-muted overflow-hidden">
+                                <img 
+                                  src={file.publicUrl} 
+                                  alt={file.filename}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            
+                            {/* Video Thumbnail */}
+                            {file.file_type?.startsWith('video/') && (
+                              <div className="aspect-video bg-black flex items-center justify-center">
+                                <Video className="h-8 w-8 text-white" />
+                              </div>
+                            )}
+                            
+                            {/* Audio Icon */}
+                            {file.file_type?.startsWith('audio/') && (
+                              <div className="aspect-video bg-primary/10 flex items-center justify-center">
+                                <Music className="h-8 w-8 text-primary" />
+                              </div>
+                            )}
+                            
+                            {/* Document Icon */}
+                            {(file.file_type?.includes('pdf') || file.file_type?.includes('document') || file.file_type?.includes('text')) && (
+                              <div className="aspect-video bg-muted flex items-center justify-center">
+                                <FileText className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            
+                            <div className="p-2">
+                              <p className="text-xs font-medium truncate">{file.filename}</p>
+                              <p className="text-xs text-muted-foreground">{file.file_type?.split('/')[0] || 'fil'}</p>
                             </div>
-                          )}
-                          
-                          {/* Video Thumbnail */}
-                          {file.file_type?.startsWith('video/') && (
-                            <div className="aspect-video bg-black flex items-center justify-center">
-                              <Video className="h-8 w-8 text-white" />
-                            </div>
-                          )}
-                          
-                          {/* Audio Icon */}
-                          {file.file_type?.startsWith('audio/') && (
-                            <div className="aspect-video bg-primary/10 flex items-center justify-center">
-                              <Music className="h-8 w-8 text-primary" />
-                            </div>
-                          )}
-                          
-                          {/* Document Icon */}
-                          {(file.file_type?.includes('pdf') || file.file_type?.includes('document') || file.file_type?.includes('text')) && (
-                            <div className="aspect-video bg-muted flex items-center justify-center">
-                              <FileText className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          )}
-                          
-                          <div className="p-2">
-                            <p className="text-xs font-medium truncate">{file.filename}</p>
-                            <p className="text-xs text-muted-foreground">{file.file_type?.split('/')[0] || 'fil'}</p>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        )) : <></>}
+                      </div>
                   </div>
                 )}
 
@@ -579,11 +581,11 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                     </div>
                   ) : conceptData.available_dates.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {conceptData.available_dates.map((date, index) => (
-                        <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded text-sm">
+                      {Array.isArray(conceptData.available_dates) ? conceptData.available_dates.filter(date => date).map((date, index) => (
+                        <span key={date.toISOString() || `date-${index}`} className="bg-primary/10 text-primary px-2 py-1 rounded text-sm">
                           {format(date, 'dd.MM.yyyy')}
                         </span>
-                      ))}
+                      )) : <></>}
                     </div>
                   ) : (
                     <div className="mt-2">

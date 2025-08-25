@@ -61,14 +61,14 @@ export const AdminConceptsSection = ({ profile }: AdminConceptsSectionProps) => 
             </div>
           ) : (
             <div className="space-y-4">
-              {concepts.map((concept) => (
+              {Array.isArray(concepts) ? concepts.filter(concept => concept && concept.id).map((concept) => (
                 <ConceptCard 
                   key={concept.id}
                   concept={concept}
                   showActions={true}
                   onDelete={() => handleDeleteConcept(concept.id)}
                 />
-              ))}
+              )) : <></>}
               {concepts.length === 0 && (
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

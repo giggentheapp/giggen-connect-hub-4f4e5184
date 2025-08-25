@@ -137,7 +137,7 @@ export const GoerDashboard = ({ profile, onSignOut }: GoerDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {visibleMakers.slice(0, 6).map((maker) => (
+              {Array.isArray(visibleMakers) ? visibleMakers.slice(0, 6).filter(maker => maker && maker.id).map((maker) => (
                 <div key={maker.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     {maker.avatar_url ? (
@@ -162,7 +162,7 @@ export const GoerDashboard = ({ profile, onSignOut }: GoerDashboardProps) => {
                     <p className="text-sm text-muted-foreground">{maker.bio}</p>
                   )}
                 </div>
-              ))}
+              )) : <></>}
             </div>
             {visibleMakers.length > 6 && (
               <div className="text-center mt-4">

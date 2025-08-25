@@ -151,7 +151,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
           <div className="text-center py-4">Laster hospitality riders...</div>
         ) : (
           <div className="space-y-4">
-            {items.map((item) => (
+            {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
               <div key={item.id} className="border rounded-lg p-4">
                 {editingItem === item.id ? (
                   <div className="space-y-3">
@@ -208,7 +208,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                   </div>
                 )}
               </div>
-            ))}
+            )) : []}
             {items.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 Ingen hospitality rider filer ennå. Last opp dokumenter som beskriver hospitality krav.

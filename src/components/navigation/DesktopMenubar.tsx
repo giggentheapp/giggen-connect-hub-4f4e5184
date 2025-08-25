@@ -92,10 +92,10 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
 
         {/* Navigation */}
         <nav className="p-3 space-y-2">
-          {navItems.map((item) => {
+          {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id || activeSection.startsWith(`${item.id}-`);
-            const hasSubItems = item.subItems.length > 0;
+            const hasSubItems = Array.isArray(item.subItems) && item.subItems.length > 0;
             const isSubmenuExpanded = expandedSubmenu === item.id;
             
             return (
@@ -127,20 +127,20 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
                 {/* Sub-menu items */}
                 {hasSubItems && isExpanded && isSubmenuExpanded && (
                   <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
-                    {item.subItems.map((subItem) => (
+                    {Array.isArray(item.subItems) ? item.subItems.filter(subItem => subItem && subItem.id).map((subItem) => (
                       <button
                         key={subItem.id}
                         onClick={() => handleSubItemClick(subItem)}
                         className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
                       >
-                        {subItem.label}
+                        {subItem.label || 'Unnamed'}
                       </button>
-                    ))}
+                    )) : <></>}
                   </div>
                 )}
               </div>
             );
-          })}
+          }) : []}
         </nav>
       </div>
     </div>

@@ -21,7 +21,7 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
       
       <nav className="flex-1 px-3">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
             
@@ -41,7 +41,7 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
                 </button>
               </li>
             );
-          })}
+          }) : []}
         </ul>
       </nav>
     </aside>

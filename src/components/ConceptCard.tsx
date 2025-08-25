@@ -188,13 +188,13 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                 <Badge variant="outline">
                   Ubestemt / Ved avtale
                 </Badge>
-              ) : (
-                availableDates.map((date: string, index: number) => (
-                  <Badge key={index} variant="outline">
-                    {format(new Date(date), 'dd.MM.yyyy')}
-                  </Badge>
-                ))
-              )}
+               ) : (
+                Array.isArray(availableDates) ? availableDates.filter(date => date).map((date: string, index: number) => (
+                   <Badge key={date || `date-${index}`} variant="outline">
+                     {format(new Date(date), 'dd.MM.yyyy')}
+                   </Badge>
+                 )) : <></>
+               )}
             </div>
           </div>
         )}
@@ -204,7 +204,7 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
           <div>
             <h4 className="font-medium mb-4">Konsept portefølje</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {conceptFiles.map((file) => (
+              {Array.isArray(conceptFiles) ? conceptFiles.filter(file => file && file.id).map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
                   
                   {/* Video Display */}
@@ -305,7 +305,7 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
                     </p>
                   </div>
                 </div>
-              ))}
+              )) : <></>}
             </div>
           </div>
         )}

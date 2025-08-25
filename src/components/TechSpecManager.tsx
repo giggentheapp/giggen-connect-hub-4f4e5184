@@ -151,7 +151,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
           <div className="text-center py-4">Laster tech specs...</div>
         ) : (
           <div className="space-y-4">
-            {items.map((item) => (
+            {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
               <div key={item.id} className="border rounded-lg p-4">
                 {editingItem === item.id ? (
                   <div className="space-y-3">
@@ -208,7 +208,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                   </div>
                 )}
               </div>
-            ))}
+            )) : []}
             {items.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 Ingen tech spec filer ennå. Last opp dokumenter som beskriver tekniske krav.

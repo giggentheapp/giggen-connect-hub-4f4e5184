@@ -167,17 +167,17 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         </div>
 
         {/* Suggestions dropdown */}
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && Array.isArray(suggestions) && suggestions.length > 0 && (
           <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {suggestions.map((suggestion, index) => (
+            {suggestions.filter(suggestion => suggestion && suggestion.place_name).map((suggestion, index) => (
               <button
-                key={index}
+                key={suggestion.place_name || `suggestion-${index}`}
                 onClick={() => handleSuggestionClick(suggestion)}
                 className="w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors border-b border-border last:border-b-0 text-sm"
               >
                 <div className="flex items-center gap-2">
                   <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="truncate">{suggestion.place_name}</span>
+                  <span className="truncate">{suggestion.place_name || 'Unknown address'}</span>
                 </div>
               </button>
             ))}

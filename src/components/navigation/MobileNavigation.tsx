@@ -17,7 +17,7 @@ export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavig
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden">
       <div className="flex items-center justify-around h-16 px-2">
-        {navItems.map((item) => {
+        {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
           
@@ -36,7 +36,7 @@ export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavig
               <span className="text-xs font-medium truncate">{item.label}</span>
             </button>
           );
-        })}
+        }) : []}
       </div>
     </nav>
   );
