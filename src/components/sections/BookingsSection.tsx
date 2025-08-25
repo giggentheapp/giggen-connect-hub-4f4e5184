@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
+import { BookingConfirmation } from '@/components/BookingConfirmation';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, DollarSign, Send, Inbox, Clock } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -28,7 +29,9 @@ interface BookingsSectionProps {
 }
 
 export const BookingsSection = ({ profile }: BookingsSectionProps) => {
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed'>('received');
   
   const { bookings, loading } = useBookings(profile.user_id);
@@ -40,32 +43,46 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'negotiating': return 'bg-yellow-100 text-yellow-800';
-      case 'confirming': return 'bg-blue-100 text-blue-800';
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'confirmed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'draft': return 'Utkast';
-      case 'negotiating': return 'Under forhandling';
-      case 'confirming': return 'Venter på bekreftelse';
+      case 'sent': return 'Sendt';
       case 'confirmed': return 'Bekreftet';
       case 'published': return 'Publisert';
-      case 'cancelled': return 'Avbrutt';
+      case 'cancelled': return 'Avlyst';
       default: return status;
     }
+  };
+
+  const getPhaseText = (booking: any) => {
+    if (booking.status === 'sent' || booking.status === 'draft') {
+      return 'Fase 2: Forhandling';
+    } else if (booking.status === 'confirmed') {
+      return 'Fase 3: Bekreftelse';
+    } else if (booking.status === 'published') {
+      return 'Ferdig: Publisert';
+    }
+    return 'Ukjent fase';
   };
 
   const BookingCard = ({ booking }: { booking: any }) => (
     <Card 
       className="cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => setSelectedBookingId(booking.id)}
+      onClick={() => {
+        setSelectedBooking(booking);
+        if (booking.status === 'confirmed') {
+          setConfirmationOpen(true);
+        } else {
+          setDetailsOpen(true);
+        }
+      }}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -77,9 +94,14 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               )}
             </CardDescription>
           </div>
-          <Badge className={getStatusColor(booking.status)}>
-            {getStatusText(booking.status)}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={getStatusColor(booking.status)}>
+              {getStatusText(booking.status)}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {getPhaseText(booking)}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
@@ -109,11 +131,29 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-            <span>Opprettet: {format(new Date(booking.created_at), 'dd.MM.yyyy')}</span>
-            {booking.updated_at !== booking.created_at && (
-              <span>Oppdatert: {format(new Date(booking.updated_at), 'dd.MM.yyyy')}</span>
-            )}
+          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+            <div className="flex items-center gap-4">
+              <span>Opprettet: {format(new Date(booking.created_at), 'dd.MM.yyyy')}</span>
+              {booking.updated_at !== booking.created_at && (
+                <span>Oppdatert: {format(new Date(booking.updated_at), 'dd.MM.yyyy')}</span>
+              )}
+            </div>
+            <Button 
+              size="sm" 
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedBooking(booking);
+                if (booking.status === 'confirmed') {
+                  setConfirmationOpen(true);
+                } else {
+                  setDetailsOpen(true);
+                }
+              }}
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              {booking.status === 'confirmed' ? 'Bekreft avtale' : 'Se detaljer'}
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -225,19 +265,28 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       </div>
 
       {/* Booking Details Dialog */}
-      <Dialog open={!!selectedBookingId} onOpenChange={() => setSelectedBookingId(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Booking-detaljer</DialogTitle>
-          </DialogHeader>
-          {selectedBookingId && (
-            <BookingDetails 
-              bookingId={selectedBookingId} 
-              onClose={() => setSelectedBookingId(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedBooking && (
+        <>
+          <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Booking detaljer</DialogTitle>
+              </DialogHeader>
+              <BookingDetails 
+                bookingId={selectedBooking.id} 
+                onClose={() => setDetailsOpen(false)} 
+              />
+            </DialogContent>
+          </Dialog>
+
+          <BookingConfirmation
+            booking={selectedBooking}
+            isOpen={confirmationOpen}
+            onClose={() => setConfirmationOpen(false)}
+            currentUserId={profile.user_id}
+          />
+        </>
+      )}
     </div>
   );
 };

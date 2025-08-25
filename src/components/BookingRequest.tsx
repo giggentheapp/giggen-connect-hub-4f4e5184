@@ -14,7 +14,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, Send, Lightbulb } from 'lucide-react';
+import { CalendarIcon, Send, Lightbulb, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BookingRequestProps {
@@ -25,13 +25,10 @@ interface BookingRequestProps {
 
 export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingRequestProps) => {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priceMusician, setPriceMusician] = useState('');
-  const [priceTicket, setPriceTicket] = useState('');
+  const [selectedConcept, setSelectedConcept] = useState<any>(null);
+  const [personalMessage, setPersonalMessage] = useState('');
   const [eventDate, setEventDate] = useState<Date>();
   const [venue, setVenue] = useState('');
-  const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const { createBooking } = useBookings();
@@ -62,10 +59,10 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || selectedConcepts.length === 0) {
+    if (!personalMessage.trim() || !selectedConcept) {
       toast({
         title: "Manglende informasjon",
-        description: "Tittel og minst ett konsept må velges",
+        description: "Personlig melding og konseptvalg er påkrevd",
         variant: "destructive",
       });
       return;
@@ -76,25 +73,28 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     try {
       await createBooking({
         receiver_id: receiverId,
-        concept_ids: selectedConcepts,
-        title,
-        description,
-        price_musician: priceMusician || null,
-        price_ticket: priceTicket || null,
+        concept_ids: [selectedConcept.id],
+        selected_concept_id: selectedConcept.id,
+        title: selectedConcept.title,
+        description: `${selectedConcept.description || ''}\n\nPersonlig melding fra avsender:\n${personalMessage}`,
+        price_musician: selectedConcept.price?.toString() || null,
+        price_ticket: null,
         event_date: eventDate?.toISOString() || null,
         venue: venue || null,
-        status: 'draft'
+        status: 'sent'
       });
 
       // Reset form
-      setTitle('');
-      setDescription('');
-      setPriceMusician('');
-      setPriceTicket('');
+      setSelectedConcept(null);
+      setPersonalMessage('');
       setEventDate(undefined);
       setVenue('');
-      setSelectedConcepts([]);
       setOpen(false);
+      
+      toast({
+        title: "Forespørsel sendt",
+        description: "Bookingforespørselen er sendt til mottakeren",
+      });
       
       onSuccess?.();
     } catch (error) {
@@ -104,12 +104,19 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     }
   };
 
-  const toggleConceptSelection = (conceptId: string) => {
-    setSelectedConcepts(prev => 
-      prev.includes(conceptId) 
-        ? prev.filter(id => id !== conceptId)
-        : [...prev, conceptId]
-    );
+  const selectConcept = (concept: any) => {
+    setSelectedConcept(concept);
+    // Auto-populate some fields
+    if (concept.available_dates) {
+      // Try to set a default date if available
+      const availableDates = concept.available_dates;
+      if (Array.isArray(availableDates) && availableDates.length > 0) {
+        const firstDate = new Date(availableDates[0]);
+        if (!isNaN(firstDate.getTime())) {
+          setEventDate(firstDate);
+        }
+      }
+    }
   };
 
   return (
@@ -126,37 +133,37 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Concept Selection */}
+          {/* Phase 1: Concept Selection */}
           <div className="space-y-3">
             <Label className="text-base font-medium flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
-              Velg konsepter (minimum 1)
+              Velg konsept (1 konsept)
             </Label>
             {concepts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Du må først opprette konsepter før du kan sende forespørsler.
               </p>
             ) : (
-                <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+              <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
                 {concepts.filter(concept => concept && concept.id).map((concept) => (
                   <Card 
                     key={concept.id} 
                     className={cn(
                       "cursor-pointer transition-colors",
-                      selectedConcepts.includes(concept.id) 
+                      selectedConcept?.id === concept.id 
                         ? "border-primary bg-primary/5" 
                         : "hover:border-muted-foreground"
                     )}
-                    onClick={() => toggleConceptSelection(concept.id)}
+                    onClick={() => selectConcept(concept)}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
-                        <Checkbox 
-                          checked={selectedConcepts.includes(concept.id)}
-                          onCheckedChange={(checked) => toggleConceptSelection(concept.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="mt-1"
-                        />
+                        <div className={cn(
+                          "mt-1 h-4 w-4 rounded border-2",
+                          selectedConcept?.id === concept.id 
+                            ? "border-primary bg-primary" 
+                            : "border-muted-foreground"
+                        )} />
                         <div className="flex-1">
                           <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
                           {concept.description && (
@@ -168,8 +175,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                             <Badge variant="outline">
                               {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
                             </Badge>
-                            {concept.status && (
-                              <Badge variant="secondary">{concept.status}</Badge>
+                            {concept.expected_audience && (
+                              <Badge variant="secondary">{concept.expected_audience} publikummere</Badge>
                             )}
                           </div>
                         </div>
@@ -177,108 +184,130 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                     </CardContent>
                   </Card>
                 ))}
-                </div>
+              </div>
             )}
           </div>
 
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Tittel på arrangement</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="F.eks. Konsert på Rockefeller"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description">Beskrivelse</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Beskriv arrangementet..."
-                rows={3}
-              />
-            </div>
-          </div>
-
-          {/* Event Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label>Dato</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !eventDate && "text-muted-foreground"
+          {selectedConcept && (
+            <>
+              {/* Pre-filled concept info (non-editable) */}
+              <Card className="bg-muted/30">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    Konseptinformasjon (fra valgt konsept)
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Denne informasjonen fylles automatisk ut basert på ditt valgte konsept
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Tittel</Label>
+                    <p className="font-medium">{selectedConcept.title}</p>
+                  </div>
+                  {selectedConcept.description && (
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Beskrivelse</Label>
+                      <p>{selectedConcept.description}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Pris for musiker</Label>
+                      <p>{selectedConcept.price ? `${selectedConcept.price} kr` : 'Ikke satt'}</p>
+                    </div>
+                    {selectedConcept.expected_audience && (
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Forventet publikum</Label>
+                        <p>{selectedConcept.expected_audience} personer</p>
+                      </div>
                     )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {eventDate ? format(eventDate, "dd.MM.yyyy") : "Velg dato"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={eventDate}
-                    onSelect={setEventDate}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
+                  </div>
+                  {selectedConcept.tech_spec && (
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Tech spec</Label>
+                      <p className="text-sm bg-background p-2 rounded border">{selectedConcept.tech_spec}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Editable arrangement details */}
+              <Card className="bg-blue-50/50 dark:bg-blue-950/20">
+                <CardHeader>
+                  <CardTitle className="text-lg">Arrangementsdetaljer (kan justeres)</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Disse detaljene kan justeres i forhandlingsfasen
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Dato</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !eventDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {eventDate ? format(eventDate, "dd.MM.yyyy") : "Velg dato"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={eventDate}
+                            onSelect={setEventDate}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="venue">Spillested</Label>
+                      <Input
+                        id="venue"
+                        value={venue}
+                        onChange={(e) => setVenue(e.target.value)}
+                        placeholder="F.eks. Rockefeller Music Hall"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personal message (required) */}
+              <Card className="bg-green-50/50 dark:bg-green-950/20">
+                <CardHeader>
+                  <CardTitle className="text-lg">Personlig melding *</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Skriv en personlig melding til mottakeren (påkrevd)
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    value={personalMessage}
+                    onChange={(e) => setPersonalMessage(e.target.value)}
+                    placeholder="Hei! Jeg vil gjerne booke deg for en konsert. Her er mer informasjon om arrangementet..."
+                    rows={4}
+                    required
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div>
-              <Label htmlFor="venue">Spillested</Label>
-              <Input
-                id="venue"
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-                placeholder="F.eks. Rockefeller Music Hall"
-              />
-            </div>
-          </div>
-
-          {/* Pricing */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="priceMusician">Pris for musiker</Label>
-              <Input
-                id="priceMusician"
-                value={priceMusician}
-                onChange={(e) => setPriceMusician(e.target.value)}
-                placeholder="1500 eller 'spiller for døra'"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Skriv fast beløp (f.eks. 1500) eller "spiller for døra"
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="priceTicket">Billettpris</Label>
-              <Input
-                id="priceTicket"
-                value={priceTicket}
-                onChange={(e) => setPriceTicket(e.target.value)}
-                placeholder="200 eller 'gratis'"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Skriv fast beløp (f.eks. 200) eller "gratis"
-              </p>
-            </div>
-          </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={submitting || concepts.length === 0}>
-              {submitting ? 'Sender...' : 'Send forespørsel'}
+            <Button type="submit" disabled={submitting || !selectedConcept || concepts.length === 0}>
+              {submitting ? 'Sender forespørsel...' : 'Send forespørsel'}
             </Button>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Avbryt

@@ -262,7 +262,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status !== 'published' && booking.status !== 'confirmed';
+  const canEdit = booking.status === 'sent' || booking.status === 'draft';
+  const isNegotiationPhase = booking.status === 'sent' || booking.status === 'draft';
+  const isConfirmationPhase = booking.status === 'confirmed';
 
   return (
     <div className="space-y-6">
