@@ -23,6 +23,11 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
     { id: 'admin', label: 'Administrasjon', icon: Settings, hasDropdown: true },
   ];
 
+  const handleMainClick = (itemId: string) => {
+    // Always navigate to the main section when clicking the main menu item
+    onSectionChange(itemId);
+  };
+
   return (
     <div 
       className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
@@ -52,60 +57,68 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
         <nav className="p-3 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeSection === item.id;
+            const isActive = activeSection === item.id || activeSection.startsWith(`${item.id}-`);
             
             if (item.hasDropdown && isExpanded) {
               return (
-                <DropdownMenu key={item.id}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
-                        isActive
-                          ? 'bg-accent text-accent-foreground font-medium'
-                          : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
-                      )}
+                <div key={item.id} className="relative">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        onClick={() => handleMainClick(item.id)}
+                        className={cn(
+                          'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
+                          isActive
+                            ? 'bg-accent text-accent-foreground font-medium'
+                            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                        )}
+                      >
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        <span className="opacity-0 animate-fade-in">{item.label}</span>
+                        <ChevronDown className="h-4 w-4 ml-auto opacity-0 animate-fade-in" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      align="start" 
+                      side="right" 
+                      className="z-[60] bg-popover/95 backdrop-blur-sm border shadow-lg"
+                      sideOffset={8}
                     >
-                      <Icon className="h-5 w-5 flex-shrink-0" />
-                      <span className="opacity-0 animate-fade-in">{item.label}</span>
-                      <ChevronDown className="h-4 w-4 ml-auto opacity-0 animate-fade-in" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="right">
-                    {item.id === 'profile' && (
-                      <>
-                        <DropdownMenuItem onClick={() => onSectionChange('profile')}>
-                          Vis som Maker
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/profile/goer-view">
-                            Vis som Goer
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {item.id === 'admin' && (
-                      <>
-                        <DropdownMenuItem onClick={() => onSectionChange('admin-files')}>
-                          Filer
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onSectionChange('admin-concepts')}>
-                          Konsepter
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onSectionChange('admin-settings')}>
-                          Innstillinger
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      {item.id === 'profile' && (
+                        <>
+                          <DropdownMenuItem onClick={() => onSectionChange('profile')}>
+                            Vis som Maker
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to="/profile/goer-view">
+                              Vis som Goer
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {item.id === 'admin' && (
+                        <>
+                          <DropdownMenuItem onClick={() => onSectionChange('admin-files')}>
+                            Filer
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onSectionChange('admin-concepts')}>
+                            Konsepter
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onSectionChange('admin-settings')}>
+                            Innstillinger
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               );
             }
             
             return (
               <button
                 key={item.id}
-                onClick={() => onSectionChange(item.id)}
+                onClick={() => handleMainClick(item.id)}
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
                   isActive
