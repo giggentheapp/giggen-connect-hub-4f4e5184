@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, ChevronDown } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { Compass, User, Settings, ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DesktopMenubarProps {
@@ -16,27 +10,64 @@ interface DesktopMenubarProps {
 
 export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenubarProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+
+  const handleNavigation = (section: string) => {
+    onSectionChange(section);
+    setIsExpanded(false);
+    setExpandedSubmenu(null);
+  };
 
   const navItems = [
-    { id: 'explore', label: 'Utforsk', icon: Compass },
-    { id: 'profile', label: 'Profil', icon: User, hasDropdown: true },
-    { id: 'admin', label: 'Administrasjon', icon: Settings, hasDropdown: true },
+    { 
+      id: 'explore', 
+      label: 'Utforsk', 
+      icon: Compass,
+      subItems: []
+    },
+    { 
+      id: 'profile', 
+      label: 'Profil', 
+      icon: User,
+      subItems: [
+        { id: 'profile', label: 'Maker-visning', action: () => handleNavigation('profile') },
+        { id: 'profile-goer', label: 'Goer-visning', link: '/profile/goer-view' }
+      ]
+    },
+    { 
+      id: 'admin', 
+      label: 'Administrasjon', 
+      icon: Settings,
+      subItems: [
+        { id: 'admin-files', label: 'Filer', action: () => handleNavigation('admin-files') },
+        { id: 'admin-concepts', label: 'Konsepter', action: () => handleNavigation('admin-concepts') },
+        { id: 'admin-settings', label: 'Innstillinger', action: () => handleNavigation('admin-settings') }
+      ]
+    },
   ];
 
   const handleMainClick = (itemId: string) => {
-    // Always navigate to the main section when clicking the main menu item
-    onSectionChange(itemId);
+    if (navItems.find(item => item.id === itemId)?.subItems.length > 0) {
+      setExpandedSubmenu(expandedSubmenu === itemId ? null : itemId);
+    } else {
+      handleNavigation(itemId);
+    }
+  };
+
+  const handleSubItemClick = (subItem: any) => {
+    if (subItem.action) {
+      subItem.action();
+    }
   };
 
   return (
     <div 
-      className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out pointer-events-auto"
+      className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      {/* Logo-only state */}
       <div className={cn(
-        "h-full bg-card border-r border-border shadow-lg transition-all duration-300 pointer-events-auto",
+        "h-full bg-card border-r border-border shadow-lg transition-all duration-300 overflow-y-auto",
         isExpanded ? "w-64" : "w-16"
       )}>
         {/* Logo */}
@@ -58,100 +89,64 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id || activeSection.startsWith(`${item.id}-`);
-            
-            if (item.hasDropdown && isExpanded) {
-              return (
-                <div key={item.id} className="relative">
-                  {/* Main clickable area */}
-                  <button
-                    onClick={() => handleMainClick(item.id)}
-                    className={cn(
-                      'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left pointer-events-auto',
-                      isActive
-                        ? 'bg-accent text-accent-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
-                    )}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="opacity-0 animate-fade-in flex-1">{item.label}</span>
-                  </button>
-                  
-                  {/* Separate dropdown trigger */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent/50 pointer-events-auto"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ChevronDown className="h-4 w-4 opacity-0 animate-fade-in" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      align="start" 
-                      side="right" 
-                      className="z-[70] bg-popover border shadow-lg pointer-events-auto"
-                      sideOffset={12}
-                      avoidCollisions={true}
-                    >
-                      {item.id === 'profile' && (
-                        <>
-                          <DropdownMenuItem 
-                            onClick={() => onSectionChange('profile')}
-                            className="pointer-events-auto cursor-pointer"
-                          >
-                            Vis som Maker
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link to="/profile/goer-view" className="pointer-events-auto cursor-pointer">
-                              Vis som Goer
-                            </Link>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      {item.id === 'admin' && (
-                        <>
-                          <DropdownMenuItem 
-                            onClick={() => onSectionChange('admin-files')}
-                            className="pointer-events-auto cursor-pointer"
-                          >
-                            Filer
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => onSectionChange('admin-concepts')}
-                            className="pointer-events-auto cursor-pointer"
-                          >
-                            Konsepter
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => onSectionChange('admin-settings')}
-                            className="pointer-events-auto cursor-pointer"
-                          >
-                            Innstillinger
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              );
-            }
+            const hasSubItems = item.subItems.length > 0;
+            const isSubmenuExpanded = expandedSubmenu === item.id;
             
             return (
-              <button
-                key={item.id}
-                onClick={() => handleMainClick(item.id)}
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors pointer-events-auto',
-                  isActive
-                    ? 'bg-accent text-accent-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+              <div key={item.id}>
+                {/* Main menu item */}
+                <button
+                  onClick={() => handleMainClick(item.id)}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
+                    isActive
+                      ? 'bg-accent text-accent-foreground font-medium'
+                      : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                  )}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {isExpanded && (
+                    <>
+                      <span className="opacity-0 animate-fade-in flex-1">{item.label}</span>
+                      {hasSubItems && (
+                        <ChevronDown className={cn(
+                          "h-4 w-4 opacity-0 animate-fade-in transition-transform",
+                          isSubmenuExpanded && "rotate-180"
+                        )} />
+                      )}
+                    </>
+                  )}
+                </button>
+
+                {/* Sub-menu items */}
+                {hasSubItems && isExpanded && isSubmenuExpanded && (
+                  <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
+                    {item.subItems.map((subItem) => (
+                      <div key={subItem.id}>
+                        {subItem.link ? (
+                          <Link
+                            to={subItem.link}
+                            className="block px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                            onClick={() => {
+                              setIsExpanded(false);
+                              setExpandedSubmenu(null);
+                            }}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => handleSubItemClick(subItem)}
+                            className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                          >
+                            {subItem.label}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {isExpanded && (
-                  <span className="opacity-0 animate-fade-in">{item.label}</span>
-                )}
-              </button>
+              </div>
             );
           })}
         </nav>
