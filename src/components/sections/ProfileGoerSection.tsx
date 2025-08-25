@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Eye } from 'lucide-react';
+import { User, Eye, MapPin, Mail, Phone } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -16,16 +16,16 @@ interface UserProfile {
   contact_info: any;
 }
 
-interface ProfileSectionProps {
+interface ProfileGoerSectionProps {
   profile: UserProfile;
 }
 
-export const ProfileSection = ({ profile }: ProfileSectionProps) => {
+export const ProfileGoerSection = ({ profile }: ProfileGoerSectionProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Min Profil - Maker-visning</h1>
-        <p className="text-muted-foreground">Slik ser andre Makere din profil</p>
+        <h1 className="text-2xl font-bold">Profil - Goer-visning</h1>
+        <p className="text-muted-foreground">Slik ser Goere din profil</p>
       </div>
 
       <Card className="max-w-2xl mx-auto">
@@ -45,7 +45,7 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
           <CardDescription className="text-lg capitalize">{profile.role}</CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           {profile.bio && (
             <div>
               <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -56,19 +56,39 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
             </div>
           )}
 
-          <div className="space-y-2">
-            <h3 className="font-semibold">Profilinformasjon</h3>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>Rolle: {profile.role}</p>
-              {profile.address && profile.is_address_public && (
-                <p>Lokasjon: {profile.address}</p>
-              )}
+          {profile.is_address_public && profile.address && (
+            <div>
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Lokasjon
+              </h3>
+              <p className="text-muted-foreground">{profile.address}</p>
             </div>
-          </div>
+          )}
+
+          {profile.contact_info && (
+            <div>
+              <h3 className="font-semibold mb-2">Kontaktinformasjon</h3>
+              <div className="space-y-2">
+                {profile.contact_info.email && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{profile.contact_info.email}</span>
+                  </div>
+                )}
+                {profile.contact_info.phone && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    <span>{profile.contact_info.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Dette er hvordan andre Makere ser din profil. Bruk venstre meny for å se Goer-visningen.
+              Dette er hvordan Goere ser din profil. Kun offentlig informasjon vises.
             </p>
           </div>
         </CardContent>

@@ -4,6 +4,7 @@ import { MobileNavigation } from '@/components/navigation/MobileNavigation';
 import { DesktopMenubar } from '@/components/navigation/DesktopMenubar';
 import { ExploreSection } from '@/components/sections/ExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
+import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { AdminSection } from '@/components/sections/AdminSection';
 import { Button } from '@/components/ui/button';
 
@@ -37,7 +38,10 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
       case 'explore':
         return <ExploreSection />;
       case 'profile':
+      case 'profile-maker':
         return <ProfileSection profile={profile} />;
+      case 'profile-goer':
+        return <ProfileGoerSection profile={profile} />;
       case 'admin':
       case 'admin-files':
       case 'admin-concepts':  

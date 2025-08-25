@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, ChevronDown, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Compass, User, Settings, ChevronDown } from 'lucide-react';
 
 interface DesktopMenubarProps {
   activeSection: string;
@@ -13,6 +12,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
 
   const handleNavigation = (section: string) => {
+    console.log('Navigating to section:', section);
     onSectionChange(section);
     setIsExpanded(false);
     setExpandedSubmenu(null);
@@ -30,8 +30,8 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
       label: 'Profil', 
       icon: User,
       subItems: [
-        { id: 'profile', label: 'Maker-visning', action: () => handleNavigation('profile') },
-        { id: 'profile-goer', label: 'Goer-visning', link: '/profile/goer-view' }
+        { id: 'profile-maker', label: 'Maker-visning', action: () => handleNavigation('profile-maker') },
+        { id: 'profile-goer', label: 'Goer-visning', action: () => handleNavigation('profile-goer') }
       ]
     },
     { 
@@ -47,7 +47,8 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
   ];
 
   const handleMainClick = (itemId: string) => {
-    if (navItems.find(item => item.id === itemId)?.subItems.length > 0) {
+    const item = navItems.find(item => item.id === itemId);
+    if (item?.subItems.length > 0) {
       setExpandedSubmenu(expandedSubmenu === itemId ? null : itemId);
     } else {
       handleNavigation(itemId);
@@ -122,27 +123,13 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
                 {hasSubItems && isExpanded && isSubmenuExpanded && (
                   <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
                     {item.subItems.map((subItem) => (
-                      <div key={subItem.id}>
-                        {subItem.link ? (
-                          <Link
-                            to={subItem.link}
-                            className="block px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                            onClick={() => {
-                              setIsExpanded(false);
-                              setExpandedSubmenu(null);
-                            }}
-                          >
-                            {subItem.label}
-                          </Link>
-                        ) : (
-                          <button
-                            onClick={() => handleSubItemClick(subItem)}
-                            className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                          >
-                            {subItem.label}
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        key={subItem.id}
+                        onClick={() => handleSubItemClick(subItem)}
+                        className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-accent-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                      >
+                        {subItem.label}
+                      </button>
                     ))}
                   </div>
                 )}
