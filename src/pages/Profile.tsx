@@ -42,7 +42,8 @@ const Profile = () => {
   const { concepts, loading: conceptsLoading } = useUserConcepts(userId);
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
 
-  const isOwnProfile = useMemo(() => currentUser?.id === userId, [currentUser?.id, userId]);
+  const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
+  const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -118,9 +119,9 @@ const Profile = () => {
   useEffect(() => {
     // Fetch events based on current user and visibility settings
     const fetchEvents = async () => {
-      if (!userId || !currentUser) return;
+      if (!userId || !currentUserId) return;
 
-      const isOwnProfile = currentUser.id === userId;
+      const isOwnProfile = currentUserId === userId;
 
       try {
         let query = supabase
@@ -142,13 +143,13 @@ const Profile = () => {
       }
     };
 
-    const isOwnProfile = currentUser?.id === userId;
+    const isOwnProfile = currentUserId === userId;
     if (settings?.show_events || isOwnProfile) {
       fetchEvents();
     } else {
       setEvents([]);
     }
-  }, [userId, currentUser, settings?.show_events]);
+  }, [userId, currentUserId, settings?.show_events]);
 
   const renderFilePreview = useCallback((file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;
