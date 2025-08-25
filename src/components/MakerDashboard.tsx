@@ -5,7 +5,9 @@ import { DesktopMenubar } from '@/components/navigation/DesktopMenubar';
 import { ExploreSection } from '@/components/sections/ExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
-import { AdminSection } from '@/components/sections/AdminSection';
+import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
+import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
+import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { Button } from '@/components/ui/button';
 
 interface UserProfile {
@@ -42,11 +44,12 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
         return <ProfileSection profile={profile} />;
       case 'profile-goer':
         return <ProfileGoerSection profile={profile} />;
-      case 'admin':
       case 'admin-files':
-      case 'admin-concepts':  
+        return <AdminFilesSection profile={profile} />;
+      case 'admin-concepts':
+        return <AdminConceptsSection profile={profile} />;
       case 'admin-settings':
-        return <AdminSection profile={profile} initialTab={activeSection.replace('admin-', '') || 'files'} />;
+        return <AdminSettingsSection profile={profile} />;
       default:
         return <ExploreSection />;
     }
