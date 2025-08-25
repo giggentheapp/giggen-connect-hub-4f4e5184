@@ -73,11 +73,21 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
       {/* Header with Sign Out */}
       <header className="border-b bg-card/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <div>
-            <h1 className="text-2xl font-bold">GIGGEN</h1>
-            <p className="text-sm text-muted-foreground">
-              Velkommen, {profile.display_name}
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">GIGGEN</h1>
+              <p className="text-sm text-muted-foreground">
+                Velkommen, {profile.display_name}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/events" 
+                className="text-sm text-primary hover:underline"
+              >
+                Se alle arrangementer
+              </Link>
+            </div>
           </div>
         </div>
       </header>

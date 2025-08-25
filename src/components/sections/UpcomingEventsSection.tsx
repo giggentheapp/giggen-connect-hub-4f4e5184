@@ -71,8 +71,20 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         .from('bookings')
         .select(`
           *,
-          sender_profile:profiles!bookings_sender_id_fkey(display_name, contact_info),
-          receiver_profile:profiles!bookings_receiver_id_fkey(display_name, contact_info)
+          sender_profile:profiles!bookings_sender_id_fkey(
+            user_id,
+            display_name, 
+            contact_info,
+            avatar_url,
+            bio
+          ),
+          receiver_profile:profiles!bookings_receiver_id_fkey(
+            user_id,
+            display_name, 
+            contact_info,
+            avatar_url,
+            bio
+          )
         `)
         .eq('status', 'published')
         .not('event_date', 'is', null)
@@ -87,7 +99,17 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       const { data, error } = await query;
 
       if (error) throw error;
-      setUpcomingEvents(data || []);
+      
+      // Filter out events with missing profile relationships
+      const validEvents = (data || []).filter(event => 
+        event.sender_profile && event.receiver_profile
+      );
+      
+      if (validEvents.length !== (data || []).length) {
+        console.warn(`Filtered out ${(data || []).length - validEvents.length} events with missing profile relations`);
+      }
+      
+      setUpcomingEvents(validEvents);
     } catch (error: any) {
       toast({
         title: "Feil ved lasting av arrangementer",
@@ -100,10 +122,20 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
   };
 
   const openEventDetails = async (event: any) => {
+    // Validate that required profile relationships exist
+    if (!event.sender_profile || !event.receiver_profile) {
+      toast({
+        title: "Manglende profildata",
+        description: "Kan ikke vise arrangementdetaljer på grunn av manglende profil-relasjoner",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSelectedEvent(event);
     
-    if (isAdminView && event.selected_concept_id) {
-      // Fetch concept details for admin view
+    // For both admin and public view, fetch concept details if available
+    if (event.selected_concept_id) {
       try {
         // Get concept creator (maker) for portfolio
         const { data: conceptData } = await supabase
@@ -115,23 +147,31 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         if (conceptData) {
           setPortfolioUserId(conceptData.maker_id);
 
-          // Fetch tech spec files
-          const { data: techSpecs } = await supabase
-            .from('profile_tech_specs')
-            .select('*')
-            .eq('profile_id', conceptData.maker_id);
+          // For admin view, also fetch tech specs and hospitality riders
+          if (isAdminView) {
+            // Fetch tech spec files
+            const { data: techSpecs } = await supabase
+              .from('profile_tech_specs')
+              .select('*')
+              .eq('profile_id', conceptData.maker_id);
 
-          // Fetch hospitality rider files
-          const { data: hospitalityRiders } = await supabase
-            .from('hospitality_riders')
-            .select('*')
-            .eq('user_id', conceptData.maker_id);
+            // Fetch hospitality rider files
+            const { data: hospitalityRiders } = await supabase
+              .from('hospitality_riders')
+              .select('*')
+              .eq('user_id', conceptData.maker_id);
 
-          setTechSpecFiles(techSpecs || []);
-          setHospitalityFiles(hospitalityRiders || []);
+            setTechSpecFiles(techSpecs || []);
+            setHospitalityFiles(hospitalityRiders || []);
+          }
         }
       } catch (error) {
         console.error('Error fetching concept details:', error);
+        toast({
+          title: "Feil ved lasting av konseptdetaljer",
+          description: "Kunne ikke laste konseptinformasjon",
+          variant: "destructive",
+        });
       }
     }
     
@@ -192,8 +232,8 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                 <User className="h-4 w-4" />
                 <span>
                   {event.sender_id === profile.user_id ? 
-                    `Med: ${event.receiver_profile?.display_name}` : 
-                    `Med: ${event.sender_profile?.display_name}`
+                    `Med: ${event.receiver_profile?.display_name || 'Ukjent bruker'}` : 
+                    `Med: ${event.sender_profile?.display_name || 'Ukjent bruker'}`
                   }
                 </span>
               </div>
@@ -306,24 +346,60 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                   </div>
                 </div>
 
-                {/* Contact Info for Admin View */}
+                {/* Contact Info and Profile Info for Admin View */}
                 {isAdminView && (
                   <div>
-                    <h3 className="font-semibold mb-2">Kontaktinformasjon</h3>
-                    <div className="space-y-3">
-                      {/* Other party contact */}
+                    <h3 className="font-semibold mb-2">Deltakerinformasjon</h3>
+                    <div className="space-y-4">
+                      {/* Sender info */}
                       <div className="p-3 border rounded-lg">
-                        <h4 className="font-medium text-sm mb-1">
-                          {selectedEvent.sender_id === profile.user_id ? 
-                            selectedEvent.receiver_profile?.display_name : 
-                            selectedEvent.sender_profile?.display_name
-                          }
+                        <h4 className="font-medium text-sm mb-2">
+                          Avsender: {selectedEvent.sender_profile?.display_name || 'Ukjent bruker'}
+                          {selectedEvent.sender_id === profile.user_id && ' (Deg)'}
                         </h4>
+                        {selectedEvent.sender_profile?.bio && (
+                          <p className="text-xs text-muted-foreground mb-2">{selectedEvent.sender_profile.bio}</p>
+                        )}
                         {(() => {
-                          const contactInfo = selectedEvent.sender_id === profile.user_id ? 
-                            selectedEvent.receiver_profile?.contact_info : 
-                            selectedEvent.sender_profile?.contact_info;
+                          const contactInfo = selectedEvent.sender_profile?.contact_info;
+                          if (!contactInfo) return <p className="text-xs text-muted-foreground">Ingen kontaktinfo tilgjengelig</p>;
                           
+                          return (
+                            <div className="space-y-1 text-xs">
+                              {contactInfo.phone && (
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-3 w-3" />
+                                  <span>{contactInfo.phone}</span>
+                                </div>
+                              )}
+                              {contactInfo.email && (
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-3 w-3" />
+                                  <span>{contactInfo.email}</span>
+                                </div>
+                              )}
+                              {contactInfo.website && (
+                                <div className="flex items-center gap-2">
+                                  <Globe className="h-3 w-3" />
+                                  <span>{contactInfo.website}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                      
+                      {/* Receiver info */}
+                      <div className="p-3 border rounded-lg">
+                        <h4 className="font-medium text-sm mb-2">
+                          Mottaker: {selectedEvent.receiver_profile?.display_name || 'Ukjent bruker'}
+                          {selectedEvent.receiver_id === profile.user_id && ' (Deg)'}
+                        </h4>
+                        {selectedEvent.receiver_profile?.bio && (
+                          <p className="text-xs text-muted-foreground mb-2">{selectedEvent.receiver_profile.bio}</p>
+                        )}
+                        {(() => {
+                          const contactInfo = selectedEvent.receiver_profile?.contact_info;
                           if (!contactInfo) return <p className="text-xs text-muted-foreground">Ingen kontaktinfo tilgjengelig</p>;
                           
                           return (
@@ -363,7 +439,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                 </div>
               )}
 
-              {/* Portfolio for public/admin view */}
+              {/* Portfolio - always show for all views */}
               {portfolioUserId && (
                 <div>
                   <h3 className="font-semibold mb-2">Portefølje</h3>
