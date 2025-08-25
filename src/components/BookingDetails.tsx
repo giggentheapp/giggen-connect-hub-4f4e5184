@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -156,8 +156,21 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     type?: string; 
     placeholder?: string; 
   }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isEditing = editingField === fieldName;
     const tempValue = tempValues[fieldName] ?? value;
+
+    // Focus input when editing starts
+    useEffect(() => {
+      if (isEditing) {
+        if (type === 'textarea' && textareaRef.current) {
+          textareaRef.current.focus();
+        } else if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }
+    }, [isEditing, type]);
 
     if (type === 'date') {
       return (
@@ -218,6 +231,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
           <div className="flex gap-2">
             {type === 'textarea' ? (
               <Textarea
+                ref={textareaRef}
                 value={tempValue || ''}
                 onChange={(e) => setTempValues(prev => ({ ...prev, [fieldName]: e.target.value }))}
                 placeholder={placeholder}
@@ -225,6 +239,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
               />
             ) : (
               <Input
+                ref={inputRef}
                 value={tempValue || ''}
                 onChange={(e) => setTempValues(prev => ({ ...prev, [fieldName]: e.target.value }))}
                 placeholder={placeholder}
@@ -396,13 +411,6 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
             </div>
           </div>
 
-          <EditableField 
-            fieldName="hospitality_rider"
-            label="Hospitality Rider"
-            value={booking.hospitality_rider}
-            type="textarea"
-            placeholder="Spesielle ønsker for arrangementet..."
-          />
         </CardContent>
       </Card>
 

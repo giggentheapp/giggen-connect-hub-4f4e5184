@@ -387,68 +387,59 @@ export const ConceptViewModal = ({
               </Card>
             )}
 
-            {/* Tech Spec File */}
-            {techSpecFile && (
+            {/* Tech Spec and Hospitality Rider Files */}
+            {(techSpecFile || hospitalityRiderFile) && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Teknisk spesifikasjon
+                    Vedlegg
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-8 w-8 text-primary" />
-                        <div>
-                          <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
-                          <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                <CardContent className="space-y-3">
+                  {techSpecFile && (
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-8 w-8 text-primary" />
+                          <div>
+                            <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
+                            <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                          </div>
                         </div>
+                        <Button
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(techSpecFile.file_url, '_blank')}
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Last ned
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.open(techSpecFile.file_url, '_blank')}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Last ned
-                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Hospitality Rider File */}
-            {hospitalityRiderFile && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Hospitality Rider
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-8 w-8 text-primary" />
-                        <div>
-                          <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
-                          <p className="text-xs text-muted-foreground">Hospitality Rider</p>
+                  )}
+                  
+                  {hospitalityRiderFile && (
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-8 w-8 text-primary" />
+                          <div>
+                            <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
+                            <p className="text-xs text-muted-foreground">Hospitality Rider</p>
+                          </div>
                         </div>
+                        <Button
+                          variant="outline"
+                          size="sm" 
+                          onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Last ned
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Last ned
-                      </Button>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )}
