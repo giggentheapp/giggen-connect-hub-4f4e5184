@@ -67,7 +67,7 @@ export const useBookings = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [userId, toast]);
+  }, [userId]);
 
   useEffect(() => {
     fetchBookings();

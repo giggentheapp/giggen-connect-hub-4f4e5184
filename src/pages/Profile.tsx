@@ -112,13 +112,15 @@ const Profile = () => {
     };
 
     fetchProfile();
-  }, [userId, currentUser, isOwnProfile, toast]);
+  }, [userId]);
 
   // Separate useEffect for events
   useEffect(() => {
     // Fetch events based on current user and visibility settings
     const fetchEvents = async () => {
-      if (!userId) return;
+      if (!userId || !currentUser) return;
+
+      const isOwnProfile = currentUser.id === userId;
 
       try {
         let query = supabase
@@ -140,12 +142,13 @@ const Profile = () => {
       }
     };
 
+    const isOwnProfile = currentUser?.id === userId;
     if (settings?.show_events || isOwnProfile) {
       fetchEvents();
     } else {
       setEvents([]);
     }
-  }, [userId, isOwnProfile, settings?.show_events]);
+  }, [userId, currentUser, settings?.show_events]);
 
   const renderFilePreview = (file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;
