@@ -52,6 +52,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 Starting booking submission with concepts:', selectedConcepts);
+    
     if (!title.trim() || selectedConcepts.length === 0) {
       toast({
         title: "Manglende informasjon",
@@ -76,6 +78,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         status: 'draft'
       });
 
+      console.log('✅ Booking created successfully with concepts:', selectedConcepts);
+
       // Reset form
       setTitle('');
       setDescription('');
@@ -88,6 +92,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       
       onSuccess?.();
     } catch (error) {
+      console.error('❌ Booking creation failed:', error);
       // Error handled in hook
     } finally {
       setSubmitting(false);
@@ -95,11 +100,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   };
 
   const toggleConceptSelection = (conceptId: string) => {
-    setSelectedConcepts(prev => 
-      prev.includes(conceptId) 
+    console.log('🎯 Toggling concept selection:', conceptId);
+    setSelectedConcepts(prev => {
+      const newSelection = prev.includes(conceptId) 
         ? prev.filter(id => id !== conceptId)
-        : [...prev, conceptId]
-    );
+        : [...prev, conceptId];
+      console.log('📝 Updated concept selection:', newSelection);
+      return newSelection;
+    });
   };
 
   return (
@@ -127,47 +135,46 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                 Du må først opprette konsepter før du kan sende forespørsler.
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
-                {concepts && concepts.length > 0 && concepts.map((concept) => 
-                  concept && concept.id ? (
-                    <Card 
-                      key={concept.id} 
-                      className={cn(
-                        "cursor-pointer transition-colors",
-                        selectedConcepts.includes(concept.id) 
-                          ? "border-primary bg-primary/5" 
-                          : "hover:border-muted-foreground"
-                      )}
-                      onClick={() => toggleConceptSelection(concept.id)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-3">
-                          <Checkbox 
-                            checked={selectedConcepts.includes(concept.id)}
-                            onChange={() => toggleConceptSelection(concept.id)}
-                            className="mt-1"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
-                            {concept.description && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {concept.description}
-                              </p>
+                <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                {concepts.map((concept) => (
+                  <Card 
+                    key={concept.id} 
+                    className={cn(
+                      "cursor-pointer transition-colors",
+                      selectedConcepts.includes(concept.id) 
+                        ? "border-primary bg-primary/5" 
+                        : "hover:border-muted-foreground"
+                    )}
+                    onClick={() => toggleConceptSelection(concept.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-3">
+                        <Checkbox 
+                          checked={selectedConcepts.includes(concept.id)}
+                          onCheckedChange={(checked) => toggleConceptSelection(concept.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium">{concept.title}</h4>
+                          {concept.description && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {concept.description}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            <Badge variant="outline">
+                              {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
+                            </Badge>
+                            {concept.status && (
+                              <Badge variant="secondary">{concept.status}</Badge>
                             )}
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              <Badge variant="outline">
-                                {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
-                              </Badge>
-                              {concept.status && (
-                                <Badge variant="secondary">{concept.status}</Badge>
-                              )}
-                            </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ) : null
-                )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </div>
