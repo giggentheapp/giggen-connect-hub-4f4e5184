@@ -21,10 +21,9 @@ interface UserProfile {
 
 interface GoerDashboardProps {
   profile: UserProfile;
-  onSignOut: () => void;
 }
 
-export const GoerDashboard = ({ profile, onSignOut }: GoerDashboardProps) => {
+export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
   const [visibleMakers, setVisibleMakers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -73,19 +72,13 @@ export const GoerDashboard = ({ profile, onSignOut }: GoerDashboardProps) => {
     <div className="min-h-screen bg-background">
       {/* Header with Sign Out */}
       <header className="border-b bg-card/95 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-4">
           <div>
             <h1 className="text-2xl font-bold">GIGGEN</h1>
             <p className="text-sm text-muted-foreground">
               Velkommen, {profile.display_name}
             </p>
           </div>
-          <button
-            onClick={onSignOut}
-            className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-accent transition-colors"
-          >
-            Logg ut
-          </button>
         </div>
       </header>
 

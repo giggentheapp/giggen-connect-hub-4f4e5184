@@ -10,7 +10,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useToast } from '@/hooks/use-toast';
-import { User, Save } from 'lucide-react';
+import { User, Save, LogOut, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface UserProfile {
   id: string;
@@ -51,7 +63,9 @@ export const SettingsSection = ({ profile, onProfileUpdate }: SettingsSectionPro
   });
   const [saving, setSaving] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Form states
   const [displayName, setDisplayName] = useState(profile.display_name || '');
@@ -207,6 +221,86 @@ export const SettingsSection = ({ profile, onProfileUpdate }: SettingsSectionPro
         description: "Kunne ikke oppdatere profilbilde",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSignOut = async () => {
+    console.log('Signing out user...');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        toast({
+          title: "Feil ved utlogging",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log('User signed out successfully');
+        navigate('/auth');
+      }
+    } catch (error: any) {
+      console.error('Unexpected error during sign out:', error);
+      toast({
+        title: "Feil ved utlogging",
+        description: "En uventet feil oppstod",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    console.log('Attempting to delete user account:', profile.user_id);
+    setDeletingUser(true);
+    
+    try {
+      // Delete all user-related data first
+      console.log('Deleting user concepts...');
+      await supabase.from('concepts').delete().eq('maker_id', profile.user_id);
+      
+      console.log('Deleting user profile settings...');
+      await supabase.from('profile_settings').delete().eq('maker_id', profile.user_id);
+      
+      console.log('Deleting user tech specs...');
+      await supabase.from('profile_tech_specs').delete().eq('profile_id', profile.user_id);
+      
+      console.log('Deleting user hospitality riders...');
+      await supabase.from('hospitality_riders').delete().eq('user_id', profile.user_id);
+      
+      console.log('Deleting user portfolio...');
+      await supabase.from('profile_portfolio').delete().eq('user_id', profile.user_id);
+      
+      console.log('Deleting user profile...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', profile.user_id);
+
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+        throw profileError;
+      }
+
+      console.log('User data deleted successfully, signing out...');
+      
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      navigate('/auth');
+      
+      toast({
+        title: "Konto slettet",
+        description: "Din konto og alle relaterte data har blitt slettet",
+      });
+      
+    } catch (error: any) {
+      console.error('Error deleting user account:', error);
+      toast({
+        title: "Feil ved sletting av konto",
+        description: "Kunne ikke slette kontoen din",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(false);
     }
   };
 
@@ -370,6 +464,59 @@ export const SettingsSection = ({ profile, onProfileUpdate }: SettingsSectionPro
           {geocoding ? 'Finner koordinater...' : saving ? 'Lagrer...' : 'Lagre endringer'}
         </Button>
       </div>
+
+      {/* Account Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Kontobehandling</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Logg ut</Label>
+              <p className="text-sm text-muted-foreground">
+                Logg ut av kontoen din
+              </p>
+            </div>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logg ut
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div>
+              <Label className="text-destructive">Slett konto</Label>
+              <p className="text-sm text-muted-foreground">
+                Slett kontoen din permanent. Dette kan ikke angres.
+              </p>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={deletingUser}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {deletingUser ? 'Sletter...' : 'Slett konto'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Er du sikker på at du vil slette kontoen din?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Dette vil permanent slette kontoen din og alle relaterte data. 
+                    Denne handlingen kan ikke angres.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Ja, slett kontoen min
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -29,10 +29,9 @@ interface UserProfile {
 
 interface MakerDashboardProps {
   profile: UserProfile;
-  onSignOut: () => void;
 }
 
-export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
+export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [activeSection, setActiveSection] = useState('explore');
   const isMobile = useIsMobile();
 
@@ -68,17 +67,14 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
         />
       )}
 
-      {/* Header with Sign Out */}
+      {/* Header */}
       <header className={`border-b bg-card/95 backdrop-blur-sm z-40 ${!isMobile ? 'ml-16' : ''}`}>
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-4">
           <div>
             <p className="text-sm text-muted-foreground">
               Velkommen, {profile.display_name}
             </p>
           </div>
-          <Button variant="outline" onClick={onSignOut} size="sm">
-            Logg ut
-          </Button>
         </div>
       </header>
 

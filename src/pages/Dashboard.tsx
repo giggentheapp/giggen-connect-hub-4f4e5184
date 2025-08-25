@@ -125,9 +125,9 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Role-specific dashboard with integrated navigation */}
       {profile.role === 'maker' ? (
-        <MakerDashboard profile={profile} onSignOut={handleSignOut} />
+        <MakerDashboard profile={profile} />
       ) : (
-        <GoerDashboard profile={profile} onSignOut={handleSignOut} />
+        <GoerDashboard profile={profile} />
       )}
     </div>
   );

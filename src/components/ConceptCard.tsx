@@ -150,7 +150,15 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
           {showActions && (
             <div className="flex gap-2">
               {onDelete && (
-                <Button variant="destructive" size="sm" onClick={onDelete}>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => {
+                    if (window.confirm('Er du sikker på at du vil slette dette konseptet?')) {
+                      onDelete();
+                    }
+                  }}
+                >
                   Slett
                 </Button>
               )}

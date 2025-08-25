@@ -5,6 +5,7 @@ import { Lightbulb, Plus } from 'lucide-react';
 import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -29,8 +30,25 @@ export const AdminConceptsSection = ({ profile }: AdminConceptsSectionProps) => 
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
 
   const handleDeleteConcept = async (conceptId: string) => {
-    // This will be handled by the ConceptCard component
-    refetch();
+    console.log('Attempting to delete concept with ID:', conceptId);
+    
+    try {
+      const { error } = await supabase
+        .from('concepts')
+        .delete()
+        .eq('id', conceptId);
+
+      if (error) {
+        console.error('Error deleting concept:', error);
+        throw error;
+      }
+      
+      console.log('Concept deleted successfully');
+      refetch(); // Refresh the concepts list
+    } catch (error: any) {
+      console.error('Failed to delete concept:', error);
+      throw error;
+    }
   };
 
   return (
