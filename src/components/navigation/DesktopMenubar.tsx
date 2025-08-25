@@ -46,6 +46,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
       subItems: [
         { id: 'admin-files', label: 'Filer', action: () => handleNavigation('admin-files') },
         { id: 'admin-concepts', label: 'Konsepter', action: () => handleNavigation('admin-concepts') },
+        { id: 'admin-events', label: 'Kommende arrangementer', action: () => handleNavigation('admin-events') },
         { id: 'admin-settings', label: 'Innstillinger', action: () => handleNavigation('admin-settings') }
       ]
     },

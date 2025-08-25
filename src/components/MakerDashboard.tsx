@@ -5,6 +5,7 @@ import { DesktopMenubar } from '@/components/navigation/DesktopMenubar';
 import { ExploreSection } from '@/components/sections/ExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
+import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
@@ -50,6 +51,8 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         return <AdminFilesSection profile={profile} />;
       case 'admin-concepts':
         return <AdminConceptsSection profile={profile} />;
+      case 'admin-events':
+        return <UpcomingEventsSection profile={profile} isAdminView={true} />;
       case 'admin-settings':
         return <AdminSettingsSection profile={profile} />;
       default:

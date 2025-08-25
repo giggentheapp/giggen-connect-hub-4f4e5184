@@ -3,12 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye, X, Trash } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -36,7 +38,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed'>('received');
   
-  const { bookings, loading } = useBookings(profile.user_id);
+  const { bookings, loading, updateBooking } = useBookings(profile.user_id);
   const { toast } = useToast();
 
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
@@ -72,6 +74,43 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       return 'Ferdig: Publisert';
     }
     return 'Ukjent fase';
+  };
+
+  const handleRejectBooking = async (bookingId: string) => {
+    try {
+      await updateBooking(bookingId, { status: 'rejected' });
+      toast({
+        title: "Forespørsel avvist",
+        description: "Bookingforespørselen har blitt avvist",
+      });
+    } catch (error) {
+      // Error handled in hook
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Forespørsel slettet",
+        description: "Bookingforespørselen har blitt permanent slettet",
+      });
+      
+      // Refresh bookings list
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: "Feil ved sletting",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const BookingCard = ({ booking }: { booking: any }) => (
@@ -171,6 +210,56 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                   <Eye className="h-4 w-4 mr-1" />
                   Se konsept{booking.concept_ids.length > 1 ? 'er' : ''}
                 </Button>
+              )}
+
+              {/* Reject and Delete buttons for bookings that can be rejected */}
+              {booking.status === 'sent' && (
+                <>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejectBooking(booking.id);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Avvis
+                  </Button>
+                </>
+              )}
+
+              {/* Delete button for rejected bookings */}
+              {booking.status === 'rejected' && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash className="h-4 w-4 mr-1" />
+                      Slett
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Denne handlingen kan ikke angres. Forespørselen vil bli permanent slettet.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDeleteBooking(booking.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Slett permanent
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           </div>

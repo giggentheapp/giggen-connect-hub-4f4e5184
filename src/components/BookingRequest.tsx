@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useBookings } from '@/hooks/useBookings';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
+import { ContactInfoDialog } from '@/components/ContactInfoDialog';
 import { format } from 'date-fns';
 import { CalendarIcon, Send, Lightbulb, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const [eventDate, setEventDate] = useState<Date>();
   const [venue, setVenue] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [hasShownContactDialog, setHasShownContactDialog] = useState(false);
 
   const { createBooking } = useBookings();
   const { toast } = useToast();
@@ -75,6 +78,16 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       return;
     }
 
+    // Show contact info dialog only first time
+    if (!hasShownContactDialog) {
+      setShowContactDialog(true);
+      return;
+    }
+
+    await submitBooking();
+  };
+
+  const submitBooking = async () => {
     setSubmitting(true);
     
     try {
@@ -109,6 +122,16 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleContactDialogConfirm = () => {
+    setHasShownContactDialog(true);
+    setShowContactDialog(false);
+    submitBooking();
+  };
+
+  const handleContactDialogCancel = () => {
+    setShowContactDialog(false);
   };
 
   const selectConcept = (concept: any) => {
@@ -321,6 +344,13 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             </Button>
           </div>
         </form>
+        
+        {/* Contact Info Dialog */}
+        <ContactInfoDialog
+          isOpen={showContactDialog}
+          onConfirm={handleContactDialogConfirm}
+          onCancel={handleContactDialogCancel}
+        />
       </DialogContent>
     </Dialog>
   );
