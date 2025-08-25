@@ -13,7 +13,7 @@ interface MapProps {
 }
 
 interface MakerLocation {
-  id: string;
+  user_id: string;
   display_name: string;
   avatar_url?: string;
   latitude: number;
@@ -93,7 +93,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         const { data, error } = await supabase
           .from('profiles')
           .select(`
-            id,
+            user_id,
             display_name,
             avatar_url,
             latitude,
@@ -117,7 +117,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         
         // Process makers data - ensure coordinates are valid numbers
         const makersData = data?.map(maker => ({
-          id: maker.id,
+          user_id: maker.user_id,
           display_name: maker.display_name,
           avatar_url: maker.avatar_url,
           latitude: parseFloat(maker.latitude?.toString() || '0'),
@@ -424,7 +424,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           <h3 style="margin: 0 0 6px 0; font-weight: bold; font-size: 16px; color: #333;">${maker.display_name}</h3>
           <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">${maker.address}</p>
           <a 
-            href="/profile/${maker.id}" 
+            href="/profile/${maker.user_id}" 
             style="display: inline-block; padding: 6px 12px; background: #dc2626; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: background-color 0.2s;"
             onmouseover="this.style.backgroundColor='#b91c1c'"
             onmouseout="this.style.backgroundColor='#dc2626'"
@@ -617,6 +617,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
                   <div>Pos: {maker.latitude.toFixed(6)}, {maker.longitude.toFixed(6)}</div>
                   <div>Adresse: {maker.address}</div>
                   <div>Avatar: {maker.avatar_url ? '✅' : '❌'}</div>
+                  <div>ID: {maker.user_id}</div>
                 </div>
               ))}
             </div>

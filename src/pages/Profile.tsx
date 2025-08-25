@@ -58,36 +58,41 @@ const Profile = () => {
           .from('profiles')
           .select('*')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (profileError) throw profileError;
+        
+        if (!profileData) {
+          console.warn('No profile found for user ID:', userId);
+          return; // Don't show error, just redirect to dashboard
+        }
+        
         setProfile(profileData);
 
-        // Fetch privacy settings
-        const { data: settingsData } = await supabase
-          .from('profile_settings')
-          .select('*')
-          .eq('maker_id', userId)
-          .single();
-
-        setSettings(settingsData || {
-          show_about: false,
-          show_contact: false,
-          show_portfolio: false,
-          show_techspec: false,
-          show_events: false
-        });
-
-        // Fetch events if visible
-        if (settingsData?.show_events || isOwnProfile) {
-          const { data: eventsData } = await supabase
-            .from('events')
+        // Fetch privacy settings only if user is a maker
+        if (profileData.role === 'maker') {
+          const { data: settingsData } = await supabase
+            .from('profile_settings')
             .select('*')
             .eq('maker_id', userId)
-            .eq('is_public', true)
-            .order('event_date', { ascending: true });
-          
-          setEvents(eventsData || []);
+            .maybeSingle();
+
+          setSettings(settingsData || {
+            show_about: false,
+            show_contact: false,
+            show_portfolio: false,
+            show_techspec: false,
+            show_events: false
+          });
+        } else {
+          // For goers, set default visibility settings
+          setSettings({
+            show_about: true,
+            show_contact: false,
+            show_portfolio: false,
+            show_techspec: false,
+            show_events: false
+          });
         }
 
       } catch (error: any) {
@@ -104,6 +109,39 @@ const Profile = () => {
 
     fetchProfile();
   }, [userId, currentUser, isOwnProfile, toast]);
+
+  // Separate useEffect for events
+  useEffect(() => {
+    // Fetch events based on current user and visibility settings
+    const fetchEvents = async () => {
+      if (!userId) return;
+
+      try {
+        let query = supabase
+          .from('events')
+          .select('*')
+          .eq('maker_id', userId)
+          .order('event_date', { ascending: true });
+
+        // If viewing own profile, show all events
+        // If viewing others, only show public events  
+        if (!isOwnProfile) {
+          query = query.eq('is_public', true);
+        }
+
+        const { data: eventsData } = await query;
+        setEvents(eventsData || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    if (settings?.show_events || isOwnProfile) {
+      fetchEvents();
+    } else {
+      setEvents([]);
+    }
+  }, [userId, isOwnProfile, settings?.show_events]);
 
   if (loading) {
     return <div className="flex justify-center p-8">Laster profil...</div>;
