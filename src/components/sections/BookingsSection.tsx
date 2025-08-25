@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
+import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye } from 'lucide-react';
 import { format } from 'date-fns';
@@ -32,6 +33,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed'>('received');
   
   const { bookings, loading } = useBookings(profile.user_id);
@@ -138,22 +140,39 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 <span>Oppdatert: {format(new Date(booking.updated_at), 'dd.MM.yyyy')}</span>
               )}
             </div>
-            <Button 
-              size="sm" 
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedBooking(booking);
-                if (booking.status === 'confirmed') {
-                  setConfirmationOpen(true);
-                } else {
-                  setDetailsOpen(true);
-                }
-              }}
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              {booking.status === 'confirmed' ? 'Bekreft avtale' : 'Se detaljer'}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedBooking(booking);
+                  if (booking.status === 'confirmed') {
+                    setConfirmationOpen(true);
+                  } else {
+                    setDetailsOpen(true);
+                  }
+                }}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                {booking.status === 'confirmed' ? 'Bekreft avtale' : 'Se detaljer'}
+              </Button>
+              
+              {booking.concept_ids && booking.concept_ids.length > 0 && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedBooking(booking);
+                    setConceptViewOpen(true);
+                  }}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Se konsept{booking.concept_ids.length > 1 ? 'er' : ''}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -284,6 +303,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
             isOpen={confirmationOpen}
             onClose={() => setConfirmationOpen(false)}
             currentUserId={profile.user_id}
+          />
+
+          <ConceptViewModal
+            isOpen={conceptViewOpen}
+            onClose={() => setConceptViewOpen(false)}
+            conceptIds={selectedBooking?.concept_ids || []}
+            initialConceptIndex={0}
           />
         </>
       )}
