@@ -9,11 +9,13 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb, Music, File } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConceptCard from '@/components/ConceptCard';
+import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 
 interface ProfileData {
   id: string;
+  user_id: string;
   display_name: string;
   bio?: string;
   contact_info?: any;
@@ -235,14 +237,22 @@ const Profile = () => {
             <Badge variant="outline">{profile.role}</Badge>
           </div>
         </div>
-        {isOwnProfile && (
-          <Button asChild>
-            <Link to={`/profile/${userId}/settings`}>
-              <Settings className="h-4 w-4 mr-2" />
-              Innstillinger
-            </Link>
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {!isOwnProfile && profile.role === 'maker' && currentUser && (
+            <BookingRequest 
+              receiverId={profile.user_id}
+              receiverName={profile.display_name}
+            />
+          )}
+          {isOwnProfile && (
+            <Button asChild>
+              <Link to={`/profile/${userId}/settings`}>
+                <Settings className="h-4 w-4 mr-2" />
+                Innstillinger
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

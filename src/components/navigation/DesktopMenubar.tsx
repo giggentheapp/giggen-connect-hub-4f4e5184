@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, ChevronDown } from 'lucide-react';
+import { Compass, User, Settings, ChevronDown, Calendar } from 'lucide-react';
 
 interface DesktopMenubarProps {
   activeSection: string;
@@ -32,6 +32,12 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
         { id: 'profile-maker', label: 'Maker-visning', action: () => handleNavigation('profile-maker') },
         { id: 'profile-goer', label: 'Goer-visning', action: () => handleNavigation('profile-goer') }
       ]
+    },
+    { 
+      id: 'bookings', 
+      label: 'Bookinger', 
+      icon: Calendar,
+      subItems: []
     },
     { 
       id: 'admin', 

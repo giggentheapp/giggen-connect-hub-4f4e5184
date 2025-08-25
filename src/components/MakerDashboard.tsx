@@ -8,6 +8,7 @@ import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
+import { BookingsSection } from '@/components/sections/BookingsSection';
 import { Button } from '@/components/ui/button';
 
 interface UserProfile {
@@ -44,6 +45,8 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
         return <ProfileSection profile={profile} />;
       case 'profile-goer':
         return <ProfileGoerSection profile={profile} />;
+      case 'bookings':
+        return <BookingsSection profile={profile} />;
       case 'admin-files':
         return <AdminFilesSection profile={profile} />;
       case 'admin-concepts':

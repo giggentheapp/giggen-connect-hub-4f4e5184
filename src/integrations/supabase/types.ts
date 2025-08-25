@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_changes: {
+        Row: {
+          acknowledged_by_receiver: boolean | null
+          acknowledged_by_sender: boolean | null
+          booking_id: string
+          change_timestamp: string | null
+          changed_by: string
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          acknowledged_by_receiver?: boolean | null
+          acknowledged_by_sender?: boolean | null
+          booking_id: string
+          change_timestamp?: string | null
+          changed_by: string
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          acknowledged_by_receiver?: boolean | null
+          acknowledged_by_sender?: boolean | null
+          booking_id?: string
+          change_timestamp?: string | null
+          changed_by?: string
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_changes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          concept_ids: string[]
+          created_at: string | null
+          description: string | null
+          event_date: string | null
+          hospitality_rider: string | null
+          id: string
+          price_musician: string | null
+          price_ticket: string | null
+          receiver_confirmed: boolean | null
+          receiver_id: string
+          receiver_read_agreement: boolean | null
+          selected_concept_id: string | null
+          sender_confirmed: boolean | null
+          sender_id: string
+          sender_read_agreement: boolean | null
+          status: string
+          title: string
+          updated_at: string | null
+          venue: string | null
+        }
+        Insert: {
+          concept_ids?: string[]
+          created_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          hospitality_rider?: string | null
+          id?: string
+          price_musician?: string | null
+          price_ticket?: string | null
+          receiver_confirmed?: boolean | null
+          receiver_id: string
+          receiver_read_agreement?: boolean | null
+          selected_concept_id?: string | null
+          sender_confirmed?: boolean | null
+          sender_id: string
+          sender_read_agreement?: boolean | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Update: {
+          concept_ids?: string[]
+          created_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          hospitality_rider?: string | null
+          id?: string
+          price_musician?: string | null
+          price_ticket?: string | null
+          receiver_confirmed?: boolean | null
+          receiver_id?: string
+          receiver_read_agreement?: boolean | null
+          selected_concept_id?: string | null
+          sender_confirmed?: boolean | null
+          sender_id?: string
+          sender_read_agreement?: boolean | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Relationships: []
+      }
       concept_files: {
         Row: {
           concept_id: string
