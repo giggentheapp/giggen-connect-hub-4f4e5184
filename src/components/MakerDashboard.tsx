@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileNavigation } from '@/components/navigation/MobileNavigation';
-import { DesktopSidebar } from '@/components/navigation/DesktopSidebar';
+import { DesktopMenubar } from '@/components/navigation/DesktopMenubar';
 import { ExploreSection } from '@/components/sections/ExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { AdminSection } from '@/components/sections/AdminSection';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface UserProfile {
   id: string;
@@ -24,9 +26,10 @@ interface UserProfile {
 
 interface MakerDashboardProps {
   profile: UserProfile;
+  onSignOut: () => void;
 }
 
-export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
+export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
   const [activeSection, setActiveSection] = useState('explore');
   const isMobile = useIsMobile();
 
@@ -37,24 +40,48 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       case 'profile':
         return <ProfileSection profile={profile} />;
       case 'admin':
-        return <AdminSection profile={profile} />;
+      case 'admin-files':
+      case 'admin-concepts':  
+      case 'admin-settings':
+        return <AdminSection profile={profile} initialTab={activeSection.replace('admin-', '') || 'files'} />;
       default:
         return <ExploreSection />;
     }
   };
 
   return (
-    <div className={`flex h-full ${isMobile ? 'pb-16' : ''}`}>
-      {/* Desktop Sidebar */}
+    <div className="relative min-h-screen">
+      {/* Desktop Menubar */}
       {!isMobile && (
-        <DesktopSidebar 
+        <DesktopMenubar 
           activeSection={activeSection}
           onSectionChange={setActiveSection}
         />
       )}
 
+      {/* Header with Sign Out */}
+      <header className={cn(
+        "border-b bg-card/95 backdrop-blur-sm z-40",
+        !isMobile ? "ml-16" : ""
+      )}>
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Velkommen, {profile.display_name}
+            </p>
+          </div>
+          <Button variant="outline" onClick={onSignOut} size="sm">
+            Logg ut
+          </Button>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className={cn(
+        "flex-1 overflow-auto",
+        !isMobile ? "ml-16" : "",
+        isMobile ? "pb-16" : ""
+      )}>
         <div className="container mx-auto px-4 py-6">
           {renderActiveSection()}
         </div>

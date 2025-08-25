@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
@@ -11,20 +11,20 @@ import Map from '@/components/Map';
 
 const MapView = () => {
   return (
-    <div className="relative h-screen w-full">
-      {/* Navigation Dropdown */}
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Simple navigation dropdown */}
       <div className="absolute top-4 left-4 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Navigasjon
+            <Button variant="outline" size="sm" className="bg-card/95 backdrop-blur-sm shadow-lg">
+              <Menu className="h-4 w-4 mr-2" />
+              Meny
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align="start" className="bg-card/95 backdrop-blur-sm">
             <DropdownMenuItem asChild>
               <Link to="/dashboard">
-                Tilbake til Dashboard
+                Dashboard
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -32,9 +32,7 @@ const MapView = () => {
       </div>
 
       {/* Fullscreen Map */}
-      <div className="h-full w-full">
-        <Map />
-      </div>
+      <Map className="absolute inset-0" />
     </div>
   );
 };

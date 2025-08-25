@@ -28,9 +28,10 @@ interface UserProfile {
 
 interface AdminSectionProps {
   profile: UserProfile;
+  initialTab?: string;
 }
 
-export const AdminSection = ({ profile }: AdminSectionProps) => {
+export const AdminSection = ({ profile, initialTab = 'files' }: AdminSectionProps) => {
   const [showWizard, setShowWizard] = useState(false);
   const [updatedProfile, setUpdatedProfile] = useState(profile);
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
@@ -48,7 +49,7 @@ export const AdminSection = ({ profile }: AdminSectionProps) => {
         <p className="text-muted-foreground">Administrer filer, konsepter og innstillinger</p>
       </div>
 
-      <Tabs defaultValue="files" className="w-full">
+      <Tabs defaultValue={initialTab} className="w-full">
         <TabsList className={isMobile ? "grid w-full grid-cols-3" : "grid w-full grid-cols-3 max-w-md"}>
           <TabsTrigger value="files" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />

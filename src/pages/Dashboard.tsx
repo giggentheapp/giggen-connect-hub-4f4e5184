@@ -123,31 +123,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">GIGGEN</h1>
-            <p className="text-sm text-muted-foreground">
-              Velkommen, {profile.display_name} ({profile.role === 'maker' ? 'GiggenMaker' : 'GiggenGoer'})
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={handleSignOut}>
-              Logg ut
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Role-specific dashboard */}
-        {profile.role === 'maker' ? (
-          <MakerDashboard profile={profile} />
-        ) : (
-          <GoerDashboard profile={profile} />
-        )}
-      </div>
+      {/* Role-specific dashboard with integrated navigation */}
+      {profile.role === 'maker' ? (
+        <MakerDashboard profile={profile} onSignOut={handleSignOut} />
+      ) : (
+        <GoerDashboard profile={profile} onSignOut={handleSignOut} />
+      )}
     </div>
   );
 };
