@@ -30,13 +30,13 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
 
   return (
     <div 
-      className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
+      className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out pointer-events-auto"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Logo-only state */}
       <div className={cn(
-        "h-full bg-card border-r border-border shadow-lg transition-all duration-300",
+        "h-full bg-card border-r border-border shadow-lg transition-all duration-300 pointer-events-auto",
         isExpanded ? "w-64" : "w-16"
       )}>
         {/* Logo */}
@@ -62,35 +62,47 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
             if (item.hasDropdown && isExpanded) {
               return (
                 <div key={item.id} className="relative">
+                  {/* Main clickable area */}
+                  <button
+                    onClick={() => handleMainClick(item.id)}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left pointer-events-auto',
+                      isActive
+                        ? 'bg-accent text-accent-foreground font-medium'
+                        : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                    )}
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="opacity-0 animate-fade-in flex-1">{item.label}</span>
+                  </button>
+                  
+                  {/* Separate dropdown trigger */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        onClick={() => handleMainClick(item.id)}
-                        className={cn(
-                          'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
-                          isActive
-                            ? 'bg-accent text-accent-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
-                        )}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent/50 pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <span className="opacity-0 animate-fade-in">{item.label}</span>
-                        <ChevronDown className="h-4 w-4 ml-auto opacity-0 animate-fade-in" />
+                        <ChevronDown className="h-4 w-4 opacity-0 animate-fade-in" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                       align="start" 
                       side="right" 
-                      className="z-[60] bg-popover/95 backdrop-blur-sm border shadow-lg"
-                      sideOffset={8}
+                      className="z-[70] bg-popover border shadow-lg pointer-events-auto"
+                      sideOffset={12}
+                      avoidCollisions={true}
                     >
                       {item.id === 'profile' && (
                         <>
-                          <DropdownMenuItem onClick={() => onSectionChange('profile')}>
+                          <DropdownMenuItem 
+                            onClick={() => onSectionChange('profile')}
+                            className="pointer-events-auto cursor-pointer"
+                          >
                             Vis som Maker
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link to="/profile/goer-view">
+                            <Link to="/profile/goer-view" className="pointer-events-auto cursor-pointer">
                               Vis som Goer
                             </Link>
                           </DropdownMenuItem>
@@ -98,13 +110,22 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
                       )}
                       {item.id === 'admin' && (
                         <>
-                          <DropdownMenuItem onClick={() => onSectionChange('admin-files')}>
+                          <DropdownMenuItem 
+                            onClick={() => onSectionChange('admin-files')}
+                            className="pointer-events-auto cursor-pointer"
+                          >
                             Filer
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onSectionChange('admin-concepts')}>
+                          <DropdownMenuItem 
+                            onClick={() => onSectionChange('admin-concepts')}
+                            className="pointer-events-auto cursor-pointer"
+                          >
                             Konsepter
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onSectionChange('admin-settings')}>
+                          <DropdownMenuItem 
+                            onClick={() => onSectionChange('admin-settings')}
+                            className="pointer-events-auto cursor-pointer"
+                          >
                             Innstillinger
                           </DropdownMenuItem>
                         </>
@@ -120,7 +141,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
                 key={item.id}
                 onClick={() => handleMainClick(item.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors pointer-events-auto',
                   isActive
                     ? 'bg-accent text-accent-foreground font-medium'
                     : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
