@@ -6,7 +6,6 @@ import { ExploreSection } from '@/components/sections/ExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { AdminSection } from '@/components/sections/AdminSection';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface UserProfile {
   id: string;
@@ -60,10 +59,7 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
       )}
 
       {/* Header with Sign Out */}
-      <header className={cn(
-        "border-b bg-card/95 backdrop-blur-sm z-40",
-        !isMobile ? "ml-16" : ""
-      )}>
+      <header className={`border-b bg-card/95 backdrop-blur-sm z-40 ${!isMobile ? 'ml-16' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <p className="text-sm text-muted-foreground">
@@ -77,11 +73,7 @@ export const MakerDashboard = ({ profile, onSignOut }: MakerDashboardProps) => {
       </header>
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 overflow-auto",
-        !isMobile ? "ml-16" : "",
-        isMobile ? "pb-16" : ""
-      )}>
+      <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-16' : ''} ${isMobile ? 'pb-16' : ''}`}>
         <div className="container mx-auto px-4 py-6">
           {renderActiveSection()}
         </div>
