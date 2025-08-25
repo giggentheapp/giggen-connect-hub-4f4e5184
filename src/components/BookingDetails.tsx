@@ -302,9 +302,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                     <SelectValue placeholder="Velg konsept..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {concepts.map((concept) => (
+                    {concepts.filter(concept => concept && concept.id).map((concept) => (
                       <SelectItem key={concept.id} value={concept.id}>
-                        {concept.title} - {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
+                        {concept.title || 'Untitled'} - {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -312,7 +312,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
               </div>
             ) : (
               <div className="space-y-3">
-                {concepts.map((concept) => (
+                {concepts.filter(concept => concept && concept.id).map((concept) => (
                   <div 
                     key={concept.id}
                     className={cn(
@@ -321,7 +321,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium">{concept.title}</h4>
+                      <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
                       {concept.id === booking.selected_concept_id && (
                         <Badge>Valgt konsept</Badge>
                       )}
