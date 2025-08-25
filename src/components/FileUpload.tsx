@@ -11,7 +11,7 @@ interface FileUploadProps {
   folderPath: string;
   onFileUploaded: (file: any) => void;
   acceptedTypes?: string;
-  targetTable?: 'profile_portfolio' | 'profile_tech_specs' | 'concept_files' | null;
+  targetTable?: 'profile_portfolio' | 'profile_tech_specs' | 'concept_files' | 'hospitality_riders' | null;
 }
 
 const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.docx,.txt", targetTable = null }: FileUploadProps) => {
@@ -132,6 +132,22 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           .from('profile_tech_specs')
           .insert({
             profile_id: user.id,
+            file_url: publicUrl,
+            file_path: filePath,
+            filename: file.name,
+            file_type: fileType,
+            mime_type: file.type,
+            file_size: file.size
+          })
+          .select()
+          .single();
+        if (dbError) throw dbError;
+        dbData = data;
+      } else if (targetTable === 'hospitality_riders') {
+        const { data, error: dbError } = await supabase
+          .from('hospitality_riders')
+          .insert({
+            user_id: user.id,
             file_url: publicUrl,
             file_path: filePath,
             filename: file.name,

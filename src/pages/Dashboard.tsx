@@ -130,9 +130,16 @@ const Dashboard = () => {
               Velkommen, {profile.display_name} ({profile.role === 'maker' ? 'GiggenMaker' : 'GiggenGoer'})
             </p>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            Logg ut
-          </Button>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={handleSignOut}>
+              Logg ut
+            </Button>
+            <Link to="/files">
+              <Button variant="outline">
+                Filer
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

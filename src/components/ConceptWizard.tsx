@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
+import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 
 interface ConceptData {
   title: string;
@@ -27,6 +28,7 @@ interface ConceptData {
   available_dates: Date[];
   portfolio_files: any[];
   selected_tech_spec_file: string;
+  selected_hospitality_rider_file: string;
   is_indefinite: boolean;
 }
 
@@ -53,6 +55,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAsPublished, setSaveAsPublished] = useState(false);
   const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
+  const { files: availableHospitalityRiders, loading: hospitalityRidersLoading } = useHospitalityRiders(userId);
   const { toast } = useToast();
 
   const [conceptData, setConceptData] = useState<ConceptData>(() => ({
@@ -64,6 +67,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
     available_dates: [],
     portfolio_files: [],
     selected_tech_spec_file: '',
+    selected_hospitality_rider_file: '',
     is_indefinite: false,
   }));
 
@@ -142,6 +146,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
         tech_spec: conceptData.tech_spec || null,
         tech_spec_reference: conceptData.selected_tech_spec_file || null,
+        hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
         available_dates: conceptData.is_indefinite 
           ? JSON.stringify({ indefinite: true })
           : (conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null),
@@ -375,6 +380,43 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 {availableTechSpecs.length === 0 && !techSpecsLoading && (
                   <p className="text-sm text-muted-foreground mt-2">
                     Last opp tech spec dokumenter i din profil for å velge dem her
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="hospitalityrider">Hospitality Rider</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Velg en hospitality rider fra din profil
+                </p>
+                <Select
+                  value={conceptData.selected_hospitality_rider_file}
+                  onValueChange={(value) => updateConceptData('selected_hospitality_rider_file', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg hospitality rider..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {hospitalityRidersLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Laster...
+                      </SelectItem>
+                    ) : availableHospitalityRiders.length === 0 ? (
+                      <SelectItem value="none" disabled>
+                        Ingen hospitality rider filer funnet
+                      </SelectItem>
+                    ) : (
+                      availableHospitalityRiders.map((file) => (
+                        <SelectItem key={file.id} value={file.id}>
+                          {file.filename}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {availableHospitalityRiders.length === 0 && !hospitalityRidersLoading && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Last opp hospitality rider dokumenter i din profil for å velge dem her
                   </p>
                 )}
               </div>

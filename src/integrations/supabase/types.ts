@@ -86,6 +86,7 @@ export type Database = {
           created_at: string
           description: string | null
           expected_audience: number | null
+          hospitality_rider_reference: string | null
           id: string
           is_published: boolean
           maker_id: string
@@ -101,6 +102,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           expected_audience?: number | null
+          hospitality_rider_reference?: string | null
           id?: string
           is_published?: boolean
           maker_id: string
@@ -116,6 +118,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           expected_audience?: number | null
+          hospitality_rider_reference?: string | null
           id?: string
           is_published?: boolean
           maker_id?: string
@@ -189,6 +192,45 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      hospitality_riders: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          filename: string
+          id: string
+          mime_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string
+          file_url: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profile_portfolio: {
         Row: {

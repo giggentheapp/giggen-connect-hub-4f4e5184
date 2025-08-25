@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb } from 'lucide-react';
+import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb, Music, File } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 
 interface ProfileData {
   id: string;
@@ -37,6 +38,7 @@ const Profile = () => {
   const [events, setEvents] = useState<any[]>([]);
   const { toast } = useToast();
   const { concepts, loading: conceptsLoading } = useUserConcepts(userId);
+  const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
 
   const isOwnProfile = currentUser?.id === userId;
 
@@ -142,6 +144,44 @@ const Profile = () => {
       setEvents([]);
     }
   }, [userId, isOwnProfile, settings?.show_events]);
+
+  const renderFilePreview = (file: any) => {
+    const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;
+    
+    if (file.file_type === 'image') {
+      return (
+        <img 
+          src={publicUrl} 
+          alt={file.title || file.filename}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      );
+    } else if (file.file_type === 'video') {
+      return (
+        <video 
+          src={publicUrl}
+          className="w-full h-full object-cover"
+          muted
+          loop
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => e.currentTarget.pause()}
+        />
+      );
+    } else if (file.file_type === 'audio') {
+      return (
+        <div className="w-full h-full bg-muted flex items-center justify-center">
+          <Music className="h-8 w-8 text-muted-foreground" />
+        </div>
+      );
+    } else {
+      return (
+        <div className="w-full h-full bg-muted flex items-center justify-center">
+          <File className="h-8 w-8 text-muted-foreground" />
+        </div>
+      );
+    }
+  };
 
   if (loading) {
     return <div className="flex justify-center p-8">Laster profil...</div>;
@@ -252,6 +292,36 @@ const Profile = () => {
                 </div>
               ) : (
                 <p className="text-muted-foreground">Ingen kontaktinfo lagt til</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Portefølje */}
+        {(settings?.show_portfolio || isOwnProfile) && portfolioFiles && portfolioFiles.length > 0 && (
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <File className="h-4 w-4" />
+                Portefølje
+              </CardTitle>
+              <SectionVisibilityIndicator isVisible={settings?.show_portfolio || false} sectionName="Portefølje" />
+            </CardHeader>
+            <CardContent>
+              {portfolioLoading ? (
+                <p className="text-muted-foreground">Laster portefølje...</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {portfolioFiles.map((file) => (
+                    <div 
+                      key={file.id} 
+                      className="aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => window.open(`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`, '_blank')}
+                    >
+                      {renderFilePreview(file)}
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
