@@ -15,6 +15,7 @@ interface ConceptCardProps {
     expected_audience: number | null;
     tech_spec: string | null;
     tech_spec_reference: string | null;
+    hospitality_rider_reference?: string | null;
     available_dates: any;
     is_published: boolean;
     status: string;
@@ -42,9 +43,17 @@ interface TechSpecFile {
   file_type: string;
 }
 
+interface HospitalityRiderFile {
+  id: string;
+  filename: string;
+  file_url: string;
+  file_type: string;
+}
+
 const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProps) => {
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
+  const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,6 +86,21 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
           console.error('Error loading tech spec file:', techSpecError);
         } else {
           setTechSpecFile(techSpecData);
+        }
+      }
+
+      // Load hospitality rider file if reference exists  
+      if (concept.hospitality_rider_reference) {
+        const { data: hospitalityRiderData, error: hospitalityRiderError } = await supabase
+          .from('hospitality_riders')
+          .select('id, filename, file_url, file_type')
+          .eq('id', concept.hospitality_rider_reference)
+          .maybeSingle();
+
+        if (hospitalityRiderError) {
+          console.error('Error loading hospitality rider file:', hospitalityRiderError);
+        } else {
+          setHospitalityRiderFile(hospitalityRiderData);
         }
       }
     } catch (error) {
@@ -286,7 +310,63 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
           </div>
         )}
 
-        {/* Tech Spec - Hidden from UI as per requirements */}
+        {/* Tech Spec File */}
+        {techSpecFile && (
+          <div>
+            <h4 className="font-medium mb-4 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Teknisk spesifikasjon
+            </h4>
+            <div className="bg-muted/30 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-primary" />
+                  <div>
+                    <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
+                    <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open(techSpecFile.file_url, '_blank')}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  Last ned
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Hospitality Rider File */}
+        {hospitalityRiderFile && (
+          <div>
+            <h4 className="font-medium mb-4 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Hospitality Rider
+            </h4>
+            <div className="bg-muted/30 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-primary" />
+                  <div>
+                    <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
+                    <p className="text-xs text-muted-foreground">Hospitality Rider</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm" 
+                  onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  Last ned
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Loading state */}
         {loading && (
