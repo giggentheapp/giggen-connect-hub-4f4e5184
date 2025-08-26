@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MakerDashboard } from '@/components/MakerDashboard';
-import { GoerDashboard } from '@/components/GoerDashboard';
+import { GoerLayout } from '@/components/layouts/GoerLayout';
 
 interface UserProfile {
   id: string;
@@ -23,11 +22,14 @@ interface UserProfile {
   current_mode?: string;
 }
 
-const Dashboard = () => {
+interface GoerDashboardProps {
+  children: React.ReactNode;
+}
+
+const GoerDashboard = ({ children }: GoerDashboardProps) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const location = useLocation();
 
   useEffect(() => {
     loadProfile();
@@ -80,23 +82,11 @@ const Dashboard = () => {
     );
   }
 
-  // Redirect based on current_mode if on base dashboard route
-  const currentMode = profile.current_mode || profile.default_mode || profile.role;
-  
-  if (location.pathname === '/dashboard') {
-    if (currentMode === 'goer') {
-      return <Navigate to="/dashboard/goer/market" replace />;
-    } else {
-      return <Navigate to="/dashboard/maker/overview" replace />;
-    }
-  }
-
-  // For non-redirected routes, show appropriate dashboard
-  if (currentMode === 'goer') {
-    return <GoerDashboard profile={profile} />;
-  }
-  
-  return <MakerDashboard profile={profile} />;
+  return (
+    <GoerLayout profile={profile}>
+      {children}
+    </GoerLayout>
+  );
 };
 
-export default Dashboard;
+export default GoerDashboard;

@@ -25,13 +25,6 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
       subItems: []
     },
     { 
-      id: 'market', 
-      label: 'Arrangementsmarked', 
-      icon: Store,
-      subItems: [],
-      action: () => window.location.href = '/market'
-    },
-    { 
       id: 'profile', 
       label: 'Profil', 
       icon: User,
@@ -61,9 +54,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
 
   const handleMainClick = (itemId: string) => {
     const item = navItems.find(item => item.id === itemId);
-    if (item?.action) {
-      item.action();
-    } else if (item?.subItems.length > 0) {
+    if (item?.subItems && item.subItems.length > 0) {
       setExpandedSubmenu(expandedSubmenu === itemId ? null : itemId);
     } else {
       handleNavigation(itemId);
