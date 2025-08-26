@@ -99,16 +99,51 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   const handlePublishAgreement = async () => {
     try {
+      // Update booking status to published
       await updateBooking(booking.id, { status: 'published' });
       
-      toast({
-        title: "Arrangement publisert",
-        description: "Arrangementet er nå offentlig tilgjengelig",
-      });
+      // Create event in events_market
+      const eventDate = booking.event_date ? new Date(booking.event_date) : new Date();
+      const eventData = {
+        title: booking.title,
+        description: booking.description,
+        portfolio_id: booking.selected_concept_id, // Link to the selected concept if available
+        ticket_price: booking.price_ticket ? parseFloat(booking.price_ticket.replace(/[^\d.]/g, '')) : null,
+        venue: booking.venue,
+        date: eventDate.toISOString().split('T')[0], // Extract date part
+        time: eventDate.toTimeString().split(' ')[0], // Extract time part
+        created_by: booking.receiver_id, // The maker (receiver) creates the event
+        is_public: false // Start as private, can be made public later
+      };
+
+      const { data: event, error: eventError } = await supabase
+        .from("events_market")
+        .insert([eventData])
+        .select();
+
+      if (eventError) {
+        console.error('Error creating event in market:', eventError);
+        // Don't fail the publish if event creation fails
+        toast({
+          title: "Arrangement publisert",
+          description: "Arrangementet er publisert, men kunne ikke legges til i markedet automatisk",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Arrangement publisert",
+          description: "Arrangementet er nå publisert og lagt til i markedet",
+        });
+      }
       
       onClose();
     } catch (error) {
       // Error handled in hook
+      toast({
+        title: "Feil ved publisering",
+        description: "Kunne ikke publisere arrangementet",
+        variant: "destructive",
+      });
     }
   };
 
