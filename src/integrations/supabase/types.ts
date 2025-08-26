@@ -303,6 +303,63 @@ export type Database = {
           },
         ]
       }
+      events_market: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          portfolio_id: string | null
+          ticket_price: number | null
+          time: string | null
+          title: string
+          venue: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          portfolio_id?: string | null
+          ticket_price?: number | null
+          time?: string | null
+          title: string
+          venue?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          portfolio_id?: string | null
+          ticket_price?: number | null
+          time?: string | null
+          title?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_market_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "events_market_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "profile_portfolio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitality_riders: {
         Row: {
           created_at: string
@@ -491,6 +548,8 @@ export type Database = {
           bio: string | null
           contact_info: Json | null
           created_at: string
+          current_mode: string | null
+          default_mode: string | null
           display_name: string
           id: string
           is_address_public: boolean
@@ -506,6 +565,8 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
+          current_mode?: string | null
+          default_mode?: string | null
           display_name: string
           id?: string
           is_address_public?: boolean
@@ -521,6 +582,8 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
+          current_mode?: string | null
+          default_mode?: string | null
           display_name?: string
           id?: string
           is_address_public?: boolean
