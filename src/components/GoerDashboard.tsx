@@ -17,6 +17,8 @@ interface UserProfile {
   longitude: number | null;
   created_at: string;
   updated_at: string;
+  default_mode?: string;
+  current_mode?: string;
 }
 
 interface GoerDashboardProps {

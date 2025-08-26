@@ -11,6 +11,7 @@ import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { Button } from '@/components/ui/button';
+import { ModeSwitcher } from '@/components/ModeSwitcher';
 
 interface UserProfile {
   id: string;
@@ -26,6 +27,8 @@ interface UserProfile {
   contact_info: any;
   created_at: string;
   updated_at: string;
+  default_mode?: string;
+  current_mode?: string;
 }
 
 interface MakerDashboardProps {
@@ -73,10 +76,13 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
       {/* Header */}
       <header className={`border-b bg-card/95 backdrop-blur-sm z-40 ${!isMobile ? 'ml-16' : ''}`}>
         <div className="container mx-auto px-4 py-4">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Velkommen, {profile.display_name}
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Velkommen, {profile.display_name}
+              </p>
+            </div>
+            <ModeSwitcher profile={profile} />
           </div>
         </div>
       </header>
