@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import MapView from "./pages/MapView";
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
+import EventMarket from "./pages/EventMarket";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/map" element={<MapView />} />
           <Route path="/concept/:conceptId" element={<ConceptView />} />
           <Route path="/events" element={<UpcomingEvents />} />
+          <Route path="/market" element={<EventMarket />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

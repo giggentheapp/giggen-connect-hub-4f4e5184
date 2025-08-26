@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, ChevronDown, Calendar } from 'lucide-react';
+import { Compass, User, Settings, ChevronDown, Calendar, Store } from 'lucide-react';
 
 interface DesktopMenubarProps {
   activeSection: string;
@@ -23,6 +23,13 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
       label: 'Utforsk', 
       icon: Compass,
       subItems: []
+    },
+    { 
+      id: 'market', 
+      label: 'Arrangementsmarked', 
+      icon: Store,
+      subItems: [],
+      action: () => window.location.href = '/market'
     },
     { 
       id: 'profile', 
@@ -54,7 +61,9 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
 
   const handleMainClick = (itemId: string) => {
     const item = navItems.find(item => item.id === itemId);
-    if (item?.subItems.length > 0) {
+    if (item?.action) {
+      item.action();
+    } else if (item?.subItems.length > 0) {
       setExpandedSubmenu(expandedSubmenu === itemId ? null : itemId);
     } else {
       handleNavigation(itemId);
