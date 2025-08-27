@@ -12,6 +12,7 @@ import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { Button } from '@/components/ui/button';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
+import { GoerView } from '@/components/GoerView';
 
 interface UserProfile {
   id: string;
@@ -37,7 +38,17 @@ interface MakerDashboardProps {
 
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [activeSection, setActiveSection] = useState('explore');
+  const [currentMode, setCurrentMode] = useState(profile.current_mode || profile.default_mode || 'maker');
   const isMobile = useIsMobile();
+
+  const handleModeChange = (newMode: string) => {
+    setCurrentMode(newMode);
+  };
+
+  // Show GoerView if in goer mode
+  if (currentMode === 'goer') {
+    return <GoerView profile={profile} onModeChange={handleModeChange} />;
+  }
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -82,7 +93,7 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 Velkommen, {profile.display_name}
               </p>
             </div>
-            <ModeSwitcher profile={profile} />
+            <ModeSwitcher profile={profile} onModeChange={handleModeChange} />
           </div>
         </div>
       </header>
