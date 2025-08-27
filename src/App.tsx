@@ -7,7 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import MapView from "./pages/MapView";
+
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
 import EventMarket from "./pages/EventMarket";
@@ -27,7 +27,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="/map" element={<MapView />} />
+          
           <Route path="/concept/:conceptId" element={<ConceptView />} />
           <Route path="/events" element={<UpcomingEvents />} />
           <Route path="/market" element={<EventMarket />} />

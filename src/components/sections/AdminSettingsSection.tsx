@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { SettingsSection } from '@/components/sections/SettingsSection';
 
 interface UserProfile {
   id: string;
@@ -29,10 +28,9 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
         <p className="text-muted-foreground">Administrer profilinnstillinger og personvern</p>
       </div>
 
-      <SettingsSection 
-        profile={updatedProfile} 
-        onProfileUpdate={setUpdatedProfile}
-      />
+      <div className="text-center text-muted-foreground">
+        Settings functionality coming soon...
+      </div>
     </div>
   );
 };
