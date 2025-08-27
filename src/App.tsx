@@ -11,10 +11,6 @@ import MapView from "./pages/MapView";
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
 import EventMarket from "./pages/EventMarket";
-import GoerDashboard from "./pages/goer/GoerDashboard";
-import GoerMarket from "./pages/goer/GoerMarket";
-import GoerMap from "./pages/goer/GoerMap";
-import GoerMakers from "./pages/goer/GoerMakers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,9 +25,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/goer/market" element={<GoerDashboard><GoerMarket /></GoerDashboard>} />
-          <Route path="/dashboard/goer/map" element={<GoerDashboard><GoerMap /></GoerDashboard>} />
-          <Route path="/dashboard/goer/makers" element={<GoerDashboard><GoerMakers /></GoerDashboard>} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/map" element={<MapView />} />
           <Route path="/concept/:conceptId" element={<ConceptView />} />

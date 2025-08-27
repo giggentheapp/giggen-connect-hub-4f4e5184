@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { Users, UserCog } from "lucide-react";
 
 interface ModeSwitcherProps {
@@ -21,7 +20,6 @@ export const ModeSwitcher = ({ profile, onModeChange }: ModeSwitcherProps) => {
   const [mode, setMode] = useState(profile.current_mode || profile.default_mode || 'maker');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   // Only show mode switcher for makers who can switch between modes
   if (profile.role !== 'maker') {
@@ -44,13 +42,6 @@ export const ModeSwitcher = ({ profile, onModeChange }: ModeSwitcherProps) => {
 
       setMode(newMode);
       onModeChange?.(newMode);
-      
-      // Navigate to appropriate dashboard
-      if (newMode === 'goer') {
-        navigate('/dashboard/goer/market');
-      } else {
-        navigate('/dashboard');
-      }
       
       toast({
         title: "Modus endret",

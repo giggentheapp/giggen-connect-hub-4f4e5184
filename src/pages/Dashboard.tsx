@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerDashboard } from '@/components/GoerDashboard';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -24,40 +28,70 @@ interface UserProfile {
 }
 
 const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const location = useLocation();
 
   useEffect(() => {
-    loadProfile();
-  }, []);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session?.user) {
+          navigate('/auth');
+        }
+      }
+    );
 
-  const loadProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
+    // Check for existing session and load profile
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       
-      if (!user) {
-        window.location.href = '/auth';
+      if (!session?.user) {
+        navigate('/auth');
         return;
       }
 
+      // Load user profile
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .single();
 
-      if (error) throw error;
-      setProfile(profileData);
-    } catch (error: any) {
+      if (error) {
+        console.error('Error loading profile:', error);
+        toast({
+          title: "Feil ved lasting av profil",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setProfile(profileData);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
       toast({
-        title: "Feil ved lasting av profil",
+        title: "Feil ved utlogging",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+    } else {
+      navigate('/auth');
     }
   };
 
@@ -72,31 +106,33 @@ const Dashboard = () => {
     );
   }
 
-  if (!profile) {
+  if (!user || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Kunne ikke laste profil</p>
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground mb-4">
+              Kunne ikke laste brukerdata
+            </p>
+            <Button onClick={() => navigate('/auth')} className="w-full">
+              Gå til innlogging
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  // Redirect based on current_mode if on base dashboard route
-  const currentMode = profile.current_mode || profile.default_mode || profile.role;
-  
-  if (location.pathname === '/dashboard') {
-    if (currentMode === 'goer') {
-      return <Navigate to="/dashboard/goer/market" replace />;
-    } else {
-      return <Navigate to="/dashboard/maker/overview" replace />;
-    }
-  }
-
-  // For non-redirected routes, show appropriate dashboard
-  if (currentMode === 'goer') {
-    return <GoerDashboard profile={profile} />;
-  }
-  
-  return <MakerDashboard profile={profile} />;
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Role-specific dashboard with integrated navigation */}
+      {profile.role === 'maker' ? (
+        <MakerDashboard profile={profile} />
+      ) : (
+        <GoerDashboard profile={profile} />
+      )}
+    </div>
+  );
 };
 
 export default Dashboard;
