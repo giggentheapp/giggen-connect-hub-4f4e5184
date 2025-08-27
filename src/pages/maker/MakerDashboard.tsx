@@ -1,26 +1,19 @@
 import { Link, Routes, Route } from "react-router-dom";
-import GoerHome from "./GoerHome";
-import GoerMapFullScreen from "./GoerMapFullScreen";
+import MakerHome from "./MakerHome";
 
-export default function GoerDashboard() {
+export default function MakerDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b bg-card/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-6">
-            <h1 className="text-xl font-bold">GIGGEN - Goer</h1>
+            <h1 className="text-xl font-bold">GIGGEN - Maker</h1>
             <div className="flex items-center gap-4">
               <Link 
-                to="/goer" 
+                to="/maker" 
                 className="text-sm hover:text-primary transition-colors"
               >
                 Hjem
-              </Link>
-              <Link 
-                to="/events-market" 
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Arrangementer
               </Link>
               <Link 
                 to="/bookings" 
@@ -29,10 +22,16 @@ export default function GoerDashboard() {
                 Bookings
               </Link>
               <Link 
-                to="/maker" 
+                to="/events-market" 
+                className="text-sm hover:text-primary transition-colors"
+              >
+                Arrangementer
+              </Link>
+              <Link 
+                to="/goer" 
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                Bytt til Maker
+                Bytt til Goer
               </Link>
             </div>
           </div>
@@ -41,8 +40,7 @@ export default function GoerDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={<GoerHome />} />
-          <Route path="/map" element={<GoerMapFullScreen />} />
+          <Route path="/" element={<MakerHome />} />
         </Routes>
       </main>
     </div>
