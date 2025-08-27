@@ -116,7 +116,7 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
         </CardHeader>
         <CardContent className="text-center">
           <Link 
-            to="/map" 
+            to="/goer-map" 
             className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
           >
             <Map className="w-5 h-5 mr-2" />
@@ -172,7 +172,7 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
             {visibleMakers.length > 6 && (
               <div className="text-center mt-4">
                 <Link 
-                  to="/map" 
+                  to="/goer-map" 
                   className="text-sm text-primary hover:underline"
                 >
                   Se alle {visibleMakers.length} makere på kartet →

@@ -10,11 +10,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { useBookingChanges } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, AlertTriangle, Check, X, Eye } from 'lucide-react';
+import { CalendarIcon, AlertTriangle, Check, X, Eye, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BookingDetailsProps {
@@ -267,6 +268,53 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     );
   };
 
+  const handleRejectBooking = async () => {
+    if (!booking || !currentUserId) return;
+
+    try {
+      await updateBooking(bookingId, { status: 'rejected' });
+      setBooking(prev => prev ? { ...prev, status: 'rejected' } : null);
+      toast({
+        title: "Booking avvist",
+        description: "Bookingen har blitt avvist",
+      });
+    } catch (error) {
+      toast({
+        title: "Feil ved avvisning",
+        description: "Kunne ikke avvise bookingen",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteBooking = async () => {
+    if (!booking || !currentUserId) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Booking slettet",
+        description: "Bookingen har blitt slettet",
+      });
+
+      if (onClose) {
+        onClose();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Feil ved sletting",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="p-6 text-center">Laster booking...</div>;
   }
@@ -440,7 +488,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {canEdit && (
               <>
                 {isSender && !booking.sender_confirmed && (
@@ -461,6 +509,48 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
               <Button onClick={() => handleFieldEdit('status', 'published')}>
                 Publiser arrangement
               </Button>
+            )}
+
+            {/* Reject and Delete buttons for both sender and receiver */}
+            {(isSender || isReceiver) && booking.status !== 'rejected' && booking.status !== 'published' && (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={handleRejectBooking}
+                >
+                  Avvis
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Slett
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Denne handlingen kan ikke angres. Bookingen vil bli permanent slettet.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Slett booking
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+
+            {booking.status === 'rejected' && (
+              <Badge variant="destructive" className="ml-2">
+                Avvist
+              </Badge>
             )}
           </div>
         </CardContent>
