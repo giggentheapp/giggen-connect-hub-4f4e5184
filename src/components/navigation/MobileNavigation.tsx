@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, Calendar, Store } from 'lucide-react';
+import { Compass, User, Settings, Calendar } from 'lucide-react';
 
 interface MobileNavigationProps {
   activeSection: string;
@@ -9,7 +9,6 @@ interface MobileNavigationProps {
 export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationProps) => {
   const navItems = [
     { id: 'explore', label: 'Utforsk', icon: Compass },
-    { id: 'market', label: 'Marked', icon: Store, action: () => window.location.href = '/market' },
     { id: 'profile', label: 'Profil', icon: User },
     { id: 'bookings', label: 'Bookinger', icon: Calendar },
     { id: 'admin', label: 'Admin', icon: Settings },
@@ -25,7 +24,7 @@ export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavig
           return (
             <button
               key={item.id}
-              onClick={() => item.action ? item.action() : onSectionChange(item.id)}
+              onClick={() => onSectionChange(item.id)}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1',
                 isActive 
