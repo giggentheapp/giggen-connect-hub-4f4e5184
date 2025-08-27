@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Map, Grid3X3, List, User, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 
 interface MakerProfile {
   id: string;
@@ -19,10 +20,14 @@ interface MakerProfile {
 
 export const ExploreSection = () => {
   const [makers, setMakers] = useState<MakerProfile[]>([]);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState('list');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  const isMapMode = viewMode === 'map';
+  const isListMode = viewMode === 'list';
+  const isGridMode = viewMode === 'grid';
 
   useEffect(() => {
     fetchMakers();
@@ -66,6 +71,25 @@ export const ExploreSection = () => {
     );
   }
 
+  // If map view is selected, show fullscreen map
+  if (isMapMode) {
+    return (
+      <div className="h-[calc(100vh-8rem)]">
+        <GoerFullscreenMap 
+          onBack={() => setViewMode('list')}
+          onMakerClick={(makerId) => {
+            // Navigate to maker profile
+            window.location.href = `/profile/${makerId}`;
+          }}
+        />
+      </div>
+    );
+  }
+
+  const handleViewModeChange = (mode: string) => {
+    setViewMode(mode);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with view toggle */}
@@ -78,26 +102,28 @@ export const ExploreSection = () => {
         {!isMobile && (
           <div className="flex items-center gap-2">
             <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
+              variant={isListMode ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode('list')}
+              onClick={() => handleViewModeChange('list')}
             >
               <List className="h-4 w-4 mr-1" />
               Liste
             </Button>
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              variant={isGridMode ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => handleViewModeChange('grid')}
             >
               <Grid3X3 className="h-4 w-4 mr-1" />
               Rutenett
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/map">
-                <Map className="h-4 w-4 mr-1" />
-                Vis kart
-              </Link>
+            <Button
+              variant={isMapMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleViewModeChange('map')}
+            >
+              <Map className="h-4 w-4 mr-1" />
+              Vis kart
             </Button>
           </div>
         )}
@@ -107,28 +133,33 @@ export const ExploreSection = () => {
       {isMobile && (
         <div className="flex items-center gap-2">
           <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
+            variant={isListMode ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setViewMode('list')}
+            onClick={() => handleViewModeChange('list')}
             className="flex-1"
           >
             <List className="h-4 w-4 mr-1" />
             Liste
           </Button>
-          <Button variant="outline" size="sm" asChild className="flex-1">
-            <Link to="/map">
-              <Map className="h-4 w-4 mr-1" />
-              Kart
-            </Link>
+          <Button
+            variant={isMapMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => handleViewModeChange('map')}
+            className="flex-1"
+          >
+            <Map className="h-4 w-4 mr-1" />
+            Kart
           </Button>
         </div>
       )}
 
       {/* Makers display */}
       <div className={
-        isMobile || viewMode === 'list' 
+        isMobile || isListMode 
           ? 'space-y-4' 
-          : 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'
+          : isGridMode 
+            ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'
+            : 'space-y-4'
       }>
         {makers.map((maker) => (
           <Card key={maker.id} className="hover:shadow-md transition-shadow">
