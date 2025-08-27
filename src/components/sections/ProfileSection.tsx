@@ -68,7 +68,7 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
 
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Dette er hvordan andre Makere ser din profil. Bruk venstre meny for å se Goer-visningen.
+              Dette er hvordan andre Makere ser din profil.
             </p>
           </div>
         </CardContent>

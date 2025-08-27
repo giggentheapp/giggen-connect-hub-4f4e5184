@@ -35,10 +35,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange }: DesktopMenuba
       id: 'profile', 
       label: 'Profil', 
       icon: User,
-      subItems: [
-        { id: 'profile-maker', label: 'Maker-visning', action: () => handleNavigation('profile-maker') },
-        { id: 'profile-goer', label: 'Goer-visning', action: () => handleNavigation('profile-goer') }
-      ]
+      subItems: []
     },
     { 
       id: 'bookings', 

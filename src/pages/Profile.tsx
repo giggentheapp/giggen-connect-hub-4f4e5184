@@ -278,39 +278,6 @@ const Profile = () => {
           </Card>
         )}
 
-        {/* Kontaktinfo */}
-        {(settings?.show_contact || isOwnProfile) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Kontaktinfo
-              </CardTitle>
-              <SectionVisibilityIndicator isVisible={settings?.show_contact || false} sectionName="Kontaktinfo" />
-            </CardHeader>
-            <CardContent>
-              {profile.contact_info ? (
-                <div className="space-y-2">
-                  {profile.contact_info.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span>{profile.contact_info.email}</span>
-                    </div>
-                  )}
-                  {profile.contact_info.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      <span>{profile.contact_info.phone}</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">Ingen kontaktinfo lagt til</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         {/* Portefølje */}
         {(settings?.show_portfolio || isOwnProfile) && portfolioFiles && portfolioFiles.length > 0 && (
           <Card className="md:col-span-2">
@@ -370,49 +337,6 @@ const Profile = () => {
           </Card>
         )}
 
-        {/* Kommende arrangementer */}
-        {(settings?.show_events || isOwnProfile) && (
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Kommende arrangementer</CardTitle>
-              <SectionVisibilityIndicator isVisible={settings?.show_events || false} sectionName="Arrangementer" />
-            </CardHeader>
-            <CardContent>
-              {Array.isArray(events) && events.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {events.filter(event => event && event.id).map((event) => (
-                    <Card key={event.id}>
-                      <CardHeader>
-                        <CardTitle className="text-lg">{event.title || 'Untitled Event'}</CardTitle>
-                        {event.event_date && (
-                          <CardDescription>
-                            {new Date(event.event_date).toLocaleDateString('no-NO', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </CardDescription>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm">{event.description || 'No description'}</p>
-                        {event.location && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            📍 {event.location}
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">Ingen kommende arrangementer</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
