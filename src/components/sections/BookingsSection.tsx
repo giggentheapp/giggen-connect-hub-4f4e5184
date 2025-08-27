@@ -51,7 +51,6 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'confirmed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -62,7 +61,6 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'confirmed': return 'Bekreftet';
       case 'published': return 'Publisert';
       case 'cancelled': return 'Avlyst';
-      case 'rejected': return 'Avvist';
       default: return status;
     }
   };
@@ -99,15 +97,12 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
       if (error) throw error;
 
-      // Remove from local state
-      const { bookings: updatedBookings } = useBookings(profile.user_id);
-      
       toast({
         title: "Forespørsel slettet",
         description: "Bookingforespørselen har blitt permanent slettet",
       });
       
-      // Refresh the bookings list
+      // Refresh bookings list
       window.location.reload();
     } catch (error: any) {
       toast({
@@ -217,69 +212,20 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </Button>
               )}
 
-              {/* Reject and Delete buttons */}
-              {(booking.status === 'sent' || booking.status === 'draft') && (
+              {/* Reject and Delete buttons for bookings that can be rejected */}
+              {booking.status === 'sent' && (
                 <>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={(e) => e.stopPropagation()}
-                        className="border-destructive text-destructive hover:bg-destructive/10"
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Avvis
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Avvis forespørsel?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Dette vil markere forespørselen som avvist. Den kan fortsatt slettes senere.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={() => handleRejectBooking(booking.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Avvis forespørsel
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Trash className="h-4 w-4 mr-1" />
-                        Slett
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Slett forespørsel permanent?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Denne handlingen kan ikke angres. Forespørselen vil bli permanent slettet fra systemet.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={() => handleDeleteBooking(booking.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Slett permanent
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejectBooking(booking.id);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Avvis
+                  </Button>
                 </>
               )}
 
@@ -298,7 +244,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Slett avvist forespørsel?</AlertDialogTitle>
+                      <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
                       <AlertDialogDescription>
                         Denne handlingen kan ikke angres. Forespørselen vil bli permanent slettet.
                       </AlertDialogDescription>

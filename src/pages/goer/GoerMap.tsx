@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { EventDetailsModal } from "@/components/EventDetailsModal";
-import { useToast } from "@/hooks/use-toast";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Calendar, Clock, DollarSign } from "lucide-react";
+import { format } from "date-fns";
+import { nb } from "date-fns/locale";
 
 interface EventMarketItem {
   id: string;
@@ -17,57 +15,12 @@ interface EventMarketItem {
   date: string;
   time: string | null;
   is_public: boolean;
-  portfolio_id: string | null;
-  created_by: string | null;
-  coordinates?: [number, number];
 }
 
 const GoerMap = () => {
-  const navigate = useNavigate();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [events, setEvents] = useState<EventMarketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const [tokenError, setTokenError] = useState<string | null>(null);
-  const [mapReady, setMapReady] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<EventMarketItem | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const { toast } = useToast();
-
-  // Get Mapbox token
-  useEffect(() => {
-    const getMapboxToken = async () => {
-      try {
-        const directToken = import.meta.env.VITE_MAPBOX_TOKEN;
-        if (directToken && directToken !== 'undefined') {
-          setMapboxToken(directToken);
-          mapboxgl.accessToken = directToken;
-          return;
-        }
-        
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
-          return;
-        }
-        
-        if (data?.token && data.token !== 'undefined') {
-          setMapboxToken(data.token);
-          mapboxgl.accessToken = data.token;
-        } else {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
-        }
-      } catch (error: any) {
-        setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
-      }
-    };
-    
-    getMapboxToken();
-  }, []);
 
   useEffect(() => {
     loadEventsWithVenues();
@@ -80,23 +33,13 @@ const GoerMap = () => {
       
       const { data, error: fetchError } = await supabase
         .from("events_market")
-        .select("id, title, description, ticket_price, venue, date, time, is_public, portfolio_id, created_by")
+        .select("id, title, description, ticket_price, venue, date, time, is_public")
         .eq("is_public", true)
         .not("venue", "is", null)
         .order("date", { ascending: true });
 
       if (fetchError) throw fetchError;
-      
-      // For demo purposes, add some mock coordinates for events
-      const eventsWithCoordinates = (data || []).map((event, index) => ({
-        ...event,
-        coordinates: [
-          10.7461 + (Math.random() - 0.5) * 0.1, // Oslo longitude ± random offset
-          59.9127 + (Math.random() - 0.5) * 0.1  // Oslo latitude ± random offset
-        ] as [number, number]
-      }));
-      
-      setEvents(eventsWithCoordinates);
+      setEvents(data || []);
     } catch (err: any) {
       console.error("Error loading events:", err);
       setError(err.message);
@@ -105,245 +48,135 @@ const GoerMap = () => {
     }
   };
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken || map.current) {
-      return;
-    }
-
+  const formatEventDate = (dateStr: string) => {
     try {
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [10.7461, 59.9127], // Oslo, Norway
-        zoom: 12,
-      });
-
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
-
-      map.current.on('load', () => {
-        setMapReady(true);
-      });
-
-    } catch (error: any) {
-      toast({
-        title: "Kartfeil",
-        description: "Kunne ikke laste kartet",
-        variant: "destructive",
-      });
+      return format(new Date(dateStr), "d. MMMM yyyy", { locale: nb });
+    } catch {
+      return dateStr;
     }
+  };
 
-    return () => {
-      if (map.current) {
-        markersRef.current.forEach(marker => marker.remove());
-        markersRef.current = [];
-        map.current.remove();
-        map.current = null;
-        setMapReady(false);
-      }
-    };
-  }, [mapboxToken, toast]);
-
-  // Add event markers when data is ready
-  useEffect(() => {
-    if (!map.current || !mapReady || !events.length) {
-      return;
+  const formatEventTime = (timeStr: string | null) => {
+    if (!timeStr) return null;
+    try {
+      const [hours, minutes] = timeStr.split(':');
+      return `${hours}:${minutes}`;
+    } catch {
+      return timeStr;
     }
-
-    // Clean up existing markers
-    markersRef.current.forEach(marker => {
-      marker.remove();
-    });
-    markersRef.current = [];
-
-    // Create markers for each event
-    events.forEach((event) => {
-      if (!event.coordinates) return;
-
-      // Create marker element
-      const markerEl = document.createElement('div');
-      markerEl.className = 'event-marker';
-      markerEl.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 3px solid #ffffff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 14px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      `;
-      
-      markerEl.textContent = '🎵';
-
-      // Add hover effects
-      markerEl.addEventListener('mouseenter', () => {
-        markerEl.style.transform = 'scale(1.1)';
-        markerEl.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
-      });
-
-      markerEl.addEventListener('mouseleave', () => {
-        markerEl.style.transform = 'scale(1)';
-        markerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-      });
-
-      // Create popup
-      const popup = new mapboxgl.Popup({ 
-        offset: 25,
-        closeButton: true,
-        closeOnClick: false
-      }).setHTML(`
-        <div style="text-align: center; padding: 12px; min-width: 200px;">
-          <h3 style="margin: 0 0 6px 0; font-weight: bold; font-size: 16px; color: #333;">${event.title}</h3>
-          <p style="margin: 0 0 8px 0; font-size: 13px; color: #666;">${event.venue}</p>
-          <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${new Date(event.date).toLocaleDateString('nb-NO')}</p>
-          <button 
-            onclick="window.dispatchEvent(new CustomEvent('openEventDetails', { detail: '${event.id}' }))"
-            style="display: inline-block; padding: 6px 12px; background: #dc2626; color: white; text-decoration: none; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;"
-            onmouseover="this.style.backgroundColor='#b91c1c'"
-            onmouseout="this.style.backgroundColor='#dc2626'"
-          >
-            Se detaljer
-          </button>
-        </div>
-      `);
-
-      // Add marker to map
-      const marker = new mapboxgl.Marker({
-        element: markerEl,
-        anchor: 'bottom'
-      })
-        .setLngLat(event.coordinates)
-        .setPopup(popup)
-        .addTo(map.current!);
-        
-      markersRef.current.push(marker);
-    });
-
-    // Fit map to show all markers
-    if (events.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      events.forEach(event => {
-        if (event.coordinates) {
-          bounds.extend(event.coordinates);
-        }
-      });
-      
-      map.current.fitBounds(bounds, {
-        padding: 60,
-        maxZoom: 14,
-        duration: 1000
-      });
-    }
-    
-  }, [events, mapReady]);
-
-  // Listen for event details requests
-  useEffect(() => {
-    const handleOpenEventDetails = (e: any) => {
-      const eventId = e.detail;
-      const event = events.find(ev => ev.id === eventId);
-      if (event) {
-        setSelectedEvent(event);
-        setModalOpen(true);
-      }
-    };
-
-    window.addEventListener('openEventDetails', handleOpenEventDetails);
-    return () => window.removeEventListener('openEventDetails', handleOpenEventDetails);
-  }, [events]);
+  };
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-background">
-        {/* Back button */}
-        <div className="absolute top-4 left-4 z-10">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate('/dashboard/goer/market')}
-            className="bg-card/95 backdrop-blur-sm shadow-lg"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake til dashboard
-          </Button>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Arrangementskart</h1>
+          <p className="text-muted-foreground">Se arrangementer på kartet</p>
         </div>
-
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p>Laster kart...</p>
-          </div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Laster arrangementer...</p>
         </div>
       </div>
     );
   }
 
-  if (error || tokenError) {
+  if (error) {
     return (
-      <div className="fixed inset-0 bg-background">
-        {/* Back button */}
-        <div className="absolute top-4 left-4 z-10">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate('/dashboard/goer/market')}
-            className="bg-card/95 backdrop-blur-sm shadow-lg"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake til dashboard
-          </Button>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Arrangementskart</h1>
+          <p className="text-muted-foreground">Se arrangementer på kartet</p>
         </div>
-
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10 max-w-md">
-            <p className="text-destructive font-medium mb-2">Kartfeil</p>
-            <p className="text-sm text-muted-foreground">{error || tokenError}</p>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-destructive">Feil ved lasting av arrangementer: {error}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-background">
-      {/* Back button */}
-      <div className="absolute top-4 left-4 z-10">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => navigate('/dashboard/goer/market')}
-          className="bg-card/95 backdrop-blur-sm shadow-lg"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Tilbake til dashboard
-        </Button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Arrangementskart</h1>
+        <p className="text-muted-foreground">Se arrangementer på kartet</p>
       </div>
 
-      {/* Fullscreen Map */}
-      <div ref={mapContainer} className="w-full h-full" />
+      {/* Map Placeholder - Will be enhanced with actual map later */}
+      <Card className="h-96 bg-muted/50">
+        <CardContent className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">Kart kommer snart</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              {events.length} arrangementer med venue-informasjon
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Event Details Modal */}
-      <EventDetailsModal
-        event={selectedEvent}
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setSelectedEvent(null);
-        }}
-      />
+      {/* Events List */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Arrangementer med venue</h2>
+        {events.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">Ingen arrangementer med venue-informasjon</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {events.map((event) => (
+              <Card key={event.id} className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg line-clamp-1">{event.title}</CardTitle>
+                    <Badge variant="secondary" className="ml-2 flex-shrink-0">
+                      På kart
+                    </Badge>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-3">
+                  {event.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {event.description}
+                    </p>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>{formatEventDate(event.date)}</span>
+                      {event.time && (
+                        <>
+                          <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                          <span>{formatEventTime(event.time)}</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="line-clamp-1">{event.venue}</span>
+                    </div>
+
+                    {event.ticket_price && (
+                      <div className="flex items-center gap-2 text-sm font-semibold">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span>Billetter: {event.ticket_price} kr</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

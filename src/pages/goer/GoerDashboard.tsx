@@ -1,50 +1,92 @@
-import { Link, Routes, Route } from "react-router-dom";
-import GoerHome from "./GoerHome";
-import GoerMapFullScreen from "./GoerMapFullScreen";
+import { useEffect, useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { GoerLayout } from '@/components/layouts/GoerLayout';
 
-export default function GoerDashboard() {
-  return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b bg-card/95 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-bold">GIGGEN - Goer</h1>
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/goer" 
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Hjem
-              </Link>
-              <Link 
-                to="/events-market" 
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Arrangementer
-              </Link>
-              <Link 
-                to="/bookings" 
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Bookings
-              </Link>
-              <Link 
-                to="/maker" 
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Bytt til Maker
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="container mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<GoerHome />} />
-          <Route path="/map" element={<GoerMapFullScreen />} />
-        </Routes>
-      </main>
-    </div>
-  );
+interface UserProfile {
+  id: string;
+  user_id: string;
+  display_name: string;
+  bio: string | null;
+  role: 'maker' | 'goer';
+  avatar_url: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
+  contact_info: any;
+  created_at: string;
+  updated_at: string;
+  default_mode?: string;
+  current_mode?: string;
 }
+
+interface GoerDashboardProps {
+  children: React.ReactNode;
+}
+
+const GoerDashboard = ({ children }: GoerDashboardProps) => {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        window.location.href = '/auth';
+        return;
+      }
+
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      setProfile(profileData);
+    } catch (error: any) {
+      toast({
+        title: "Feil ved lasting av profil",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Laster dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Kunne ikke laste profil</p>
+      </div>
+    );
+  }
+
+  return (
+    <GoerLayout profile={profile}>
+      {children}
+    </GoerLayout>
+  );
+};
+
+export default GoerDashboard;
