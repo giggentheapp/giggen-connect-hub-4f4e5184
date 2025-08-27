@@ -2,98 +2,93 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft, MapPin, User, Heart } from 'lucide-react';
 
 interface GoerFullscreenMapProps {
-  className?: string;
+  onBack: () => void;
+  onMakerClick?: (makerId: string) => void;
 }
 
-interface EventMarketData {
+interface MakerData {
   id: string;
-  title: string;
-  description?: string;
-  date: string;
-  time?: string;
-  venue?: string;
-  ticket_price?: number;
-  created_by?: string;
-  is_public: boolean;
-  portfolio_id?: string;
+  user_id: string;
+  display_name: string;
+  bio: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
+  avatar_url: string | null;
+  address: string | null;
 }
 
-const GoerFullscreenMap: React.FC<GoerFullscreenMapProps> = ({ className = '' }) => {
+const GoerFullscreenMap = ({ onBack, onMakerClick }: GoerFullscreenMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [events, setEvents] = useState<EventMarketData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const markers = useRef<mapboxgl.Marker[]>([]);
+  
+  const [mapToken, setMapToken] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
+  const [makers, setMakers] = useState<MakerData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  // Get Mapbox token (same logic as Map.tsx)
+  const { toast } = useToast();
+
+  // Fetch Mapbox token
   useEffect(() => {
-    const getMapboxToken = async () => {
+    const fetchToken = async () => {
       try {
-        const directToken = import.meta.env.VITE_MAPBOX_TOKEN;
-        if (directToken && directToken !== 'undefined') {
-          setMapboxToken(directToken);
-          mapboxgl.accessToken = directToken;
+        // First try environment variable (if available in development)
+        const envToken = import.meta.env?.VITE_MAPBOX_TOKEN;
+        if (envToken) {
+          setMapToken(envToken);
           return;
         }
-        
+
+        // Fallback to Supabase function
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
-        if (error) {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
-          return;
-        }
+        if (error) throw error;
         
-        if (data?.token && data.token !== 'undefined') {
-          setMapboxToken(data.token);
-          mapboxgl.accessToken = data.token;
+        if (data?.token) {
+          setMapToken(data.token);
         } else {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+          throw new Error('No token received from function');
         }
       } catch (error: any) {
-        setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+        console.error('Error fetching Mapbox token:', error);
+        setTokenError(error.message);
       }
     };
-    
-    getMapboxToken();
+
+    fetchToken();
   }, []);
 
-  // Fetch events from events_market
-  const fetchEvents = useCallback(async (retryCount = 0) => {
+  // Fetch makers data
+  const fetchMakers = useCallback(async () => {
     try {
       setLoading(true);
       
       const { data, error } = await supabase
-        .from('events_market')
+        .from('profiles')
         .select('*')
-        .eq('is_public', true)
-        .not('venue', 'is', null)
-        .order('date', { ascending: true });
+        .eq('role', 'maker')
+        .eq('is_address_public', true)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
-      setEvents(data || []);
-      
+      setMakers(data || []);
     } catch (error: any) {
-      if (retryCount < 2) {
-        setTimeout(() => fetchEvents(retryCount + 1), 1000);
-        return;
-      }
-      
+      console.error('Error fetching makers:', error);
       toast({
-        title: "Feil ved lasting av arrangementer",
+        title: "Feil ved lasting av makers",
         description: error.message,
         variant: "destructive",
       });
@@ -102,25 +97,26 @@ const GoerFullscreenMap: React.FC<GoerFullscreenMapProps> = ({ className = '' })
     }
   }, [toast]);
 
-  // Fetch events on mount
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    fetchMakers();
+  }, [fetchMakers]);
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken || map.current) {
-      return;
-    }
+    if (!mapContainer.current || !mapToken) return;
+
+    mapboxgl.accessToken = mapToken;
 
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [10.7461, 59.9127], // Oslo, Norway
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [10.7522, 59.9139], // Oslo coordinates
         zoom: 10,
+        pitch: 0,
       });
 
+      // Add navigation controls
       map.current.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
@@ -134,149 +130,164 @@ const GoerFullscreenMap: React.FC<GoerFullscreenMapProps> = ({ className = '' })
 
       map.current.on('error', (e) => {
         console.error('Map error:', e);
+        setTokenError('Feil ved lasting av kart');
       });
 
+      return () => {
+        // Clean up markers
+        markers.current.forEach(marker => marker.remove());
+        markers.current = [];
+        
+        // Clean up map
+        if (map.current) {
+          map.current.remove();
+          map.current = null;
+        }
+      };
     } catch (error: any) {
-      toast({
-        title: "Kartfeil",
-        description: "Kunne ikke laste kartet",
-        variant: "destructive",
-      });
+      console.error('Error initializing map:', error);
+      setTokenError('Kunne ikke initialisere kart');
     }
+  }, [mapToken]);
 
-    return () => {
-      if (map.current) {
-        markersRef.current.forEach(marker => marker.remove());
-        markersRef.current = [];
-        map.current.remove();
-        map.current = null;
-        setMapReady(false);
-      }
-    };
-  }, [mapboxToken, toast]);
-
-  // Add event markers when data is ready
+  // Add markers for makers
   useEffect(() => {
-    if (!map.current || !mapReady || !events.length) {
-      return;
-    }
+    if (!map.current || !mapReady || makers.length === 0) return;
 
-    // Clean up existing markers
-    markersRef.current.forEach(marker => {
-      marker.remove();
-    });
-    markersRef.current = [];
+    // Clear existing markers
+    markers.current.forEach(marker => marker.remove());
+    markers.current = [];
 
-    // For now, we'll use placeholder coordinates for venues
-    // In a real app, you'd geocode the venue addresses
-    const defaultCoords = [
-      [10.7461, 59.9127], // Oslo
-      [10.7389, 59.9139], // Oslo center
-      [10.7522, 59.9147], // Grünerløkka
-      [10.7594, 59.9311], // Majorstuen
-    ];
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasValidCoordinates = false;
 
-    // Create markers for each event
-    events.forEach((event, index) => {
-      try {
-        // Use cycling coordinates for demo purposes
-        const coords = defaultCoords[index % defaultCoords.length];
-        
-        // Create marker element
-        const markerEl = document.createElement('div');
-        markerEl.className = 'event-marker';
-        markerEl.style.cssText = `
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          border: 3px solid #ffffff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        `;
-        
-        markerEl.textContent = '🎵';
+    makers.forEach((maker) => {
+      if (!maker.latitude || !maker.longitude) return;
 
-        // Add hover effects
-        markerEl.addEventListener('mouseenter', () => {
-          markerEl.style.transform = 'scale(1.1)';
-          markerEl.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
-        });
+      const coordinates: [number, number] = [maker.longitude, maker.latitude];
+      
+      // Create custom marker element
+      const markerElement = document.createElement('div');
+      markerElement.className = 'custom-marker';
+      markerElement.innerHTML = `
+        <div class="w-12 h-12 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
+          <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      `;
 
-        markerEl.addEventListener('mouseleave', () => {
-          markerEl.style.transform = 'scale(1)';
-          markerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-        });
-
-        // Create popup with event details
-        const popup = new mapboxgl.Popup({ 
-          offset: 25,
-          closeButton: true,
-          closeOnClick: false
-        }).setHTML(`
-          <div style="text-align: center; padding: 16px; min-width: 250px;">
-            <h3 style="margin: 0 0 8px 0; font-weight: bold; font-size: 18px; color: #333;">${event.title}</h3>
-            <p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">${new Date(event.date).toLocaleDateString('no-NO')}</p>
-            ${event.time ? `<p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Kl. ${event.time}</p>` : ''}
-            ${event.venue ? `<p style="margin: 0 0 8px 0; font-size: 14px; color: #666;"><strong>Sted:</strong> ${event.venue}</p>` : ''}
-            ${event.ticket_price ? `<p style="margin: 0 0 12px 0; font-size: 14px; color: #666;"><strong>Pris:</strong> ${event.ticket_price} kr</p>` : ''}
-            ${event.description ? `<p style="margin: 0 0 12px 0; font-size: 13px; color: #777; max-width: 200px;">${event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description}</p>` : ''}
-            <button 
-              onclick="window.open('/market', '_blank')"
-              style="display: inline-block; padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.2s;"
-              onmouseover="this.style.backgroundColor='#1d4ed8'"
-              onmouseout="this.style.backgroundColor='#3b82f6'"
-            >
-              Se detaljer
+      // Create popup content
+      const popupContent = document.createElement('div');
+      popupContent.className = 'p-4 max-w-sm';
+      popupContent.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg">${maker.display_name}</h3>
+              <p class="text-sm text-gray-600">Maker</p>
+            </div>
+          </div>
+          
+          ${maker.bio ? `<p class="text-sm text-gray-700 line-clamp-3">${maker.bio}</p>` : ''}
+          
+          ${maker.address ? `
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              <span>${maker.address}</span>
+            </div>
+          ` : ''}
+          
+          <div class="flex gap-2 pt-2">
+            <button class="view-profile-btn flex-1 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+              Se profil
+            </button>
+            <button class="favorite-btn w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors ${favorites.has(maker.user_id) ? 'text-red-500' : 'text-gray-500'}">
+              <svg class="w-5 h-5" fill="${favorites.has(maker.user_id) ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
             </button>
           </div>
-        `);
+        </div>
+      `;
 
-        // Add marker to map
-        const marker = new mapboxgl.Marker({
-          element: markerEl,
-          anchor: 'bottom'
-        })
-          .setLngLat(coords as [number, number])
-          .setPopup(popup)
-          .addTo(map.current!);
-          
-        markersRef.current.push(marker);
-        
-      } catch (error: any) {
-        console.error('Failed to create event marker:', error);
+      // Add event listeners to popup content
+      const viewProfileBtn = popupContent.querySelector('.view-profile-btn');
+      const favoriteBtn = popupContent.querySelector('.favorite-btn');
+      
+      if (viewProfileBtn) {
+        viewProfileBtn.addEventListener('click', () => {
+          if (onMakerClick) {
+            onMakerClick(maker.user_id);
+          }
+        });
       }
+
+      if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', () => {
+          setFavorites(prev => {
+            const newFavorites = new Set(prev);
+            if (newFavorites.has(maker.user_id)) {
+              newFavorites.delete(maker.user_id);
+              toast({
+                title: "Fjernet fra favoritter",
+                description: `${maker.display_name} er fjernet fra favorittene dine`,
+              });
+            } else {
+              newFavorites.add(maker.user_id);
+              toast({
+                title: "Lagt til i favoritter",
+                description: `${maker.display_name} er lagt til i favorittene dine`,
+              });
+            }
+            return newFavorites;
+          });
+        });
+      }
+
+      // Create popup
+      const popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        offset: 25,
+        className: 'maker-popup'
+      }).setDOMContent(popupContent);
+
+      // Create and add marker
+      const marker = new mapboxgl.Marker(markerElement)
+        .setLngLat(coordinates)
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      markers.current.push(marker);
+      bounds.extend(coordinates);
+      hasValidCoordinates = true;
     });
 
-    // Fit map to show all markers if there are events
-    if (events.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      defaultCoords.forEach(coord => {
-        bounds.extend(coord as [number, number]);
-      });
-      
+    // Fit map to show all markers
+    if (hasValidCoordinates && map.current) {
       map.current.fitBounds(bounds, {
-        padding: 80,
-        maxZoom: 13,
-        duration: 1000
+        padding: 50,
+        maxZoom: 15
       });
     }
-    
-  }, [events, mapReady]);
+  }, [makers, mapReady, favorites, onMakerClick, toast]);
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p>Laster arrangementer...</p>
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-lg">Laster kart...</p>
         </div>
       </div>
     );
@@ -284,42 +295,62 @@ const GoerFullscreenMap: React.FC<GoerFullscreenMapProps> = ({ className = '' })
 
   if (tokenError) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-        <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10 max-w-md">
-          <p className="text-destructive font-medium mb-2">Kartfeil</p>
-          <p className="text-sm text-muted-foreground mb-4">{tokenError}</p>
-          <Button onClick={() => navigate('/dashboard')} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tilbake til dashboard
-          </Button>
-        </div>
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center text-destructive">Kartfeil</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p>Kunne ikke laste kartet: {tokenError}</p>
+            <Button onClick={onBack} className="w-full">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Tilbake
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
-      {/* Back button */}
-      <div className="absolute top-4 left-4 z-10">
-        <Button 
-          onClick={() => navigate('/dashboard')} 
-          variant="secondary"
-          className="bg-background/90 backdrop-blur-sm border shadow-lg"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Tilbake til dashboard
-        </Button>
-      </div>
-
-      {/* Event counter */}
-      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm border rounded-lg px-3 py-2 shadow-lg">
-        <p className="text-sm font-medium">
-          {events.length} arrangementer på kartet
-        </p>
+    <div className="fixed inset-0 bg-background z-50">
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between p-4">
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Tilbake
+          </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              {makers.length} makers
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Heart className="w-4 h-4" />
+              {favorites.size} favoritter
+            </Badge>
+          </div>
+        </div>
       </div>
 
       {/* Map Container */}
-      <div ref={mapContainer} className="w-full h-full" />
+      <div 
+        ref={mapContainer} 
+        className="absolute inset-0 pt-20"
+        style={{ width: '100%', height: 'calc(100% - 5rem)' }}
+      />
+
+      {/* Instructions */}
+      <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
+        <Card className="bg-background/95 backdrop-blur-sm pointer-events-auto">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground text-center">
+              Klikk på en markør for å se maker-detaljer og gå til profilen deres
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

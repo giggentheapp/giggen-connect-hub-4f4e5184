@@ -41,7 +41,7 @@ export const useBookings = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = useCallback(async (includeHistorical: boolean = false) => {
     try {
       setLoading(true);
       
@@ -52,6 +52,11 @@ export const useBookings = (userId?: string) => {
 
       if (userId) {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+      }
+
+      // Filter out historical bookings by default
+      if (!includeHistorical) {
+        query = query.not('status', 'eq', 'rejected').not('status', 'eq', 'cancelled');
       }
 
       const { data, error } = await query;
@@ -67,7 +72,7 @@ export const useBookings = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, toast]);
 
   useEffect(() => {
     fetchBookings();
@@ -154,13 +159,18 @@ export const useBookings = (userId?: string) => {
     }
   };
 
+  const fetchHistoricalBookings = useCallback(async () => {
+    return fetchBookings(true);
+  }, [fetchBookings]);
+
   return {
     bookings,
     loading,
     createBooking,
     updateBooking,
     trackChange,
-    refetch: fetchBookings
+    refetch: fetchBookings,
+    fetchHistorical: fetchHistoricalBookings
   };
 };
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
+import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 import { cn } from '@/lib/utils';
 import { Search, User, Heart, Settings } from 'lucide-react';
 
@@ -47,17 +48,13 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         return (
           <div className="h-[calc(100vh-8rem)]">
             {viewMode === 'map' ? (
-              <div className="relative bg-muted rounded-lg h-full flex items-center justify-center">
-                <p className="text-muted-foreground">Kart kommer her (fullskjerm)</p>
-                
-                {/* Toggle knapp på kartet */}
-                <button
-                  onClick={() => setViewMode('list')}
-                  className="absolute bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg hover:bg-primary/90 transition-colors"
-                >
-                  Vis liste
-                </button>
-              </div>
+              <GoerFullscreenMap 
+                onBack={() => setViewMode('list')}
+                onMakerClick={(makerId) => {
+                  // Handle maker profile navigation
+                  console.log('Navigate to maker:', makerId);
+                }}
+              />
             ) : (
               <div>
                 <div className="flex items-center justify-between mb-6">

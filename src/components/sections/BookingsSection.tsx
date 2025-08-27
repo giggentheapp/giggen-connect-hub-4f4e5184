@@ -36,7 +36,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed'>('received');
+  const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
   
   const { bookings, loading, updateBooking } = useBookings(profile.user_id);
   const { toast } = useToast();
@@ -44,6 +44,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
   const confirmedBookings = bookings.filter(b => b.status === 'published' || b.status === 'confirmed');
+  const historicalBookings = bookings.filter(b => ['rejected', 'cancelled'].includes(b.status));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -316,13 +317,21 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
           <Clock className="h-4 w-4" />
           Bekreftet ({confirmedBookings.length})
         </Button>
+        <Button 
+          variant={activeTab === 'history' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('history')}
+          className="flex items-center gap-2"
+        >
+          <Clock className="h-4 w-4" />
+          Historikk ({historicalBookings.length})
+        </Button>
       </div>
 
       {/* Bookings List */}
       <div className="space-y-4">
         {activeTab === 'received' && (
           <>
-            {receivedBookings.length === 0 ? (
+            {receivedBookings.filter(b => !['rejected', 'cancelled'].includes(b.status)).length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -330,16 +339,18 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(receivedBookings) ? receivedBookings.filter(booking => booking && booking.id).map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              )) : <></>
+              Array.isArray(receivedBookings) ? receivedBookings
+                .filter(booking => booking && booking.id && !['rejected', 'cancelled'].includes(booking.status))
+                .map((booking) => (
+                  <BookingCard key={booking.id} booking={booking} />
+                )) : <></>
             )}
           </>
         )}
 
         {activeTab === 'sent' && (
           <>
-            {sentBookings.length === 0 ? (
+            {sentBookings.filter(b => !['rejected', 'cancelled'].includes(b.status)).length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -347,9 +358,11 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(sentBookings) ? sentBookings.filter(booking => booking && booking.id).map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              )) : <></>
+              Array.isArray(sentBookings) ? sentBookings
+                .filter(booking => booking && booking.id && !['rejected', 'cancelled'].includes(booking.status))
+                .map((booking) => (
+                  <BookingCard key={booking.id} booking={booking} />
+                )) : <></>
             )}
           </>
         )}
@@ -365,6 +378,23 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(confirmedBookings) ? confirmedBookings.filter(booking => booking && booking.id).map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              )) : <></>
+            )}
+          </>
+        )}
+
+        {activeTab === 'history' && (
+          <>
+            {historicalBookings.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">Ingen historiske bookinger</p>
+                </CardContent>
+              </Card>
+            ) : (
+              Array.isArray(historicalBookings) ? historicalBookings.filter(booking => booking && booking.id).map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
               )) : <></>
             )}
