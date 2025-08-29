@@ -10,7 +10,6 @@ import Profile from "./pages/Profile";
 
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
-import EventMarket from "./pages/EventMarket";
 import NotFound from "./pages/NotFound";
 import GoerMapPage from "./pages/GoerMapPage";
 
@@ -30,7 +29,6 @@ const App = () => (
           
           <Route path="/concept/:conceptId" element={<ConceptView />} />
           <Route path="/events" element={<UpcomingEvents />} />
-          <Route path="/market" element={<EventMarket />} />
           <Route path="/goer-map" element={<GoerMapPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

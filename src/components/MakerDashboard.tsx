@@ -13,6 +13,10 @@ import { BookingsSection } from '@/components/sections/BookingsSection';
 import { Button } from '@/components/ui/button';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import { GoerView } from '@/components/GoerView';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
@@ -40,9 +44,24 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
   const [activeSection, setActiveSection] = useState('explore');
   const [currentMode, setCurrentMode] = useState(profile.current_mode || profile.default_mode || 'maker');
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleModeChange = (newMode: string) => {
     setCurrentMode(newMode);
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Feil ved utlogging",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate('/auth');
+    }
   };
 
   // Show GoerView if in goer mode
@@ -93,7 +112,18 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
                 Velkommen, {profile.display_name}
               </p>
             </div>
-            <ModeSwitcher profile={profile} onModeChange={handleModeChange} />
+            <div className="flex items-center gap-2">
+              <ModeSwitcher profile={profile} onModeChange={handleModeChange} />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logg ut
+              </Button>
+            </div>
           </div>
         </div>
       </header>

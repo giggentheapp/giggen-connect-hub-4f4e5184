@@ -4,7 +4,11 @@ import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 import { cn } from '@/lib/utils';
-import { Search, User, Heart, Settings } from 'lucide-react';
+import { Search, User, Heart, Settings, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
@@ -34,6 +38,21 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // For Utforsk-seksjonen
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Feil ved utlogging",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate('/auth');
+    }
+  };
 
   const goerNavItems = [
     { id: 'explore', label: 'Utforsk', icon: Search },
@@ -103,9 +122,14 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
               <div className="bg-card rounded-lg p-6 border">
                 <h3 className="font-semibold mb-4">Konto</h3>
                 <div className="space-y-3">
-                  <button className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="outline" 
+                    className="w-full justify-start"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
                     Logg ut
-                  </button>
+                  </Button>
                   <button className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                     Slett konto
                   </button>
@@ -207,9 +231,20 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
                 {profile.role === 'maker' ? 'Publikum-modus' : 'Publikum'}
               </p>
             </div>
-            {profile.role === 'maker' && (
-              <ModeSwitcher profile={profile} onModeChange={onModeChange} />
-            )}
+            <div className="flex items-center gap-2">
+              {profile.role === 'maker' && (
+                <ModeSwitcher profile={profile} onModeChange={onModeChange} />
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logg ut
+              </Button>
+            </div>
           </div>
         </div>
       </header>
