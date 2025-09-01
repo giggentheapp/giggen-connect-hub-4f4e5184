@@ -47,6 +47,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');
   const historicalBookings = bookings.filter(b => b.status === 'rejected');
 
+  // Helper functions for booking status display
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
