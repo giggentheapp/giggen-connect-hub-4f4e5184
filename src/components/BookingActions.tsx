@@ -20,16 +20,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
 
-  // Debug logging
-  console.log('🔧 BookingActions Debug:', {
-    bookingId: booking.id,
-    status: booking.status,
-    currentUserId,
-    senderId: booking.sender_id,
-    receiverId: booking.receiver_id,
-    isSender,
-    isReceiver
-  });
+  // Clean up debug logging - remove these console.log statements for production
 
   const handleAcceptBooking = async () => {
     if (loading) return;
@@ -77,23 +68,32 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
+      console.log('🗑️ Attempting to delete booking:', booking.id);
+      
       const { error } = await supabase
         .from('bookings')
         .delete()
         .eq('id', booking.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Delete booking error:', error);
+        throw error;
+      }
+
+      console.log('✅ Booking deleted successfully:', booking.id);
 
       toast({
         title: "Booking slettet",
         description: "Bookingen har blitt permanent slettet",
       });
       
+      // Call onAction to trigger refresh of booking list
       onAction?.();
     } catch (error: any) {
+      console.error('💥 Delete booking failed:', error);
       toast({
         title: "Feil ved sletting",
-        description: error.message,
+        description: error.message || "Kunne ikke slette booking",
         variant: "destructive",
       });
     } finally {

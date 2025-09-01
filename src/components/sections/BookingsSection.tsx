@@ -39,20 +39,8 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
   
-  const { bookings, loading, updateBooking } = useBookings(profile.user_id);
+  const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
-
-  // Debug logging
-  console.log('📋 BookingsSection Debug:', {
-    totalBookings: bookings.length,
-    bookingsData: bookings.map(b => ({
-      id: b.id,
-      title: b.title,
-      status: b.status,
-      sender_id: b.sender_id,
-      receiver_id: b.receiver_id
-    }))
-  });
 
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
@@ -92,9 +80,20 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
     return 'Ukjent fase';
   };
 
-  const handleBookingAction = () => {
-    // Refresh bookings list after any action
-    window.location.reload();
+  const handleBookingAction = async () => {
+    // Force refresh of bookings data instead of page reload
+    console.log('📄 Refreshing bookings after action...');
+    try {
+      await refetch();
+      console.log('✅ Bookings refreshed successfully');
+    } catch (error) {
+      console.error('❌ Failed to refresh bookings:', error);
+      toast({
+        title: "Kunne ikke oppdatere listen",
+        description: "Prøv å oppdatere siden manuelt",
+        variant: "destructive",
+      });
+    }
   };
 
   const BookingCard = ({ booking }: { booking: any }) => (
@@ -364,9 +363,9 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
             onConceptAction={(conceptId, action) => {
               console.log(`Concept ${conceptId} ${action}`);
               setConceptViewOpen(false);
-              // Refresh the page to update bookings after concept action
+              // Refresh bookings after concept action
               if (action === 'deleted' || action === 'rejected') {
-                window.location.reload();
+                handleBookingAction();
               }
             }}
           />
