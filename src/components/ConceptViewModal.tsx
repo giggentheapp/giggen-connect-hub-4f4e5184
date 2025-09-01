@@ -3,16 +3,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X, MoreVertical } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
+import { useConceptActions } from '@/hooks/useConceptActions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ConceptViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   conceptIds: string[];
   initialConceptIndex?: number;
+  showConceptActions?: boolean;
+  onConceptAction?: (conceptId: string, action: 'rejected' | 'deleted') => void;
 }
 
 interface Concept {
@@ -59,7 +69,9 @@ export const ConceptViewModal = ({
   isOpen, 
   onClose, 
   conceptIds, 
-  initialConceptIndex = 0 
+  initialConceptIndex = 0,
+  showConceptActions = false,
+  onConceptAction
 }: ConceptViewModalProps) => {
   const [currentConceptIndex, setCurrentConceptIndex] = useState(initialConceptIndex);
   const [concept, setConcept] = useState<Concept | null>(null);
@@ -67,8 +79,10 @@ export const ConceptViewModal = ({
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showActionsDialog, setShowActionsDialog] = useState(false);
   
   const { toast } = useToast();
+  const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
   useEffect(() => {
     if (isOpen && conceptIds.length > 0) {
@@ -160,8 +174,25 @@ export const ConceptViewModal = ({
     }
   };
 
+  const handleReject = async (reason?: string) => {
+    if (!concept) return;
+    const result = await rejectConcept(concept.id, reason);
+    if (result.success && onConceptAction) {
+      onConceptAction(concept.id, 'rejected');
+      onClose();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!concept) return;
+    const result = await deleteConcept(concept.id);
+    if (result.success && onConceptAction) {
+      onConceptAction(concept.id, 'deleted');
+      onClose();
+    }
+  };
+
   const parseAvailableDates = (datesData: any) => {
-    if (!datesData) return { dates: [], isIndefinite: false };
     try {
       const dates = typeof datesData === 'string' ? JSON.parse(datesData) : datesData;
       if (dates && typeof dates === 'object' && dates.indefinite) {
@@ -212,6 +243,22 @@ export const ConceptViewModal = ({
                   </Button>
                 </div>
               )}
+              {/* Concept Actions */}
+              {showConceptActions && concept && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={actionLoading}>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowActionsDialog(true)}>
+                      Konsepthandlinger
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              
               <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="h-4 w-4" />
               </Button>
@@ -455,6 +502,18 @@ export const ConceptViewModal = ({
           </div>
         )}
       </DialogContent>
+      
+      {/* Concept Actions Dialog */}
+      {showConceptActions && concept && (
+        <ConceptActionsDialog
+          isOpen={showActionsDialog}
+          onClose={() => setShowActionsDialog(false)}
+          onReject={handleReject}
+          onDelete={handleDelete}
+          conceptTitle={concept.title}
+          isLoading={actionLoading}
+        />
+      )}
     </Dialog>
   );
 };

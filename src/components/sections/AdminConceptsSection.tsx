@@ -84,7 +84,14 @@ export const AdminConceptsSection = ({ profile }: AdminConceptsSectionProps) => 
                   key={concept.id}
                   concept={concept}
                   showActions={true}
+                  showConceptActions={true}
                   onDelete={() => handleDeleteConcept(concept.id)}
+                  onConceptAction={(action) => {
+                    if (action === 'deleted' || action === 'rejected') {
+                      // Refresh the concepts list when a concept is deleted or rejected
+                      refetch();
+                    }
+                  }}
                 />
               )) : <></>}
               {concepts.length === 0 && (

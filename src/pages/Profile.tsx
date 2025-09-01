@@ -323,11 +323,18 @@ const Profile = () => {
               ) : Array.isArray(concepts) && concepts.length > 0 ? (
                 <div className="space-y-4">
                   {concepts.filter(concept => concept && concept.id).map((concept) => (
-                    <ConceptCard 
-                      key={concept.id}
-                      concept={concept}
-                      showActions={false}
-                    />
+                  <ConceptCard 
+                    key={concept.id}
+                    concept={concept}
+                    showActions={false}
+                    showConceptActions={!isOwnProfile}
+                    onConceptAction={(action) => {
+                      if (action === 'deleted' || action === 'rejected') {
+                        // Optionally refresh the page to update the concepts list
+                        window.location.reload();
+                      }
+                    }}
+                  />
                   ))}
                 </div>
               ) : (

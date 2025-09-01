@@ -2,9 +2,17 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, FileText, Image, Video, Music, Download } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
+import { useConceptActions } from '@/hooks/useConceptActions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ConceptCardProps {
   concept: {
@@ -23,7 +31,9 @@ interface ConceptCardProps {
     maker_id: string;
   };
   showActions?: boolean;
+  showConceptActions?: boolean;
   onDelete?: () => void;
+  onConceptAction?: (action: 'rejected' | 'deleted') => void;
 }
 
 interface ConceptFile {
@@ -50,11 +60,20 @@ interface HospitalityRiderFile {
   file_type: string;
 }
 
-const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProps) => {
+const ConceptCard = ({ 
+  concept, 
+  showActions = false, 
+  showConceptActions = false, 
+  onDelete,
+  onConceptAction
+}: ConceptCardProps) => {
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showActionsDialog, setShowActionsDialog] = useState(false);
+  
+  const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
   useEffect(() => {
     loadConceptData();
@@ -130,6 +149,20 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
     }
   };
 
+  const handleReject = async (reason?: string) => {
+    const result = await rejectConcept(concept.id, reason);
+    if (result.success && onConceptAction) {
+      onConceptAction('rejected');
+    }
+  };
+
+  const handleDelete = async () => {
+    const result = await deleteConcept(concept.id);
+    if (result.success && onConceptAction) {
+      onConceptAction('deleted');
+    }
+  };
+
   const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
 
   return (
@@ -147,9 +180,26 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
               <p className="text-muted-foreground">{concept.description}</p>
             )}
           </div>
-          {showActions && (
+          {(showActions || showConceptActions) && (
             <div className="flex gap-2">
-              {onDelete && (
+              {/* Concept Actions (Reject/Delete) */}
+              {showConceptActions && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={actionLoading}>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowActionsDialog(true)}>
+                      Konsepthandlinger
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              
+              {/* Traditional Delete Action */}
+              {showActions && onDelete && (
                 <Button 
                   variant="destructive" 
                   size="sm" 
@@ -395,6 +445,18 @@ const ConceptCard = ({ concept, showActions = false, onDelete }: ConceptCardProp
           Opprettet: {format(new Date(concept.created_at), 'dd.MM.yyyy HH:mm')}
         </div>
       </CardContent>
+      
+      {/* Concept Actions Dialog */}
+      {showConceptActions && (
+        <ConceptActionsDialog
+          isOpen={showActionsDialog}
+          onClose={() => setShowActionsDialog(false)}
+          onReject={handleReject}
+          onDelete={handleDelete}
+          conceptTitle={concept.title}
+          isLoading={actionLoading}
+        />
+      )}
     </Card>
   );
 };

@@ -256,6 +256,60 @@ export type Database = {
           },
         ]
       }
+      concepts_history: {
+        Row: {
+          available_dates: Json | null
+          description: string | null
+          expected_audience: number | null
+          id: string
+          maker_id: string
+          original_concept_id: string
+          original_created_at: string
+          original_data: Json | null
+          price: number | null
+          rejected_at: string
+          rejected_by: string
+          rejection_reason: string | null
+          status: string
+          tech_spec: string | null
+          title: string
+        }
+        Insert: {
+          available_dates?: Json | null
+          description?: string | null
+          expected_audience?: number | null
+          id?: string
+          maker_id: string
+          original_concept_id: string
+          original_created_at: string
+          original_data?: Json | null
+          price?: number | null
+          rejected_at?: string
+          rejected_by: string
+          rejection_reason?: string | null
+          status?: string
+          tech_spec?: string | null
+          title: string
+        }
+        Update: {
+          available_dates?: Json | null
+          description?: string | null
+          expected_audience?: number | null
+          id?: string
+          maker_id?: string
+          original_concept_id?: string
+          original_created_at?: string
+          original_data?: Json | null
+          price?: number | null
+          rejected_at?: string
+          rejected_by?: string
+          rejection_reason?: string | null
+          status?: string
+          tech_spec?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
