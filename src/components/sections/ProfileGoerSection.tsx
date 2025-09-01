@@ -23,10 +23,6 @@ interface ProfileGoerSectionProps {
 export const ProfileGoerSection = ({ profile }: ProfileGoerSectionProps) => {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Profil - Goer-visning</h1>
-        <p className="text-muted-foreground">Slik ser Goere din profil</p>
-      </div>
 
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">

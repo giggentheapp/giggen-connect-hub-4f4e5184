@@ -253,39 +253,15 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {isAdminView ? 'Mine kommende arrangementer' : 'Kommende arrangementer'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isAdminView ? 
-              'Administrer dine bekreftede arrangementer' : 
-              'Se alle publiserte arrangementer'
-            }
-          </p>
-        </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster arrangementer...</p>
-        </div>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Laster arrangementer...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">
-          {isAdminView ? 'Mine kommende arrangementer' : 'Kommende arrangementer'}
-        </h1>
-        <p className="text-muted-foreground">
-          {isAdminView ? 
-            'Administrer dine bekreftede arrangementer' : 
-            'Se alle publiserte arrangementer'
-          }
-        </p>
-      </div>
 
       {upcomingEvents.length === 0 ? (
         <Card>

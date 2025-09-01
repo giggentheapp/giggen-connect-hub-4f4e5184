@@ -59,14 +59,9 @@ export const ExploreSection = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Utforsk Makere</h1>
-        </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster makere...</p>
-        </div>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Laster makere...</p>
       </div>
     );
   }
@@ -92,14 +87,9 @@ export const ExploreSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with view toggle */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Utforsk Makere</h1>
-          <p className="text-muted-foreground">Oppdag kreative talenter i GIGGEN-nettverket</p>
-        </div>
-        
-        {!isMobile && (
+      {/* View toggle */}
+      {!isMobile && (
+        <div className="flex justify-end">
           <div className="flex items-center gap-2">
             <Button
               variant={isListMode ? 'default' : 'outline'}
@@ -126,8 +116,8 @@ export const ExploreSection = () => {
               Vis kart
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Mobile view toggle */}
       {isMobile && (

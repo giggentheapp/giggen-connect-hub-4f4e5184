@@ -200,25 +200,15 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Bookinger</h1>
-          <p className="text-muted-foreground">Administrer dine booking-forespørsler og arrangementer</p>
-        </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster bookinger...</p>
-        </div>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Laster bookinger...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Bookinger</h1>
-        <p className="text-muted-foreground">Administrer dine booking-forespørsler og arrangementer</p>
-      </div>
 
       {/* Tab Navigation */}
       <div className="flex gap-2 border-b">

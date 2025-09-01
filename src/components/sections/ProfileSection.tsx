@@ -23,10 +23,6 @@ interface ProfileSectionProps {
 export const ProfileSection = ({ profile }: ProfileSectionProps) => {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Min Profil - Maker-visning</h1>
-        <p className="text-muted-foreground">Slik ser andre Makere din profil</p>
-      </div>
 
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">

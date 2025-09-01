@@ -100,33 +100,11 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
         <DesktopMenubar 
           activeSection={activeSection}
           onSectionChange={setActiveSection}
+          profile={profile}
+          onModeChange={handleModeChange}
         />
       )}
 
-      {/* Header */}
-      <header className={`border-b bg-card/95 backdrop-blur-sm z-40 ${!isMobile ? 'ml-16' : ''}`}>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Velkommen, {profile.display_name}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ModeSwitcher profile={profile} onModeChange={handleModeChange} />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logg ut
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-16' : ''} ${isMobile ? 'pb-16' : ''}`}>
