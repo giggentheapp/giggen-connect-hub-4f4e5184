@@ -102,7 +102,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
   };
 
   const getDeleteWarningText = () => {
-    if (booking.status === 'confirmed') {
+    if (booking.status === 'confirmed' || booking.status === 'published') {
       return "Dette vil permanent slette en bekreftet booking. Kontaktinformasjon vil ikke lenger være tilgjengelig for noen av partene.";
     }
     return "Denne handlingen kan ikke angres. Bookingen vil bli permanent slettet.";
@@ -134,8 +134,8 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
         </Button>
       )}
 
-      {/* Delete button - available for rejected and confirmed bookings */}
-      {(booking.status === 'rejected' || booking.status === 'confirmed') && (
+      {/* Delete button - available for rejected, confirmed, and published bookings */}
+      {(booking.status === 'rejected' || booking.status === 'confirmed' || booking.status === 'published') && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button 
