@@ -42,6 +42,18 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const { bookings, loading, updateBooking } = useBookings(profile.user_id);
   const { toast } = useToast();
 
+  // Debug logging
+  console.log('📋 BookingsSection Debug:', {
+    totalBookings: bookings.length,
+    bookingsData: bookings.map(b => ({
+      id: b.id,
+      title: b.title,
+      status: b.status,
+      sender_id: b.sender_id,
+      receiver_id: b.receiver_id
+    }))
+  });
+
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');

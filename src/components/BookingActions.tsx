@@ -20,6 +20,17 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
 
+  // Debug logging
+  console.log('🔧 BookingActions Debug:', {
+    bookingId: booking.id,
+    status: booking.status,
+    currentUserId,
+    senderId: booking.sender_id,
+    receiverId: booking.receiver_id,
+    isSender,
+    isReceiver
+  });
+
   const handleAcceptBooking = async () => {
     if (loading) return;
     setLoading(true);
