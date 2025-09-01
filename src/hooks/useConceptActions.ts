@@ -91,7 +91,41 @@ export const useConceptActions = () => {
     try {
       setLoading(true);
 
-      // Delete concept files first (cascade delete)
+      // First, get the current concept data
+      const { data: concept, error: fetchError } = await supabase
+        .from('concepts')
+        .select('*')
+        .eq('id', conceptId)
+        .single();
+
+      if (fetchError || !concept) {
+        throw new Error('Kunne ikke hente konseptdata');
+      }
+
+      // Create history entry
+      const { error: historyError } = await supabase
+        .from('concepts_history')
+        .insert({
+          original_concept_id: concept.id,
+          maker_id: concept.maker_id,
+          title: concept.title,
+          description: concept.description,
+          status: 'deleted',
+          price: concept.price,
+          expected_audience: concept.expected_audience,
+          tech_spec: concept.tech_spec,
+          available_dates: concept.available_dates,
+          rejected_by: (await supabase.auth.getUser()).data.user?.id,
+          rejection_reason: 'Slettet av bruker',
+          original_created_at: concept.created_at,
+          original_data: concept
+        });
+
+      if (historyError) {
+        throw historyError;
+      }
+
+      // Delete concept files (cascade delete)
       const { error: filesError } = await supabase
         .from('concept_files')
         .delete()
@@ -113,7 +147,7 @@ export const useConceptActions = () => {
 
       toast({
         title: "Konsept slettet",
-        description: "Konseptet er permanent fjernet",
+        description: "Konseptet er flyttet til historikken",
       });
 
       return { success: true };

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X, MoreVertical } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X, MoreVertical, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -245,18 +245,26 @@ export const ConceptViewModal = ({
               )}
               {/* Concept Actions */}
               {showConceptActions && concept && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" disabled={actionLoading}>
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setShowActionsDialog(true)}>
-                      Konsepthandlinger
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={actionLoading}
+                    onClick={() => handleReject()}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Avvis
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    disabled={actionLoading}
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Slett
+                  </Button>
+                </div>
               )}
               
               <Button variant="outline" size="sm" onClick={onClose}>

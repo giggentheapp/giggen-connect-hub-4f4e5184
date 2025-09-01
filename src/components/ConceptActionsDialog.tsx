@@ -80,13 +80,13 @@ export const ConceptActionsDialog = ({
             </Button>
             
             <Button
-              variant="destructive"
+              variant="outline"
               className="w-full justify-start"
               onClick={() => setShowDeleteDialog(true)}
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Slett konsept permanent
+              Slett konsept til historikk
             </Button>
           </div>
 
@@ -143,10 +143,10 @@ export const ConceptActionsDialog = ({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+            <AlertDialogTitle>Slett konsept til historikk?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dette vil permanent slette konseptet "{conceptTitle}" og alle tilknyttede filer. 
-              Denne handlingen kan ikke angres.
+              Dette vil slette konseptet "{conceptTitle}" og flytte det til historikken. 
+              Du kan ikke angre denne handlingen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -158,7 +158,7 @@ export const ConceptActionsDialog = ({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isLoading}
             >
-              {isLoading ? 'Sletter...' : 'Slett permanent'}
+              {isLoading ? 'Sletter...' : 'Slett til historikk'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
