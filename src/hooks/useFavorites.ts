@@ -130,10 +130,38 @@ export const useFavorites = (userId: string | undefined) => {
     }
   };
 
+  const addFavorite = async (itemId: string, itemType: 'maker' | 'event') => {
+    if (!userId) return;
+
+    try {
+      console.log('➕ Adding favorite:', { userId, itemId, itemType });
+      
+      const { error } = await supabase
+        .from('favorites')
+        .insert({
+          user_id: userId,
+          item_id: itemId,
+          item_type: itemType
+        });
+
+      if (error) throw error;
+
+      console.log('✅ Favorite added successfully');
+      
+      // Refetch to update local state
+      await fetchFavorites();
+    } catch (err: any) {
+      console.error('❌ Error adding favorite:', err);
+      setError(err.message);
+    }
+  };
+
   const removeFavorite = async (itemId: string, itemType: 'maker' | 'event') => {
     if (!userId) return;
 
     try {
+      console.log('➖ Removing favorite:', { userId, itemId, itemType });
+      
       const { error } = await supabase
         .from('favorites')
         .delete()
@@ -143,6 +171,8 @@ export const useFavorites = (userId: string | undefined) => {
 
       if (error) throw error;
 
+      console.log('✅ Favorite removed successfully');
+
       // Update local state
       if (itemType === 'maker') {
         setFavoriteMakers(prev => prev.filter(maker => maker.id !== itemId));
@@ -150,8 +180,16 @@ export const useFavorites = (userId: string | undefined) => {
         setFavoriteEvents(prev => prev.filter(event => event.id !== itemId));
       }
     } catch (err: any) {
-      console.error('Error removing favorite:', err);
+      console.error('❌ Error removing favorite:', err);
       setError(err.message);
+    }
+  };
+
+  const isFavorite = (itemId: string, itemType: 'maker' | 'event') => {
+    if (itemType === 'maker') {
+      return favoriteMakers.some(maker => maker.id === itemId);
+    } else {
+      return favoriteEvents.some(event => event.id === itemId);
     }
   };
 
@@ -165,6 +203,8 @@ export const useFavorites = (userId: string | undefined) => {
     loading,
     error,
     refetch: fetchFavorites,
-    removeFavorite
+    addFavorite,
+    removeFavorite,
+    isFavorite
   };
 };

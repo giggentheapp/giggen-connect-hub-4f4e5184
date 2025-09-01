@@ -12,6 +12,7 @@ import ConceptCard from '@/components/ConceptCard';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
+import { FavoriteButton } from '@/components/FavoriteButton';
 
 interface ProfileData {
   id: string;
@@ -243,10 +244,19 @@ const Profile = () => {
         </div>
         <div className="flex gap-2">
           {!isOwnProfile && profile.role === 'maker' && currentUser && (
-            <BookingRequest 
-              receiverId={profile.user_id}
-              receiverName={profile.display_name}
-            />
+            <>
+              <FavoriteButton
+                userId={currentUserId}
+                itemId={profile.user_id}
+                itemType="maker"
+                itemName={profile.display_name}
+                variant="outline"
+              />
+              <BookingRequest 
+                receiverId={profile.user_id}
+                receiverName={profile.display_name}
+              />
+            </>
           )}
           {isOwnProfile && (
             <Button asChild>
