@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 import { cn } from '@/lib/utils';
-import { Search, User, Heart, Settings, LogOut } from 'lucide-react';
+import { Search, Heart, Settings, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ interface GoerViewProps {
 }
 
 export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
-  const [activeSection, setActiveSection] = useState('explore');
+  const [activeSection, setActiveSection] = useState('favorites');
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // For Utforsk-seksjonen
   const isMobile = useIsMobile();
@@ -60,7 +59,6 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   const goerNavItems = [
     { id: 'explore', label: 'Utforsk', icon: Search },
     { id: 'favorites', label: 'Favoritter', icon: Heart },
-    { id: 'profile', label: 'Min Profil', icon: User },
     { id: 'settings', label: 'Innstillinger', icon: Settings },
   ];
 
@@ -69,30 +67,20 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
       case 'explore':
         return (
           <div className="h-[calc(100vh-8rem)]">
-            {viewMode === 'map' ? (
-              <GoerFullscreenMap 
-                onBack={() => setViewMode('list')}
-                onMakerClick={(makerId) => {
-                  // Handle maker profile navigation
-                  console.log('Navigate to maker:', makerId);
-                }}
-              />
-            ) : (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h1 className="text-2xl font-bold">Makers & Arrangementer</h1>
-                  <button
-                    onClick={() => setViewMode('map')}
-                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg hover:bg-secondary/80 transition-colors"
-                  >
-                    Vis kart
-                  </button>
-                </div>
-                <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
-                  <p className="text-muted-foreground">Liste med makers og arrangementer kommer her</p>
-                </div>
-              </div>
-            )}
+            <GoerFullscreenMap 
+              onBack={() => setViewMode('list')}
+              onMakerClick={(makerId) => {
+                // Handle maker profile navigation
+                console.log('Navigate to maker:', makerId);
+              }}
+            />
+            {/* List button at bottom center */}
+            <button
+              onClick={() => setViewMode('list')}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg hover:bg-primary/90 transition-colors z-10"
+            >
+              Vis liste
+            </button>
           </div>
         );
       case 'favorites':
@@ -115,8 +103,6 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
             </div>
           </div>
         );
-      case 'profile':
-        return <ProfileGoerSection profile={profile} />;
       case 'settings':
         return (
           <div>
@@ -143,16 +129,21 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         );
       default:
         return (
-          <div className="h-[calc(100vh-8rem)]">
-            <div className="relative bg-muted rounded-lg h-full flex items-center justify-center">
-              <p className="text-muted-foreground">Kart kommer her (fullskjerm)</p>
-              
-              <button
-                onClick={() => setViewMode('list')}
-                className="absolute bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg hover:bg-primary/90 transition-colors"
-              >
-                Vis liste
-              </button>
+          <div>
+            <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Favoritt Makers</h2>
+                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-muted-foreground">Dine favoritt makers kommer her</p>
+                </div>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Favoritt Arrangementer</h2>
+                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-muted-foreground">Dine favoritt arrangementer kommer her</p>
+                </div>
+              </div>
             </div>
           </div>
         );
