@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { UserSettings } from '@/components/UserSettings';
 
 interface UserProfile {
   id: string;
@@ -81,7 +82,16 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         return (
           <div>
             <h1 className="text-2xl font-bold mb-6">Innstillinger</h1>
-            <div className="space-y-6 max-w-2xl">
+            <UserSettings 
+              profile={profile}
+              onProfileUpdate={(updatedProfile) => {
+                // Update the local profile state if needed
+                console.log('Profile updated:', updatedProfile);
+              }}
+            />
+            
+            {/* Account Actions */}
+            <div className="mt-8 space-y-6 max-w-2xl">
               <div className="bg-card rounded-lg p-6 border">
                 <h3 className="font-semibold mb-4">Konto</h3>
                 <div className="space-y-3">
