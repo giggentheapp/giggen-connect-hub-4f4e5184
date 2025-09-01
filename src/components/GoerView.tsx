@@ -3,14 +3,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 import { cn } from '@/lib/utils';
-import { Search, Heart, Settings, LogOut, Compass } from 'lucide-react';
+import { Search, Settings, LogOut, Compass } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useFavorites } from '@/hooks/useFavorites';
-import { FavoriteMakerCard } from '@/components/FavoriteMakerCard';
-import { FavoriteEventCard } from '@/components/FavoriteEventCard';
 
 interface UserProfile {
   id: string;
@@ -38,22 +35,12 @@ interface GoerViewProps {
 export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   console.log('🎯 GoerView initialized with profile:', profile);
   
-  const [activeSection, setActiveSection] = useState('favorites');
+  const [activeSection, setActiveSection] = useState('explore');
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // For Utforsk-seksjonen
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  console.log('🔍 Calling useFavorites with userId:', profile.user_id);
-  const { favoriteMakers, favoriteEvents, loading, removeFavorite } = useFavorites(profile.user_id);
-  
-  console.log('📊 Favorites data:', { 
-    favoriteMakers, 
-    favoriteEvents, 
-    loading,
-    hasData: favoriteMakers.length > 0 || favoriteEvents.length > 0
-  });
   
   // Check if user is a Maker in Goer mode (needs ModeSwitcher)
   const isMakerInGoerMode = profile.role === 'maker' && onModeChange;
@@ -73,7 +60,6 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
 
   const goerNavItems = [
     { id: 'explore', label: 'Utforsk', icon: Search },
-    { id: 'favorites', label: 'Favoritter', icon: Heart },
     { id: 'settings', label: 'Innstillinger', icon: Settings },
   ];
 
@@ -83,82 +69,12 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         return (
           <div className="h-screen">
             <GoerFullscreenMap 
-              onBack={() => setActiveSection('favorites')}
+              onBack={() => setActiveSection('explore')}
               onMakerClick={(makerId) => {
                 navigate(`/profile/${makerId}`);
               }}
               userId={profile.user_id}
             />
-          </div>
-        );
-      case 'favorites':
-        if (loading) {
-          return (
-            <div>
-              <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
-              <div className="space-y-6">
-                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-                  <p className="text-muted-foreground">Laster favoritter...</p>
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        const hasNoFavorites = favoriteMakers.length === 0 && favoriteEvents.length === 0;
-
-        if (hasNoFavorites) {
-          return (
-            <div>
-              <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
-              <div className="text-center py-12">
-                <Compass className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Du har ingen favoritter ennå</h3>
-                <p className="text-muted-foreground mb-4">
-                  Utforsk makers og arrangementer for å legge til favoritter
-                </p>
-                <Button onClick={() => setActiveSection('explore')} variant="outline">
-                  Utforsk nå
-                </Button>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div>
-            <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
-            <div className="space-y-8">
-              {favoriteMakers.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Favoritt Makers ({favoriteMakers.length})</h2>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {favoriteMakers.map((maker) => (
-                      <FavoriteMakerCard
-                        key={maker.id}
-                        maker={maker}
-                        onRemove={(makerId) => removeFavorite(makerId, 'maker')}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {favoriteEvents.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Favoritt Arrangementer ({favoriteEvents.length})</h2>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {favoriteEvents.map((event) => (
-                      <FavoriteEventCard
-                        key={event.id}
-                        event={event}
-                        onRemove={(eventId) => removeFavorite(eventId, 'event')}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         );
       case 'settings':
@@ -193,20 +109,16 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
       default:
         return (
           <div>
-            <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Favoritt Makers</h2>
-                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-                  <p className="text-muted-foreground">Dine favoritt makers kommer her</p>
-                </div>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Favoritt Arrangementer</h2>
-                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-                  <p className="text-muted-foreground">Dine favoritt arrangementer kommer her</p>
-                </div>
-              </div>
+            <h1 className="text-2xl font-bold mb-6">Utforsk</h1>
+            <div className="text-center py-12">
+              <Compass className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Utforsk makers i ditt område</h3>
+              <p className="text-muted-foreground mb-4">
+                Finn kreative talenter og se deres arbeider på kartet
+              </p>
+              <Button onClick={() => setActiveSection('explore')} variant="outline">
+                Åpne kart
+              </Button>
             </div>
           </div>
         );

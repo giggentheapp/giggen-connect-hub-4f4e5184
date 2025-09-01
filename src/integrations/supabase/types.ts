@@ -360,38 +360,6 @@ export type Database = {
           },
         ]
       }
-      favorites: {
-        Row: {
-          created_at: string
-          id: string
-          item_id: string
-          item_type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_id: string
-          item_type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_id?: string
-          item_type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_favorites_item_id_profiles"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       hospitality_riders: {
         Row: {
           created_at: string

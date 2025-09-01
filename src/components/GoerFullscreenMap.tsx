@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, MapPin, User, Heart } from 'lucide-react';
-import { useFavorites } from '@/hooks/useFavorites';
+import { ArrowLeft, MapPin, User } from 'lucide-react';
 
 interface GoerFullscreenMapProps {
   onBack: () => void;
@@ -39,7 +38,6 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
   const [mapReady, setMapReady] = useState(false);
 
   const { toast } = useToast();
-  const { addFavorite, removeFavorite, isFavorite, favoriteMakers } = useFavorites(userId);
 
   // Fetch Mapbox token
   useEffect(() => {
@@ -209,14 +207,9 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
             </div>
           ` : ''}
           
-          <div class="flex gap-2 pt-2">
-            <button class="view-profile-btn flex-1 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+          <div class="flex pt-2">
+            <button class="view-profile-btn w-full bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
               Se profil
-            </button>
-            <button class="favorite-btn w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors ${isFavorite(maker.user_id, 'maker') ? 'text-red-500' : 'text-gray-500'}">
-              <svg class="w-5 h-5" fill="${isFavorite(maker.user_id, 'maker') ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
             </button>
           </div>
         </div>
@@ -224,40 +217,11 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
 
       // Add event listeners to popup content
       const viewProfileBtn = popupContent.querySelector('.view-profile-btn');
-      const favoriteBtn = popupContent.querySelector('.favorite-btn');
       
       if (viewProfileBtn) {
         viewProfileBtn.addEventListener('click', () => {
           if (onMakerClick) {
             onMakerClick(maker.user_id);
-          }
-        });
-      }
-
-      if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', async () => {
-          const isCurrentlyFavorite = isFavorite(maker.user_id, 'maker');
-          
-          if (isCurrentlyFavorite) {
-            await removeFavorite(maker.user_id, 'maker');
-            toast({
-              title: "Fjernet fra favoritter",
-              description: `${maker.display_name} er fjernet fra favorittene dine`,
-            });
-          } else {
-            await addFavorite(maker.user_id, 'maker');
-            toast({
-              title: "Lagt til i favoritter", 
-              description: `${maker.display_name} er lagt til i favorittene dine`,
-            });
-          }
-          
-          // Update the heart icon in the popup
-          const heartIcon = favoriteBtn.querySelector('svg');
-          if (heartIcon) {
-            const newIsFavorite = isFavorite(maker.user_id, 'maker');
-            favoriteBtn.className = `favorite-btn w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors ${newIsFavorite ? 'text-red-500' : 'text-gray-500'}`;
-            heartIcon.setAttribute('fill', newIsFavorite ? 'currentColor' : 'none');
           }
         });
       }
@@ -288,7 +252,7 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
         maxZoom: 15
       });
     }
-  }, [makers, mapReady, isFavorite, onMakerClick, toast, addFavorite, removeFavorite]);
+  }, [makers, mapReady, onMakerClick]);
 
   if (loading) {
     return (
@@ -333,10 +297,6 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
             <Badge variant="secondary" className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
               {makers.length} makers
-            </Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Heart className="w-4 h-4" />
-              {favoriteMakers.length} favoritter
             </Badge>
           </div>
         </div>
