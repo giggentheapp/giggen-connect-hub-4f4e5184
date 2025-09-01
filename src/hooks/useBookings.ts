@@ -54,9 +54,9 @@ export const useBookings = (userId?: string) => {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       }
 
-      // Filter out historical bookings by default
+      // Filter out historical bookings by default (only rejected bookings are historical)
       if (!includeHistorical) {
-        query = query.not('status', 'eq', 'rejected').not('status', 'eq', 'cancelled');
+        query = query.not('status', 'eq', 'rejected');
       }
 
       const { data, error } = await query;
@@ -88,7 +88,7 @@ export const useBookings = (userId?: string) => {
         .insert({
           ...bookingData,
           sender_id: user.id,
-          status: 'draft'
+          status: 'pending'
         } as any)
         .select()
         .single();

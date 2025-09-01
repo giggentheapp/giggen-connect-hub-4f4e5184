@@ -10,7 +10,8 @@ import { BookingConfirmation } from '@/components/BookingConfirmation';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye, X, Trash } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye } from 'lucide-react';
+import { BookingActions } from '@/components/BookingActions';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -43,75 +44,45 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
-  const confirmedBookings = bookings.filter(b => b.status === 'published' || b.status === 'confirmed');
-  const historicalBookings = bookings.filter(b => ['rejected', 'cancelled'].includes(b.status));
+  const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');
+  const historicalBookings = bookings.filter(b => b.status === 'rejected');
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'pending': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'confirmed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'sent': return 'Sendt';
+      case 'pending': return 'Venter svar';
       case 'confirmed': return 'Bekreftet';
       case 'published': return 'Publisert';
-      case 'cancelled': return 'Avlyst';
+      case 'rejected': return 'Avvist';
       default: return status;
     }
   };
 
   const getPhaseText = (booking: any) => {
-    if (booking.status === 'sent' || booking.status === 'draft') {
-      return 'Fase 2: Forhandling';
+    if (booking.status === 'pending') {
+      return 'Venter på svar';
     } else if (booking.status === 'confirmed') {
-      return 'Fase 3: Bekreftelse';
+      return 'Bekreftet - Klar for publisering';
     } else if (booking.status === 'published') {
       return 'Ferdig: Publisert';
+    } else if (booking.status === 'rejected') {
+      return 'Avvist';
     }
     return 'Ukjent fase';
   };
 
-  const handleRejectBooking = async (bookingId: string) => {
-    try {
-      await updateBooking(bookingId, { status: 'rejected' });
-      toast({
-        title: "Forespørsel avvist",
-        description: "Bookingforespørselen har blitt avvist",
-      });
-    } catch (error) {
-      // Error handled in hook
-    }
-  };
-
-  const handleDeleteBooking = async (bookingId: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Forespørsel slettet",
-        description: "Bookingforespørselen har blitt permanent slettet",
-      });
-      
-      // Refresh bookings list
-      window.location.reload();
-    } catch (error: any) {
-      toast({
-        title: "Feil ved sletting",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const handleBookingAction = () => {
+    // Refresh bookings list after any action
+    window.location.reload();
   };
 
   const BookingCard = ({ booking }: { booking: any }) => (
@@ -213,55 +184,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </Button>
               )}
 
-              {/* Reject and Delete buttons for bookings that can be rejected */}
-              {booking.status === 'sent' && (
-                <>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRejectBooking(booking.id);
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Avvis
-                  </Button>
-                </>
-              )}
-
-              {/* Delete button for rejected bookings */}
-              {booking.status === 'rejected' && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Trash className="h-4 w-4 mr-1" />
-                      Slett
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Denne handlingen kan ikke angres. Forespørselen vil bli permanent slettet.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={() => handleDeleteBooking(booking.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Slett permanent
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+              <div onClick={(e) => e.stopPropagation()}>
+                <BookingActions 
+                  booking={booking}
+                  currentUserId={profile.user_id}
+                  onAction={handleBookingAction}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -331,7 +260,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       <div className="space-y-4">
         {activeTab === 'received' && (
           <>
-            {receivedBookings.filter(b => !['rejected', 'cancelled'].includes(b.status)).length === 0 ? (
+            {receivedBookings.filter(b => b.status !== 'rejected').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -340,7 +269,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(receivedBookings) ? receivedBookings
-                .filter(booking => booking && booking.id && !['rejected', 'cancelled'].includes(booking.status))
+                .filter(booking => booking && booking.id && booking.status !== 'rejected')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>
@@ -350,7 +279,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
         {activeTab === 'sent' && (
           <>
-            {sentBookings.filter(b => !['rejected', 'cancelled'].includes(b.status)).length === 0 ? (
+            {sentBookings.filter(b => b.status !== 'rejected').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -359,7 +288,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(sentBookings) ? sentBookings
-                .filter(booking => booking && booking.id && !['rejected', 'cancelled'].includes(booking.status))
+                .filter(booking => booking && booking.id && booking.status !== 'rejected')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>

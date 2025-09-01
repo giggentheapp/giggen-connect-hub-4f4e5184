@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useBookings } from '@/hooks/useBookings';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
-import { ContactInfoDialog } from '@/components/ContactInfoDialog';
+import { ContactInfoSharingDialog } from '@/components/ContactInfoSharingDialog';
 import { format } from 'date-fns';
 import { CalendarIcon, Send, Lightbulb, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -101,7 +101,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         price_ticket: null,
         event_date: eventDate?.toISOString() || null,
         venue: venue || null,
-        status: 'sent'
+        status: 'pending'
       });
 
       // Reset form
@@ -345,8 +345,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           </div>
         </form>
         
-        {/* Contact Info Dialog */}
-        <ContactInfoDialog
+        {/* Contact Info Sharing Dialog */}
+        <ContactInfoSharingDialog
           isOpen={showContactDialog}
           onConfirm={handleContactDialogConfirm}
           onCancel={handleContactDialogCancel}
