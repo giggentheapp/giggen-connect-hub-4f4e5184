@@ -200,7 +200,7 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Floating over map */}
       {!isMobile && (
         <div 
           className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
@@ -208,7 +208,7 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
           onMouseLeave={() => setIsExpanded(false)}
         >
           <div className={cn(
-            "h-full bg-card border-r border-border shadow-lg transition-all duration-300 overflow-y-auto",
+            "h-full bg-card/95 backdrop-blur-sm border-r border-border shadow-lg transition-all duration-300 overflow-y-auto",
             isExpanded ? "w-64" : "w-16"
           )}>
             {/* Logo */}
@@ -276,11 +276,15 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         </div>
       )}
 
-      {/* Main Content */}
-      <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-16' : ''} ${isMobile ? 'pb-16' : ''}`}>
-        <div className="container mx-auto px-4 py-6">
-          {renderActiveSection()}
-        </div>
+      {/* Main Content - Full width with sidebar overlay */}
+      <main className={`flex-1 overflow-auto ${isMobile ? 'pb-16' : ''}`}>
+        {activeSection === 'explore' ? (
+          renderActiveSection()
+        ) : (
+          <div className={`container mx-auto px-4 py-6 ${!isMobile ? 'ml-20' : ''}`}>
+            {renderActiveSection()}
+          </div>
+        )}
       </main>
 
       {/* Mobile Navigation */}

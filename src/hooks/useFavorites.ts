@@ -34,64 +34,96 @@ export const useFavorites = (userId: string | undefined) => {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('🔍 FETCHING FAVORITES for userId:', userId);
 
-      // Fetch favorite makers
+      // Fetch favorite makers - simplified query first
       const { data: makerFavorites, error: makerError } = await supabase
         .from('favorites')
-        .select(`
-          item_id,
-          profiles!inner(
-            id,
-            display_name,
-            bio,
-            avatar_url,
-            role
-          )
-        `)
+        .select('*')
         .eq('user_id', userId)
         .eq('item_type', 'maker');
 
-      if (makerError) throw makerError;
+      console.log('📊 Maker favorites query result:', { makerFavorites, makerError });
 
-      // Fetch favorite events
+      if (makerError) {
+        console.error('❌ Maker favorites error:', makerError);
+        throw makerError;
+      }
+
+      // Fetch favorite events - simplified query first
       const { data: eventFavorites, error: eventError } = await supabase
         .from('favorites')
-        .select(`
-          item_id,
-          events!inner(
-            id,
-            title,
-            description,
-            event_date,
-            location
-          )
-        `)
+        .select('*')
         .eq('user_id', userId)
         .eq('item_type', 'event');
 
-      if (eventError) throw eventError;
+      console.log('📊 Event favorites query result:', { eventFavorites, eventError });
 
-      // Transform data
-      const makers = makerFavorites?.map((fav: any) => ({
-        id: fav.profiles.id,
-        display_name: fav.profiles.display_name,
-        bio: fav.profiles.bio,
-        avatar_url: fav.profiles.avatar_url,
-        role: fav.profiles.role
-      })) || [];
+      if (eventError) {
+        console.error('❌ Event favorites error:', eventError);
+        throw eventError;
+      }
 
-      const events = eventFavorites?.map((fav: any) => ({
-        id: fav.events.id,
-        title: fav.events.title,
-        description: fav.events.description,
-        event_date: fav.events.event_date,
-        location: fav.events.location
-      })) || [];
+      // If we have favorite makers, fetch their profiles
+      let makers: FavoriteMaker[] = [];
+      if (makerFavorites && makerFavorites.length > 0) {
+        const makerIds = makerFavorites.map(fav => fav.item_id);
+        console.log('🔍 Fetching profiles for maker IDs:', makerIds);
+        
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, bio, avatar_url, role')
+          .in('user_id', makerIds);
 
+        console.log('📊 Profiles query result:', { profiles, profilesError });
+
+        if (profilesError) {
+          console.error('❌ Profiles error:', profilesError);
+          throw profilesError;
+        }
+
+        makers = profiles?.map(profile => ({
+          id: profile.user_id,
+          display_name: profile.display_name,
+          bio: profile.bio,
+          avatar_url: profile.avatar_url,
+          role: profile.role
+        })) || [];
+      }
+
+      // If we have favorite events, fetch their details
+      let events: FavoriteEvent[] = [];
+      if (eventFavorites && eventFavorites.length > 0) {
+        const eventIds = eventFavorites.map(fav => fav.item_id);
+        console.log('🔍 Fetching events for IDs:', eventIds);
+        
+        const { data: eventDetails, error: eventsError } = await supabase
+          .from('events')
+          .select('id, title, description, event_date, location')
+          .in('id', eventIds);
+
+        console.log('📊 Events query result:', { eventDetails, eventsError });
+
+        if (eventsError) {
+          console.error('❌ Events error:', eventsError);
+          throw eventsError;
+        }
+
+        events = eventDetails?.map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          event_date: event.event_date,
+          location: event.location
+        })) || [];
+      }
+
+      console.log('✅ Final results:', { makers, events });
       setFavoriteMakers(makers);
       setFavoriteEvents(events);
     } catch (err: any) {
-      console.error('Error fetching favorites:', err);
+      console.error('❌ ERROR fetching favorites:', err);
       setError(err.message);
     } finally {
       setLoading(false);
