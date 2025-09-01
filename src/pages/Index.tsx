@@ -35,7 +35,10 @@ const Index = () => {
           
           <div className="pt-4">
             <Button 
-              onClick={() => navigate('/auth')} 
+              onClick={() => {
+                console.log('🚀 Index.tsx: "Kom i gang" clicked - navigating to /auth');
+                navigate('/auth');
+              }} 
               className="w-full"
               size="lg"
             >

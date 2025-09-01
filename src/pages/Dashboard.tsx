@@ -83,14 +83,24 @@ const Dashboard = () => {
   }, [navigate, toast]);
 
   const handleSignOut = async () => {
+    console.log('🚪 Dashboard.tsx: Signing out...');
+    
+    // Clear session and local storage
     const { error } = await supabase.auth.signOut();
+    
+    // Force clear localStorage as backup
+    localStorage.removeItem('sb-hkcdyqghfqyrlwjcsrnx-auth-token');
+    sessionStorage.clear();
+    
     if (error) {
+      console.error('❌ Dashboard.tsx: Sign out error:', error);
       toast({
         title: "Feil ved utlogging",
         description: error.message,
         variant: "destructive",
       });
     } else {
+      console.log('✅ Dashboard.tsx: Signed out successfully, navigating to /auth');
       navigate('/auth');
     }
   };
