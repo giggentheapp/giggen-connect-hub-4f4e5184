@@ -3,11 +3,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 import { cn } from '@/lib/utils';
-import { Search, Heart, Settings, LogOut } from 'lucide-react';
+import { Search, Heart, Settings, LogOut, Compass } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useFavorites } from '@/hooks/useFavorites';
+import { FavoriteMakerCard } from '@/components/FavoriteMakerCard';
+import { FavoriteEventCard } from '@/components/FavoriteEventCard';
 
 interface UserProfile {
   id: string;
@@ -39,6 +42,7 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { favoriteMakers, favoriteEvents, loading, removeFavorite } = useFavorites(profile.user_id);
   
   // Check if user is a Maker in Goer mode (needs ModeSwitcher)
   const isMakerInGoerMode = profile.role === 'maker' && onModeChange;
@@ -76,22 +80,72 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
           </div>
         );
       case 'favorites':
+        if (loading) {
+          return (
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
+              <div className="space-y-6">
+                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-muted-foreground">Laster favoritter...</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        const hasNoFavorites = favoriteMakers.length === 0 && favoriteEvents.length === 0;
+
+        if (hasNoFavorites) {
+          return (
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
+              <div className="text-center py-12">
+                <Compass className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Du har ingen favoritter ennå</h3>
+                <p className="text-muted-foreground mb-4">
+                  Utforsk makers og arrangementer for å legge til favoritter
+                </p>
+                <Button onClick={() => setActiveSection('explore')} variant="outline">
+                  Utforsk nå
+                </Button>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div>
             <h1 className="text-2xl font-bold mb-6">Favoritter</h1>
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Favoritt Makers</h2>
-                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-                  <p className="text-muted-foreground">Dine favoritt makers kommer her</p>
+            <div className="space-y-8">
+              {favoriteMakers.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Favoritt Makers ({favoriteMakers.length})</h2>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {favoriteMakers.map((maker) => (
+                      <FavoriteMakerCard
+                        key={maker.id}
+                        maker={maker}
+                        onRemove={(makerId) => removeFavorite(makerId, 'maker')}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Favoritt Arrangementer</h2>
-                <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-                  <p className="text-muted-foreground">Dine favoritt arrangementer kommer her</p>
+              )}
+              
+              {favoriteEvents.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Favoritt Arrangementer ({favoriteEvents.length})</h2>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {favoriteEvents.map((event) => (
+                      <FavoriteEventCard
+                        key={event.id}
+                        event={event}
+                        onRemove={(eventId) => removeFavorite(eventId, 'event')}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
