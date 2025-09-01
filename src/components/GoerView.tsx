@@ -36,13 +36,24 @@ interface GoerViewProps {
 }
 
 export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
+  console.log('🎯 GoerView initialized with profile:', profile);
+  
   const [activeSection, setActiveSection] = useState('favorites');
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // For Utforsk-seksjonen
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  console.log('🔍 Calling useFavorites with userId:', profile.user_id);
   const { favoriteMakers, favoriteEvents, loading, removeFavorite } = useFavorites(profile.user_id);
+  
+  console.log('📊 Favorites data:', { 
+    favoriteMakers, 
+    favoriteEvents, 
+    loading,
+    hasData: favoriteMakers.length > 0 || favoriteEvents.length > 0
+  });
   
   // Check if user is a Maker in Goer mode (needs ModeSwitcher)
   const isMakerInGoerMode = profile.role === 'maker' && onModeChange;
@@ -162,6 +173,14 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
                       <ModeSwitcher profile={profile} onModeChange={onModeChange} />
                     </div>
                   )}
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="outline" 
+                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logg ut
+                  </Button>
                   <button className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                     Slett konto
                   </button>
@@ -311,15 +330,6 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
                 </button>
               );
             })}
-            
-            {/* Mobile Logout Button */}
-            <button
-              onClick={handleSignOut}
-              className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="text-xs font-medium truncate">Logg ut</span>
-            </button>
           </div>
         </nav>
       )}
