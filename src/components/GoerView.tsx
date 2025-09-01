@@ -66,21 +66,13 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
     switch (activeSection) {
       case 'explore':
         return (
-          <div className="h-[calc(100vh-8rem)]">
+          <div className="h-screen">
             <GoerFullscreenMap 
-              onBack={() => setViewMode('list')}
+              onBack={() => setActiveSection('favorites')}
               onMakerClick={(makerId) => {
-                // Handle maker profile navigation
-                console.log('Navigate to maker:', makerId);
+                navigate(`/profile/${makerId}`);
               }}
             />
-            {/* List button at bottom center */}
-            <button
-              onClick={() => setViewMode('list')}
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg hover:bg-primary/90 transition-colors z-10"
-            >
-              Vis liste
-            </button>
           </div>
         );
       case 'favorites':
@@ -111,14 +103,11 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
               <div className="bg-card rounded-lg p-6 border">
                 <h3 className="font-semibold mb-4">Konto</h3>
                 <div className="space-y-3">
-                  <Button 
-                    onClick={handleSignOut}
-                    variant="outline" 
-                    className="w-full justify-start"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logg ut
-                  </Button>
+                  {isMakerInGoerMode && (
+                    <div className="pb-4 border-b">
+                      <ModeSwitcher profile={profile} onModeChange={onModeChange} />
+                    </div>
+                  )}
                   <button className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                     Slett konto
                   </button>
@@ -208,37 +197,30 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
                   </button>
                 );
               })}
+              
+              {/* ModeSwitcher for Makers in Goer mode */}
+              {isMakerInGoerMode && isExpanded && (
+                <div className="pt-4 border-t border-border">
+                  <ModeSwitcher profile={profile} onModeChange={onModeChange} />
+                </div>
+              )}
+              
+              {/* Logout Button */}
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left text-muted-foreground hover:bg-destructive/10 hover:text-destructive mt-4"
+              >
+                <LogOut className="h-5 w-5 flex-shrink-0" />
+                {isExpanded && (
+                  <span className="opacity-0 animate-fade-in flex-1">
+                    Logg ut
+                  </span>
+                )}
+              </button>
             </nav>
           </div>
         </div>
       )}
-
-      {/* Header */}
-      <header className={`border-b bg-card/95 backdrop-blur-sm z-40 ${!isMobile ? 'ml-16' : ''}`}>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Velkommen, {profile.display_name}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {isMakerInGoerMode && (
-                <ModeSwitcher profile={profile} onModeChange={onModeChange} />
-              )}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logg ut
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-16' : ''} ${isMobile ? 'pb-16' : ''}`}>
@@ -271,6 +253,15 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
                 </button>
               );
             })}
+            
+            {/* Mobile Logout Button */}
+            <button
+              onClick={handleSignOut}
+              className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-xs font-medium truncate">Logg ut</span>
+            </button>
           </div>
         </nav>
       )}
