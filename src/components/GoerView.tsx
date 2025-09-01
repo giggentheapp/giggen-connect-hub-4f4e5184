@@ -40,6 +40,9 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Check if user is a Maker in Goer mode (needs ModeSwitcher)
+  const isMakerInGoerMode = profile.role === 'maker' && onModeChange;
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -227,12 +230,9 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
               <p className="text-sm text-muted-foreground">
                 Velkommen, {profile.display_name}
               </p>
-              <p className="text-xs text-primary font-medium">
-                {profile.role === 'maker' ? 'Publikum-modus' : 'Publikum'}
-              </p>
             </div>
             <div className="flex items-center gap-2">
-              {profile.role === 'maker' && (
+              {isMakerInGoerMode && (
                 <ModeSwitcher profile={profile} onModeChange={onModeChange} />
               )}
               <Button 

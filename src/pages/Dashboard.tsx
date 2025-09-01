@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
-import { GoerDashboard } from '@/components/GoerDashboard';
+import { GoerView } from '@/components/GoerView';
 import { Link } from 'react-router-dom';
 
 interface UserProfile {
@@ -139,7 +139,7 @@ const Dashboard = () => {
       {profile.role === 'maker' ? (
         <MakerDashboard profile={profile} />
       ) : (
-        <GoerDashboard profile={profile} />
+        <GoerView profile={profile} />
       )}
     </div>
   );
