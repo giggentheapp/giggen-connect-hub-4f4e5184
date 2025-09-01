@@ -432,18 +432,11 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
             showConceptActions={true}
             onConceptAction={(conceptId, action) => {
               console.log(`Concept ${conceptId} ${action}`);
-              // Refresh bookings when concept is rejected/deleted
-              if (action === 'deleted') {
-                // Remove the concept from the booking's concept_ids
-                setBookings(prev => prev.map(booking => 
-                  booking.id === selectedBooking?.id
-                    ? { ...booking, concept_ids: booking.concept_ids.filter(id => id !== conceptId) }
-                    : booking
-                ));
-              }
               setConceptViewOpen(false);
-              // Optionally refresh the entire bookings list
-              // window.location.reload(); // or call a refresh function
+              // Refresh the page to update bookings after concept action
+              if (action === 'deleted' || action === 'rejected') {
+                window.location.reload();
+              }
             }}
           />
         </>

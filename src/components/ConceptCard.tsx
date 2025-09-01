@@ -67,6 +67,8 @@ const ConceptCard = ({
   onDelete,
   onConceptAction
 }: ConceptCardProps) => {
+  console.log('ConceptCard rendering with concept:', concept.id);
+  
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
