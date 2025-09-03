@@ -2,18 +2,10 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, MapPin, User, Users, Search, Home } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-interface GoerFullscreenMapProps {
-  onBack: () => void;
-  onMakerClick?: (makerId: string) => void;
-  userId?: string;
-}
+import { MapPin, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface MakerData {
   id: string;
@@ -27,7 +19,11 @@ interface MakerData {
   address: string | null;
 }
 
-const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapProps) => {
+interface MapBackgroundProps {
+  userId?: string;
+}
+
+export const MapBackground = ({ userId }: MapBackgroundProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -37,9 +33,9 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
   const [makers, setMakers] = useState<MakerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Fetch Mapbox token
   useEffect(() => {
@@ -222,9 +218,7 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
       
       if (viewProfileBtn) {
         viewProfileBtn.addEventListener('click', () => {
-          if (onMakerClick) {
-            onMakerClick(maker.user_id);
-          }
+          navigate(`/profile/${maker.user_id}`);
         });
       }
 
@@ -254,141 +248,33 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
         maxZoom: 15
       });
     }
-  }, [makers, mapReady, onMakerClick]);
+  }, [makers, mapReady, navigate]);
 
-  if (loading) {
+  if (loading || tokenError) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-lg">Laster kart...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (tokenError) {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-destructive">Kartfeil</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p>Kunne ikke laste kartet: {tokenError}</p>
-            <Button onClick={onBack} className="w-full">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Tilbake
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="absolute inset-0 bg-muted/20 flex items-center justify-center">
+        {loading ? (
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        ) : (
+          <div className="text-center p-4">
+            <p className="text-destructive">Kartfeil: {tokenError}</p>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-background z-50">
-      {/* Map Container - Full Screen */}
+    <>
+      {/* Map Container */}
       <div 
         ref={mapContainer} 
         className="absolute inset-0"
         style={{ width: '100%', height: '100%' }}
       />
 
-      {/* Floating Sidebar - Flies in from left */}
-      <div 
-        className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
-        onMouseEnter={() => setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
-      >
-        <div className={cn(
-          "h-full bg-card/95 backdrop-blur-sm border-r border-border shadow-lg transition-all duration-300 overflow-y-auto",
-          isExpanded ? "w-64" : "w-16"
-        )}>
-          {/* Logo */}
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <MapPin className="h-4 w-4 text-primary-foreground" />
-              </div>
-              {isExpanded && (
-                <span className="font-bold text-lg text-foreground opacity-0 animate-fade-in">
-                  UTFORSK
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="p-3 space-y-2">
-            <button
-              onClick={onBack}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
-            >
-              <Home className="h-5 w-5 flex-shrink-0" />
-              {isExpanded && (
-                <span className="opacity-0 animate-fade-in flex-1">
-                  Tilbake til dashboard
-                </span>
-              )}
-            </button>
-
-            {/* Makers Stats */}
-            <div className="pt-4 border-t border-border space-y-3">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <Users className="h-5 w-5 flex-shrink-0 text-primary" />
-                {isExpanded && (
-                  <div className="opacity-0 animate-fade-in flex-1">
-                    <p className="text-sm font-medium">{makers.length} Makers</p>
-                    <p className="text-xs text-muted-foreground">Synlige på kartet</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3 px-3 py-2">
-                <Search className="h-5 w-5 flex-shrink-0 text-primary" />
-                {isExpanded && (
-                  <div className="opacity-0 animate-fade-in flex-1">
-                    <p className="text-sm font-medium">Utforsk</p>
-                    <p className="text-xs text-muted-foreground">Klikk på markører for detaljer</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Makers */}
-            {isExpanded && makers.length > 0 && (
-              <div className="pt-4 border-t border-border">
-                <p className="text-sm font-medium text-foreground px-3 mb-2 opacity-0 animate-fade-in">
-                  Nylige makers
-                </p>
-                <div className="space-y-1 max-h-64 overflow-y-auto">
-                  {makers.slice(0, 5).map((maker) => (
-                    <button
-                      key={maker.id}
-                      onClick={() => onMakerClick && onMakerClick(maker.user_id)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left hover:bg-accent/50 opacity-0 animate-fade-in"
-                    >
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{maker.display_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {maker.address || 'Maker'}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </nav>
-        </div>
-      </div>
-
       {/* Floating Makers Count Badge */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-40">
         <Badge 
           variant="secondary" 
           className="flex items-center gap-1 bg-background/95 backdrop-blur-sm border shadow-lg"
@@ -397,19 +283,6 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
           {makers.length} makers
         </Badge>
       </div>
-
-      {/* Floating Instructions */}
-      <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
-        <Card className="bg-background/95 backdrop-blur-sm border shadow-lg pointer-events-auto">
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground text-center">
-              Klikk på en markør for å se maker-detaljer og gå til profilen deres
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </>
   );
 };
-
-export default GoerFullscreenMap;

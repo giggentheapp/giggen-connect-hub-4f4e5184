@@ -1,6 +1,5 @@
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
-import GoerFullscreenMap from '@/components/GoerFullscreenMap';
-import { useNavigate } from 'react-router-dom';
+import { MapBackground } from '@/components/MapBackground';
 
 interface UserProfile {
   id: string;
@@ -27,20 +26,9 @@ interface GoerViewProps {
 
 export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   console.log('🎯 GoerView initialized with profile:', profile);
-  const navigate = useNavigate();
 
   // Create map component for reuse
-  const mapComponent = (
-    <GoerFullscreenMap 
-      onBack={() => {}}
-      onMakerClick={(makerId) => {
-        navigate(`/profile/${makerId}`);
-      }}
-      userId={profile.user_id}
-      profile={profile}
-      onModeChange={onModeChange}
-    />
-  );
+  const mapComponent = <MapBackground userId={profile.user_id} />;
 
   return (
     <UnifiedSidePanel 
