@@ -22,6 +22,7 @@ interface Booking {
   receiver_read_agreement: boolean;
   created_at: string;
   updated_at: string;
+  sender_contact_info?: any;
 }
 
 interface BookingChange {

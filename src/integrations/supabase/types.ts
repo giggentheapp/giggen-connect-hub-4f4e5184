@@ -80,6 +80,7 @@ export type Database = {
           receiver_read_agreement: boolean | null
           selected_concept_id: string | null
           sender_confirmed: boolean | null
+          sender_contact_info: Json | null
           sender_id: string
           sender_read_agreement: boolean | null
           status: string
@@ -101,6 +102,7 @@ export type Database = {
           receiver_read_agreement?: boolean | null
           selected_concept_id?: string | null
           sender_confirmed?: boolean | null
+          sender_contact_info?: Json | null
           sender_id: string
           sender_read_agreement?: boolean | null
           status?: string
@@ -122,6 +124,7 @@ export type Database = {
           receiver_read_agreement?: boolean | null
           selected_concept_id?: string | null
           sender_confirmed?: boolean | null
+          sender_contact_info?: Json | null
           sender_id?: string
           sender_read_agreement?: boolean | null
           status?: string

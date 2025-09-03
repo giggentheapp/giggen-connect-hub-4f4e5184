@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBookings } from '@/hooks/useBookings';
 import { useBookingChanges } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Eye } from 'lucide-react';
+import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Eye, Bell, User } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingConfirmationProps {
@@ -20,12 +20,15 @@ interface BookingConfirmationProps {
 
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
   const [hasReadChanges, setHasReadChanges] = useState(false);
+  const [realtimeBooking, setRealtimeBooking] = useState(booking);
   const { updateBooking } = useBookings();
   const { changes } = useBookingChanges(booking?.id);
   const { toast } = useToast();
 
-  const isSender = currentUserId === booking?.sender_id;
-  const isReceiver = currentUserId === booking?.receiver_id;
+  // Use realtime booking data
+  const currentBooking = realtimeBooking || booking;
+  const isSender = currentUserId === currentBooking?.sender_id;
+  const isReceiver = currentUserId === currentBooking?.receiver_id;
   const userConfirmedField = isSender ? 'sender_confirmed' : 'receiver_confirmed';
   const userReadField = isSender ? 'sender_read_agreement' : 'receiver_read_agreement';
   const otherUserConfirmedField = isSender ? 'receiver_confirmed' : 'sender_confirmed';
@@ -34,8 +37,54 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   useEffect(() => {
     if (isOpen) {
       setHasReadChanges(false);
+      setRealtimeBooking(booking);
     }
-  }, [isOpen]);
+  }, [isOpen, booking]);
+
+  // Real-time subscription for booking updates
+  useEffect(() => {
+    if (!booking?.id) return;
+
+    const channel = supabase
+      .channel('booking-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `id=eq.${booking.id}`
+        },
+        (payload) => {
+          const updatedBooking = payload.new;
+          setRealtimeBooking(prev => ({ ...prev, ...updatedBooking }));
+          
+          // Show notification when other party confirms
+          const isSender = currentUserId === booking.sender_id;
+          const otherUserConfirmedField = isSender ? 'receiver_confirmed' : 'sender_confirmed';
+          const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
+          
+          if (updatedBooking[otherUserConfirmedField] && !booking[otherUserConfirmedField]) {
+            toast({
+              title: "Booking bekreftet! 🎉",
+              description: "Den andre parten har bekreftet bookingen",
+            });
+          }
+          
+          if (updatedBooking[otherUserReadField] && !booking[otherUserReadField]) {
+            toast({
+              title: "Avtale lest! 📋",
+              description: "Den andre parten har lest avtalen",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [booking?.id, currentUserId, booking?.sender_confirmed, booking?.receiver_confirmed, booking?.sender_read_agreement, booking?.receiver_read_agreement, toast]);
 
   const unacknowledgedChanges = changes.filter(change => {
     if (isSender && !change.acknowledged_by_sender) return true;
@@ -70,7 +119,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   const handleConfirmBooking = async () => {
     try {
-      await updateBooking(booking.id, { 
+      await updateBooking(currentBooking.id, { 
         [userConfirmedField]: true,
         status: 'confirmed'
       });
@@ -86,7 +135,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   const handleReadAgreement = async () => {
     try {
-      await updateBooking(booking.id, { [userReadField]: true });
+      await updateBooking(currentBooking.id, { [userReadField]: true });
       
       toast({
         title: "Avtale lest",
@@ -106,10 +155,10 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     });
   };
 
-  if (!booking) return null;
+  if (!currentBooking) return null;
 
-  const bothConfirmed = booking.sender_confirmed && booking.receiver_confirmed;
-  const bothReadAgreement = booking.sender_read_agreement && booking.receiver_read_agreement;
+  const bothConfirmed = currentBooking.sender_confirmed && currentBooking.receiver_confirmed;
+  const bothReadAgreement = currentBooking.sender_read_agreement && currentBooking.receiver_read_agreement;
   const canPublish = bothConfirmed && bothReadAgreement;
   const hasUnreadChanges = unacknowledgedChanges.length > 0;
 
@@ -119,7 +168,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5" />
-            Bookingbekreftelse - {booking.title}
+            Bookingbekreftelse - {currentBooking.title}
           </DialogTitle>
         </DialogHeader>
 
@@ -132,7 +181,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
-                  {booking.sender_confirmed ? (
+                  {currentBooking.sender_confirmed ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <X className="h-4 w-4 text-red-500" />
@@ -141,7 +190,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {booking.receiver_confirmed ? (
+                  {currentBooking.receiver_confirmed ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <X className="h-4 w-4 text-red-500" />
@@ -150,7 +199,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {booking.sender_read_agreement ? (
+                  {currentBooking.sender_read_agreement ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <X className="h-4 w-4 text-red-500" />
@@ -159,7 +208,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {booking.receiver_read_agreement ? (
+                  {currentBooking.receiver_read_agreement ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <X className="h-4 w-4 text-red-500" />
@@ -205,6 +254,38 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
             </Card>
           )}
 
+          {/* Contact Info (for receivers) */}
+          {isReceiver && currentBooking.sender_contact_info && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Kontaktinformasjon fra avsender
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {currentBooking.sender_contact_info.name && (
+                  <div>
+                    <span className="font-medium">Navn: </span>
+                    {currentBooking.sender_contact_info.name}
+                  </div>
+                )}
+                {currentBooking.sender_contact_info.email && (
+                  <div>
+                    <span className="font-medium">E-post: </span>
+                    {currentBooking.sender_contact_info.email}
+                  </div>
+                )}
+                {currentBooking.sender_contact_info.phone && (
+                  <div>
+                    <span className="font-medium">Telefon: </span>
+                    {currentBooking.sender_contact_info.phone}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Event Details */}
           <Card>
             <CardHeader>
@@ -213,53 +294,53 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-medium mb-2">Tittel</h3>
-                <p>{booking.title}</p>
+                <p>{currentBooking.title}</p>
               </div>
               
-              {booking.description && (
+              {currentBooking.description && (
                 <div>
                   <h3 className="font-medium mb-2">Beskrivelse</h3>
-                  <p className="whitespace-pre-line">{booking.description}</p>
+                  <p className="whitespace-pre-line">{currentBooking.description}</p>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {booking.event_date && (
+                {currentBooking.event_date && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{format(new Date(booking.event_date), 'dd.MM.yyyy')}</span>
+                    <span>{format(new Date(currentBooking.event_date), 'dd.MM.yyyy')}</span>
                   </div>
                 )}
                 
-                {booking.venue && (
+                {currentBooking.venue && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{booking.venue}</span>
+                    <span>{currentBooking.venue}</span>
                   </div>
                 )}
               </div>
 
-              {(booking.price_musician || booking.price_ticket) && (
+              {(currentBooking.price_musician || currentBooking.price_ticket) && (
                 <div>
                   <h3 className="font-medium mb-2 flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
                     Pris
                   </h3>
                   <div className="space-y-1">
-                    {booking.price_musician && (
-                      <p>Musiker: {booking.price_musician}</p>
+                    {currentBooking.price_musician && (
+                      <p>Musiker: {currentBooking.price_musician}</p>
                     )}
-                    {booking.price_ticket && (
-                      <p>Billett: {booking.price_ticket}</p>
+                    {currentBooking.price_ticket && (
+                      <p>Billett: {currentBooking.price_ticket}</p>
                     )}
                   </div>
                 </div>
               )}
 
-              {booking.hospitality_rider && (
+              {currentBooking.hospitality_rider && (
                 <div>
                   <h3 className="font-medium mb-2">Hospitality Rider</h3>
-                  <p className="whitespace-pre-line">{booking.hospitality_rider}</p>
+                  <p className="whitespace-pre-line">{currentBooking.hospitality_rider}</p>
                 </div>
               )}
             </CardContent>
@@ -274,26 +355,32 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
               </Button>
             )}
 
-            {(!hasUnreadChanges || hasReadChanges) && !booking[userConfirmedField] && (
+            {(!hasUnreadChanges || hasReadChanges) && !currentBooking[userConfirmedField] && (
               <Button onClick={handleConfirmBooking}>
                 <Check className="h-4 w-4 mr-2" />
                 Bekreft booking
               </Button>
             )}
 
-            {booking[userConfirmedField] && !booking[otherUserConfirmedField] && (
-              <Badge variant="outline">Venter på at den andre parten bekrefter</Badge>
+            {currentBooking[userConfirmedField] && !currentBooking[otherUserConfirmedField] && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Bell className="h-3 w-3" />
+                Venter på at den andre parten bekrefter
+              </Badge>
             )}
 
-            {bothConfirmed && !booking[userReadField] && (
+            {bothConfirmed && !currentBooking[userReadField] && (
               <Button onClick={handleReadAgreement}>
                 <Check className="h-4 w-4 mr-2" />
                 Jeg har lest avtalen
               </Button>
             )}
 
-            {booking[userReadField] && !booking[otherUserReadField] && (
-              <Badge variant="outline">Venter på at den andre parten leser avtalen</Badge>
+            {currentBooking[userReadField] && !currentBooking[otherUserReadField] && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Bell className="h-3 w-3" />
+                Venter på at den andre parten leser avtalen
+              </Badge>
             )}
 
             {canPublish && (

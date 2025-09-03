@@ -91,6 +91,19 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     setSubmitting(true);
     
     try {
+      // Get current user's contact info to share
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('contact_info, display_name')
+        .eq('user_id', user?.id)
+        .single();
+
+      const contactInfoToShare = profile?.contact_info || {
+        name: profile?.display_name,
+        email: user?.email
+      };
+
       await createBooking({
         receiver_id: receiverId,
         concept_ids: [selectedConcept.id],
@@ -101,7 +114,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         price_ticket: null,
         event_date: eventDate?.toISOString() || null,
         venue: venue || null,
-        status: 'pending'
+        status: 'pending',
+        sender_contact_info: contactInfoToShare
       });
 
       // Reset form
