@@ -252,17 +252,14 @@ export const UnifiedSidePanel = ({ profile, mapComponent, className }: UnifiedSi
       {/* Main Content */}
       <main className={cn(
         "flex-1 overflow-hidden",
-        !isMobile ? (activeSection === 'explore' && isGoer ? '' : 'ml-20') : '',
+        !isMobile ? (activeSection === 'explore' ? '' : 'ml-20') : '',
         isMobile ? 'pb-16' : ''
       )}>
-        {activeSection === 'explore' && isGoer ? (
-          // For goer explore mode, don't render content over the map
-          null
+        {activeSection === 'explore' && (isGoer || ismaker) ? (
+          // For explore mode, render content directly without container
+          renderActiveSection()
         ) : (
-          <div className={cn(
-            "h-full",
-            activeSection === 'explore' && ismaker ? 'p-6' : 'container mx-auto px-4 py-6'
-          )}>
+          <div className="container mx-auto px-4 py-6 h-full">
             {renderActiveSection()}
           </div>
         )}
