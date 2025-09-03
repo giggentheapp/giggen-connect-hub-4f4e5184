@@ -668,6 +668,22 @@ export type Database = {
           show_techspec: boolean
         }[]
       }
+      get_public_makers_for_explore: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          id: string
+          is_address_public: boolean
+          latitude: number
+          longitude: number
+          role: string
+          user_id: string
+        }[]
+      }
       get_public_profile: {
         Args: { target_user_id: string }
         Returns: {

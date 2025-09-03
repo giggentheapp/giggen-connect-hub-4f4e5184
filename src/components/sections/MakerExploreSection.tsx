@@ -39,9 +39,7 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
       
       // Use secure function to get only public maker profiles
       const { data, error } = await supabase
-        .rpc('get_public_profile', {})
-        .eq('role', 'maker')
-        .neq('user_id', profile.user_id); // Exclude current user
+        .rpc('get_public_makers_for_explore');
       
       if (error) throw error;
       setMakers(data || []);

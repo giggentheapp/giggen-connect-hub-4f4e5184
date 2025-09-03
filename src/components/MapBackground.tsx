@@ -72,17 +72,20 @@ export const MapBackground = ({ userId }: MapBackgroundProps) => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'maker')
-        .eq('is_address_public', true)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+      // Use secure function for getting makers visible on map
+      const { data: makersData, error: makersError } = await supabase
+        .rpc('get_public_makers_for_explore');
 
-      if (error) throw error;
+      if (makersError) throw makersError;
+
+      // Filter makers with valid coordinates 
+      const validMakers = (makersData || []).filter(maker => 
+        maker.latitude && maker.longitude
+      );
+
+      console.log('📍 MapBackground: Loaded makers for map:', validMakers.length);
       
-      setMakers(data || []);
+      setMakers(validMakers || []);
     } catch (error: any) {
       console.error('Error fetching makers:', error);
       toast({
