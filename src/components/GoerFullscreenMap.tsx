@@ -8,11 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, MapPin, User, Users, Search, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 
 interface GoerFullscreenMapProps {
   onBack: () => void;
   onMakerClick?: (makerId: string) => void;
   userId?: string;
+  profile?: any;
+  onModeChange?: (newMode: string) => void;
 }
 
 interface MakerData {
@@ -27,7 +30,7 @@ interface MakerData {
   address: string | null;
 }
 
-const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapProps) => {
+const GoerFullscreenMap = ({ onBack, onMakerClick, userId, profile, onModeChange }: GoerFullscreenMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -286,6 +289,45 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
     );
   }
 
+  // If profile is provided, use UnifiedSidePanel
+  if (profile) {
+    return (
+      <div className="relative min-h-screen">
+        {/* Map Container - Full Screen Background */}
+        <div 
+          ref={mapContainer} 
+          className="fixed inset-0"
+          style={{ width: '100%', height: '100%' }}
+        />
+
+        {/* UnifiedSidePanel Overlay */}
+        <UnifiedSidePanel 
+          profile={profile}
+          onModeChange={onModeChange}
+          mapComponent={
+            <div 
+              ref={mapContainer} 
+              className="absolute inset-0"
+              style={{ width: '100%', height: '100%' }}
+            />
+          }
+        />
+
+        {/* Floating Makers Count Badge */}
+        <div className="absolute top-4 right-4 z-40">
+          <Badge 
+            variant="secondary" 
+            className="flex items-center gap-1 bg-background/95 backdrop-blur-sm border shadow-lg"
+          >
+            <MapPin className="w-4 h-4" />
+            {makers.length} makers
+          </Badge>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to original layout for compatibility
   return (
     <div className="fixed inset-0 bg-background z-50">
       {/* Map Container - Full Screen */}

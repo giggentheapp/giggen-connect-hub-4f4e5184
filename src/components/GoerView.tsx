@@ -37,6 +37,8 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
         navigate(`/profile/${makerId}`);
       }}
       userId={profile.user_id}
+      profile={profile}
+      onModeChange={onModeChange}
     />
   );
 
