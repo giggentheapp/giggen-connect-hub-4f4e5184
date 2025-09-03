@@ -12,6 +12,7 @@ import ConceptCard from '@/components/ConceptCard';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
+import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
 
 interface ProfileData {
   id: string;
@@ -259,49 +260,70 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-8">
         {/* Om meg */}
         {(settings?.show_about || isOwnProfile) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-4 w-4" />
+                <User className="h-5 w-5" />
                 Om meg
               </CardTitle>
               <SectionVisibilityIndicator isVisible={settings?.show_about || false} sectionName="Om meg" />
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                {profile.bio || "Ingen beskrivelse lagt til"}
+              <p className="text-foreground leading-relaxed">
+                {profile.bio || (isOwnProfile ? "Ingen beskrivelse lagt til. Legg til en beskrivelse i innstillingene." : "Ingen beskrivelse tilgjengelig.")}
               </p>
             </CardContent>
           </Card>
         )}
 
         {/* Portefølje */}
-        {(settings?.show_portfolio || isOwnProfile) && portfolioFiles && portfolioFiles.length > 0 && (
-          <Card className="md:col-span-2">
+        {(settings?.show_portfolio || isOwnProfile) && (
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <File className="h-4 w-4" />
+                <File className="h-5 w-5" />
                 Portefølje
               </CardTitle>
               <SectionVisibilityIndicator isVisible={settings?.show_portfolio || false} sectionName="Portefølje" />
             </CardHeader>
             <CardContent>
               {portfolioLoading ? (
-                <p className="text-muted-foreground">Laster portefølje...</p>
-              ) : (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-muted-foreground">Laster portefølje...</span>
+                </div>
+              ) : Array.isArray(portfolioFiles) && portfolioFiles.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {Array.isArray(portfolioFiles) ? portfolioFiles.filter(file => file && file.id && file.file_path).map((file) => (
+                  {portfolioFiles.filter(file => file && file.id && file.file_path).map((file) => (
                     <div 
                       key={file.id} 
-                      className="aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-shadow cursor-pointer"
+                      className="group aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-all duration-200 cursor-pointer"
                       onClick={() => window.open(`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`, '_blank')}
                     >
-                      {renderFilePreview(file)}
+                      <div className="relative w-full h-full">
+                        {renderFilePreview(file)}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                        {file.title && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                            <p className="text-white text-sm font-medium truncate">{file.title}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )) : <></>}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    {isOwnProfile 
+                      ? "Ingen portefølje lagt til ennå. Last opp filer i innstillingene." 
+                      : "Ingen portefølje tilgjengelig"
+                    }
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -310,40 +332,52 @@ const Profile = () => {
 
         {/* Konsepter */}
         {profile.role === 'maker' && (
-          <Card className="md:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" />
+                <Lightbulb className="h-5 w-5" />
                 Konsepter
               </CardTitle>
+              <CardDescription>
+                {isOwnProfile ? "Dine publiserte konsepter" : "Publiserte konsepter"}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {conceptsLoading ? (
-                <p className="text-muted-foreground">Laster konsepter...</p>
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-muted-foreground">Laster konsepter...</span>
+                </div>
               ) : Array.isArray(concepts) && concepts.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {concepts.filter(concept => concept && concept.id).map((concept) => (
-                  <ConceptCard 
-                    key={concept.id}
-                    concept={concept}
-                    showActions={false}
-                    showConceptActions={!isOwnProfile}
-                    onConceptAction={(action) => {
-                      if (action === 'deleted' || action === 'rejected') {
-                        // Optionally refresh the page to update the concepts list
-                        window.location.reload();
-                      }
-                    }}
-                  />
+                    <ConceptCard 
+                      key={concept.id}
+                      concept={concept}
+                      showActions={false}
+                      showConceptActions={!isOwnProfile}
+                      onConceptAction={(action) => {
+                        if (action === 'deleted' || action === 'rejected') {
+                          window.location.reload();
+                        }
+                      }}
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">Ingen publiserte konsepter</p>
+                <div className="text-center py-12">
+                  <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    {isOwnProfile 
+                      ? "Ingen publiserte konsepter ennå. Opprett ditt første konsept i dashboardet." 
+                      : "Ingen publiserte konsepter"
+                    }
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
         )}
-
       </div>
     </div>
   );
