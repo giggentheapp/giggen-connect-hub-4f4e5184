@@ -654,6 +654,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_visible_makers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          id: string
+          is_address_public: boolean
+          latitude: number
+          longitude: number
+          role: string
+          user_id: string
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
@@ -702,6 +718,23 @@ export type Database = {
       }
       get_safe_profile_fields: {
         Args: { viewed_user_id: string; viewer_user_id?: string }
+        Returns: {
+          address: string
+          avatar_url: string
+          bio: string
+          contact_info: Json
+          created_at: string
+          display_name: string
+          id: string
+          is_address_public: boolean
+          latitude: number
+          longitude: number
+          role: string
+          user_id: string
+        }[]
+      }
+      get_secure_profile_data: {
+        Args: { target_user_id: string; viewer_role?: string }
         Returns: {
           address: string
           avatar_url: string

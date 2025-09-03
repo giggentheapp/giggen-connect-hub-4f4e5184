@@ -67,21 +67,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         setLoading(true);
         
         const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            user_id,
-            display_name,
-            avatar_url,
-            latitude,
-            longitude,
-            address
-          `)
-          .eq('role', 'maker')
-          .eq('is_address_public', true)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .not('address', 'is', null)
-          .order('display_name', { ascending: true });
+          .rpc('get_all_visible_makers');
 
         if (error) {
           throw error;

@@ -21,9 +21,10 @@ interface MakerData {
 
 interface MapBackgroundProps {
   userId?: string;
+  onProfileClick?: (userId: string) => void;
 }
 
-export const MapBackground = ({ userId }: MapBackgroundProps) => {
+export const MapBackground = ({ userId, onProfileClick }: MapBackgroundProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -67,14 +68,14 @@ export const MapBackground = ({ userId }: MapBackgroundProps) => {
     fetchToken();
   }, []);
 
-  // Fetch makers data
+// Fetch makers data
   const fetchMakers = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Use secure function for getting makers visible on map
+      // Use new function for getting all visible makers
       const { data: makersData, error: makersError } = await supabase
-        .rpc('get_public_makers_for_explore');
+        .rpc('get_all_visible_makers');
 
       if (makersError) throw makersError;
 
@@ -221,7 +222,11 @@ export const MapBackground = ({ userId }: MapBackgroundProps) => {
       
       if (viewProfileBtn) {
         viewProfileBtn.addEventListener('click', () => {
-          navigate(`/profile/${maker.user_id}`);
+          if (onProfileClick) {
+            onProfileClick(maker.user_id);
+          } else {
+            navigate(`/profile/${maker.user_id}`);
+          }
         });
       }
 
@@ -251,7 +256,7 @@ export const MapBackground = ({ userId }: MapBackgroundProps) => {
         maxZoom: 15
       });
     }
-  }, [makers, mapReady, navigate]);
+  }, [makers, mapReady, navigate, onProfileClick]);
 
   if (loading || tokenError) {
     return (

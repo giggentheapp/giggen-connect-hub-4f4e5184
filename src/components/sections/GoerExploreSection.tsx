@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Users, Calendar, Clock, Eye } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { MapBackground } from '@/components/MapBackground';
+import { ProfileModal } from '@/components/ProfileModal';
 
 interface UserProfile {
   id: string;
@@ -29,17 +31,22 @@ export const GoerExploreSection = ({ profile }: GoerExploreSectionProps) => {
   const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const { isGoer } = useRole();
 
-  const fetchMakers = async () => {
-    if (!isGoer) return; // Only goers can see makers
-    
+  // Auto-fetch makers when component mounts
+  useEffect(() => {
+    fetchMakers();
+  }, []);
+
+  const fetchMakers = async () => {    
     try {
       setLoading(true);
       
-      // Use secure function to get only public maker profiles
+      // Use new function to get all visible makers
       const { data, error } = await supabase
-        .rpc('get_public_makers_for_explore');
+        .rpc('get_all_visible_makers');
       
       if (error) throw error;
       setMakers(data || []);
@@ -51,60 +58,56 @@ export const GoerExploreSection = ({ profile }: GoerExploreSectionProps) => {
   };
 
   const handleViewProfile = (makerId: string) => {
-    window.open(`/profile/${makerId}`, '_blank');
+    setSelectedUserId(makerId);
+    setProfileModalOpen(true);
   };
 
   return (
-    <div className="space-y-4">
-      {/* Tab Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="map">Kart</TabsTrigger>
-          <TabsTrigger value="list">Liste</TabsTrigger>
-        </TabsList>
+    <div className="fixed inset-0 bg-background">
+      {/* Full Screen Map */}
+      <div className="absolute inset-0">
+        <MapBackground onProfileClick={handleViewProfile} />
+      </div>
+      
+      {/* Floating Controls */}
+      <div className="absolute top-4 left-4 right-4 z-10">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-card/95 backdrop-blur-sm border shadow-lg">
+            <TabsTrigger value="map">Kart</TabsTrigger>
+            <TabsTrigger value="list">Makere</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-        <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Utforsk makere på kart
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Kartvisning vises som bakgrunn. Bruk kartfunksjonene for å utforske makere i ditt område.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Makere i ditt område
-              </CardTitle>
-              <Button 
-                onClick={fetchMakers} 
-                disabled={loading}
-                variant="outline"
-                size="sm"
-              >
-                {loading ? 'Laster...' : 'Last inn makere'}
-              </Button>
-            </CardHeader>
-            <CardContent>
+      {/* Floating List Panel */}
+      {activeTab === 'list' && (
+        <div className="absolute top-20 left-4 right-4 bottom-4 z-10">
+          <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
+            <CardContent className="p-4 h-full overflow-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Makere i nettverket
+                </h2>
+                <Button 
+                  onClick={fetchMakers} 
+                  disabled={loading}
+                  variant="outline"
+                  size="sm"
+                >
+                  {loading ? 'Laster...' : 'Oppdater makere'}
+                </Button>
+              </div>
+              
               {makers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Ingen makere funnet. Trykk "Last inn makere" for å se tilgjengelige utøvere.</p>
+                  <p>{loading ? 'Laster makere...' : 'Ingen makere funnet.'}</p>
                 </div>
               ) : (
-                <div className="grid gap-4">
+                <div className="space-y-4">
                   {makers.map((maker) => (
-                    <Card key={maker.id} className="border">
+                    <Card key={maker.id} className="border bg-background/80">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
@@ -122,7 +125,7 @@ export const GoerExploreSection = ({ profile }: GoerExploreSectionProps) => {
                                 <Badge variant="secondary" className="text-xs">
                                   {maker.role}
                                 </Badge>
-                                {maker.address && (
+                                {maker.address && maker.is_address_public && (
                                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
                                     {maker.address}
@@ -147,8 +150,15 @@ export const GoerExploreSection = ({ profile }: GoerExploreSectionProps) => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
+      
+      {/* Profile Modal */}
+      <ProfileModal 
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        userId={selectedUserId}
+      />
     </div>
   );
 };

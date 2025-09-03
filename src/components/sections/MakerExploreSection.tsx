@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import Map from '@/components/Map';
+import { ProfileModal } from '@/components/ProfileModal';
+import { MapBackground } from '@/components/MapBackground';
 
 interface UserProfile {
   id: string;
@@ -30,17 +32,22 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
   const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const { ismaker } = useRole();
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const { role } = useRole();
 
-  const fetchOtherMakers = async () => {
-    if (!ismaker) return; // Only makers can see other makers
-    
+  // Auto-fetch makers when component mounts
+  useEffect(() => {
+    fetchAllMakers();
+  }, []);
+
+  const fetchAllMakers = async () => {
     try {
       setLoading(true);
       
-      // Use secure function to get only public maker profiles
+      // Use new function to get all visible makers
       const { data, error } = await supabase
-        .rpc('get_public_makers_for_explore');
+        .rpc('get_all_visible_makers');
       
       if (error) throw error;
       setMakers(data || []);
@@ -52,7 +59,8 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
   };
 
   const handleViewProfile = (makerId: string) => {
-    window.open(`/profile/${makerId}`, '_blank');
+    setSelectedUserId(makerId);
+    setProfileModalOpen(true);
   };
 
   const handleStartBooking = (receiverId: string) => {
@@ -65,7 +73,7 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <Map className="w-full h-full" />
+        <MapBackground onProfileClick={handleViewProfile} />
       </div>
       
       {/* Floating Controls */}
@@ -89,19 +97,19 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
                   Makere i nettverket
                 </h2>
                 <Button 
-                  onClick={fetchOtherMakers} 
+                  onClick={fetchAllMakers} 
                   disabled={loading}
                   variant="outline"
                   size="sm"
                 >
-                  {loading ? 'Laster...' : 'Last inn makere'}
+                  {loading ? 'Laster...' : 'Oppdater makere'}
                 </Button>
               </div>
               
               {makers.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Ingen andre makere funnet. Trykk "Last inn makere" for å se nettverket.</p>
+                  <p>{loading ? 'Laster makere...' : 'Ingen makere funnet.'}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -160,6 +168,13 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
           </Card>
         </div>
       )}
+      
+      {/* Profile Modal */}
+      <ProfileModal 
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        userId={selectedUserId}
+      />
     </div>
   );
 };
