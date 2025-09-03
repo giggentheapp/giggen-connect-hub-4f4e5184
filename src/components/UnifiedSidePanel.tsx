@@ -2,18 +2,21 @@ import { useState, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   Compass, User, Settings, Calendar, FolderOpen, 
-  LogOut, Search, MapPin, Users, Home, List, Lightbulb
+  LogOut, Search, MapPin, Users, Home, List, Lightbulb, Briefcase, FileText
 } from 'lucide-react';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useRole } from '@/contexts/RoleProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Import sections
 import { ExploreSection } from '@/components/sections/ExploreSection';
+import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
+import { MakerExploreSection } from '@/components/sections/MakerExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
@@ -23,7 +26,6 @@ import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { UserSettings } from '@/components/UserSettings';
 import { EventMarket } from '@/components/EventMarket';
-import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 
 interface UserProfile {
   id: string;
@@ -57,9 +59,10 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { role: userRole, ismaker, isGoer, loading: roleLoading } = useRole();
 
-  const isMakerInGoerMode = profile.role === 'maker' && onModeChange;
-  const currentRole = profile.current_mode || profile.default_mode || profile.role;
+  // Use role from context as single source of truth
+  const currentRole = userRole || profile.role;
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -81,95 +84,94 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
     }
   };
 
-  // Role-based navigation items
+  // Role-based navigation items based on actual user role from context
   const getNavigationItems = () => {
-    if (currentRole === 'goer') {
+    if (isGoer) {
       return [
-        { id: 'explore', label: 'Utforsk', icon: Search },
+        { id: 'explore', label: 'Utforsk', icon: MapPin },
+        { id: 'event-market', label: 'Event-market', icon: Calendar },
         { id: 'profile', label: 'Profil', icon: User },
-        { id: 'event-market', label: 'Event Market', icon: Calendar },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
-    } else {
+    } else if (ismaker) {
       return [
-        { id: 'explore', label: 'Utforsk', icon: Compass },
+        { id: 'explore', label: 'Utforsk', icon: MapPin },
         { id: 'profile', label: 'Profil', icon: User },
-        { id: 'bookings', label: 'Bookinger', icon: Calendar },
-        { id: 'admin-files', label: 'Filer', icon: FolderOpen },
+        { id: 'bookings', label: 'Bookinger', icon: Briefcase },
+        { id: 'admin-files', label: 'Filer', icon: FileText },
         { id: 'admin-concepts', label: 'Konsepter', icon: Lightbulb },
         { id: 'admin-events', label: 'Arrangementer', icon: Calendar },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
     }
+    return []; // Loading state
   };
 
   const renderActiveSection = () => {
+    // Block content rendering if role loading
+    if (roleLoading) {
+      return <div className="flex items-center justify-center py-8">Laster...</div>;
+    }
+
     switch (activeSection) {
       case 'explore':
-        if (currentRole === 'goer') {
-          // For goer mode, always show full-screen map
-          return null; // Map is rendered as background
-        } else {
-          return <ExploreSection />;
+        if (isGoer) {
+          return <GoerExploreSection profile={profile} />;
+        } else if (ismaker) {
+          return <MakerExploreSection profile={profile} />;
         }
+        return null; // Loading state
       
       case 'profile':
-        if (currentRole === 'goer') {
+        if (isGoer) {
           return <ProfileGoerSection profile={profile} />;
-        } else {
+        } else if (ismaker) {
           return <ProfileSection profile={profile} />;
         }
+        return null;
       
       case 'bookings':
-        return <BookingsSection profile={profile} />;
+        // Only available to makers
+        if (ismaker) {
+          return <BookingsSection profile={profile} />;
+        }
+        return null;
       
       case 'admin-files':
-        return <AdminFilesSection profile={profile} />;
+        // Only available to makers
+        if (ismaker) {
+          return <AdminFilesSection profile={profile} />;
+        }
+        return null;
       
       case 'admin-concepts':
-        return <AdminConceptsSection profile={profile} />;
+        // Only available to makers
+        if (ismaker) {
+          return <AdminConceptsSection profile={profile} />;
+        }
+        return null;
       
       case 'admin-events':
-        return <UpcomingEventsSection profile={profile} isAdminView={true} />;
+        // Only available to makers
+        if (ismaker) {
+          return <UpcomingEventsSection profile={profile} isAdminView={true} />;
+        }
+        return null;
       
       case 'event-market':
+        // Available to all authenticated users
         return <EventMarket />;
       
       case 'settings':
-        return (
-          <div>
-            <UserSettings 
-              profile={profile}
-              onProfileUpdate={(updatedProfile) => {
-                console.log('Profile updated:', updatedProfile);
-              }}
-            />
-            
-            <div className="mt-8 space-y-6 max-w-2xl">
-              <div className="bg-card rounded-lg p-6 border">
-                <h3 className="font-semibold mb-4">Konto</h3>
-                <div className="space-y-3">
-                  {isMakerInGoerMode && (
-                    <div className="pb-4 border-b">
-                      <ModeSwitcher profile={profile} onModeChange={onModeChange} />
-                    </div>
-                  )}
-                  <Button 
-                    onClick={handleSignOut}
-                    variant="outline" 
-                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logg ut
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return <AdminSettingsSection profile={profile} />;
       
       default:
-        return <ExploreSection />;
+        if (isGoer) {
+          return <GoerExploreSection profile={profile} />;
+        } else if (ismaker) {
+          return <MakerExploreSection profile={profile} />;
+        }
+        return null;
     }
   };
 
@@ -178,7 +180,7 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
   return (
     <div className={cn("relative min-h-screen", className)}>
       {/* Full-screen Map Background for Goer Explore mode */}
-      {activeSection === 'explore' && currentRole === 'goer' && mapComponent && (
+      {activeSection === 'explore' && isGoer && mapComponent && (
         <div className="fixed inset-0 z-10">
           {mapComponent}
         </div>
@@ -236,8 +238,8 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
                 );
               })}
 
-              {/* ModeSwitcher for Makers in Goer mode */}
-              {isMakerInGoerMode && isExpanded && (
+              {/* ModeSwitcher for Makers */}
+              {ismaker && onModeChange && isExpanded && (
                 <div className="pt-4 border-t border-border">
                   <ModeSwitcher profile={profile} onModeChange={onModeChange} />
                 </div>
@@ -263,10 +265,10 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
       {/* Main Content */}
       <main className={cn(
         "flex-1 overflow-auto",
-        !isMobile ? (activeSection === 'explore' && currentRole === 'goer' ? '' : 'ml-20') : '',
+        !isMobile ? (activeSection === 'explore' && isGoer ? '' : 'ml-20') : '',
         isMobile ? 'pb-16' : ''
       )}>
-        {activeSection === 'explore' && currentRole === 'goer' ? (
+        {activeSection === 'explore' && isGoer ? (
           // For goer explore mode, don't render content over the map
           null
         ) : (

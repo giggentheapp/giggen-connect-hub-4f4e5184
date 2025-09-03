@@ -1,33 +1,7 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type UserRole = 'maker' | 'goer';
-
-interface RoleContext {
-  role: UserRole | null;
-  loading: boolean;
-  error: string | null;
-  ismaker: boolean;
-  isGoer: boolean;
-  refresh: () => void;
-}
-
-const RoleContext = createContext<RoleContext>({
-  role: null,
-  loading: true,
-  error: null,
-  ismaker: false,
-  isGoer: false,
-  refresh: () => {},
-});
-
-export const useRole = () => {
-  const context = useContext(RoleContext);
-  if (!context) {
-    throw new Error('useRole must be used within a RoleProvider');
-  }
-  return context;
-};
 
 export const useRoleData = () => {
   const [role, setRole] = useState<UserRole | null>(null);
