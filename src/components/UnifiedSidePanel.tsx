@@ -93,10 +93,10 @@ export const UnifiedSidePanel = ({ profile, mapComponent, className }: UnifiedSi
       return [
         { id: 'profile', label: 'Profil', icon: User },
         { id: 'explore', label: 'Utforsk', icon: MapPin },
-        { id: 'admin-files', label: 'Portefølje', icon: FileText },
+        { id: 'admin-files', label: 'Filer', icon: FileText },
         { id: 'admin-concepts', label: 'Konsepter', icon: Lightbulb },
         { id: 'bookings', label: 'Booking', icon: Briefcase },
-        { id: 'admin-events', label: 'Filer', icon: Calendar },
+        { id: 'admin-events', label: 'Kommende arrangementer', icon: Calendar },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
     }
