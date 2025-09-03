@@ -2,7 +2,7 @@ import { useState, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   Compass, User, Settings, Calendar, FolderOpen, 
-  LogOut, Search, MapPin, Users, Home, List
+  LogOut, Search, MapPin, Users, Home, List, Lightbulb
 } from 'lucide-react';
 import { ModeSwitcher } from '@/components/ModeSwitcher';
 import { Button } from '@/components/ui/button';
@@ -96,7 +96,7 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
         { id: 'profile', label: 'Profil', icon: User },
         { id: 'bookings', label: 'Bookinger', icon: Calendar },
         { id: 'admin-files', label: 'Filer', icon: FolderOpen },
-        { id: 'admin-concepts', label: 'Konsepter', icon: Settings },
+        { id: 'admin-concepts', label: 'Konsepter', icon: Lightbulb },
         { id: 'admin-events', label: 'Arrangementer', icon: Calendar },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
