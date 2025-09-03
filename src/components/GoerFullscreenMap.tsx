@@ -286,32 +286,39 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
 
   return (
     <div className="fixed inset-0 bg-background z-50">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-        <div className="flex items-center justify-between p-4">
-          <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tilbake
-          </Button>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              {makers.length} makers
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      {/* Map Container */}
+      {/* Map Container - Full Screen */}
       <div 
         ref={mapContainer} 
-        className="absolute inset-0 pt-20"
-        style={{ width: '100%', height: 'calc(100% - 5rem)' }}
+        className="absolute inset-0"
+        style={{ width: '100%', height: '100%' }}
       />
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
-        <Card className="bg-background/95 backdrop-blur-sm pointer-events-auto">
+      {/* Floating Back Button */}
+      <div className="absolute top-4 left-4 z-10">
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="bg-background/95 backdrop-blur-sm border shadow-lg hover:bg-background"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Tilbake
+        </Button>
+      </div>
+
+      {/* Floating Makers Count Badge */}
+      <div className="absolute top-4 right-4 z-10">
+        <Badge 
+          variant="secondary" 
+          className="flex items-center gap-1 bg-background/95 backdrop-blur-sm border shadow-lg"
+        >
+          <MapPin className="w-4 h-4" />
+          {makers.length} makers
+        </Badge>
+      </div>
+
+      {/* Floating Instructions */}
+      <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
+        <Card className="bg-background/95 backdrop-blur-sm border shadow-lg pointer-events-auto">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground text-center">
               Klikk på en markør for å se maker-detaljer og gå til profilen deres
