@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Lightbulb, Calendar, Eye, MessageSquare } from 'lucide-react';
+import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
+import Map from '@/components/Map';
 
 interface UserProfile {
   id: string;
@@ -61,37 +62,26 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Tab Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+    <div className="h-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="map">Kart</TabsTrigger>
           <TabsTrigger value="list">Nettverk</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Utforsk andre makere
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Kartvisning viser andre makere i nettverket. Bruk kartet for å finne samarbeidspartnere.
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="map" className="flex-1 mt-0">
+          <div className="h-[calc(100vh-200px)]">
+            <Map className="w-full h-full rounded-lg border" />
+          </div>
         </TabsContent>
 
-        <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+        <TabsContent value="list" className="flex-1 mt-0">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Users className="w-5 h-5" />
                 Makere i nettverket
-              </CardTitle>
+              </h2>
               <Button 
                 onClick={fetchOtherMakers} 
                 disabled={loading}
@@ -100,68 +90,67 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
               >
                 {loading ? 'Laster...' : 'Last inn makere'}
               </Button>
-            </CardHeader>
-            <CardContent>
-              {makers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Ingen andre makere funnet. Trykk "Last inn makere" for å se nettverket.</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {makers.map((maker) => (
-                    <Card key={maker.id} className="border">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                              <span className="text-primary-foreground text-sm font-bold">
-                                {maker.display_name?.charAt(0) || 'M'}
-                              </span>
-                            </div>
-                            <div>
-                              <h3 className="font-medium">{maker.display_name}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {maker.role}
-                                </Badge>
-                                {maker.address && maker.is_address_public && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    {maker.address}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+            </div>
+            
+            {makers.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Ingen andre makere funnet. Trykk "Last inn makere" for å se nettverket.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {makers.map((maker) => (
+                  <Card key={maker.id} className="border">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <span className="text-primary-foreground text-sm font-bold">
+                              {maker.display_name?.charAt(0) || 'M'}
+                            </span>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleViewProfile(maker.user_id)}
-                              variant="outline"
-                              size="sm"
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              Se profil
-                            </Button>
-                            <Button
-                              onClick={() => handleStartBooking(maker.user_id)}
-                              size="sm"
-                            >
-                              <MessageSquare className="w-4 h-4 mr-2" />
-                              Booking
-                            </Button>
+                          <div>
+                            <h3 className="font-medium">{maker.display_name}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="text-xs">
+                                {maker.role}
+                              </Badge>
+                              {maker.address && maker.is_address_public && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {maker.address}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleViewProfile(maker.user_id)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Se profil
+                          </Button>
+                          <Button
+                            onClick={() => handleStartBooking(maker.user_id)}
+                            size="sm"
+                          >
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            Booking
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
