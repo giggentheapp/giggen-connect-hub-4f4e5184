@@ -7,10 +7,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
+import { BookingAgreement } from '@/components/BookingAgreement';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye, Check } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
 import { format } from 'date-fns';
 
@@ -36,6 +37,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
   
@@ -177,8 +179,20 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                   }
                 }}
               >
-                <Eye className="h-4 w-4 mr-1" />
-                {booking.status === 'confirmed' ? 'Bekreft avtale' : 'Se detaljer'}
+              {booking.status === 'confirmed' && (
+                <Button
+                  size="sm" 
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedBooking(booking);
+                    setAgreementOpen(true);
+                  }}
+                >
+                  <Check className="h-4 w-4 mr-1" />
+                  Se avtale
+                </Button>
+              )}
               </Button>
               
               {booking.concept_ids && booking.concept_ids.length > 0 && (
@@ -352,6 +366,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
             booking={selectedBooking}
             isOpen={confirmationOpen}
             onClose={() => setConfirmationOpen(false)}
+            currentUserId={profile.user_id}
+          />
+
+          <BookingAgreement
+            booking={selectedBooking}
+            isOpen={agreementOpen}
+            onClose={() => setAgreementOpen(false)}
             currentUserId={profile.user_id}
           />
 

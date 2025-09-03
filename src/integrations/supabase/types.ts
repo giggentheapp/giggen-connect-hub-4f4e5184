@@ -363,6 +363,8 @@ export type Database = {
           created_by: string | null
           date: string
           description: string | null
+          event_datetime: string | null
+          expected_audience: number | null
           id: string
           is_public: boolean | null
           portfolio_id: string | null
@@ -376,6 +378,8 @@ export type Database = {
           created_by?: string | null
           date: string
           description?: string | null
+          event_datetime?: string | null
+          expected_audience?: number | null
           id?: string
           is_public?: boolean | null
           portfolio_id?: string | null
@@ -389,6 +393,8 @@ export type Database = {
           created_by?: string | null
           date?: string
           description?: string | null
+          event_datetime?: string | null
+          expected_audience?: number | null
           id?: string
           is_public?: boolean | null
           portfolio_id?: string | null
