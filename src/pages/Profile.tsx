@@ -6,13 +6,29 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb, Music, File } from 'lucide-react';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Eye, 
+  EyeOff, 
+  Settings, 
+  ArrowLeft, 
+  Lightbulb, 
+  Music, 
+  File, 
+  Calendar, 
+  MapPin, 
+  Users 
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConceptCard from '@/components/ConceptCard';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
+import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 
 interface ProfileData {
   id: string;
@@ -39,6 +55,7 @@ const Profile = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<any[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const { toast } = useToast();
   const { concepts, loading: conceptsLoading } = useUserConcepts(userId);
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
@@ -330,8 +347,8 @@ const Profile = () => {
           </Card>
         )}
 
-        {/* Konsepter */}
-        {profile.role === 'maker' && (
+        {/* Konsepter - Only visible when Maker views Maker profile */}
+        {profile.role === 'maker' && currentUser?.role === 'maker' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -375,6 +392,104 @@ const Profile = () => {
                   </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Kommende arrangementer - Only visible when Goer views Maker profile */}
+        {profile.role === 'maker' && currentUser?.role === 'goer' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Kommende arrangementer
+              </CardTitle>
+              <CardDescription>
+                Arrangementene til denne makeren
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {eventsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-muted-foreground">Laster arrangementer...</span>
+                </div>
+              ) : Array.isArray(events) && events.length > 0 ? (
+                <div className="space-y-4">
+                  {events.filter(event => event && event.id).map((event) => (
+                    <div 
+                      key={event.id}
+                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-foreground">{event.title}</h4>
+                        {event.is_public && (
+                          <Badge variant="secondary" className="text-xs">Offentlig</Badge>
+                        )}
+                      </div>
+                      
+                      {event.description && (
+                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+                      
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        {event.event_date && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{format(new Date(event.event_date), 'dd.MM.yyyy', { locale: nb })}</span>
+                          </div>
+                        )}
+                        
+                        {event.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        )}
+                        
+                        {event.max_participants && (
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span>Maks {event.max_participants} deltakere</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Ingen kommende arrangementer
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Bookinger - Only visible when Maker views their own or another Maker's profile */}
+        {profile.role === 'maker' && currentUser?.role === 'maker' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Bookinger
+              </CardTitle>
+              <CardDescription>
+                {isOwnProfile ? "Dine bookinger" : `Bookinger med ${profile.display_name}`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  Bookingfunksjonalitet vil bli implementert
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}

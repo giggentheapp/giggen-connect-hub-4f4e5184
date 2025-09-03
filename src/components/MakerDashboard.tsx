@@ -1,22 +1,6 @@
 import { useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { MobileNavigation } from '@/components/navigation/MobileNavigation';
-import { DesktopMenubar } from '@/components/navigation/DesktopMenubar';
-import { ExploreSection } from '@/components/sections/ExploreSection';
-import { ProfileSection } from '@/components/sections/ProfileSection';
-import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
-import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
-import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
-import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
-import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
-import { BookingsSection } from '@/components/sections/BookingsSection';
-import { Button } from '@/components/ui/button';
-import { ModeSwitcher } from '@/components/ModeSwitcher';
 import { GoerView } from '@/components/GoerView';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 
 interface UserProfile {
   id: string;
@@ -41,27 +25,10 @@ interface MakerDashboardProps {
 }
 
 export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
-  const [activeSection, setActiveSection] = useState('explore');
   const [currentMode, setCurrentMode] = useState(profile.current_mode || profile.default_mode || 'maker');
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleModeChange = (newMode: string) => {
     setCurrentMode(newMode);
-  };
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Feil ved utlogging",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      navigate('/auth');
-    }
   };
 
   // Show GoerView if in goer mode
@@ -69,57 +36,10 @@ export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
     return <GoerView profile={profile} onModeChange={handleModeChange} />;
   }
 
-  const renderActiveSection = () => {
-    switch (activeSection) {
-      case 'explore':
-        return <ExploreSection />;
-      case 'profile':
-      case 'profile-maker':
-        return <ProfileSection profile={profile} />;
-      case 'profile-goer':
-        return <ProfileGoerSection profile={profile} />;
-      case 'bookings':
-        return <BookingsSection profile={profile} />;
-      case 'admin-files':
-        return <AdminFilesSection profile={profile} />;
-      case 'admin-concepts':
-        return <AdminConceptsSection profile={profile} />;
-      case 'admin-events':
-        return <UpcomingEventsSection profile={profile} isAdminView={true} />;
-      case 'admin-settings':
-        return <AdminSettingsSection profile={profile} />;
-      default:
-        return <ExploreSection />;
-    }
-  };
-
   return (
-    <div className="relative min-h-screen">
-      {/* Desktop Menubar */}
-      {!isMobile && (
-        <DesktopMenubar 
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          profile={profile}
-          onModeChange={handleModeChange}
-        />
-      )}
-
-
-      {/* Main Content */}
-      <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-16' : ''} ${isMobile ? 'pb-16' : ''}`}>
-        <div className="container mx-auto px-4 py-6">
-          {renderActiveSection()}
-        </div>
-      </main>
-
-      {/* Mobile Navigation */}
-      {isMobile && (
-        <MobileNavigation 
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
-      )}
-    </div>
+    <UnifiedSidePanel 
+      profile={profile}
+      onModeChange={handleModeChange}
+    />
   );
 };
