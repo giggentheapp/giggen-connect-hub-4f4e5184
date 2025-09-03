@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings, ChevronDown, Calendar, LogOut } from 'lucide-react';
-import { ModeSwitcher } from '@/components/ModeSwitcher';
+
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -21,18 +21,15 @@ interface UserProfile {
   contact_info: any;
   created_at: string;
   updated_at: string;
-  default_mode?: string;
-  current_mode?: string;
 }
 
 interface DesktopMenubarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   profile: UserProfile;
-  onModeChange: (newMode: string) => void;
 }
 
-export const DesktopMenubar = ({ activeSection, onSectionChange, profile, onModeChange }: DesktopMenubarProps) => {
+export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: DesktopMenubarProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -184,7 +181,6 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile, onMode
         {/* Bottom Controls */}
         {isExpanded && (
           <div className="mt-auto p-3 border-t border-border space-y-3">
-            <ModeSwitcher profile={profile} onModeChange={onModeChange} />
             <Button 
               variant="outline" 
               size="sm" 

@@ -602,8 +602,6 @@ export type Database = {
           bio: string | null
           contact_info: Json | null
           created_at: string
-          current_mode: string | null
-          default_mode: string | null
           display_name: string
           id: string
           is_address_public: boolean
@@ -619,8 +617,6 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
-          current_mode?: string | null
-          default_mode?: string | null
           display_name: string
           id?: string
           is_address_public?: boolean
@@ -636,8 +632,6 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
-          current_mode?: string | null
-          default_mode?: string | null
           display_name?: string
           id?: string
           is_address_public?: boolean

@@ -23,8 +23,6 @@ interface UserProfile {
   contact_info: any;
   created_at: string;
   updated_at: string;
-  default_mode?: string;
-  current_mode?: string;
 }
 
 const Dashboard = () => {

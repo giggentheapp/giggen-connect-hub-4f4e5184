@@ -4,7 +4,7 @@ import {
   Compass, User, Settings, Calendar, FolderOpen, 
   LogOut, Search, MapPin, Users, Home, List, Lightbulb, Briefcase, FileText
 } from 'lucide-react';
-import { ModeSwitcher } from '@/components/ModeSwitcher';
+
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +25,7 @@ import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { UserSettings } from '@/components/UserSettings';
-import { EventMarket } from '@/components/EventMarket';
+
 
 interface UserProfile {
   id: string;
@@ -41,18 +41,15 @@ interface UserProfile {
   contact_info: any;
   created_at: string;
   updated_at: string;
-  default_mode?: string;
-  current_mode?: string;
 }
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
-  onModeChange?: (newMode: string) => void;
   mapComponent?: ReactNode;
   className?: string;
 }
 
-export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, className }: UnifiedSidePanelProps) => {
+export const UnifiedSidePanel = ({ profile, mapComponent, className }: UnifiedSidePanelProps) => {
   const [activeSection, setActiveSection] = useState('explore');
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -84,23 +81,22 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
     }
   };
 
-  // Role-based navigation items based on actual user role from context
+  // Role-based navigation items - simplified role-specific navigation  
   const getNavigationItems = () => {
     if (isGoer) {
       return [
-        { id: 'explore', label: 'Utforsk', icon: MapPin },
-        { id: 'event-market', label: 'Event-market', icon: Calendar },
         { id: 'profile', label: 'Profil', icon: User },
+        { id: 'explore', label: 'Utforsk', icon: MapPin },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
     } else if (ismaker) {
       return [
-        { id: 'explore', label: 'Utforsk', icon: MapPin },
         { id: 'profile', label: 'Profil', icon: User },
-        { id: 'bookings', label: 'Bookinger', icon: Briefcase },
-        { id: 'admin-files', label: 'Filer', icon: FileText },
+        { id: 'explore', label: 'Utforsk', icon: MapPin },
+        { id: 'admin-files', label: 'Portefølje', icon: FileText },
         { id: 'admin-concepts', label: 'Konsepter', icon: Lightbulb },
-        { id: 'admin-events', label: 'Arrangementer', icon: Calendar },
+        { id: 'bookings', label: 'Booking', icon: Briefcase },
+        { id: 'admin-events', label: 'Filer', icon: Calendar },
         { id: 'settings', label: 'Innstillinger', icon: Settings },
       ];
     }
@@ -158,9 +154,6 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
         }
         return null;
       
-      case 'event-market':
-        // Available to all authenticated users
-        return <EventMarket />;
       
       case 'settings':
         return <AdminSettingsSection profile={profile} />;
@@ -238,12 +231,6 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
                 );
               })}
 
-              {/* ModeSwitcher for Makers */}
-              {ismaker && onModeChange && isExpanded && (
-                <div className="pt-4 border-t border-border">
-                  <ModeSwitcher profile={profile} onModeChange={onModeChange} />
-                </div>
-              )}
               
               {/* Logout Button */}
               <button

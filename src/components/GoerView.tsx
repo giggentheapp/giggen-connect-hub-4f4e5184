@@ -15,16 +15,13 @@ interface UserProfile {
   contact_info: any;
   created_at: string;
   updated_at: string;
-  default_mode?: string;
-  current_mode?: string;
 }
 
 interface GoerViewProps {
   profile: UserProfile;
-  onModeChange?: (newMode: string) => void;
 }
 
-export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
+export const GoerView = ({ profile }: GoerViewProps) => {
   console.log('🎯 GoerView initialized with profile:', profile);
 
   // Create map component for reuse
@@ -33,7 +30,6 @@ export const GoerView = ({ profile, onModeChange }: GoerViewProps) => {
   return (
     <UnifiedSidePanel 
       profile={profile}
-      onModeChange={onModeChange}
       mapComponent={mapComponent}
     />
   );
