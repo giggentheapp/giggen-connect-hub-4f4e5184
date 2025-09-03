@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, MapPin, User } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Users, Search, Home } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface GoerFullscreenMapProps {
   onBack: () => void;
@@ -36,6 +37,7 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
   const [makers, setMakers] = useState<MakerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { toast } = useToast();
 
@@ -293,16 +295,96 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
         style={{ width: '100%', height: '100%' }}
       />
 
-      {/* Floating Back Button */}
-      <div className="absolute top-4 left-4 z-10">
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-          className="bg-background/95 backdrop-blur-sm border shadow-lg hover:bg-background"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Tilbake
-        </Button>
+      {/* Floating Sidebar - Flies in from left */}
+      <div 
+        className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out"
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
+        <div className={cn(
+          "h-full bg-card/95 backdrop-blur-sm border-r border-border shadow-lg transition-all duration-300 overflow-y-auto",
+          isExpanded ? "w-64" : "w-16"
+        )}>
+          {/* Logo */}
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <MapPin className="h-4 w-4 text-primary-foreground" />
+              </div>
+              {isExpanded && (
+                <span className="font-bold text-lg text-foreground opacity-0 animate-fade-in">
+                  UTFORSK
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="p-3 space-y-2">
+            <button
+              onClick={onBack}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+            >
+              <Home className="h-5 w-5 flex-shrink-0" />
+              {isExpanded && (
+                <span className="opacity-0 animate-fade-in flex-1">
+                  Tilbake til dashboard
+                </span>
+              )}
+            </button>
+
+            {/* Makers Stats */}
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center gap-3 px-3 py-2">
+                <Users className="h-5 w-5 flex-shrink-0 text-primary" />
+                {isExpanded && (
+                  <div className="opacity-0 animate-fade-in flex-1">
+                    <p className="text-sm font-medium">{makers.length} Makers</p>
+                    <p className="text-xs text-muted-foreground">Synlige på kartet</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 px-3 py-2">
+                <Search className="h-5 w-5 flex-shrink-0 text-primary" />
+                {isExpanded && (
+                  <div className="opacity-0 animate-fade-in flex-1">
+                    <p className="text-sm font-medium">Utforsk</p>
+                    <p className="text-xs text-muted-foreground">Klikk på markører for detaljer</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Makers */}
+            {isExpanded && makers.length > 0 && (
+              <div className="pt-4 border-t border-border">
+                <p className="text-sm font-medium text-foreground px-3 mb-2 opacity-0 animate-fade-in">
+                  Nylige makers
+                </p>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {makers.slice(0, 5).map((maker) => (
+                    <button
+                      key={maker.id}
+                      onClick={() => onMakerClick && onMakerClick(maker.user_id)}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left hover:bg-accent/50 opacity-0 animate-fade-in"
+                    >
+                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{maker.display_name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {maker.address || 'Maker'}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </nav>
+        </div>
       </div>
 
       {/* Floating Makers Count Badge */}
