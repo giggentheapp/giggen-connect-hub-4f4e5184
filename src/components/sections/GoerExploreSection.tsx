@@ -37,11 +37,10 @@ export const GoerExploreSection = ({ profile }: GoerExploreSectionProps) => {
     try {
       setLoading(true);
       
+      // Use secure function to get only public maker profiles
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'maker')
-        .eq('is_address_public', true);
+        .rpc('get_public_profile', {})
+        .eq('role', 'maker');
       
       if (error) throw error;
       setMakers(data || []);
