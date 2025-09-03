@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, User, MessageSquare, X } from 'lucide-react';
+import { MapPin, User, X } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { BookingRequest } from '@/components/BookingRequest';
 
 interface ProfileData {
   id: string;
@@ -34,6 +35,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [concepts, setConcepts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const { role: currentUserRole } = useRole();
 
@@ -62,14 +64,41 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
           setProfile(profileData[0]);
         }
 
-        // Fetch portfolio if visible
-        const { data: portfolioData } = await supabase
-          .from('profile_portfolio')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_public', true);
-
-        setPortfolio(portfolioData || []);
+        // Fetch portfolio if visible to user
+        const { data: { user } } = await supabase.auth.getUser();
+        const isOwnProfile = user?.id === userId;
+        let portfolioData: any[] = [];
+        
+        if (isOwnProfile) {
+          // Own profile - show all portfolio
+          const { data } = await supabase
+            .from('profile_portfolio')
+            .select('*')
+            .eq('user_id', userId);
+          portfolioData = data || [];
+          setPortfolioVisible(true);
+        } else {
+          // Other's profile - check if portfolio should be visible
+          const { data: settingsData } = await supabase
+            .from('profile_settings')
+            .select('show_portfolio')
+            .eq('maker_id', userId)
+            .maybeSingle();
+            
+          const showPortfolio = settingsData?.show_portfolio || false;
+          setPortfolioVisible(showPortfolio);
+          
+          if (showPortfolio) {
+            const { data } = await supabase
+              .from('profile_portfolio')
+              .select('*')
+              .eq('user_id', userId)
+              .eq('is_public', true);
+            portfolioData = data || [];
+          }
+        }
+        
+        setPortfolio(portfolioData);
 
         // Fetch concepts if user is maker and viewing another maker
         if (currentUserRole === 'maker') {
@@ -146,14 +175,10 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
     );
   };
 
-  const handleStartBooking = () => {
-    console.log('Starting booking with:', userId);
-    // This would typically navigate to booking creation
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-y-auto p-0 gap-0">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b p-6">
           <div className="flex items-center justify-between">
@@ -183,11 +208,11 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {profile.role === 'maker' && currentUserRole === 'maker' && (
-                <Button onClick={handleStartBooking} size="sm">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Start booking
-                </Button>
+              {profile.role === 'maker' && (
+                <BookingRequest 
+                  receiverId={profile.user_id}
+                  receiverName={profile.display_name}
+                />
               )}
               <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="w-4 h-4" />
@@ -242,7 +267,11 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                   <CardTitle>Portefølje</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {portfolio.length > 0 ? (
+                  {!portfolioVisible ? (
+                    <p className="text-muted-foreground italic">
+                      Portefølje er ikke offentlig tilgjengelig
+                    </p>
+                  ) : portfolio.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {portfolio.map((file) => (
                         <div key={file.id} className="space-y-2">
