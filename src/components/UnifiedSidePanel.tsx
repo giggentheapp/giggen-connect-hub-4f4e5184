@@ -107,38 +107,8 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
     switch (activeSection) {
       case 'explore':
         if (currentRole === 'goer') {
-          return (
-            <div className="h-full">
-              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'map' | 'list')} className="h-full flex flex-col">
-                <div className="p-4 border-b">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="map">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      Kart
-                    </TabsTrigger>
-                    <TabsTrigger value="list">
-                      <List className="w-4 h-4 mr-2" />
-                      Liste
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-                
-                <TabsContent value="map" className="flex-1 mt-0">
-                  {mapComponent || (
-                    <GoerFullscreenMap 
-                      onBack={() => setActiveSection('explore')}
-                      onMakerClick={(makerId) => navigate(`/profile/${makerId}`)}
-                      userId={profile.user_id}
-                    />
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="list" className="flex-1 mt-0 p-4">
-                  <ExploreSection />
-                </TabsContent>
-              </Tabs>
-            </div>
-          );
+          // For goer mode, always show full-screen map
+          return null; // Map is rendered as background
         } else {
           return <ExploreSection />;
         }
@@ -207,9 +177,9 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
 
   return (
     <div className={cn("relative min-h-screen", className)}>
-      {/* Map Background (always visible) */}
-      {activeSection === 'explore' && viewMode === 'map' && currentRole === 'goer' && mapComponent && (
-        <div className="fixed inset-0">
+      {/* Full-screen Map Background for Goer Explore mode */}
+      {activeSection === 'explore' && currentRole === 'goer' && mapComponent && (
+        <div className="fixed inset-0 z-10">
           {mapComponent}
         </div>
       )}
@@ -293,11 +263,12 @@ export const UnifiedSidePanel = ({ profile, onModeChange, mapComponent, classNam
       {/* Main Content */}
       <main className={cn(
         "flex-1 overflow-auto",
-        !isMobile ? (activeSection === 'explore' && viewMode === 'map' && currentRole === 'goer' ? '' : 'ml-20') : '',
+        !isMobile ? (activeSection === 'explore' && currentRole === 'goer' ? '' : 'ml-20') : '',
         isMobile ? 'pb-16' : ''
       )}>
-        {activeSection === 'explore' && viewMode === 'map' && currentRole === 'goer' ? (
-          renderActiveSection()
+        {activeSection === 'explore' && currentRole === 'goer' ? (
+          // For goer explore mode, don't render content over the map
+          null
         ) : (
           <div className="container mx-auto px-4 py-6">
             {renderActiveSection()}
