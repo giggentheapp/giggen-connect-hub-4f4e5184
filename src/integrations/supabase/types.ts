@@ -693,6 +693,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_data: {
+        Args: { user_uuid: string }
+        Returns: undefined
+      }
       get_all_visible_makers: {
         Args: Record<PropertyKey, never>
         Returns: {

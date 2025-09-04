@@ -22,14 +22,17 @@ interface AdminSettingsSectionProps {
 export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => {
   const [updatedProfile, setUpdatedProfile] = useState(profile);
 
+  const handleProfileUpdate = (newProfile: UserProfile) => {
+    setUpdatedProfile(newProfile);
+    // Trigger real-time update by broadcasting the change
+    window.dispatchEvent(new CustomEvent('profileUpdated', { detail: newProfile }));
+  };
+
   return (
     <div className="space-y-6">
-
       <UserSettings 
         profile={updatedProfile}
-        onProfileUpdate={(newProfile) => {
-          setUpdatedProfile(newProfile);
-        }}
+        onProfileUpdate={handleProfileUpdate}
       />
     </div>
   );

@@ -22,9 +22,10 @@ interface MakerData {
 interface MapBackgroundProps {
   userId?: string;
   onProfileClick?: (userId: string) => void;
+  filterType?: 'all' | 'makers' | 'events';
 }
 
-export const MapBackground = ({ userId, onProfileClick }: MapBackgroundProps) => {
+export const MapBackground = ({ userId, onProfileClick, filterType = 'all' }: MapBackgroundProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);

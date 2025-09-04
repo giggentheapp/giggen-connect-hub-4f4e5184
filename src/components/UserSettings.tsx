@@ -7,9 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail } from 'lucide-react';
+import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -47,9 +49,11 @@ export const UserSettings = ({
     email: '',
     website: ''
   });
-  const {
-    toast
-  } = useToast();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Fetch current settings when component mounts
   useEffect(() => {
@@ -208,6 +212,103 @@ export const UserSettings = ({
       setLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/auth');
+    } catch (error: any) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Feil ved utlogging",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Feil",
+        description: "Passordene matcher ikke",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Feil",
+        description: "Passordet må være minst 6 tegn langt",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      setNewPassword('');
+      setConfirmPassword('');
+      toast({
+        title: "Lagret!",
+        description: "Passordet ble endret"
+      });
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      toast({
+        title: "Feil ved oppdatering",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (deleteConfirmation !== 'SLETT') {
+      toast({
+        title: "Feil",
+        description: "Du må skrive 'SLETT' for å bekrefte",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Delete all user data and profile (this will cascade to auth.users)
+      const { error: deleteDataError } = await supabase
+        .rpc('delete_user_data', { user_uuid: profile.user_id });
+      
+      if (deleteDataError) throw deleteDataError;
+      
+      // Sign out the user
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Bruker slettet",
+        description: "Din bruker og alle tilhørende data er slettet"
+      });
+      
+      navigate('/auth');
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Feil ved sletting",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return <div className="space-y-6 max-w-4xl">
       {/* Profile Settings */}
       <Card>
@@ -265,10 +366,113 @@ export const UserSettings = ({
         </CardContent>
       </Card>
 
-      {/* Privacy Settings */}
-      
+      {/* Password Change */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            Endre passord
+          </CardTitle>
+          <CardDescription>
+            Oppdater ditt passord for økt sikkerhet
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="new-password">Nytt passord</Label>
+            <Input 
+              id="new-password" 
+              type="password" 
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Minst 6 tegn"
+            />
+          </div>
+          <div>
+            <Label htmlFor="confirm-password">Bekreft passord</Label>
+            <Input 
+              id="confirm-password" 
+              type="password" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Gjenta passordet"
+            />
+          </div>
+          <Button 
+            onClick={handleChangePassword} 
+            disabled={loading || !newPassword || !confirmPassword}
+            className="w-full md:w-auto"
+          >
+            <Key className="h-4 w-4 mr-2" />
+            {loading ? 'Oppdaterer...' : 'Endre passord'}
+          </Button>
+        </CardContent>
+      </Card>
 
-      {/* Language & Notifications */}
-      
+      {/* Account Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Kontohandlinger
+          </CardTitle>
+          <CardDescription>
+            Administrer din konto
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button 
+            onClick={handleLogout}
+            variant="outline"
+            className="w-full justify-start"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logg ut
+          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive"
+                className="w-full justify-start"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Slett bruker
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Denne handlingen kan ikke angres. Dette vil permanent slette din bruker og alle tilhørende data inkludert profil, konsepter, bookinger og arrangementer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="my-4">
+                <Label htmlFor="delete-confirm">
+                  Skriv 'SLETT' for å bekrefte:
+                </Label>
+                <Input
+                  id="delete-confirm"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="SLETT"
+                />
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>
+                  Avbryt
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteUser}
+                  disabled={loading || deleteConfirmation !== 'SLETT'}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {loading ? 'Sletter...' : 'Slett bruker permanent'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>;
 };
