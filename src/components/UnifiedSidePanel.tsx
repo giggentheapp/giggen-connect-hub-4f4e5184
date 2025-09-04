@@ -85,11 +85,18 @@ export const UnifiedSidePanel = ({
       setActiveSection('explore');
       setViewMode(mode as 'map' | 'list');
       if (type) setExploreType(type as 'makers' | 'events');
+      if (isMobile) {
+        setIsExpanded(false);
+      }
+    } else if (section === 'explore') {
+      // Don't navigate immediately when clicking explore - just ensure submenu shows
+      // The submenu will handle actual navigation
+      return;
     } else {
       setActiveSection(section);
-    }
-    if (isMobile) {
-      setIsExpanded(false);
+      if (isMobile) {
+        setIsExpanded(false);
+      }
     }
   };
 
@@ -241,7 +248,7 @@ export const UnifiedSidePanel = ({
                           {item.label}
                         </span>}
                     </button>
-                    {isExpanded && (activeSection === 'explore' || isActive) && item.subItems && (
+                    {isExpanded && item.id === 'explore' && item.subItems && (
                       <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
                         {item.subItems.map(subItem => (
                           <button 
