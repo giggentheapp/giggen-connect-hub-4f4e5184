@@ -241,7 +241,7 @@ export const UnifiedSidePanel = ({
                           {item.label}
                         </span>}
                     </button>
-                    {isExpanded && isActive && item.subItems && (
+                    {isExpanded && (activeSection === 'explore' || isActive) && item.subItems && (
                       <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
                         {item.subItems.map(subItem => (
                           <button 
