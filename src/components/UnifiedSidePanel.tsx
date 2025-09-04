@@ -49,6 +49,7 @@ export const UnifiedSidePanel = ({
   const [activeSection, setActiveSection] = useState('explore');
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const {
@@ -78,7 +79,15 @@ export const UnifiedSidePanel = ({
     }
   };
   const handleNavigation = (section: string) => {
-    setActiveSection(section);
+    // Handle explore sub-navigation
+    if (section.startsWith('explore-')) {
+      const [, mode, type] = section.split('-');
+      setActiveSection('explore');
+      setViewMode(mode as 'map' | 'list');
+      if (type) setExploreType(type as 'makers' | 'events');
+    } else {
+      setActiveSection(section);
+    }
     if (isMobile) {
       setIsExpanded(false);
     }
@@ -87,19 +96,27 @@ export const UnifiedSidePanel = ({
   // Role-based navigation items - simplified role-specific navigation  
   const getNavigationItems = () => {
     if (isGoer) {
-      return [{
-        id: 'profile',
-        label: 'Profil',
-        icon: User
-      }, {
-        id: 'explore',
-        label: 'Utforsk',
-        icon: MapPin
-      }, {
-        id: 'settings',
-        label: 'Innstillinger',
-        icon: Settings
-      }];
+      return [
+        {
+          id: 'profile',
+          label: 'Profil',
+          icon: User
+        },
+        {
+          id: 'explore',
+          label: 'Utforsk',
+          icon: MapPin,
+          subItems: [
+            { id: 'explore-map-makers', label: 'Kart' },
+            { id: 'explore-list-makers', label: 'Liste' }
+          ]
+        },
+        {
+          id: 'settings',
+          label: 'Innstillinger',
+          icon: Settings
+        }
+      ];
     } else if (ismaker) {
       return [{
         id: 'profile',
@@ -141,7 +158,7 @@ export const UnifiedSidePanel = ({
     switch (activeSection) {
       case 'explore':
         if (isGoer) {
-          return <GoerExploreSection profile={profile} />;
+          return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
         } else if (ismaker) {
           return <MakerExploreSection profile={profile} />;
         }
@@ -183,7 +200,7 @@ export const UnifiedSidePanel = ({
         return <AdminSettingsSection profile={profile} />;
       default:
         if (isGoer) {
-          return <GoerExploreSection profile={profile} />;
+          return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
         } else if (ismaker) {
           return <MakerExploreSection profile={profile} />;
         }
@@ -217,12 +234,34 @@ export const UnifiedSidePanel = ({
               {navItems.map(item => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
-            return <button key={item.id} onClick={() => handleNavigation(item.id)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left', isActive ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}>
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    {isExpanded && <span className="opacity-0 animate-fade-in flex-1">
-                        {item.label}
-                      </span>}
-                  </button>;
+            return <div key={item.id}>
+                    <button onClick={() => handleNavigation(item.id)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left', isActive ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}>
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      {isExpanded && <span className="opacity-0 animate-fade-in flex-1">
+                          {item.label}
+                        </span>}
+                    </button>
+                    {isExpanded && isActive && item.subItems && (
+                      <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
+                        {item.subItems.map(subItem => (
+                          <button 
+                            key={subItem.id}
+                            onClick={() => handleNavigation(subItem.id)}
+                            className={cn(
+                              'w-full text-left px-3 py-1 rounded-md text-sm transition-colors',
+                              (activeSection === 'explore' && 
+                                ((subItem.id.includes('map') && viewMode === 'map') ||
+                                 (subItem.id.includes('list') && viewMode === 'list')))
+                                ? 'bg-accent/70 text-accent-foreground'
+                                : 'text-muted-foreground hover:bg-accent/30 hover:text-accent-foreground'
+                            )}
+                          >
+                            {subItem.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>;
           })}
 
               
