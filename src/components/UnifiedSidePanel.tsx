@@ -114,8 +114,10 @@ export const UnifiedSidePanel = ({
           label: 'Utforsk',
           icon: MapPin,
           subItems: [
-            { id: 'explore-map-makers', label: 'Kart' },
-            { id: 'explore-list-makers', label: 'Liste' }
+            { id: 'explore-map-makers', label: 'Kart - Makere' },
+            { id: 'explore-map-events', label: 'Kart - Events' },
+            { id: 'explore-list-makers', label: 'Liste - Makere' },
+            { id: 'explore-list-events', label: 'Liste - Events' }
           ]
         },
         {

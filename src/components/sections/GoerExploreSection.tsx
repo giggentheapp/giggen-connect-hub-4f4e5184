@@ -31,7 +31,6 @@ interface GoerExploreSectionProps {
 }
 
 export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
-  const [filterType, setFilterType] = useState<'all' | 'makers' | 'events'>('all');
   const [makers, setMakers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +39,9 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const { isGoer } = useRole();
+
+  // Use exploreType from props for filtering
+  const currentFilter = exploreType === 'makers' ? 'makers' : 'events';
 
   // Auto-fetch data when component mounts
   useEffect(() => {
@@ -98,7 +100,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
       <div className="absolute inset-0">
         <MapBackground 
           onProfileClick={handleViewProfile}
-          filterType={filterType}
+          filterType={currentFilter}
         />
       </div>
       
@@ -106,23 +108,18 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
       <div className="fixed top-4 right-4 z-50">
         <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-md p-1">
           <Button
-            variant={filterType === 'all' ? 'default' : 'ghost'}
+            variant={currentFilter === 'makers' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setFilterType('all')}
-          >
-            Alle
-          </Button>
-          <Button
-            variant={filterType === 'makers' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setFilterType('makers')}
+            onClick={() => {/* Filter handled by navigation */}}
+            disabled
           >
             Makere
           </Button>
           <Button
-            variant={filterType === 'events' ? 'default' : 'ghost'}
+            variant={currentFilter === 'events' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setFilterType('events')}
+            onClick={() => {/* Filter handled by navigation */}}
+            disabled
           >
             Events
           </Button>
