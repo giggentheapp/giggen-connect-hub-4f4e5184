@@ -53,7 +53,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  const { updateBooking, trackChange } = useBookings();
+  const { updateBooking, proposeChange } = useBookings();
   const { changes } = useBookingChanges(bookingId);
   const { toast } = useToast();
 
@@ -107,7 +107,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     
     try {
       await updateBooking(bookingId, { [fieldName]: newValue });
-      await trackChange(bookingId, fieldName, oldValue, newValue);
+      await proposeChange(bookingId, fieldName, oldValue, newValue);
       
       setBooking(prev => prev ? { ...prev, [fieldName]: newValue } : null);
       setEditingField(null);
@@ -120,10 +120,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   const getFieldChange = (fieldName: string) => {
     return changes.find(change => 
       change.field_name === fieldName && 
-      (
-        (currentUserId === booking?.sender_id && !change.acknowledged_by_sender) ||
-        (currentUserId === booking?.receiver_id && !change.acknowledged_by_receiver)
-      )
+      change.status === 'pending' && 
+      change.changed_by !== currentUserId
     );
   };
 

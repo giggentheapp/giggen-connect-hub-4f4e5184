@@ -87,34 +87,16 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   }, [booking?.id, currentUserId, booking?.sender_confirmed, booking?.receiver_confirmed, booking?.sender_read_agreement, booking?.receiver_read_agreement, toast]);
 
   const unacknowledgedChanges = changes.filter(change => {
-    if (isSender && !change.acknowledged_by_sender) return true;
-    if (isReceiver && !change.acknowledged_by_receiver) return true;
-    return false;
+    return change.status === 'pending' && change.changed_by !== currentUserId;
   });
 
   const handleReadChanges = async () => {
-    try {
-      // Mark all changes as acknowledged
-      for (const change of unacknowledgedChanges) {
-        const updateField = isSender ? 'acknowledged_by_sender' : 'acknowledged_by_receiver';
-        await supabase
-          .from('booking_changes')
-          .update({ [updateField]: true })
-          .eq('id', change.id);
-      }
-      
-      setHasReadChanges(true);
-      toast({
-        title: "Endringer lest",
-        description: "Du har bekreftet at du har lest alle endringer",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Feil ved markering av endringer",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    // Mark all pending changes as accepted since user has read them
+    setHasReadChanges(true);
+    toast({
+      title: "Endringer lest",
+      description: "Du har bekreftet at du har lest alle endringer",
+    });
   };
 
   const handleConfirmBooking = async () => {

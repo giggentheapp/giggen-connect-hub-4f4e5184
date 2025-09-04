@@ -23,6 +23,13 @@ interface Booking {
   created_at: string;
   updated_at: string;
   sender_contact_info?: any;
+  // New fields
+  time?: string | null;
+  audience_estimate?: number | null;
+  ticket_price?: number | null;
+  artist_fee?: number | null;
+  personal_message?: string | null;
+  hospitality_rider_status?: string;
 }
 
 interface BookingChange {
@@ -33,8 +40,9 @@ interface BookingChange {
   old_value: string | null;
   new_value: string | null;
   change_timestamp: string;
-  acknowledged_by_sender: boolean;
-  acknowledged_by_receiver: boolean;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+  updated_at: string;
 }
 
 export const useBookings = (userId?: string) => {
@@ -139,7 +147,7 @@ export const useBookings = (userId?: string) => {
     }
   };
 
-  const trackChange = async (bookingId: string, fieldName: string, oldValue: string | null, newValue: string | null) => {
+  const proposeChange = async (bookingId: string, fieldName: string, oldValue: string | null, newValue: string | null) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ikke autentisert');
@@ -151,12 +159,81 @@ export const useBookings = (userId?: string) => {
           changed_by: user.id,
           field_name: fieldName,
           old_value: oldValue,
-          new_value: newValue
+          new_value: newValue,
+          status: 'pending'
         } as any);
 
       if (error) throw error;
+
+      toast({
+        title: "Endring foreslått",
+        description: `Endring til ${fieldName} er foreslått og venter på godkjenning`,
+      });
     } catch (error: any) {
-      console.error('Error tracking change:', error);
+      console.error('Error proposing change:', error);
+      toast({
+        title: "Feil ved foreslå endring",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const approveChange = async (changeId: string, bookingId: string, fieldName: string, newValue: string | null) => {
+    try {
+      // First approve the change
+      const { error: changeError } = await supabase
+        .from('booking_changes')
+        .update({ status: 'accepted' })
+        .eq('id', changeId);
+
+      if (changeError) throw changeError;
+
+      // Then update the booking with the new value
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .update({ [fieldName]: newValue })
+        .eq('id', bookingId);
+
+      if (bookingError) throw bookingError;
+
+      // Update local state
+      setBookings(prev => prev.map(booking => 
+        booking.id === bookingId ? { ...booking, [fieldName]: newValue } : booking
+      ));
+
+      toast({
+        title: "Endring godkjent",
+        description: "Endringen er godkjent og tatt i bruk",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Feil ved godkjenning",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const rejectChange = async (changeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('booking_changes')
+        .update({ status: 'rejected' })
+        .eq('id', changeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Endring avvist",
+        description: "Endringen er avvist",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Feil ved avvisning",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -169,7 +246,9 @@ export const useBookings = (userId?: string) => {
     loading,
     createBooking,
     updateBooking,
-    trackChange,
+    proposeChange,
+    approveChange,
+    rejectChange,
     refetch: fetchBookings,
     fetchHistorical: fetchHistoricalBookings
   };
@@ -190,8 +269,8 @@ export const useBookingChanges = (bookingId?: string) => {
           .eq('booking_id', bookingId)
           .order('change_timestamp', { ascending: false });
 
-        if (error) throw error;
-        setChanges(data || []);
+      if (error) throw error;
+      setChanges((data || []) as BookingChange[]);
       } catch (error) {
         console.error('Error fetching changes:', error);
       } finally {

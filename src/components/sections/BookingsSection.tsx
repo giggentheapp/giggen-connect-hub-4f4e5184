@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
-import { BookingDetails } from '@/components/BookingDetails';
+import { EnhancedBookingDetails } from '@/components/EnhancedBookingDetails';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
 import { BookingAgreement } from '@/components/BookingAgreement';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
@@ -100,17 +100,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   };
 
   const BookingCard = ({ booking }: { booking: any }) => (
-    <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => {
-        setSelectedBooking(booking);
-        if (booking.status === 'confirmed') {
-          setConfirmationOpen(true);
-        } else {
+      <Card 
+        className="cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => {
+          setSelectedBooking(booking);
           setDetailsOpen(true);
-        }
-      }}
-    >
+        }}
+      >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
@@ -166,34 +162,18 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               )}
             </div>
             <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedBooking(booking);
-                  if (booking.status === 'confirmed') {
-                    setConfirmationOpen(true);
-                  } else {
-                    setDetailsOpen(true);
-                  }
-                }}
-              >
-              {booking.status === 'confirmed' && (
-                <Button
+                <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedBooking(booking);
-                    setAgreementOpen(true);
+                    setDetailsOpen(true);
                   }}
                 >
-                  <Check className="h-4 w-4 mr-1" />
-                  Se avtale
+                  <Eye className="h-4 w-4 mr-1" />
+                  Detaljer
                 </Button>
-              )}
-              </Button>
               
               {booking.concept_ids && booking.concept_ids.length > 0 && (
                 <Button 
@@ -347,33 +327,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
         )}
       </div>
 
-      {/* Booking Details Dialog */}
+      {/* Enhanced Booking Details Dialog */}
       {selectedBooking && (
         <>
-          <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Booking detaljer</DialogTitle>
-              </DialogHeader>
-              <BookingDetails 
-                bookingId={selectedBooking.id} 
-                onClose={() => setDetailsOpen(false)} 
-              />
-            </DialogContent>
-          </Dialog>
-
-          <BookingConfirmation
-            booking={selectedBooking}
-            isOpen={confirmationOpen}
-            onClose={() => setConfirmationOpen(false)}
-            currentUserId={profile.user_id}
-          />
-
-          <BookingAgreement
-            booking={selectedBooking}
-            isOpen={agreementOpen}
-            onClose={() => setAgreementOpen(false)}
-            currentUserId={profile.user_id}
+          <EnhancedBookingDetails
+            bookingId={selectedBooking.id}
+            isOpen={detailsOpen}
+            onClose={() => setDetailsOpen(false)}
           />
 
           <ConceptViewModal

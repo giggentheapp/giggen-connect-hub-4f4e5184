@@ -16,37 +16,40 @@ export type Database = {
     Tables: {
       booking_changes: {
         Row: {
-          acknowledged_by_receiver: boolean | null
-          acknowledged_by_sender: boolean | null
           booking_id: string
-          change_timestamp: string | null
+          change_timestamp: string
           changed_by: string
+          created_at: string
           field_name: string
           id: string
           new_value: string | null
           old_value: string | null
+          status: string
+          updated_at: string
         }
         Insert: {
-          acknowledged_by_receiver?: boolean | null
-          acknowledged_by_sender?: boolean | null
           booking_id: string
-          change_timestamp?: string | null
+          change_timestamp?: string
           changed_by: string
+          created_at?: string
           field_name: string
           id?: string
           new_value?: string | null
           old_value?: string | null
+          status?: string
+          updated_at?: string
         }
         Update: {
-          acknowledged_by_receiver?: boolean | null
-          acknowledged_by_sender?: boolean | null
           booking_id?: string
-          change_timestamp?: string | null
+          change_timestamp?: string
           changed_by?: string
+          created_at?: string
           field_name?: string
           id?: string
           new_value?: string | null
           old_value?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -56,23 +59,20 @@ export type Database = {
             referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "booking_changes_changed_by_fkey"
-            columns: ["changed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       bookings: {
         Row: {
+          artist_fee: number | null
+          audience_estimate: number | null
           concept_ids: string[]
           created_at: string | null
           description: string | null
           event_date: string | null
           hospitality_rider: string | null
+          hospitality_rider_status: string | null
           id: string
+          personal_message: string | null
           price_musician: string | null
           price_ticket: string | null
           receiver_confirmed: boolean | null
@@ -84,17 +84,23 @@ export type Database = {
           sender_id: string
           sender_read_agreement: boolean | null
           status: string
+          ticket_price: number | null
+          time: string | null
           title: string
           updated_at: string | null
           venue: string | null
         }
         Insert: {
+          artist_fee?: number | null
+          audience_estimate?: number | null
           concept_ids?: string[]
           created_at?: string | null
           description?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
+          hospitality_rider_status?: string | null
           id?: string
+          personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
           receiver_confirmed?: boolean | null
@@ -106,17 +112,23 @@ export type Database = {
           sender_id: string
           sender_read_agreement?: boolean | null
           status?: string
+          ticket_price?: number | null
+          time?: string | null
           title: string
           updated_at?: string | null
           venue?: string | null
         }
         Update: {
+          artist_fee?: number | null
+          audience_estimate?: number | null
           concept_ids?: string[]
           created_at?: string | null
           description?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
+          hospitality_rider_status?: string | null
           id?: string
+          personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
           receiver_confirmed?: boolean | null
@@ -128,6 +140,8 @@ export type Database = {
           sender_id?: string
           sender_read_agreement?: boolean | null
           status?: string
+          ticket_price?: number | null
+          time?: string | null
           title?: string
           updated_at?: string | null
           venue?: string | null
