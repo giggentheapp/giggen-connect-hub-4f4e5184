@@ -30,7 +30,7 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
   return (
     <div className="space-y-6">
       {/* Basic Profile Info */}
-      <Card className="max-w-2xl mx-auto">
+      <Card>
         <CardHeader className="text-center">
           <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
             {profile.avatar_url ? (
