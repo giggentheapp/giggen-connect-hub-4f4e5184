@@ -89,9 +89,11 @@ export const UnifiedSidePanel = ({
         setIsExpanded(false);
       }
     } else if (section === 'explore') {
-      // Don't navigate immediately when clicking explore - just ensure submenu shows
-      // The submenu will handle actual navigation
-      return;
+      // Navigate to explore section with default view when clicking explore
+      setActiveSection('explore');
+      if (isMobile) {
+        setIsExpanded(false);
+      }
     } else {
       setActiveSection(section);
       if (isMobile) {
