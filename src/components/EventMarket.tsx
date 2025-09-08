@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, DollarSign, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
+import { EventModal } from "@/components/EventModal";
 
 interface EventMarketItem {
   id: string;
@@ -20,6 +21,8 @@ interface EventMarketItem {
 export const EventMarket = () => {
   const [events, setEvents] = useState<EventMarketItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   useEffect(() => {
     loadPublicEvents();
@@ -61,6 +64,18 @@ export const EventMarket = () => {
     }
   };
 
+  const handleEventClick = (eventId: string) => {
+    console.log('EventMarket: Event card clicked', { eventId });
+    setSelectedEventId(eventId);
+    setIsEventModalOpen(true);
+  };
+
+  const handleEventModalClose = () => {
+    console.log('EventMarket: Event modal closed');
+    setIsEventModalOpen(false);
+    setSelectedEventId(null);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -96,6 +111,7 @@ export const EventMarket = () => {
             <Card 
               key={event.id} 
               className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+              onClick={() => handleEventClick(event.id)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -144,6 +160,12 @@ export const EventMarket = () => {
           ))}
         </div>
       )}
+
+      <EventModal 
+        isOpen={isEventModalOpen}
+        onClose={handleEventModalClose}
+        eventId={selectedEventId}
+      />
     </div>
   );
 };

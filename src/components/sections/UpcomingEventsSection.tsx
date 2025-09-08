@@ -8,6 +8,7 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, DollarSign, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
+import { EventModal } from '@/components/EventModal';
 
 interface UserProfile {
   id: string;
@@ -57,6 +58,8 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
   const [portfolioUserId, setPortfolioUserId] = useState<string | null>(null);
   const [techSpecFiles, setTechSpecFiles] = useState<any[]>([]);
   const [hospitalityFiles, setHospitalityFiles] = useState<any[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -137,61 +140,76 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
   };
 
   const openEventDetails = async (event: any) => {
-    // Validate that required profile relationships exist
-    if (!event.sender_profile || !event.receiver_profile) {
-      toast({
-        title: "Manglende profildata",
-        description: "Kan ikke vise arrangementdetaljer på grunn av manglende profil-relasjoner",
-        variant: "destructive",
-      });
-      return;
-    }
+    console.log('UpcomingEventsSection: Event card clicked', { eventId: event.id, isAdminView });
     
-    setSelectedEvent(event);
-    
-    // For both admin and public view, fetch concept details if available
-    const conceptId = event.selected_concept_id || event.portfolio_id;
-    if (conceptId) {
-      try {
-        // Get concept creator (maker) for portfolio
-        const { data: conceptData } = await supabase
-          .from('concepts')
-          .select('maker_id')
-          .eq('id', conceptId)
-          .single();
-
-        if (conceptData) {
-          setPortfolioUserId(conceptData.maker_id);
-
-          // For admin view, also fetch tech specs and hospitality riders
-          if (isAdminView) {
-            // Fetch tech spec files
-            const { data: techSpecs } = await supabase
-              .from('profile_tech_specs')
-              .select('*')
-              .eq('profile_id', conceptData.maker_id);
-
-            // Fetch hospitality rider files
-            const { data: hospitalityRiders } = await supabase
-              .from('hospitality_riders')
-              .select('*')
-              .eq('user_id', conceptData.maker_id);
-
-            setTechSpecFiles(techSpecs || []);
-            setHospitalityFiles(hospitalityRiders || []);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching concept details:', error);
+    // For admin view with bookings, keep existing detailed dialog
+    if (isAdminView && (event.sender_profile || event.receiver_profile)) {
+      // Validate that required profile relationships exist
+      if (!event.sender_profile || !event.receiver_profile) {
         toast({
-          title: "Feil ved lasting av konseptdetaljer",
-          description: "Kunne ikke laste konseptinformasjon",
+          title: "Manglende profildata",
+          description: "Kan ikke vise arrangementdetaljer på grunn av manglende profil-relasjoner",
           variant: "destructive",
         });
+        return;
       }
+      
+      setSelectedEvent(event);
+      
+      // For both admin and public view, fetch concept details if available
+      const conceptId = event.selected_concept_id || event.portfolio_id;
+      if (conceptId) {
+        try {
+          // Get concept creator (maker) for portfolio
+          const { data: conceptData } = await supabase
+            .from('concepts')
+            .select('maker_id')
+            .eq('id', conceptId)
+            .single();
+
+          if (conceptData) {
+            setPortfolioUserId(conceptData.maker_id);
+
+            // For admin view, also fetch tech specs and hospitality riders
+            if (isAdminView) {
+              // Fetch tech spec files
+              const { data: techSpecs } = await supabase
+                .from('profile_tech_specs')
+                .select('*')
+                .eq('profile_id', conceptData.maker_id);
+
+              // Fetch hospitality rider files
+              const { data: hospitalityRiders } = await supabase
+                .from('hospitality_riders')
+                .select('*')
+                .eq('user_id', conceptData.maker_id);
+
+              setTechSpecFiles(techSpecs || []);
+              setHospitalityFiles(hospitalityRiders || []);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching concept details:', error);
+          toast({
+            title: "Feil ved lasting av konseptdetaljer",
+            description: "Kunne ikke laste konseptinformasjon",
+            variant: "destructive",
+          });
+        }
+      }
+      
+      setDetailsOpen(true);
+    } else {
+      // For public events from events_market, use EventModal
+      setSelectedEventId(event.id);
+      setIsEventModalOpen(true);
     }
-    
-    setDetailsOpen(true);
+  };
+
+  const handleEventModalClose = () => {
+    console.log('UpcomingEventsSection: Event modal closed');
+    setIsEventModalOpen(false);
+    setSelectedEventId(null);
   };
 
   const EventCard = ({ event }: { event: any }) => {
@@ -529,6 +547,12 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           </DialogContent>
         </Dialog>
       )}
+
+      <EventModal 
+        isOpen={isEventModalOpen}
+        onClose={handleEventModalClose}
+        eventId={selectedEventId}
+      />
     </div>
   );
 };
