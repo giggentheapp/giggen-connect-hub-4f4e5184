@@ -68,12 +68,12 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
-      // Move to history by updating status instead of permanent deletion
-      await updateBooking(booking.id, { status: 'deleted' });
+      // Move to history by updating status to cancelled instead of permanent deletion
+      await updateBooking(booking.id, { status: 'cancelled' });
       
       toast({
         title: "Booking flyttet til historikk",
-        description: "Bookingen har blitt flyttet til historikk-seksjonen",
+        description: "Bookingen har blitt avlyst og flyttet til historikk-seksjonen",
       });
       
       onAction?.();

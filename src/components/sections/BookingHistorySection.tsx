@@ -54,7 +54,7 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
           .from('bookings')
           .select('*')
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .in('status', ['rejected', 'cancelled', 'deleted'])
+          .in('status', ['rejected', 'cancelled'])
           .order('updated_at', { ascending: false });
 
         if (error) throw error;
@@ -115,7 +115,6 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
     switch (status) {
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'deleted': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -124,7 +123,6 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
     switch (status) {
       case 'rejected': return 'Avvist';
       case 'cancelled': return 'Avlyst';
-      case 'deleted': return 'Slettet';
       default: return status;
     }
   };
@@ -313,7 +311,6 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
                   <SelectItem value="all">Alle statuser</SelectItem>
                   <SelectItem value="rejected">Avvist</SelectItem>
                   <SelectItem value="cancelled">Avlyst</SelectItem>
-                  <SelectItem value="deleted">Slettet</SelectItem>
                 </SelectContent>
               </Select>
             </div>
