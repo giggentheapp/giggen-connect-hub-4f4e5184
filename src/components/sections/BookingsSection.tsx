@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,47 +41,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
   
-  const { bookings, loading, updateBooking, refetch, fetchHistorical } = useBookings(profile.user_id);
+  const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
-
-  // Fetch historical bookings when history tab is active
-  const [historicalBookings, setHistoricalBookings] = useState<any[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-
-  const fetchHistoricalBookings = async () => {
-    setHistoryLoading(true);
-    try {
-      // Fetch all bookings including historical ones
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-        .in('status', ['rejected', 'deleted'])
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setHistoricalBookings(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Feil ved lasting av historikk",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  // Fetch historical bookings when history tab becomes active
-  useEffect(() => {
-    if (activeTab === 'history') {
-      fetchHistoricalBookings();
-    }
-  }, [activeTab]);
 
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');
+  const historicalBookings = bookings.filter(b => b.status === 'rejected' || b.status === 'cancelled');
 
   // Helper functions for booking status display
   const getStatusColor = (status: string) => {
@@ -90,7 +56,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'confirmed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'deleted': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -101,7 +67,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'confirmed': return 'Bekreftet';
       case 'published': return 'Publisert';
       case 'rejected': return 'Avvist';
-      case 'deleted': return 'Slettet';
+      case 'cancelled': return 'Avlyst';
       default: return status;
     }
   };
@@ -115,26 +81,23 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       return 'Ferdig: Publisert';
     } else if (booking.status === 'rejected') {
       return 'Avvist';
-    } else if (booking.status === 'deleted') {
-      return 'Slettet';
+    } else if (booking.status === 'cancelled') {
+      return 'Avlyst';
     }
     return 'Ukjent fase';
   };
 
   const handleBookingAction = async () => {
-    // Force refresh of bookings data and historical bookings if needed
+    // Force refresh of bookings data instead of page reload
     console.log('📄 Refreshing bookings after action...');
     try {
       await refetch();
-      if (activeTab === 'history') {
-        await fetchHistoricalBookings();
-      }
       console.log('✅ Bookings refreshed successfully');
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({
         title: "Kunne ikke oppdatere listen",
-        description: "Prøv å oppdatere siden manuellt",
+        description: "Prøv å oppdatere siden manuelt",
         variant: "destructive",
       });
     }
@@ -297,7 +260,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       <div className="space-y-4">
         {activeTab === 'received' && (
           <>
-            {receivedBookings.filter(b => b.status !== 'rejected' && b.status !== 'deleted').length === 0 ? (
+            {receivedBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -306,7 +269,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(receivedBookings) ? receivedBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'deleted')
+                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>
@@ -316,7 +279,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
         {activeTab === 'sent' && (
           <>
-            {sentBookings.filter(b => b.status !== 'rejected' && b.status !== 'deleted').length === 0 ? (
+            {sentBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -325,7 +288,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(sentBookings) ? sentBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'deleted')
+                .filter(booking => booking && booking.id && booking.status !== 'rejected')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>
@@ -352,12 +315,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
         {activeTab === 'history' && (
           <>
-            {historyLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p>Laster historikk...</p>
-              </div>
-            ) : historicalBookings.length === 0 ? (
+            {historicalBookings.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
