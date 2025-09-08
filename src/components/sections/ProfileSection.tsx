@@ -1,6 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Eye } from 'lucide-react';
+import { User, Eye, Folder, Lightbulb, Calendar } from 'lucide-react';
+import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
+import ConceptCard from '@/components/ConceptCard';
+import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
+import { useUserConcepts } from '@/hooks/useUserConcepts';
 
 interface UserProfile {
   id: string;
@@ -21,9 +25,11 @@ interface ProfileSectionProps {
 }
 
 export const ProfileSection = ({ profile }: ProfileSectionProps) => {
+  const { concepts, loading: conceptsLoading } = useUserConcepts(profile.user_id);
+
   return (
     <div className="space-y-6">
-
+      {/* Basic Profile Info */}
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
@@ -67,6 +73,75 @@ export const ProfileSection = ({ profile }: ProfileSectionProps) => {
               Dette er hvordan andre Makere ser din profil.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Portfolio Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Folder className="h-5 w-5" />
+            Min Portefølje
+          </CardTitle>
+          <CardDescription>
+            Slik vises porteføljen din til andre makere
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProfilePortfolioViewer userId={profile.user_id} />
+        </CardContent>
+      </Card>
+
+      {/* Concepts Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" />
+            Mine Publiserte Konsepter
+          </CardTitle>
+          <CardDescription>
+            Konseptene dine som er synlige for andre makere
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {conceptsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Laster konsepter...</p>
+            </div>
+          ) : concepts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+              <p>Ingen publiserte konsepter ennå</p>
+              <p className="text-sm">Opprett og publiser konsepter for å vise dem her</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {concepts.map((concept) => (
+                <ConceptCard 
+                  key={concept.id}
+                  concept={concept}
+                  showActions={false}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Upcoming Events Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Mine Kommende Arrangementer
+          </CardTitle>
+          <CardDescription>
+            Arrangementer du er involvert i
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UpcomingEventsSection profile={profile} isAdminView={true} />
         </CardContent>
       </Card>
     </div>
