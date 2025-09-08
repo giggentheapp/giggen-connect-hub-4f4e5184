@@ -14,7 +14,7 @@ interface BookingActionsProps {
 
 export const BookingActions = ({ booking, currentUserId, onAction }: BookingActionsProps) => {
   const [loading, setLoading] = useState(false);
-  const { updateBooking } = useBookings();
+  const { updateBooking, deleteBookingSecurely } = useBookings();
   const { toast } = useToast();
 
   const isSender = currentUserId === booking.sender_id;
@@ -68,21 +68,13 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
-      // Move to history by updating status to deleted instead of permanent deletion
-      await updateBooking(booking.id, { status: 'deleted' });
-      
-      toast({
-        title: "Booking flyttet til historikk",
-        description: "Bookingen har blitt avlyst og flyttet til historikk-seksjonen",
-      });
+      // Use secure deletion which cleans sensitive data
+      await deleteBookingSecurely(booking.id, 'Bruker slettet bookingen');
       
       onAction?.();
     } catch (error: any) {
-      toast({
-        title: "Feil ved sletting",
-        description: error.message || "Kunne ikke flytte booking til historikk",
-        variant: "destructive",
-      });
+      // Error already handled by deleteBookingSecurely function
+      console.error('Error deleting booking:', error);
     } finally {
       setLoading(false);
     }

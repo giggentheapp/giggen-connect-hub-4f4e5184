@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { BookingDetailsPanel } from './BookingDetailsPanel';
+import { EnhancedBookingDetailsPanel } from './EnhancedBookingDetailsPanel';
 import { BookingChangeHistoryPanel } from './BookingChangeHistoryPanel';
 import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
@@ -204,7 +204,7 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
               
               <div className="flex-1 overflow-y-auto mt-4">
                 <TabsContent value="details" className="space-y-6 m-0">
-                  <BookingDetailsPanel
+                  <EnhancedBookingDetailsPanel
                     booking={booking}
                     currentUserId={currentUserId}
                     canEdit={canEdit}

@@ -28,8 +28,14 @@ interface Booking {
   audience_estimate?: number | null;
   ticket_price?: number | null;
   artist_fee?: number | null;
-  personal_message?: string | null;
-  hospitality_rider_status?: string;
+// New fields for enhanced privacy and workflow
+  is_public_after_approval?: boolean;
+  public_visibility_settings?: any;
+  agreement_summary_text?: string;
+  deleted_at?: string;
+  deletion_reason?: string;
+  contact_info_shared_at?: string;
+  both_parties_approved?: boolean;
 }
 
 interface BookingChange {
@@ -147,6 +153,43 @@ export const useBookings = (userId?: string) => {
     }
   };
 
+  const deleteBookingSecurely = async (bookingId: string, reason: string = '') => {
+    try {
+      // Update booking status to deleted, which will trigger the privacy function
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: 'deleted',
+          deletion_reason: reason,
+          deleted_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Remove from local state or move to history
+      setBookings(prev => prev.map(booking => 
+        booking.id === bookingId ? data as Booking : booking
+      ));
+
+      toast({
+        title: "Booking slettet",
+        description: "Bookingen er flyttet til historikk og sensitiv data er fjernet",
+      });
+      
+      return data;
+    } catch (error: any) {
+      toast({
+        title: "Feil ved sletting av booking",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const proposeChange = async (bookingId: string, fieldName: string, oldValue: string | null, newValue: string | null) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -246,6 +289,7 @@ export const useBookings = (userId?: string) => {
     loading,
     createBooking,
     updateBooking,
+    deleteBookingSecurely,
     proposeChange,
     approveChange,
     rejectChange,

@@ -63,18 +63,25 @@ export type Database = {
       }
       bookings: {
         Row: {
+          agreement_summary_text: string | null
           artist_fee: number | null
           audience_estimate: number | null
+          both_parties_approved: boolean | null
           concept_ids: string[]
+          contact_info_shared_at: string | null
           created_at: string | null
+          deleted_at: string | null
+          deletion_reason: string | null
           description: string | null
           event_date: string | null
           hospitality_rider: string | null
           hospitality_rider_status: string | null
           id: string
+          is_public_after_approval: boolean | null
           personal_message: string | null
           price_musician: string | null
           price_ticket: string | null
+          public_visibility_settings: Json | null
           receiver_confirmed: boolean | null
           receiver_id: string
           receiver_read_agreement: boolean | null
@@ -91,18 +98,25 @@ export type Database = {
           venue: string | null
         }
         Insert: {
+          agreement_summary_text?: string | null
           artist_fee?: number | null
           audience_estimate?: number | null
+          both_parties_approved?: boolean | null
           concept_ids?: string[]
+          contact_info_shared_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deletion_reason?: string | null
           description?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
           id?: string
+          is_public_after_approval?: boolean | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
+          public_visibility_settings?: Json | null
           receiver_confirmed?: boolean | null
           receiver_id: string
           receiver_read_agreement?: boolean | null
@@ -119,18 +133,25 @@ export type Database = {
           venue?: string | null
         }
         Update: {
+          agreement_summary_text?: string | null
           artist_fee?: number | null
           audience_estimate?: number | null
+          both_parties_approved?: boolean | null
           concept_ids?: string[]
+          contact_info_shared_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deletion_reason?: string | null
           description?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
           id?: string
+          is_public_after_approval?: boolean | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
+          public_visibility_settings?: Json | null
           receiver_confirmed?: boolean | null
           receiver_id?: string
           receiver_read_agreement?: boolean | null
@@ -693,6 +714,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clean_booking_sensitive_data: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
       delete_user_data: {
         Args: { user_uuid: string }
         Returns: undefined
@@ -725,6 +750,21 @@ export type Database = {
           show_events: boolean
           show_portfolio: boolean
           show_techspec: boolean
+        }[]
+      }
+      get_public_booking_info: {
+        Args: { booking_uuid: string }
+        Returns: {
+          created_at: string
+          description: string
+          event_date: string
+          event_time: string
+          expected_audience: number
+          id: string
+          is_public: boolean
+          ticket_price: number
+          title: string
+          venue: string
         }[]
       }
       get_public_makers_for_explore: {
