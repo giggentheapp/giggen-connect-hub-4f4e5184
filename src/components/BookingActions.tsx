@@ -68,32 +68,19 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
-      console.log('🗑️ Attempting to delete booking:', booking.id);
+      // Move to history by updating status instead of permanent deletion
+      await updateBooking(booking.id, { status: 'deleted' });
       
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', booking.id);
-
-      if (error) {
-        console.error('❌ Delete booking error:', error);
-        throw error;
-      }
-
-      console.log('✅ Booking deleted successfully:', booking.id);
-
       toast({
-        title: "Booking slettet",
-        description: "Bookingen har blitt permanent slettet",
+        title: "Booking flyttet til historikk",
+        description: "Bookingen har blitt flyttet til historikk-seksjonen",
       });
       
-      // Call onAction to trigger refresh of booking list
       onAction?.();
     } catch (error: any) {
-      console.error('💥 Delete booking failed:', error);
       toast({
         title: "Feil ved sletting",
-        description: error.message || "Kunne ikke slette booking",
+        description: error.message || "Kunne ikke flytte booking til historikk",
         variant: "destructive",
       });
     } finally {
@@ -103,9 +90,9 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
   const getDeleteWarningText = () => {
     if (booking.status === 'confirmed' || booking.status === 'published') {
-      return "Dette vil permanent slette en bekreftet booking. Kontaktinformasjon vil ikke lenger være tilgjengelig for noen av partene.";
+      return "Dette vil flytte en bekreftet booking til historikk. Du kan finne den igjen i historikk-seksjonen.";
     }
-    return "Denne handlingen kan ikke angres. Bookingen vil bli permanent slettet.";
+    return "Bookingen vil bli flyttet til historikk-seksjonen hvor du kan finne den igjen.";
   };
 
   return (
@@ -148,7 +135,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+              <AlertDialogTitle>Flytt til historikk?</AlertDialogTitle>
               <AlertDialogDescription>
                 {getDeleteWarningText()}
               </AlertDialogDescription>
@@ -159,7 +146,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
                 onClick={handleDeleteBooking}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Slett permanent
+                Flytt til historikk
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -63,9 +63,9 @@ export const useBookings = (userId?: string) => {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       }
 
-      // Filter out historical bookings by default (rejected bookings are historical)
+      // Filter out historical bookings by default (rejected, cancelled, deleted bookings are historical)
       if (!includeHistorical) {
-        query = query.neq('status', 'rejected');
+        query = query.not('status', 'in', '(rejected,cancelled,deleted)');
       }
 
       const { data, error } = await query;
