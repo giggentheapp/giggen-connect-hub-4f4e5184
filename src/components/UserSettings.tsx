@@ -392,6 +392,112 @@ export const UserSettings = ({
               )}
             </div>
             
+            <div>
+              <Label htmlFor="bio">Om meg</Label>
+              <Textarea 
+                id="bio" 
+                value={profileData.bio || ''} 
+                onChange={e => {
+                  const value = e.target.value;
+                  setProfileData(prev => ({
+                    ...prev,
+                    bio: value
+                  }));
+                  
+                  // Validate bio
+                  const validation = validateBio(value);
+                  setValidationErrors(prev => ({
+                    ...prev,
+                    bio: validation.isValid ? '' : validation.error || ''
+                  }));
+                }}
+                placeholder="Fortell litt om deg selv..."
+                rows={3}
+              />
+              {validationErrors.bio && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.bio}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Kontaktinformasjon</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  E-post
+                </Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={contactInfo.email} 
+                  onChange={e => {
+                    const value = e.target.value;
+                    setContactInfo(prev => ({
+                      ...prev,
+                      email: value
+                    }));
+                    
+                    // Validate email
+                    const validation = validateEmail(value);
+                    setValidationErrors(prev => ({
+                      ...prev,
+                      email: validation.isValid ? '' : validation.error || ''
+                    }));
+                  }}
+                  placeholder="din@epost.no"
+                />
+                {validationErrors.email && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Telefonnummer
+                </Label>
+                <Input 
+                  id="phone" 
+                  type="tel" 
+                  value={contactInfo.phone} 
+                  onChange={e => {
+                    const value = e.target.value;
+                    setContactInfo(prev => ({
+                      ...prev,
+                      phone: value
+                    }));
+                    
+                    // Validate phone
+                    const validation = validatePhone(value);
+                    setValidationErrors(prev => ({
+                      ...prev,
+                      phone: validation.isValid ? '' : validation.error || ''
+                    }));
+                  }}
+                  placeholder="+47 123 45 678"
+                />
+                {validationErrors.phone && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="website">Nettside</Label>
+                <Input 
+                  id="website" 
+                  type="url" 
+                  value={contactInfo.website} 
+                  onChange={e => setContactInfo(prev => ({
+                    ...prev,
+                    website: e.target.value
+                  }))}
+                  placeholder="https://dinside.no"
+                />
+              </div>
+            </div>
           </div>
 
           
@@ -404,6 +510,161 @@ export const UserSettings = ({
           </Button>
         </CardContent>
       </Card>
+
+      {/* Privacy Settings - Only for Makers */}
+      {profileData.role === 'maker' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Personvern og synlighet
+            </CardTitle>
+            <CardDescription>
+              Kontroller hva andre kan se av profilen din. Disse innstillingene bestemmer hvilke deler av profilen som vises til andre brukere.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            
+            {/* Map Visibility */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Globe className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Vis på kart</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  La andre finne deg på kartet. Krever at adressen din også er offentlig.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_on_map || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_on_map: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* About Me Section */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Om meg-seksjon</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Vis biografien din til andre brukere som besøker profilen din.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_about || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_about: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Contact Information */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Mail className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Kontaktinformasjon</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Del kontaktinformasjon med andre brukere når dere har en bekreftet booking.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_contact || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Portfolio */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Camera className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Portefølje</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  La andre se bildene og videoene i porteføljen din.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_portfolio || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_portfolio: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Technical Specifications */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Tekniske spesifikasjoner</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Del tekniske krav og spesifikasjoner med potensielle samarbeidspartnere.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_techspec || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_techspec: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Events */}
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Bell className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Arrangementer</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Vis dine planlagte arrangementer og konserter til andre brukere.
+                </p>
+              </div>
+              <Switch
+                checked={profileSettings?.show_events || false}
+                onCheckedChange={(checked) => updateProfileSettings({ show_events: checked })}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Address Privacy */}
+            <div className="border-t pt-4">
+              <div className="flex items-start justify-between space-x-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Globe className="h-4 w-4" />
+                    <Label className="text-sm font-medium">Offentlig adresse</Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Gjør adressen din synlig for andre brukere. Dette er nødvendig for å vises på kartet.
+                  </p>
+                </div>
+                <Switch
+                  checked={profileData.is_address_public || false}
+                  onCheckedChange={(checked) => {
+                    setProfileData(prev => ({
+                      ...prev,
+                      is_address_public: checked
+                    }));
+                    // If making address private, also disable map visibility
+                    if (!checked) {
+                      updateProfileSettings({ show_on_map: false });
+                    }
+                  }}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+          </CardContent>
+        </Card>
+      )}
 
       {/* Password Change */}
       <Card>
