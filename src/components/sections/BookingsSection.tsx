@@ -41,13 +41,13 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
   
-  const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
+  const { bookings, loading, updateBooking, refetch, fetchHistorical } = useBookings(profile.user_id);
   const { toast } = useToast();
 
   const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
   const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');
-  const historicalBookings = bookings.filter(b => b.status === 'rejected' || b.status === 'cancelled');
+  const historicalBookings = bookings.filter(b => b.status === 'rejected' || b.status === 'cancelled' || b.status === 'deleted');
 
   // Helper functions for booking status display
   const getStatusColor = (status: string) => {
@@ -57,6 +57,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'deleted': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -68,6 +69,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       case 'published': return 'Publisert';
       case 'rejected': return 'Avvist';
       case 'cancelled': return 'Avlyst';
+      case 'deleted': return 'Slettet';
       default: return status;
     }
   };
@@ -83,15 +85,21 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       return 'Avvist';
     } else if (booking.status === 'cancelled') {
       return 'Avlyst';
+    } else if (booking.status === 'deleted') {
+      return 'Slettet';
     }
     return 'Ukjent fase';
   };
 
   const handleBookingAction = async () => {
-    // Force refresh of bookings data instead of page reload
+    // Force refresh of bookings data and fetch historical if on history tab
     console.log('📄 Refreshing bookings after action...');
     try {
-      await refetch();
+      if (activeTab === 'history') {
+        await fetchHistorical();
+      } else {
+        await refetch();
+      }
       console.log('✅ Bookings refreshed successfully');
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
@@ -248,7 +256,15 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
         </Button>
         <Button 
           variant={activeTab === 'history' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('history')}
+          onClick={async () => {
+            setActiveTab('history');
+            // Fetch historical bookings when switching to history tab
+            try {
+              await fetchHistorical();
+            } catch (error) {
+              console.error('Failed to fetch historical bookings:', error);
+            }
+          }}
           className="flex items-center gap-2"
         >
           <Clock className="h-4 w-4" />
@@ -260,7 +276,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       <div className="space-y-4">
         {activeTab === 'received' && (
           <>
-            {receivedBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled').length === 0 ? (
+            {receivedBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled' && b.status !== 'deleted').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -269,7 +285,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(receivedBookings) ? receivedBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled')
+                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled' && booking.status !== 'deleted')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>
@@ -279,7 +295,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
 
         {activeTab === 'sent' && (
           <>
-            {sentBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled').length === 0 ? (
+            {sentBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled' && b.status !== 'deleted').length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -288,7 +304,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
               </Card>
             ) : (
               Array.isArray(sentBookings) ? sentBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected')
+                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled' && booking.status !== 'deleted')
                 .map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 )) : <></>
