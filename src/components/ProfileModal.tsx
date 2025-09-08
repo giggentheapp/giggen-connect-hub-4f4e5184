@@ -8,6 +8,7 @@ import { MapPin, User, X } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
+import { EventModal } from '@/components/EventModal';
 
 interface ProfileData {
   id: string;
@@ -37,6 +38,8 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [events, setEvents] = useState<any[]>([]);
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const { role: currentUserRole } = useRole();
 
   useEffect(() => {
@@ -129,6 +132,16 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
 
     fetchProfileData();
   }, [userId, isOpen, currentUserRole]);
+
+  const handleEventClick = (eventId: string) => {
+    setSelectedEventId(eventId);
+    setIsEventModalOpen(true);
+  };
+
+  const handleEventModalClose = () => {
+    setIsEventModalOpen(false);
+    setSelectedEventId(null);
+  };
 
   if (!profile) {
     return (
@@ -326,25 +339,30 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                     <CardTitle>Kommende arrangementer</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {events.length > 0 ? (
-                      <div className="space-y-4">
-                        {events.map((event) => (
-                          <div key={event.id} className="p-4 border rounded-lg">
-                            <h4 className="font-medium">{event.title}</h4>
-                            {event.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                            )}
-                            {event.event_date && (
-                              <p className="text-sm mt-2">
-                                Dato: {new Date(event.event_date).toLocaleDateString('nb-NO')}
-                              </p>
-                            )}
-                            {event.location && (
-                              <p className="text-sm">Sted: {event.location}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                     {events.length > 0 ? (
+                       <div className="space-y-4">
+                         {events.map((event) => (
+                           <div 
+                             key={event.id} 
+                             className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                             onClick={() => handleEventClick(event.id)}
+                           >
+                             <h4 className="font-medium">{event.title}</h4>
+                             {event.description && (
+                               <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                             )}
+                             {event.event_date && (
+                               <p className="text-sm mt-2">
+                                 Dato: {new Date(event.event_date).toLocaleDateString('nb-NO')}
+                               </p>
+                             )}
+                             {event.location && (
+                               <p className="text-sm">Sted: {event.location}</p>
+                             )}
+                             <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
+                           </div>
+                         ))}
+                       </div>
                     ) : (
                       <p className="text-muted-foreground italic">Ingen kommende arrangementer</p>
                     )}
@@ -355,6 +373,12 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
           </Tabs>
         </div>
       </DialogContent>
+      
+      <EventModal 
+        isOpen={isEventModalOpen}
+        onClose={handleEventModalClose}
+        eventId={selectedEventId}
+      />
     </Dialog>
   );
 };
