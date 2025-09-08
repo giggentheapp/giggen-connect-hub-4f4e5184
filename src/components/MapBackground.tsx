@@ -224,45 +224,105 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
 
         const coordinates: [number, number] = [maker.longitude, maker.latitude];
         
-        // Create custom marker element for makers
+        // Create custom marker element for makers with safe DOM methods
         const markerElement = document.createElement('div');
         markerElement.className = 'custom-marker';
-        markerElement.innerHTML = `
-          <div class="w-12 h-12 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
-            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-              </svg>
-            </div>
-          </div>
-        `;
+        
+        const outerDiv = document.createElement('div');
+        outerDiv.className = 'w-12 h-12 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110';
+        
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'w-8 h-8 bg-white rounded-full flex items-center justify-center';
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'w-4 h-4 text-primary');
+        svg.setAttribute('fill', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 20 20');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('fill-rule', 'evenodd');
+        path.setAttribute('d', 'M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z');
+        path.setAttribute('clip-rule', 'evenodd');
+        
+        svg.appendChild(path);
+        innerDiv.appendChild(svg);
+        outerDiv.appendChild(innerDiv);
+        markerElement.appendChild(outerDiv);
 
-        // Create popup content for makers
+        // Create popup content for makers with safe DOM methods
         const popupContent = document.createElement('div');
         popupContent.className = 'maker-popup-content max-w-sm p-4';
-        popupContent.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-start gap-3">
-              <div class="w-12 h-12 rounded-full overflow-hidden bg-primary flex items-center justify-center flex-shrink-0">
-                ${maker.avatar_url ? 
-                  `<img src="${maker.avatar_url}" alt="${maker.display_name}" class="w-full h-full object-cover" />` :
-                  `<span class="text-primary-foreground text-sm font-bold">${maker.display_name?.charAt(0) || 'M'}</span>`
-                }
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-base">${maker.display_name}</h3>
-                <p class="text-sm text-muted-foreground mt-1 line-clamp-2">${maker.bio || 'Ingen beskrivelse tilgjengelig'}</p>
-                ${maker.address ? `<p class="text-xs text-muted-foreground mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>${maker.address}</p>` : ''}
-              </div>
-            </div>
-            <div class="flex gap-2 pt-2 border-t">
-              <button class="view-profile-btn flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
-                Se profil
-              </button>
-            </div>
-          </div>
-        `;
-
+        
+        const container = document.createElement('div');
+        container.className = 'space-y-3';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-start gap-3';
+        
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'w-12 h-12 rounded-full overflow-hidden bg-primary flex items-center justify-center flex-shrink-0';
+        
+        if (maker.avatar_url) {
+          const img = document.createElement('img');
+          img.src = maker.avatar_url;
+          img.alt = maker.display_name || 'Maker Avatar';
+          img.className = 'w-full h-full object-cover';
+          avatarDiv.appendChild(img);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'text-primary-foreground text-sm font-bold';
+          span.textContent = maker.display_name?.charAt(0) || 'M';
+          avatarDiv.appendChild(span);
+        }
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'flex-1 min-w-0';
+        
+        const title = document.createElement('h3');
+        title.className = 'font-semibold text-base';
+        title.textContent = maker.display_name || 'Unknown Maker';
+        contentDiv.appendChild(title);
+        
+        const bio = document.createElement('p');
+        bio.className = 'text-sm text-muted-foreground mt-1 line-clamp-2';
+        bio.textContent = maker.bio || 'Ingen beskrivelse tilgjengelig';
+        contentDiv.appendChild(bio);
+        
+        if (maker.address) {
+          const addressDiv = document.createElement('p');
+          addressDiv.className = 'text-xs text-muted-foreground mt-1 flex items-center gap-1';
+          
+          const locationSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          locationSvg.setAttribute('class', 'w-3 h-3');
+          locationSvg.setAttribute('fill', 'currentColor');
+          locationSvg.setAttribute('viewBox', '0 0 20 20');
+          
+          const locationPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          locationPath.setAttribute('fill-rule', 'evenodd');
+          locationPath.setAttribute('d', 'M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z');
+          locationPath.setAttribute('clip-rule', 'evenodd');
+          
+          locationSvg.appendChild(locationPath);
+          addressDiv.appendChild(locationSvg);
+          addressDiv.appendChild(document.createTextNode(maker.address));
+          contentDiv.appendChild(addressDiv);
+        }
+        
+        headerDiv.appendChild(avatarDiv);
+        headerDiv.appendChild(contentDiv);
+        container.appendChild(headerDiv);
+        
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'flex gap-2 pt-2 border-t';
+        
+        const viewButton = document.createElement('button');
+        viewButton.className = 'view-profile-btn flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors';
+        viewButton.textContent = 'Se profil';
+        buttonDiv.appendChild(viewButton);
+        
+        container.appendChild(buttonDiv);
+        popupContent.appendChild(container);
+        
         // Add event listeners to popup content
         const viewProfileBtn = popupContent.querySelector('.view-profile-btn');
         

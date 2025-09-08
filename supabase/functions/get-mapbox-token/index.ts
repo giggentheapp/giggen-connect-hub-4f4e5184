@@ -14,6 +14,22 @@ serve(async (req) => {
   try {
     console.log('Getting Mapbox token from environment')
     
+    // Basic rate limiting: Check for auth header or restrict to specific origins
+    const authHeader = req.headers.get('authorization')
+    const origin = req.headers.get('origin')
+    
+    // Allow requests with valid Supabase auth or from trusted origins
+    if (!authHeader && origin && !origin.includes('supabase.co') && !origin.includes('localhost')) {
+      console.log('Unauthorized access attempt from:', origin)
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+    
     // Get Mapbox token from secrets
     const mapboxToken = Deno.env.get('MAPBOX_ACCESS_TOKEN')
     

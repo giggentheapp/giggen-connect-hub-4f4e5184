@@ -8,7 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
+import { validateDisplayName, validateEmail, validatePhone, validateBio } from '@/lib/validation';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +43,7 @@ export const UserSettings = ({
   onProfileUpdate
 }: UserSettingsProps) => {
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [profileData, setProfileData] = useState<UserProfile>(profile);
   const [profileSettings, setProfileSettings] = useState<ProfileSettings | null>(null);
   const [contactInfo, setContactInfo] = useState({
@@ -174,6 +176,30 @@ export const UserSettings = ({
     }
   };
   const handleProfileSubmit = async () => {
+    // Validate all fields before submitting
+    const displayNameValidation = validateDisplayName(profileData.display_name);
+    const emailValidation = validateEmail(contactInfo.email);
+    const phoneValidation = validatePhone(contactInfo.phone);
+    const bioValidation = validateBio(profileData.bio || '');
+
+    const errors: Record<string, string> = {};
+    if (!displayNameValidation.isValid) errors.display_name = displayNameValidation.error || '';
+    if (!emailValidation.isValid) errors.email = emailValidation.error || '';
+    if (!phoneValidation.isValid) errors.phone = phoneValidation.error || '';
+    if (!bioValidation.isValid) errors.bio = bioValidation.error || '';
+
+    setValidationErrors(errors);
+
+    // Don't submit if there are validation errors
+    if (Object.keys(errors).some(key => errors[key])) {
+      toast({
+        title: "Valideringsfeil",
+        description: "Vennligst rett opp feilene før du lagrer",
+        variant: "destructive"
+      });
+      return;
+    }
+
     await updateProfile({
       display_name: profileData.display_name,
       bio: profileData.bio,
@@ -347,10 +373,23 @@ export const UserSettings = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="display-name">Visningsnavn</Label>
-              <Input id="display-name" value={profileData.display_name} onChange={e => setProfileData(prev => ({
-              ...prev,
-              display_name: e.target.value
-            }))} />
+              <Input id="display-name" value={profileData.display_name} onChange={e => {
+                const value = e.target.value;
+                setProfileData(prev => ({
+                  ...prev,
+                  display_name: value
+                }));
+                
+                // Validate display name
+                const validation = validateDisplayName(value);
+                setValidationErrors(prev => ({
+                  ...prev,
+                  display_name: validation.isValid ? '' : validation.error || ''
+                }));
+              }} />
+              {validationErrors.display_name && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.display_name}</p>
+              )}
             </div>
             
           </div>
