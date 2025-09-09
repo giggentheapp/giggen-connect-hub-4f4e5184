@@ -15,8 +15,15 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
 
   return (
     <aside className="hidden md:flex flex-col w-60 bg-sidebar-background border-r border-sidebar-border h-full">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold text-sidebar-foreground">Navigation</h2>
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+            alt="GIGGEN Logo" 
+            className="w-8 h-8 object-contain"
+          />
+          <span className="text-lg font-semibold text-sidebar-foreground">GIGGEN</span>
+        </div>
       </div>
       
       <nav className="flex-1 px-3">

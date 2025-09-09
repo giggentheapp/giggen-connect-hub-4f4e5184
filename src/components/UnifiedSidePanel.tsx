@@ -231,9 +231,11 @@ export const UnifiedSidePanel = ({
             {/* Logo */}
             <div className="p-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">G</span>
-                </div>
+                <img 
+                  src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+                  alt="GIGGEN Logo" 
+                  className="w-8 h-8 object-contain"
+                />
                 {isExpanded && <span className="font-bold text-lg text-foreground opacity-0 animate-fade-in">
                     GIGGEN
                   </span>}
