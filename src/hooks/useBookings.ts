@@ -15,7 +15,7 @@ interface Booking {
   event_date: string | null;
   venue: string | null;
   hospitality_rider: string | null;
-  status: string;
+  status: 'draft' | 'pending' | 'allowed' | 'approved' | 'published' | 'rejected' | 'cancelled' | 'confirmed' | 'deleted';
   sender_confirmed: boolean;
   receiver_confirmed: boolean;
   sender_read_agreement: boolean;
@@ -36,6 +36,16 @@ interface Booking {
   deletion_reason?: string;
   contact_info_shared_at?: string;
   both_parties_approved?: boolean;
+  // New workflow fields
+  allowed_at?: string;
+  approved_at?: string;
+  published_at?: string;
+  rejected_at?: string;
+  cancelled_at?: string;
+  receiver_allowed_at?: string;
+  requires_approval?: boolean;
+  last_modified_by?: string;
+  last_modified_at?: string;
 }
 
 interface BookingChange {
@@ -103,7 +113,9 @@ export const useBookings = (userId?: string) => {
         .insert({
           ...bookingData,
           sender_id: user.id,
-          status: 'pending'
+          status: 'pending', // Always start with pending status
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         } as any)
         .select()
         .single();
@@ -112,8 +124,8 @@ export const useBookings = (userId?: string) => {
       
       setBookings(prev => [data as Booking, ...prev]);
       toast({
-        title: "Booking opprettet",
-        description: "Forespørselen er sendt",
+        title: "Forespørsel sendt",
+        description: "Forespørselen venter på mottakers svar",
       });
       
       return data;

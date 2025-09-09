@@ -39,21 +39,37 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'confirmed' | 'history'>('received');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
   
   const { bookings, loading, updateBooking, refetch, fetchHistorical } = useBookings(profile.user_id);
   const { toast } = useToast();
 
-  const sentBookings = bookings.filter(b => b.sender_id === profile.user_id);
-  const receivedBookings = bookings.filter(b => b.receiver_id === profile.user_id);
-  const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'published');
-  const historicalBookings = bookings.filter(b => b.status === 'rejected' || b.status === 'cancelled' || b.status === 'deleted');
+  // New workflow-based filtering
+  const incomingRequests = bookings.filter(b => 
+    b.receiver_id === profile.user_id && b.status === 'pending'
+  );
+  const sentRequests = bookings.filter(b => 
+    b.sender_id === profile.user_id && b.status === 'pending'
+  );
+  const ongoingAgreements = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
+    (b.status === 'allowed' || b.status === 'approved')
+  );
+  const upcomingEvents = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
+    b.status === 'published'
+  );
+  const historicalBookings = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) &&
+    (b.status === 'rejected' || b.status === 'cancelled' || b.status === 'deleted')
+  );
 
-  // Helper functions for booking status display
+  // Helper functions for booking status display with new workflow
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'confirmed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'allowed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'approved': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
@@ -65,7 +81,8 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending': return 'Venter svar';
-      case 'confirmed': return 'Bekreftet';
+      case 'allowed': return 'Tillatt';
+      case 'approved': return 'Godkjent';
       case 'published': return 'Publisert';
       case 'rejected': return 'Avvist';
       case 'cancelled': return 'Avlyst';
@@ -75,20 +92,24 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   };
 
   const getPhaseText = (booking: any) => {
-    if (booking.status === 'pending') {
-      return 'Venter på svar';
-    } else if (booking.status === 'confirmed') {
-      return 'Bekreftet - Klar for publisering';
-    } else if (booking.status === 'published') {
-      return 'Ferdig: Publisert';
-    } else if (booking.status === 'rejected') {
-      return 'Avvist';
-    } else if (booking.status === 'cancelled') {
-      return 'Avlyst';
-    } else if (booking.status === 'deleted') {
-      return 'Slettet';
+    switch (booking.status) {
+      case 'pending':
+        return booking.receiver_id === profile.user_id ? '1. Forespørsel' : 'Sendt forespørsel';
+      case 'allowed':
+        return '2. Pågående avtale - Kan redigeres';
+      case 'approved':
+        return '2. Pågående avtale - Klar for publisering';
+      case 'published':
+        return '3. Publisert arrangement';
+      case 'rejected':
+        return 'Avvist';
+      case 'cancelled':
+        return 'Avlyst';
+      case 'deleted':
+        return 'Slettet';
+      default:
+        return 'Ukjent status';
     }
-    return 'Ukjent fase';
   };
 
   const handleBookingAction = async () => {
@@ -228,15 +249,15 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   return (
     <div className="space-y-6">
 
-      {/* Tab Navigation */}
-      <div className="flex gap-2 border-b">
+      {/* Tab Navigation - New Workflow */}
+      <div className="flex gap-2 border-b flex-wrap">
         <Button 
-          variant={activeTab === 'received' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('received')}
+          variant={activeTab === 'incoming' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('incoming')}
           className="flex items-center gap-2"
         >
           <Inbox className="h-4 w-4" />
-          Mottatt ({receivedBookings.length})
+          Innkommende forespørsler ({incomingRequests.length})
         </Button>
         <Button 
           variant={activeTab === 'sent' ? 'default' : 'ghost'}
@@ -244,15 +265,23 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
           className="flex items-center gap-2"
         >
           <Send className="h-4 w-4" />
-          Sendt ({sentBookings.length})
+          Sendt forespørsel ({sentRequests.length})
         </Button>
         <Button 
-          variant={activeTab === 'confirmed' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('confirmed')}
+          variant={activeTab === 'ongoing' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('ongoing')}
           className="flex items-center gap-2"
         >
           <Clock className="h-4 w-4" />
-          Bekreftet ({confirmedBookings.length})
+          Pågående avtaler ({ongoingAgreements.length})
+        </Button>
+        <Button 
+          variant={activeTab === 'upcoming' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('upcoming')}
+          className="flex items-center gap-2"
+        >
+          <Check className="h-4 w-4" />
+          Kommende arrangementer ({upcomingEvents.length})
         </Button>
         <Button 
           variant={activeTab === 'history' ? 'default' : 'ghost'}
@@ -272,30 +301,40 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
         </Button>
       </div>
 
-      {/* Bookings List */}
+      {/* Bookings List - New Workflow */}
       <div className="space-y-4">
-        {activeTab === 'received' && (
+        {activeTab === 'incoming' && (
           <>
-            {receivedBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled' && b.status !== 'deleted').length === 0 ? (
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Innkommende forespørsler</h3>
+              <p className="text-sm text-muted-foreground">
+                Forespørsler som venter på ditt svar. Kontaktinfo og dokumenter vises ikke før du tillater forespørselen.
+              </p>
+            </div>
+            {incomingRequests.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen mottatte forespørsler</p>
+                  <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(receivedBookings) ? receivedBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled' && booking.status !== 'deleted')
-                .map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
-                )) : <></>
+              incomingRequests.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))
             )}
           </>
         )}
 
         {activeTab === 'sent' && (
           <>
-            {sentBookings.filter(b => b.status !== 'rejected' && b.status !== 'cancelled' && b.status !== 'deleted').length === 0 ? (
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Sendt forespørsel</h3>
+              <p className="text-sm text-muted-foreground">
+                Forespørsler du har sendt som venter på svar fra mottakeren.
+              </p>
+            </div>
+            {sentRequests.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -303,34 +342,67 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(sentBookings) ? sentBookings
-                .filter(booking => booking && booking.id && booking.status !== 'rejected' && booking.status !== 'cancelled' && booking.status !== 'deleted')
-                .map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
-                )) : <></>
+              sentRequests.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))
             )}
           </>
         )}
 
-        {activeTab === 'confirmed' && (
+        {activeTab === 'ongoing' && (
           <>
-            {confirmedBookings.length === 0 ? (
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Pågående avtaler</h3>
+              <p className="text-sm text-muted-foreground">
+                Tillatte avtaler hvor dere kan redigere detaljer og se hverandres kontaktinfo og dokumenter.
+              </p>
+            </div>
+            {ongoingAgreements.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen bekreftede arrangementer</p>
+                  <p className="text-muted-foreground">Ingen pågående avtaler</p>
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(confirmedBookings) ? confirmedBookings.filter(booking => booking && booking.id).map((booking) => (
+              ongoingAgreements.map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
-              )) : <></>
+              ))
+            )}
+          </>
+        )}
+
+        {activeTab === 'upcoming' && (
+          <>
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Kommende arrangementer</h3>
+              <p className="text-sm text-muted-foreground">
+                Publiserte arrangementer som er synlige for andre brukere (med begrenset info). Avtaler er låst for redigering.
+              </p>
+            </div>
+            {upcomingEvents.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">Ingen kommende arrangementer</p>
+                </CardContent>
+              </Card>
+            ) : (
+              upcomingEvents.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))
             )}
           </>
         )}
 
         {activeTab === 'history' && (
           <>
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Historikk</h3>
+              <p className="text-sm text-muted-foreground">
+                Avviste, avlyste eller slettede bookinger. Sensitiv data er fjernet for personvern.
+              </p>
+            </div>
             {historicalBookings.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-8">
@@ -339,9 +411,9 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
                 </CardContent>
               </Card>
             ) : (
-              Array.isArray(historicalBookings) ? historicalBookings.filter(booking => booking && booking.id).map((booking) => (
+              historicalBookings.map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
-              )) : <></>
+              ))
             )}
           </>
         )}
