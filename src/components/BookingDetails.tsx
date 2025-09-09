@@ -326,9 +326,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'sent' || booking.status === 'draft';
-  const isNegotiationPhase = booking.status === 'sent' || booking.status === 'draft';
-  const isConfirmationPhase = booking.status === 'confirmed';
+  const canEdit = booking.status === 'pending' || booking.status === 'allowed';
+  const isNegotiationPhase = booking.status === 'pending' || booking.status === 'allowed';
+  const isConfirmationPhase = booking.status === 'both_parties_approved';
 
   return (
     <div className="space-y-6">
@@ -336,7 +336,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
         <div>
           <h2 className="text-2xl font-bold">{booking.title}</h2>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant={booking.status === 'published' ? 'default' : 'secondary'}>
+            <Badge variant={booking.status === 'upcoming' ? 'default' : 'secondary'}>
               {booking.status}
             </Badge>
             {isSender && <Badge variant="outline">Du er avsender</Badge>}
@@ -467,8 +467,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
       <BookingDocumentViewer
         techSpec={booking.tech_spec}
         hospitalityRider={booking.hospitality_rider}
-        bookingStatus={booking.status}
-        isVisible={booking.status === 'allowed' || booking.status === 'approved' || booking.status === 'published' || booking.status === 'confirmed'}
+      bookingStatus={booking.status}
+      isVisible={booking.status === 'allowed' || booking.status === 'both_parties_approved' || booking.status === 'upcoming'}
       />
 
       {/* Status and Actions */}
@@ -521,7 +521,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
             )}
 
             {/* Reject and Delete buttons for both sender and receiver */}
-            {(isSender || isReceiver) && booking.status !== 'rejected' && booking.status !== 'published' && (
+            {(isSender || isReceiver) && booking.status !== 'cancelled' && booking.status !== 'upcoming' && (
               <>
                 <Button 
                   variant="outline" 
@@ -556,9 +556,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
               </>
             )}
 
-            {booking.status === 'rejected' && (
+            {booking.status === 'cancelled' && (
               <Badge variant="destructive" className="ml-2">
-                Avvist
+                Avlyst
               </Badge>
             )}
           </div>

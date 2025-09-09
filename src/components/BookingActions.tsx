@@ -52,9 +52,11 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
+      // Set both parties as confirmed to trigger both_parties_approved (generated column)
       await updateBooking(booking.id, { 
         status: 'both_parties_approved',
-        both_parties_approved: true
+        sender_confirmed: true,
+        receiver_confirmed: true
       });
       
       toast({
@@ -156,9 +158,9 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
   };
 
   const getDeleteWarningText = () => {
-    if (booking.status === 'published') {
+    if (booking.status === 'upcoming') {
       return "Dette vil slette et publisert arrangement. ADVARSEL: Dette kan påvirke andre brukere som har sett arrangementet.";
-    } else if (booking.status === 'approved' || booking.status === 'allowed') {
+    } else if (booking.status === 'both_parties_approved' || booking.status === 'allowed') {
       return "Dette vil avlyse en pågående avtale og flytte den til historikk.";
     }
     return "Bookingen vil bli flyttet til historikk-seksjonen.";
@@ -257,8 +259,8 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
           </>
         )}
 
-        {/* STEP 3: Publish (both parties, approved status) */}
-        {booking.status === 'approved' && (
+        {/* STEP 3: Publish (both parties, both_parties_approved status) */}
+        {booking.status === 'both_parties_approved' && (
           <>
             <Button 
               onClick={showPublishingSummary}
@@ -288,7 +290,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
         )}
 
         {/* Delete button for historical bookings */}
-        {(booking.status === 'rejected' || booking.status === 'cancelled' || booking.status === 'deleted' || booking.status === 'published') && (
+        {(booking.status === 'cancelled' || booking.status === 'completed' || booking.status === 'upcoming') && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 

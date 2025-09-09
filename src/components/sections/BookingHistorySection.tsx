@@ -10,7 +10,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, MapPin, DollarSign, Search, Filter, Eye, Trash2, Clock, Ban } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Search, Filter, Eye, Trash2, Clock, Ban, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -54,7 +54,7 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
           .from('bookings')
           .select('*')
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .in('status', ['cancelled'])
+          .in('status', ['cancelled', 'completed'])
           .order('updated_at', { ascending: false });
 
         if (error) throw error;
@@ -113,24 +113,24 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'completed': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'rejected': return 'Avvist';
       case 'cancelled': return 'Avlyst';
+      case 'completed': return 'Gjennomført';
       default: return status;
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'rejected': return Ban;
       case 'cancelled': return Clock;
+      case 'completed': return Check;
       default: return Clock;
     }
   };
@@ -309,8 +309,8 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Alle statuser</SelectItem>
-                  <SelectItem value="rejected">Avvist</SelectItem>
                   <SelectItem value="cancelled">Avlyst</SelectItem>
+                  <SelectItem value="completed">Gjennomført</SelectItem>
                 </SelectContent>
               </Select>
             </div>
