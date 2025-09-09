@@ -105,10 +105,10 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4 shadow-glow"></div>
+          <p className="text-lg font-medium bg-gradient-primary bg-clip-text text-transparent">Laster dashboard...</p>
         </div>
       </div>
     );
@@ -116,13 +116,13 @@ const Dashboard = () => {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
+        <Card className="w-full max-w-md shadow-glow border-gradient">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground mb-4">
               Kunne ikke laste brukerdata
             </p>
-            <Button onClick={() => navigate('/auth')} className="w-full">
+            <Button variant="gradient" onClick={() => navigate('/auth')} className="w-full">
               Gå til innlogging
             </Button>
           </CardContent>
@@ -132,7 +132,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
       {/* Role-specific dashboard with integrated navigation */}
       {profile.role === 'maker' ? (
         <MakerDashboard profile={profile} />
