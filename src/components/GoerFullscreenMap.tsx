@@ -76,17 +76,28 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
     try {
       setLoading(true);
       
+      // Use the same secure data access method as other components
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'maker')
-        .eq('is_address_public', true)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .rpc('get_all_visible_makers');
 
       if (error) throw error;
       
-      setMakers(data || []);
+      // Transform data to match expected format
+      const makersData = data?.filter(maker => 
+        maker.latitude && maker.longitude && maker.address
+      ).map(maker => ({
+        id: maker.id,
+        user_id: maker.user_id,
+        display_name: maker.display_name,
+        bio: maker.bio,
+        latitude: parseFloat(maker.latitude?.toString() || '0'),
+        longitude: parseFloat(maker.longitude?.toString() || '0'),
+        is_address_public: maker.is_address_public,
+        avatar_url: maker.avatar_url,
+        address: maker.address
+      })) || [];
+      
+      setMakers(makersData);
     } catch (error: any) {
       console.error('Error fetching makers:', error);
       toast({
