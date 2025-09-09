@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import ProfilePortfolioManager from '@/components/ProfilePortfolioManager';
 import TechSpecManager from '@/components/TechSpecManager';
 import HospitalityRiderManager from '@/components/HospitalityRiderManager';
-
 interface UserProfile {
   id: string;
   user_id: string;
@@ -16,16 +15,15 @@ interface UserProfile {
   is_address_public: boolean;
   contact_info: any;
 }
-
 interface AdminFilesSectionProps {
   profile: UserProfile;
 }
+export const AdminFilesSection = ({
+  profile
+}: AdminFilesSectionProps) => {
+  return <div className="space-y-6">
 
-export const AdminFilesSection = ({ profile }: AdminFilesSectionProps) => {
-  return (
-    <div className="space-y-6">
-
-      <Card>
+      <Card className="bg-slate-200">
         <CardHeader>
           <CardTitle>Filhåndtering</CardTitle>
           <CardDescription>
@@ -34,30 +32,17 @@ export const AdminFilesSection = ({ profile }: AdminFilesSectionProps) => {
         </CardHeader>
         <CardContent className="space-y-8">
           <div>
-            <ProfilePortfolioManager 
-              userId={profile.user_id}
-              title="Profilportefølje"
-              description="Last opp bilder, videoer og andre filer som viser frem ditt arbeid"
-            />
+            <ProfilePortfolioManager userId={profile.user_id} title="Profilportefølje" description="Last opp bilder, videoer og andre filer som viser frem ditt arbeid" />
           </div>
           
           <div>
-            <TechSpecManager 
-              userId={profile.user_id}
-              title="Tekniske spesifikasjoner"
-              description="Last opp tekniske spesifikasjoner og rider-dokumenter"
-            />
+            <TechSpecManager userId={profile.user_id} title="Tekniske spesifikasjoner" description="Last opp tekniske spesifikasjoner og rider-dokumenter" />
           </div>
           
           <div>
-            <HospitalityRiderManager 
-              userId={profile.user_id}
-              title="Hospitality Riders"
-              description="Last opp hospitality rider-dokumenter for arrangementer"
-            />
+            <HospitalityRiderManager userId={profile.user_id} title="Hospitality Riders" description="Last opp hospitality rider-dokumenter for arrangementer" />
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
