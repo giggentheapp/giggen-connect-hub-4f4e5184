@@ -368,7 +368,7 @@ export const BookingDetailsPanel = ({ booking, currentUserId, canEdit }: Booking
         techSpec={booking.tech_spec}
         hospitalityRider={booking.hospitality_rider}
         bookingStatus={booking.status}
-        isVisible={booking.status === 'allowed' || booking.status === 'approved' || booking.status === 'published' || booking.status === 'confirmed'}
+        isVisible={booking.status === 'allowed' || booking.status === 'both_parties_approved' || booking.status === 'upcoming'}
       />
 
       {!canEdit && (

@@ -110,7 +110,7 @@ export const useConceptActions = () => {
           maker_id: concept.maker_id,
           title: concept.title,
           description: concept.description,
-          status: 'deleted',
+          status: 'cancelled',
           price: concept.price,
           expected_audience: concept.expected_audience,
           tech_spec: concept.tech_spec,

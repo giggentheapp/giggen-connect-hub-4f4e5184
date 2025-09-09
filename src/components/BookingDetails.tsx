@@ -514,8 +514,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
               </>
             )}
             
-            {booking.sender_confirmed && booking.receiver_confirmed && booking.status !== 'published' && (
-              <Button onClick={() => handleFieldEdit('status', 'published')}>
+            {booking.sender_confirmed && booking.receiver_confirmed && booking.status !== 'upcoming' && (
+              <Button onClick={() => handleFieldEdit('status', 'upcoming')}>
                 Publiser arrangement
               </Button>
             )}

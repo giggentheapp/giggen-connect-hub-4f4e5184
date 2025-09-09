@@ -85,16 +85,16 @@ export const EnhancedBookingDetailsPanel = ({
     switch (booking.status) {
       case 'pending':
         return { color: 'blue', text: 'Venter på svar' };
-      case 'confirmed':
-        return { color: 'yellow', text: 'Bekreftet - Klar for publisering' };
-      case 'published':
+      case 'allowed':
+        return { color: 'yellow', text: 'Tillatt - Kan redigeres' };
+      case 'both_parties_approved':
+        return { color: 'purple', text: 'Godkjent - Klar for publisering' };
+      case 'upcoming':
         return { color: 'green', text: 'Publisert' };
-      case 'rejected':
-        return { color: 'red', text: 'Avvist' };
+      case 'completed':
+        return { color: 'blue', text: 'Gjennomført' };
       case 'cancelled':
         return { color: 'orange', text: 'Avlyst' };
-      case 'deleted':
-        return { color: 'gray', text: 'Slettet' };
       default:
         return { color: 'gray', text: booking.status };
     }
@@ -138,7 +138,7 @@ export const EnhancedBookingDetailsPanel = ({
           </div>
 
           {/* Approval Button */}
-          {booking.status === 'confirmed' && !booking[isSender ? 'sender_confirmed' : 'receiver_confirmed'] && (
+          {booking.status === 'both_parties_approved' && !booking[isSender ? 'sender_confirmed' : 'receiver_confirmed'] && (
             <div className="mt-4">
               <Button onClick={() => setApprovalOpen(true)} className="w-full">
                 <Check className="h-4 w-4 mr-2" />

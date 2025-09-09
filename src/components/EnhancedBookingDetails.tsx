@@ -118,25 +118,26 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
 
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'pending' || booking.status === 'sent' || booking.status === 'draft';
-  const isNegotiationPhase = booking.status === 'pending' || booking.status === 'sent' || booking.status === 'draft';
-  const isConfirmationPhase = booking.status === 'confirmed';
-  const isPublished = booking.status === 'published';
+  const canEdit = booking.status === 'pending' || booking.status === 'allowed';
+  const isNegotiationPhase = booking.status === 'pending' || booking.status === 'allowed';
+  const isConfirmationPhase = booking.status === 'both_parties_approved';
+  const isPublished = booking.status === 'upcoming';
   const bothConfirmed = booking.sender_confirmed && booking.receiver_confirmed;
 
   const getStatusInfo = (status: string) => {
     switch (status) {
-      case 'draft':
-        return { color: 'bg-gray-100 text-gray-800', label: 'Utkast' };
       case 'pending':
-      case 'sent':
-        return { color: 'bg-blue-100 text-blue-800', label: 'Forhandling' };
-      case 'confirmed':
-        return { color: 'bg-green-100 text-green-800', label: 'Bekreftet' };
-      case 'published':
-        return { color: 'bg-purple-100 text-purple-800', label: 'Publisert' };
-      case 'rejected':
-        return { color: 'bg-red-100 text-red-800', label: 'Avvist' };
+        return { color: 'bg-blue-100 text-blue-800', label: 'Venter på svar' };
+      case 'allowed':
+        return { color: 'bg-yellow-100 text-yellow-800', label: 'Tillatt - Kan redigeres' };
+      case 'both_parties_approved':
+        return { color: 'bg-purple-100 text-purple-800', label: 'Godkjent - Klar for publisering' };
+      case 'upcoming':
+        return { color: 'bg-green-100 text-green-800', label: 'Publisert' };
+      case 'completed':
+        return { color: 'bg-blue-100 text-blue-800', label: 'Gjennomført' };
+      case 'cancelled':
+        return { color: 'bg-orange-100 text-orange-800', label: 'Avlyst' };
       default:
         return { color: 'bg-gray-100 text-gray-800', label: status };
     }
