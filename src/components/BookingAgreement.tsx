@@ -23,6 +23,8 @@ interface BookingAgreementProps {
   currentUserId: string;
 }
 
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+
 export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: BookingAgreementProps) => {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [userHasRead, setUserHasRead] = useState(false);
@@ -327,16 +329,13 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
               </Card>
             )}
 
-            {booking.hospitality_rider && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Hospitality Rider (tekst)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-line">{booking.hospitality_rider}</p>
-                </CardContent>
-              </Card>
-            )}
+            {/* Documents */}
+            <BookingDocumentViewer
+              techSpec={booking.tech_spec}
+              hospitalityRider={booking.hospitality_rider}
+              bookingStatus={booking.status}
+              isVisible={true} // Always visible in agreement dialog
+            />
 
             {/* Legal Terms */}
             <Card>

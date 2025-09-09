@@ -104,6 +104,30 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         email: user?.email
       };
 
+      // Fetch tech spec and hospitality rider documents from concept
+      let techSpecUrl = null;
+      let hospitalityRiderUrl = null;
+
+      if (selectedConcept.tech_spec_reference) {
+        const { data: techSpecData } = await supabase
+          .from('profile_tech_specs')
+          .select('file_url')
+          .eq('id', selectedConcept.tech_spec_reference)
+          .single();
+        
+        techSpecUrl = techSpecData?.file_url || null;
+      }
+
+      if (selectedConcept.hospitality_rider_reference) {
+        const { data: hospitalityRiderData } = await supabase
+          .from('hospitality_riders')
+          .select('file_url')
+          .eq('id', selectedConcept.hospitality_rider_reference)
+          .single();
+        
+        hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
+      }
+
       await createBooking({
         receiver_id: receiverId,
         concept_ids: [selectedConcept.id],
@@ -115,7 +139,9 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         event_date: eventDate?.toISOString() || null,
         venue: venue || null,
         status: 'pending',
-        sender_contact_info: contactInfoToShare
+        sender_contact_info: contactInfoToShare,
+        tech_spec: techSpecUrl || "Ikke lagt ved dokument",
+        hospitality_rider: hospitalityRiderUrl || "Ikke lagt ved dokument"
       });
 
       // Reset form

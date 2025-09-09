@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { CalendarIcon, AlertTriangle, Check, X, Eye, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+
 interface BookingDetailsProps {
   bookingId: string;
   onClose?: () => void;
@@ -36,6 +38,7 @@ interface Booking {
   event_date: string | null;
   venue: string | null;
   hospitality_rider: string | null;
+  tech_spec: string | null;
   status: string;
   sender_confirmed: boolean;
   receiver_confirmed: boolean;
@@ -459,6 +462,14 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
         </CardContent>
       </Card>
+
+      {/* Documents */}
+      <BookingDocumentViewer
+        techSpec={booking.tech_spec}
+        hospitalityRider={booking.hospitality_rider}
+        bookingStatus={booking.status}
+        isVisible={booking.status === 'allowed' || booking.status === 'approved' || booking.status === 'published' || booking.status === 'confirmed'}
+      />
 
       {/* Status and Actions */}
       <Card>

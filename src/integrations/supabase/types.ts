@@ -118,6 +118,7 @@ export type Database = {
           sender_id: string
           sender_read_agreement: boolean | null
           status: Database["public"]["Enums"]["booking_status"] | null
+          tech_spec: string | null
           ticket_price: number | null
           time: string | null
           title: string
@@ -162,6 +163,7 @@ export type Database = {
           sender_id: string
           sender_read_agreement?: boolean | null
           status?: Database["public"]["Enums"]["booking_status"] | null
+          tech_spec?: string | null
           ticket_price?: number | null
           time?: string | null
           title: string
@@ -206,6 +208,7 @@ export type Database = {
           sender_id?: string
           sender_read_agreement?: boolean | null
           status?: Database["public"]["Enums"]["booking_status"] | null
+          tech_spec?: string | null
           ticket_price?: number | null
           time?: string | null
           title?: string

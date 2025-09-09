@@ -18,6 +18,8 @@ interface BookingConfirmationProps {
   currentUserId: string;
 }
 
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
   const [hasReadChanges, setHasReadChanges] = useState(false);
   const [realtimeBooking, setRealtimeBooking] = useState(booking);
@@ -319,12 +321,13 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
                 </div>
               )}
 
-              {currentBooking.hospitality_rider && (
-                <div>
-                  <h3 className="font-medium mb-2">Hospitality Rider</h3>
-                  <p className="whitespace-pre-line">{currentBooking.hospitality_rider}</p>
-                </div>
-              )}
+          {/* Documents */}
+          <BookingDocumentViewer
+            techSpec={currentBooking.tech_spec}
+            hospitalityRider={currentBooking.hospitality_rider}
+            bookingStatus={currentBooking.status}
+            isVisible={true} // Always visible in confirmation dialog
+          />
             </CardContent>
           </Card>
 

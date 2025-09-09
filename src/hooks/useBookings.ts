@@ -15,6 +15,7 @@ interface Booking {
   event_date: string | null;
   venue: string | null;
   hospitality_rider: string | null;
+  tech_spec: string | null;
   status: 'draft' | 'pending' | 'allowed' | 'approved' | 'published' | 'rejected' | 'cancelled' | 'confirmed' | 'deleted';
   sender_confirmed: boolean;
   receiver_confirmed: boolean;

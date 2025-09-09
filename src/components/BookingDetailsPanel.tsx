@@ -29,6 +29,8 @@ interface EditableFieldProps {
   onPropose: (fieldName: string, oldValue: any, newValue: any) => void;
 }
 
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+
 export const BookingDetailsPanel = ({ booking, currentUserId, canEdit }: BookingDetailsPanelProps) => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
@@ -360,6 +362,14 @@ export const BookingDetailsPanel = ({ booking, currentUserId, canEdit }: Booking
           />
         </CardContent>
       </Card>
+
+      {/* Documents */}
+      <BookingDocumentViewer
+        techSpec={booking.tech_spec}
+        hospitalityRider={booking.hospitality_rider}
+        bookingStatus={booking.status}
+        isVisible={booking.status === 'allowed' || booking.status === 'approved' || booking.status === 'published' || booking.status === 'confirmed'}
+      />
 
       {!canEdit && (
         <div className="text-sm text-muted-foreground bg-muted p-3 rounded">

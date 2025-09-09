@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import { BookingDetailsPanel } from '@/components/BookingDetailsPanel';
 import { DocumentViewer } from '@/components/DocumentViewer';
 import { BookingApprovalDialog } from '@/components/BookingApprovalDialog';
@@ -276,19 +277,12 @@ export const EnhancedBookingDetailsPanel = ({
         </CardContent>
       </Card>
 
-      {/* Documents */}
-      <DocumentViewer
-        files={techSpecFiles}
-        title="Tekniske spesifikasjoner"
+      {/* Documents from booking concept */}
+      <BookingDocumentViewer
+        techSpec={booking.tech_spec}
+        hospitalityRider={booking.hospitality_rider}
+        bookingStatus={booking.status}
         isVisible={bothConfirmed}
-        notProvidedMessage="Ingen tekniske spesifikasjoner lagt ved"
-      />
-
-      <DocumentViewer
-        files={hospitalityFiles}
-        title="Hospitality Rider"
-        isVisible={bothConfirmed}
-        notProvidedMessage="Ingen hospitality rider lagt ved"
       />
 
       {/* Editable Fields */}
