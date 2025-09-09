@@ -237,14 +237,13 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
         {/* Content */}
         <div className="p-6">
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="about">Om meg</TabsTrigger>
               <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
-              {currentUserRole === 'maker' ? (
+              {currentUserRole === 'maker' && (
                 <TabsTrigger value="concepts">Konsepter</TabsTrigger>
-              ) : (
-                <TabsTrigger value="events">Kommende arrangementer</TabsTrigger>
               )}
+              <TabsTrigger value="events">Arrangementer</TabsTrigger>
             </TabsList>
 
             <TabsContent value="about" className="mt-6">
@@ -259,17 +258,8 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                     <p className="text-muted-foreground italic">Ingen beskrivelse tilgjengelig</p>
                   )}
                   
-                  {profile.contact_info && (
-                    <div className="mt-4 p-4 bg-muted rounded-lg">
-                      <h4 className="font-medium mb-2">Kontaktinformasjon</h4>
-                      {profile.contact_info.email && (
-                        <p className="text-sm">Email: {profile.contact_info.email}</p>
-                      )}
-                      {profile.contact_info.phone && (
-                        <p className="text-sm">Telefon: {profile.contact_info.phone}</p>
-                      )}
-                    </div>
-                  )}
+                  {/* SECURITY: Contact info is NEVER shown in profile popups */}
+                  {/* Contact info is only available in booking sections when allowed */}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -305,7 +295,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
               </Card>
             </TabsContent>
 
-            {currentUserRole === 'maker' ? (
+            {currentUserRole === 'maker' && (
               <TabsContent value="concepts" className="mt-6">
                 <Card>
                   <CardHeader>
@@ -332,44 +322,44 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                   </CardContent>
                 </Card>
               </TabsContent>
-            ) : (
-              <TabsContent value="events" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Kommende arrangementer</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                     {events.length > 0 ? (
-                       <div className="space-y-4">
-                         {events.map((event) => (
-                           <div 
-                             key={event.id} 
-                             className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                             onClick={() => handleEventClick(event.id)}
-                           >
-                             <h4 className="font-medium">{event.title}</h4>
-                             {event.description && (
-                               <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                             )}
-                             {event.event_date && (
-                               <p className="text-sm mt-2">
-                                 Dato: {new Date(event.event_date).toLocaleDateString('nb-NO')}
-                               </p>
-                             )}
-                             {event.location && (
-                               <p className="text-sm">Sted: {event.location}</p>
-                             )}
-                             <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
-                           </div>
-                         ))}
-                       </div>
-                    ) : (
-                      <p className="text-muted-foreground italic">Ingen kommende arrangementer</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
             )}
+
+            <TabsContent value="events" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kommende arrangementer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                   {events.length > 0 ? (
+                     <div className="space-y-4">
+                       {events.map((event) => (
+                         <div 
+                           key={event.id} 
+                           className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                           onClick={() => handleEventClick(event.id)}
+                         >
+                           <h4 className="font-medium">{event.title}</h4>
+                           {event.description && (
+                             <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                           )}
+                           {event.event_date && (
+                             <p className="text-sm mt-2">
+                               Dato: {new Date(event.event_date).toLocaleDateString('nb-NO')}
+                             </p>
+                           )}
+                           {event.location && (
+                             <p className="text-sm">Sted: {event.location}</p>
+                           )}
+                           <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
+                         </div>
+                       ))}
+                     </div>
+                  ) : (
+                    <p className="text-muted-foreground italic">Ingen kommende arrangementer</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </DialogContent>

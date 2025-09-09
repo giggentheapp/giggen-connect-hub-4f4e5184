@@ -902,6 +902,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_active_booking_with_user: {
+        Args: { target_user_id: string; viewer_user_id?: string }
+        Returns: boolean
+      }
       is_maker: {
         Args: { user_uuid: string }
         Returns: boolean
