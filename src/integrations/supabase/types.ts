@@ -783,6 +783,30 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_booking_for_viewer: {
+        Args: { booking_id: string; viewer_id?: string }
+        Returns: {
+          allowed_at: string
+          approved_at: string
+          artist_fee: number
+          contact_info: Json
+          created_at: string
+          description: string
+          event_date: string
+          hospitality_rider: string
+          id: string
+          is_viewer_receiver: boolean
+          is_viewer_sender: boolean
+          personal_message: string
+          price_musician: string
+          published_at: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          title: string
+          venue: string
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
