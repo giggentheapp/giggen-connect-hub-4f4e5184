@@ -55,6 +55,9 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
       try {
         setLoading(true);
 
+        // Add debugging
+        console.log('Fetching profile for userId:', userId, 'currentUserRole:', currentUserRole);
+        
         // Fetch secure profile data
         const { data: profileData, error: profileError } = await supabase
           .rpc('get_secure_profile_data', { 
@@ -62,9 +65,18 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
             viewer_role: currentUserRole 
           });
 
-        if (profileError) throw profileError;
+        console.log('Profile RPC result:', { profileData, profileError });
+        
+        if (profileError) {
+          console.error('Profile RPC error:', profileError);
+          throw profileError;
+        }
+        
         if (profileData && profileData.length > 0) {
+          console.log('Setting profile:', profileData[0]);
           setProfile(profileData[0]);
+        } else {
+          console.warn('No profile data returned for user:', userId);
         }
 
         // Fetch portfolio if visible to user
