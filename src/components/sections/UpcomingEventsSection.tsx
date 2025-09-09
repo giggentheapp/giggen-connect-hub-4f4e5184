@@ -492,7 +492,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
               {portfolioUserId && (
                 <div>
                   <h3 className="font-semibold mb-2">Portefølje</h3>
-                  <ProfilePortfolioViewer userId={portfolioUserId} />
+                  <ProfilePortfolioViewer userId={portfolioUserId} isOwnProfile={false} />
                 </div>
               )}
 

@@ -272,7 +272,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
                   <CardTitle>Portefølje</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ProfilePortfolioViewer userId={makerId} />
+                  <ProfilePortfolioViewer userId={makerId} isOwnProfile={false} />
                 </CardContent>
               </Card>
             )}

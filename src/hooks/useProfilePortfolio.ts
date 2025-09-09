@@ -37,7 +37,6 @@ export const useProfilePortfolio = (userId: string | undefined) => {
         .from('profile_portfolio')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_public', true)
         .order('created_at', { ascending: true });
 
       if (fetchError) throw fetchError;

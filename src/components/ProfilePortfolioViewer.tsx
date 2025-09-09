@@ -6,9 +6,10 @@ import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 interface ProfilePortfolioViewerProps {
   userId: string;
   showControls?: boolean;
+  isOwnProfile?: boolean;
 }
 
-export const ProfilePortfolioViewer = ({ userId, showControls = false }: ProfilePortfolioViewerProps) => {
+export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
   const { files, loading, error } = useProfilePortfolio(userId);
 
   if (loading) {
@@ -38,9 +39,9 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false }: Profile
       <Card>
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
-            {showControls 
+            {showControls || isOwnProfile
               ? "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp."
-              : "Ingen portefølje tilgjengelig"
+              : "Ingen offentlige porteføljefiler tilgjengelig"
             }
           </p>
         </CardContent>

@@ -338,7 +338,7 @@ const Profile = () => {
                   <p className="text-muted-foreground">
                     {isOwnProfile 
                       ? "Ingen portefølje lagt til ennå. Last opp filer i innstillingene." 
-                      : "Ingen portefølje tilgjengelig"
+                      : settings?.show_portfolio ? "Ingen offentlige porteføljefiler" : "Portefølje er ikke offentlig"
                     }
                   </p>
                 </div>

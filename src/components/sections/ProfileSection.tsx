@@ -72,7 +72,7 @@ export const ProfileSection = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ProfilePortfolioViewer userId={profile.user_id} />
+          <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
         </CardContent>
       </Card>
 
