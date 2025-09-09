@@ -84,7 +84,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
   const handlePublishAgreement = async () => {
     try {
       // Update booking status to published
-      await updateBooking(booking.id, { status: 'published' });
+      await updateBooking(booking.id, { status: 'upcoming' });
 
       // Create event in events_market
       const eventDate = booking.event_date ? new Date(booking.event_date) : new Date();

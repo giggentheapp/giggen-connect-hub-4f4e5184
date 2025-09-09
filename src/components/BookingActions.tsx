@@ -53,7 +53,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
     try {
       await updateBooking(booking.id, { 
-        status: 'approved',
+        status: 'both_parties_approved',
         both_parties_approved: true
       });
       
@@ -77,7 +77,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
     try {
       await updateBooking(booking.id, { 
-        status: 'published',
+        status: 'upcoming',
         is_public_after_approval: true,
         published_at: new Date().toISOString()
       });
@@ -101,7 +101,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
     try {
       await updateBooking(booking.id, { 
-        status: 'rejected',
+        status: 'cancelled',
         rejected_at: new Date().toISOString()
       });
       

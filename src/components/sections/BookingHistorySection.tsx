@@ -54,7 +54,7 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
           .from('bookings')
           .select('*')
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .in('status', ['rejected', 'cancelled'])
+          .in('status', ['cancelled'])
           .order('updated_at', { ascending: false });
 
         if (error) throw error;

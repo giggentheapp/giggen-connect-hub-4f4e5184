@@ -117,7 +117,7 @@ export type Database = {
           sender_contact_info: Json | null
           sender_id: string
           sender_read_agreement: boolean | null
-          status: Database["public"]["Enums"]["booking_status"] | null
+          status: Database["public"]["Enums"]["booking_status"]
           tech_spec: string | null
           ticket_price: number | null
           time: string | null
@@ -162,7 +162,7 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id: string
           sender_read_agreement?: boolean | null
-          status?: Database["public"]["Enums"]["booking_status"] | null
+          status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
           ticket_price?: number | null
           time?: string | null
@@ -207,7 +207,7 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id?: string
           sender_read_agreement?: boolean | null
-          status?: Database["public"]["Enums"]["booking_status"] | null
+          status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
           ticket_price?: number | null
           time?: string | null
@@ -916,15 +916,12 @@ export type Database = {
     }
     Enums: {
       booking_status:
-        | "draft"
         | "pending"
         | "allowed"
-        | "approved"
-        | "published"
-        | "rejected"
+        | "both_parties_approved"
+        | "upcoming"
+        | "completed"
         | "cancelled"
-        | "confirmed"
-        | "deleted"
       user_role: "maker" | "goer"
     }
     CompositeTypes: {
@@ -1054,15 +1051,12 @@ export const Constants = {
   public: {
     Enums: {
       booking_status: [
-        "draft",
         "pending",
         "allowed",
-        "approved",
-        "published",
-        "rejected",
+        "both_parties_approved",
+        "upcoming",
+        "completed",
         "cancelled",
-        "confirmed",
-        "deleted",
       ],
       user_role: ["maker", "goer"],
     },

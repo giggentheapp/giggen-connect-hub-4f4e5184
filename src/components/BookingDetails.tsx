@@ -273,8 +273,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     if (!booking || !currentUserId) return;
 
     try {
-      await updateBooking(bookingId, { status: 'rejected' });
-      setBooking(prev => prev ? { ...prev, status: 'rejected' } : null);
+      await updateBooking(bookingId, { status: 'cancelled' });
+      setBooking(prev => prev ? { ...prev, status: 'cancelled' } : null);
       toast({
         title: "Booking avvist",
         description: "Bookingen har blitt avvist",

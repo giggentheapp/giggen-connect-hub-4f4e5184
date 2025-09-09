@@ -105,7 +105,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     try {
       await updateBooking(currentBooking.id, { 
         [userConfirmedField]: true,
-        status: 'confirmed'
+        status: 'both_parties_approved'
       });
       
       toast({

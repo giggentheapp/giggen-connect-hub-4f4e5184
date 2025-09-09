@@ -16,7 +16,7 @@ interface Booking {
   venue: string | null;
   hospitality_rider: string | null;
   tech_spec: string | null;
-  status: 'draft' | 'pending' | 'allowed' | 'approved' | 'published' | 'rejected' | 'cancelled' | 'confirmed' | 'deleted';
+  status: 'pending' | 'allowed' | 'both_parties_approved' | 'upcoming' | 'completed' | 'cancelled';
   sender_confirmed: boolean;
   receiver_confirmed: boolean;
   sender_read_agreement: boolean;
@@ -80,9 +80,9 @@ export const useBookings = (userId?: string) => {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       }
 
-      // Filter out historical bookings by default (rejected, cancelled, deleted bookings are historical)
+      // Filter out historical bookings by default (completed, cancelled bookings are historical)
       if (!includeHistorical) {
-        query = query.not('status', 'in', '(rejected,cancelled,deleted)');
+        query = query.not('status', 'in', '(completed,cancelled)');
       }
 
       const { data, error } = await query;
@@ -168,11 +168,11 @@ export const useBookings = (userId?: string) => {
 
   const deleteBookingSecurely = async (bookingId: string, reason: string = '') => {
     try {
-      // Update booking status to deleted, which will trigger the privacy function
+      // Update booking status to cancelled, which will trigger the privacy function
       const { data, error } = await supabase
         .from('bookings')
         .update({ 
-          status: 'deleted',
+          status: 'cancelled',
           deletion_reason: reason,
           deleted_at: new Date().toISOString()
         })

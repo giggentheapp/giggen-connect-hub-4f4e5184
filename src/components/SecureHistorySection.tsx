@@ -61,7 +61,7 @@ export const SecureHistorySection = ({ profile }: SecureHistorySectionProps) => 
             receiver_id
           `)
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .eq('status', 'deleted')
+          .eq('status', 'cancelled')
           .order('deleted_at', { ascending: false });
 
         if (error) throw error;

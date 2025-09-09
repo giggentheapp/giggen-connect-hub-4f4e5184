@@ -94,7 +94,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
               bio
             )
           `)
-          .eq('status', 'published')
+          .eq('status', 'upcoming')
           .not('event_date', 'is', null)
           .gte('event_date', new Date().toISOString())
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)

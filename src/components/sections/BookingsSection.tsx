@@ -53,15 +53,15 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   );
   const ongoingAgreements = bookings.filter(b => 
     (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    (b.status === 'allowed' || b.status === 'approved')
+    (b.status === 'allowed' || b.status === 'both_parties_approved')
   );
   const upcomingEvents = bookings.filter(b => 
     (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    b.status === 'published'
+    b.status === 'upcoming'
   );
   const historicalBookings = bookings.filter(b => 
     (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) &&
-    (b.status === 'rejected' || b.status === 'cancelled' || b.status === 'deleted')
+    (b.status === 'cancelled' || b.status === 'completed')
   );
 
   // Helper functions for booking status display with new workflow
@@ -69,11 +69,10 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
     switch (status) {
       case 'pending': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'allowed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'approved': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'both_parties_approved': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'upcoming': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'completed': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'cancelled': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'deleted': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -82,11 +81,10 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
     switch (status) {
       case 'pending': return 'Venter svar';
       case 'allowed': return 'Tillatt';
-      case 'approved': return 'Godkjent';
-      case 'published': return 'Publisert';
-      case 'rejected': return 'Avvist';
+      case 'both_parties_approved': return 'Godkjent';
+      case 'upcoming': return 'Publisert';
+      case 'completed': return 'Gjennomført';
       case 'cancelled': return 'Avlyst';
-      case 'deleted': return 'Slettet';
       default: return status;
     }
   };
@@ -97,16 +95,14 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
         return booking.receiver_id === profile.user_id ? '1. Forespørsel' : 'Sendt forespørsel';
       case 'allowed':
         return '2. Pågående avtale - Kan redigeres';
-      case 'approved':
+      case 'both_parties_approved':
         return '2. Pågående avtale - Klar for publisering';
-      case 'published':
+      case 'upcoming':
         return '3. Publisert arrangement';
-      case 'rejected':
-        return 'Avvist';
+      case 'completed':
+        return 'Gjennomført';
       case 'cancelled':
         return 'Avlyst';
-      case 'deleted':
-        return 'Slettet';
       default:
         return 'Ukjent status';
     }
