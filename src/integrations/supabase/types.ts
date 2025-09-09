@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       booking_changes: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           booking_id: string
           change_timestamp: string
           changed_by: string
@@ -24,10 +26,16 @@ export type Database = {
           id: string
           new_value: string | null
           old_value: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          requires_approval: boolean | null
           status: string
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           booking_id: string
           change_timestamp?: string
           changed_by: string
@@ -36,10 +44,16 @@ export type Database = {
           id?: string
           new_value?: string | null
           old_value?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          requires_approval?: boolean | null
           status?: string
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           booking_id?: string
           change_timestamp?: string
           changed_by?: string
@@ -48,6 +62,10 @@ export type Database = {
           id?: string
           new_value?: string | null
           old_value?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          requires_approval?: boolean | null
           status?: string
           updated_at?: string
         }
@@ -64,9 +82,12 @@ export type Database = {
       bookings: {
         Row: {
           agreement_summary_text: string | null
+          allowed_at: string | null
+          approved_at: string | null
           artist_fee: number | null
           audience_estimate: number | null
           both_parties_approved: boolean | null
+          cancelled_at: string | null
           concept_ids: string[]
           contact_info_shared_at: string | null
           created_at: string | null
@@ -78,19 +99,25 @@ export type Database = {
           hospitality_rider_status: string | null
           id: string
           is_public_after_approval: boolean | null
+          last_modified_at: string | null
+          last_modified_by: string | null
           personal_message: string | null
           price_musician: string | null
           price_ticket: string | null
           public_visibility_settings: Json | null
+          published_at: string | null
+          receiver_allowed_at: string | null
           receiver_confirmed: boolean | null
           receiver_id: string
           receiver_read_agreement: boolean | null
+          rejected_at: string | null
+          requires_approval: boolean | null
           selected_concept_id: string | null
           sender_confirmed: boolean | null
           sender_contact_info: Json | null
           sender_id: string
           sender_read_agreement: boolean | null
-          status: string
+          status: Database["public"]["Enums"]["booking_status"] | null
           ticket_price: number | null
           time: string | null
           title: string
@@ -99,9 +126,12 @@ export type Database = {
         }
         Insert: {
           agreement_summary_text?: string | null
+          allowed_at?: string | null
+          approved_at?: string | null
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
+          cancelled_at?: string | null
           concept_ids?: string[]
           contact_info_shared_at?: string | null
           created_at?: string | null
@@ -113,19 +143,25 @@ export type Database = {
           hospitality_rider_status?: string | null
           id?: string
           is_public_after_approval?: boolean | null
+          last_modified_at?: string | null
+          last_modified_by?: string | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
           public_visibility_settings?: Json | null
+          published_at?: string | null
+          receiver_allowed_at?: string | null
           receiver_confirmed?: boolean | null
           receiver_id: string
           receiver_read_agreement?: boolean | null
+          rejected_at?: string | null
+          requires_approval?: boolean | null
           selected_concept_id?: string | null
           sender_confirmed?: boolean | null
           sender_contact_info?: Json | null
           sender_id: string
           sender_read_agreement?: boolean | null
-          status?: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
           ticket_price?: number | null
           time?: string | null
           title: string
@@ -134,9 +170,12 @@ export type Database = {
         }
         Update: {
           agreement_summary_text?: string | null
+          allowed_at?: string | null
+          approved_at?: string | null
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
+          cancelled_at?: string | null
           concept_ids?: string[]
           contact_info_shared_at?: string | null
           created_at?: string | null
@@ -148,19 +187,25 @@ export type Database = {
           hospitality_rider_status?: string | null
           id?: string
           is_public_after_approval?: boolean | null
+          last_modified_at?: string | null
+          last_modified_by?: string | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
           public_visibility_settings?: Json | null
+          published_at?: string | null
+          receiver_allowed_at?: string | null
           receiver_confirmed?: boolean | null
           receiver_id?: string
           receiver_read_agreement?: boolean | null
+          rejected_at?: string | null
+          requires_approval?: boolean | null
           selected_concept_id?: string | null
           sender_confirmed?: boolean | null
           sender_contact_info?: Json | null
           sender_id?: string
           sender_read_agreement?: boolean | null
-          status?: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
           ticket_price?: number | null
           time?: string | null
           title?: string
@@ -839,6 +884,16 @@ export type Database = {
       }
     }
     Enums: {
+      booking_status:
+        | "draft"
+        | "pending"
+        | "allowed"
+        | "approved"
+        | "published"
+        | "rejected"
+        | "cancelled"
+        | "confirmed"
+        | "deleted"
       user_role: "maker" | "goer"
     }
     CompositeTypes: {
@@ -967,6 +1022,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      booking_status: [
+        "draft",
+        "pending",
+        "allowed",
+        "approved",
+        "published",
+        "rejected",
+        "cancelled",
+        "confirmed",
+        "deleted",
+      ],
       user_role: ["maker", "goer"],
     },
   },
