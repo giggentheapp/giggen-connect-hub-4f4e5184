@@ -120,9 +120,10 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
+        style: 'mapbox://styles/mapbox/light-v11',
         center: [10.7461, 59.9127], // Oslo, Norway
         zoom: 10,
+        pitch: 15,
       });
 
       map.current.addControl(
@@ -189,87 +190,141 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           cursor: pointer;
         `;
 
-        // Create marker element
+        // Create marker element with profile picture
         const markerEl = document.createElement('div');
         markerEl.className = 'mapbox-marker';
         
+        // Always create a colorful circular marker with gradient border
+        markerEl.style.cssText = `
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          border: 4px solid transparent;
+          background: linear-gradient(135deg, hsl(222.2 47.4% 11.2%), hsl(217.2 91.2% 59.8%)) border-box;
+          box-shadow: 0 6px 20px hsla(222.2 47.4% 11.2% / 0.3), 0 0 0 2px hsl(0 0% 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          cursor: pointer;
+          overflow: hidden;
+        `;
+
+        // Inner container for avatar or initials
+        const innerEl = document.createElement('div');
+        innerEl.style.cssText = `
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: hsl(0 0% 100%);
+        `;
+        
         if (maker.avatar_url) {
-          markerEl.style.cssText = `
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: 3px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            background-size: cover;
-            background-position: center;
-            background-image: url('${maker.avatar_url}');
-            background-color: #f0f0f0;
-            transition: all 0.2s ease;
-            position: relative;
+          const img = document.createElement('img');
+          img.src = maker.avatar_url;
+          img.alt = maker.display_name;
+          img.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
           `;
+          img.onerror = () => {
+            // Fallback to initials if image fails to load
+            img.style.display = 'none';
+            const initialsEl = document.createElement('div');
+            initialsEl.style.cssText = `
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(135deg, hsl(222.2 47.4% 11.2%), hsl(217.2 91.2% 59.8%));
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: hsl(0 0% 100%);
+              font-weight: bold;
+              font-size: 18px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            const initials = maker.display_name
+              .split(' ')
+              .map(name => name.charAt(0))
+              .slice(0, 2)
+              .join('')
+              .toUpperCase();
+            initialsEl.textContent = initials;
+            innerEl.appendChild(initialsEl);
+          };
+          innerEl.appendChild(img);
         } else {
-          markerEl.style.cssText = `
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: 3px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            background: linear-gradient(135deg, #dc2626, #ef4444);
+          const initialsEl = document.createElement('div');
+          initialsEl.style.cssText = `
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, hsl(222.2 47.4% 11.2%), hsl(217.2 91.2% 59.8%));
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: hsl(0 0% 100%);
             font-weight: bold;
             font-size: 18px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            transition: all 0.2s ease;
-            position: relative;
           `;
-          
           const initials = maker.display_name
             .split(' ')
             .map(name => name.charAt(0))
             .slice(0, 2)
             .join('')
             .toUpperCase();
-          markerEl.textContent = initials;
+          initialsEl.textContent = initials;
+          innerEl.appendChild(initialsEl);
         }
+        
+        markerEl.appendChild(innerEl);
 
-        // Create name label
+        // Create name label with enhanced styling
         const nameLabel = document.createElement('div');
         nameLabel.className = 'mapbox-marker-name';
         nameLabel.textContent = maker.display_name;
         nameLabel.style.cssText = `
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          font-weight: 500;
+          background: hsla(222.2 47.4% 11.2% / 0.9);
+          color: hsl(0 0% 100%);
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           white-space: nowrap;
-          margin-top: 4px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          max-width: 120px;
+          margin-top: 8px;
+          box-shadow: 0 4px 16px hsla(222.2 47.4% 11.2% / 0.2);
+          max-width: 140px;
           overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
           pointer-events: none;
+          border: 1px solid hsla(0 0% 100% / 0.1);
+          backdrop-filter: blur(8px);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         `;
 
         // Add hover effects
         const addHoverEffects = () => {
-          markerEl.style.transform = 'scale(1.1)';
-          markerEl.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
-          nameLabel.style.background = 'rgba(0, 0, 0, 0.9)';
+          markerEl.style.transform = 'scale(1.15)';
+          markerEl.style.boxShadow = '0 8px 25px hsla(222.2 47.4% 11.2% / 0.4), 0 0 0 3px hsl(217.2 91.2% 59.8% / 0.3)';
+          nameLabel.style.background = 'hsla(222.2 47.4% 11.2% / 0.95)';
           nameLabel.style.transform = 'scale(1.05)';
+          nameLabel.style.color = 'hsl(0 0% 100%)';
         };
 
         const removeHoverEffects = () => {
           markerEl.style.transform = 'scale(1)';
-          markerEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-          nameLabel.style.background = 'rgba(0, 0, 0, 0.8)';
+          markerEl.style.boxShadow = '0 6px 20px hsla(222.2 47.4% 11.2% / 0.3), 0 0 0 2px hsl(0 0% 100%)';
+          nameLabel.style.background = 'hsla(222.2 47.4% 11.2% / 0.8)';
           nameLabel.style.transform = 'scale(1)';
+          nameLabel.style.color = 'hsl(0 0% 100%)';
         };
 
         markerContainer.addEventListener('mouseenter', addHoverEffects);

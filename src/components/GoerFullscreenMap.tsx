@@ -168,28 +168,39 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
 
       const coordinates: [number, number] = [maker.longitude, maker.latitude];
       
-      // Create custom marker element with safe DOM methods
+      // Create custom marker element with profile picture
       const markerElement = document.createElement('div');
       markerElement.className = 'custom-marker';
       
       const outerDiv = document.createElement('div');
-      outerDiv.className = 'w-12 h-12 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110';
+      outerDiv.className = 'w-16 h-16 rounded-full border-4 border-white shadow-xl cursor-pointer transform transition-all duration-300 hover:scale-110 hover:shadow-2xl';
+      outerDiv.style.background = 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ring)))';
+      outerDiv.style.boxShadow = '0 8px 25px hsla(var(--primary) / 0.3), 0 0 0 2px hsl(var(--background))';
       
       const innerDiv = document.createElement('div');
-      innerDiv.className = 'w-8 h-8 bg-white rounded-full flex items-center justify-center';
+      innerDiv.className = 'w-12 h-12 rounded-full overflow-hidden bg-background/95 flex items-center justify-center m-auto mt-1';
       
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('class', 'w-4 h-4 text-primary');
-      svg.setAttribute('fill', 'currentColor');
-      svg.setAttribute('viewBox', '0 0 20 20');
+      if (maker.avatar_url) {
+        const img = document.createElement('img');
+        img.src = maker.avatar_url;
+        img.alt = maker.display_name || 'Maker Avatar';
+        img.className = 'w-full h-full object-cover';
+        img.onerror = () => {
+          // Fallback to initials if image fails
+          img.style.display = 'none';
+          const initialsEl = document.createElement('div');
+          initialsEl.className = 'w-full h-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold';
+          initialsEl.textContent = maker.display_name?.charAt(0).toUpperCase() || 'M';
+          innerDiv.appendChild(initialsEl);
+        };
+        innerDiv.appendChild(img);
+      } else {
+        const initialsEl = document.createElement('div');
+        initialsEl.className = 'w-full h-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold';
+        initialsEl.textContent = maker.display_name?.charAt(0).toUpperCase() || 'M';
+        innerDiv.appendChild(initialsEl);
+      }
       
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('fill-rule', 'evenodd');
-      path.setAttribute('d', 'M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z');
-      path.setAttribute('clip-rule', 'evenodd');
-      
-      svg.appendChild(path);
-      innerDiv.appendChild(svg);
       outerDiv.appendChild(innerDiv);
       markerElement.appendChild(outerDiv);
 
@@ -203,21 +214,29 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
       const header = document.createElement('div');
       header.className = 'flex items-center gap-3';
       
-      const iconDiv = document.createElement('div');
-      iconDiv.className = 'w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center';
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'w-12 h-12 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center';
       
-      const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      iconSvg.setAttribute('class', 'w-6 h-6 text-primary');
-      iconSvg.setAttribute('fill', 'currentColor');
-      iconSvg.setAttribute('viewBox', '0 0 20 20');
-      
-      const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      iconPath.setAttribute('fill-rule', 'evenodd');
-      iconPath.setAttribute('d', 'M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z');
-      iconPath.setAttribute('clip-rule', 'evenodd');
-      
-      iconSvg.appendChild(iconPath);
-      iconDiv.appendChild(iconSvg);
+      if (maker.avatar_url) {
+        const img = document.createElement('img');
+        img.src = maker.avatar_url;
+        img.alt = maker.display_name || 'Maker Avatar';
+        img.className = 'w-full h-full object-cover';
+        img.onerror = () => {
+          // Fallback to initials if image fails
+          img.style.display = 'none';
+          const initialsEl = document.createElement('div');
+          initialsEl.className = 'w-full h-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold';
+          initialsEl.textContent = maker.display_name?.charAt(0).toUpperCase() || 'M';
+          avatarDiv.appendChild(initialsEl);
+        };
+        avatarDiv.appendChild(img);
+      } else {
+        const initialsEl = document.createElement('div');
+        initialsEl.className = 'w-full h-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold';
+        initialsEl.textContent = maker.display_name?.charAt(0).toUpperCase() || 'M';
+        avatarDiv.appendChild(initialsEl);
+      }
       
       const textDiv = document.createElement('div');
       const title = document.createElement('h3');
@@ -230,7 +249,7 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
       
       textDiv.appendChild(title);
       textDiv.appendChild(subtitle);
-      header.appendChild(iconDiv);
+      header.appendChild(avatarDiv);
       header.appendChild(textDiv);
       container.appendChild(header);
       

@@ -38,6 +38,11 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Map colors and gradients */
+    --map-primary-gradient: linear-gradient(135deg, hsl(222.2 47.4% 11.2%), hsl(217.2 91.2% 59.8%));
+    --map-marker-shadow: 0 8px 25px hsla(222.2 47.4% 11.2% / 0.3);
+    --map-marker-hover-shadow: 0 12px 35px hsla(222.2 47.4% 11.2% / 0.4);
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
