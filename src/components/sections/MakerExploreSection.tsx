@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Map from '@/components/Map';
 import { ProfileModal } from '@/components/ProfileModal';
 import { MapBackground } from '@/components/MapBackground';
+import { BookingRequest } from '@/components/BookingRequest';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,7 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
   const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [bookingMaker, setBookingMaker] = useState<{ id: string; name: string } | null>(null);
   const { role } = useRole();
 
   // Auto-fetch makers when component mounts
@@ -63,10 +65,8 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
     setProfileModalOpen(true);
   };
 
-  const handleStartBooking = (receiverId: string) => {
-    // Navigate to booking creation with pre-filled receiver
-    console.log('Starting booking with maker:', receiverId);
-    // This would typically navigate to a booking creation page
+  const handleStartBooking = (receiverId: string, receiverName: string) => {
+    setBookingMaker({ id: receiverId, name: receiverName });
   };
 
   return (
@@ -151,7 +151,7 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
                               Se profil
                             </Button>
                             <Button
-                              onClick={() => handleStartBooking(maker.user_id)}
+                              onClick={() => handleStartBooking(maker.user_id, maker.display_name)}
                               size="sm"
                             >
                               <MessageSquare className="w-4 h-4 mr-2" />
@@ -175,6 +175,15 @@ export const MakerExploreSection = ({ profile }: MakerExploreSectionProps) => {
         onClose={() => setProfileModalOpen(false)}
         userId={selectedUserId}
       />
+      
+      {/* Booking Request Modal */}
+      {bookingMaker && (
+        <BookingRequest 
+          receiverId={bookingMaker.id}
+          receiverName={bookingMaker.name}
+          onSuccess={() => setBookingMaker(null)}
+        />
+      )}
     </div>
   );
 };
