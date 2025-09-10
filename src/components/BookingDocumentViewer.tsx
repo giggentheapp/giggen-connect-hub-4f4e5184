@@ -73,9 +73,11 @@ export const BookingDocumentViewer = ({
         
         if (isPdf) {
           setFileType('pdf');
-          // For PDFs, use the proxy URL directly for better compatibility
-          setContent(proxyUrl);
-          console.log('PDF proxy URL set:', proxyUrl);
+          // For PDFs, convert the response to blob URL to avoid Chrome blocking
+          const blobUrl = URL.createObjectURL(blob);
+          setContent(blobUrl);
+          console.log('PDF blob URL created from proxy:', blobUrl);
+          console.log('Original proxy URL was:', proxyUrl);
         } else if (isImage) {
           setFileType('image');
           // For images, convert to base64 to avoid Chrome blocking
@@ -109,7 +111,13 @@ export const BookingDocumentViewer = ({
     React.useEffect(() => {
       loadFile();
       return () => {
-        // No cleanup needed for proxy URLs or base64 content
+        // Cleanup blob URLs when component unmounts
+        if (content && (content.startsWith('blob:') || content.startsWith('data:'))) {
+          if (content.startsWith('blob:')) {
+            URL.revokeObjectURL(content);
+            console.log('Blob URL cleaned up:', content);
+          }
+        }
       };
     }, [url]);
 
@@ -180,67 +188,84 @@ export const BookingDocumentViewer = ({
           <div className="w-full">
             <div className="bg-muted/50 p-3 text-sm text-center mb-4 rounded">
               📄 PDF-dokument - {title}
+              <div className="text-xs mt-1">
+                URL type: {content?.startsWith('blob:') ? 'Blob URL (sikker)' : content?.startsWith('https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/') ? 'Proxy URL' : 'Direct URL'}
+              </div>
             </div>
             <div className="w-full h-[600px] border rounded overflow-hidden">
-              <object
-                data={content}
-                type="application/pdf"
-                className="w-full h-full"
-              >
-                <div className="p-8 text-center space-y-4">
-                  <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
-                  <div className="space-y-2">
-                    <h4 className="font-medium">PDF kan ikke vises i nettleseren</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Last ned filen for å åpne den i din PDF-leser
-                    </p>
-                  </div>
-                  <Button 
-                    size="lg" 
-                    className="mt-4"
-              onClick={async () => {
-                try {
-                  // Use proxy URL for download too
-                  const getProxyUrl = (originalUrl: string) => {
-                    try {
-                      const urlObj = new URL(originalUrl);
-                      const pathParts = urlObj.pathname.split('/');
-                      const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
-                      if (bucketIndex > 0 && bucketIndex < pathParts.length) {
-                        const bucket = pathParts[bucketIndex];
-                        const filePath = pathParts.slice(bucketIndex + 1).join('/');
-                        return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
-                      }
-                    } catch (e) {
-                      console.error('Failed to parse URL for download:', e);
-                    }
-                    return originalUrl;
-                  };
+              {content && content.startsWith('blob:') ? (
+                <iframe
+                  src={content}
+                  className="w-full h-full rounded"
+                  title={`${title} - PDF Preview`}
+                  onLoad={() => console.log('PDF iframe loaded successfully with blob URL:', content)}
+                  onError={(e) => console.error('PDF iframe failed to load:', e, content)}
+                />
+              ) : (
+                <object
+                  data={content}
+                  type="application/pdf"
+                  className="w-full h-full"
+                  onLoad={() => console.log('PDF object loaded with URL:', content)}
+                >
+                  <div className="p-8 text-center space-y-4">
+                    <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <div className="space-y-2">
+                      <h4 className="font-medium">PDF kan ikke vises i nettleseren</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Last ned filen for å åpne den i din PDF-leser
+                      </p>
+                      <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                        Debug: {content?.substring(0, 80)}...
+                      </p>
+                    </div>
+                    <Button 
+                      size="lg" 
+                      className="mt-4"
+                      onClick={async () => {
+                        try {
+                          // Use proxy URL for download too
+                          const getProxyUrl = (originalUrl: string) => {
+                            try {
+                              const urlObj = new URL(originalUrl);
+                              const pathParts = urlObj.pathname.split('/');
+                              const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+                              if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+                                const bucket = pathParts[bucketIndex];
+                                const filePath = pathParts.slice(bucketIndex + 1).join('/');
+                                return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
+                              }
+                            } catch (e) {
+                              console.error('Failed to parse URL for download:', e);
+                            }
+                            return originalUrl;
+                          };
 
-                  const proxyUrl = getProxyUrl(url);
-                  const response = await fetch(proxyUrl);
-                  const blob = await response.blob();
-                  const urlParts = url.split('/');
-                  const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
-                  
-                  const downloadUrl = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = downloadUrl;
-                  link.download = filename;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(downloadUrl);
-                } catch (error) {
-                  console.error('Download failed:', error);
-                }
-              }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Last ned PDF
-                  </Button>
-                </div>
-              </object>
+                          const proxyUrl = getProxyUrl(url);
+                          const response = await fetch(proxyUrl);
+                          const blob = await response.blob();
+                          const urlParts = url.split('/');
+                          const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+                          
+                          const downloadUrl = URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = downloadUrl;
+                          link.download = filename;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          URL.revokeObjectURL(downloadUrl);
+                        } catch (error) {
+                          console.error('Download failed:', error);
+                        }
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Last ned PDF
+                    </Button>
+                  </div>
+                </object>
+              )}
             </div>
           </div>
         );
