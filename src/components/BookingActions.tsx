@@ -148,14 +148,25 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
-      await updateBooking(booking.id, { 
-        status: 'cancelled'
-      });
-      
-      toast({
-        title: "Avtale avlyst",
-        description: "Avtalen har blitt avlyst og flyttet til historikk",
-      });
+      if (booking.status === 'allowed') {
+        // During negotiation phase - permanent deletion
+        await rejectBooking(booking.id);
+        
+        toast({
+          title: "Booking avlyst",
+          description: "Bookingen er permanent slettet fra systemet",
+        });
+      } else {
+        // For approved/published bookings - archive to history
+        await updateBooking(booking.id, { 
+          status: 'cancelled'
+        });
+        
+        toast({
+          title: "Avtale avlyst",
+          description: "Avtalen har blitt avlyst og flyttet til historikk",
+        });
+      }
       
       onAction?.();
     } catch (error) {
@@ -182,7 +193,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
   const getDeleteWarningText = () => {
     if (booking.status === 'upcoming') {
       return "Dette vil slette et publisert arrangement. ADVARSEL: Dette kan påvirke andre brukere som har sett arrangementet.";
-    } else if (booking.status === 'both_parties_approved' || booking.status === 'allowed') {
+    } else if (booking.status === 'both_parties_approved') {
       return "Dette vil avlyse en pågående avtale og flytte den til historikk.";
     }
     return "Bookingen vil bli flyttet til historikk-seksjonen.";
@@ -290,9 +301,10 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
               variant="outline"
               onClick={handleCancelBooking}
               disabled={loading}
+              className="text-destructive hover:text-destructive"
             >
               <X className="h-4 w-4 mr-1" />
-              Avlys avtale
+              Avlys booking (permanent)
             </Button>
           </>
         )}
@@ -312,6 +324,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
               variant="outline"
               onClick={handleCancelBooking}
               disabled={loading}
+              className="text-destructive hover:text-destructive"
             >
               <X className="h-4 w-4 mr-1" />
               Avlys avtale
@@ -325,6 +338,43 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
             <Eye className="h-4 w-4 mr-1" />
             Venter på mottakers svar
           </div>
+        )}
+
+        {/* Cancel/Delete button with confirmation for all active bookings */}
+        {(booking.status === 'allowed' || booking.status === 'both_parties_approved') && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive"
+                size="sm"
+              >
+                <X className="h-4 w-4 mr-1" />
+                {booking.status === 'allowed' ? 'Avlys booking' : 'Avlys avtale'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {booking.status === 'allowed' ? 'Avlys booking?' : 'Avlys avtale?'}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {booking.status === 'allowed' 
+                    ? "Dette vil permanent slette bookingen fra systemet. Handlingen kan ikke angres."
+                    : "Dette vil avlyse en pågående avtale og flytte den til historikk."
+                  }
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleCancelBooking}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {booking.status === 'allowed' ? 'Slett permanent' : 'Avlys avtale'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
 
         {/* Delete button for historical bookings */}
