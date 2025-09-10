@@ -10,6 +10,7 @@ interface Booking {
   selected_concept_id: string | null;
   title: string;
   description: string | null;
+  personal_message: string | null;
   price_musician: string | null;
   price_ticket: string | null;
   event_date: string | null;

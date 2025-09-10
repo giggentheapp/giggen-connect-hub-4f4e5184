@@ -84,7 +84,10 @@ export const EnhancedBookingDetailsPanel = ({
     
     switch (booking.status) {
       case 'pending':
-        return { color: 'blue', text: 'Venter på svar' };
+        return { 
+          color: 'blue', 
+          text: isSender ? 'Venter på svar fra mottaker' : 'Venter på ditt svar'
+        };
       case 'allowed':
         return { color: 'yellow', text: 'Tillatt - Kan redigeres' };
       case 'both_parties_approved':

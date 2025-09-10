@@ -15,7 +15,7 @@ import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactInfoSharingDialog } from '@/components/ContactInfoSharingDialog';
 import { format } from 'date-fns';
-import { CalendarIcon, Send, Lightbulb, Eye } from 'lucide-react';
+import { CalendarIcon, Send, Lightbulb, Eye, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BookingRequestProps {
@@ -69,10 +69,10 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!personalMessage.trim() || !selectedConcept) {
+    if (!personalMessage.trim() || !selectedConcept || !eventDate || !venue.trim()) {
       toast({
         title: "Manglende informasjon",
-        description: "Personlig melding og konseptvalg er påkrevd",
+        description: "Personlig melding, konseptvalg, dato og spillested er påkrevd",
         variant: "destructive",
       });
       return;
@@ -133,9 +133,11 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         concept_ids: [selectedConcept.id],
         selected_concept_id: selectedConcept.id,
         title: selectedConcept.title,
-        description: `${selectedConcept.description || ''}\n\nPersonlig melding fra avsender:\n${personalMessage}`,
+        description: selectedConcept.description || '',
+        personal_message: personalMessage,
         price_musician: selectedConcept.price?.toString() || null,
-        price_ticket: null,
+        artist_fee: selectedConcept.price || null,
+        audience_estimate: selectedConcept.expected_audience || null,
         event_date: eventDate?.toISOString() || null,
         venue: venue || null,
         status: 'pending',
@@ -176,7 +178,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
   const selectConcept = (concept: any) => {
     setSelectedConcept(concept);
-    // Auto-populate some fields
+    
+    // Auto-populate fields from concept
     if (concept.available_dates) {
       // Try to set a default date if available
       const availableDates = concept.available_dates;
@@ -186,6 +189,11 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           setEventDate(firstDate);
         }
       }
+    }
+    
+    // Auto-populate venue if available
+    if (concept.venue) {
+      setVenue(concept.venue);
     }
   };
 
@@ -260,61 +268,63 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
           {selectedConcept && (
             <>
-              {/* Pre-filled concept info (non-editable) */}
-              <Card className="bg-muted/30">
+              {/* Auto-populated booking details from concept */}
+              <Card className="bg-primary/5 border-primary/20">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Eye className="h-4 w-4" />
-                    Konseptinformasjon (fra valgt konsept)
+                    Booking detaljer (auto-utfylt fra konsept)
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Denne informasjonen fylles automatisk ut basert på ditt valgte konsept
+                    Informasjonen nedenfor er hentet fra det valgte konseptet og sendes med forespørselen
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Tittel</Label>
-                    <p className="font-medium">{selectedConcept.title}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Konsept tittel</Label>
+                      <p className="font-medium">{selectedConcept.title}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Artist honorar</Label>
+                      <p className="font-medium">{selectedConcept.price ? `${selectedConcept.price} kr` : 'Ikke satt'}</p>
+                    </div>
                   </div>
+                  
+                  {selectedConcept.expected_audience && (
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Forventet publikum</Label>
+                      <p>{selectedConcept.expected_audience} personer</p>
+                    </div>
+                  )}
+                  
                   {selectedConcept.description && (
                     <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Beskrivelse</Label>
-                      <p>{selectedConcept.description}</p>
+                      <Label className="text-sm font-medium text-muted-foreground">Konsept beskrivelse</Label>
+                      <p className="text-sm bg-background p-3 rounded border">{selectedConcept.description}</p>
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Pris for musiker</Label>
-                      <p>{selectedConcept.price ? `${selectedConcept.price} kr` : 'Ikke satt'}</p>
-                    </div>
-                    {selectedConcept.expected_audience && (
-                      <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Forventet publikum</Label>
-                        <p>{selectedConcept.expected_audience} personer</p>
-                      </div>
-                    )}
+                  
+                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      <strong>Inkludert:</strong> Tech spec og hospitality rider fra konseptet er automatisk vedlagt
+                    </p>
                   </div>
-                  {selectedConcept.tech_spec && (
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Tech spec</Label>
-                      <p className="text-sm bg-background p-2 rounded border">{selectedConcept.tech_spec}</p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
-              {/* Editable arrangement details */}
-              <Card className="bg-blue-50/50 dark:bg-blue-950/20">
+              {/* Arrangement specific details */}
+              <Card className="bg-orange-50/50 dark:bg-orange-950/20">
                 <CardHeader>
-                  <CardTitle className="text-lg">Arrangementsdetaljer (kan justeres)</CardTitle>
+                  <CardTitle className="text-lg">Arrangement detaljer</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Disse detaljene kan justeres i forhandlingsfasen
+                    Spesifiser detaljer for denne konkrete bookingen
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label>Dato</Label>
+                      <Label>Dato *</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -342,12 +352,13 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                     </div>
 
                     <div>
-                      <Label htmlFor="venue">Spillested</Label>
+                      <Label htmlFor="venue">Spillested *</Label>
                       <Input
                         id="venue"
                         value={venue}
                         onChange={(e) => setVenue(e.target.value)}
                         placeholder="F.eks. Rockefeller Music Hall"
+                        required
                       />
                     </div>
                   </div>
@@ -355,29 +366,61 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               </Card>
 
               {/* Personal message (required) */}
-              <Card className="bg-green-50/50 dark:bg-green-950/20">
+              <Card className="bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                 <CardHeader>
-                  <CardTitle className="text-lg">Personlig melding *</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    Personlig melding *
+                    <Badge variant="secondary">Påkrevd</Badge>
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Skriv en personlig melding til mottakeren (påkrevd)
+                    Skriv en personlig melding til mottakeren. Dette sendes separat fra konsept-beskrivelsen.
                   </p>
                 </CardHeader>
                 <CardContent>
                   <Textarea
                     value={personalMessage}
                     onChange={(e) => setPersonalMessage(e.target.value)}
-                    placeholder="Hei! Jeg vil gjerne booke deg for en konsert. Her er mer informasjon om arrangementet..."
+                    placeholder="Hei! Jeg vil gjerne booke deg for arrangementet mitt. Her er mer informasjon om hvorfor jeg tror ditt konsept passer perfekt..."
                     rows={4}
                     required
+                    className="min-h-[100px]"
                   />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Denne meldingen vises separat fra konseptbeskrivelsen til mottakeren
+                  </p>
+                </CardContent>
+              </Card>
+              
+              {/* Status info */}
+              <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-500 text-white rounded-full p-1">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">
+                        Neste steg: Venter på svar
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        Når du sender forespørselen, vil mottakeren se all informasjonen og kan godkjenne eller foreslå endringer. 
+                        Kontaktinformasjon deles først når begge parter godkjenner bookingen.
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </>
           )}
 
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={submitting || !selectedConcept || concepts.length === 0}>
-              {submitting ? 'Sender forespørsel...' : 'Send forespørsel'}
+          <div className="flex gap-3 pt-6 border-t">
+            <Button 
+              type="submit" 
+              disabled={submitting || !selectedConcept || concepts.length === 0 || !personalMessage.trim() || !eventDate || !venue.trim()}
+              className="flex-1"
+            >
+              {submitting ? 'Sender forespørsel...' : 'Send booking-forespørsel'}
+              <Send className="h-4 w-4 ml-2" />
             </Button>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Avbryt
