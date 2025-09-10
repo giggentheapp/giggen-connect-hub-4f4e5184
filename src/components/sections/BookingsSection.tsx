@@ -11,8 +11,11 @@ import { BookingAgreement } from '@/components/BookingAgreement';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, MapPin, DollarSign, Send, Inbox, Clock, Eye, Check } from 'lucide-react';
+import { Send, Inbox, Clock, Eye, Check } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
+import { BookingCardStep1 } from '@/components/BookingCardStep1';
+import { BookingCardStep2 } from '@/components/BookingCardStep2';
+import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -128,110 +131,80 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
     }
   };
 
-  const BookingCard = ({ booking }: { booking: any }) => (
-      <Card 
-        className="cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => {
-          setSelectedBooking(booking);
-          setDetailsOpen(true);
-        }}
-      >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div>
+  const BookingCard = ({ booking }: { booking: any }) => {
+    const handleDetailsClick = () => {
+      setSelectedBooking(booking);
+      setDetailsOpen(true);
+    };
+
+    const handleConceptClick = () => {
+      setSelectedBooking(booking);
+      setConceptViewOpen(true);
+    };
+
+    // Use different card components based on booking status
+    if (booking.status === 'pending') {
+      return (
+        <BookingCardStep1
+          booking={booking}
+          currentUserId={profile.user_id}
+          onDetailsClick={handleDetailsClick}
+          onConceptClick={handleConceptClick}
+          onAction={handleBookingAction}
+        />
+      );
+    }
+
+    if (booking.status === 'allowed' || booking.status === 'both_parties_approved') {
+      return (
+        <BookingCardStep2
+          booking={booking}
+          currentUserId={profile.user_id}
+          onDetailsClick={handleDetailsClick}
+          onConceptClick={handleConceptClick}
+          onAction={handleBookingAction}
+        />
+      );
+    }
+
+    if (booking.status === 'upcoming') {
+      return (
+        <BookingCardStep3
+          booking={booking}
+          currentUserId={profile.user_id}
+          onDetailsClick={handleDetailsClick}
+          onConceptClick={handleConceptClick}
+          onAction={handleBookingAction}
+        />
+      );
+    }
+
+    // Fallback for other statuses (cancelled, completed, etc.)
+    return (
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
             <CardTitle className="text-lg">{booking.title}</CardTitle>
-            <CardDescription>
-              {booking.description && (
-                <span className="block">{booking.description}</span>
-              )}
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
             <Badge className={getStatusColor(booking.status)}>
               {getStatusText(booking.status)}
             </Badge>
-            <Badge variant="outline" className="text-xs">
-              {getPhaseText(booking)}
-            </Badge>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-2 text-sm">
-          {booking.event_date && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>{format(new Date(booking.event_date), 'dd.MM.yyyy')}</span>
-            </div>
-          )}
-          
-          {booking.venue && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{booking.venue}</span>
-            </div>
-          )}
-          
-          {(booking.price_musician || booking.price_ticket) && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <DollarSign className="h-4 w-4" />
-              <span>
-                {booking.price_musician && `Musiker: ${booking.price_musician}`}
-                {booking.price_musician && booking.price_ticket && ' • '}
-                {booking.price_ticket && `Billett: ${booking.price_ticket}`}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-            <div className="flex items-center gap-4">
-              <span>Opprettet: {format(new Date(booking.created_at), 'dd.MM.yyyy')}</span>
-              {booking.updated_at !== booking.created_at && (
-                <span>Oppdatert: {format(new Date(booking.updated_at), 'dd.MM.yyyy')}</span>
-              )}
-            </div>
-            <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedBooking(booking);
-                    setDetailsOpen(true);
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Detaljer
-                </Button>
-              
-              {booking.concept_ids && booking.concept_ids.length > 0 && (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedBooking(booking);
-                    setConceptViewOpen(true);
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Se konsept{booking.concept_ids.length > 1 ? 'er' : ''}
-                </Button>
-              )}
-
-              <div onClick={(e) => e.stopPropagation()}>
-                <BookingActions 
-                  booking={booking}
-                  currentUserId={profile.user_id}
-                  onAction={handleBookingAction}
-                />
-              </div>
-            </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleDetailsClick}>
+              Se detaljer
+            </Button>
+            <BookingActions 
+              booking={booking}
+              currentUserId={profile.user_id}
+              onAction={handleBookingAction}
+            />
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (loading) {
     return (
