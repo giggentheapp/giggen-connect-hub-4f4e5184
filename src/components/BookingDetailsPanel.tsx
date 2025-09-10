@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -244,7 +245,40 @@ export const BookingDetailsPanel = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
             
-            <EditableField fieldName="artist_fee" label="Artist honorar (kr)" value={booking.artist_fee} type="number" placeholder="5000" onPropose={handleFieldUpdate} />
+            {/* Door Deal Section */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="door-deal" 
+                  checked={booking.door_deal || false}
+                  onCheckedChange={(checked) => handleFieldUpdate('door_deal', booking.door_deal, checked)}
+                  disabled={!canEdit}
+                />
+                <Label htmlFor="door-deal" className="text-sm font-medium">
+                  Spiller for døra
+                </Label>
+              </div>
+              
+              {booking.door_deal ? (
+                <EditableField 
+                  fieldName="door_percentage" 
+                  label="Andel av dørinntekter (%)" 
+                  value={booking.door_percentage} 
+                  type="number" 
+                  placeholder="70" 
+                  onPropose={handleFieldUpdate} 
+                />
+              ) : (
+                <EditableField 
+                  fieldName="artist_fee" 
+                  label="Artist honorar (kr)" 
+                  value={booking.artist_fee} 
+                  type="number" 
+                  placeholder="5000" 
+                  onPropose={handleFieldUpdate} 
+                />
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

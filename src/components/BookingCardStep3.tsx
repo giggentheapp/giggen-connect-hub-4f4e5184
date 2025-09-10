@@ -77,7 +77,12 @@ export const BookingCardStep3 = ({
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-green-600" />
             <span>
-              <strong>Avtalt honorar:</strong> {booking.artist_fee || booking.price_musician || 'Ikke spesifisert'}
+              <strong>Avtalt honorar:</strong>{' '}
+              {booking.door_deal ? (
+                `${booking.door_percentage}% av dørinntekter`
+              ) : (
+                booking.artist_fee || booking.price_musician || 'Ikke spesifisert'
+              )}
               {booking.ticket_price && ` • Billettpris: ${booking.ticket_price}kr`}
             </span>
           </div>

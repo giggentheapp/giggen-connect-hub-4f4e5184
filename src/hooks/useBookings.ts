@@ -30,6 +30,9 @@ interface Booking {
   audience_estimate?: number | null;
   ticket_price?: number | null;
   artist_fee?: number | null;
+  // Door deal fields
+  door_deal?: boolean;
+  door_percentage?: number | null;
 // New fields for enhanced privacy and workflow
   is_public_after_approval?: boolean;
   public_visibility_settings?: any;

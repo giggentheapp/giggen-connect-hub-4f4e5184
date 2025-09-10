@@ -217,17 +217,23 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
                   )}
                 </div>
 
-                {(booking.price_musician || booking.price_ticket) && (
+                {(booking.price_musician || booking.price_ticket || booking.artist_fee || booking.door_deal) && (
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
                       Prising
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {booking.price_musician && (
+                      {(booking.price_musician || booking.artist_fee || booking.door_deal) && (
                         <div>
                           <span className="text-sm text-muted-foreground">Musiker honorar:</span>
-                          <p className="font-medium">{booking.price_musician}</p>
+                          <p className="font-medium">
+                            {booking.door_deal ? (
+                              `${booking.door_percentage}% av dørinntekter`
+                            ) : (
+                              booking.artist_fee || booking.price_musician || 'Ikke spesifisert'
+                            )}
+                          </p>
                         </div>
                       )}
                       {booking.price_ticket && (

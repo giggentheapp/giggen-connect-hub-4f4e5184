@@ -94,6 +94,8 @@ export type Database = {
           deleted_at: string | null
           deletion_reason: string | null
           description: string | null
+          door_deal: boolean | null
+          door_percentage: number | null
           event_date: string | null
           hospitality_rider: string | null
           hospitality_rider_status: string | null
@@ -139,6 +141,8 @@ export type Database = {
           deleted_at?: string | null
           deletion_reason?: string | null
           description?: string | null
+          door_deal?: boolean | null
+          door_percentage?: number | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
@@ -184,6 +188,8 @@ export type Database = {
           deleted_at?: string | null
           deletion_reason?: string | null
           description?: string | null
+          door_deal?: boolean | null
+          door_percentage?: number | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
