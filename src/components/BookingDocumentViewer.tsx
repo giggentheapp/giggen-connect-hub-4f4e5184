@@ -22,9 +22,10 @@ export const BookingDocumentViewer = ({
   }
 
   const FileViewer = ({ url, title }: { url: string, title: string }) => {
-    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [content, setContent] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [fileType, setFileType] = useState<'pdf' | 'image' | 'text' | 'other'>('other');
 
     const loadFile = async () => {
       try {
@@ -38,12 +39,44 @@ export const BookingDocumentViewer = ({
         }
         
         const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        setBlobUrl(blobUrl);
-        console.log('File loaded successfully for preview');
+        console.log('Blob loaded:', blob.type, blob.size);
+        
+        // Determine file type
+        const isPdf = url.toLowerCase().includes('.pdf') || blob.type === 'application/pdf';
+        const isImage = blob.type.startsWith('image/') || url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
+        const isText = blob.type.startsWith('text/') || url.toLowerCase().match(/\.(txt|md|json)$/);
+        
+        if (isPdf) {
+          setFileType('pdf');
+          // For PDFs, create object URL and embed directly
+          const objectUrl = URL.createObjectURL(blob);
+          setContent(objectUrl);
+          console.log('PDF object URL created:', objectUrl);
+        } else if (isImage) {
+          setFileType('image');
+          // For images, convert to base64 to avoid Chrome blocking
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            setContent(base64);
+            console.log('Image converted to base64, length:', base64.length);
+          };
+          reader.readAsDataURL(blob);
+          return; // Exit early since FileReader is async
+        } else if (isText) {
+          setFileType('text');
+          // For text files, read as text
+          const text = await blob.text();
+          setContent(text);
+          console.log('Text content loaded, length:', text.length);
+        } else {
+          setFileType('other');
+          console.log('Unsupported file type for preview:', blob.type);
+        }
+        
       } catch (err) {
         console.error('Failed to load file for preview:', err);
-        setError('Kunne ikke laste fil for forhåndsvisning');
+        setError('Kunne ikke laste fil for forhåndsvisning: ' + (err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -52,65 +85,115 @@ export const BookingDocumentViewer = ({
     React.useEffect(() => {
       loadFile();
       return () => {
-        if (blobUrl) {
-          window.URL.revokeObjectURL(blobUrl);
+        if (content && fileType === 'pdf' && content.startsWith('blob:')) {
+          URL.revokeObjectURL(content);
         }
       };
     }, [url]);
 
     if (loading) {
-      return <div className="flex justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      return <div className="flex flex-col items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p className="text-sm text-muted-foreground">Laster fil for forhåndsvisning...</p>
       </div>;
     }
 
     if (error) {
-      return <div className="p-4 text-center text-destructive">{error}</div>;
+      return <div className="p-4 text-center">
+        <div className="text-destructive mb-2">{error}</div>
+        <Button 
+          size="sm" 
+          variant="outline"
+          onClick={() => window.open(url, '_blank')}
+        >
+          Prøv å åpne i ny fane
+        </Button>
+      </div>;
     }
 
-    if (!blobUrl) {
-      return <div className="p-4 text-center text-muted-foreground">Ingen fil tilgjengelig</div>;
+    if (!content) {
+      return <div className="p-4 text-center text-muted-foreground">Ingen innhold tilgjengelig</div>;
     }
 
-    // Check if it's a PDF based on the URL or content type
-    const isPdf = url.toLowerCase().includes('.pdf') || title.toLowerCase().includes('pdf');
-    
-    if (isPdf) {
-      return (
-        <div className="w-full h-[600px] border rounded">
-          <iframe
-            src={blobUrl}
-            className="w-full h-full rounded"
-            title={`${title} - Forhåndsvisning`}
-          />
-        </div>
-      );
+    switch (fileType) {
+      case 'pdf':
+        return (
+          <div className="w-full">
+            <div className="bg-muted/50 p-2 text-sm text-center mb-2">
+              PDF-forhåndsvisning - {title}
+            </div>
+            <div className="w-full h-[600px] border rounded overflow-hidden">
+              <object
+                data={content}
+                type="application/pdf"
+                className="w-full h-full"
+              >
+                <div className="p-8 text-center">
+                  <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">
+                    PDF kan ikke vises i nettleseren.<br/>
+                    Bruk "Last ned"-knappen for å åpne filen.
+                  </p>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => window.open(url, '_blank')}
+                  >
+                    Åpne i ny fane
+                  </Button>
+                </div>
+              </object>
+            </div>
+          </div>
+        );
+      
+      case 'image':
+        return (
+          <div className="flex flex-col items-center p-4">
+            <div className="bg-muted/50 p-2 text-sm text-center mb-4 rounded">
+              Bilde-forhåndsvisning - {title}
+            </div>
+            <img 
+              src={content} 
+              alt={title}
+              className="max-w-full max-h-[600px] rounded border shadow-sm"
+              onError={() => setError('Kunne ikke laste bildet')}
+            />
+          </div>
+        );
+      
+      case 'text':
+        return (
+          <div className="w-full">
+            <div className="bg-muted/50 p-2 text-sm text-center mb-2 rounded">
+              Tekst-forhåndsvisning - {title}
+            </div>
+            <div className="border rounded p-4 bg-background max-h-[600px] overflow-auto">
+              <pre className="whitespace-pre-wrap text-sm font-mono">{content}</pre>
+            </div>
+          </div>
+        );
+      
+      default:
+        return (
+          <div className="p-8 text-center">
+            <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">
+              Filtype støttes ikke for forhåndsvisning.<br/>
+              Bruk "Last ned"-knappen for å åpne filen.
+            </p>
+            <div className="space-y-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => window.open(url, '_blank')}
+              >
+                Prøv å åpne i ny fane
+              </Button>
+            </div>
+          </div>
+        );
     }
-
-    // For images
-    const isImage = url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
-    if (isImage) {
-      return (
-        <div className="flex justify-center p-4">
-          <img 
-            src={blobUrl} 
-            alt={title}
-            className="max-w-full max-h-[600px] rounded border"
-          />
-        </div>
-      );
-    }
-
-    // For other file types, show message
-    return (
-      <div className="p-8 text-center">
-        <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground">
-          Filtype støttes ikke for forhåndsvisning.<br/>
-          Bruk "Last ned"-knappen for å åpne filen.
-        </p>
-      </div>
-    );
   };
   
   const DocumentDisplay = ({
