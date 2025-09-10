@@ -425,8 +425,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                         Neste steg: Venter på svar
                       </p>
                       <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        Når du sender forespørselen, vil mottakeren se all informasjonen og kan godkjenne eller foreslå endringer. 
-                        Kontaktinfo deles først når mottaker har "tillatt" forespørselen.
+                        Når du sender forespørselen, vil mottakeren få tilgang til all informasjon som er lagt til i konseptet ditt, samt detaljene du har ført inn ovenfor. Din kontaktinformasjon deles først når mottaker har tillatt forespørselen.
                       </p>
                     </div>
                   </div>
