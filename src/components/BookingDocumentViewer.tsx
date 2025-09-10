@@ -99,14 +99,33 @@ export const BookingDocumentViewer = ({
     }
 
     if (error) {
-      return <div className="p-4 text-center">
-        <div className="text-destructive mb-2">{error}</div>
+      return <div className="p-8 text-center space-y-4">
+        <div className="text-destructive font-medium">Kunne ikke laste fil</div>
+        <p className="text-sm text-muted-foreground">{error}</p>
         <Button 
-          size="sm" 
-          variant="outline"
-          onClick={() => window.open(url, '_blank')}
+          size="lg"
+          onClick={async () => {
+            try {
+              const response = await fetch(url);
+              const blob = await response.blob();
+              const urlParts = url.split('/');
+              const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+              
+              const downloadUrl = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = downloadUrl;
+              link.download = filename;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+              console.error('Download failed:', error);
+            }
+          }}
         >
-          Prøv å åpne i ny fane
+          <Download className="h-4 w-4 mr-2" />
+          Prøv å laste ned likevel
         </Button>
       </div>;
     }
@@ -119,8 +138,8 @@ export const BookingDocumentViewer = ({
       case 'pdf':
         return (
           <div className="w-full">
-            <div className="bg-muted/50 p-2 text-sm text-center mb-2">
-              PDF-forhåndsvisning - {title}
+            <div className="bg-muted/50 p-3 text-sm text-center mb-4 rounded">
+              📄 PDF-dokument - {title}
             </div>
             <div className="w-full h-[600px] border rounded overflow-hidden">
               <object
@@ -128,18 +147,39 @@ export const BookingDocumentViewer = ({
                 type="application/pdf"
                 className="w-full h-full"
               >
-                <div className="p-8 text-center">
-                  <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-4">
-                    PDF kan ikke vises i nettleseren.<br/>
-                    Bruk "Last ned"-knappen for å åpne filen.
-                  </p>
+                <div className="p-8 text-center space-y-4">
+                  <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+                  <div className="space-y-2">
+                    <h4 className="font-medium">PDF kan ikke vises i nettleseren</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Last ned filen for å åpne den i din PDF-leser
+                    </p>
+                  </div>
                   <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => window.open(url, '_blank')}
+                    size="lg" 
+                    className="mt-4"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const urlParts = url.split('/');
+                        const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+                        
+                        const downloadUrl = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = downloadUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(downloadUrl);
+                      } catch (error) {
+                        console.error('Download failed:', error);
+                      }
+                    }}
                   >
-                    Åpne i ny fane
+                    <Download className="h-4 w-4 mr-2" />
+                    Last ned PDF
                   </Button>
                 </div>
               </object>
@@ -150,8 +190,8 @@ export const BookingDocumentViewer = ({
       case 'image':
         return (
           <div className="flex flex-col items-center p-4">
-            <div className="bg-muted/50 p-2 text-sm text-center mb-4 rounded">
-              Bilde-forhåndsvisning - {title}
+            <div className="bg-muted/50 p-3 text-sm text-center mb-4 rounded w-full">
+              🖼️ Bilde - {title}
             </div>
             <img 
               src={content} 
@@ -165,8 +205,8 @@ export const BookingDocumentViewer = ({
       case 'text':
         return (
           <div className="w-full">
-            <div className="bg-muted/50 p-2 text-sm text-center mb-2 rounded">
-              Tekst-forhåndsvisning - {title}
+            <div className="bg-muted/50 p-3 text-sm text-center mb-4 rounded">
+              📝 Tekstfil - {title}
             </div>
             <div className="border rounded p-4 bg-background max-h-[600px] overflow-auto">
               <pre className="whitespace-pre-wrap text-sm font-mono">{content}</pre>
@@ -176,21 +216,39 @@ export const BookingDocumentViewer = ({
       
       default:
         return (
-          <div className="p-8 text-center">
-            <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">
-              Filtype støttes ikke for forhåndsvisning.<br/>
-              Bruk "Last ned"-knappen for å åpne filen.
-            </p>
+          <div className="p-8 text-center space-y-4">
+            <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
             <div className="space-y-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => window.open(url, '_blank')}
-              >
-                Prøv å åpne i ny fane
-              </Button>
+              <h4 className="font-medium">{title}</h4>
+              <p className="text-sm text-muted-foreground">
+                Filtype støttes ikke for forhåndsvisning
+              </p>
             </div>
+            <Button 
+              size="lg"
+              onClick={async () => {
+                try {
+                  const response = await fetch(url);
+                  const blob = await response.blob();
+                  const urlParts = url.split('/');
+                  const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+                  
+                  const downloadUrl = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = downloadUrl;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(downloadUrl);
+                } catch (error) {
+                  console.error('Download failed:', error);
+                }
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Last ned fil
+            </Button>
           </div>
         );
     }
@@ -234,46 +292,49 @@ export const BookingDocumentViewer = ({
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
                   <DialogHeader>
-                    <DialogTitle>{title} - Forhåndsvisning</DialogTitle>
+                    <DialogTitle>📄 {title}</DialogTitle>
                   </DialogHeader>
                   <FileViewer url={documentUrl} title={title} />
                 </DialogContent>
               </Dialog>
-              <Button size="sm" variant="outline" onClick={async () => {
-            try {
-              console.log('Downloading file from URL:', documentUrl);
-              
-              // Fetch the file data
-              const response = await fetch(documentUrl);
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              // Get the blob data
-              const blob = await response.blob();
-              
-              // Extract filename from URL or use title
-              const urlParts = documentUrl.split('/');
-              const urlFilename = decodeURIComponent(urlParts[urlParts.length - 1]);
-              const filename = urlFilename || `${title.toLowerCase().replace(/\s+/g, '_')}.pdf`;
-              
-              // Create download link
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = filename;
-              document.body.appendChild(link);
-              link.click();
-              
-              // Cleanup
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
-              
-              console.log('File downloaded successfully:', filename);
-            } catch (error) {
-              console.error('Download failed:', error);
-            }
-          }}>
+              <Button 
+                size="sm" 
+                onClick={async () => {
+                  try {
+                    console.log('Downloading file from URL:', documentUrl);
+                    
+                    // Fetch the file data
+                    const response = await fetch(documentUrl);
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // Get the blob data
+                    const blob = await response.blob();
+                    
+                    // Extract filename from URL or use title
+                    const urlParts = documentUrl.split('/');
+                    const urlFilename = decodeURIComponent(urlParts[urlParts.length - 1]);
+                    const filename = urlFilename || `${title.toLowerCase().replace(/\s+/g, '_')}.pdf`;
+                    
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Cleanup
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    console.log('File downloaded successfully:', filename);
+                  } catch (error) {
+                    console.error('Download failed:', error);
+                  }
+                }}
+              >
                 <Download className="h-3 w-3 mr-1" />
                 Last ned
               </Button>
