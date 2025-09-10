@@ -17,8 +17,6 @@ export const BookingDocumentViewer = ({
   bookingStatus,
   isVisible
 }: BookingDocumentViewerProps) => {
-  const [viewingDocument, setViewingDocument] = useState<{url: string, title: string} | null>(null);
-  
   if (!isVisible) {
     return;
   }
@@ -125,6 +123,11 @@ export const BookingDocumentViewer = ({
     fallbackText: string;
   }) => {
     const isUrl = documentUrl && documentUrl !== fallbackText && documentUrl.startsWith('http');
+    
+    const handlePreviewClick = () => {
+      console.log('Preview button clicked for:', title, documentUrl);
+    };
+    
     return <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="font-medium">{title}</h4>
@@ -137,7 +140,11 @@ export const BookingDocumentViewer = ({
             <div className="flex gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="sm" variant="outline" onClick={() => setViewingDocument({url: documentUrl, title})}>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handlePreviewClick}
+                  >
                     <Eye className="h-3 w-3 mr-1" />
                     Forhåndsvis
                   </Button>
