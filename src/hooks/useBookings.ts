@@ -115,9 +115,13 @@ export const useBookings = (userId?: string) => {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       }
 
-      // Filter out historical bookings by default (completed, cancelled bookings are historical)
+      // Filter bookings based on historical flag
       if (!includeHistorical) {
+        // Active view: exclude completed and cancelled bookings
         query = query.not('status', 'in', '(completed,cancelled)');
+      } else {
+        // Historical view: show only completed and cancelled bookings
+        query = query.in('status', ['completed', 'cancelled']);
       }
 
       const { data, error } = await query;
@@ -223,8 +227,8 @@ export const useBookings = (userId?: string) => {
       ));
 
       toast({
-        title: "Booking slettet",
-        description: "Bookingen er flyttet til historikk og sensitiv data er fjernet",
+        title: "Arrangement arkivert",
+        description: "Arrangementet er flyttet til historikk og sensitiv data er fjernet",
       });
       
       return data;
