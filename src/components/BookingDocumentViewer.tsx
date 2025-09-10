@@ -41,14 +41,42 @@ export const BookingDocumentViewer = ({
                 <ExternalLink className="h-3 w-3 mr-1" />
                 Åpne
               </Button>
-              <Button size="sm" variant="outline" onClick={() => {
-            // Create a temporary link to download the file
-            const link = document.createElement('a');
-            link.href = documentUrl;
-            link.download = title.toLowerCase().replace(/\s+/g, '_');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+              <Button size="sm" variant="outline" onClick={async () => {
+            try {
+              console.log('Downloading file from URL:', documentUrl);
+              
+              // Fetch the file data
+              const response = await fetch(documentUrl);
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              // Get the blob data
+              const blob = await response.blob();
+              
+              // Extract filename from URL or use title
+              const urlParts = documentUrl.split('/');
+              const urlFilename = decodeURIComponent(urlParts[urlParts.length - 1]);
+              const filename = urlFilename || `${title.toLowerCase().replace(/\s+/g, '_')}.pdf`;
+              
+              // Create download link
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = filename;
+              document.body.appendChild(link);
+              link.click();
+              
+              // Cleanup
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+              
+              console.log('File downloaded successfully:', filename);
+            } catch (error) {
+              console.error('Download failed:', error);
+              // Fallback to direct window.open
+              window.open(documentUrl, '_blank');
+            }
           }}>
                 <Download className="h-3 w-3 mr-1" />
                 Last ned
