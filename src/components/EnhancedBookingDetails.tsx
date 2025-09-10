@@ -11,86 +11,79 @@ import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Check, X, FileText, History, Edit3, Eye, Trash2 } from 'lucide-react';
-
 interface EnhancedBookingDetailsProps {
   bookingId: string;
   isOpen: boolean;
   onClose: () => void;
 }
-
-export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedBookingDetailsProps) => {
+export const EnhancedBookingDetails = ({
+  bookingId,
+  isOpen,
+  onClose
+}: EnhancedBookingDetailsProps) => {
   const [booking, setBooking] = useState<any>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       setCurrentUserId(user?.id || null);
     };
     getCurrentUser();
   }, []);
-
   useEffect(() => {
     const fetchBooking = async () => {
       if (!isOpen || !bookingId) return;
-      
       try {
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('id', bookingId)
-          .single();
-
+        const {
+          data,
+          error
+        } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
         if (error) throw error;
         setBooking(data);
       } catch (error: any) {
         toast({
           title: "Feil ved lasting av booking",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setLoading(false);
       }
     };
-
     fetchBooking();
   }, [bookingId, isOpen, toast]);
 
   // Real-time subscription for booking updates
   useEffect(() => {
     if (!booking?.id) return;
-
-    const channel = supabase
-      .channel('enhanced-booking-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `id=eq.${booking.id}`
-        },
-        (payload) => {
-          setBooking(prev => ({ ...prev, ...payload.new }));
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel('enhanced-booking-updates').on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'bookings',
+      filter: `id=eq.${booking.id}`
+    }, payload => {
+      setBooking(prev => ({
+        ...prev,
+        ...payload.new
+      }));
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [booking?.id]);
-
   if (!isOpen) return null;
-
   if (loading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+    return <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl max-h-[90vh]">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -99,23 +92,18 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
             </div>
           </div>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
   if (!booking || !currentUserId) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+    return <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl max-h-[90vh]">
           <div className="text-center p-8">
             <AlertTriangle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p>Booking ikke funnet eller ingen tilgang</p>
           </div>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
   const canEdit = booking.status === 'pending' || booking.status === 'allowed';
@@ -123,30 +111,47 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
   const isConfirmationPhase = booking.status === 'both_parties_approved';
   const isPublished = booking.status === 'upcoming';
   const bothConfirmed = booking.sender_confirmed && booking.receiver_confirmed;
-
   const getStatusInfo = (status: string) => {
     switch (status) {
       case 'pending':
-        return { color: 'bg-blue-100 text-blue-800', label: 'Venter på svar' };
+        return {
+          color: 'bg-blue-100 text-blue-800',
+          label: 'Venter på svar'
+        };
       case 'allowed':
-        return { color: 'bg-yellow-100 text-yellow-800', label: 'Tillatt - Kan redigeres' };
+        return {
+          color: 'bg-yellow-100 text-yellow-800',
+          label: 'Tillatt - Kan redigeres'
+        };
       case 'both_parties_approved':
-        return { color: 'bg-purple-100 text-purple-800', label: 'Godkjent - Klar for publisering' };
+        return {
+          color: 'bg-purple-100 text-purple-800',
+          label: 'Godkjent - Klar for publisering'
+        };
       case 'upcoming':
-        return { color: 'bg-green-100 text-green-800', label: 'Publisert' };
+        return {
+          color: 'bg-green-100 text-green-800',
+          label: 'Publisert'
+        };
       case 'completed':
-        return { color: 'bg-blue-100 text-blue-800', label: 'Gjennomført' };
+        return {
+          color: 'bg-blue-100 text-blue-800',
+          label: 'Gjennomført'
+        };
       case 'cancelled':
-        return { color: 'bg-orange-100 text-orange-800', label: 'Avlyst' };
+        return {
+          color: 'bg-orange-100 text-orange-800',
+          label: 'Avlyst'
+        };
       default:
-        return { color: 'bg-gray-100 text-gray-800', label: status };
+        return {
+          color: 'bg-gray-100 text-gray-800',
+          label: status
+        };
     }
   };
-
   const statusInfo = getStatusInfo(booking.status);
-
-  return (
-    <>
+  return <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -163,29 +168,14 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
               </div>
               
               <div className="flex gap-2">
-                {isNegotiationPhase && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowConfirmation(true)}
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Bekreft booking
-                  </Button>
-                )}
+                {isNegotiationPhase}
                 
-                {isConfirmationPhase && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAgreement(true)}
-                  >
+                {isConfirmationPhase && <Button variant="outline" onClick={() => setShowAgreement(true)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Vis avtale
-                  </Button>
-                )}
+                  </Button>}
                 
-                <Button variant="outline" onClick={onClose}>
-                  Lukk
-                </Button>
+                
               </div>
             </div>
           </DialogHeader>
@@ -205,19 +195,11 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
               
               <div className="flex-1 overflow-y-auto mt-4">
                 <TabsContent value="details" className="space-y-6 m-0">
-                  <EnhancedBookingDetailsPanel
-                    booking={booking}
-                    currentUserId={currentUserId}
-                    canEdit={canEdit}
-                  />
+                  <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
                 </TabsContent>
                 
                 <TabsContent value="changes" className="m-0">
-                  <BookingChangeHistoryPanel
-                    bookingId={bookingId}
-                    currentUserId={currentUserId}
-                    booking={booking}
-                  />
+                  <BookingChangeHistoryPanel bookingId={bookingId} currentUserId={currentUserId} booking={booking} />
                 </TabsContent>
               </div>
             </Tabs>
@@ -226,20 +208,9 @@ export const EnhancedBookingDetails = ({ bookingId, isOpen, onClose }: EnhancedB
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <BookingConfirmation
-        booking={booking}
-        isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
-        currentUserId={currentUserId}
-      />
+      <BookingConfirmation booking={booking} isOpen={showConfirmation} onClose={() => setShowConfirmation(false)} currentUserId={currentUserId} />
 
       {/* Agreement Dialog */}
-      <BookingAgreement
-        booking={booking}
-        isOpen={showAgreement}
-        onClose={() => setShowAgreement(false)}
-        currentUserId={currentUserId}
-      />
-    </>
-  );
+      <BookingAgreement booking={booking} isOpen={showAgreement} onClose={() => setShowAgreement(false)} currentUserId={currentUserId} />
+    </>;
 };
