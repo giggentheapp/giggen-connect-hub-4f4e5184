@@ -31,15 +31,40 @@ export const BookingDocumentViewer = ({
       try {
         setLoading(true);
         setError(null);
-        console.log('Loading file for preview:', url);
+        console.log('Loading file for preview via proxy:', url);
         
-        const response = await fetch(url);
+        // Extract file path from Supabase URL for proxy
+        const getProxyUrl = (originalUrl: string) => {
+          try {
+            const urlObj = new URL(originalUrl);
+            const pathParts = urlObj.pathname.split('/');
+            
+            // Find bucket and file path from Supabase storage URL
+            // URL format: /storage/v1/object/public/{bucket}/{path}
+            const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+            if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+              const bucket = pathParts[bucketIndex];
+              const filePath = pathParts.slice(bucketIndex + 1).join('/');
+              
+              // Use our proxy endpoint
+              const proxyUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
+              console.log('Proxy URL:', proxyUrl);
+              return proxyUrl;
+            }
+          } catch (e) {
+            console.error('Failed to parse URL for proxy:', e);
+          }
+          return originalUrl; // Fallback to original URL
+        };
+
+        const proxyUrl = getProxyUrl(url);
+        const response = await fetch(proxyUrl);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const blob = await response.blob();
-        console.log('Blob loaded:', blob.type, blob.size);
+        console.log('Blob loaded via proxy:', blob.type, blob.size);
         
         // Determine file type
         const isPdf = url.toLowerCase().includes('.pdf') || blob.type === 'application/pdf';
@@ -48,10 +73,9 @@ export const BookingDocumentViewer = ({
         
         if (isPdf) {
           setFileType('pdf');
-          // For PDFs, create object URL and embed directly
-          const objectUrl = URL.createObjectURL(blob);
-          setContent(objectUrl);
-          console.log('PDF object URL created:', objectUrl);
+          // For PDFs, use the proxy URL directly for better compatibility
+          setContent(proxyUrl);
+          console.log('PDF proxy URL set:', proxyUrl);
         } else if (isImage) {
           setFileType('image');
           // For images, convert to base64 to avoid Chrome blocking
@@ -85,9 +109,7 @@ export const BookingDocumentViewer = ({
     React.useEffect(() => {
       loadFile();
       return () => {
-        if (content && fileType === 'pdf' && content.startsWith('blob:')) {
-          URL.revokeObjectURL(content);
-        }
+        // No cleanup needed for proxy URLs or base64 content
       };
     }, [url]);
 
@@ -106,7 +128,25 @@ export const BookingDocumentViewer = ({
           size="lg"
           onClick={async () => {
             try {
-              const response = await fetch(url);
+              // Use proxy URL for download
+              const getProxyUrl = (originalUrl: string) => {
+                try {
+                  const urlObj = new URL(originalUrl);
+                  const pathParts = urlObj.pathname.split('/');
+                  const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+                  if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+                    const bucket = pathParts[bucketIndex];
+                    const filePath = pathParts.slice(bucketIndex + 1).join('/');
+                    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
+                  }
+                } catch (e) {
+                  console.error('Failed to parse URL for download:', e);
+                }
+                return originalUrl;
+              };
+
+              const proxyUrl = getProxyUrl(url);
+              const response = await fetch(proxyUrl);
               const blob = await response.blob();
               const urlParts = url.split('/');
               const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
@@ -158,25 +198,43 @@ export const BookingDocumentViewer = ({
                   <Button 
                     size="lg" 
                     className="mt-4"
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        const urlParts = url.split('/');
-                        const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
-                        
-                        const downloadUrl = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = downloadUrl;
-                        link.download = filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        URL.revokeObjectURL(downloadUrl);
-                      } catch (error) {
-                        console.error('Download failed:', error);
+              onClick={async () => {
+                try {
+                  // Use proxy URL for download too
+                  const getProxyUrl = (originalUrl: string) => {
+                    try {
+                      const urlObj = new URL(originalUrl);
+                      const pathParts = urlObj.pathname.split('/');
+                      const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+                      if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+                        const bucket = pathParts[bucketIndex];
+                        const filePath = pathParts.slice(bucketIndex + 1).join('/');
+                        return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
                       }
-                    }}
+                    } catch (e) {
+                      console.error('Failed to parse URL for download:', e);
+                    }
+                    return originalUrl;
+                  };
+
+                  const proxyUrl = getProxyUrl(url);
+                  const response = await fetch(proxyUrl);
+                  const blob = await response.blob();
+                  const urlParts = url.split('/');
+                  const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+                  
+                  const downloadUrl = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = downloadUrl;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(downloadUrl);
+                } catch (error) {
+                  console.error('Download failed:', error);
+                }
+              }}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Last ned PDF
@@ -226,25 +284,43 @@ export const BookingDocumentViewer = ({
             </div>
             <Button 
               size="lg"
-              onClick={async () => {
+          onClick={async () => {
+            try {
+              // Use proxy URL for download
+              const getProxyUrl = (originalUrl: string) => {
                 try {
-                  const response = await fetch(url);
-                  const blob = await response.blob();
-                  const urlParts = url.split('/');
-                  const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
-                  
-                  const downloadUrl = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = downloadUrl;
-                  link.download = filename;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(downloadUrl);
-                } catch (error) {
-                  console.error('Download failed:', error);
+                  const urlObj = new URL(originalUrl);
+                  const pathParts = urlObj.pathname.split('/');
+                  const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+                  if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+                    const bucket = pathParts[bucketIndex];
+                    const filePath = pathParts.slice(bucketIndex + 1).join('/');
+                    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
+                  }
+                } catch (e) {
+                  console.error('Failed to parse URL for download:', e);
                 }
-              }}
+                return originalUrl;
+              };
+
+              const proxyUrl = getProxyUrl(url);
+              const response = await fetch(proxyUrl);
+              const blob = await response.blob();
+              const urlParts = url.split('/');
+              const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+              
+              const downloadUrl = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = downloadUrl;
+              link.download = filename;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+              console.error('Download failed:', error);
+            }
+          }}
             >
               <Download className="h-4 w-4 mr-2" />
               Last ned fil
@@ -301,10 +377,27 @@ export const BookingDocumentViewer = ({
                 size="sm" 
                 onClick={async () => {
                   try {
-                    console.log('Downloading file from URL:', documentUrl);
+                    console.log('Downloading file from URL via proxy:', documentUrl);
                     
-                    // Fetch the file data
-                    const response = await fetch(documentUrl);
+                    // Use proxy URL for download
+                    const getProxyUrl = (originalUrl: string) => {
+                      try {
+                        const urlObj = new URL(originalUrl);
+                        const pathParts = urlObj.pathname.split('/');
+                        const bucketIndex = pathParts.findIndex(part => part === 'public') + 1;
+                        if (bucketIndex > 0 && bucketIndex < pathParts.length) {
+                          const bucket = pathParts[bucketIndex];
+                          const filePath = pathParts.slice(bucketIndex + 1).join('/');
+                          return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/serve-file?bucket=${bucket}&path=${encodeURIComponent(filePath)}`;
+                        }
+                      } catch (e) {
+                        console.error('Failed to parse URL for download:', e);
+                      }
+                      return originalUrl;
+                    };
+
+                    const proxyUrl = getProxyUrl(documentUrl);
+                    const response = await fetch(proxyUrl);
                     if (!response.ok) {
                       throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -329,7 +422,7 @@ export const BookingDocumentViewer = ({
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(url);
                     
-                    console.log('File downloaded successfully:', filename);
+                    console.log('File downloaded successfully via proxy:', filename);
                   } catch (error) {
                     console.error('Download failed:', error);
                   }
