@@ -12,7 +12,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
-import { useBookingChanges } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { CalendarIcon, AlertTriangle, Check, X, Eye, Trash2 } from 'lucide-react';
@@ -56,8 +55,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  const { updateBooking, proposeChange } = useBookings();
-  const { changes } = useBookingChanges(bookingId);
+  const { updateBooking } = useBookings();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -106,44 +104,21 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   const handleFieldEdit = async (fieldName: string, newValue: any) => {
     if (!booking || !currentUserId) return;
 
-    const oldValue = (booking as any)[fieldName];
-    
     try {
       await updateBooking(bookingId, { [fieldName]: newValue });
-      await proposeChange(bookingId, fieldName, oldValue, newValue);
-      
       setBooking(prev => prev ? { ...prev, [fieldName]: newValue } : null);
       setEditingField(null);
       setTempValues({});
+      
+      toast({
+        title: "Oppdatert",
+        description: `${fieldName} er oppdatert`,
+      });
     } catch (error) {
       // Error handled in hook
     }
   };
 
-  const getFieldChange = (fieldName: string) => {
-    return changes.find(change => 
-      change.field_name === fieldName && 
-      change.status === 'pending' && 
-      change.changed_by !== currentUserId
-    );
-  };
-
-  const ChangeIndicator = ({ fieldName }: { fieldName: string }) => {
-    const change = getFieldChange(fieldName);
-    
-    if (!change) return null;
-
-    return (
-      <Tooltip>
-        <TooltipTrigger>
-          <AlertTriangle className="h-4 w-4 text-amber-500 ml-2" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Endret fra "{change.old_value}" til "{change.new_value}"</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  };
 
   const EditableField = ({ 
     fieldName, 
@@ -177,10 +152,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     if (type === 'date') {
       return (
         <div className="space-y-2">
-          <Label className="flex items-center">
-            {label}
-            <ChangeIndicator fieldName={fieldName} />
-          </Label>
+          <Label>{label}</Label>
           {isEditing ? (
             <div className="flex gap-2">
               <Popover>
@@ -225,10 +197,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
     return (
       <div className="space-y-2">
-        <Label className="flex items-center">
-          {label}
-          <ChangeIndicator fieldName={fieldName} />
-        </Label>
+        <Label>{label}</Label>
         {isEditing ? (
           <div className="flex gap-2">
             {type === 'textarea' ? (

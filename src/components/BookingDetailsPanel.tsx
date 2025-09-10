@@ -37,13 +37,9 @@ export const BookingDetailsPanel = ({
 }: BookingDetailsPanelProps) => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
-  const {
-    proposeChange
-  } = useBookings();
-  const {
-    toast
-  } = useToast();
-  const handleProposeChange = async (fieldName: string, oldValue: any, newValue: any) => {
+  const { updateBooking } = useBookings();
+  const { toast } = useToast();
+  const handleFieldUpdate = async (fieldName: string, oldValue: any, newValue: any) => {
     if (!canEdit) {
       toast({
         title: "Kan ikke redigere",
@@ -56,7 +52,21 @@ export const BookingDetailsPanel = ({
       setEditingField(null);
       return;
     }
-    await proposeChange(booking.id, fieldName, String(oldValue || ''), String(newValue || ''));
+
+    try {
+      await updateBooking(booking.id, { [fieldName]: newValue });
+      toast({
+        title: "Oppdatert",
+        description: `${fieldName} er oppdatert`,
+      });
+    } catch (error) {
+      toast({
+        title: "Feil",
+        description: "Kunne ikke oppdatere feltet",
+        variant: "destructive"
+      });
+    }
+    
     setEditingField(null);
     setTempValues({});
   };
@@ -195,9 +205,9 @@ export const BookingDetailsPanel = ({
           <CardTitle>Grunnleggende informasjon</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <EditableField fieldName="title" label="Tittel" value={booking.title} placeholder="Navn på arrangementet" onPropose={handleProposeChange} />
+          <EditableField fieldName="title" label="Tittel" value={booking.title} placeholder="Navn på arrangementet" onPropose={handleFieldUpdate} />
           
-          <EditableField fieldName="description" label="Beskrivelse" value={booking.description} type="textarea" placeholder="Beskriv arrangementet..." onPropose={handleProposeChange} />
+          <EditableField fieldName="description" label="Beskrivelse" value={booking.description} type="textarea" placeholder="Beskriv arrangementet..." onPropose={handleFieldUpdate} />
         </CardContent>
       </Card>
 
@@ -211,12 +221,12 @@ export const BookingDetailsPanel = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <EditableField fieldName="event_date" label="Dato" value={booking.event_date} type="date" placeholder="Velg dato" onPropose={handleProposeChange} />
+            <EditableField fieldName="event_date" label="Dato" value={booking.event_date} type="date" placeholder="Velg dato" onPropose={handleFieldUpdate} />
             
-            <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleProposeChange} />
+            <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
           </div>
 
-          <EditableField fieldName="venue" label="Spillested" value={booking.venue} placeholder="F.eks. Rockefeller Music Hall" onPropose={handleProposeChange} />
+          <EditableField fieldName="venue" label="Spillested" value={booking.venue} placeholder="F.eks. Rockefeller Music Hall" onPropose={handleFieldUpdate} />
         </CardContent>
       </Card>
 
@@ -229,12 +239,12 @@ export const BookingDetailsPanel = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <EditableField fieldName="audience_estimate" label="Estimert publikum" value={booking.audience_estimate} type="number" placeholder="100" onPropose={handleProposeChange} />
+          <EditableField fieldName="audience_estimate" label="Estimert publikum" value={booking.audience_estimate} type="number" placeholder="100" onPropose={handleFieldUpdate} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleProposeChange} />
+            <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
             
-            <EditableField fieldName="artist_fee" label="Artist honorar (kr)" value={booking.artist_fee} type="number" placeholder="5000" onPropose={handleProposeChange} />
+            <EditableField fieldName="artist_fee" label="Artist honorar (kr)" value={booking.artist_fee} type="number" placeholder="5000" onPropose={handleFieldUpdate} />
           </div>
         </CardContent>
       </Card>

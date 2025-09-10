@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBookings } from '@/hooks/useBookings';
-import { useBookingChanges } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Eye, Bell, User } from 'lucide-react';
 import { format } from 'date-fns';
@@ -24,7 +23,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   const [hasReadChanges, setHasReadChanges] = useState(false);
   const [realtimeBooking, setRealtimeBooking] = useState(booking);
   const { updateBooking } = useBookings();
-  const { changes } = useBookingChanges(booking?.id);
   const { toast } = useToast();
 
   // Use realtime booking data
@@ -88,18 +86,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     };
   }, [booking?.id, currentUserId, booking?.sender_confirmed, booking?.receiver_confirmed, booking?.sender_read_agreement, booking?.receiver_read_agreement, toast]);
 
-  const unacknowledgedChanges = changes.filter(change => {
-    return change.status === 'pending' && change.changed_by !== currentUserId;
-  });
-
-  const handleReadChanges = async () => {
-    // Mark all pending changes as accepted since user has read them
-    setHasReadChanges(true);
-    toast({
-      title: "Endringer lest",
-      description: "Du har bekreftet at du har lest alle endringer",
-    });
-  };
 
   const handleConfirmBooking = async () => {
     try {
@@ -144,7 +130,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   const bothConfirmed = currentBooking.sender_confirmed && currentBooking.receiver_confirmed;
   const bothReadAgreement = currentBooking.sender_read_agreement && currentBooking.receiver_read_agreement;
   const canPublish = bothConfirmed && bothReadAgreement;
-  const hasUnreadChanges = unacknowledgedChanges.length > 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -203,40 +188,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
             </CardContent>
           </Card>
 
-          {/* Changes Alert */}
-          {hasUnreadChanges && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Det er {unacknowledgedChanges.length} endring(er) som må bekreftes før du kan gå videre.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Changes List */}
-          {unacknowledgedChanges.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  Endringer som må bekreftes
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {unacknowledgedChanges.map((change) => (
-                  <div key={change.id} className="p-3 border rounded bg-amber-50/50 dark:bg-amber-950/20">
-                    <div className="font-medium">{change.field_name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      Endret fra "{change.old_value || 'ikke satt'}" til "{change.new_value || 'ikke satt'}"
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(change.change_timestamp), 'dd.MM.yyyy HH:mm')}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
 
           {/* Contact Info (for receivers) */}
           {isReceiver && currentBooking.sender_contact_info && (
@@ -331,16 +282,8 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
             </CardContent>
           </Card>
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
-            {hasUnreadChanges && !hasReadChanges && (
-              <Button onClick={handleReadChanges}>
-                <Check className="h-4 w-4 mr-2" />
-                Jeg har lest alle endringene
-              </Button>
-            )}
-
-            {(!hasUnreadChanges || hasReadChanges) && !currentBooking[userConfirmedField] && (
+            {!currentBooking[userConfirmedField] && (
               <Button onClick={handleConfirmBooking}>
                 <Check className="h-4 w-4 mr-2" />
                 Bekreft booking

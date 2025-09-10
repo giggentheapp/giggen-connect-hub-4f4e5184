@@ -50,23 +50,54 @@ interface Booking {
   last_modified_at?: string;
 }
 
-interface BookingChange {
-  id: string;
-  booking_id: string;
-  changed_by: string;
-  field_name: string;
-  old_value: string | null;
-  new_value: string | null;
-  change_timestamp: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  created_at: string;
-  updated_at: string;
-}
 
 export const useBookings = (userId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Set up realtime subscription for booking updates
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel('booking-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `sender_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('Booking updated (as sender):', payload);
+          setBookings(prev => prev.map(booking => 
+            booking.id === payload.new.id ? payload.new as Booking : booking
+          ));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `receiver_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('Booking updated (as receiver):', payload);
+          setBookings(prev => prev.map(booking => 
+            booking.id === payload.new.id ? payload.new as Booking : booking
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   const fetchBookings = useCallback(async (includeHistorical: boolean = false) => {
     try {
@@ -204,95 +235,6 @@ export const useBookings = (userId?: string) => {
     }
   };
 
-  const proposeChange = async (bookingId: string, fieldName: string, oldValue: string | null, newValue: string | null) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Ikke autentisert');
-
-      const { error } = await supabase
-        .from('booking_changes')
-        .insert({
-          booking_id: bookingId,
-          changed_by: user.id,
-          field_name: fieldName,
-          old_value: oldValue,
-          new_value: newValue,
-          status: 'pending'
-        } as any);
-
-      if (error) throw error;
-
-      toast({
-        title: "Endring foreslått",
-        description: `Endring til ${fieldName} er foreslått og venter på godkjenning`,
-      });
-    } catch (error: any) {
-      console.error('Error proposing change:', error);
-      toast({
-        title: "Feil ved foreslå endring",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const approveChange = async (changeId: string, bookingId: string, fieldName: string, newValue: string | null) => {
-    try {
-      // First approve the change
-      const { error: changeError } = await supabase
-        .from('booking_changes')
-        .update({ status: 'accepted' })
-        .eq('id', changeId);
-
-      if (changeError) throw changeError;
-
-      // Then update the booking with the new value
-      const { error: bookingError } = await supabase
-        .from('bookings')
-        .update({ [fieldName]: newValue })
-        .eq('id', bookingId);
-
-      if (bookingError) throw bookingError;
-
-      // Update local state
-      setBookings(prev => prev.map(booking => 
-        booking.id === bookingId ? { ...booking, [fieldName]: newValue } : booking
-      ));
-
-      toast({
-        title: "Endring godkjent",
-        description: "Endringen er godkjent og tatt i bruk",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Feil ved godkjenning",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const rejectChange = async (changeId: string) => {
-    try {
-      const { error } = await supabase
-        .from('booking_changes')
-        .update({ status: 'rejected' })
-        .eq('id', changeId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Endring avvist",
-        description: "Endringen er avvist",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Feil ved avvisning",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const fetchHistoricalBookings = useCallback(async () => {
     return fetchBookings(true);
@@ -304,40 +246,7 @@ export const useBookings = (userId?: string) => {
     createBooking,
     updateBooking,
     deleteBookingSecurely,
-    proposeChange,
-    approveChange,
-    rejectChange,
     refetch: fetchBookings,
     fetchHistorical: fetchHistoricalBookings
   };
-};
-
-export const useBookingChanges = (bookingId?: string) => {
-  const [changes, setChanges] = useState<BookingChange[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!bookingId) return;
-
-    const fetchChanges = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('booking_changes')
-          .select('*')
-          .eq('booking_id', bookingId)
-          .order('change_timestamp', { ascending: false });
-
-      if (error) throw error;
-      setChanges((data || []) as BookingChange[]);
-      } catch (error) {
-        console.error('Error fetching changes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChanges();
-  }, [bookingId]);
-
-  return { changes, loading };
 };
