@@ -3,12 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EnhancedBookingDetailsPanel } from './EnhancedBookingDetailsPanel';
+import { BookingChangeHistoryPanel } from './BookingChangeHistoryPanel';
 import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Check, X, FileText, Eye, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, X, FileText, History, Edit3, Eye, Trash2 } from 'lucide-react';
 interface EnhancedBookingDetailsProps {
   bookingId: string;
   isOpen: boolean;
@@ -154,7 +156,7 @@ export const EnhancedBookingDetails = ({
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
-              <div>
+              <div className="bg-slate-200">
                 <DialogTitle className="text-xl">{booking.title}</DialogTitle>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={statusInfo.color}>
@@ -178,8 +180,29 @@ export const EnhancedBookingDetails = ({
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto mt-4">
-            <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
+          <div className="flex-1 overflow-hidden">
+            <Tabs defaultValue="details" className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details" className="flex items-center gap-2">
+                  <Edit3 className="h-4 w-4" />
+                  Detaljer
+                </TabsTrigger>
+                <TabsTrigger value="changes" className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Endringer
+                </TabsTrigger>
+              </TabsList>
+              
+              <div className="flex-1 overflow-y-auto mt-4">
+                <TabsContent value="details" className="space-y-6 m-0">
+                  <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
+                </TabsContent>
+                
+                <TabsContent value="changes" className="m-0">
+                  <BookingChangeHistoryPanel bookingId={bookingId} currentUserId={currentUserId} booking={booking} />
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
         </DialogContent>
       </Dialog>
