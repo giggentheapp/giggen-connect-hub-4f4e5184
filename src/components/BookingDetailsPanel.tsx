@@ -40,6 +40,22 @@ export const BookingDetailsPanel = ({
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
   const { updateBooking } = useBookings();
   const { toast } = useToast();
+
+  // DEBUG: Log booking data to see door deal transfer
+  useEffect(() => {
+    console.log('🔍 BookingDetailsPanel - Booking data received:');
+    console.log('  - door_deal:', booking.door_deal);
+    console.log('  - door_percentage:', booking.door_percentage);
+    console.log('  - artist_fee:', booking.artist_fee);
+    console.log('  - price_musician:', booking.price_musician);
+    console.log('  - Complete booking object:', booking);
+    
+    if (booking.door_deal) {
+      console.log('  ✅ Door deal detected - should show percentage field');
+    } else {
+      console.log('  ❌ No door deal - should show fixed fee field');
+    }
+  }, [booking]);
   const handleFieldUpdate = async (fieldName: string, oldValue: any, newValue: any) => {
     if (!canEdit) {
       toast({

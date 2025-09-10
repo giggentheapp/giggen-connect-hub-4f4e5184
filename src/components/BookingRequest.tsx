@@ -154,7 +154,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
       }
 
-      await createBooking({
+      // DEBUG: Log final booking data before creation
+      const bookingData = {
         receiver_id: receiverId,
         concept_ids: [selectedConcept.id],
         selected_concept_id: selectedConcept.id,
@@ -173,11 +174,20 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         // Audience and pricing
         audience_estimate: selectedConcept.expected_audience || null,
         ticket_price: isTicketPriceByAgreement ? null : (ticketPrice || null),
-        status: 'pending',
+        status: 'pending' as const,
         sender_contact_info: contactInfoToShare,
         tech_spec: techSpecUrl || "Ikke lagt ved dokument",
         hospitality_rider: hospitalityRiderUrl || "Ikke lagt ved dokument"
-      });
+      };
+
+      console.log('🚀 Creating booking with data:');
+      console.log('  - door_deal:', bookingData.door_deal);
+      console.log('  - door_percentage:', bookingData.door_percentage);
+      console.log('  - artist_fee:', bookingData.artist_fee);
+      console.log('  - price_musician:', bookingData.price_musician);
+      console.log('  - Full booking data:', bookingData);
+
+      await createBooking(bookingData);
 
       // Reset form
       setSelectedConcept(null);
@@ -216,6 +226,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   };
 
   const selectConcept = (concept: any) => {
+    // DEBUG: Log concept selection with pricing details
+    console.log('🎯 CONCEPT SELECTED:', concept.title);
+    console.log('  - Raw concept data:', concept);
+    console.log('  - door_deal:', concept.door_deal);
+    console.log('  - door_percentage:', concept.door_percentage);
+    console.log('  - price:', concept.price);
+    console.log('  - price_by_agreement:', concept.price_by_agreement);
+    
     setSelectedConcept(concept);
     
     // Reset all form fields first
