@@ -198,8 +198,6 @@ export const BookingDetailsPanel = ({
           <EditableField fieldName="title" label="Tittel" value={booking.title} placeholder="Navn på arrangementet" onPropose={handleProposeChange} />
           
           <EditableField fieldName="description" label="Beskrivelse" value={booking.description} type="textarea" placeholder="Beskriv arrangementet..." onPropose={handleProposeChange} />
-
-          <EditableField fieldName="personal_message" label="Personlig melding" value={booking.personal_message} type="textarea" placeholder="Personlig melding mellom partene..." onPropose={handleProposeChange} />
         </CardContent>
       </Card>
 
