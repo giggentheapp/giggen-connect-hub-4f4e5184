@@ -239,44 +239,57 @@ export const BookingDetailsPanel = ({
             Publikum og prising
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <EditableField fieldName="audience_estimate" label="Estimert publikum" value={booking.audience_estimate} type="number" placeholder="100" onPropose={handleFieldUpdate} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
             
-            {/* Door Deal Section */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="door-deal" 
-                  checked={booking.door_deal || false}
-                  onCheckedChange={(checked) => handleFieldUpdate('door_deal', booking.door_deal, checked)}
-                  disabled={!canEdit}
-                />
-                <Label htmlFor="door-deal" className="text-sm font-medium">
-                  Spiller for døra
-                </Label>
+            {/* Artist Payment Section */}
+            <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Artist honorar</Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="door-deal" 
+                    checked={booking.door_deal || false}
+                    onCheckedChange={(checked) => handleFieldUpdate('door_deal', booking.door_deal, checked)}
+                    disabled={!canEdit}
+                  />
+                  <Label htmlFor="door-deal" className="text-sm font-medium cursor-pointer">
+                    Spiller for døra
+                  </Label>
+                </div>
               </div>
               
               {booking.door_deal ? (
-                <EditableField 
-                  fieldName="door_percentage" 
-                  label="Andel av dørinntekter (%)" 
-                  value={booking.door_percentage} 
-                  type="number" 
-                  placeholder="70" 
-                  onPropose={handleFieldUpdate} 
-                />
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
+                  <EditableField 
+                    fieldName="door_percentage" 
+                    label="Andel av dørinntekter (%)" 
+                    value={booking.door_percentage} 
+                    type="number" 
+                    placeholder="70" 
+                    onPropose={handleFieldUpdate} 
+                  />
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    Artist får {booking.door_percentage || 'X'}% av total dørinntekt
+                  </p>
+                </div>
               ) : (
-                <EditableField 
-                  fieldName="artist_fee" 
-                  label="Artist honorar (kr)" 
-                  value={booking.artist_fee} 
-                  type="number" 
-                  placeholder="5000" 
-                  onPropose={handleFieldUpdate} 
-                />
+                <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
+                  <EditableField 
+                    fieldName="artist_fee" 
+                    label="Fast honorar (kr)" 
+                    value={booking.artist_fee} 
+                    type="number" 
+                    placeholder="5000" 
+                    onPropose={handleFieldUpdate} 
+                  />
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    Garantert utbetaling uavhengig av billettsalg
+                  </p>
+                </div>
               )}
             </div>
           </div>
