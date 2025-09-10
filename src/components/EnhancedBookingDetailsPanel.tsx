@@ -41,7 +41,7 @@ export const EnhancedBookingDetailsPanel = ({
 
   const isSender = currentUserId === booking?.sender_id;
   const isReceiver = currentUserId === booking?.receiver_id;
-  const bothConfirmed = booking?.sender_confirmed && booking?.receiver_confirmed;
+  const bothConfirmed = booking?.approved_by_sender && booking?.approved_by_receiver;
   const contactInfoVisible = bothConfirmed || booking?.contact_info_shared_at;
   
   // Get tech specs and hospitality riders for the receiver (maker)
@@ -122,30 +122,30 @@ export const EnhancedBookingDetailsPanel = ({
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
-              {booking.sender_confirmed ? (
+              {booking.approved_by_sender ? (
                 <Check className="h-4 w-4 text-green-500" />
               ) : (
                 <X className="h-4 w-4 text-red-500" />
               )}
-              <span className="text-sm">Avsender godkjent</span>
+              <span className="text-sm">Avsender godkjent for publisering</span>
             </div>
             
             <div className="flex items-center gap-2">
-              {booking.receiver_confirmed ? (
+              {booking.approved_by_receiver ? (
                 <Check className="h-4 w-4 text-green-500" />
               ) : (
                 <X className="h-4 w-4 text-red-500" />
               )}
-              <span className="text-sm">Mottaker godkjent</span>
+              <span className="text-sm">Mottaker godkjent for publisering</span>
             </div>
           </div>
 
           {/* Approval Button */}
-          {booking.status === 'both_parties_approved' && !booking[isSender ? 'sender_confirmed' : 'receiver_confirmed'] && (
+          {booking.status === 'allowed' && !booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] && (
             <div className="mt-4">
               <Button onClick={() => setApprovalOpen(true)} className="w-full">
                 <Check className="h-4 w-4 mr-2" />
-                Godkjenn booking
+                Godkjenn for publisering
               </Button>
             </div>
           )}

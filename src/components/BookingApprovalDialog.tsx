@@ -39,8 +39,8 @@ export const BookingApprovalDialog = ({ booking, isOpen, onClose, currentUserId 
 
   const isSender = currentUserId === booking?.sender_id;
   const isReceiver = currentUserId === booking?.receiver_id;
-  const userConfirmedField = isSender ? 'sender_confirmed' : 'receiver_confirmed';
-  const otherUserConfirmedField = isSender ? 'receiver_confirmed' : 'sender_confirmed';
+  const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
+  const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
 
   // Load user profile and privacy settings
   useEffect(() => {
@@ -145,7 +145,7 @@ Privat informasjon (kun synlig for partene):
 
   if (!booking) return null;
 
-  const bothConfirmed = booking.sender_confirmed && booking.receiver_confirmed;
+  const bothConfirmed = booking.approved_by_sender && booking.approved_by_receiver;
   const userAlreadyConfirmed = booking[userConfirmedField];
 
   return (
@@ -167,23 +167,23 @@ Privat informasjon (kun synlig for partene):
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    {booking.sender_confirmed ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <X className="h-4 w-4 text-red-500" />
-                    )}
-                    <span>Avsender godkjent</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {booking.receiver_confirmed ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <X className="h-4 w-4 text-red-500" />
-                    )}
-                    <span>Mottaker godkjent</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  {booking.approved_by_sender ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <X className="h-4 w-4 text-red-500" />
+                  )}
+                  <span>Avsender godkjent for publisering</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {booking.approved_by_receiver ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <X className="h-4 w-4 text-red-500" />
+                  )}
+                  <span>Mottaker godkjent for publisering</span>
+                </div>
                 </div>
               </CardContent>
             </Card>

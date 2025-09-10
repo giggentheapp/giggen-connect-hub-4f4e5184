@@ -33,9 +33,9 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   const currentBooking = realtimeBooking || booking;
   const isSender = currentUserId === currentBooking?.sender_id;
   const isReceiver = currentUserId === currentBooking?.receiver_id;
-  const userConfirmedField = isSender ? 'sender_confirmed' : 'receiver_confirmed';
+  const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
   const userReadField = isSender ? 'sender_read_agreement' : 'receiver_read_agreement';
-  const otherUserConfirmedField = isSender ? 'receiver_confirmed' : 'sender_confirmed';
+  const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
   const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
           
           // Show notification when other party confirms
           const isSender = currentUserId === booking.sender_id;
-          const otherUserConfirmedField = isSender ? 'receiver_confirmed' : 'sender_confirmed';
+          const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
           const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
           
           if (updatedBooking[otherUserConfirmedField] && !booking[otherUserConfirmedField]) {
@@ -197,7 +197,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   if (!currentBooking) return null;
 
-  const bothConfirmed = currentBooking.sender_confirmed && currentBooking.receiver_confirmed;
+  const bothConfirmed = currentBooking.approved_by_sender && currentBooking.approved_by_receiver;
   const bothReadAgreement = currentBooking.sender_read_agreement && currentBooking.receiver_read_agreement;
   const canShowPreview = bothConfirmed && bothReadAgreement;
 

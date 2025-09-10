@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useBookings } from '@/hooks/useBookings';
@@ -46,23 +47,35 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     }
   };
 
-  // Step 2: Approve booking (both parties must approve)
+  // Step 2: Individual approval (each party approves separately)
   const handleApproveForPublishing = async () => {
     if (loading) return;
     setLoading(true);
 
     try {
-      // Set both parties as confirmed to trigger both_parties_approved (generated column)
-      await updateBooking(booking.id, { 
-        status: 'both_parties_approved',
-        sender_confirmed: true,
-        receiver_confirmed: true
-      });
+      const approvalField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
+      const otherApprovalField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
+      const otherUserHasApproved = booking[otherApprovalField];
       
-      toast({
-        title: "Avtale godkjent for publisering",
-        description: "Avtalen er klar for publisering. Begge parter kan nå publisere den.",
-      });
+      const updates: any = {
+        [approvalField]: true,
+        // If other party already approved, set status to both_parties_approved
+        ...(otherUserHasApproved && { status: 'both_parties_approved' })
+      };
+      
+      await updateBooking(booking.id, updates);
+      
+      if (otherUserHasApproved) {
+        toast({
+          title: "Begge parter har godkjent! ✅",
+          description: "Avtalen er klar for publisering.",
+        });
+      } else {
+        toast({
+          title: "Du har godkjent",
+          description: "Venter på godkjenning fra den andre parten.",
+        });
+      }
       
       onAction?.();
     } catch (error) {
@@ -246,17 +259,33 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
           </>
         )}
 
-        {/* STEP 2: Approve for publishing (both parties, allowed status) */}
+        {/* STEP 2: Individual approval (each party approves separately) */}
         {booking.status === 'allowed' && (
           <>
-            <Button 
-              onClick={handleApproveForPublishing}
-              disabled={loading}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <Check className="h-4 w-4 mr-1" />
-              Godkjenn for publisering (2/3)
-            </Button>
+            {/* Show current user's approval status */}
+            {!booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] ? (
+              <Button 
+                onClick={handleApproveForPublishing}
+                disabled={loading}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Godkjenn for publisering (2/3)
+              </Button>
+            ) : (
+              <Badge variant="outline" className="text-green-700 border-green-300">
+                Du har godkjent ✓
+                {!booking[isSender ? 'approved_by_receiver' : 'approved_by_sender'] && ' - Venter på motpart'}
+              </Badge>
+            )}
+            
+            {/* Show other party's approval status */}
+            {booking[isSender ? 'approved_by_receiver' : 'approved_by_sender'] && (
+              <Badge variant="outline" className="text-green-700 border-green-300">
+                Motpart har godkjent ✓
+              </Badge>
+            )}
+            
             <Button 
               variant="outline"
               onClick={handleCancelBooking}

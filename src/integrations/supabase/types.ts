@@ -84,6 +84,8 @@ export type Database = {
           agreement_summary_text: string | null
           allowed_at: string | null
           approved_at: string | null
+          approved_by_receiver: boolean
+          approved_by_sender: boolean
           artist_fee: number | null
           audience_estimate: number | null
           both_parties_approved: boolean | null
@@ -110,12 +112,14 @@ export type Database = {
           public_visibility_settings: Json | null
           published_at: string | null
           receiver_allowed_at: string | null
+          receiver_approved_at: string | null
           receiver_confirmed: boolean | null
           receiver_id: string
           receiver_read_agreement: boolean | null
           rejected_at: string | null
           requires_approval: boolean | null
           selected_concept_id: string | null
+          sender_approved_at: string | null
           sender_confirmed: boolean | null
           sender_contact_info: Json | null
           sender_id: string
@@ -132,6 +136,8 @@ export type Database = {
           agreement_summary_text?: string | null
           allowed_at?: string | null
           approved_at?: string | null
+          approved_by_receiver?: boolean
+          approved_by_sender?: boolean
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
@@ -158,12 +164,14 @@ export type Database = {
           public_visibility_settings?: Json | null
           published_at?: string | null
           receiver_allowed_at?: string | null
+          receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
           receiver_id: string
           receiver_read_agreement?: boolean | null
           rejected_at?: string | null
           requires_approval?: boolean | null
           selected_concept_id?: string | null
+          sender_approved_at?: string | null
           sender_confirmed?: boolean | null
           sender_contact_info?: Json | null
           sender_id: string
@@ -180,6 +188,8 @@ export type Database = {
           agreement_summary_text?: string | null
           allowed_at?: string | null
           approved_at?: string | null
+          approved_by_receiver?: boolean
+          approved_by_sender?: boolean
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
@@ -206,12 +216,14 @@ export type Database = {
           public_visibility_settings?: Json | null
           published_at?: string | null
           receiver_allowed_at?: string | null
+          receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
           receiver_id?: string
           receiver_read_agreement?: boolean | null
           rejected_at?: string | null
           requires_approval?: boolean | null
           selected_concept_id?: string | null
+          sender_approved_at?: string | null
           sender_confirmed?: boolean | null
           sender_contact_info?: Json | null
           sender_id?: string
