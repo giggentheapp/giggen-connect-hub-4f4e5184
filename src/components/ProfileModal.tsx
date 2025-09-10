@@ -9,6 +9,7 @@ import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { EventModal } from '@/components/EventModal';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileData {
   id: string;
@@ -41,6 +42,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const { role: currentUserRole } = useRole();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId || !isOpen) {
@@ -157,6 +159,11 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const handleEventModalClose = () => {
     setIsEventModalOpen(false);
     setSelectedEventId(null);
+  };
+
+  const handleConceptClick = (conceptId: string) => {
+    onClose(); // Close the profile modal
+    navigate(`/concept/${conceptId}`); // Navigate to concept details
   };
 
   if (!profile) {
@@ -323,7 +330,11 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                     {concepts.length > 0 ? (
                       <div className="space-y-4">
                         {concepts.map((concept) => (
-                          <div key={concept.id} className="p-4 border rounded-lg">
+                          <div 
+                            key={concept.id} 
+                            className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={() => handleConceptClick(concept.id)}
+                          >
                             <h4 className="font-medium">{concept.title}</h4>
                             {concept.description && (
                               <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
@@ -331,6 +342,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                             {concept.price && (
                               <p className="text-sm mt-2">Pris: {concept.price} kr</p>
                             )}
+                            <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
                           </div>
                         ))}
                       </div>
