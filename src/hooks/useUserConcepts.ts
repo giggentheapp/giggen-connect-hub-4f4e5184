@@ -9,6 +9,7 @@ export interface UserConcept {
   expected_audience: number | null;
   tech_spec: string | null;
   tech_spec_reference: string | null;
+  hospitality_rider_reference: string | null;
   available_dates: any;
   is_published: boolean;
   status: string | null;

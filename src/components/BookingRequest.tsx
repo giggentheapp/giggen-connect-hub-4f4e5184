@@ -179,22 +179,44 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const selectConcept = (concept: any) => {
     setSelectedConcept(concept);
     
-    // Auto-populate fields from concept
+    // Auto-populate fields from concept data
+    console.log('🎯 AUTO-POPULATING booking fields from concept:', concept.title);
+    
+    // Auto-populate date from concept's available dates
     if (concept.available_dates) {
-      // Try to set a default date if available
-      const availableDates = concept.available_dates;
-      if (Array.isArray(availableDates) && availableDates.length > 0) {
-        const firstDate = new Date(availableDates[0]);
-        if (!isNaN(firstDate.getTime())) {
-          setEventDate(firstDate);
+      try {
+        const availableDates = typeof concept.available_dates === 'string' 
+          ? JSON.parse(concept.available_dates) 
+          : concept.available_dates;
+          
+        if (Array.isArray(availableDates) && availableDates.length > 0) {
+          const firstDate = new Date(availableDates[0]);
+          if (!isNaN(firstDate.getTime())) {
+            setEventDate(firstDate);
+            console.log('  ✅ Date auto-set from concept:', firstDate.toDateString());
+          }
         }
+      } catch (e) {
+        console.log('  ⚠️ Could not parse available_dates from concept');
       }
     }
     
-    // Auto-populate venue if available
+    // Auto-populate venue if available (from concept or default)
     if (concept.venue) {
       setVenue(concept.venue);
+      console.log('  ✅ Venue auto-set from concept:', concept.venue);
+    } else {
+      // Reset venue for new concept selection
+      setVenue('');
     }
+    
+    console.log('  📋 Auto-populated booking data:');
+    console.log('    - Title:', concept.title);
+    console.log('    - Description:', concept.description || 'None');
+    console.log('    - Price:', concept.price || 'Not set');
+    console.log('    - Expected audience:', concept.expected_audience || 'Not set');
+    console.log('    - Tech spec reference:', concept.tech_spec_reference || 'None');
+    console.log('    - Hospitality rider reference:', concept.hospitality_rider_reference || 'None');
   };
 
   return (
