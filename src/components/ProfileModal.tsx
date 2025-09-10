@@ -84,39 +84,67 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
         const isOwnProfile = user?.id === userId;
         let portfolioData: any[] = [];
         
-        console.log('Portfolio fetch - isOwnProfile:', isOwnProfile, 'userId:', userId, 'currentUser:', user?.id);
+        console.log('🎨 Portfolio fetch start:', { 
+          isOwnProfile, 
+          targetUserId: userId, 
+          currentUserId: user?.id,
+          profileRole: profile?.role 
+        });
         
         if (isOwnProfile) {
           // Own profile - show all portfolio
-          const { data } = await supabase
+          console.log('📁 Fetching own portfolio...');
+          const { data, error } = await supabase
             .from('profile_portfolio')
             .select('*')
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+            
           portfolioData = data || [];
-          console.log('Own profile portfolio:', portfolioData.length, 'files');
+          console.log('✅ Own portfolio result:', { 
+            count: portfolioData.length, 
+            files: portfolioData.map(f => ({ id: f.id, title: f.title, is_public: f.is_public })),
+            error 
+          });
           setPortfolioVisible(true);
         } else {
           // Other's profile - check if portfolio should be visible
+          console.log('🔍 Checking portfolio settings for other user...');
           const { data: settingsData, error: settingsError } = await supabase
             .from('profile_settings')
             .select('show_portfolio')
             .eq('maker_id', userId)
             .maybeSingle();
             
-          console.log('Profile settings fetch:', { settingsData, settingsError, userId });
+          console.log('⚙️ Settings result:', { 
+            settingsData, 
+            settingsError, 
+            targetUserId: userId,
+            showPortfolio: settingsData?.show_portfolio 
+          });
           
-          const showPortfolio = settingsData?.show_portfolio || false;
-          console.log('Show portfolio decision:', showPortfolio);
+          const showPortfolio = settingsData?.show_portfolio === true;
+          console.log('🎯 Portfolio visibility decision:', showPortfolio);
           setPortfolioVisible(showPortfolio);
           
           if (showPortfolio) {
+            console.log('📂 Fetching public portfolio files...');
             const { data, error } = await supabase
               .from('profile_portfolio')
               .select('*')
               .eq('user_id', userId)
-              .eq('is_public', true);
+              .eq('is_public', true)
+              .order('created_at', { ascending: false });
+              
             portfolioData = data || [];
-            console.log('Other profile portfolio:', portfolioData.length, 'files', 'error:', error);
+            console.log('✅ Public portfolio result:', { 
+              count: portfolioData.length,
+              files: portfolioData.map(f => ({ id: f.id, title: f.title, is_public: f.is_public })),
+              error,
+              query: `user_id=${userId} AND is_public=true`
+            });
+          } else {
+            console.log('❌ Portfolio not visible - settings disabled');
           }
         }
         
@@ -307,8 +335,17 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                         </div>
                       ))}
                     </div>
+                  ) : portfolioVisible ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground italic">
+                        Ingen offentlige porteføljefiler funnet
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Debugging: portfolioVisible={String(portfolioVisible)}, portfolio.length={portfolio.length}
+                      </p>
+                    </div>
                   ) : (
-                    <p className="text-muted-foreground italic">Ingen porteføljeelementer tilgjengelig</p>
+                    <p className="text-muted-foreground italic">Portefølje er ikke tilgjengelig</p>
                   )}
                 </CardContent>
               </Card>
