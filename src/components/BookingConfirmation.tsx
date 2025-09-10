@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Eye, Bell, User } from 'lucide-react';
+import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Users, FileText, Music, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingConfirmationProps {
@@ -18,10 +19,13 @@ interface BookingConfirmationProps {
 }
 
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import { BookingPublicPreview } from '@/components/BookingPublicPreview';
 
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
-  const [hasReadChanges, setHasReadChanges] = useState(false);
+  const [hasReadAgreement, setHasReadAgreement] = useState(false);
   const [realtimeBooking, setRealtimeBooking] = useState(booking);
+  const [showPublicPreview, setShowPublicPreview] = useState(false);
+  const [makerProfile, setMakerProfile] = useState(null);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
 
@@ -36,8 +40,26 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   useEffect(() => {
     if (isOpen) {
-      setHasReadChanges(false);
+      setHasReadAgreement(false);
       setRealtimeBooking(booking);
+      
+      // Load maker profile
+      const loadMakerProfile = async () => {
+        if (booking?.receiver_id) {
+          try {
+            const { data } = await supabase
+              .from('profiles')
+              .select('display_name, avatar_url, bio')
+              .eq('user_id', booking.receiver_id)
+              .single();
+            setMakerProfile(data);
+          } catch (error) {
+            console.error('Error loading maker profile:', error);
+          }
+        }
+      };
+      
+      loadMakerProfile();
     }
   }, [isOpen, booking]);
 
@@ -88,233 +110,264 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
 
   const handleConfirmBooking = async () => {
+    if (!hasReadAgreement) {
+      toast({
+        title: "Les avtalen først",
+        description: "Du må bekrefte at du har lest og forstått avtalen",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      await updateBooking(currentBooking.id, { 
+      const updates: any = { 
         [userConfirmedField]: true,
-        status: 'both_parties_approved'
-      });
+        [userReadField]: true
+      };
+
+      // If both parties confirm, update status
+      if (currentBooking[otherUserConfirmedField]) {
+        updates.status = 'both_parties_approved';
+      }
+      
+      await updateBooking(currentBooking.id, updates);
       
       toast({
-        title: "Booking bekreftet",
-        description: "Du har bekreftet bookingen",
+        title: "Avtale godkjent",
+        description: "Du har godkjent bookingavtalen",
       });
+
+      // If both have now confirmed, show preview
+      if (currentBooking[otherUserConfirmedField]) {
+        setShowPublicPreview(true);
+      }
     } catch (error) {
       // Error handled in hook
     }
   };
 
-  const handleReadAgreement = async () => {
+  const handlePublishEvent = async () => {
     try {
-      await updateBooking(currentBooking.id, { [userReadField]: true });
-      
-      toast({
-        title: "Avtale lest",
-        description: "Du har bekreftet at du har lest avtalen",
-      });
-    } catch (error) {
-      // Error handled in hook
-    }
-  };
+      // Update booking status to published
+      await updateBooking(currentBooking.id, { status: 'upcoming' });
 
-  const handlePublishAgreement = async () => {
-    // This function is deprecated - use BookingAgreement component instead
-    toast({
-      title: "Bruk avtalevisning",
-      description: "Vennligst bruk den nye avtalefunksjonaliteten for publisering",
-      variant: "default",
-    });
+      // Create event in events_market
+      const eventDate = currentBooking.event_date ? new Date(currentBooking.event_date) : new Date();
+      const eventData = {
+        title: currentBooking.title,
+        description: currentBooking.description,
+        portfolio_id: currentBooking.selected_concept_id,
+        ticket_price: currentBooking.ticket_price || null,
+        venue: currentBooking.venue,
+        date: eventDate.toISOString().split('T')[0],
+        time: currentBooking.time || eventDate.toTimeString().split(' ')[0],
+        event_datetime: eventDate.toISOString(),
+        expected_audience: currentBooking.audience_estimate || null,
+        created_by: currentUserId,
+        is_public: true
+      };
+
+      const { error: eventError } = await supabase
+        .from("events_market")
+        .insert([eventData]);
+
+      if (eventError) {
+        console.error('Error creating event in market:', eventError);
+        toast({
+          title: "Arrangement publisert",
+          description: "Arrangementet er publisert, men kunne ikke legges til i markedet automatisk",
+        });
+      } else {
+        toast({
+          title: "Arrangement publisert! 🎉",
+          description: "Arrangementet er nå synlig for alle i Goer-appen",
+        });
+      }
+
+      setShowPublicPreview(false);
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Feil ved publisering",
+        description: "Kunne ikke publisere arrangementet",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!currentBooking) return null;
 
   const bothConfirmed = currentBooking.sender_confirmed && currentBooking.receiver_confirmed;
   const bothReadAgreement = currentBooking.sender_read_agreement && currentBooking.receiver_read_agreement;
-  const canPublish = bothConfirmed && bothReadAgreement;
+  const canShowPreview = bothConfirmed && bothReadAgreement;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Bookingbekreftelse - {currentBooking.title}
+            <FileText className="h-5 w-5" />
+            Avtale-oppsummering - {currentBooking.title}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Status Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Status oversikt</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  {currentBooking.sender_confirmed ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
-                  <span>Avsender bekreftet</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  {currentBooking.receiver_confirmed ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
-                  <span>Mottaker bekreftet</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {currentBooking.sender_read_agreement ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
-                  <span>Avsender har lest avtale</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  {currentBooking.receiver_read_agreement ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-500" />
-                  )}
-                  <span>Mottaker har lest avtale</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-
-          {/* Contact Info (for receivers) */}
-          {isReceiver && currentBooking.sender_contact_info && (
+        <ScrollArea className="max-h-[60vh]">
+          <div className="space-y-6 pr-4">
+            {/* Complete Agreement Overview */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Kontaktinformasjon fra avsender
+                  <Music className="h-5 w-5" />
+                  Komplett avtaleoversikt
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {currentBooking.sender_contact_info.name && (
-                  <div>
-                    <span className="font-medium">Navn: </span>
-                    {currentBooking.sender_contact_info.name}
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">{currentBooking.title}</h3>
+                  {currentBooking.description && (
+                    <p className="text-muted-foreground mb-4">{currentBooking.description}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentBooking.event_date && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>
+                        {format(new Date(currentBooking.event_date), 'dd.MM.yyyy')}
+                        {currentBooking.time && ` kl. ${currentBooking.time}`}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {currentBooking.venue && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>{currentBooking.venue}</span>
+                    </div>
+                  )}
+
+                  {currentBooking.audience_estimate && (
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>Publikum: {currentBooking.audience_estimate}</span>
+                    </div>
+                  )}
+
+                  {currentBooking.ticket_price && (
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                      <span>Billettpris: {currentBooking.ticket_price}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Details */}
+                {(currentBooking.price_musician || currentBooking.artist_fee || currentBooking.door_deal) && (
+                  <div className="border-t pt-4 mt-4">
+                    <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Artist honorar
+                    </h4>
+                    <p className="text-sm">
+                      {currentBooking.door_deal ? (
+                        `${currentBooking.door_percentage}% av dørinntekter`
+                      ) : (
+                        currentBooking.artist_fee || currentBooking.price_musician || 'Ikke spesifisert'
+                      )}
+                    </p>
                   </div>
                 )}
-                {currentBooking.sender_contact_info.email && (
-                  <div>
-                    <span className="font-medium">E-post: </span>
-                    {currentBooking.sender_contact_info.email}
+
+                {/* Technical Requirements */}
+                {currentBooking.tech_spec && (
+                  <div className="border-t pt-4 mt-4">
+                    <h4 className="font-medium mb-2">Tekniske krav</h4>
+                    <p className="text-sm whitespace-pre-line">{currentBooking.tech_spec}</p>
                   </div>
                 )}
-                {currentBooking.sender_contact_info.phone && (
-                  <div>
-                    <span className="font-medium">Telefon: </span>
-                    {currentBooking.sender_contact_info.phone}
+
+                {/* Hospitality */}
+                {currentBooking.hospitality_rider && (
+                  <div className="border-t pt-4 mt-4">
+                    <h4 className="font-medium mb-2">Hospitality</h4>
+                    <p className="text-sm whitespace-pre-line">{currentBooking.hospitality_rider}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          )}
 
-          {/* Event Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Endelige arrangementsdetaljer</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-medium mb-2">Tittel</h3>
-                <p>{currentBooking.title}</p>
-              </div>
-              
-              {currentBooking.description && (
-                <div>
-                  <h3 className="font-medium mb-2">Beskrivelse</h3>
-                  <p className="whitespace-pre-line">{currentBooking.description}</p>
-                </div>
-              )}
+            {/* Contact Info (for receivers) */}
+            {isReceiver && currentBooking.sender_contact_info && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kontaktinformasjon fra arrangør</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {currentBooking.sender_contact_info.name && (
+                    <div>
+                      <span className="font-medium">Navn: </span>
+                      {currentBooking.sender_contact_info.name}
+                    </div>
+                  )}
+                  {currentBooking.sender_contact_info.email && (
+                    <div>
+                      <span className="font-medium">E-post: </span>
+                      {currentBooking.sender_contact_info.email}
+                    </div>
+                  )}
+                  {currentBooking.sender_contact_info.phone && (
+                    <div>
+                      <span className="font-medium">Telefon: </span>
+                      {currentBooking.sender_contact_info.phone}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </ScrollArea>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {currentBooking.event_date && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{format(new Date(currentBooking.event_date), 'dd.MM.yyyy')}</span>
-                  </div>
-                )}
-                
-                {currentBooking.venue && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{currentBooking.venue}</span>
-                  </div>
-                )}
-              </div>
+        {/* Agreement Confirmation */}
+        <div className="border-t pt-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Checkbox
+              id="read-agreement"
+              checked={hasReadAgreement}
+              onCheckedChange={(checked) => setHasReadAgreement(checked === true)}
+            />
+            <label 
+              htmlFor="read-agreement" 
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Jeg har lest og forstått hele avtalen
+            </label>
+          </div>
 
-              {(currentBooking.price_musician || currentBooking.price_ticket) && (
-                <div>
-                  <h3 className="font-medium mb-2 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Pris
-                  </h3>
-                  <div className="space-y-1">
-                    {currentBooking.price_musician && (
-                      <p>Musiker: {currentBooking.price_musician}</p>
-                    )}
-                    {currentBooking.price_ticket && (
-                      <p>Billett: {currentBooking.price_ticket}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-          {/* Documents */}
-          <BookingDocumentViewer
-            techSpec={currentBooking.tech_spec}
-            hospitalityRider={currentBooking.hospitality_rider}
-            bookingStatus={currentBooking.status}
-            isVisible={true} // Always visible in confirmation dialog
-          />
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3">
             {!currentBooking[userConfirmedField] && (
-              <Button onClick={handleConfirmBooking}>
+              <Button 
+                onClick={handleConfirmBooking}
+                disabled={!hasReadAgreement}
+              >
                 <Check className="h-4 w-4 mr-2" />
-                Bekreft booking
+                Godkjenn avtale
               </Button>
             )}
 
             {currentBooking[userConfirmedField] && !currentBooking[otherUserConfirmedField] && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Bell className="h-3 w-3" />
-                Venter på at den andre parten bekrefter
+              <Badge variant="outline">
+                Venter på godkjenning fra den andre parten
               </Badge>
             )}
 
-            {bothConfirmed && !currentBooking[userReadField] && (
-              <Button onClick={handleReadAgreement}>
-                <Check className="h-4 w-4 mr-2" />
-                Jeg har lest avtalen
-              </Button>
-            )}
-
-            {currentBooking[userReadField] && !currentBooking[otherUserReadField] && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Bell className="h-3 w-3" />
-                Venter på at den andre parten leser avtalen
-              </Badge>
-            )}
-
-            {canPublish && (
-              <Button onClick={handlePublishAgreement} className="bg-green-600 hover:bg-green-700">
-                <Check className="h-4 w-4 mr-2" />
-                Publiser arrangement
+            {canShowPreview && !showPublicPreview && (
+              <Button 
+                onClick={() => setShowPublicPreview(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Forhåndsvis og publiser
               </Button>
             )}
             
@@ -324,6 +377,15 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
           </div>
         </div>
       </DialogContent>
+
+      {/* Public Preview Dialog */}
+      <BookingPublicPreview
+        booking={currentBooking}
+        makerProfile={makerProfile}
+        isOpen={showPublicPreview}
+        onClose={() => setShowPublicPreview(false)}
+        onPublish={handlePublishEvent}
+      />
     </Dialog>
   );
 };
