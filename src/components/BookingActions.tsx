@@ -103,8 +103,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
     try {
       await updateBooking(booking.id, { 
-        status: 'cancelled',
-        rejected_at: new Date().toISOString()
+        status: 'cancelled'
       });
       
       toast({
@@ -126,8 +125,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
 
     try {
       await updateBooking(booking.id, { 
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString()
+        status: 'cancelled'
       });
       
       toast({
