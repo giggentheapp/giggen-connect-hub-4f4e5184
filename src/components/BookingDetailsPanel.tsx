@@ -263,50 +263,98 @@ export const BookingDetailsPanel = ({
             
             {/* Artist Payment Section - Auto-filled from concept */}
             <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Artist honorar</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="door-deal" 
-                    checked={booking.door_deal || false}
-                    onCheckedChange={(checked) => handleFieldUpdate('door_deal', booking.door_deal, checked)}
-                    disabled={!canEdit}
-                  />
-                  <Label htmlFor="door-deal" className="text-sm font-medium cursor-pointer">
-                    Spiller for døra
-                  </Label>
-                </div>
-              </div>
+              <Label className="text-base font-semibold">Artist honorar</Label>
               
-              {booking.door_deal ? (
-                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
-                  <EditableField 
-                    fieldName="door_percentage" 
-                    label="Andel av dørinntekter (%)" 
-                    value={booking.door_percentage} 
-                    type="number" 
-                    placeholder="70" 
-                    onPropose={handleFieldUpdate} 
-                  />
-                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                    Artist får {booking.door_percentage || 'X'}% av total dørinntekt
-                  </p>
+              <div className="space-y-3">
+                {/* Payment Type Selection */}
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      handleFieldUpdate('door_deal', booking.door_deal, false);
+                      handleFieldUpdate('by_agreement', booking.by_agreement, false);
+                    }}
+                    disabled={!canEdit}
+                    className="h-auto p-3 flex flex-col items-center gap-1"
+                  >
+                    <span className="font-medium">Fast honorar</span>
+                    <span className="text-xs opacity-70">Garantert beløp</span>
+                  </Button>
+                  
+                  <Button
+                    variant={booking.door_deal ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      handleFieldUpdate('door_deal', booking.door_deal, true);
+                      handleFieldUpdate('by_agreement', booking.by_agreement, false);
+                    }}
+                    disabled={!canEdit}
+                    className="h-auto p-3 flex flex-col items-center gap-1"
+                  >
+                    <span className="font-medium">Spiller for døra</span>
+                    <span className="text-xs opacity-70">Andel av inntekt</span>
+                  </Button>
+                  
+                  <Button
+                    variant={booking.by_agreement ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      handleFieldUpdate('door_deal', booking.door_deal, false);
+                      handleFieldUpdate('by_agreement', booking.by_agreement, true);
+                    }}
+                    disabled={!canEdit}
+                    className="h-auto p-3 flex flex-col items-center gap-1"
+                  >
+                    <span className="font-medium">Ved avtale</span>
+                    <span className="text-xs opacity-70">Avtales senere</span>
+                  </Button>
                 </div>
-              ) : (
-                <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
-                  <EditableField 
-                    fieldName="artist_fee" 
-                    label="Fast honorar (kr)" 
-                    value={booking.artist_fee} 
-                    type="number" 
-                    placeholder="5000" 
-                    onPropose={handleFieldUpdate} 
-                  />
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                    Garantert utbetaling uavhengig av billettsalg
-                  </p>
-                </div>
-              )}
+
+                {/* Payment Details */}
+                {booking.door_deal && (
+                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
+                    <EditableField 
+                      fieldName="door_percentage" 
+                      label="Andel av dørinntekter (%)" 
+                      value={booking.door_percentage} 
+                      type="number" 
+                      placeholder="70" 
+                      onPropose={handleFieldUpdate} 
+                    />
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      Artist får {booking.door_percentage || 'X'}% av total dørinntekt
+                    </p>
+                  </div>
+                )}
+
+                {!booking.door_deal && !booking.by_agreement && (
+                  <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
+                    <EditableField 
+                      fieldName="artist_fee" 
+                      label="Fast honorar (kr)" 
+                      value={booking.artist_fee} 
+                      type="number" 
+                      placeholder="5000" 
+                      onPropose={handleFieldUpdate} 
+                    />
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Garantert utbetaling uavhengig av billettsalg
+                    </p>
+                  </div>
+                )}
+
+                {booking.by_agreement && (
+                  <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
+                      Honorar avtales direkte mellom partene
+                    </p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      Detaljer om betaling diskuteres og bestemmes i direkte kontakt
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
