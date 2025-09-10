@@ -55,7 +55,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  const { updateBooking } = useBookings();
+  const { updateBooking, rejectBooking } = useBookings();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -242,16 +242,33 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     if (!booking || !currentUserId) return;
 
     try {
-      await updateBooking(bookingId, { status: 'cancelled' });
-      setBooking(prev => prev ? { ...prev, status: 'cancelled' } : null);
-      toast({
-        title: "Booking avvist",
-        description: "Bookingen har blitt avvist",
-      });
+      if (booking.status === 'pending') {
+        // This is rejection of a pending request - use permanent deletion
+        await rejectBooking(bookingId, 'Forespørsel avvist');
+        
+        toast({
+          title: "Forespørsel avvist",
+          description: "Forespørselen er permanent slettet fra systemet",
+        });
+
+        // Close the dialog since booking is permanently deleted
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        // This is cancellation of an approved booking - use soft deletion
+        await updateBooking(bookingId, { status: 'cancelled' });
+        setBooking(prev => prev ? { ...prev, status: 'cancelled' } : null);
+        
+        toast({
+          title: "Avtale avlyst",
+          description: "Avtalen har blitt avlyst og flyttet til historikk",
+        });
+      }
     } catch (error) {
       toast({
         title: "Feil ved avvisning",
-        description: "Kunne ikke avvise bookingen",
+        description: "Kunne ikke avvise forespørselen",
         variant: "destructive",
       });
     }

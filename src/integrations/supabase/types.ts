@@ -928,6 +928,14 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      permanently_delete_booking: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
+      process_scheduled_deletions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       booking_status:

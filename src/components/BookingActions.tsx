@@ -16,7 +16,7 @@ interface BookingActionsProps {
 export const BookingActions = ({ booking, currentUserId, onAction }: BookingActionsProps) => {
   const [loading, setLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
-  const { updateBooking, deleteBookingSecurely } = useBookings();
+  const { updateBooking, deleteBookingSecurely, rejectBooking } = useBookings();
   const { toast } = useToast();
 
   const isSender = currentUserId === booking.sender_id;
@@ -102,14 +102,25 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     setLoading(true);
 
     try {
-      await updateBooking(booking.id, { 
-        status: 'cancelled'
-      });
-      
-      toast({
-        title: "Forespørsel avvist",
-        description: "Forespørselen har blitt avvist og flyttet til historikk",
-      });
+      if (booking.status === 'pending') {
+        // This is rejection of a pending request - use permanent deletion
+        await rejectBooking(booking.id, 'Forespørsel avvist');
+        
+        toast({
+          title: "Forespørsel avvist",
+          description: "Forespørselen er permanent slettet fra systemet",
+        });
+      } else {
+        // This is cancellation of an approved booking - use soft deletion
+        await updateBooking(booking.id, { 
+          status: 'cancelled'
+        });
+        
+        toast({
+          title: "Avtale avlyst",
+          description: "Avtalen har blitt avlyst og flyttet til historikk",
+        });
+      }
       
       onAction?.();
     } catch (error) {

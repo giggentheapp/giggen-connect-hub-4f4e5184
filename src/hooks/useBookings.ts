@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Booking {
   id: string;
@@ -58,6 +59,7 @@ export const useBookings = (userId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Set up realtime subscription for booking updates
   useEffect(() => {
@@ -242,6 +244,55 @@ export const useBookings = (userId?: string) => {
     }
   };
 
+  const rejectBooking = async (bookingId: string, rejectionReason?: string) => {
+    try {
+      // First update the booking status to trigger deletion logic
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({
+          status: 'cancelled',
+          rejected_at: new Date().toISOString(),
+          rejection_reason: rejectionReason || 'Forespørsel avvist',
+          last_modified_by: userId
+        })
+        .eq('id', bookingId);
+
+      if (updateError) throw updateError;
+
+      // Process any scheduled deletions immediately
+      const { error: cleanupError } = await supabase.rpc('process_scheduled_deletions');
+      
+      if (cleanupError) {
+        console.warn('Cleanup warning (non-critical):', cleanupError.message);
+      }
+
+      // Remove from local state immediately since it's deleted
+      setBookings(prev => prev.filter(booking => booking.id !== bookingId));
+
+      toast({
+        title: "Forespørsel avvist",
+        description: "Booking-forespørselen er permanent slettet fra systemet"
+      });
+
+      // Refresh bookings to ensure consistency
+      if (userId) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['bookings', userId] }),
+          queryClient.invalidateQueries({ queryKey: ['sentBookings', userId] }),
+          queryClient.invalidateQueries({ queryKey: ['receivedBookings', userId] })
+        ]);
+      }
+    } catch (error: any) {
+      console.error('Error rejecting booking:', error);
+      toast({
+        title: "Feil ved avvisning",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
 
   const fetchHistoricalBookings = useCallback(async () => {
     return fetchBookings(true);
@@ -253,6 +304,7 @@ export const useBookings = (userId?: string) => {
     createBooking,
     updateBooking,
     deleteBookingSecurely,
+    rejectBooking,
     refetch: fetchBookings,
     fetchHistorical: fetchHistoricalBookings
   };
