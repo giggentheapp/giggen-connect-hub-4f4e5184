@@ -30,6 +30,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const [personalMessage, setPersonalMessage] = useState('');
   const [eventDate, setEventDate] = useState<Date>();
   const [venue, setVenue] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [ticketPrice, setTicketPrice] = useState<number | null>(null);
+  const [isDateByAgreement, setIsDateByAgreement] = useState(false);
+  const [isTimeByAgreement, setIsTimeByAgreement] = useState(false);
+  const [isVenueByAgreement, setIsVenueByAgreement] = useState(false);
+  const [isTicketPriceByAgreement, setIsTicketPriceByAgreement] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [hasShownContactDialog, setHasShownContactDialog] = useState(false);
@@ -69,10 +75,30 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!personalMessage.trim() || !selectedConcept || !eventDate || !venue.trim()) {
+    // Enhanced validation that allows "by agreement" fields
+    if (!personalMessage.trim() || !selectedConcept) {
       toast({
         title: "Manglende informasjon",
-        description: "Personlig melding, konseptvalg, dato og spillested er påkrevd",
+        description: "Personlig melding og konseptvalg er påkrevd",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check required fields unless they are "by agreement"
+    if (!isDateByAgreement && !eventDate) {
+      toast({
+        title: "Manglende dato",
+        description: "Velg en dato eller marker som 'Ved avtale'",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isVenueByAgreement && !venue.trim()) {
+      toast({
+        title: "Manglende spillested",
+        description: "Angi spillested eller marker som 'Ved avtale'",
         variant: "destructive",
       });
       return;
@@ -135,11 +161,18 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         title: selectedConcept.title,
         description: selectedConcept.description || '',
         personal_message: personalMessage,
+        // Pricing from concept - handle all pricing types
         price_musician: selectedConcept.price?.toString() || null,
-        artist_fee: selectedConcept.price || null,
+        artist_fee: selectedConcept.door_deal ? null : (selectedConcept.price || null),
+        door_deal: selectedConcept.door_deal || false,
+        door_percentage: selectedConcept.door_percentage || null,
+        // Event details - use "Ved avtale" text when by agreement
+        event_date: isDateByAgreement ? null : eventDate?.toISOString() || null,
+        time: isTimeByAgreement ? "Ved avtale" : (eventTime || null),
+        venue: isVenueByAgreement ? "Ved avtale" : (venue || null),
+        // Audience and pricing
         audience_estimate: selectedConcept.expected_audience || null,
-        event_date: eventDate?.toISOString() || null,
-        venue: venue || null,
+        ticket_price: isTicketPriceByAgreement ? null : (ticketPrice || null),
         status: 'pending',
         sender_contact_info: contactInfoToShare,
         tech_spec: techSpecUrl || "Ikke lagt ved dokument",
@@ -151,6 +184,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       setPersonalMessage('');
       setEventDate(undefined);
       setVenue('');
+      setEventTime('');
+      setTicketPrice(null);
+      setIsDateByAgreement(false);
+      setIsTimeByAgreement(false);
+      setIsVenueByAgreement(false);
+      setIsTicketPriceByAgreement(false);
       setOpen(false);
       
       toast({
@@ -179,17 +218,31 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const selectConcept = (concept: any) => {
     setSelectedConcept(concept);
     
-    // Auto-populate fields from concept data
-    console.log('🎯 AUTO-POPULATING booking fields from concept:', concept.title);
+    // Reset all form fields first
+    setEventDate(undefined);
+    setVenue('');
+    setEventTime('');
+    setTicketPrice(null);
+    setIsDateByAgreement(false);
+    setIsTimeByAgreement(false);
+    setIsVenueByAgreement(false);
+    setIsTicketPriceByAgreement(false);
     
-    // Auto-populate date from concept's available dates
+    // Auto-populate fields from concept data
+    console.log('🎯 COMPLETE AUTO-FILL from concept:', concept.title);
+    
+    // 1. Handle available dates
     if (concept.available_dates) {
       try {
         const availableDates = typeof concept.available_dates === 'string' 
           ? JSON.parse(concept.available_dates) 
           : concept.available_dates;
           
-        if (Array.isArray(availableDates) && availableDates.length > 0) {
+        // Check if dates are set to "indefinite" (by agreement)
+        if (availableDates && typeof availableDates === 'object' && availableDates.indefinite) {
+          setIsDateByAgreement(true);
+          console.log('  ✅ Date set as "Ved avtale" from concept');
+        } else if (Array.isArray(availableDates) && availableDates.length > 0) {
           const firstDate = new Date(availableDates[0]);
           if (!isNaN(firstDate.getTime())) {
             setEventDate(firstDate);
@@ -201,19 +254,40 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       }
     }
     
-    // Auto-populate venue if available (from concept or default)
+    // 2. Handle venue
     if (concept.venue) {
       setVenue(concept.venue);
       console.log('  ✅ Venue auto-set from concept:', concept.venue);
     } else {
-      // Reset venue for new concept selection
-      setVenue('');
+      // If concept doesn't specify venue, mark as by agreement
+      setIsVenueByAgreement(true);
+      console.log('  ✅ Venue set as "Ved avtale" (not specified in concept)');
     }
     
-    console.log('  📋 Auto-populated booking data:');
+    // 3. Handle time (if specified in concept)
+    if (concept.time) {
+      setEventTime(concept.time);
+      console.log('  ✅ Time auto-set from concept:', concept.time);
+    } else {
+      setIsTimeByAgreement(true);
+      console.log('  ✅ Time set as "Ved avtale" (not specified in concept)');
+    }
+    
+    // 4. Handle ticket pricing (if specified in concept) 
+    if (concept.ticket_price && concept.ticket_price > 0) {
+      setTicketPrice(concept.ticket_price);
+      console.log('  ✅ Ticket price auto-set from concept:', concept.ticket_price);
+    } else {
+      setIsTicketPriceByAgreement(true);
+      console.log('  ✅ Ticket price set as "Ved avtale" (not specified in concept)');
+    }
+    
+    console.log('  📋 Complete auto-fill summary:');
     console.log('    - Title:', concept.title);
     console.log('    - Description:', concept.description || 'None');
-    console.log('    - Price:', concept.price || 'Not set');
+    console.log('    - Pricing type:', concept.door_deal ? 'Door deal' : concept.price_by_agreement ? 'By agreement' : 'Fixed');
+    console.log('    - Price/Fee:', concept.price || 'Not set');
+    console.log('    - Door percentage:', concept.door_percentage || 'N/A');
     console.log('    - Expected audience:', concept.expected_audience || 'Not set');
     console.log('    - Tech spec reference:', concept.tech_spec_reference || 'None');
     console.log('    - Hospitality rider reference:', concept.hospitality_rider_reference || 'None');
@@ -301,91 +375,242 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                     Informasjonen nedenfor er hentet fra det valgte konseptet og sendes med forespørselen
                   </p>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Konsept tittel</Label>
-                      <p className="font-medium">{selectedConcept.title}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Artist honorar</Label>
-                      <p className="font-medium">{selectedConcept.price ? `${selectedConcept.price} kr` : 'Ikke satt'}</p>
-                    </div>
-                  </div>
-                  
-                  {selectedConcept.expected_audience && (
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Forventet publikum</Label>
-                      <p>{selectedConcept.expected_audience} personer</p>
-                    </div>
-                  )}
-                  
-                  {selectedConcept.description && (
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Konsept beskrivelse</Label>
-                      <p className="text-sm bg-background p-3 rounded border">{selectedConcept.description}</p>
-                    </div>
-                  )}
-                  
-                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded">
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      <strong>Inkludert:</strong> Tech spec og hospitality rider fra konseptet er automatisk vedlagt
-                    </p>
-                  </div>
-                </CardContent>
+                 <CardContent className="space-y-4">
+                   {/* Complete Auto-filled Summary */}
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Tittel</Label>
+                       <p className="font-medium">{selectedConcept.title}</p>
+                     </div>
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Artist honorar</Label>
+                       <p className="font-medium">
+                         {selectedConcept.door_deal && selectedConcept.door_percentage
+                           ? `${selectedConcept.door_percentage}% av dørinntekter`
+                           : selectedConcept.price_by_agreement
+                           ? 'Ved avtale'
+                           : selectedConcept.price
+                           ? `${selectedConcept.price} kr`
+                           : 'Ved avtale'
+                         }
+                       </p>
+                     </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Dato</Label>
+                       <p className="font-medium">
+                         {isDateByAgreement ? 'Ved avtale' : eventDate ? format(eventDate, 'dd.MM.yyyy') : 'Ved avtale'}
+                       </p>
+                     </div>
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Klokkeslett</Label>
+                       <p className="font-medium">
+                         {isTimeByAgreement ? 'Ved avtale' : eventTime || 'Ved avtale'}
+                       </p>
+                     </div>
+                   </div>
+
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Spillested</Label>
+                       <p className="font-medium">
+                         {isVenueByAgreement ? 'Ved avtale' : venue || 'Ved avtale'}
+                       </p>
+                     </div>
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Billettpris</Label>
+                       <p className="font-medium">
+                         {isTicketPriceByAgreement ? 'Ved avtale' : ticketPrice ? `${ticketPrice} kr` : 'Ved avtale'}
+                       </p>
+                     </div>
+                   </div>
+                   
+                   {selectedConcept.expected_audience && (
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Estimert publikum</Label>
+                       <p className="font-medium">{selectedConcept.expected_audience} personer</p>
+                     </div>
+                   )}
+                   
+                   {selectedConcept.description && (
+                     <div>
+                       <Label className="text-sm font-medium text-muted-foreground">Beskrivelse</Label>
+                       <p className="text-sm bg-background p-3 rounded border">{selectedConcept.description}</p>
+                     </div>
+                   )}
+                   
+                   {/* Agreement Notice */}
+                   {(isDateByAgreement || isTimeByAgreement || isVenueByAgreement || isTicketPriceByAgreement || selectedConcept.price_by_agreement) && (
+                     <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded border border-amber-200 dark:border-amber-800">
+                       <p className="text-sm text-amber-800 dark:text-amber-200">
+                         <strong>⚠️ Detaljer "Ved avtale":</strong> Noen felter markert som "Ved avtale" vil bli forhandlet direkte mellom partene etter godkjenning.
+                       </p>
+                     </div>
+                   )}
+                   
+                   <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded border border-blue-200 dark:border-blue-800">
+                     <p className="text-sm text-blue-800 dark:text-blue-200">
+                       <strong>Inkludert:</strong> Tech spec og hospitality rider fra konseptet er automatisk vedlagt
+                     </p>
+                   </div>
+                 </CardContent>
               </Card>
 
-              {/* Arrangement specific details */}
-              <Card className="bg-orange-50/50 dark:bg-orange-950/20">
-                <CardHeader>
-                  <CardTitle className="text-lg">Arrangement detaljer</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Spesifiser detaljer for denne konkrete bookingen
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Dato *</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !eventDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {eventDate ? format(eventDate, "dd.MM.yyyy") : "Velg dato"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={eventDate}
-                            onSelect={setEventDate}
-                            disabled={(date) => date < new Date()}
-                            initialFocus
-                            className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+               {/* Arrangement specific details - Locked until negotiation */}
+               <Card className="bg-orange-50/50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800">
+                 <CardHeader>
+                   <CardTitle className="text-lg flex items-center gap-2">
+                     Arrangement detaljer
+                     <Badge variant="secondary" className="text-xs">Låst til konsept</Badge>
+                   </CardTitle>
+                   <p className="text-sm text-muted-foreground">
+                     Disse detaljene er hentet fra konseptet og kan endres først i forhandlingsfasen
+                   </p>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     {/* Date Field - Locked but show agreement option */}
+                     <div>
+                       <div className="flex items-center justify-between mb-2">
+                         <Label>Dato</Label>
+                         <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="date-by-agreement"
+                             checked={isDateByAgreement}
+                             onCheckedChange={(checked) => setIsDateByAgreement(!!checked)}
+                           />
+                           <Label htmlFor="date-by-agreement" className="text-xs cursor-pointer">
+                             Ved avtale
+                           </Label>
+                         </div>
+                       </div>
+                       {!isDateByAgreement ? (
+                         <Popover>
+                           <PopoverTrigger asChild>
+                             <Button
+                               variant="outline"
+                               className={cn(
+                                 "w-full justify-start text-left font-normal",
+                                 !eventDate && "text-muted-foreground"
+                               )}
+                             >
+                               <CalendarIcon className="mr-2 h-4 w-4" />
+                               {eventDate ? format(eventDate, "dd.MM.yyyy") : "Auto-utfylt fra konsept"}
+                             </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-auto p-0" align="start">
+                             <Calendar
+                               mode="single"
+                               selected={eventDate}
+                               onSelect={setEventDate}
+                               disabled={(date) => date < new Date()}
+                               initialFocus
+                             />
+                           </PopoverContent>
+                         </Popover>
+                       ) : (
+                         <div className="p-2 border rounded bg-muted/50 text-muted-foreground">
+                           Forhandles direkte mellom partene
+                         </div>
+                       )}
+                     </div>
 
-                    <div>
-                      <Label htmlFor="venue">Spillested *</Label>
-                      <Input
-                        id="venue"
-                        value={venue}
-                        onChange={(e) => setVenue(e.target.value)}
-                        placeholder="F.eks. Rockefeller Music Hall"
-                        required
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                     {/* Time Field */}
+                     <div>
+                       <div className="flex items-center justify-between mb-2">
+                         <Label>Klokkeslett</Label>
+                         <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="time-by-agreement"
+                             checked={isTimeByAgreement}
+                             onCheckedChange={(checked) => setIsTimeByAgreement(!!checked)}
+                           />
+                           <Label htmlFor="time-by-agreement" className="text-xs cursor-pointer">
+                             Ved avtale
+                           </Label>
+                         </div>
+                       </div>
+                       {!isTimeByAgreement ? (
+                         <Input
+                           type="time"
+                           value={eventTime}
+                           onChange={(e) => setEventTime(e.target.value)}
+                           placeholder="19:00"
+                         />
+                       ) : (
+                         <div className="p-2 border rounded bg-muted/50 text-muted-foreground">
+                           Forhandles direkte mellom partene
+                         </div>
+                       )}
+                     </div>
+                   </div>
+
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     {/* Venue Field */}
+                     <div>
+                       <div className="flex items-center justify-between mb-2">
+                         <Label>Spillested</Label>
+                         <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="venue-by-agreement"
+                             checked={isVenueByAgreement}
+                             onCheckedChange={(checked) => setIsVenueByAgreement(!!checked)}
+                           />
+                           <Label htmlFor="venue-by-agreement" className="text-xs cursor-pointer">
+                             Ved avtale
+                           </Label>
+                         </div>
+                       </div>
+                       {!isVenueByAgreement ? (
+                         <Input
+                           value={venue}
+                           onChange={(e) => setVenue(e.target.value)}
+                           placeholder="Auto-utfylt fra konsept"
+                         />
+                       ) : (
+                         <div className="p-2 border rounded bg-muted/50 text-muted-foreground">
+                           Forhandles direkte mellom partene
+                         </div>
+                       )}
+                     </div>
+
+                     {/* Ticket Price Field */}
+                     <div>
+                       <div className="flex items-center justify-between mb-2">
+                         <Label>Billettpris (kr)</Label>
+                         <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="ticket-price-by-agreement"
+                             checked={isTicketPriceByAgreement}
+                             onCheckedChange={(checked) => setIsTicketPriceByAgreement(!!checked)}
+                           />
+                           <Label htmlFor="ticket-price-by-agreement" className="text-xs cursor-pointer">
+                             Ved avtale
+                           </Label>
+                         </div>
+                       </div>
+                       {!isTicketPriceByAgreement ? (
+                         <Input
+                           type="number"
+                           value={ticketPrice || ''}
+                           onChange={(e) => setTicketPrice(e.target.value ? Number(e.target.value) : null)}
+                           placeholder="Auto-utfylt fra konsept"
+                         />
+                       ) : (
+                         <div className="p-2 border rounded bg-muted/50 text-muted-foreground">
+                           Forhandles direkte mellom partene
+                         </div>
+                       )}
+                     </div>
+                   </div>
+
+                   <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                     💡 Alle felter er auto-utfylt fra konseptet. Endringer kan gjøres i forhandlingsfasen.
+                   </div>
+                 </CardContent>
+               </Card>
 
               {/* Personal message (required) */}
               <Card className="bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
