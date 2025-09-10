@@ -87,6 +87,7 @@ export type Database = {
           artist_fee: number | null
           audience_estimate: number | null
           both_parties_approved: boolean | null
+          by_agreement: boolean | null
           cancelled_at: string | null
           concept_ids: string[]
           contact_info_shared_at: string | null
@@ -134,6 +135,7 @@ export type Database = {
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
+          by_agreement?: boolean | null
           cancelled_at?: string | null
           concept_ids?: string[]
           contact_info_shared_at?: string | null
@@ -181,6 +183,7 @@ export type Database = {
           artist_fee?: number | null
           audience_estimate?: number | null
           both_parties_approved?: boolean | null
+          by_agreement?: boolean | null
           cancelled_at?: string | null
           concept_ids?: string[]
           contact_info_shared_at?: string | null
