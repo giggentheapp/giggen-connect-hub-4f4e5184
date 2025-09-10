@@ -307,7 +307,7 @@ export const BookingDetailsPanel = ({
                     className="h-auto p-3 flex flex-col items-center gap-1"
                   >
                     <span className="font-medium">Ved avtale</span>
-                    <span className="text-xs opacity-70">Avtales senere</span>
+                    <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
                   </Button>
                 </div>
 
