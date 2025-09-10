@@ -152,16 +152,6 @@ export const EnhancedBookingDetailsPanel = ({
         </CardContent>
       </Card>
 
-      {/* Privacy Notice */}
-      {!bothConfirmed && (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Sensitiv informasjon som kontaktdetaljer, priser og dokumenter vil kun være synlig 
-            etter at begge parter har godkjent bookingen.
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Contact Information */}
       {contactInfoVisible && isReceiver && booking.sender_contact_info && (
