@@ -245,7 +245,7 @@ export const BookingDetailsPanel = ({
           <div className="space-y-4">
             <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
             
-            {/* Artist Payment Section */}
+            {/* Artist Payment Section - Auto-filled from concept */}
             <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Artist honorar</Label>
