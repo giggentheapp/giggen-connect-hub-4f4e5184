@@ -936,6 +936,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      reject_booking_request: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
     }
     Enums: {
       booking_status:

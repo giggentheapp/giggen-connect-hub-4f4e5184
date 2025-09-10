@@ -104,7 +104,7 @@ export const BookingActions = ({ booking, currentUserId, onAction }: BookingActi
     try {
       if (booking.status === 'pending') {
         // This is rejection of a pending request - use permanent deletion
-        await rejectBooking(booking.id, 'Forespørsel avvist');
+        await rejectBooking(booking.id);
         
         toast({
           title: "Forespørsel avvist",

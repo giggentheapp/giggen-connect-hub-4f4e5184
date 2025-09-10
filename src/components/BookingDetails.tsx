@@ -244,7 +244,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     try {
       if (booking.status === 'pending') {
         // This is rejection of a pending request - use permanent deletion
-        await rejectBooking(bookingId, 'Forespørsel avvist');
+        await rejectBooking(bookingId);
         
         toast({
           title: "Forespørsel avvist",

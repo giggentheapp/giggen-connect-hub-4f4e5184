@@ -246,27 +246,14 @@ export const useBookings = (userId?: string) => {
 
   const rejectBooking = async (bookingId: string, rejectionReason?: string) => {
     try {
-      // First update the booking status to trigger deletion logic
-      const { error: updateError } = await supabase
-        .from('bookings')
-        .update({
-          status: 'cancelled',
-          rejected_at: new Date().toISOString(),
-          rejection_reason: rejectionReason || 'Forespørsel avvist',
-          last_modified_by: userId
-        })
-        .eq('id', bookingId);
+      // Use the direct rejection function that permanently deletes pending bookings
+      const { error: rejectError } = await supabase.rpc('reject_booking_request', {
+        booking_uuid: bookingId
+      });
 
-      if (updateError) throw updateError;
+      if (rejectError) throw rejectError;
 
-      // Process any scheduled deletions immediately
-      const { error: cleanupError } = await supabase.rpc('process_scheduled_deletions');
-      
-      if (cleanupError) {
-        console.warn('Cleanup warning (non-critical):', cleanupError.message);
-      }
-
-      // Remove from local state immediately since it's deleted
+      // Remove from local state immediately since it's permanently deleted
       setBookings(prev => prev.filter(booking => booking.id !== bookingId));
 
       toast({
