@@ -31,6 +31,7 @@ interface EditableFieldProps {
   onPropose: (fieldName: string, oldValue: any, newValue: any) => void;
 }
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 export const BookingDetailsPanel = ({
   booking,
   currentUserId,
@@ -243,7 +244,29 @@ export const BookingDetailsPanel = ({
             <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
           </div>
 
-          <EditableField fieldName="venue" label="Spillested" value={booking.venue} placeholder="F.eks. Rockefeller Music Hall" onPropose={handleFieldUpdate} />
+          {canEdit ? (
+            <div className="space-y-2">
+              <AddressAutocomplete 
+                value={booking.venue || ''} 
+                onChange={(address, coordinates) => {
+                  handleFieldUpdate('venue', booking.venue, address);
+                  if (coordinates) {
+                    // Store coordinates separately if needed
+                    console.log('Venue coordinates:', coordinates);
+                  }
+                }}
+                placeholder="F.eks. Rockefeller Music Hall, Oslo" 
+              />
+            </div>
+          ) : (
+            <EditableField 
+              fieldName="venue" 
+              label="Spillested" 
+              value={booking.venue} 
+              placeholder="F.eks. Rockefeller Music Hall" 
+              onPropose={handleFieldUpdate} 
+            />
+          )}
         </CardContent>
       </Card>
 
