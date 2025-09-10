@@ -680,7 +680,9 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           <div className="flex gap-3 pt-6 border-t">
             <Button 
               type="submit" 
-              disabled={submitting || !selectedConcept || concepts.length === 0 || !personalMessage.trim() || !eventDate || !venue.trim()}
+              disabled={submitting || !selectedConcept || concepts.length === 0 || !personalMessage.trim() || 
+                (!eventDate && !isDateByAgreement) || 
+                (!venue.trim() && !isVenueByAgreement)}
               className="flex-1"
             >
               {submitting ? 'Sender forespørsel...' : 'Send booking-forespørsel'}
