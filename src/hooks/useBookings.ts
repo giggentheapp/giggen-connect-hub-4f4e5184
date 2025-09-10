@@ -244,7 +244,7 @@ export const useBookings = (userId?: string) => {
     }
   };
 
-  const rejectBooking = async (bookingId: string, rejectionReason?: string) => {
+  const rejectBooking = async (bookingId: string) => {
     try {
       // Use the direct rejection function that permanently deletes pending bookings
       const { error: rejectError } = await supabase.rpc('reject_booking_request', {
