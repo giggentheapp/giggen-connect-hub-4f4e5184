@@ -309,12 +309,15 @@ export type Database = {
           available_dates: Json | null
           created_at: string
           description: string | null
+          door_deal: boolean | null
+          door_percentage: number | null
           expected_audience: number | null
           hospitality_rider_reference: string | null
           id: string
           is_published: boolean
           maker_id: string
           price: number | null
+          price_by_agreement: boolean | null
           status: string | null
           tech_spec: string | null
           tech_spec_reference: string | null
@@ -325,12 +328,15 @@ export type Database = {
           available_dates?: Json | null
           created_at?: string
           description?: string | null
+          door_deal?: boolean | null
+          door_percentage?: number | null
           expected_audience?: number | null
           hospitality_rider_reference?: string | null
           id?: string
           is_published?: boolean
           maker_id: string
           price?: number | null
+          price_by_agreement?: boolean | null
           status?: string | null
           tech_spec?: string | null
           tech_spec_reference?: string | null
@@ -341,12 +347,15 @@ export type Database = {
           available_dates?: Json | null
           created_at?: string
           description?: string | null
+          door_deal?: boolean | null
+          door_percentage?: number | null
           expected_audience?: number | null
           hospitality_rider_reference?: string | null
           id?: string
           is_published?: boolean
           maker_id?: string
           price?: number | null
+          price_by_agreement?: boolean | null
           status?: string | null
           tech_spec?: string | null
           tech_spec_reference?: string | null

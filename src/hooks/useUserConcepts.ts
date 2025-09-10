@@ -16,6 +16,10 @@ export interface UserConcept {
   created_at: string;
   updated_at: string;
   maker_id: string;
+  // Flexible pricing fields
+  door_deal?: boolean;
+  door_percentage?: number | null;
+  price_by_agreement?: boolean;
 }
 
 export const useUserConcepts = (userId: string | undefined) => {

@@ -9,6 +9,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarIcon, ChevronLeft, ChevronRight, Eye, Save, X, Video, Music, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +32,9 @@ interface ConceptData {
   selected_tech_spec_file: string;
   selected_hospitality_rider_file: string;
   is_indefinite: boolean;
+  // Flexible pricing options
+  pricing_type: 'fixed' | 'door_deal' | 'by_agreement';
+  door_percentage: string;
 }
 
 interface ConceptWizardProps {
@@ -69,6 +74,9 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
     selected_tech_spec_file: '',
     selected_hospitality_rider_file: '',
     is_indefinite: false,
+    // Flexible pricing options
+    pricing_type: 'fixed',
+    door_percentage: '',
   }));
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
@@ -140,7 +148,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         maker_id: userId,
         title: conceptData.title,
         description: conceptData.description || null,
-        price: conceptData.price ? parseFloat(conceptData.price) : null,
+        price: conceptData.pricing_type === 'fixed' && conceptData.price ? parseFloat(conceptData.price) : null,
+        door_deal: conceptData.pricing_type === 'door_deal',
+        door_percentage: conceptData.pricing_type === 'door_deal' && conceptData.door_percentage ? parseFloat(conceptData.door_percentage) : null,
+        price_by_agreement: conceptData.pricing_type === 'by_agreement',
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
         tech_spec: conceptData.tech_spec || null,
         tech_spec_reference: conceptData.selected_tech_spec_file || null,
@@ -223,10 +234,11 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
       case 0: 
         return conceptData.title.trim().length > 0;
       case 1: 
-        return conceptData.price.length > 0 && 
-               conceptData.expected_audience.length > 0 &&
-               parseFloat(conceptData.price) > 0 &&
-               parseInt(conceptData.expected_audience) > 0;
+        const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
+        const pricingValid = conceptData.pricing_type === 'by_agreement' || 
+                            (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0 && parseFloat(conceptData.price) > 0) ||
+                            (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0 && parseFloat(conceptData.door_percentage) > 0);
+        return audienceValid && pricingValid;
       case 2: 
         return true; // Portfolio is optional
       case 3: 
@@ -312,17 +324,83 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           )}
 
           {currentStep === 1 && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="price">Pris (NOK) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  placeholder="F.eks. 5000"
-                  value={conceptData.price}
-                  onChange={(e) => updateConceptData('price', e.target.value)}
-                />
+            <div className="space-y-6">
+              {/* Pricing Section */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                <Label className="text-base font-semibold">Prismodell *</Label>
+                <RadioGroup
+                  value={conceptData.pricing_type}
+                  onValueChange={(value: 'fixed' | 'door_deal' | 'by_agreement') => {
+                    updateConceptData('pricing_type', value);
+                    // Clear related fields when switching types
+                    if (value !== 'fixed') updateConceptData('price', '');
+                    if (value !== 'door_deal') updateConceptData('door_percentage', '');
+                  }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="fixed" id="fixed-price" />
+                    <Label htmlFor="fixed-price" className="cursor-pointer">Fast pris</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="door_deal" id="door-deal" />
+                    <Label htmlFor="door-deal" className="cursor-pointer">Spiller for døra</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="by_agreement" id="by-agreement" />
+                    <Label htmlFor="by-agreement" className="cursor-pointer">Ved avtale</Label>
+                  </div>
+                </RadioGroup>
+
+                {/* Fixed Price Input */}
+                {conceptData.pricing_type === 'fixed' && (
+                  <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
+                    <Label htmlFor="price">Pris (NOK) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      placeholder="F.eks. 5000"
+                      value={conceptData.price}
+                      onChange={(e) => updateConceptData('price', e.target.value)}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Garantert utbetaling uavhengig av billettsalg
+                    </p>
+                  </div>
+                )}
+
+                {/* Door Deal Input */}
+                {conceptData.pricing_type === 'door_deal' && (
+                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
+                    <Label htmlFor="door-percentage">Andel av dørinntekter (%) *</Label>
+                    <Input
+                      id="door-percentage"
+                      type="number"
+                      placeholder="F.eks. 70"
+                      value={conceptData.door_percentage}
+                      onChange={(e) => updateConceptData('door_percentage', e.target.value)}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      Artist får {conceptData.door_percentage || 'X'}% av total dørinntekt
+                    </p>
+                  </div>
+                )}
+
+                {/* By Agreement */}
+                {conceptData.pricing_type === 'by_agreement' && (
+                  <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Pris avtales direkte med interesserte parter
+                    </p>
+                  </div>
+                )}
               </div>
+
+              {/* Audience Section */}
               <div>
                 <Label htmlFor="audience">Forventet publikum (antall) *</Label>
                 <Input
@@ -514,7 +592,15 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <strong>Pris:</strong> {conceptData.price} NOK
+                    <strong>Pris:</strong>{' '}
+                    {conceptData.pricing_type === 'fixed' && conceptData.price
+                      ? `${conceptData.price} NOK`
+                      : conceptData.pricing_type === 'door_deal' && conceptData.door_percentage
+                      ? `${conceptData.door_percentage}% av dørinntekter`
+                      : conceptData.pricing_type === 'by_agreement'
+                      ? 'Ved avtale'
+                      : 'Ikke spesifisert'
+                    }
                   </div>
                   <div>
                     <strong>Forventet publikum:</strong> {conceptData.expected_audience} personer

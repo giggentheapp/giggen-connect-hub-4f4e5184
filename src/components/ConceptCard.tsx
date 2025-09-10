@@ -29,6 +29,10 @@ interface ConceptCardProps {
     status: string;
     created_at: string;
     maker_id: string;
+    // Flexible pricing fields
+    door_deal?: boolean;
+    door_percentage?: number | null;
+    price_by_agreement?: boolean;
   };
   showActions?: boolean;
   showConceptActions?: boolean;
@@ -222,12 +226,19 @@ const ConceptCard = ({
       <CardContent className="space-y-6">
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {concept.price && (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Pris:</span>
-              <span>{concept.price} NOK</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="font-medium">Pris:</span>
+            <span>
+              {concept.door_deal && concept.door_percentage
+                ? `${concept.door_percentage}% av dørinntekter`
+                : concept.price_by_agreement
+                ? 'Ved avtale'
+                : concept.price
+                ? `${concept.price} NOK`
+                : 'Ikke spesifisert'
+              }
+            </span>
+          </div>
           {concept.expected_audience && (
             <div className="flex items-center gap-2">
               <span className="font-medium">Publikum:</span>
