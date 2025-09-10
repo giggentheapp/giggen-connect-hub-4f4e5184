@@ -84,6 +84,8 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
         const isOwnProfile = user?.id === userId;
         let portfolioData: any[] = [];
         
+        console.log('Portfolio fetch - isOwnProfile:', isOwnProfile, 'userId:', userId, 'currentUser:', user?.id);
+        
         if (isOwnProfile) {
           // Own profile - show all portfolio
           const { data } = await supabase
@@ -91,25 +93,30 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
             .select('*')
             .eq('user_id', userId);
           portfolioData = data || [];
+          console.log('Own profile portfolio:', portfolioData.length, 'files');
           setPortfolioVisible(true);
         } else {
           // Other's profile - check if portfolio should be visible
-          const { data: settingsData } = await supabase
+          const { data: settingsData, error: settingsError } = await supabase
             .from('profile_settings')
             .select('show_portfolio')
             .eq('maker_id', userId)
             .maybeSingle();
             
+          console.log('Profile settings fetch:', { settingsData, settingsError, userId });
+          
           const showPortfolio = settingsData?.show_portfolio || false;
+          console.log('Show portfolio decision:', showPortfolio);
           setPortfolioVisible(showPortfolio);
           
           if (showPortfolio) {
-            const { data } = await supabase
+            const { data, error } = await supabase
               .from('profile_portfolio')
               .select('*')
               .eq('user_id', userId)
               .eq('is_public', true);
             portfolioData = data || [];
+            console.log('Other profile portfolio:', portfolioData.length, 'files', 'error:', error);
           }
         }
         
