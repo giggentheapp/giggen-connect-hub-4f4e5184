@@ -30,7 +30,14 @@ export const BookingCardStep2 = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              {booking.title}
+              <Button 
+                variant="ghost" 
+                className="p-0 h-auto font-semibold text-lg hover:text-primary transition-colors"
+                onClick={onConceptClick}
+                disabled={!booking.concept_ids || booking.concept_ids.length === 0}
+              >
+                {booking.title}
+              </Button>
               <Badge variant="secondary" className="text-xs">
                 {canEdit ? 'Steg 2: Under forhandling' : 'Steg 2: Venter på godkjenning'}
               </Badge>

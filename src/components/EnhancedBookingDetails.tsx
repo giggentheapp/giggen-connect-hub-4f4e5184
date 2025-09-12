@@ -6,11 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EnhancedBookingDetailsPanel } from './EnhancedBookingDetailsPanel';
-import { BookingChangeHistoryPanel } from './BookingChangeHistoryPanel';
 import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Check, X, FileText, History, Edit3, Eye, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, X, FileText, Eye, Trash2 } from 'lucide-react';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 interface EnhancedBookingDetailsProps {
   bookingId: string;
@@ -192,27 +191,8 @@ export const EnhancedBookingDetails = ({
           </DialogHeader>
 
           <div className="flex-1 overflow-hidden">
-            <Tabs defaultValue="details" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="details" className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  {canEdit ? 'Rediger detaljer' : 'Se detaljer'}
-                </TabsTrigger>
-                <TabsTrigger value="changes" className="flex items-center gap-2">
-                  <History className="h-4 w-4" />
-                  Endringer
-                </TabsTrigger>
-              </TabsList>
-              
-              <div className="flex-1 overflow-y-auto mt-4">
-                <TabsContent value="details" className="space-y-6 m-0">
-                  <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
-                </TabsContent>
-                
-                <TabsContent value="changes" className="m-0">
-                  <BookingChangeHistoryPanel bookingId={bookingId} currentUserId={currentUserId} booking={booking} />
-                </TabsContent>
-              </div>
+            <Tabs defaultValue="details" className="flex flex-col h-full">
+              <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
             </Tabs>
           </div>
         </DialogContent>
