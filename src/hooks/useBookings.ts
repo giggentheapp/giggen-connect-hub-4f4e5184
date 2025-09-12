@@ -284,6 +284,42 @@ export const useBookings = (userId?: string) => {
   };
 
 
+  const permanentlyDeleteBooking = async (bookingId: string) => {
+    try {
+      // Use the new function that handles permanent deletion for any status
+      const { error } = await supabase.rpc('permanently_delete_any_booking', {
+        booking_uuid: bookingId
+      });
+
+      if (error) throw error;
+
+      // Remove from local state immediately since it's permanently deleted
+      setBookings(prev => prev.filter(booking => booking.id !== bookingId));
+
+      toast({
+        title: "Booking permanent slettet",
+        description: "Bookingen og all relatert data er permanent fjernet fra systemet"
+      });
+
+      // Refresh bookings to ensure consistency
+      if (userId) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['bookings', userId] }),
+          queryClient.invalidateQueries({ queryKey: ['sentBookings', userId] }),
+          queryClient.invalidateQueries({ queryKey: ['receivedBookings', userId] })
+        ]);
+      }
+    } catch (error: any) {
+      console.error('Error permanently deleting booking:', error);
+      toast({
+        title: "Feil ved sletting",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const fetchHistoricalBookings = useCallback(async () => {
     return fetchBookings(true);
   }, [fetchBookings]);
@@ -295,6 +331,7 @@ export const useBookings = (userId?: string) => {
     updateBooking,
     deleteBookingSecurely,
     rejectBooking,
+    permanentlyDeleteBooking,
     refetch: fetchBookings,
     fetchHistorical: fetchHistoricalBookings
   };

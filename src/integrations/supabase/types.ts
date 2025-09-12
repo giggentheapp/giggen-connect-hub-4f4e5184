@@ -949,7 +949,15 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      permanently_delete_any_booking: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
       permanently_delete_booking: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
+      permanently_delete_booking_with_relations: {
         Args: { booking_uuid: string }
         Returns: undefined
       }

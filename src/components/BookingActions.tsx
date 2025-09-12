@@ -22,7 +22,8 @@ export const BookingActions = ({
   const {
     updateBooking,
     deleteBookingSecurely,
-    rejectBooking
+    rejectBooking,
+    permanentlyDeleteBooking
   } = useBookings();
   const {
     toast
@@ -129,23 +130,8 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      if (booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') {
-        // During negotiation/approval phase - permanent deletion
-        await rejectBooking(booking.id);
-        toast({
-          title: "Booking avlyst",
-          description: "Bookingen er permanent slettet fra systemet"
-        });
-      } else {
-        // For fully approved/published bookings - archive to history
-        await updateBooking(booking.id, {
-          status: 'cancelled'
-        });
-        toast({
-          title: "Avtale avlyst",
-          description: "Avtalen har blitt avlyst og flyttet til historikk"
-        });
-      }
+      // Always use permanent deletion for ongoing bookings
+      await permanentlyDeleteBooking(booking.id);
       onAction?.();
     } catch (error) {
       // Error handled in hook
@@ -239,11 +225,6 @@ export const BookingActions = ({
                 Du har godkjent ✓
                 {booking.status !== 'approved_by_both' && ' - Venter på motpart'}
               </Badge>}
-            
-            <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
-              <X className="h-4 w-4 mr-1" />
-              Avlys booking (permanent)
-            </Button>
           </>}
 
         {/* Progressive approval statuses */}
@@ -272,11 +253,6 @@ export const BookingActions = ({
                   Godkjenn for publisering (2/3)
                 </Button>
               </>}
-            
-            <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
-              <X className="h-4 w-4 mr-1" />
-              Avlys booking (permanent)
-            </Button>
           </>}
 
         {/* STEP 3: Publish (both parties, approved_by_both status) */}
@@ -293,11 +269,6 @@ export const BookingActions = ({
             {booking[isSender ? 'published_by_receiver' : 'published_by_sender'] && <Badge variant="outline" className="text-blue-700 border-blue-300">
                 Motpart har publisert ✓
               </Badge>}
-            
-            <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
-              <X className="h-4 w-4 mr-1" />
-              Avlys avtale
-            </Button>
           </>}
 
         {/* Show status for sent requests (sender view of pending) */}
@@ -306,27 +277,27 @@ export const BookingActions = ({
             Venter på mottakers svar
           </div>}
 
-        {/* Cancel/Delete button with confirmation for negotiation and approval phases */}
+        {/* Single cancel/delete button with confirmation for ongoing bookings */}
         {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') && <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
                 <X className="h-4 w-4 mr-1" />
-                {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Avlys booking' : 'Avlys avtale'}
+                Avlys booking
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Avlys booking?' : 'Avlys avtale?'}
+                  Er du sikker på at du vil avlyse denne bookingen?
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? "Dette vil permanent slette bookingen fra systemet. Handlingen kan ikke angres." : "Dette vil avlyse en pågående avtale og flytte den til historikk."}
+                  Dette vil permanent slette bookingen og all relatert data fra systemet. Handlingen kan ikke angres.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Avbryt</AlertDialogCancel>
                 <AlertDialogAction onClick={handleCancelBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Slett permanent' : 'Avlys avtale'}
+                  Slett permanent
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
