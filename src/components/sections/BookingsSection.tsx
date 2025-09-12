@@ -56,7 +56,7 @@ export const BookingsSection = ({
   // New workflow-based filtering
   const incomingRequests = bookings.filter(b => b.receiver_id === profile.user_id && b.status === 'pending');
   const sentRequests = bookings.filter(b => b.sender_id === profile.user_id && b.status === 'pending');
-  const ongoingAgreements = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'allowed' || b.status === 'approved_by_both'));
+  const ongoingAgreements = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'allowed' || b.status === 'approved_by_sender' || b.status === 'approved_by_receiver' || b.status === 'approved_by_both'));
   const upcomingEvents = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && b.status === 'upcoming');
   const historicalBookings = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'cancelled' || b.status === 'completed'));
 
