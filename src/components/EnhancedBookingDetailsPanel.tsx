@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import { BookingDetailsPanel } from '@/components/BookingDetailsPanel';
 import { DocumentViewer } from '@/components/DocumentViewer';
-import { BookingApprovalDialog } from '@/components/BookingApprovalDialog';
+import { ComprehensiveAgreementReview } from '@/components/ComprehensiveAgreementReview';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { supabase } from '@/integrations/supabase/client';
@@ -242,8 +242,8 @@ export const EnhancedBookingDetailsPanel = ({
         </Card>
       )}
 
-      {/* Approval Dialog */}
-      <BookingApprovalDialog
+      {/* Comprehensive Agreement Review */}
+      <ComprehensiveAgreementReview
         booking={booking}
         isOpen={approvalOpen}
         onClose={() => setApprovalOpen(false)}

@@ -72,7 +72,32 @@ export const BookingDetailsPanel = ({
     }
 
     try {
-      await updateBooking(booking.id, { [fieldName]: newValue });
+      const updates: any = { 
+        [fieldName]: newValue,
+        last_modified_by: currentUserId,
+        last_modified_at: new Date().toISOString()
+      };
+
+      // If either party has approved, reset their approval when changes are made
+      const isSender = currentUserId === booking.sender_id;
+      const isReceiver = currentUserId === booking.receiver_id;
+      
+      if (booking.approved_by_sender || booking.approved_by_receiver) {
+        // Reset approvals when changes are made
+        updates.approved_by_sender = false;
+        updates.approved_by_receiver = false;
+        updates.sender_approved_at = null;
+        updates.receiver_approved_at = null;
+        
+        toast({
+          title: "Godkjenninger nullstilt",
+          description: "På grunn av endringene må begge parter godkjenne avtalen på nytt",
+          variant: "default"
+        });
+      }
+
+      await updateBooking(booking.id, updates);
+      
       toast({
         title: "Oppdatert",
         description: `${fieldName} er oppdatert`,
