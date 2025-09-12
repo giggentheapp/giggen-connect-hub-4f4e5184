@@ -141,7 +141,7 @@ export const EnhancedBookingDetailsPanel = ({
           </div>
 
           {/* Approval Button */}
-          {booking.status === 'allowed' && !booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] && (
+          {booking.status === 'approved_by_both' && !booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] && (
             <div className="mt-4">
               <Button onClick={() => setApprovalOpen(true)} className="w-full">
                 <Check className="h-4 w-4 mr-2" />

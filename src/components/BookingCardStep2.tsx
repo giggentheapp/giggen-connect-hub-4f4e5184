@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, DollarSign, MessageCircle, Edit3 } from 'lucide-react';
+import { Calendar, MapPin, Users, DollarSign, MessageCircle, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 
@@ -20,8 +20,8 @@ export const BookingCardStep2 = ({
   onConceptClick, 
   onAction 
 }: BookingCardStep2Props) => {
-  const isAllowed = booking.status === 'allowed';
-  const isBothApproved = booking.status === 'both_parties_approved';
+  const isApprovedByBoth = booking.status === 'approved_by_both';
+  const canEdit = isApprovedByBoth;
 
   return (
     <Card className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500">
@@ -31,7 +31,7 @@ export const BookingCardStep2 = ({
             <CardTitle className="text-lg flex items-center gap-2">
               {booking.title}
               <Badge variant="secondary" className="text-xs">
-                {isAllowed ? 'Steg 2: Under forhandling' : 'Steg 2: Klar for publisering'}
+                {canEdit ? 'Steg 2: Under forhandling' : 'Steg 2: Venter på godkjenning'}
               </Badge>
             </CardTitle>
             {booking.description && (
@@ -40,11 +40,11 @@ export const BookingCardStep2 = ({
               </p>
             )}
           </div>
-          <Badge className={isAllowed 
+          <Badge className={canEdit 
             ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-            : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
           }>
-            {isAllowed ? 'Under forhandling' : 'Godkjent'}
+            {canEdit ? 'Under forhandling' : 'Venter på begge parter'}
           </Badge>
         </div>
       </CardHeader>
@@ -107,8 +107,8 @@ export const BookingCardStep2 = ({
               variant="outline"
               onClick={onDetailsClick}
             >
-              <Edit3 className="h-4 w-4 mr-1" />
-              {isAllowed ? 'Rediger detaljer' : 'Se finale detaljer'}
+              <Eye className="h-4 w-4 mr-1" />
+              {canEdit ? 'Rediger detaljer' : 'Se detaljer'}
             </Button>
             
             {booking.concept_ids && booking.concept_ids.length > 0 && (
@@ -131,10 +131,10 @@ export const BookingCardStep2 = ({
 
         {/* Status info */}
         <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-          {isAllowed ? (
+          {canEdit ? (
             <span>🔄 Begge parter kan redigere detaljer og se kontaktinfo</span>
           ) : (
-            <span>✅ Avtalen er godkjent - klar for publisering!</span>
+            <span>⏳ Venter på at begge parter godkjenner før redigering er mulig</span>
           )}
         </div>
       </CardContent>

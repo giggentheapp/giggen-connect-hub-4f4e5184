@@ -155,7 +155,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
       );
     }
 
-    if (booking.status === 'allowed' || booking.status === 'both_parties_approved') {
+    if (booking.status === 'approved_by_both' || booking.status === 'upcoming') {
       return (
         <BookingCardStep2
           booking={booking}

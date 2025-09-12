@@ -312,9 +312,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'pending' || booking.status === 'allowed';
-  const isNegotiationPhase = booking.status === 'pending' || booking.status === 'allowed';
-  const isConfirmationPhase = booking.status === 'both_parties_approved';
+  const canEdit = booking.status === 'approved_by_both' || booking.status === 'upcoming';
+  const isNegotiationPhase = booking.status === 'approved_by_both';
+  const isConfirmationPhase = booking.status === 'upcoming';
 
   return (
     <div className="space-y-6">
@@ -454,7 +454,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
         techSpec={booking.tech_spec}
         hospitalityRider={booking.hospitality_rider}
       bookingStatus={booking.status}
-      isVisible={booking.status === 'allowed' || booking.status === 'both_parties_approved' || booking.status === 'upcoming'}
+      isVisible={booking.status === 'approved_by_both' || booking.status === 'upcoming' || booking.status === 'published'}
       />
 
       {/* Status and Actions */}

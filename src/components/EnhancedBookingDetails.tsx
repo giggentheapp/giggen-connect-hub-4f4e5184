@@ -106,10 +106,10 @@ export const EnhancedBookingDetails = ({
   }
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'pending' || booking.status === 'allowed';
-  const isNegotiationPhase = booking.status === 'pending' || booking.status === 'allowed';
-  const isConfirmationPhase = booking.status === 'both_parties_approved';
-  const isPublished = booking.status === 'upcoming';
+  const canEdit = booking.status === 'approved_by_both' || booking.status === 'upcoming';
+  const isNegotiationPhase = booking.status === 'approved_by_both';
+  const isConfirmationPhase = booking.status === 'upcoming';
+  const isPublished = booking.status === 'published';
   const bothConfirmed = booking.sender_confirmed && booking.receiver_confirmed;
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -118,17 +118,27 @@ export const EnhancedBookingDetails = ({
           color: 'bg-blue-100 text-blue-800',
           label: 'Venter på svar'
         };
-      case 'allowed':
+      case 'approved_by_sender':
+        return {
+          color: 'bg-orange-100 text-orange-800',
+          label: 'Godkjent av avsender'
+        };
+      case 'approved_by_receiver':
+        return {
+          color: 'bg-orange-100 text-orange-800',
+          label: 'Godkjent av mottaker'
+        };
+      case 'approved_by_both':
         return {
           color: 'bg-yellow-100 text-yellow-800',
-          label: 'Tillatt - Kan redigeres'
-        };
-      case 'both_parties_approved':
-        return {
-          color: 'bg-purple-100 text-purple-800',
-          label: 'Godkjent - Klar for publisering'
+          label: 'Godkjent - Kan redigeres'
         };
       case 'upcoming':
+        return {
+          color: 'bg-purple-100 text-purple-800',
+          label: 'Klar for publisering'
+        };
+      case 'published':
         return {
           color: 'bg-green-100 text-green-800',
           label: 'Publisert'
@@ -140,7 +150,7 @@ export const EnhancedBookingDetails = ({
         };
       case 'cancelled':
         return {
-          color: 'bg-orange-100 text-orange-800',
+          color: 'bg-red-100 text-red-800',
           label: 'Avlyst'
         };
       default:
@@ -184,8 +194,8 @@ export const EnhancedBookingDetails = ({
             <Tabs defaultValue="details" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="details" className="flex items-center gap-2">
-                  <Edit3 className="h-4 w-4" />
-                  Detaljer
+                  <Eye className="h-4 w-4" />
+                  {canEdit ? 'Rediger detaljer' : 'Se detaljer'}
                 </TabsTrigger>
                 <TabsTrigger value="changes" className="flex items-center gap-2">
                   <History className="h-4 w-4" />
