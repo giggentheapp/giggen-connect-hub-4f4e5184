@@ -111,6 +111,8 @@ export type Database = {
           price_ticket: string | null
           public_visibility_settings: Json | null
           published_at: string | null
+          published_by_receiver: boolean | null
+          published_by_sender: boolean | null
           receiver_allowed_at: string | null
           receiver_approved_at: string | null
           receiver_confirmed: boolean | null
@@ -163,6 +165,8 @@ export type Database = {
           price_ticket?: string | null
           public_visibility_settings?: Json | null
           published_at?: string | null
+          published_by_receiver?: boolean | null
+          published_by_sender?: boolean | null
           receiver_allowed_at?: string | null
           receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
@@ -215,6 +219,8 @@ export type Database = {
           price_ticket?: string | null
           public_visibility_settings?: Json | null
           published_at?: string | null
+          published_by_receiver?: boolean | null
+          published_by_sender?: boolean | null
           receiver_allowed_at?: string | null
           receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
@@ -964,6 +970,9 @@ export type Database = {
         | "upcoming"
         | "completed"
         | "cancelled"
+        | "approved_by_sender"
+        | "approved_by_receiver"
+        | "approved_by_both"
       user_role: "maker" | "goer"
     }
     CompositeTypes: {
@@ -1099,6 +1108,9 @@ export const Constants = {
         "upcoming",
         "completed",
         "cancelled",
+        "approved_by_sender",
+        "approved_by_receiver",
+        "approved_by_both",
       ],
       user_role: ["maker", "goer"],
     },
