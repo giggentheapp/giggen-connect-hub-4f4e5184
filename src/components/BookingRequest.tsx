@@ -262,7 +262,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                 <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
                   <p>• Mottakeren får en melding om forespørselen din</p>
                   <p>• De kan se konseptdetaljene og din personlige melding</p>
-                  <p>• Ved interesse kan de godkjenne forespørselen</p>
+                  <p>• Ved interesse kan de tillate forespørselen</p>
                   <p>• Dere får da tilgang til hverandres kontaktinformasjon</p>
                   <p>• Detaljerte forhandlinger kan starte direkte mellom dere</p>
                 </div>
