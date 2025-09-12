@@ -50,7 +50,7 @@ export const ComprehensiveAgreementReview = ({
   onClose, 
   currentUserId 
 }: ComprehensiveAgreementReviewProps) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set()); // Start with no sections expanded
   const [scrollTracking, setScrollTracking] = useState<Record<string, boolean>>({});
   const [sectionsCompleted, setSectionsCompleted] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
@@ -67,7 +67,18 @@ export const ComprehensiveAgreementReview = ({
   const userApprovalTimestamp = isSender ? 'sender_approved_at' : 'receiver_approved_at';
   const otherUserApprovalTimestamp = isSender ? 'receiver_approved_at' : 'sender_approved_at';
 
-  // Check if booking was modified after this user's approval or other user's approval
+  // Debug component opening
+  useEffect(() => {
+    if (isOpen && booking) {
+      console.log('🔍 ComprehensiveAgreementReview opened for booking:', booking.id);
+      console.log('📊 Initial state:', {
+        expandedSections: Array.from(expandedSections),
+        scrollTracking,
+        sectionsCompleted,
+        allSectionsCompleted
+      });
+    }
+  }, [isOpen, booking]);
   useEffect(() => {
     if (!booking || !isOpen) return;
 
@@ -130,21 +141,35 @@ export const ComprehensiveAgreementReview = ({
   const allSectionsCompleted = completedSections === totalSections;
 
   // Handle scroll tracking for each section
-  const handleScroll = (sectionId: string, element: HTMLDivElement) => {
-    const { scrollTop, scrollHeight, clientHeight } = element;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
-    
-    if (isAtBottom && !scrollTracking[sectionId]) {
-      setScrollTracking(prev => ({ ...prev, [sectionId]: true }));
+  const handleScroll = (sectionId: string) => {
+    return (e: React.UIEvent<HTMLDivElement>) => {
+      const element = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = element;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px tolerance
       
-      // Mark section as completed when scrolled to bottom
-      if (!sectionsCompleted[sectionId]) {
-        setSectionsCompleted(prev => ({ ...prev, [sectionId]: true }));
+      console.log(`🔍 Scroll tracking for ${sectionId}:`, {
+        scrollTop,
+        scrollHeight,
+        clientHeight,
+        isAtBottom,
+        alreadyTracked: scrollTracking[sectionId]
+      });
+      
+      if (isAtBottom && !scrollTracking[sectionId]) {
+        console.log(`✅ Section ${sectionId} completed by scrolling!`);
+        setScrollTracking(prev => ({ ...prev, [sectionId]: true }));
+        
+        // Mark section as completed when scrolled to bottom
+        if (!sectionsCompleted[sectionId]) {
+          setSectionsCompleted(prev => ({ ...prev, [sectionId]: true }));
+        }
       }
-    }
+    };
   };
 
   const toggleSection = (sectionId: string) => {
+    console.log(`🔄 Toggling section ${sectionId}. Currently expanded:`, Array.from(expandedSections));
+    
     if (expandedSections.has(sectionId)) {
       setExpandedSections(prev => {
         const newSet = new Set(prev);
@@ -157,6 +182,14 @@ export const ComprehensiveAgreementReview = ({
   };
 
   const handleApproval = async () => {
+    console.log('🚀 Attempting approval...', {
+      allSectionsCompleted,
+      completedSections,
+      totalSections,
+      sectionsCompleted,
+      scrollTracking
+    });
+    
     if (!allSectionsCompleted) {
       toast({
         title: "Gjennomgå alle seksjoner",
@@ -221,7 +254,7 @@ export const ComprehensiveAgreementReview = ({
             </DialogTitle>
             
             {hasChangedSinceLastApproval && (
-              <Alert>
+              <Alert className="mb-4">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   Avtalen har blitt endret siden siste godkjenning. Vennligst gjennomgå alle endringene nøye.
@@ -229,12 +262,32 @@ export const ComprehensiveAgreementReview = ({
               </Alert>
             )}
 
+            <Alert className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Obligatorisk gjennomgang:</strong> Du må åpne og scrolle til bunns av alle 5 seksjoner nedenfor før du kan godkjenne avtalen. Dette sikrer at du har lest og forstått alle vilkår.
+              </AlertDescription>
+            </Alert>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Fremgang: {completedSections}/{totalSections} seksjoner gjennomgått</span>
-                <span>{Math.round((completedSections / totalSections) * 100)}%</span>
+                <span className={cn(
+                  "font-medium",
+                  allSectionsCompleted ? "text-green-600" : "text-orange-600"
+                )}>
+                  {Math.round((completedSections / totalSections) * 100)}%
+                </span>
               </div>
               <Progress value={(completedSections / totalSections) * 100} className="h-2" />
+              
+              {/* Debug info */}
+              <div className="text-xs text-muted-foreground border p-2 rounded">
+                <div>Completed: {completedSections}/{totalSections}</div>
+                <div>Scroll tracking: {JSON.stringify(scrollTracking)}</div>
+                <div>Sections completed: {JSON.stringify(sectionsCompleted)}</div>
+                <div>All completed: {allSectionsCompleted ? 'YES' : 'NO'}</div>
+              </div>
             </div>
           </div>
         </DialogHeader>
@@ -290,8 +343,8 @@ export const ComprehensiveAgreementReview = ({
                 <Card>
                   <CardContent className="pt-6">
                     <ScrollArea 
-                      className="h-48"
-                      onScrollCapture={(e) => handleScroll('basic', e.target as HTMLDivElement)}
+                      className="h-48 border"
+                      onScroll={handleScroll('basic')}
                     >
                       <div className="space-y-4" ref={(el) => { if (el) scrollRefs.current.basic = el; }}>
                         <div>
@@ -348,8 +401,8 @@ export const ComprehensiveAgreementReview = ({
                 <Card>
                   <CardContent className="pt-6">
                     <ScrollArea 
-                      className="h-48"
-                      onScrollCapture={(e) => handleScroll('pricing', e.target as HTMLDivElement)}
+                      className="h-48 border"
+                      onScroll={handleScroll('pricing')}
                     >
                       <div className="space-y-4" ref={(el) => { if (el) scrollRefs.current.pricing = el; }}>
                         {booking.audience_estimate && (
@@ -407,8 +460,8 @@ export const ComprehensiveAgreementReview = ({
                 <Card>
                   <CardContent className="pt-6">
                     <ScrollArea 
-                      className="h-48"
-                      onScrollCapture={(e) => handleScroll('technical', e.target as HTMLDivElement)}
+                      className="h-48 border"
+                      onScroll={handleScroll('technical')}
                     >
                       <div className="space-y-4" ref={(el) => { if (el) scrollRefs.current.technical = el; }}>
                         {booking.tech_spec ? (
@@ -465,8 +518,8 @@ export const ComprehensiveAgreementReview = ({
                 <Card>
                   <CardContent className="pt-6">
                     <ScrollArea 
-                      className="h-48"
-                      onScrollCapture={(e) => handleScroll('hospitality', e.target as HTMLDivElement)}
+                      className="h-48 border"
+                      onScroll={handleScroll('hospitality')}
                     >
                       <div className="space-y-4" ref={(el) => { if (el) scrollRefs.current.hospitality = el; }}>
                         {booking.hospitality_rider ? (
@@ -523,8 +576,8 @@ export const ComprehensiveAgreementReview = ({
                 <Card>
                   <CardContent className="pt-6">
                     <ScrollArea 
-                      className="h-48"
-                      onScrollCapture={(e) => handleScroll('contact', e.target as HTMLDivElement)}
+                      className="h-48 border"
+                      onScroll={handleScroll('contact')}
                     >
                       <div className="space-y-4" ref={(el) => { if (el) scrollRefs.current.contact = el; }}>
                         {booking.sender_contact_info && (
@@ -590,10 +643,13 @@ export const ComprehensiveAgreementReview = ({
               <Button 
                 onClick={handleApproval}
                 disabled={!allSectionsCompleted || loading}
-                className="ml-auto"
+                className={cn(
+                  "ml-auto",
+                  !allSectionsCompleted && "cursor-not-allowed opacity-50"
+                )}
               >
                 <Check className="h-4 w-4 mr-2" />
-                {loading ? 'Godkjenner...' : 'Godkjenn avtale'}
+                {loading ? 'Godkjenner...' : `Godkjenn avtale (${completedSections}/${totalSections})`}
               </Button>
             </>
           ) : (
