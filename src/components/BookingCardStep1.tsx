@@ -79,14 +79,6 @@ export const BookingCardStep1 = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-3 border-t">
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onDetailsClick}
-            >
-              Se detaljer
-            </Button>
-            
             {booking.concept_ids && booking.concept_ids.length > 0 && (
               <Button 
                 size="sm" 
@@ -117,7 +109,7 @@ export const BookingCardStep1 = ({
         {/* Info note for receivers */}
         {isReceiver && (
           <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-            💡 Kontaktinfo og dokumenter blir synlige først når du tillater forespørselen
+            💡 Ved tillatelse kommer dere inn i forhandlingsfasen hvor detaljer kan justeres. Kontaktinfo og dokumenter blir da synlige.
           </div>
         )}
       </CardContent>
