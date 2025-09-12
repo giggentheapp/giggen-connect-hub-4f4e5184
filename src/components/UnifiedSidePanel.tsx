@@ -146,9 +146,9 @@ export const UnifiedSidePanel = ({
         label: 'Konsepter',
         icon: Lightbulb
       }, {
-        id: 'admin-events',
-        label: 'Kommende arrangementer',
-        icon: Calendar
+        id: 'bookings',
+        label: 'Booking',
+        icon: Briefcase
       }, {
         id: 'settings',
         label: 'Innstillinger',
@@ -179,6 +179,12 @@ export const UnifiedSidePanel = ({
           return <ProfileSection profile={profile} />;
         }
         return null;
+      case 'bookings':
+        // Only available to makers
+        if (ismaker) {
+          return <BookingsSection profile={profile} />;
+        }
+        return null;
       case 'admin-files':
         // Only available to makers
         if (ismaker) {
@@ -189,12 +195,6 @@ export const UnifiedSidePanel = ({
         // Only available to makers
         if (ismaker) {
           return <AdminConceptsSection profile={profile} />;
-        }
-        return null;
-      case 'admin-events':
-        // Only available to makers
-        if (ismaker) {
-          return <UpcomingEventsSection profile={profile} isAdminView={true} />;
         }
         return null;
       case 'settings':
