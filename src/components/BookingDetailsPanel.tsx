@@ -387,10 +387,10 @@ export const BookingDetailsPanel = ({
       
 
       {/* Documents */}
-      <BookingDocumentViewer techSpec={booking.tech_spec} hospitalityRider={booking.hospitality_rider} bookingStatus={booking.status} isVisible={booking.status === 'approved_by_both' || booking.status === 'upcoming' || booking.status === 'published'} />
+      <BookingDocumentViewer techSpec={booking.tech_spec} hospitalityRider={booking.hospitality_rider} bookingStatus={booking.status} isVisible={canEdit || booking.status === 'upcoming' || booking.status === 'published'} />
 
       {!canEdit && <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-          💡 Endringer kan kun foreslås når booking er i forhandlingsfase
+          💡 Detaljer kan redigeres når bookingen er godkjent og i forhandlingsfase
         </div>}
     </div>;
 };

@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { CalendarIcon, AlertTriangle, Check, X, Eye, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 
@@ -312,7 +313,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
 
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'approved_by_both' || booking.status === 'upcoming';
+  const canEdit = canBeEditedByParties(booking.status as BookingStatus) || booking.status === 'approved_by_both' || booking.status === 'upcoming';
   const isNegotiationPhase = booking.status === 'approved_by_both';
   const isConfirmationPhase = booking.status === 'upcoming';
 

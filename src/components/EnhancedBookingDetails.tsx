@@ -11,6 +11,7 @@ import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Check, X, FileText, History, Edit3, Eye, Trash2 } from 'lucide-react';
+import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 interface EnhancedBookingDetailsProps {
   bookingId: string;
   isOpen: boolean;
@@ -106,7 +107,7 @@ export const EnhancedBookingDetails = ({
   }
   const isSender = currentUserId === booking.sender_id;
   const isReceiver = currentUserId === booking.receiver_id;
-  const canEdit = booking.status === 'approved_by_both' || booking.status === 'upcoming';
+  const canEdit = canBeEditedByParties(booking.status as BookingStatus) || booking.status === 'approved_by_both' || booking.status === 'upcoming';
   const isNegotiationPhase = booking.status === 'approved_by_both';
   const isConfirmationPhase = booking.status === 'upcoming';
   const isPublished = booking.status === 'published';

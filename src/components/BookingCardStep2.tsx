@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Users, DollarSign, MessageCircle, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
+import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 
 interface BookingCardStep2Props {
   booking: any;
@@ -21,7 +22,7 @@ export const BookingCardStep2 = ({
   onAction 
 }: BookingCardStep2Props) => {
   const isApprovedByBoth = booking.status === 'approved_by_both';
-  const canEdit = isApprovedByBoth;
+  const canEdit = canBeEditedByParties(booking.status as BookingStatus) || isApprovedByBoth;
 
   return (
     <Card className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500">
