@@ -253,6 +253,20 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                   required
                 />
               </div>
+
+              {/* Next Steps Information */}
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                  Hva skjer videre?
+                </h4>
+                <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                  <p>• Mottakeren får en melding om forespørselen din</p>
+                  <p>• De kan se konseptdetaljene og din personlige melding</p>
+                  <p>• Ved interesse kan de godkjenne forespørselen</p>
+                  <p>• Dere får da tilgang til hverandres kontaktinformasjon</p>
+                  <p>• Detaljerte forhandlinger kan starte direkte mellom dere</p>
+                </div>
+              </div>
             </>
           )}
 
