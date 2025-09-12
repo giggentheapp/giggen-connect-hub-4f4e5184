@@ -56,7 +56,7 @@ export const BookingsSection = ({
   // New workflow-based filtering
   const incomingRequests = bookings.filter(b => b.receiver_id === profile.user_id && b.status === 'pending');
   const sentRequests = bookings.filter(b => b.sender_id === profile.user_id && b.status === 'pending');
-  const ongoingAgreements = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'allowed' || b.status === 'both_parties_approved'));
+  const ongoingAgreements = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'allowed' || b.status === 'approved_by_both'));
   const upcomingEvents = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && b.status === 'upcoming');
   const historicalBookings = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'cancelled' || b.status === 'completed'));
 
@@ -67,7 +67,7 @@ export const BookingsSection = ({
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'allowed':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'both_parties_approved':
+      case 'approved_by_both':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'upcoming':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -85,7 +85,7 @@ export const BookingsSection = ({
         return 'Venter svar';
       case 'allowed':
         return 'Tillatt';
-      case 'both_parties_approved':
+      case 'approved_by_both':
         return 'Godkjent';
       case 'upcoming':
         return 'Publisert';
@@ -103,7 +103,7 @@ export const BookingsSection = ({
         return booking.receiver_id === profile.user_id ? '1. Forespørsel' : 'Sendt forespørsel';
       case 'allowed':
         return '2. Pågående avtale - Kan redigeres';
-      case 'both_parties_approved':
+      case 'approved_by_both':
         return '2. Pågående avtale - Klar for publisering';
       case 'upcoming':
         return '3. Publisert arrangement';
@@ -152,7 +152,7 @@ export const BookingsSection = ({
     if (booking.status === 'pending') {
       return <BookingCardStep1 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} />;
     }
-    if (booking.status === 'allowed' || booking.status === 'both_parties_approved') {
+    if (booking.status === 'allowed' || booking.status === 'approved_by_both') {
       return <BookingCardStep2 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} />;
     }
     if (booking.status === 'upcoming') {
