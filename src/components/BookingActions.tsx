@@ -57,27 +57,15 @@ export const BookingActions = ({
     setLoading(true);
     try {
       const approvalField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
-      const otherApprovalField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
-      const otherUserHasApproved = booking[otherApprovalField];
       const updates: any = {
-        [approvalField]: true,
-        // If other party already approved, set status to both_parties_approved
-        ...(otherUserHasApproved && {
-          status: 'both_parties_approved'
-        })
+        [approvalField]: true
       };
       await updateBooking(booking.id, updates);
-      if (otherUserHasApproved) {
-        toast({
-          title: "Begge parter har godkjent! ✅",
-          description: "Avtalen er klar for publisering."
-        });
-      } else {
-        toast({
-          title: "Du har godkjent",
-          description: "Venter på godkjenning fra den andre parten."
-        });
-      }
+      
+      toast({
+        title: "Du har godkjent",
+        description: "Venter på godkjenning fra den andre parten."
+      });
       onAction?.();
     } catch (error) {
       // Error handled in hook
@@ -86,18 +74,20 @@ export const BookingActions = ({
     }
   };
 
-  // Step 3: Publish booking (both parties can publish)
+  // Step 3: Individual publishing (each party can publish separately)
   const handlePublishBooking = async () => {
     if (loading) return;
     setLoading(true);
     try {
+      const publishField = isSender ? 'published_by_sender' : 'published_by_receiver';
       await updateBooking(booking.id, {
+        [publishField]: true,
         status: 'upcoming',
         is_public_after_approval: true,
         published_at: new Date().toISOString()
       });
       toast({
-        title: "Arrangementet er publisert!",
+        title: "Du har publisert arrangementet!",
         description: "Arrangementet er nå synlig for andre brukere og kan ikke lenger redigeres."
       });
       onAction?.();
@@ -139,15 +129,15 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      if (booking.status === 'allowed') {
-        // During negotiation phase - permanent deletion
+      if (booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') {
+        // During negotiation/approval phase - permanent deletion
         await rejectBooking(booking.id);
         toast({
           title: "Booking avlyst",
           description: "Bookingen er permanent slettet fra systemet"
         });
       } else {
-        // For approved/published bookings - archive to history
+        // For fully approved/published bookings - archive to history
         await updateBooking(booking.id, {
           status: 'cancelled'
         });
@@ -247,12 +237,7 @@ export const BookingActions = ({
                 Godkjenn for publisering (2/3)
               </Button> : <Badge variant="outline" className="text-green-700 border-green-300">
                 Du har godkjent ✓
-                {!booking[isSender ? 'approved_by_receiver' : 'approved_by_sender'] && ' - Venter på motpart'}
-              </Badge>}
-            
-            {/* Show other party's approval status */}
-            {booking[isSender ? 'approved_by_receiver' : 'approved_by_sender'] && <Badge variant="outline" className="text-green-700 border-green-300">
-                Motpart har godkjent ✓
+                {booking.status !== 'approved_by_both' && ' - Venter på motpart'}
               </Badge>}
             
             <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
@@ -261,13 +246,58 @@ export const BookingActions = ({
             </Button>
           </>}
 
-        {/* STEP 3: Publish (both parties, both_parties_approved status) */}
-        {booking.status === 'both_parties_approved' && <>
-            <Button onClick={showPublishingSummary} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
-              <ArrowRight className="h-4 w-4 mr-1" />
-              Publiser arrangement (3/3)
-            </Button>
+        {/* Progressive approval statuses */}
+        {(booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') && <>
+            {booking.status === 'approved_by_sender' && isSender && <Badge variant="outline" className="text-green-700 border-green-300">
+                Du har godkjent ✓ - Venter på motpart
+              </Badge>}
+            {booking.status === 'approved_by_receiver' && isReceiver && <Badge variant="outline" className="text-green-700 border-green-300">
+                Du har godkjent ✓ - Venter på motpart
+              </Badge>}
+            {booking.status === 'approved_by_sender' && isReceiver && <>
+                <Badge variant="outline" className="text-orange-700 border-orange-300">
+                  Motpart har godkjent - Din tur!
+                </Badge>
+                <Button onClick={handleApproveForPublishing} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+                  <Check className="h-4 w-4 mr-1" />
+                  Godkjenn for publisering (2/3)
+                </Button>
+              </>}
+            {booking.status === 'approved_by_receiver' && isSender && <>
+                <Badge variant="outline" className="text-orange-700 border-orange-300">
+                  Motpart har godkjent - Din tur!
+                </Badge>
+                <Button onClick={handleApproveForPublishing} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+                  <Check className="h-4 w-4 mr-1" />
+                  Godkjenn for publisering (2/3)
+                </Button>
+              </>}
             
+            <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
+              <X className="h-4 w-4 mr-1" />
+              Avlys booking (permanent)
+            </Button>
+          </>}
+
+        {/* STEP 3: Publish (both parties, approved_by_both status) */}
+        {booking.status === 'approved_by_both' && <>
+            {/* Show current user's publish status */}
+            {!booking[isSender ? 'published_by_sender' : 'published_by_receiver'] ? <Button onClick={showPublishingSummary} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                <ArrowRight className="h-4 w-4 mr-1" />
+                Publiser arrangement (3/3)
+              </Button> : <Badge variant="outline" className="text-blue-700 border-blue-300">
+                Du har publisert ✓
+              </Badge>}
+            
+            {/* Show other party's publish status */}
+            {booking[isSender ? 'published_by_receiver' : 'published_by_sender'] && <Badge variant="outline" className="text-blue-700 border-blue-300">
+                Motpart har publisert ✓
+              </Badge>}
+            
+            <Button variant="outline" onClick={handleCancelBooking} disabled={loading} className="text-destructive hover:text-destructive">
+              <X className="h-4 w-4 mr-1" />
+              Avlys avtale
+            </Button>
           </>}
 
         {/* Show status for sent requests (sender view of pending) */}
@@ -276,27 +306,27 @@ export const BookingActions = ({
             Venter på mottakers svar
           </div>}
 
-        {/* Cancel/Delete button with confirmation for all active bookings */}
-        {(booking.status === 'allowed' || booking.status === 'both_parties_approved') && <AlertDialog>
+        {/* Cancel/Delete button with confirmation for negotiation and approval phases */}
+        {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') && <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
                 <X className="h-4 w-4 mr-1" />
-                {booking.status === 'allowed' ? 'Avlys booking' : 'Avlys avtale'}
+                {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Avlys booking' : 'Avlys avtale'}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {booking.status === 'allowed' ? 'Avlys booking?' : 'Avlys avtale?'}
+                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Avlys booking?' : 'Avlys avtale?'}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {booking.status === 'allowed' ? "Dette vil permanent slette bookingen fra systemet. Handlingen kan ikke angres." : "Dette vil avlyse en pågående avtale og flytte den til historikk."}
+                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? "Dette vil permanent slette bookingen fra systemet. Handlingen kan ikke angres." : "Dette vil avlyse en pågående avtale og flytte den til historikk."}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Avbryt</AlertDialogCancel>
                 <AlertDialogAction onClick={handleCancelBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {booking.status === 'allowed' ? 'Slett permanent' : 'Avlys avtale'}
+                  {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') ? 'Slett permanent' : 'Avlys avtale'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

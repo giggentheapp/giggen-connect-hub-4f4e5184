@@ -18,7 +18,7 @@ interface Booking {
   venue: string | null;
   hospitality_rider: string | null;
   tech_spec: string | null;
-  status: 'pending' | 'allowed' | 'both_parties_approved' | 'upcoming' | 'completed' | 'cancelled';
+  status: 'pending' | 'allowed' | 'approved_by_sender' | 'approved_by_receiver' | 'approved_by_both' | 'upcoming' | 'completed' | 'cancelled';
   sender_confirmed: boolean;
   receiver_confirmed: boolean;
   sender_read_agreement: boolean;
@@ -52,6 +52,9 @@ interface Booking {
   requires_approval?: boolean;
   last_modified_by?: string;
   last_modified_at?: string;
+  // New publishing fields
+  published_by_sender?: boolean;
+  published_by_receiver?: boolean;
 }
 
 

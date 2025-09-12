@@ -56,7 +56,7 @@ export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   );
   const ongoingAgreements = bookings.filter(b => 
     (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    (b.status === 'allowed' || b.status === 'both_parties_approved')
+    (b.status === 'allowed' || b.status === 'approved_by_sender' || b.status === 'approved_by_receiver' || b.status === 'approved_by_both')
   );
   const upcomingEvents = bookings.filter(b => 
     (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
