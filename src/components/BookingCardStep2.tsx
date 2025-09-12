@@ -119,7 +119,7 @@ export const BookingCardStep2 = ({
               {canEdit ? 'Rediger detaljer' : 'Se detaljer'}
             </Button>
             
-            {booking.concept_ids && booking.concept_ids.length > 0 && (
+            {booking.concept_ids && booking.concept_ids.length > 0 && booking.status !== 'pending' && (
               <Button 
                 size="sm" 
                 variant="outline"
