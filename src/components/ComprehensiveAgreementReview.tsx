@@ -385,6 +385,13 @@ export const ComprehensiveAgreementReview = ({
                   });
                   setHasReadConfirmation(checked);
                   setCanProceed(checked);
+                  
+                  // If this is the last step and checkbox is checked, mark section as completed
+                  if (isLastStep && checked) {
+                    const newCompleted = new Set([...completedSections, currentSection.id]);
+                    setCompletedSections(newCompleted);
+                    console.log('✅ Last section completed via checkbox:', Array.from(newCompleted));
+                  }
                 }}
                 className="rounded"
               />
