@@ -76,6 +76,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       if (isAdminView) {
         // Admin view: get from bookings table with full profile info
         console.log('🔍 Fetching upcoming events for admin view, user:', profile.user_id);
+        console.log('🔍 ProfileSection isAdminView=true, looking for bookings with status=upcoming');
         
         query = supabase
           .from('bookings')
@@ -101,6 +102,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           .order('created_at', { ascending: false }); // Order by created_at instead of event_date to catch all
       } else {
         // Public view: get from events_market table
+        console.log('🔍 Public view: fetching from events_market');
         query = supabase
           .from('events_market')
           .select('*')
@@ -111,9 +113,14 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Query error:', error);
+        throw error;
+      }
       
       console.log('📊 Fetched upcoming events:', data?.length || 0, 'events');
+      console.log('📋 Raw data:', data);
+      
       if (isAdminView && data) {
         console.log('📋 Admin view events:', data.map(e => ({
           id: e.id,
@@ -121,7 +128,9 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           status: e.status,
           event_date: e.event_date,
           published_by_sender: e.published_by_sender,
-          published_by_receiver: e.published_by_receiver
+          published_by_receiver: e.published_by_receiver,
+          sender_profile: !!e.sender_profile,
+          receiver_profile: !!e.receiver_profile
         })));
       }
       
@@ -135,6 +144,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           console.warn(`Filtered out ${(data || []).length - validEvents.length} events with missing profile relations`);
         }
         
+        console.log('✅ Final valid events:', validEvents.length);
         setUpcomingEvents(validEvents);
       } else {
         // For public view, data comes from events_market - no filtering needed
