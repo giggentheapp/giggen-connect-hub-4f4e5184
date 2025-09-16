@@ -186,6 +186,8 @@ export const useBookings = (userId?: string) => {
 
   const updateBooking = async (bookingId: string, updates: Partial<Booking>) => {
     try {
+      console.log('🔄 Updating booking:', bookingId, 'with updates:', updates);
+      
       const { data, error } = await supabase
         .from('bookings')
         .update(updates)
@@ -195,12 +197,21 @@ export const useBookings = (userId?: string) => {
 
       if (error) throw error;
       
+      console.log('✅ Booking updated successfully:', {
+        id: data.id,
+        status: data.status,
+        published_by_sender: data.published_by_sender,
+        published_by_receiver: data.published_by_receiver,
+        event_date: data.event_date
+      });
+      
       setBookings(prev => prev.map(booking => 
         booking.id === bookingId ? data as Booking : booking
       ));
       
       return data;
     } catch (error: any) {
+      console.error('❌ Error updating booking:', error);
       toast({
         title: "Feil ved oppdatering av booking",
         description: error.message,

@@ -64,20 +64,44 @@ export const BookingActions = ({
   const handlePublishBooking = async () => {
     if (loading) return;
     setLoading(true);
+    
+    console.log('📢 Publishing booking:', {
+      bookingId: booking.id,
+      title: booking.title,
+      currentUser: isSender ? 'sender' : 'receiver',
+      currentStatus: booking.status,
+      event_date: booking.event_date,
+      published_by_sender: booking.published_by_sender,
+      published_by_receiver: booking.published_by_receiver
+    });
+    
     try {
       const publishField = isSender ? 'published_by_sender' : 'published_by_receiver';
-      await updateBooking(booking.id, {
+      const updates = {
         [publishField]: true,
-        status: 'upcoming',
+        status: 'upcoming' as const,
         is_public_after_approval: true,
         published_at: new Date().toISOString()
+      };
+      
+      console.log('🔄 Updating booking with:', updates);
+      
+      const result = await updateBooking(booking.id, updates);
+      
+      console.log('✅ Booking published successfully:', {
+        bookingId: booking.id,
+        newStatus: result?.status,
+        published_by_sender: result?.published_by_sender,
+        published_by_receiver: result?.published_by_receiver
       });
+      
       toast({
         title: "Du har publisert arrangementet!",
         description: "Arrangementet er nå synlig for andre brukere og kan ikke lenger redigeres."
       });
       onAction?.();
     } catch (error) {
+      console.error('❌ Error publishing booking:', error);
       // Error handled in hook
     } finally {
       setLoading(false);

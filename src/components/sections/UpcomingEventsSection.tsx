@@ -75,6 +75,8 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       
       if (isAdminView) {
         // Admin view: get from bookings table with full profile info
+        console.log('🔍 Fetching upcoming events for admin view, user:', profile.user_id);
+        
         query = supabase
           .from('bookings')
           .select(`
@@ -95,10 +97,8 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
             )
           `)
           .eq('status', 'upcoming')
-          .not('event_date', 'is', null)
-          .gte('event_date', new Date().toISOString())
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .order('event_date', { ascending: true });
+          .order('created_at', { ascending: false }); // Order by created_at instead of event_date to catch all
       } else {
         // Public view: get from events_market table
         query = supabase
@@ -112,6 +112,18 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       const { data, error } = await query;
 
       if (error) throw error;
+      
+      console.log('📊 Fetched upcoming events:', data?.length || 0, 'events');
+      if (isAdminView && data) {
+        console.log('📋 Admin view events:', data.map(e => ({
+          id: e.id,
+          title: e.title,
+          status: e.status,
+          event_date: e.event_date,
+          published_by_sender: e.published_by_sender,
+          published_by_receiver: e.published_by_receiver
+        })));
+      }
       
       if (isAdminView) {
         // Filter out events with missing profile relationships for admin view
@@ -129,6 +141,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         setUpcomingEvents(data || []);
       }
     } catch (error: any) {
+      console.error('❌ Error fetching upcoming events:', error);
       toast({
         title: "Feil ved lasting av arrangementer",
         description: error.message,
