@@ -38,11 +38,6 @@ const SECTIONS = [
     id: 'pricing',
     title: 'Publikum og prising',
     icon: DollarSign,
-  },
-  {
-    id: 'contact',
-    title: 'Kontaktinformasjon',
-    icon: Phone,
   }
 ];
 
@@ -204,6 +199,26 @@ export const ComprehensiveAgreementReview = ({
               </div>
             )}
 
+            {booking.sender_contact_info && (
+              <div className="bg-muted p-4 rounded-lg">
+                <h4 className="font-medium mb-3">Kontaktinformasjon</h4>
+                <div className="space-y-2">
+                  {booking.sender_contact_info.email && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">E-post:</span>
+                      <span className="text-sm">{booking.sender_contact_info.email}</span>
+                    </div>
+                  )}
+                  {booking.sender_contact_info.phone && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Telefon:</span>
+                      <span className="text-sm">{booking.sender_contact_info.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-sm">
                 Dette er grunnleggende informasjon om arrangementet. Les gjennom alle detaljer nøye før du fortsetter.
@@ -213,6 +228,19 @@ export const ComprehensiveAgreementReview = ({
         );
 
       case 'pricing':
+        const audienceEstimate = booking.audience_estimate || 0;
+        const ticketPrice = booking.ticket_price || 0;
+        const totalRevenue = audienceEstimate * ticketPrice;
+        
+        const showCalculations = !booking.by_agreement && audienceEstimate > 0 && ticketPrice > 0;
+        
+        let artistEarnings = 0;
+        if (booking.door_deal && booking.door_percentage) {
+          artistEarnings = Math.round(totalRevenue * (booking.door_percentage / 100));
+        } else if (booking.artist_fee) {
+          artistEarnings = booking.artist_fee;
+        }
+
         return (
           <div className="space-y-4">
             {booking.audience_estimate && (
@@ -238,43 +266,30 @@ export const ComprehensiveAgreementReview = ({
               ) : (
                 <p className="text-lg">Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong></p>
               )}
-            </div>
-
-            <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <p className="text-sm">
-                Økonomiske vilkår er bindende. Sørg for at du forstår og godtar alle priser og honorarordninger.
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'contact':
-        return (
-          <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-3">Kontaktinformasjon</h4>
-              {booking.sender_contact_info && (
-                <div className="space-y-2">
-                  {booking.sender_contact_info.email && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">E-post:</span>
-                      <span className="text-sm">{booking.sender_contact_info.email}</span>
+              
+              {showCalculations && (
+                <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                  {booking.door_deal ? (
+                    <div className="space-y-2">
+                      <p className="text-base">
+                        Total inntekt: <strong>{totalRevenue.toLocaleString('nb-NO')} kr</strong>
+                      </p>
+                      <p className="text-base">
+                        Artist får: <strong>{artistEarnings.toLocaleString('nb-NO')} kr</strong> ({booking.door_percentage}%)
+                      </p>
                     </div>
-                  )}
-                  {booking.sender_contact_info.phone && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Telefon:</span>
-                      <span className="text-sm">{booking.sender_contact_info.phone}</span>
-                    </div>
+                  ) : (
+                    <p className="text-base">
+                      Estimert total inntekt: <strong>{totalRevenue.toLocaleString('nb-NO')} kr</strong>
+                    </p>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+            <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm">
-                Kontaktinformasjon deles mellom partene ved godkjenning av avtalen. 
-                Denne informasjonen skal kun brukes i forbindelse med arrangementet.
+                Økonomiske vilkår er bindende. Sørg for at du forstår og godtar alle priser og honorarordninger.
               </p>
             </div>
           </div>
