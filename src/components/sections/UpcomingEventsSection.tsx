@@ -82,14 +82,14 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           .from('bookings')
           .select(`
             *,
-            sender_profile:profiles!bookings_sender_id_fkey(
+            sender_profile:sender_id(
               user_id,
               display_name, 
               contact_info,
               avatar_url,
               bio
             ),
-            receiver_profile:profiles!bookings_receiver_id_fkey(
+            receiver_profile:receiver_id(
               user_id,
               display_name, 
               contact_info,
