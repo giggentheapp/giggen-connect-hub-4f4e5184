@@ -70,13 +70,23 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
     try {
       setLoading(true);
       
+      console.log('🚨 UpcomingEventsSection.fetchUpcomingEvents CALLED');
+      console.log('🚨 isAdminView:', isAdminView);
+      console.log('🚨 profile.user_id:', profile.user_id);
+      
       // Fetch from events_market for public view, bookings for admin view
       let query;
       
       if (isAdminView) {
-        // Admin view: get from bookings table with full profile info
-        console.log('🔍 Fetching upcoming events for admin view, user:', profile.user_id);
-        console.log('🔍 ProfileSection isAdminView=true, looking for bookings with status=upcoming');
+        // COPY EXACT WORKING QUERY FROM BOOKINGS SECTION
+        console.log('🚨 ADMIN VIEW: Using simple bookings query (no profile joins)');
+        
+        query = supabase
+          .from('bookings')
+          .select('*')
+          .eq('status', 'upcoming')
+          .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
+          .order('created_at', { ascending: false });
         
         query = supabase
           .from('bookings')
@@ -102,7 +112,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           .order('created_at', { ascending: false }); // Order by created_at instead of event_date to catch all
       } else {
         // Public view: get from events_market table
-        console.log('🔍 Public view: fetching from events_market');
+        console.log('🚨 PUBLIC VIEW: fetching from events_market');
         query = supabase
           .from('events_market')
           .select('*')
@@ -118,38 +128,11 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         throw error;
       }
       
-      console.log('📊 Fetched upcoming events:', data?.length || 0, 'events');
-      console.log('📋 Raw data:', data);
+      console.log('🚨 FETCHED DATA:', data?.length || 0, 'events');
+      console.log('🚨 RAW DATA:', data);
       
-      if (isAdminView && data) {
-        console.log('📋 Admin view events:', data.map(e => ({
-          id: e.id,
-          title: e.title,
-          status: e.status,
-          event_date: e.event_date,
-          published_by_sender: e.published_by_sender,
-          published_by_receiver: e.published_by_receiver,
-          sender_profile: !!e.sender_profile,
-          receiver_profile: !!e.receiver_profile
-        })));
-      }
-      
-      if (isAdminView) {
-        // Filter out events with missing profile relationships for admin view
-        const validEvents = (data || []).filter(event => 
-          event.sender_profile && event.receiver_profile
-        );
-        
-        if (validEvents.length !== (data || []).length) {
-          console.warn(`Filtered out ${(data || []).length - validEvents.length} events with missing profile relations`);
-        }
-        
-        console.log('✅ Final valid events:', validEvents.length);
-        setUpcomingEvents(validEvents);
-      } else {
-        // For public view, data comes from events_market - no filtering needed
-        setUpcomingEvents(data || []);
-      }
+      // NO COMPLEX FILTERING - JUST SET THE DATA
+      setUpcomingEvents(data || []);
     } catch (error: any) {
       console.error('❌ Error fetching upcoming events:', error);
       toast({

@@ -24,6 +24,9 @@ interface ProfileSectionProps {
 export const ProfileSection = ({
   profile
 }: ProfileSectionProps) => {
+  console.log('🚨 ProfileSection RENDERED for user:', profile.user_id);
+  console.log('🚨 ProfileSection will call UpcomingEventsSection with isAdminView=true');
+  
   const {
     concepts,
     loading: conceptsLoading
