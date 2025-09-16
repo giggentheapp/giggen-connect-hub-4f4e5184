@@ -27,6 +27,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
+import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 
@@ -34,10 +35,14 @@ interface ProfileData {
   id: string;
   user_id: string;
   display_name: string;
-  bio?: string;
-  contact_info?: any;
-  avatar_url?: string;
-  role: string;
+  bio: string | null;
+  contact_info: any;
+  avatar_url: string | null;
+  role: 'maker' | 'goer';
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_address_public: boolean;
 }
 
 interface ProfileSettings {
@@ -133,41 +138,7 @@ const Profile = () => {
     fetchProfile();
   }, [userId]);
 
-  // Separate useEffect for events
-  useEffect(() => {
-    // Fetch events based on current user and visibility settings
-    const fetchEvents = async () => {
-      if (!userId || !currentUserId) return;
-
-      const isOwnProfile = currentUserId === userId;
-
-      try {
-        let query = supabase
-          .from('events')
-          .select('*')
-          .eq('maker_id', userId)
-          .order('event_date', { ascending: true });
-
-        // If viewing own profile, show all events
-        // If viewing others, only show public events  
-        if (!isOwnProfile) {
-          query = query.eq('is_public', true);
-        }
-
-        const { data: eventsData } = await query;
-        setEvents(eventsData || []);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-
-    const isOwnProfile = currentUserId === userId;
-    if (settings?.show_events || isOwnProfile) {
-      fetchEvents();
-    } else {
-      setEvents([]);
-    }
-  }, [userId, currentUserId, settings?.show_events]);
+  // Events are now handled by UpcomingEventsSection component
 
   const renderFilePreview = useCallback((file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;
@@ -396,79 +367,12 @@ const Profile = () => {
           </Card>
         )}
 
-        {/* Kommende arrangementer - Only visible when Goer views Maker profile */}
-        {profile.role === 'maker' && currentUser?.role === 'goer' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Kommende arrangementer
-              </CardTitle>
-              <CardDescription>
-                Arrangementene til denne makeren
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {eventsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-muted-foreground">Laster arrangementer...</span>
-                </div>
-              ) : Array.isArray(events) && events.length > 0 ? (
-                <div className="space-y-4">
-                  {events.filter(event => event && event.id).map((event) => (
-                    <div 
-                      key={event.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{event.title}</h4>
-                        {event.is_public && (
-                          <Badge variant="secondary" className="text-xs">Offentlig</Badge>
-                        )}
-                      </div>
-                      
-                      {event.description && (
-                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                          {event.description}
-                        </p>
-                      )}
-                      
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        {event.event_date && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{format(new Date(event.event_date), 'dd.MM.yyyy', { locale: nb })}</span>
-                          </div>
-                        )}
-                        
-                        {event.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            <span className="truncate">{event.location}</span>
-                          </div>
-                        )}
-                        
-                        {event.max_participants && (
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span>Maks {event.max_participants} deltakere</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Ingen kommende arrangementer
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* Kommende arrangementer - Show for both own profile and when viewing others */}
+        {(isOwnProfile || (settings?.show_events && profile.role === 'maker')) && (
+          <UpcomingEventsSection 
+            profile={profile} 
+            isAdminView={isOwnProfile} 
+          />
         )}
 
         {/* Bookinger - Only visible when Maker views their own or another Maker's profile */}
