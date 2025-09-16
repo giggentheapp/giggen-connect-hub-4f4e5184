@@ -40,16 +40,6 @@ const SECTIONS = [
     icon: DollarSign,
   },
   {
-    id: 'technical',
-    title: 'Tekniske spesifikasjoner',
-    icon: Settings,
-  },
-  {
-    id: 'hospitality',
-    title: 'Hospitality og rider',
-    icon: FileText,
-  },
-  {
     id: 'contact',
     title: 'Kontaktinformasjon',
     icon: Phone,
@@ -66,11 +56,9 @@ export const ComprehensiveAgreementReview = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [canProceed, setCanProceed] = useState(false);
-  const [contentNeedsScroll, setContentNeedsScroll] = useState(false);
   const [hasReadConfirmation, setHasReadConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
-  const [timeOnSection, setTimeOnSection] = useState(0);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -107,86 +95,11 @@ export const ComprehensiveAgreementReview = ({
       setCompletedSections(new Set());
       setCanProceed(false);
       setHasReadConfirmation(false);
-      setTimeOnSection(0);
     }
   }, [isOpen]);
 
-  // Timer for time-based fallback
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setInterval(() => {
-        setTimeOnSection(prev => prev + 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isOpen, currentStep]);
-
-  // Check if content needs scrolling and enable smart progression
-  useEffect(() => {
-    if (!scrollRef.current || !contentRef.current) return;
-
-    const checkContentSize = () => {
-      const scrollContainer = scrollRef.current;
-      const content = contentRef.current;
-      
-      if (!scrollContainer || !content) return;
-
-      const containerHeight = scrollContainer.clientHeight;
-      const contentHeight = content.scrollHeight;
-      const needsScroll = contentHeight > containerHeight + 20; // 20px buffer
-
-      console.log('Content size check:', {
-        containerHeight,
-        contentHeight,
-        needsScroll,
-        section: currentSection.id
-      });
-
-      setContentNeedsScroll(needsScroll);
-      
-      // If content doesn't need scrolling, automatically enable progression
-      if (!needsScroll) {
-        setCanProceed(true);
-      }
-    };
-
-    // Check immediately and after a short delay for layout settling
-    checkContentSize();
-    const timeout = setTimeout(checkContentSize, 100);
-    
-    return () => clearTimeout(timeout);
-  }, [currentStep, currentSection.id]);
-
-  // Fallback timer - enable after 5 seconds regardless
-  useEffect(() => {
-    if (timeOnSection >= 5) {
-      setCanProceed(true);
-    }
-  }, [timeOnSection]);
-
-  // Handle scroll tracking
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (!contentNeedsScroll) return; // Don't track scroll if not needed
-
-    const element = e.currentTarget;
-    const { scrollTop, scrollHeight, clientHeight } = element;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
-    
-    console.log('Scroll tracking:', {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-      isAtBottom,
-      section: currentSection.id
-    });
-    
-    if (isAtBottom) {
-      setCanProceed(true);
-    }
-  };
-
   const handleNext = () => {
-    if (!canProceed && contentNeedsScroll && !hasReadConfirmation) return;
+    if (!canProceed && !hasReadConfirmation) return;
 
     // Mark current section as completed
     setCompletedSections(prev => new Set([...prev, currentSection.id]));
@@ -200,12 +113,6 @@ export const ComprehensiveAgreementReview = ({
     setCurrentStep(prev => prev + 1);
     setCanProceed(false);
     setHasReadConfirmation(false);
-    setTimeOnSection(0);
-    
-    // Reset scroll position for next section
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
   };
 
   const handleApproval = async () => {
@@ -341,68 +248,6 @@ export const ComprehensiveAgreementReview = ({
           </div>
         );
 
-      case 'technical':
-        return (
-          <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Tekniske spesifikasjoner</h4>
-              {booking.tech_spec ? (
-                <div>
-                  <p className="text-sm mb-2">Tekniske krav er vedlagt som dokument:</p>
-                  <a 
-                    href={booking.tech_spec} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Åpne tekniske spesifikasjoner
-                  </a>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Ingen spesifikke tekniske krav er oppgitt for dette arrangementet.</p>
-              )}
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm">
-                Tekniske spesifikasjoner dekker lyd, lys, scene og andre tekniske krav. 
-                Kontakt arrangør hvis du har spørsmål om tekniske løsninger.
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'hospitality':
-        return (
-          <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Hospitality rider</h4>
-              {booking.hospitality_rider ? (
-                <div>
-                  <p className="text-sm mb-2">Hospitality-krav er vedlagt som dokument:</p>
-                  <a 
-                    href={booking.hospitality_rider} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Åpne hospitality rider
-                  </a>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Ingen spesifikke hospitality-krav er oppgitt for dette arrangementet.</p>
-              )}
-            </div>
-
-            <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-              <p className="text-sm">
-                Hospitality rider dekker mat, drikke, overnatting og andre praktiske behov. 
-                Disse kravene er en del av avtalen og må oppfylles.
-              </p>
-            </div>
-          </div>
-        );
-
       case 'contact':
         return (
           <div className="space-y-4">
@@ -489,7 +334,6 @@ export const ComprehensiveAgreementReview = ({
             <ScrollArea 
               className="h-64 pr-4" 
               ref={scrollRef}
-              onScroll={handleScroll}
             >
               <div ref={contentRef}>
                 {renderSectionContent()}
@@ -500,33 +344,18 @@ export const ComprehensiveAgreementReview = ({
 
         <div className="flex items-center justify-between mt-6">
           <div className="space-y-2">
-            <div className="text-sm text-muted-foreground">
-              {canProceed ? (
-                <span className="text-green-600 font-medium">✓ Klar for neste steg</span>
-              ) : contentNeedsScroll ? (
-                <span>Scroll ned for å lese hele seksjonen</span>
-              ) : timeOnSection < 5 ? (
-                <span>Les gjennom innholdet ({5 - timeOnSection}s)</span>
-              ) : (
-                <span className="text-green-600 font-medium">✓ Tid utløpt - kan fortsette</span>
-              )}
-            </div>
-            
-            {/* Fallback checkbox if user has trouble with scroll detection */}
-            {!canProceed && contentNeedsScroll && timeOnSection > 3 && (
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasReadConfirmation}
-                  onChange={(e) => {
-                    setHasReadConfirmation(e.target.checked);
-                    if (e.target.checked) setCanProceed(true);
-                  }}
-                  className="rounded"
-                />
-                <span>Jeg har lest og forstått denne seksjonen</span>
-              </label>
-            )}
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasReadConfirmation}
+                onChange={(e) => {
+                  setHasReadConfirmation(e.target.checked);
+                  setCanProceed(e.target.checked);
+                }}
+                className="rounded"
+              />
+              <span>Jeg har lest og forstått denne delen</span>
+            </label>
           </div>
 
           <div className="flex gap-2">
@@ -537,7 +366,6 @@ export const ComprehensiveAgreementReview = ({
                   setCurrentStep(prev => prev - 1);
                   setCanProceed(false);
                   setHasReadConfirmation(false);
-                  setTimeOnSection(0);
                 }}
               >
                 Tilbake
