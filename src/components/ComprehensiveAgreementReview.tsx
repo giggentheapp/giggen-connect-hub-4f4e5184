@@ -33,6 +33,7 @@ interface ComprehensiveAgreementReviewProps {
   isOpen: boolean;
   onClose: () => void;
   currentUserId: string;
+  onApprovalComplete?: () => void;
 }
 
 interface Section {
@@ -44,11 +45,12 @@ interface Section {
   scrolledToBottom: boolean;
 }
 
-export const ComprehensiveAgreementReview = ({ 
-  booking, 
-  isOpen, 
-  onClose, 
-  currentUserId 
+export const ComprehensiveAgreementReview = ({
+  booking,
+  isOpen,
+  onClose,
+  currentUserId,
+  onApprovalComplete
 }: ComprehensiveAgreementReviewProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set()); // Start with no sections expanded
   const [scrollTracking, setScrollTracking] = useState<Record<string, boolean>>({});
@@ -226,6 +228,8 @@ export const ComprehensiveAgreementReview = ({
           "Du har godkjent avtalen",
       });
 
+      // Call the completion callback if provided
+      onApprovalComplete?.();
       onClose();
     } catch (error: any) {
       toast({

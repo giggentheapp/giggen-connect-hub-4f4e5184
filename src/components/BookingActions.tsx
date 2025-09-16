@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ComprehensiveAgreementReview } from '@/components/ComprehensiveAgreementReview';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +20,7 @@ export const BookingActions = ({
 }: BookingActionsProps) => {
   const [loading, setLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const [showAgreementReview, setShowAgreementReview] = useState(false);
   const {
     updateBooking,
     deleteBookingSecurely,
@@ -52,27 +54,10 @@ export const BookingActions = ({
     }
   };
 
-  // Step 2: Individual approval (each party approves separately)
-  const handleApproveForPublishing = async () => {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const approvalField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
-      const updates: any = {
-        [approvalField]: true
-      };
-      await updateBooking(booking.id, updates);
-      
-      toast({
-        title: "Du har godkjent",
-        description: "Venter på godkjenning fra den andre parten."
-      });
-      onAction?.();
-    } catch (error) {
-      // Error handled in hook
-    } finally {
-      setLoading(false);
-    }
+  // Step 2: Open comprehensive agreement review before approval
+  const openAgreementReview = () => {
+    console.log('📋 Opening agreement review for approval');
+    setShowAgreementReview(true);
   };
 
   // Step 3: Individual publishing (each party can publish separately)
@@ -218,7 +203,7 @@ export const BookingActions = ({
         {/* STEP 2: Individual approval (each party approves separately) */}
         {booking.status === 'allowed' && <>
             {/* Show current user's approval status */}
-            {!booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] ? <Button onClick={handleApproveForPublishing} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+            {!booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] ? <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
                 <Check className="h-4 w-4 mr-1" />
                 Godkjenn for publisering (2/3)
               </Button> : <Badge variant="outline" className="text-green-700 border-green-300">
@@ -239,7 +224,7 @@ export const BookingActions = ({
                 <Badge variant="outline" className="text-orange-700 border-orange-300">
                   Motpart har godkjent - Din tur!
                 </Badge>
-                <Button onClick={handleApproveForPublishing} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
                   <Check className="h-4 w-4 mr-1" />
                   Godkjenn for publisering (2/3)
                 </Button>
@@ -248,7 +233,7 @@ export const BookingActions = ({
                 <Badge variant="outline" className="text-orange-700 border-orange-300">
                   Motpart har godkjent - Din tur!
                 </Badge>
-                <Button onClick={handleApproveForPublishing} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
                   <Check className="h-4 w-4 mr-1" />
                   Godkjenn for publisering (2/3)
                 </Button>
@@ -329,5 +314,14 @@ export const BookingActions = ({
       </div>
 
       <PublishingSummaryDialog />
+      
+      {/* Comprehensive Agreement Review */}
+      <ComprehensiveAgreementReview
+        booking={booking}
+        isOpen={showAgreementReview}
+        onClose={() => setShowAgreementReview(false)}
+        currentUserId={currentUserId}
+        onApprovalComplete={onAction}
+      />
     </>;
 };
