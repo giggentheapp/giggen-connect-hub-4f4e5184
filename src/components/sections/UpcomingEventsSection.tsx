@@ -74,7 +74,6 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       console.log('🚨 isAdminView:', isAdminView);
       console.log('🚨 profile.user_id:', profile.user_id);
       
-      // Fetch from events_market for public view, bookings for admin view
       let query;
       
       if (isAdminView) {
@@ -87,29 +86,6 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           .eq('status', 'upcoming')
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
           .order('created_at', { ascending: false });
-        
-        query = supabase
-          .from('bookings')
-          .select(`
-            *,
-            sender_profile:profiles!bookings_sender_id_fkey(
-              user_id,
-              display_name, 
-              contact_info,
-              avatar_url,
-              bio
-            ),
-            receiver_profile:profiles!bookings_receiver_id_fkey(
-              user_id,
-              display_name, 
-              contact_info,
-              avatar_url,
-              bio
-            )
-          `)
-          .eq('status', 'upcoming')
-          .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .order('created_at', { ascending: false }); // Order by created_at instead of event_date to catch all
       } else {
         // Public view: get from events_market table
         console.log('🚨 PUBLIC VIEW: fetching from events_market');
@@ -146,21 +122,41 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
   };
 
   const openEventDetails = async (event: any) => {
-    console.log('UpcomingEventsSection: Event card clicked', { eventId: event.id, isAdminView });
+    console.log('🚨 UpcomingEventsSection: Event card clicked', { eventId: event.id, isAdminView });
     
-    // For admin view with bookings, keep existing detailed dialog
-    if (isAdminView && (event.sender_profile || event.receiver_profile)) {
-      // Validate that required profile relationships exist
-      if (!event.sender_profile || !event.receiver_profile) {
-        toast({
-          title: "Manglende profildata",
-          description: "Kan ikke vise arrangementdetaljer på grunn av manglende profil-relasjoner",
-          variant: "destructive",
-        });
-        return;
-      }
-      
+    // For admin view, always show detailed dialog with all available info
+    if (isAdminView) {
+      console.log('🚨 Admin view: Opening detailed event dialog');
       setSelectedEvent(event);
+      
+      // For admin view, try to fetch additional profile data if needed
+      if (event.sender_id && event.receiver_id) {
+        try {
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('display_name, contact_info, bio, avatar_url')
+            .eq('user_id', event.sender_id)
+            .single();
+            
+          const { data: receiverProfile } = await supabase
+            .from('profiles')
+            .select('display_name, contact_info, bio, avatar_url')
+            .eq('user_id', event.receiver_id)
+            .single();
+            
+          // Enhance event with profile data
+          const enhancedEvent = {
+            ...event,
+            sender_profile: senderProfile,
+            receiver_profile: receiverProfile
+          };
+          setSelectedEvent(enhancedEvent);
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+          // Use event as-is if profile fetch fails
+          setSelectedEvent(event);
+        }
+      }
       
       // For both admin and public view, fetch concept details if available
       const conceptId = event.selected_concept_id || event.portfolio_id;
@@ -207,6 +203,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       setDetailsOpen(true);
     } else {
       // For public events from events_market, use EventModal
+      console.log('🚨 Public view: Opening EventModal');
       setSelectedEventId(event.id);
       setIsEventModalOpen(true);
     }
@@ -301,7 +298,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
             )}
 
             <div className="flex justify-end pt-2">
-              <Button size="sm" variant="ghost">
+              <Button size="sm" variant="ghost" onClick={() => openEventDetails(event)}>
                 <Eye className="h-4 w-4 mr-1" />
                 Se detaljer
               </Button>
@@ -323,6 +320,21 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
 
   return (
     <div className="space-y-6">
+      {/* Privacy Information */}
+      {isAdminView ? (
+        <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>Personvern:</strong> Kun offentlig arrangementinfo vises til andre brukere. 
+            Sensitive detaljer som honorar og kontaktinfo er kun synlig for deg og samarbeidspartneren.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-gray-50 dark:bg-gray-950 p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            Viser kun offentlig arrangementinfo. Sensitive detaljer er ikke tilgjengelig.
+          </p>
+        </div>
+      )}
 
       {upcomingEvents.length === 0 ? (
         <Card>
@@ -443,7 +455,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                           );
                         })()}
                       </div>
-                      
+
                       {/* Receiver info */}
                       <div className="p-3 border rounded-lg">
                         <h4 className="font-medium text-sm mb-2">
@@ -486,7 +498,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                 )}
               </div>
 
-              {/* Description */}
+              {/* Event Description */}
               {selectedEvent.description && (
                 <div>
                   <h3 className="font-semibold mb-2">Beskrivelse</h3>
@@ -494,59 +506,58 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                 </div>
               )}
 
-              {/* Portfolio - always show for all views */}
+              {/* Portfolio Section */}
               {portfolioUserId && (
                 <div>
-                  <h3 className="font-semibold mb-2">Portefølje</h3>
+                  <h3 className="font-semibold mb-2">Konseptmateriale</h3>
                   <ProfilePortfolioViewer userId={portfolioUserId} isOwnProfile={false} />
                 </div>
               )}
 
-              {/* Tech Specs and Hospitality Rider for Admin View */}
+              {/* Tech Specs and Hospitality Riders for Admin View */}
               {isAdminView && (techSpecFiles.length > 0 || hospitalityFiles.length > 0) && (
-                <div>
-                  <h3 className="font-semibold mb-2">Vedlegg</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {techSpecFiles.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-sm mb-2">Tech Spec</h4>
-                        <div className="space-y-2">
-                          {techSpecFiles.map((file) => (
-                            <div key={file.id} className="p-2 border rounded text-sm">
-                              <a 
-                                href={file.file_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                {file.filename}
-                              </a>
-                            </div>
-                          ))}
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tech Specs */}
+                  {techSpecFiles.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Tekniske spesifikasjoner</h3>
+                      <div className="space-y-2">
+                        {techSpecFiles.map((file) => (
+                          <div key={file.id} className="p-2 border rounded-lg">
+                            <a 
+                              href={file.file_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              {file.filename}
+                            </a>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                    
-                    {hospitalityFiles.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-sm mb-2">Hospitality Rider</h4>
-                        <div className="space-y-2">
-                          {hospitalityFiles.map((file) => (
-                            <div key={file.id} className="p-2 border rounded text-sm">
-                              <a 
-                                href={file.file_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                {file.filename}
-                              </a>
-                            </div>
-                          ))}
-                        </div>
+                    </div>
+                  )}
+
+                  {/* Hospitality Riders */}
+                  {hospitalityFiles.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Hospitality rider</h3>
+                      <div className="space-y-2">
+                        {hospitalityFiles.map((file) => (
+                          <div key={file.id} className="p-2 border rounded-lg">
+                            <a 
+                              href={file.file_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              {file.filename}
+                            </a>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -554,11 +565,14 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         </Dialog>
       )}
 
-      <EventModal 
-        isOpen={isEventModalOpen}
-        onClose={handleEventModalClose}
-        eventId={selectedEventId}
-      />
+      {/* Event Modal for public events */}
+      {selectedEventId && (
+        <EventModal 
+          eventId={selectedEventId}
+          isOpen={isEventModalOpen}
+          onClose={handleEventModalClose}
+        />
+      )}
     </div>
   );
 };
