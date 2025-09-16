@@ -65,11 +65,15 @@ export const ComprehensiveAgreementReview = ({
 }: ComprehensiveAgreementReviewProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const [canProceed, setCanProceed] = useState(false);
+  const [contentNeedsScroll, setContentNeedsScroll] = useState(false);
+  const [hasReadConfirmation, setHasReadConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
+  const [timeOnSection, setTimeOnSection] = useState(0);
   
   const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
 
@@ -101,21 +105,88 @@ export const ComprehensiveAgreementReview = ({
     if (isOpen) {
       setCurrentStep(0);
       setCompletedSections(new Set());
-      setHasScrolledToBottom(false);
+      setCanProceed(false);
+      setHasReadConfirmation(false);
+      setTimeOnSection(0);
     }
   }, [isOpen]);
 
+  // Timer for time-based fallback
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setInterval(() => {
+        setTimeOnSection(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isOpen, currentStep]);
+
+  // Check if content needs scrolling and enable smart progression
+  useEffect(() => {
+    if (!scrollRef.current || !contentRef.current) return;
+
+    const checkContentSize = () => {
+      const scrollContainer = scrollRef.current;
+      const content = contentRef.current;
+      
+      if (!scrollContainer || !content) return;
+
+      const containerHeight = scrollContainer.clientHeight;
+      const contentHeight = content.scrollHeight;
+      const needsScroll = contentHeight > containerHeight + 20; // 20px buffer
+
+      console.log('Content size check:', {
+        containerHeight,
+        contentHeight,
+        needsScroll,
+        section: currentSection.id
+      });
+
+      setContentNeedsScroll(needsScroll);
+      
+      // If content doesn't need scrolling, automatically enable progression
+      if (!needsScroll) {
+        setCanProceed(true);
+      }
+    };
+
+    // Check immediately and after a short delay for layout settling
+    checkContentSize();
+    const timeout = setTimeout(checkContentSize, 100);
+    
+    return () => clearTimeout(timeout);
+  }, [currentStep, currentSection.id]);
+
+  // Fallback timer - enable after 5 seconds regardless
+  useEffect(() => {
+    if (timeOnSection >= 5) {
+      setCanProceed(true);
+    }
+  }, [timeOnSection]);
+
   // Handle scroll tracking
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!contentNeedsScroll) return; // Don't track scroll if not needed
+
     const element = e.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = element;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
     
-    setHasScrolledToBottom(isAtBottom);
+    console.log('Scroll tracking:', {
+      scrollTop,
+      scrollHeight,
+      clientHeight,
+      isAtBottom,
+      section: currentSection.id
+    });
+    
+    if (isAtBottom) {
+      setCanProceed(true);
+    }
   };
 
   const handleNext = () => {
-    if (!hasScrolledToBottom) return;
+    if (!canProceed && contentNeedsScroll && !hasReadConfirmation) return;
 
     // Mark current section as completed
     setCompletedSections(prev => new Set([...prev, currentSection.id]));
@@ -127,7 +198,9 @@ export const ComprehensiveAgreementReview = ({
     
     // Move to next section
     setCurrentStep(prev => prev + 1);
-    setHasScrolledToBottom(false);
+    setCanProceed(false);
+    setHasReadConfirmation(false);
+    setTimeOnSection(0);
     
     // Reset scroll position for next section
     if (scrollRef.current) {
@@ -418,17 +491,41 @@ export const ComprehensiveAgreementReview = ({
               ref={scrollRef}
               onScroll={handleScroll}
             >
-              {renderSectionContent()}
+              <div ref={contentRef}>
+                {renderSectionContent()}
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
 
         <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-muted-foreground">
-            {hasScrolledToBottom ? (
-              <span className="text-green-600 font-medium">✓ Les gjennom</span>
-            ) : (
-              <span>Scroll ned for å lese hele seksjonen</span>
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">
+              {canProceed ? (
+                <span className="text-green-600 font-medium">✓ Klar for neste steg</span>
+              ) : contentNeedsScroll ? (
+                <span>Scroll ned for å lese hele seksjonen</span>
+              ) : timeOnSection < 5 ? (
+                <span>Les gjennom innholdet ({5 - timeOnSection}s)</span>
+              ) : (
+                <span className="text-green-600 font-medium">✓ Tid utløpt - kan fortsette</span>
+              )}
+            </div>
+            
+            {/* Fallback checkbox if user has trouble with scroll detection */}
+            {!canProceed && contentNeedsScroll && timeOnSection > 3 && (
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasReadConfirmation}
+                  onChange={(e) => {
+                    setHasReadConfirmation(e.target.checked);
+                    if (e.target.checked) setCanProceed(true);
+                  }}
+                  className="rounded"
+                />
+                <span>Jeg har lest og forstått denne seksjonen</span>
+              </label>
             )}
           </div>
 
@@ -436,7 +533,12 @@ export const ComprehensiveAgreementReview = ({
             {currentStep > 0 && (
               <Button 
                 variant="outline" 
-                onClick={() => setCurrentStep(prev => prev - 1)}
+                onClick={() => {
+                  setCurrentStep(prev => prev - 1);
+                  setCanProceed(false);
+                  setHasReadConfirmation(false);
+                  setTimeOnSection(0);
+                }}
               >
                 Tilbake
               </Button>
@@ -445,7 +547,7 @@ export const ComprehensiveAgreementReview = ({
             {!isLastStep ? (
               <Button 
                 onClick={handleNext}
-                disabled={!hasScrolledToBottom}
+                disabled={!canProceed}
                 className="min-w-20"
               >
                 Neste
@@ -454,7 +556,7 @@ export const ComprehensiveAgreementReview = ({
             ) : (
               <Button
                 onClick={handleApproval}
-                disabled={!hasScrolledToBottom || !allSectionsCompleted || loading}
+                disabled={!canProceed || !allSectionsCompleted || loading}
                 className="min-w-32"
               >
                 {loading ? "Godkjenner..." : "Godkjenn avtale"}
