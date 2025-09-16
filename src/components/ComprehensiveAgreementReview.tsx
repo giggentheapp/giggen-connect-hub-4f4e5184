@@ -94,13 +94,25 @@ export const ComprehensiveAgreementReview = ({
   }, [isOpen]);
 
   const handleNext = () => {
+    console.log('🔄 handleNext called:', { 
+      canProceed, 
+      hasReadConfirmation, 
+      currentSection: currentSection.id, 
+      isLastStep,
+      completedSections: Array.from(completedSections)
+    });
+    
     if (!canProceed && !hasReadConfirmation) return;
 
     // Mark current section as completed
-    setCompletedSections(prev => new Set([...prev, currentSection.id]));
+    const newCompleted = new Set([...completedSections, currentSection.id]);
+    setCompletedSections(newCompleted);
+    
+    console.log('✅ Section completed:', currentSection.id, 'All completed sections:', Array.from(newCompleted));
     
     if (isLastStep) {
       // All sections completed, can now approve
+      console.log('🎯 Last step completed, approval should be available');
       return;
     }
     
@@ -364,8 +376,15 @@ export const ComprehensiveAgreementReview = ({
                 type="checkbox"
                 checked={hasReadConfirmation}
                 onChange={(e) => {
-                  setHasReadConfirmation(e.target.checked);
-                  setCanProceed(e.target.checked);
+                  const checked = e.target.checked;
+                  console.log('📋 Checkbox changed:', { 
+                    checked, 
+                    currentSection: currentSection.id, 
+                    step: currentStep + 1,
+                    isLastStep 
+                  });
+                  setHasReadConfirmation(checked);
+                  setCanProceed(checked);
                 }}
                 className="rounded"
               />
@@ -398,7 +417,16 @@ export const ComprehensiveAgreementReview = ({
               </Button>
             ) : (
               <Button
-                onClick={handleApproval}
+                onClick={() => {
+                  console.log('🚀 Approval button clicked:', {
+                    canProceed,
+                    allSectionsCompleted,
+                    loading,
+                    completedSections: Array.from(completedSections),
+                    sectionsLength: SECTIONS.length
+                  });
+                  handleApproval();
+                }}
                 disabled={!canProceed || !allSectionsCompleted || loading}
                 className="min-w-32"
               >
