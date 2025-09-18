@@ -87,12 +87,13 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
           .order('created_at', { ascending: false });
       } else {
-        // Public view: get from events_market table
-        console.log('🚨 PUBLIC VIEW: fetching from events_market');
+        // Public view: get from events_market table - filter by the profile owner's events
+        console.log('🚨 PUBLIC VIEW: fetching from events_market for user:', profile.user_id);
         query = supabase
           .from('events_market')
           .select('*')
           .eq('is_public', true)
+          .eq('created_by', profile.user_id)
           .gte('date', new Date().toISOString().split('T')[0])
           .order('date', { ascending: true });
       }
