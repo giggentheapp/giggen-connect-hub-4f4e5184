@@ -160,6 +160,8 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
   useEffect(() => {
     if (!mapContainer.current || !mapToken) return;
 
+    console.log('🗺️ Using Mapbox token:', mapToken.substring(0, 20) + '...');
+    console.log('🎨 New token with colors loaded successfully!');
     mapboxgl.accessToken = mapToken;
 
     try {

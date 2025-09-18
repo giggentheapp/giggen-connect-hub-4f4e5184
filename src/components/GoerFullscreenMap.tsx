@@ -118,6 +118,8 @@ const GoerFullscreenMap = ({ onBack, onMakerClick, userId }: GoerFullscreenMapPr
   useEffect(() => {
     if (!mapContainer.current || !mapToken) return;
 
+    console.log('🗺️ GoerFullscreenMap using token:', mapToken.substring(0, 20) + '...');
+    console.log('🎨 Color-enabled Mapbox token loaded!');
     mapboxgl.accessToken = mapToken;
 
     try {
