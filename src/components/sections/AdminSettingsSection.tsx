@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { UserSettings } from '@/components/UserSettings';
 import { MapboxSettingsSection } from '@/components/MapboxSettingsSection';
-import { MapboxConfigUpdater } from '@/components/MapboxConfigUpdater';
+import { MapboxConfigInitializer } from '@/components/MapboxConfigInitializer';
 
 interface UserProfile {
   id: string;
@@ -32,7 +32,11 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
 
   return (
     <div className="space-y-6">
-      <MapboxConfigUpdater styleUrl="mapbox://styles/giggentheapp/cmdc04yqm004m01qzbafib4fl" />
+      <MapboxConfigInitializer 
+        accessToken="pk.eyJ1IjoiZ2lnZ2VudGhlYXBwIiwiYSI6ImNtZmNiem5qNjF4bDgyanFzNjRlMnZsc3MifQ.pdpTiiX4bL8K_dF6PKxQvA"
+        styleUrl="mapbox://styles/giggentheapp/cmdc04yqm004m01qzbafib4fl"
+        userId={updatedProfile.user_id}
+      />
       <UserSettings 
         profile={updatedProfile}
         onProfileUpdate={handleProfileUpdate}

@@ -63,15 +63,16 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
   // Get mapbox configuration (user's custom or system default)
   const { config: mapboxConfig, loading: configLoading } = useMapboxConfig(userId);
 
-  // Fetch Mapbox token from config or edge function
   useEffect(() => {
-    if (mapboxConfig.accessToken) {
+    if (mapboxConfig.accessToken && !configLoading) {
+      console.log('🗺️ Using custom user Mapbox token:', mapboxConfig.accessToken.substring(0, 20) + '...');
       setMapToken(mapboxConfig.accessToken);
       setTokenError(null);
       return;
     }
 
-    if (!configLoading) {
+    if (!configLoading && !mapboxConfig.accessToken) {
+      console.log('🔄 No user config, falling back to system token');
       // Fallback to edge function if no user config
       const fetchToken = async () => {
         try {
@@ -80,13 +81,19 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
           if (error) throw error;
           
           if (data?.token) {
-            setMapToken(data.token);
+            // Ensure we only use public tokens for map rendering
+            if (data.token.startsWith('pk.')) {
+              console.log('✅ Using system public token:', data.token.substring(0, 20) + '...');
+              setMapToken(data.token);
+            } else {
+              throw new Error('System token is not a public token (must start with pk.)');
+            }
           } else {
             throw new Error('No token received from function');
           }
         } catch (error: any) {
-          console.error('Error fetching Mapbox token:', error);
-          setTokenError(error.message);
+          console.error('❌ Error fetching system token:', error);
+          setTokenError(`Mapbox token error: ${error.message}`);
         }
       };
 
