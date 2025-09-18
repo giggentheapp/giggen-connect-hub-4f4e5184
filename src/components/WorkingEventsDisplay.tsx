@@ -25,6 +25,9 @@ interface WorkingEventsDisplayProps {
 }
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEventsDisplayProps) => {
+  // STEP 1: ALERT TO CONFIRM COMPONENT LOADS
+  alert(`COMPONENT LOADED for ${profile.display_name} (${profile.user_id})`);
+  
   console.log('DEBUG COMPONENT LOADED');
   console.log('Profile user_id:', profile.user_id);
   console.log('Profile display_name:', profile.display_name);
