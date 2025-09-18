@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { UserSettings } from '@/components/UserSettings';
+import { MapboxSettingsSection } from '@/components/MapboxSettingsSection';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,9 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
         profile={updatedProfile}
         onProfileUpdate={handleProfileUpdate}
       />
+      {updatedProfile.role === 'maker' && (
+        <MapboxSettingsSection userId={updatedProfile.user_id} />
+      )}
     </div>
   );
 };

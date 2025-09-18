@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, User, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useMapboxConfig } from '@/hooks/useMapboxConfig';
 
 interface EventData {
   id: string;
@@ -59,35 +60,39 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch Mapbox token
+  // Get mapbox configuration (user's custom or system default)
+  const { config: mapboxConfig, loading: configLoading } = useMapboxConfig(userId);
+
+  // Fetch Mapbox token from config or edge function
   useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        // First try environment variable (if available in development)
-        const envToken = import.meta.env?.VITE_MAPBOX_TOKEN;
-        if (envToken) {
-          setMapToken(envToken);
-          return;
-        }
+    if (mapboxConfig.accessToken) {
+      setMapToken(mapboxConfig.accessToken);
+      setTokenError(null);
+      return;
+    }
 
-        // Fallback to Supabase function
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) throw error;
-        
-        if (data?.token) {
-          setMapToken(data.token);
-        } else {
-          throw new Error('No token received from function');
+    if (!configLoading) {
+      // Fallback to edge function if no user config
+      const fetchToken = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+          
+          if (error) throw error;
+          
+          if (data?.token) {
+            setMapToken(data.token);
+          } else {
+            throw new Error('No token received from function');
+          }
+        } catch (error: any) {
+          console.error('Error fetching Mapbox token:', error);
+          setTokenError(error.message);
         }
-      } catch (error: any) {
-        console.error('Error fetching Mapbox token:', error);
-        setTokenError(error.message);
-      }
-    };
+      };
 
-    fetchToken();
-  }, []);
+      fetchToken();
+    }
+  }, [mapboxConfig, configLoading, userId]);
 
   // Fetch makers data
   const fetchMakers = useCallback(async () => {
@@ -158,16 +163,17 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || !mapToken) return;
+    if (!mapContainer.current || !mapToken || configLoading) return;
 
     console.log('🗺️ Using Mapbox token:', mapToken.substring(0, 20) + '...');
     console.log('🎨 New token with colors loaded successfully!');
+    console.log('🎨 Using style URL:', mapboxConfig.styleUrl);
     mapboxgl.accessToken = mapToken;
 
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: mapboxConfig.styleUrl || 'mapbox://styles/mapbox/light-v11',
         center: [10.7522, 59.9139], // Oslo coordinates
         zoom: 10,
         pitch: 0,
@@ -205,7 +211,7 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
       console.error('Error initializing map:', error);
       setTokenError('Kunne ikke initialisere kart');
     }
-  }, [mapToken]);
+  }, [mapToken, mapboxConfig.styleUrl, configLoading]);
 
   // Add markers for makers and events
   useEffect(() => {
