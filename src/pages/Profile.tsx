@@ -27,7 +27,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
-import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
+import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 
@@ -369,10 +369,26 @@ const Profile = () => {
 
         {/* Kommende arrangementer - Show for both own profile and when viewing others */}
         {(isOwnProfile || (settings?.show_events && profile.role === 'maker')) && (
-          <UpcomingEventsSection 
-            profile={profile} 
-            isAdminView={isOwnProfile} 
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                {isOwnProfile ? 'Mine Kommende Arrangementer' : 'Kommende Arrangementer'}
+              </CardTitle>
+              <CardDescription>
+                {isOwnProfile ? 
+                  'Dine kommende arrangementer og konserter' :
+                  'Publiserte arrangementer fra denne makeren'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WorkingEventsDisplay 
+                profile={profile} 
+                showSensitiveInfo={isOwnProfile} 
+              />
+            </CardContent>
+          </Card>
         )}
 
         {/* Bookinger - Only visible when Maker views their own or another Maker's profile */}
