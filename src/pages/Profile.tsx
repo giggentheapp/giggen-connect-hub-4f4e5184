@@ -368,28 +368,34 @@ const Profile = () => {
         )}
 
         {/* Kommende arrangementer - Show for both own profile and when viewing others */}
-        {(isOwnProfile || (settings?.show_events && profile.role === 'maker')) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                {isOwnProfile ? 'Mine Kommende Arrangementer' : 'Kommende Arrangementer'}
-              </CardTitle>
-              <CardDescription>
-                {isOwnProfile ? 
-                  'Dine kommende arrangementer og konserter' :
-                  'Publiserte arrangementer fra denne makeren'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <WorkingEventsDisplay 
-                profile={profile} 
-                showSensitiveInfo={isOwnProfile} 
-              />
-            </CardContent>
-          </Card>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              {isOwnProfile ? 'Mine Kommende Arrangementer' : 'Kommende Arrangementer'}
+              <Badge variant="outline" className="ml-2">
+                DEBUG: {isOwnProfile ? 'OWN' : 'OTHER'}
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              {isOwnProfile ? 
+                'Dine kommende arrangementer og konserter' :
+                'Publiserte arrangementer fra denne makeren'
+              }
+              <div className="text-xs text-blue-600 mt-1">
+                DEBUG: Settings show_events: {settings?.show_events?.toString() || 'undefined'}, 
+                Role: {profile?.role}, 
+                Should show: {(isOwnProfile || (settings?.show_events && profile.role === 'maker')).toString()}
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WorkingEventsDisplay 
+              profile={profile} 
+              showSensitiveInfo={isOwnProfile} 
+            />
+          </CardContent>
+        </Card>
 
         {/* Bookinger - Only visible when Maker views their own or another Maker's profile */}
         {profile.role === 'maker' && currentUser?.role === 'maker' && (

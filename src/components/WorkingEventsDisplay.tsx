@@ -25,14 +25,36 @@ interface WorkingEventsDisplayProps {
 }
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEventsDisplayProps) => {
+  console.log('🚨🚨🚨 WorkingEventsDisplay COMPONENT LOADED');
+  console.log('🚨 Profile user_id:', profile.user_id);
+  console.log('🚨 Profile display_name:', profile.display_name);
+  console.log('🚨 showSensitiveInfo:', showSensitiveInfo);
+  
   // COPY THE EXACT WORKING CODE FROM BOOKINGS SECTION
   const { bookings, loading } = useBookings(profile.user_id);
   
+  console.log('🚨 useBookings returned:', { bookings: bookings?.length || 0, loading });
+  console.log('🚨 All bookings:', bookings);
+  
   // COPY THE EXACT WORKING FILTER
   const upcomingEvents = bookings.filter(b => b.status === 'upcoming');
+  
+  console.log('🚨 Filtered upcoming events:', upcomingEvents.length);
+  console.log('🚨 Upcoming events data:', upcomingEvents);
 
-  console.log('🎯 WorkingEventsDisplay: Found', upcomingEvents.length, 'upcoming events for', profile.user_id);
-  console.log('🎯 WorkingEventsDisplay: showSensitiveInfo =', showSensitiveInfo);
+  // TEST WITH HARDCODED DATA
+  const testEvent = {
+    id: 'test-123',
+    title: 'TEST HARDCODED EVENT',
+    description: 'This is a test to see if the UI works',
+    event_date: new Date().toISOString(),
+    venue: 'Test Venue',
+    price_ticket: '100 kr',
+    status: 'upcoming'
+  };
+  
+  console.log('🚨 Adding test event to check UI');
+  const eventsToShow = [...upcomingEvents, testEvent];
 
   const EventCard = ({ event }: { event: any }) => {
     // Format date display
@@ -144,7 +166,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
         </div>
       )}
 
-      {upcomingEvents.length === 0 ? (
+      {eventsToShow.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -154,13 +176,21 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
                 'Ingen kommende arrangementer for øyeblikket'
               }
             </p>
+            <div className="mt-4 text-xs text-red-500">
+              DEBUG: Real events: {upcomingEvents.length}, Total bookings: {bookings.length}
+            </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {upcomingEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+        <div className="space-y-4">
+          <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+            DEBUG: Showing {eventsToShow.length} events (Real: {upcomingEvents.length}, Test: 1)
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {eventsToShow.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
         </div>
       )}
     </div>
