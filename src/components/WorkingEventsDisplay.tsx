@@ -25,62 +25,66 @@ interface WorkingEventsDisplayProps {
 }
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEventsDisplayProps) => {
-  // STEP 1: ALERT TO CONFIRM COMPONENT LOADS
-  alert(`COMPONENT LOADED for ${profile.display_name} (${profile.user_id})`);
-  
-  console.log('DEBUG COMPONENT LOADED');
-  console.log('Profile user_id:', profile.user_id);
-  console.log('Profile display_name:', profile.display_name);
-  console.log('showSensitiveInfo:', showSensitiveInfo);
-  
-  // COPY THE EXACT WORKING CODE FROM BOOKINGS SECTION
   const { bookings, loading } = useBookings(profile.user_id);
-  
-  console.log('useBookings returned:', { bookings: bookings?.length || 0, loading });
-  console.log('All bookings:', bookings);
-  
-  // COPY THE EXACT WORKING FILTER
   const upcomingEvents = bookings.filter(b => b.status === 'upcoming');
-  
-  console.log('Filtered upcoming events:', upcomingEvents.length);
-  console.log('Upcoming events data:', upcomingEvents);
 
-  // ALWAYS SHOW HARDCODED TEST - THIS WILL TELL US IF UI STRUCTURE WORKS
-  return (
-    <div className="space-y-6">
-      <div className="bg-red-100 p-4 rounded border-2 border-red-500">
-        <h3 className="text-red-800 font-bold">HARDCODED TEST EVENT</h3>
-        <p className="text-red-700">If you see this red box, the UI structure works!</p>
-        <p className="text-sm text-red-600">
-          Profile: {profile.display_name} | 
-          User ID: {profile.user_id} | 
-          Show Sensitive: {showSensitiveInfo ? 'YES' : 'NO'}
-        </p>
-        <p className="text-sm text-red-600">
-          Real events found: {upcomingEvents.length} | 
-          Total bookings: {bookings.length} | 
-          Loading: {loading ? 'YES' : 'NO'}
-        </p>
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-muted-foreground">Loading events...</div>
       </div>
-      
-      {upcomingEvents.length > 0 && (
-        <div className="bg-green-100 p-4 rounded border-2 border-green-500">
-          <h4 className="text-green-800 font-bold">REAL EVENTS FOUND:</h4>
-          {upcomingEvents.map(event => (
-            <div key={event.id} className="border p-2 mb-2 bg-white rounded">
-              <strong>{event.title}</strong> - Status: {event.status}
-              <br />
-              <small>ID: {event.id}</small>
+    );
+  }
+
+  if (upcomingEvents.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-muted-foreground">No upcoming events</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {upcomingEvents.map((event) => (
+        <Card key={event.id} className="p-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">{event.title}</CardTitle>
+            <CardDescription>
+              {event.event_date && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4" />
+                  {format(new Date(event.event_date), 'MMM d, yyyy')}
+                </div>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {event.venue && (
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4" />
+                  {event.venue}
+                </div>
+              )}
+              {event.ticket_price && (
+                <div className="flex items-center gap-2 text-sm">
+                  <DollarSign className="h-4 w-4" />
+                  {event.ticket_price} kr
+                </div>
+              )}
+              {event.description && (
+                <div className="text-sm text-muted-foreground">
+                  {event.description}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      )}
-      
-      {loading && (
-        <div className="bg-yellow-100 p-4 rounded border-2 border-yellow-500">
-          <p className="text-yellow-800">Loading bookings...</p>
-        </div>
-      )}
+            <div className="mt-3">
+              <Badge variant="secondary">{event.status}</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };
