@@ -9,6 +9,7 @@ import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { EventModal } from '@/components/EventModal';
+import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { useNavigate } from 'react-router-dom';
 
 interface ProfileData {
@@ -36,7 +37,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [concepts, setConcepts] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -49,7 +49,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
       setProfile(null);
       setPortfolio([]);
       setConcepts([]);
-      setEvents([]);
       return;
     }
 
@@ -131,15 +130,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
 
           setConcepts(conceptsData || []);
         }
-
-        // Fetch public events
-        const { data: eventsData } = await supabase
-          .from('events')
-          .select('*')
-          .eq('maker_id', userId)
-          .eq('is_public', true);
-
-        setEvents(eventsData || []);
 
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -360,33 +350,22 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                   <CardTitle>Kommende arrangementer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                   {events.length > 0 ? (
-                     <div className="space-y-4">
-                       {events.map((event) => (
-                         <div 
-                           key={event.id} 
-                           className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                           onClick={() => handleEventClick(event.id)}
-                         >
-                           <h4 className="font-medium">{event.title}</h4>
-                           {event.description && (
-                             <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                           )}
-                           {event.event_date && (
-                             <p className="text-sm mt-2">
-                               Dato: {new Date(event.event_date).toLocaleDateString('nb-NO')}
-                             </p>
-                           )}
-                           {event.location && (
-                             <p className="text-sm">Sted: {event.location}</p>
-                           )}
-                           <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
-                         </div>
-                       ))}
-                     </div>
-                  ) : (
-                    <p className="text-muted-foreground italic">Ingen kommende arrangementer</p>
-                  )}
+                  <WorkingEventsDisplay 
+                    profile={{
+                      id: profile.id,
+                      user_id: profile.user_id,
+                      display_name: profile.display_name,
+                      bio: profile.bio || null,
+                      role: profile.role as 'maker' | 'goer',
+                      avatar_url: profile.avatar_url || null,
+                      address: profile.address || null,
+                      latitude: profile.latitude || null,
+                      longitude: profile.longitude || null,
+                      is_address_public: profile.is_address_public,
+                      contact_info: profile.contact_info
+                    }}
+                    showSensitiveInfo={false}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
