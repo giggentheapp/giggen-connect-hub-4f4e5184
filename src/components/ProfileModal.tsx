@@ -8,7 +8,6 @@ import { MapPin, User, X } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
-import { EventModal } from '@/components/EventModal';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,8 +38,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [concepts, setConcepts] = useState<any[]>([]);
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const { role: currentUserRole } = useRole();
   const navigate = useNavigate();
 
@@ -141,15 +138,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
     fetchProfileData();
   }, [userId, isOpen, currentUserRole]);
 
-  const handleEventClick = (eventId: string) => {
-    setSelectedEventId(eventId);
-    setIsEventModalOpen(true);
-  };
-
-  const handleEventModalClose = () => {
-    setIsEventModalOpen(false);
-    setSelectedEventId(null);
-  };
 
   const handleConceptClick = (conceptId: string) => {
     onClose(); // Close the profile modal
@@ -372,12 +360,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
           </Tabs>
         </div>
       </DialogContent>
-      
-      <EventModal 
-        isOpen={isEventModalOpen}
-        onClose={handleEventModalClose}
-        eventId={selectedEventId}
-      />
     </Dialog>
   );
 };
