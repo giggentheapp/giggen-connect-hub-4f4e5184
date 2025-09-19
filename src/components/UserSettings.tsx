@@ -13,6 +13,7 @@ import { validateDisplayName, validateEmail, validatePhone, validateBio } from '
 import { supabase } from '@/integrations/supabase/client';
 import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -387,8 +388,27 @@ export const UserSettings = ({
             }} />
               {validationErrors.display_name && <p className="text-sm text-red-500 mt-1">{validationErrors.display_name}</p>}
             </div>
-            
-            
+          </div>
+
+          {/* Address Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Adresse</h3>
+            <div>
+              <Label htmlFor="address">Adresse</Label>
+              <AddressAutocomplete
+                value={profileData.address || ''}
+                onChange={(address, coordinates) => {
+                  setProfileData(prev => ({
+                    ...prev,
+                    address: address,
+                    latitude: coordinates?.lat || null,
+                    longitude: coordinates?.lng || null
+                  }));
+                }}
+                placeholder="Skriv inn din adresse..."
+                className="w-full"
+              />
+            </div>
           </div>
 
           {/* Contact Information - Only for Makers */}
