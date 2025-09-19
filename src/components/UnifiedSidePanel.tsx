@@ -10,7 +10,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Import sections
-import { ExploreSection } from '@/components/sections/ExploreSection';
 import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
 import { MakerExploreSection } from '@/components/sections/MakerExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
