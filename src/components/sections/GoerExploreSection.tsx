@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Calendar, Clock, Eye, Filter, Map, List } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MapBackground } from '@/components/MapBackground';
 import { ProfileModal } from '@/components/ProfileModal';
 import { EventModal } from '@/components/EventModal';
+import { BookingRequest } from '@/components/BookingRequest';
 
 interface UserProfile {
   id: string;
@@ -39,7 +39,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>('map'); // Default to map
+  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>('map');
   const [currentFilter, setCurrentFilter] = useState<'makers' | 'events'>('makers');
   const navigate = useNavigate();
   const { isGoer } = useRole();
@@ -86,14 +86,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   };
 
   const handleViewProfile = (makerId: string) => {
-    console.log('🎯 GoerExploreSection: handleViewProfile called with makerId:', makerId);
-    console.log('🎯 Current navigate function:', navigate);
-    console.log('🎯 About to navigate to:', `/profile/${makerId}`);
-    
-    // Navigate directly to profile page instead of modal
     navigate(`/profile/${makerId}`);
-    
-    console.log('✅ GoerExploreSection: navigate() call completed');
   };
 
   const handleViewEvent = (eventId: string) => {
@@ -103,81 +96,43 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* FLOATING TOGGLE BUTTON - TOP RIGHT - AGGRESSIVE DEBUG VISIBILITY */}
-      <div 
-        className="fixed top-4 right-4 flex gap-2"
-        style={{
-          zIndex: 99999,
-          position: 'fixed',
-          isolation: 'isolate'
-        }}
-      >
-        {/* DEBUG INDICATOR */}
-        <div style={{
-          position: 'fixed',
-          top: '10px',
-          right: '10px',
-          background: 'lime',
-          color: 'black',
-          padding: '2px 6px',
-          fontSize: '10px',
-          zIndex: 100000,
-          border: '1px solid black'
-        }}>
-          DEBUG ON
+      {/* Clean Toggle Header */}
+      <div className="absolute top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Toggle Buttons */}
+          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+            <button
+              onClick={() => setCurrentViewMode('map')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                currentViewMode === 'map'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Kart
+            </button>
+            <button
+              onClick={() => setCurrentViewMode('list')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                currentViewMode === 'list'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Liste
+            </button>
+          </div>
+
+          {/* Maker Count */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="w-4 h-4 text-purple-600" />
+            <span className="text-purple-600 font-medium">{makers.length} makers</span>
+          </div>
         </div>
-
-        {/* View Toggle Button - MAXIMUM VISIBILITY */}
-        <button
-          onClick={() => setCurrentViewMode(currentViewMode === 'map' ? 'list' : 'map')}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 99999,
-            background: 'red',
-            color: 'white',
-            border: '3px solid black',
-            padding: '15px 20px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
-            cursor: 'pointer',
-            minWidth: '120px',
-            minHeight: '50px'
-          }}
-        >
-          {currentViewMode === 'map' ? '🗂️ LISTE' : '🗺️ KART'}
-        </button>
-
-        {/* Filter Toggle Button - MAXIMUM VISIBILITY */}
-        <button
-          onClick={() => setCurrentFilter(currentFilter === 'makers' ? 'events' : 'makers')}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '160px',
-            zIndex: 99999,
-            background: 'blue',
-            color: 'white',
-            border: '3px solid black',
-            padding: '15px 20px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
-            cursor: 'pointer',
-            minWidth: '120px',
-            minHeight: '50px'
-          }}
-        >
-          {currentFilter === 'makers' ? '📅 EVENTS' : '🎭 MAKERE'}
-        </button>
       </div>
 
-      {/* MAIN CONTENT AREA */}
-      <div className="absolute inset-0">
+      {/* Main Content Area */}
+      <div className="absolute inset-0 pt-20">
         {currentViewMode === 'map' ? (
           /* MAP VIEW */
           <MapBackground 
@@ -187,137 +142,80 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
         ) : (
           /* LIST VIEW */
           <div className="absolute inset-0 bg-background overflow-auto">
-            <div className="container mx-auto px-4 py-6 max-w-4xl">
+            <div className="container mx-auto px-6 py-6 max-w-4xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  {currentFilter === 'makers' ? (
-                    <>
-                      <Users className="w-6 h-6" />
-                      Makere i nettverket
-                    </>
-                  ) : (
-                    <>
-                      <Calendar className="w-6 h-6" />
-                      Kommende arrangementer
-                    </>
-                  )}
+                <h2 className="text-xl font-semibold text-foreground">
+                  Makere i nettverket
                 </h2>
                 <Button 
-                  onClick={currentFilter === 'makers' ? fetchMakers : fetchEvents} 
+                  onClick={fetchMakers} 
                   disabled={loading}
                   variant="outline"
                   size="sm"
                 >
-                  {loading ? 'Laster...' : 'Oppdater'}
+                  Oppdater makere
                 </Button>
               </div>
               
-              {currentFilter === 'makers' ? (
-                /* MAKERS LIST */
-                makers.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>{loading ? 'Laster makere...' : 'Ingen makere funnet.'}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {makers.map((maker) => (
-                      <Card key={maker.id} className="border bg-card hover:bg-card/80 cursor-pointer transition-colors" onClick={() => handleViewProfile(maker.user_id)}>
-                        <CardContent className="p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
-                              {maker.avatar_url ? (
-                                <img 
-                                  src={maker.avatar_url} 
-                                  alt={maker.display_name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-muted-foreground text-lg font-bold">
-                                  {maker.display_name?.charAt(0) || 'M'}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-semibold">{maker.display_name}</h3>
-                              <p className="text-muted-foreground mt-1">
-                                {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                              </p>
-                              <div className="flex items-center gap-3 mt-3">
-                                <Badge variant="secondary" className="text-xs">
-                                  {maker.role}
-                                </Badge>
-                                {maker.address && (
-                                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    {maker.address}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )
+              {makers.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>{loading ? 'Laster makere...' : 'Ingen makere funnet.'}</p>
+                </div>
               ) : (
-                /* EVENTS LIST */
-                events.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>{loading ? 'Laster arrangementer...' : 'Ingen arrangementer funnet.'}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {events.map((event) => (
-                      <Card key={event.id} className="border bg-card hover:bg-card/80 cursor-pointer transition-colors" onClick={() => handleViewEvent(event.id)}>
-                        <CardContent className="p-6">
-                          <div className="space-y-3">
-                            <h3 className="text-lg font-semibold">{event.title}</h3>
-                            {event.description && (
-                              <p className="text-muted-foreground">
-                                {event.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                              {event.venue && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="w-4 h-4" />
-                                  {event.venue}
-                                </span>
-                              )}
-                              {event.date && (
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
-                                  {new Date(event.date).toLocaleDateString('nb-NO')}
-                                </span>
-                              )}
-                              {event.time && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  {event.time}
-                                </span>
-                              )}
-                            </div>
-                            {event.ticket_price && (
-                              <div className="flex items-center gap-3">
-                                <Badge variant="outline" className="text-sm">
-                                  {event.ticket_price} kr
-                                </Badge>
-                                {event.expected_audience && (
-                                  <Badge variant="secondary" className="text-sm">
-                                    {event.expected_audience} publikummere
-                                  </Badge>
-                                )}
-                              </div>
+                <div className="space-y-4">
+                  {makers.map((maker) => (
+                    <div key={maker.id} className="bg-white rounded-lg border border-border p-6 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-foreground mb-2">
+                            {maker.display_name}
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
+                            {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                          </p>
+                          <div className="flex items-center gap-4">
+                            <Badge 
+                              variant="secondary" 
+                              className="bg-blue-50 text-blue-600 border-blue-200 text-xs font-medium"
+                            >
+                              maker
+                            </Badge>
+                            {maker.address && (
+                              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {maker.address}
+                              </span>
                             )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewProfile(maker.user_id);
+                            }}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Se profil
+                          </Button>
+                          <BookingRequest
+                            receiverId={maker.user_id}
+                            receiverName={maker.display_name}
+                            onSuccess={() => {
+                              // Handle success if needed
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
