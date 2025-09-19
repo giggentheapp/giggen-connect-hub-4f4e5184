@@ -32,11 +32,14 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
 
   return (
     <div className="space-y-6">
+      {/* Temporarily disabled Mapbox initialization to prevent blocking modal */}
+      {/* 
       <MapboxConfigInitializer 
         accessToken="pk.eyJ1IjoiZ2lnZ2VudGhlYXBwIiwiYSI6ImNtZmNiem5qNjF4bDgyanFzNjRlMnZsc3MifQ.pdpTiiX4bL8K_dF6PKxQvA"
         styleUrl="mapbox://styles/giggentheapp/cmdc04yqm004m01qzbafib4fl"
         userId={updatedProfile.user_id}
       />
+      */}
       <UserSettings 
         profile={updatedProfile}
         onProfileUpdate={handleProfileUpdate}
