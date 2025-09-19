@@ -420,9 +420,10 @@ export const UserSettings = ({
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Kontaktinformasjon</h3>
+          {/* Contact Information - Only for Makers */}
+          {profileData.role === 'maker' && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Kontaktinformasjon</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="email" className="flex items-center gap-2">
@@ -499,6 +500,7 @@ export const UserSettings = ({
               </div>
             </div>
           </div>
+          )}
 
           
 
