@@ -103,36 +103,77 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* FLOATING TOGGLE BUTTON - TOP RIGHT */}
-      <div className="fixed top-4 right-4 z-[9999] flex gap-2">
-        {/* View Toggle Button */}
-        <Button
-          onClick={() => setCurrentViewMode(currentViewMode === 'map' ? 'list' : 'map')}
-          className="bg-white text-foreground border shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
-          size="sm"
-        >
-          {currentViewMode === 'map' ? (
-            <>
-              <List className="w-4 h-4" />
-              Liste
-            </>
-          ) : (
-            <>
-              <Map className="w-4 h-4" />
-              Kart
-            </>
-          )}
-        </Button>
+      {/* FLOATING TOGGLE BUTTON - TOP RIGHT - AGGRESSIVE DEBUG VISIBILITY */}
+      <div 
+        className="fixed top-4 right-4 flex gap-2"
+        style={{
+          zIndex: 99999,
+          position: 'fixed',
+          isolation: 'isolate'
+        }}
+      >
+        {/* DEBUG INDICATOR */}
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: 'lime',
+          color: 'black',
+          padding: '2px 6px',
+          fontSize: '10px',
+          zIndex: 100000,
+          border: '1px solid black'
+        }}>
+          DEBUG ON
+        </div>
 
-        {/* Filter Toggle Button */}
-        <Button
-          onClick={() => setCurrentFilter(currentFilter === 'makers' ? 'events' : 'makers')}
-          className="bg-white text-foreground border shadow-lg hover:shadow-xl transition-all duration-200"
-          size="sm"
-          variant="outline"
+        {/* View Toggle Button - MAXIMUM VISIBILITY */}
+        <button
+          onClick={() => setCurrentViewMode(currentViewMode === 'map' ? 'list' : 'map')}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: 99999,
+            background: 'red',
+            color: 'white',
+            border: '3px solid black',
+            padding: '15px 20px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
+            cursor: 'pointer',
+            minWidth: '120px',
+            minHeight: '50px'
+          }}
         >
-          {currentFilter === 'makers' ? 'Events' : 'Makere'}
-        </Button>
+          {currentViewMode === 'map' ? '🗂️ LISTE' : '🗺️ KART'}
+        </button>
+
+        {/* Filter Toggle Button - MAXIMUM VISIBILITY */}
+        <button
+          onClick={() => setCurrentFilter(currentFilter === 'makers' ? 'events' : 'makers')}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '160px',
+            zIndex: 99999,
+            background: 'blue',
+            color: 'white',
+            border: '3px solid black',
+            padding: '15px 20px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
+            cursor: 'pointer',
+            minWidth: '120px',
+            minHeight: '50px'
+          }}
+        >
+          {currentFilter === 'makers' ? '📅 EVENTS' : '🎭 MAKERE'}
+        </button>
       </div>
 
       {/* MAIN CONTENT AREA */}
