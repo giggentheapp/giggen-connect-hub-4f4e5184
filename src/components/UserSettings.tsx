@@ -54,7 +54,9 @@ export const UserSettings = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
 
   // Fetch current settings when component mounts
@@ -181,13 +183,11 @@ export const UserSettings = ({
     const emailValidation = validateEmail(contactInfo.email);
     const phoneValidation = validatePhone(contactInfo.phone);
     const bioValidation = validateBio(profileData.bio || '');
-
     const errors: Record<string, string> = {};
     if (!displayNameValidation.isValid) errors.display_name = displayNameValidation.error || '';
     if (!emailValidation.isValid) errors.email = emailValidation.error || '';
     if (!phoneValidation.isValid) errors.phone = phoneValidation.error || '';
     if (!bioValidation.isValid) errors.bio = bioValidation.error || '';
-
     setValidationErrors(errors);
 
     // Don't submit if there are validation errors
@@ -199,7 +199,6 @@ export const UserSettings = ({
       });
       return;
     }
-
     await updateProfile({
       display_name: profileData.display_name,
       bio: profileData.bio,
@@ -238,10 +237,11 @@ export const UserSettings = ({
       setLoading(false);
     }
   };
-
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const {
+        error
+      } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/auth');
     } catch (error: any) {
@@ -253,7 +253,6 @@ export const UserSettings = ({
       });
     }
   };
-
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
       toast({
@@ -263,7 +262,6 @@ export const UserSettings = ({
       });
       return;
     }
-
     if (newPassword.length < 6) {
       toast({
         title: "Feil",
@@ -272,12 +270,14 @@ export const UserSettings = ({
       });
       return;
     }
-
     try {
       setLoading(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const {
+        error
+      } = await supabase.auth.updateUser({
+        password: newPassword
+      });
       if (error) throw error;
-      
       setNewPassword('');
       setConfirmPassword('');
       toast({
@@ -295,7 +295,6 @@ export const UserSettings = ({
       setLoading(false);
     }
   };
-
   const handleDeleteUser = async () => {
     if (deleteConfirmation !== 'SLETT') {
       toast({
@@ -305,24 +304,23 @@ export const UserSettings = ({
       });
       return;
     }
-
     try {
       setLoading(true);
-      
+
       // Delete all user data and profile (this will cascade to auth.users)
-      const { error: deleteDataError } = await supabase
-        .rpc('delete_user_data', { user_uuid: profile.user_id });
-      
+      const {
+        error: deleteDataError
+      } = await supabase.rpc('delete_user_data', {
+        user_uuid: profile.user_id
+      });
       if (deleteDataError) throw deleteDataError;
-      
+
       // Sign out the user
       await supabase.auth.signOut();
-      
       toast({
         title: "Bruker slettet",
         description: "Din bruker og alle tilhørende data er slettet"
       });
-      
       navigate('/auth');
     } catch (error: any) {
       console.error('Error deleting user:', error);
@@ -374,55 +372,27 @@ export const UserSettings = ({
             <div>
               <Label htmlFor="display-name">Visningsnavn</Label>
               <Input id="display-name" value={profileData.display_name} onChange={e => {
-                const value = e.target.value;
-                setProfileData(prev => ({
-                  ...prev,
-                  display_name: value
-                }));
-                
-                // Validate display name
-                const validation = validateDisplayName(value);
-                setValidationErrors(prev => ({
-                  ...prev,
-                  display_name: validation.isValid ? '' : validation.error || ''
-                }));
-              }} />
-              {validationErrors.display_name && (
-                <p className="text-sm text-red-500 mt-1">{validationErrors.display_name}</p>
-              )}
+              const value = e.target.value;
+              setProfileData(prev => ({
+                ...prev,
+                display_name: value
+              }));
+
+              // Validate display name
+              const validation = validateDisplayName(value);
+              setValidationErrors(prev => ({
+                ...prev,
+                display_name: validation.isValid ? '' : validation.error || ''
+              }));
+            }} />
+              {validationErrors.display_name && <p className="text-sm text-red-500 mt-1">{validationErrors.display_name}</p>}
             </div>
             
-            <div>
-              <Label htmlFor="bio">Om meg</Label>
-              <Textarea 
-                id="bio" 
-                value={profileData.bio || ''} 
-                onChange={e => {
-                  const value = e.target.value;
-                  setProfileData(prev => ({
-                    ...prev,
-                    bio: value
-                  }));
-                  
-                  // Validate bio
-                  const validation = validateBio(value);
-                  setValidationErrors(prev => ({
-                    ...prev,
-                    bio: validation.isValid ? '' : validation.error || ''
-                  }));
-                }}
-                placeholder="Fortell litt om deg selv..."
-                rows={3}
-              />
-              {validationErrors.bio && (
-                <p className="text-sm text-red-500 mt-1">{validationErrors.bio}</p>
-              )}
-            </div>
+            
           </div>
 
           {/* Contact Information - Only for Makers */}
-          {profileData.role === 'maker' && (
-            <div className="space-y-4">
+          {profileData.role === 'maker' && <div className="space-y-4">
               <h3 className="text-lg font-medium">Kontaktinformasjon</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -430,29 +400,21 @@ export const UserSettings = ({
                   <Mail className="h-4 w-4" />
                   E-post
                 </Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={contactInfo.email} 
-                  onChange={e => {
-                    const value = e.target.value;
-                    setContactInfo(prev => ({
-                      ...prev,
-                      email: value
-                    }));
-                    
-                    // Validate email
-                    const validation = validateEmail(value);
-                    setValidationErrors(prev => ({
-                      ...prev,
-                      email: validation.isValid ? '' : validation.error || ''
-                    }));
-                  }}
-                  placeholder="din@epost.no"
-                />
-                {validationErrors.email && (
-                  <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
-                )}
+                <Input id="email" type="email" value={contactInfo.email} onChange={e => {
+                const value = e.target.value;
+                setContactInfo(prev => ({
+                  ...prev,
+                  email: value
+                }));
+
+                // Validate email
+                const validation = validateEmail(value);
+                setValidationErrors(prev => ({
+                  ...prev,
+                  email: validation.isValid ? '' : validation.error || ''
+                }));
+              }} placeholder="din@epost.no" />
+                {validationErrors.email && <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>}
               </div>
               
               <div>
@@ -460,47 +422,32 @@ export const UserSettings = ({
                   <Phone className="h-4 w-4" />
                   Telefonnummer
                 </Label>
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  value={contactInfo.phone} 
-                  onChange={e => {
-                    const value = e.target.value;
-                    setContactInfo(prev => ({
-                      ...prev,
-                      phone: value
-                    }));
-                    
-                    // Validate phone
-                    const validation = validatePhone(value);
-                    setValidationErrors(prev => ({
-                      ...prev,
-                      phone: validation.isValid ? '' : validation.error || ''
-                    }));
-                  }}
-                  placeholder="+47 123 45 678"
-                />
-                {validationErrors.phone && (
-                  <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
-                )}
+                <Input id="phone" type="tel" value={contactInfo.phone} onChange={e => {
+                const value = e.target.value;
+                setContactInfo(prev => ({
+                  ...prev,
+                  phone: value
+                }));
+
+                // Validate phone
+                const validation = validatePhone(value);
+                setValidationErrors(prev => ({
+                  ...prev,
+                  phone: validation.isValid ? '' : validation.error || ''
+                }));
+              }} placeholder="+47 123 45 678" />
+                {validationErrors.phone && <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>}
               </div>
               
               <div>
                 <Label htmlFor="website">Nettside</Label>
-                <Input 
-                  id="website" 
-                  type="url" 
-                  value={contactInfo.website} 
-                  onChange={e => setContactInfo(prev => ({
-                    ...prev,
-                    website: e.target.value
-                  }))}
-                  placeholder="https://dinside.no"
-                />
+                <Input id="website" type="url" value={contactInfo.website} onChange={e => setContactInfo(prev => ({
+                ...prev,
+                website: e.target.value
+              }))} placeholder="https://dinside.no" />
               </div>
             </div>
-          </div>
-          )}
+          </div>}
 
           
 
@@ -514,8 +461,7 @@ export const UserSettings = ({
       </Card>
 
       {/* Privacy Settings - Only for Makers */}
-      {profileData.role === 'maker' && (
-        <Card>
+      {profileData.role === 'maker' && <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -538,11 +484,9 @@ export const UserSettings = ({
                   La andre finne deg på kartet. Krever at adressen din også er offentlig.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_on_map || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_on_map: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_on_map || false} onCheckedChange={checked => updateProfileSettings({
+            show_on_map: checked
+          })} disabled={loading} />
             </div>
 
             {/* About Me Section */}
@@ -556,11 +500,9 @@ export const UserSettings = ({
                   Vis biografien din til andre brukere som besøker profilen din.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_about || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_about: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_about || false} onCheckedChange={checked => updateProfileSettings({
+            show_about: checked
+          })} disabled={loading} />
             </div>
 
             {/* Contact Information */}
@@ -574,11 +516,9 @@ export const UserSettings = ({
                   Del kontaktinformasjon med andre brukere når dere har en bekreftet booking.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_contact || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_contact || false} onCheckedChange={checked => updateProfileSettings({
+            show_contact: checked
+          })} disabled={loading} />
             </div>
 
             {/* Portfolio */}
@@ -592,11 +532,9 @@ export const UserSettings = ({
                   La andre se bildene og videoene i porteføljen din.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_portfolio || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_portfolio: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_portfolio || false} onCheckedChange={checked => updateProfileSettings({
+            show_portfolio: checked
+          })} disabled={loading} />
             </div>
 
             {/* Technical Specifications */}
@@ -610,11 +548,9 @@ export const UserSettings = ({
                   Del tekniske krav og spesifikasjoner med potensielle samarbeidspartnere.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_techspec || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_techspec: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_techspec || false} onCheckedChange={checked => updateProfileSettings({
+            show_techspec: checked
+          })} disabled={loading} />
             </div>
 
             {/* Events */}
@@ -628,11 +564,9 @@ export const UserSettings = ({
                   Vis dine planlagte arrangementer og konserter til andre brukere.
                 </p>
               </div>
-              <Switch
-                checked={profileSettings?.show_events || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_events: checked })}
-                disabled={loading}
-              />
+              <Switch checked={profileSettings?.show_events || false} onCheckedChange={checked => updateProfileSettings({
+            show_events: checked
+          })} disabled={loading} />
             </div>
 
             {/* Address Privacy */}
@@ -647,26 +581,23 @@ export const UserSettings = ({
                     Gjør adressen din synlig for andre brukere. Dette er nødvendig for å vises på kartet.
                   </p>
                 </div>
-                <Switch
-                  checked={profileData.is_address_public || false}
-                  onCheckedChange={(checked) => {
-                    setProfileData(prev => ({
-                      ...prev,
-                      is_address_public: checked
-                    }));
-                    // If making address private, also disable map visibility
-                    if (!checked) {
-                      updateProfileSettings({ show_on_map: false });
-                    }
-                  }}
-                  disabled={loading}
-                />
+                <Switch checked={profileData.is_address_public || false} onCheckedChange={checked => {
+              setProfileData(prev => ({
+                ...prev,
+                is_address_public: checked
+              }));
+              // If making address private, also disable map visibility
+              if (!checked) {
+                updateProfileSettings({
+                  show_on_map: false
+                });
+              }
+            }} disabled={loading} />
               </div>
             </div>
 
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Password Change */}
       <Card>
@@ -682,29 +613,13 @@ export const UserSettings = ({
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="new-password">Nytt passord</Label>
-            <Input 
-              id="new-password" 
-              type="password" 
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Minst 6 tegn"
-            />
+            <Input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minst 6 tegn" />
           </div>
           <div>
             <Label htmlFor="confirm-password">Bekreft passord</Label>
-            <Input 
-              id="confirm-password" 
-              type="password" 
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Gjenta passordet"
-            />
+            <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Gjenta passordet" />
           </div>
-          <Button 
-            onClick={handleChangePassword} 
-            disabled={loading || !newPassword || !confirmPassword}
-            className="w-full md:w-auto"
-          >
+          <Button onClick={handleChangePassword} disabled={loading || !newPassword || !confirmPassword} className="w-full md:w-auto">
             <Key className="h-4 w-4 mr-2" />
             {loading ? 'Oppdaterer...' : 'Endre passord'}
           </Button>
@@ -723,21 +638,14 @@ export const UserSettings = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            onClick={handleLogout}
-            variant="outline"
-            className="w-full justify-start"
-          >
+          <Button onClick={handleLogout} variant="outline" className="w-full justify-start">
             <LogOut className="h-4 w-4 mr-2" />
             Logg ut
           </Button>
           
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button 
-                variant="destructive"
-                className="w-full justify-start"
-              >
+              <Button variant="destructive" className="w-full justify-start">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Slett bruker
               </Button>
@@ -753,22 +661,13 @@ export const UserSettings = ({
                 <Label htmlFor="delete-confirm">
                   Skriv 'SLETT' for å bekrefte:
                 </Label>
-                <Input
-                  id="delete-confirm"
-                  value={deleteConfirmation}
-                  onChange={(e) => setDeleteConfirmation(e.target.value)}
-                  placeholder="SLETT"
-                />
+                <Input id="delete-confirm" value={deleteConfirmation} onChange={e => setDeleteConfirmation(e.target.value)} placeholder="SLETT" />
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>
                   Avbryt
                 </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteUser}
-                  disabled={loading || deleteConfirmation !== 'SLETT'}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
+                <AlertDialogAction onClick={handleDeleteUser} disabled={loading || deleteConfirmation !== 'SLETT'} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                   {loading ? 'Sletter...' : 'Slett bruker permanent'}
                 </AlertDialogAction>
               </AlertDialogFooter>
