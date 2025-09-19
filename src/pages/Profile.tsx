@@ -224,8 +224,30 @@ const Profile = () => {
   }
 
   if (!profile) {
-    console.log('📄 Profile: No profile found, redirecting to dashboard');
-    return <Navigate to="/dashboard" replace />;
+    console.log('📄 Profile: No profile found, showing not found message');
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake til oversikt
+            </Link>
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-12">
+              <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Profil ikke funnet</h2>
+              <p className="text-muted-foreground">
+                Brukerprofilen du leter etter eksisterer ikke eller er ikke tilgjengelig.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   console.log('📄 Profile: Rendering profile for:', profile.display_name, profile.role);
