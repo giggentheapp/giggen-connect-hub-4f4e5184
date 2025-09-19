@@ -44,12 +44,35 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const navigate = useNavigate();
   const { isGoer } = useRole();
 
-  console.log('🚀 GoerExploreSection render:', { 
+  // AGGRESSIVE DEBUGGING - Track component lifecycle
+  const mountTime = useState(() => Date.now())[0];
+  console.log('🚀 GoerExploreSection MOUNT/RENDER:', { 
+    mountTime,
+    currentTime: Date.now(),
+    timeDiff: Date.now() - mountTime,
     currentViewMode, 
     currentFilter, 
     viewMode, 
     exploreType,
     profile: profile?.display_name 
+  });
+
+  // Track when component unmounts
+  useEffect(() => {
+    console.log('🎬 GoerExploreSection MOUNTED at:', Date.now());
+    return () => {
+      console.log('💀 GoerExploreSection UNMOUNTING at:', Date.now());
+    };
+  }, []);
+
+  // Track every single re-render
+  useEffect(() => {
+    console.log('🔄 GoerExploreSection RE-RENDER:', {
+      currentViewMode,
+      currentFilter,
+      propsViewMode: viewMode,
+      propsExploreType: exploreType
+    });
   });
 
   // Auto-fetch data when component mounts
@@ -117,18 +140,131 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* Full Screen Map */}
-      {currentViewMode === 'map' && (
-        <div className="absolute inset-0">
-          <MapBackground 
-            onProfileClick={(makerId) => {
-              console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
-              handleViewProfile(makerId);
-            }}
-            filterType={currentFilter}
-          />
+      {/* AGGRESSIVE TEST - SIMPLE BUTTON THAT MUST STAY VISIBLE */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          zIndex: 99999,
+          background: 'red',
+          color: 'white',
+          padding: '10px',
+          border: '3px solid black',
+          display: 'block',
+          visibility: 'visible'
+        }}
+      >
+        <button 
+          onClick={() => console.log('🚨 TEST BUTTON CLICKED')}
+          style={{ background: 'red', color: 'white', padding: '5px', border: 'none' }}
+        >
+          I SHOULD ALWAYS BE VISIBLE - TEST BUTTON
+        </button>
+      </div>
+
+      {/* FORCED ALWAYS-VISIBLE TOGGLES */}
+      <div 
+        className="fixed top-4 left-4 right-4 z-[99999] flex gap-4"
+        style={{
+          position: 'fixed',
+          top: '60px',
+          left: '10px',
+          zIndex: 99998,
+          display: 'block',
+          visibility: 'visible'
+        }}
+      >
+        <div 
+          className="flex items-center gap-4"
+          style={{
+            background: 'white',
+            border: '3px solid blue',
+            padding: '10px',
+            display: 'flex',
+            visibility: 'visible'
+          }}
+        >
+          {/* View Mode Toggle - FORCED VISIBLE */}
+          <div style={{ background: 'yellow', padding: '5px', border: '2px solid green' }}>
+            <button
+              onClick={() => {
+                console.log('🔄 FORCED View Mode Toggle: switching to map');
+                setCurrentViewMode('map');
+              }}
+              style={{
+                background: currentViewMode === 'map' ? 'blue' : 'gray',
+                color: 'white',
+                padding: '8px',
+                margin: '2px',
+                border: 'none'
+              }}
+            >
+              KART
+            </button>
+            <button
+              onClick={() => {
+                console.log('🔄 FORCED View Mode Toggle: switching to list');
+                setCurrentViewMode('list');
+              }}
+              style={{
+                background: currentViewMode === 'list' ? 'blue' : 'gray',
+                color: 'white',
+                padding: '8px',
+                margin: '2px',
+                border: 'none'
+              }}
+            >
+              LISTE
+            </button>
+          </div>
+          
+          {/* Filter Toggle - FORCED VISIBLE */}
+          <div style={{ background: 'orange', padding: '5px', border: '2px solid purple' }}>
+            <button
+              onClick={() => {
+                console.log('🔄 FORCED Filter Toggle: switching to makers');
+                setCurrentFilter('makers');
+              }}
+              style={{
+                background: currentFilter === 'makers' ? 'purple' : 'gray',
+                color: 'white',
+                padding: '8px',
+                margin: '2px',
+                border: 'none'
+              }}
+            >
+              MAKERE
+            </button>
+            <button
+              onClick={() => {
+                console.log('🔄 FORCED Filter Toggle: switching to events');
+                setCurrentFilter('events');
+              }}
+              style={{
+                background: currentFilter === 'events' ? 'purple' : 'gray',
+                color: 'white',
+                padding: '8px',
+                margin: '2px',
+                border: 'none'
+              }}
+            >
+              EVENTS
+            </button>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Full Screen Map - NO CONDITIONS */}
+      <div className="absolute inset-0">
+        <MapBackground 
+          onProfileClick={(makerId) => {
+            console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
+            handleViewProfile(makerId);
+          }}
+          filterType={currentFilter}
+        />
+      </div>
       
       {/* Fixed Controls - Top - ALWAYS VISIBLE */}
       <div className="fixed top-4 left-4 right-4 z-[9999] flex gap-4">
