@@ -26,7 +26,7 @@ interface WorkingEventsDisplayProps {
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEventsDisplayProps) => {
   const { bookings, loading } = useBookings(profile.user_id);
-  const upcomingEvents = bookings.filter(b => b.status === 'upcoming');
+  const publishedEvents = bookings.filter(b => b.status === 'upcoming');
 
   if (loading) {
     return (
@@ -36,7 +36,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
     );
   }
 
-  if (upcomingEvents.length === 0) {
+  if (publishedEvents.length === 0) {
     return (
       <div className="space-y-4">
         <div className="text-sm text-muted-foreground">No upcoming events</div>
@@ -46,7 +46,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
 
   return (
     <div className="space-y-4">
-      {upcomingEvents.map((event) => (
+      {publishedEvents.map((event) => (
         <Card key={event.id} className="p-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">{event.title}</CardTitle>
