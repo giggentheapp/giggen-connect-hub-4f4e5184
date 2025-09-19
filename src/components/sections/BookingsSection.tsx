@@ -53,12 +53,31 @@ export const BookingsSection = ({
     toast
   } = useToast();
 
-  // New workflow-based filtering
-  const incomingRequests = bookings.filter(b => b.receiver_id === profile.user_id && b.status === 'pending');
-  const sentRequests = bookings.filter(b => b.sender_id === profile.user_id && b.status === 'pending');
-  const ongoingAgreements = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'allowed' || b.status === 'approved_by_sender' || b.status === 'approved_by_receiver' || b.status === 'approved_by_both'));
-  const upcomingEvents = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && b.status === 'upcoming');
-  const historicalBookings = bookings.filter(b => (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && (b.status === 'cancelled' || b.status === 'completed'));
+  // Stable filtering - always filter from complete dataset
+  const incomingRequests = bookings.filter(b => 
+    b.receiver_id === profile.user_id && 
+    b.status === 'pending'
+  );
+  
+  const sentRequests = bookings.filter(b => 
+    b.sender_id === profile.user_id && 
+    b.status === 'pending'
+  );
+  
+  const ongoingAgreements = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
+    (b.status === 'allowed' || b.status === 'approved_by_sender' || b.status === 'approved_by_receiver' || b.status === 'approved_by_both')
+  );
+  
+  const upcomingEvents = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
+    b.status === 'upcoming'
+  );
+  
+  const historicalBookings = bookings.filter(b => 
+    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
+    (b.status === 'cancelled' || b.status === 'completed')
+  );
 
   // Helper functions for booking status display with new workflow
   const getStatusColor = (status: string) => {
@@ -116,15 +135,11 @@ export const BookingsSection = ({
     }
   };
   const handleBookingAction = async () => {
-    // Force refresh of bookings data and fetch historical if on history tab
-    console.log('📄 Refreshing bookings after action...');
+    // Always fetch all bookings - no need to check active tab
+    console.log('📄 Refreshing all bookings after action...');
     try {
-      if (activeTab === 'history') {
-        await fetchHistorical();
-      } else {
-        await refetch();
-      }
-      console.log('✅ Bookings refreshed successfully');
+      await refetch();
+      console.log('✅ All bookings refreshed successfully');
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({
@@ -205,15 +220,11 @@ export const BookingsSection = ({
           <Check className="h-4 w-4" />
           Kommende arrangementer ({upcomingEvents.length})
         </Button>
-        <Button variant={activeTab === 'history' ? 'default' : 'ghost'} onClick={async () => {
-        setActiveTab('history');
-        // Fetch historical bookings when switching to history tab
-        try {
-          await fetchHistorical();
-        } catch (error) {
-          console.error('Failed to fetch historical bookings:', error);
-        }
-      }} className="flex items-center gap-2">
+        <Button 
+          variant={activeTab === 'history' ? 'default' : 'ghost'} 
+          onClick={() => setActiveTab('history')} 
+          className="flex items-center gap-2"
+        >
           <Clock className="h-4 w-4" />
           Historikk ({historicalBookings.length})
         </Button>

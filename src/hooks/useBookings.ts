@@ -120,15 +120,7 @@ export const useBookings = (userId?: string) => {
         query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       }
 
-      // Filter bookings based on historical flag
-      if (!includeHistorical) {
-        // Active view: exclude completed and cancelled bookings
-        query = query.not('status', 'in', '(completed,cancelled)');
-      } else {
-        // Historical view: show only completed and cancelled bookings
-        query = query.in('status', ['completed', 'cancelled']);
-      }
-
+      // Always fetch all bookings - filter in UI instead of changing data source
       const { data, error } = await query;
 
       if (error) throw error;
@@ -331,10 +323,6 @@ export const useBookings = (userId?: string) => {
     }
   };
 
-  const fetchHistoricalBookings = useCallback(async () => {
-    return fetchBookings(true);
-  }, [fetchBookings]);
-
   return {
     bookings,
     loading,
@@ -344,6 +332,6 @@ export const useBookings = (userId?: string) => {
     rejectBooking,
     permanentlyDeleteBooking,
     refetch: fetchBookings,
-    fetchHistorical: fetchHistoricalBookings
+    fetchHistorical: fetchBookings // Same as refetch - no need for separate function
   };
 };
