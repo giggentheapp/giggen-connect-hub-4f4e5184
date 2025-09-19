@@ -31,38 +31,7 @@ export const ProfileGoerSection = ({
           <CardDescription className="text-lg capitalize">{profile.role}</CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          {profile.bio && <div>
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Om meg
-              </h3>
-              <p className="text-muted-foreground">{profile.bio}</p>
-            </div>}
-
-          {profile.is_address_public && profile.address && <div>
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Lokasjon
-              </h3>
-              <p className="text-muted-foreground">{profile.address}</p>
-            </div>}
-
-          {profile.contact_info && <div>
-              <h3 className="font-semibold mb-2">Kontaktinformasjon</h3>
-              <div className="space-y-2">
-                {profile.contact_info.email}
-                {profile.contact_info.phone && <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                    <span>{profile.contact_info.phone}</span>
-                  </div>}
-              </div>
-            </div>}
-
-          <div className="pt-4 border-t">
-            
-          </div>
-        </CardContent>
+        
       </Card>
     </div>;
 };
