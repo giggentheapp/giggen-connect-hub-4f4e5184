@@ -71,9 +71,36 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       currentViewMode,
       currentFilter,
       propsViewMode: viewMode,
-      propsExploreType: exploreType
+      propsExploreType: exploreType,
+      timestamp: Date.now()
     });
   });
+
+  // DEBUG: Track when MapBackground might be causing issues
+  useEffect(() => {
+    const checkToggleVisibility = () => {
+      const toggleContainer = document.getElementById('persistent-toggles-container');
+      if (toggleContainer) {
+        const styles = getComputedStyle(toggleContainer);
+        console.log('🎯 Toggle visibility check:', {
+          display: styles.display,
+          visibility: styles.visibility,
+          zIndex: styles.zIndex,
+          position: styles.position
+        });
+      } else {
+        console.error('❌ Toggle container missing during visibility check!');
+      }
+    };
+
+    // Check toggle visibility periodically
+    const interval = setInterval(checkToggleVisibility, 2000);
+    
+    // Initial check
+    setTimeout(checkToggleVisibility, 100);
+
+    return () => clearInterval(interval);
+  }, [currentViewMode, currentFilter]);
 
   // Auto-fetch data when component mounts
   useEffect(() => {
@@ -86,6 +113,29 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
     console.log('🔧 Props changed:', { viewMode, exploreType });
     // Don't reset state if user has already interacted with toggles
   }, [viewMode, exploreType]);
+
+  // PROTECTION: Force toggle visibility every 500ms
+  useEffect(() => {
+    const forceToggleVisibility = () => {
+      const toggleContainer = document.getElementById('persistent-toggles-container');
+      if (toggleContainer) {
+        // Force styles to ensure visibility
+        toggleContainer.style.display = 'block';
+        toggleContainer.style.visibility = 'visible';
+        toggleContainer.style.zIndex = '999999';
+        toggleContainer.style.position = 'fixed';
+        toggleContainer.style.pointerEvents = 'auto';
+      } else {
+        console.error('🚨 PROTECTION: Toggle container is missing from DOM!');
+      }
+    };
+
+    // Force visibility immediately and then every 500ms
+    forceToggleVisibility();
+    const interval = setInterval(forceToggleVisibility, 500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchMakers = async () => {    
     try {
@@ -140,126 +190,172 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* AGGRESSIVE TEST - SIMPLE BUTTON THAT MUST STAY VISIBLE */}
+      {/* COMPLETELY SEPARATE TOGGLE CONTAINER - INDEPENDENT OF MAP */}
       <div 
+        id="persistent-toggles-container"
         style={{
           position: 'fixed',
           top: '10px',
           left: '10px',
-          zIndex: 99999,
-          background: 'red',
-          color: 'white',
-          padding: '10px',
-          border: '3px solid black',
-          display: 'block',
-          visibility: 'visible'
+          right: '10px',
+          zIndex: 999999, // Maximum z-index to stay above everything
+          pointerEvents: 'auto',
+          isolation: 'isolate', // Create new stacking context
         }}
       >
-        <button 
-          onClick={() => console.log('🚨 TEST BUTTON CLICKED')}
-          style={{ background: 'red', color: 'white', padding: '5px', border: 'none' }}
-        >
-          I SHOULD ALWAYS BE VISIBLE - TEST BUTTON
-        </button>
-      </div>
-
-      {/* FORCED ALWAYS-VISIBLE TOGGLES */}
-      <div 
-        className="fixed top-4 left-4 right-4 z-[99999] flex gap-4"
-        style={{
-          position: 'fixed',
-          top: '60px',
-          left: '10px',
-          zIndex: 99998,
-          display: 'block',
-          visibility: 'visible'
-        }}
-      >
+        {/* RED TEST BUTTON - MUST ALWAYS STAY */}
         <div 
-          className="flex items-center gap-4"
           style={{
-            background: 'white',
-            border: '3px solid blue',
-            padding: '10px',
-            display: 'flex',
-            visibility: 'visible'
+            background: 'red',
+            color: 'white',
+            padding: '8px 16px',
+            marginBottom: '10px',
+            border: '3px solid black',
+            borderRadius: '4px',
+            display: 'block',
+            visibility: 'visible',
+            position: 'relative',
+            zIndex: 1000000
           }}
         >
-          {/* View Mode Toggle - FORCED VISIBLE */}
-          <div style={{ background: 'yellow', padding: '5px', border: '2px solid green' }}>
+          <button 
+            onClick={() => console.log('🚨 TEST BUTTON CLICKED - STILL VISIBLE')}
+            style={{ background: 'red', color: 'white', padding: '5px', border: 'none' }}
+          >
+            TEST: I MUST STAY VISIBLE DURING MAP ZOOM
+          </button>
+        </div>
+
+        {/* FORCED PERSISTENT TOGGLES */}
+        <div 
+          style={{
+            display: 'flex',
+            gap: '12px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '3px solid blue',
+            borderRadius: '8px',
+            padding: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            position: 'relative',
+            zIndex: 1000000,
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          {/* View Mode Toggle */}
+          <div style={{ 
+            background: 'yellow', 
+            padding: '8px', 
+            border: '2px solid green',
+            borderRadius: '6px'
+          }}>
             <button
               onClick={() => {
-                console.log('🔄 FORCED View Mode Toggle: switching to map');
+                console.log('🔄 PERSISTENT: switching to map view');
                 setCurrentViewMode('map');
               }}
               style={{
-                background: currentViewMode === 'map' ? 'blue' : 'gray',
+                background: currentViewMode === 'map' ? '#0066cc' : '#666',
                 color: 'white',
-                padding: '8px',
+                padding: '10px 16px',
                 margin: '2px',
-                border: 'none'
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
               }}
             >
-              KART
+              🗺️ KART
             </button>
             <button
               onClick={() => {
-                console.log('🔄 FORCED View Mode Toggle: switching to list');
+                console.log('🔄 PERSISTENT: switching to list view');
                 setCurrentViewMode('list');
               }}
               style={{
-                background: currentViewMode === 'list' ? 'blue' : 'gray',
+                background: currentViewMode === 'list' ? '#0066cc' : '#666',
                 color: 'white',
-                padding: '8px',
+                padding: '10px 16px',
                 margin: '2px',
-                border: 'none'
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
               }}
             >
-              LISTE
+              📋 LISTE
             </button>
           </div>
           
-          {/* Filter Toggle - FORCED VISIBLE */}
-          <div style={{ background: 'orange', padding: '5px', border: '2px solid purple' }}>
+          {/* Filter Toggle */}
+          <div style={{ 
+            background: 'orange', 
+            padding: '8px', 
+            border: '2px solid purple',
+            borderRadius: '6px'
+          }}>
             <button
               onClick={() => {
-                console.log('🔄 FORCED Filter Toggle: switching to makers');
+                console.log('🔄 PERSISTENT: switching to makers filter');
                 setCurrentFilter('makers');
               }}
               style={{
-                background: currentFilter === 'makers' ? 'purple' : 'gray',
+                background: currentFilter === 'makers' ? '#800080' : '#666',
                 color: 'white',
-                padding: '8px',
+                padding: '10px 16px',
                 margin: '2px',
-                border: 'none'
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
               }}
             >
-              MAKERE
+              👨‍🎨 MAKERE
             </button>
             <button
               onClick={() => {
-                console.log('🔄 FORCED Filter Toggle: switching to events');
+                console.log('🔄 PERSISTENT: switching to events filter');
                 setCurrentFilter('events');
               }}
               style={{
-                background: currentFilter === 'events' ? 'purple' : 'gray',
+                background: currentFilter === 'events' ? '#800080' : '#666',
                 color: 'white',
-                padding: '8px',
+                padding: '10px 16px',
                 margin: '2px',
-                border: 'none'
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
               }}
             >
-              EVENTS
+              🎭 EVENTS
             </button>
           </div>
         </div>
       </div>
 
-      {/* Full Screen Map - NO CONDITIONS */}
-      <div className="absolute inset-0">
+      {/* MAP CONTAINER - COMPLETELY SEPARATE FROM TOGGLES */}
+      <div 
+        id="map-container"
+        className="absolute inset-0"
+        style={{ 
+          zIndex: 1, // Low z-index, below toggles
+          isolation: 'isolate'
+        }}
+      >
         <MapBackground 
           onProfileClick={(makerId) => {
-            console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
+            console.log('🗺️ MapBackground: Profile clicked, makerId:', makerId);
+            console.log('🗺️ Checking if toggles are still visible...');
+            
+            // Check if toggles are still in DOM
+            const toggleContainer = document.getElementById('persistent-toggles-container');
+            if (toggleContainer) {
+              console.log('✅ Toggle container still exists in DOM');
+              console.log('Toggle container styles:', getComputedStyle(toggleContainer).display);
+            } else {
+              console.error('❌ Toggle container MISSING from DOM!');
+            }
+            
             handleViewProfile(makerId);
           }}
           filterType={currentFilter}

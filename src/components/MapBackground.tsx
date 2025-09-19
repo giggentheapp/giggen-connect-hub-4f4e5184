@@ -395,10 +395,41 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
 
     // Fit map to show all markers
     if (hasValidCoordinates && map.current) {
+      console.log('🔍 MapBackground: About to call fitBounds - checking toggle visibility...');
+      
+      // Check toggle visibility BEFORE zoom
+      const toggleContainer = document.getElementById('persistent-toggles-container');
+      if (toggleContainer) {
+        console.log('✅ BEFORE fitBounds: Toggle container exists');
+      } else {
+        console.error('❌ BEFORE fitBounds: Toggle container MISSING!');
+      }
+      
       map.current.fitBounds(bounds, {
         padding: 50,
-        maxZoom: 15
+        maxZoom: 15,
+        // Add animation callback to track when zoom completes
+        animate: true,
+        duration: 1000
       });
+      
+      // Check toggle visibility AFTER zoom starts
+      setTimeout(() => {
+        const toggleContainerAfter = document.getElementById('persistent-toggles-container');
+        if (toggleContainerAfter) {
+          console.log('✅ AFTER fitBounds: Toggle container still exists');
+          const styles = getComputedStyle(toggleContainerAfter);
+          console.log('Toggle styles after zoom:', {
+            display: styles.display,
+            visibility: styles.visibility,
+            zIndex: styles.zIndex
+          });
+        } else {
+          console.error('❌ AFTER fitBounds: Toggle container DISAPPEARED!');
+        }
+      }, 100);
+      
+      console.log('🔍 MapBackground: fitBounds called, monitoring toggle visibility...');
     }
   }, [makers, events, mapReady, navigate, onProfileClick, filterType]);
 
