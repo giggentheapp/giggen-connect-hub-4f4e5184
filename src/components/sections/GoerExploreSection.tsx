@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Calendar, Clock, Eye, MessageSquare } from 'lucide-react';
+import { MapPin, Users, Eye } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MapBackground } from '@/components/MapBackground';
 import { ProfileModal } from '@/components/ProfileModal';
-import { EventModal } from '@/components/EventModal';
-import { BookingRequest } from '@/components/BookingRequest';
 
 interface UserProfile {
   id: string;
@@ -32,25 +31,20 @@ interface GoerExploreSectionProps {
 }
 
 export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
+  const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>('map');
-  const [currentFilter, setCurrentFilter] = useState<'makers' | 'events'>('makers');
   const navigate = useNavigate();
   const { isGoer } = useRole();
 
-  // Auto-fetch data when component mounts
+  // Auto-fetch makers when component mounts
   useEffect(() => {
-    fetchMakers();
-    fetchEvents();
+    fetchAllMakers();
   }, []);
 
-  const fetchMakers = async () => {    
+  const fetchAllMakers = async () => {
     try {
       setLoading(true);
       
@@ -67,93 +61,45 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     }
   };
 
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('events_market')
-        .select('*')
-        .eq('is_public', true)
-        .order('date', { ascending: true });
-      
-      if (error) throw error;
-      setEvents(data || []);
-    } catch (err) {
-      console.error('Error fetching events:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleViewProfile = (makerId: string) => {
-    navigate(`/profile/${makerId}`);
-  };
-
-  const handleViewEvent = (eventId: string) => {
-    setSelectedEventId(eventId);
-    setEventModalOpen(true);
+    setSelectedUserId(makerId);
+    setProfileModalOpen(true);
   };
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* Clean Toggle Header */}
-      <div className="absolute top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
-        <div className="flex items-center justify-between px-6 py-4">
-          {/* Toggle Buttons */}
-          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-            <button
-              onClick={() => setCurrentViewMode('map')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                currentViewMode === 'map'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Kart
-            </button>
-            <button
-              onClick={() => setCurrentViewMode('list')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                currentViewMode === 'list'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Liste
-            </button>
-          </div>
-
-          {/* Maker Count */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="w-4 h-4 text-purple-600" />
-            <span className="text-purple-600 font-medium">{makers.length} makers</span>
-          </div>
-        </div>
+      {/* Full Screen Map */}
+      <div className="absolute inset-0">
+        <MapBackground onProfileClick={handleViewProfile} />
+      </div>
+      
+      {/* Floating Controls */}
+      <div className="absolute top-4 left-4 right-4 z-10">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-card/95 backdrop-blur-sm border shadow-lg">
+            <TabsTrigger value="map">Kart</TabsTrigger>
+            <TabsTrigger value="list">Liste</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Main Content Area */}
-      <div className="absolute inset-0 pt-20">
-        {currentViewMode === 'map' ? (
-          /* MAP VIEW */
-          <MapBackground 
-            onProfileClick={(makerId) => handleViewProfile(makerId)}
-            filterType={currentFilter}
-          />
-        ) : (
-          /* LIST VIEW */
-          <div className="absolute inset-0 bg-background overflow-auto">
-            <div className="container mx-auto px-6 py-6 max-w-4xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-foreground">
+      {/* Floating List Panel */}
+      {activeTab === 'list' && (
+        <div className="absolute top-20 left-4 right-4 bottom-4 z-10 animate-fade-in">
+          <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
+            <CardContent className="p-4 h-full overflow-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5" />
                   Makere i nettverket
                 </h2>
                 <Button 
-                  onClick={fetchMakers} 
-                  disabled={loading}
-                  variant="outline"
+                  onClick={fetchAllMakers} 
+                  disabled={loading} 
+                  variant="outline" 
                   size="sm"
                 >
-                  Oppdater makere
+                  {loading ? 'Laster...' : 'Oppdater makere'}
                 </Button>
               </div>
               
@@ -165,75 +111,59 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
               ) : (
                 <div className="space-y-4">
                   {makers.map((maker) => (
-                    <div key={maker.id} className="bg-white rounded-lg border border-border p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-foreground mb-2">
-                            {maker.display_name}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
-                            {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                          </p>
-                          <div className="flex items-center gap-4">
-                            <Badge 
-                              variant="secondary" 
-                              className="bg-blue-50 text-blue-600 border-blue-200 text-xs font-medium"
-                            >
-                              maker
-                            </Badge>
-                            {maker.address && (
-                              <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
-                                {maker.address}
+                    <Card key={maker.id} className="border bg-background/80">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                              <span className="text-primary-foreground text-sm font-bold">
+                                {maker.display_name?.charAt(0) || 'M'}
                               </span>
-                            )}
+                            </div>
+                            <div>
+                              <h3 className="font-medium">{maker.display_name}</h3>
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {maker.role}
+                                </Badge>
+                                {maker.address && maker.is_address_public && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" />
+                                    {maker.address}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => handleViewProfile(maker.user_id)} 
+                              variant="outline" 
+                              size="sm"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              Se profil
+                            </Button>
                           </div>
                         </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewProfile(maker.user_id);
-                            }}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Se profil
-                          </Button>
-                          <BookingRequest
-                            receiverId={maker.user_id}
-                            receiverName={maker.display_name}
-                            onSuccess={() => {
-                              // Handle success if needed
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-        )}
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       
       {/* Profile Modal */}
       <ProfileModal 
         isOpen={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
         userId={selectedUserId}
-      />
-      
-      {/* Event Modal */}
-      <EventModal 
-        isOpen={eventModalOpen}
-        onClose={() => setEventModalOpen(false)}
-        eventId={selectedEventId}
       />
     </div>
   );
