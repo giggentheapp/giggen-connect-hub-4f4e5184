@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Map, Grid3X3, List, User, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 
 interface MakerProfile {
@@ -23,6 +23,7 @@ export const ExploreSection = () => {
   const [viewMode, setViewMode] = useState('list');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const isMapMode = viewMode === 'map';
@@ -73,8 +74,8 @@ export const ExploreSection = () => {
         <GoerFullscreenMap 
           onBack={() => setViewMode('list')}
           onMakerClick={(makerId) => {
-            // Navigate to maker profile
-            window.location.href = `/profile/${makerId}`;
+            // Navigate to maker profile using React Router
+            navigate(`/profile/${makerId}`);
           }}
         />
       </div>

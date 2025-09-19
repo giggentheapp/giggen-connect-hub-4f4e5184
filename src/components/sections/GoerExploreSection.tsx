@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Calendar, Clock, Eye, Filter } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MapBackground } from '@/components/MapBackground';
 import { ProfileModal } from '@/components/ProfileModal';
@@ -38,6 +39,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { isGoer } = useRole();
 
   // Use exploreType from props for filtering
@@ -85,8 +87,8 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   };
 
   const handleViewProfile = (makerId: string) => {
-    setSelectedUserId(makerId);
-    setProfileModalOpen(true);
+    // Navigate directly to profile page instead of modal
+    navigate(`/profile/${makerId}`);
   };
 
   const handleViewEvent = (eventId: string) => {
