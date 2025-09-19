@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, DollarSign, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useBookings } from '@/hooks/useBookings';
+import { BookingDetailsModal } from '@/components/BookingDetailsModal';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -22,19 +25,31 @@ interface UserProfile {
 interface WorkingEventsDisplayProps {
   profile: UserProfile;
   showSensitiveInfo: boolean; // true for own profile, false for others
+  currentUserId?: string; // Add current user ID to determine ownership
 }
 
-export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEventsDisplayProps) => {
+export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId }: WorkingEventsDisplayProps) => {
   const { bookings, loading } = useBookings(profile.user_id);
   const publishedEvents = bookings.filter(b => b.status === 'upcoming');
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Debug logging to check what data we're getting
-  console.log('WorkingEventsDisplay DEBUG:');
-  console.log('Profile user_id:', profile.user_id);
-  console.log('Profile display_name:', profile.display_name);
-  console.log('All bookings:', bookings);
-  console.log('Published events (status=upcoming):', publishedEvents);
-  console.log('Loading state:', loading);
+  const handleEventClick = (bookingId: string) => {
+    console.log('Event clicked:', bookingId);
+    setSelectedBookingId(bookingId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedBookingId(null);
+  };
+
+  // Determine if current user is owner of the booking
+  const isBookingOwner = (booking: any) => {
+    if (!currentUserId) return false;
+    return booking.sender_id === currentUserId || booking.receiver_id === currentUserId;
+  };
 
   if (loading) {
     return (
@@ -53,46 +68,71 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
   }
 
   return (
-    <div className="space-y-4">
-      {publishedEvents.map((event) => (
-        <Card key={event.id} className="p-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">{event.title}</CardTitle>
-            <CardDescription>
-              {event.event_date && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  {format(new Date(event.event_date), 'MMM d, yyyy')}
-                </div>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {event.venue && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4" />
-                  {event.venue}
-                </div>
-              )}
-              {event.ticket_price && (
-                <div className="flex items-center gap-2 text-sm">
-                  <DollarSign className="h-4 w-4" />
-                  {event.ticket_price} kr
-                </div>
-              )}
-              {event.description && (
-                <div className="text-sm text-muted-foreground">
-                  {event.description}
-                </div>
-              )}
-            </div>
-            <div className="mt-3">
-              <Badge variant="secondary">{event.status}</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <>
+      <div className="space-y-4">
+        {publishedEvents.map((event) => (
+          <Card 
+            key={event.id} 
+            className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleEventClick(event.id)}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{event.title}</CardTitle>
+              <CardDescription>
+                {event.event_date && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4" />
+                    {format(new Date(event.event_date), 'MMM d, yyyy')}
+                  </div>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {event.venue && event.venue !== 'Ved avtale' && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4" />
+                    {event.venue}
+                  </div>
+                )}
+                {event.ticket_price && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-4 w-4" />
+                    {event.ticket_price} kr
+                  </div>
+                )}
+                {event.audience_estimate && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="h-4 w-4" />
+                    {event.audience_estimate} personer
+                  </div>
+                )}
+                {event.description && (
+                  <div className="text-sm text-muted-foreground line-clamp-2">
+                    {event.description}
+                  </div>
+                )}
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <Badge variant="secondary">{event.status}</Badge>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  Se detaljer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Booking Details Modal */}
+      <BookingDetailsModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        bookingId={selectedBookingId}
+        currentUserId={currentUserId}
+        isOwner={selectedBookingId ? isBookingOwner(publishedEvents.find(e => e.id === selectedBookingId)) : false}
+      />
+    </>
   );
 };

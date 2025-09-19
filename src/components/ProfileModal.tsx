@@ -38,6 +38,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [concepts, setConcepts] = useState<any[]>([]);
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { role: currentUserRole } = useRole();
   const navigate = useNavigate();
 
@@ -52,6 +53,10 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
     const fetchProfileData = async () => {
       try {
         setLoading(true);
+
+        // Get current user ID
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUserId(user?.id || null);
 
         // Add debugging
         console.log('Fetching profile for userId:', userId, 'currentUserRole:', currentUserRole);
@@ -78,8 +83,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
         }
 
         // Fetch portfolio if visible to user
-        const { data: { user } } = await supabase.auth.getUser();
-        const isOwnProfile = user?.id === userId;
+        const isOwnProfile = currentUserId === userId;
         let portfolioData: any[] = [];
         
         if (isOwnProfile) {
@@ -353,6 +357,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                       contact_info: profile.contact_info
                     }}
                     showSensitiveInfo={false}
+                    currentUserId={currentUserId}
                   />
                 </CardContent>
               </Card>
