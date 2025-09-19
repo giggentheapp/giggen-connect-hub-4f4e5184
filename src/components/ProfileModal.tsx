@@ -226,11 +226,22 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {profile.role === 'maker' && (
+              {profile.role === 'maker' && currentUserRole === 'maker' && (
                 <BookingRequest 
                   receiverId={profile.user_id}
                   receiverName={profile.display_name}
                 />
+              )}
+              {profile.role === 'maker' && currentUserRole === 'goer' && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    navigate(`/profile/${profile.user_id}`);
+                    onClose();
+                  }}
+                >
+                  Se full profil
+                </Button>
               )}
               <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="w-4 h-4" />

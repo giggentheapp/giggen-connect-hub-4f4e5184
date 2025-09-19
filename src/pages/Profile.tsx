@@ -62,6 +62,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<any[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -77,8 +78,19 @@ const Profile = () => {
     const getCurrentUser = async () => {
       console.log('📄 Profile: Getting current user...');
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('📄 Profile: Current user fetched:', user?.id, user?.role);
+      console.log('📄 Profile: Current user fetched:', user?.id);
       setCurrentUser(user);
+      
+      // Also get current user's profile to check role
+      if (user?.id) {
+        const { data: profileData } = await supabase
+          .rpc('get_secure_profile_data', { 
+            target_user_id: user.id 
+          })
+          .maybeSingle();
+        console.log('📄 Profile: Current user profile:', profileData);
+        setCurrentUserProfile(profileData);
+      }
     };
     getCurrentUser();
   }, []);
@@ -290,11 +302,17 @@ const Profile = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          {!isOwnProfile && profile.role === 'maker' && currentUser && (
+          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'maker' && (
             <BookingRequest 
               receiverId={profile.user_id}
               receiverName={profile.display_name}
             />
+          )}
+          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'goer' && (
+            <Button variant="outline">
+              <User className="h-4 w-4 mr-2" />
+              Se offentlig profil
+            </Button>
           )}
           {isOwnProfile && (
             <Button asChild>
