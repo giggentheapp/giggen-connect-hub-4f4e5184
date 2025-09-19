@@ -152,7 +152,22 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      await deleteBookingSecurely(booking.id, 'Bruker slettet bookingen');
+      // For historical bookings (cancelled/completed), use permanent deletion
+      // since they're already in history status
+      if (booking.status === 'cancelled' || booking.status === 'completed') {
+        await permanentlyDeleteBooking(booking.id);
+        toast({
+          title: "Arrangement permanent slettet",
+          description: "Arrangementet er fjernet fra historikken og kan ikke gjenopprettes"
+        });
+      } else {
+        // For active bookings, use secure deletion (archiving)
+        await deleteBookingSecurely(booking.id, 'Bruker slettet bookingen');
+        toast({
+          title: "Arrangement arkivert",
+          description: "Arrangementet er flyttet til historikk"
+        });
+      }
       onAction?.();
     } catch (error: any) {
       console.error('Error deleting booking:', error);
@@ -161,7 +176,9 @@ export const BookingActions = ({
     }
   };
   const getDeleteWarningText = () => {
-    if (booking.status === 'upcoming') {
+    if (booking.status === 'cancelled' || booking.status === 'completed') {
+      return "Dette vil PERMANENT slette arrangementet fra historikken. Handlingen kan ikke angres.";
+    } else if (booking.status === 'upcoming') {
       return "Dette vil slette et publisert arrangement. ADVARSEL: Dette kan påvirke andre brukere som har sett arrangementet.";
     } else if (booking.status === 'both_parties_approved') {
       return "Dette vil avlyse en pågående avtale og flytte den til historikk.";
@@ -322,7 +339,12 @@ export const BookingActions = ({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Slett booking?</AlertDialogTitle>
+                <AlertDialogTitle>
+                  {booking.status === 'cancelled' || booking.status === 'completed' 
+                    ? 'Slett permanent fra historikk?' 
+                    : 'Slett booking?'
+                  }
+                </AlertDialogTitle>
                 <AlertDialogDescription>
                   {getDeleteWarningText()}
                 </AlertDialogDescription>
@@ -330,7 +352,10 @@ export const BookingActions = ({
               <AlertDialogFooter>
                 <AlertDialogCancel>Avbryt</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Slett
+                  {booking.status === 'cancelled' || booking.status === 'completed' 
+                    ? 'Slett permanent' 
+                    : 'Slett'
+                  }
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
