@@ -79,26 +79,9 @@ export const UnifiedSidePanel = ({
     }
   };
   const handleNavigation = (section: string) => {
-    // Handle explore sub-navigation
-    if (section.startsWith('explore-')) {
-      const [, mode, type] = section.split('-');
-      setActiveSection('explore');
-      setViewMode(mode as 'map' | 'list');
-      if (type) setExploreType(type as 'makers' | 'events');
-      if (isMobile) {
-        setIsExpanded(false);
-      }
-    } else if (section === 'explore') {
-      // Navigate to explore section with default view when clicking explore
-      setActiveSection('explore');
-      if (isMobile) {
-        setIsExpanded(false);
-      }
-    } else {
-      setActiveSection(section);
-      if (isMobile) {
-        setIsExpanded(false);
-      }
+    setActiveSection(section);
+    if (isMobile) {
+      setIsExpanded(false);
     }
   };
 
@@ -114,13 +97,7 @@ export const UnifiedSidePanel = ({
         {
           id: 'explore',
           label: 'Utforsk',
-          icon: MapPin,
-          subItems: [
-            { id: 'explore-map-makers', label: 'Kart - Makere' },
-            { id: 'explore-map-events', label: 'Kart - Events' },
-            { id: 'explore-list-makers', label: 'Liste - Makere' },
-            { id: 'explore-list-events', label: 'Liste - Events' }
-          ]
+          icon: MapPin
         },
         {
           id: 'settings',
@@ -244,26 +221,6 @@ export const UnifiedSidePanel = ({
                           {item.label}
                         </span>}
                     </button>
-                    {isExpanded && item.id === 'explore' && item.subItems && (
-                      <div className="ml-8 mt-1 space-y-1 opacity-0 animate-fade-in">
-                        {item.subItems.map(subItem => (
-                          <button 
-                            key={subItem.id}
-                            onClick={() => handleNavigation(subItem.id)}
-                            className={cn(
-                              'w-full text-left px-3 py-1 rounded-md text-sm transition-colors',
-                              (activeSection === 'explore' && 
-                                ((subItem.id.includes('map') && viewMode === 'map') ||
-                                 (subItem.id.includes('list') && viewMode === 'list')))
-                                ? 'bg-accent/70 text-accent-foreground'
-                                : 'text-muted-foreground hover:bg-accent/30 hover:text-accent-foreground'
-                            )}
-                          >
-                            {subItem.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>;
           })}
 
