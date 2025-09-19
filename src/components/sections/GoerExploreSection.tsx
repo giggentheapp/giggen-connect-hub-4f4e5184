@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Calendar, Clock, Eye, Filter } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Eye, Filter, Map, List } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,7 +31,7 @@ interface GoerExploreSectionProps {
   exploreType?: 'makers' | 'events';
 }
 
-export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
+export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
   const [makers, setMakers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,11 +39,10 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>(viewMode);
+  const [currentFilter, setCurrentFilter] = useState<'makers' | 'events'>(exploreType);
   const navigate = useNavigate();
   const { isGoer } = useRole();
-
-  // Use exploreType from props for filtering
-  const currentFilter = exploreType === 'makers' ? 'makers' : 'events';
 
   // Auto-fetch data when component mounts
   useEffect(() => {
@@ -105,32 +104,55 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   return (
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
-      <div className="absolute inset-0">
-        <MapBackground 
-          onProfileClick={(makerId) => {
-            console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
-            handleViewProfile(makerId);
-          }}
-          filterType={currentFilter}
-        />
-      </div>
+      {currentViewMode === 'map' && (
+        <div className="absolute inset-0">
+          <MapBackground 
+            onProfileClick={(makerId) => {
+              console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
+              handleViewProfile(makerId);
+            }}
+            filterType={currentFilter}
+          />
+        </div>
+      )}
       
-      {/* Fixed Filter Button - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Fixed Controls - Top */}
+      <div className="fixed top-4 left-4 right-4 z-50 flex gap-4">
+        {/* View Mode Toggle */}
+        <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-md p-1">
+          <Button
+            variant={currentViewMode === 'map' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setCurrentViewMode('map')}
+            className="flex items-center gap-1"
+          >
+            <Map className="w-4 h-4" />
+            Kart
+          </Button>
+          <Button
+            variant={currentViewMode === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setCurrentViewMode('list')}
+            className="flex items-center gap-1"
+          >
+            <List className="w-4 h-4" />
+            Liste
+          </Button>
+        </div>
+        
+        {/* Filter Toggle */}
         <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-md p-1">
           <Button
             variant={currentFilter === 'makers' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => {/* Filter handled by navigation */}}
-            disabled
+            onClick={() => setCurrentFilter('makers')}
           >
             Makere
           </Button>
           <Button
             variant={currentFilter === 'events' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => {/* Filter handled by navigation */}}
-            disabled
+            onClick={() => setCurrentFilter('events')}
           >
             Events
           </Button>
@@ -138,13 +160,13 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
       </div>
 
       {/* List Panel */}
-      {viewMode === 'list' && (
-        <div className="absolute top-4 left-4 right-4 bottom-4 z-10">
+      {currentViewMode === 'list' && (
+        <div className="absolute top-20 left-4 right-4 bottom-4 z-10">
           <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
             <CardContent className="p-4 h-full overflow-auto">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
-                  {exploreType === 'makers' ? (
+                  {currentFilter === 'makers' ? (
                     <>
                       <Users className="w-5 h-5" />
                       Makere i nettverket
@@ -157,7 +179,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                   )}
                 </h2>
                 <Button 
-                  onClick={exploreType === 'makers' ? fetchMakers : fetchEvents} 
+                  onClick={currentFilter === 'makers' ? fetchMakers : fetchEvents} 
                   disabled={loading}
                   variant="outline"
                   size="sm"
@@ -166,7 +188,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                 </Button>
               </div>
               
-              {exploreType === 'makers' ? (
+              {currentFilter === 'makers' ? (
                 makers.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
