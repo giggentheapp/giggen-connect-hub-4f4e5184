@@ -320,16 +320,16 @@ const Profile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
-                Konsepter
+                Tilbud
               </CardTitle>
               <CardDescription>
-                {isOwnProfile ? "Dine publiserte konsepter" : "Publiserte konsepter"}
+                {isOwnProfile ? "Dine publiserte tilbud" : "Publiserte tilbud"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {conceptsLoading ? <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-muted-foreground">Laster konsepter...</span>
+                  <span className="ml-2 text-muted-foreground">Laster tilbud...</span>
                 </div> : Array.isArray(concepts) && concepts.length > 0 ? <div className="space-y-6">
                   {concepts.filter(concept => concept && concept.id).map(concept => <ConceptCard key={concept.id} concept={concept} showActions={false} showConceptActions={!isOwnProfile} onConceptAction={action => {
               if (action === 'deleted' || action === 'rejected') {
@@ -339,7 +339,7 @@ const Profile = () => {
                 </div> : <div className="text-center py-12">
                   <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">
-                    {isOwnProfile ? "Ingen publiserte konsepter ennå. Opprett ditt første konsept i dashboardet." : "Ingen publiserte konsepter"}
+                    {isOwnProfile ? "Ingen publiserte tilbud ennå. Opprett ditt første tilbud i dashboardet." : "Ingen publiserte tilbud"}
                   </p>
                 </div>}
             </CardContent>

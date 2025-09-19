@@ -194,8 +194,8 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
         } catch (error) {
           console.error('Error fetching concept details:', error);
           toast({
-            title: "Feil ved lasting av konseptdetaljer",
-            description: "Kunne ikke laste konseptinformasjon",
+            title: "Feil ved lasting av tilbudsdetaljer",
+            description: "Kunne ikke laste tilbudsinformasjon",
             variant: "destructive",
           });
         }

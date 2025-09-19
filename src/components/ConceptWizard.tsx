@@ -204,15 +204,15 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           // Don't throw here - concept was created successfully, just log the file error
           toast({
             title: "Advarsel",
-            description: "Konsept lagret, men noen filer kunne ikke lagres. Prøv å laste dem opp på nytt.",
+            description: "Tilbud lagret, men noen filer kunne ikke lagres. Prøv å laste dem opp på nytt.",
             variant: "destructive",
           });
         }
       }
 
       toast({
-        title: isPublished ? "Konsept publisert!" : "Konsept lagret!",
-        description: isPublished ? "Konseptet er nå tilgjengelig for andre" : "Konseptet er lagret som utkast",
+        title: isPublished ? "Tilbud publisert!" : "Tilbud lagret!",
+        description: isPublished ? "Tilbudet er nå tilgjengelig for andre" : "Tilbudet er lagret som utkast",
       });
 
       onSuccess();
@@ -260,7 +260,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>
-              Opprett nytt konsept
+              Opprett nytt tilbud
             </CardTitle>
             <CardDescription>
               {STEPS[currentStep].title} - {STEPS[currentStep].description}
@@ -302,7 +302,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           {currentStep === 0 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Konsepttittel *</Label>
+                <Label htmlFor="title">Tilbudstittel *</Label>
                 <Input
                   id="title"
                   placeholder="F.eks. Live akustisk konsert"
@@ -314,7 +314,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 <Label htmlFor="description">Beskrivelse</Label>
                 <Textarea
                   id="description"
-                  placeholder="Beskriv konseptet ditt i detalj..."
+                  placeholder="Beskriv tilbudet ditt i detalj..."
                   value={conceptData.description}
                   onChange={(e) => updateConceptData('description', e.target.value)}
                   className="min-h-[120px]"
@@ -703,7 +703,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   className="flex-1"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  Publiser konsept
+                  Publiser tilbud
                 </Button>
               </div>
             </div>
@@ -716,7 +716,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
             <AlertDialogHeader>
               <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
               <AlertDialogDescription>
-                Når konseptet er opprettet vil det ikke kunne redigeres. Er du sikker på at du vil fortsette?
+                Når tilbudet er opprettet vil det ikke kunne redigeres. Er du sikker på at du vil fortsette?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -730,7 +730,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 }}
                 disabled={saving}
               >
-                {saveAsPublished ? 'Publiser konsept' : 'Lagre konsept'}
+                {saveAsPublished ? "Publiser tilbud" : "Lagre tilbud"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

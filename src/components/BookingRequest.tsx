@@ -47,7 +47,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     if (!personalMessage.trim() || !selectedConcept) {
       toast({
         title: "Manglende informasjon",
-        description: "Personlig melding og konseptvalg er påkrevd",
+        description: "Personlig melding og tilbudsvalg er påkrevd",
         variant: "destructive",
       });
       return;
@@ -176,11 +176,11 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           {/* Concept Selection */}
           <div className="space-y-3">
             <Label className="text-base font-medium">
-              Velg konsept
+              Velg tilbud
             </Label>
             {concepts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Du må først opprette konsepter før du kan sende forespørsler.
+                Du må først opprette tilbud før du kan sende forespørsler.
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
@@ -223,7 +223,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             <>
               {/* Selected Concept Info */}
               <div className="space-y-2">
-                <Label className="text-base font-medium">Valgt konsept</Label>
+                <Label className="text-base font-medium">Valgt tilbud</Label>
                 <Card className="bg-muted/50">
                   <CardContent className="p-3">
                     <h4 className="font-medium">{selectedConcept.title}</h4>
@@ -241,7 +241,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                     Personlig melding *
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Dette sendes separat fra konseptbeskrivelsen
+                    Dette sendes separat fra tilbudsbeskrivelsen
                   </p>
                 </div>
                 <Textarea
@@ -261,7 +261,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                 </h4>
                 <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
                   <p>• Mottakeren får en melding om forespørselen din</p>
-                  <p>• De kan se konseptdetaljene og din personlige melding</p>
+                  <p>• De kan se tilbudsdetaljene og din personlige melding</p>
                   <p>• Ved interesse kan de tillate forespørselen</p>
                   <p>• Dere får da tilgang til hverandres kontaktinformasjon</p>
                   <p>• Detaljerte forhandlinger kan starte direkte mellom dere</p>

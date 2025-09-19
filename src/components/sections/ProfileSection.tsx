@@ -84,20 +84,20 @@ export const ProfileSection = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5" />
-            Mine Publiserte Konsepter
+            Mine publiserte tilbud
           </CardTitle>
           <CardDescription>
-            Konseptene dine som er synlige for andre makere
+            Tilbudene dine som er synlige for andre makere
           </CardDescription>
         </CardHeader>
         <CardContent>
           {conceptsLoading ? <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Laster konsepter...</p>
+              <p>Laster tilbud...</p>
             </div> : concepts.length === 0 ? <div className="text-center py-8 text-muted-foreground">
               <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p>Ingen publiserte konsepter ennå</p>
-              <p className="text-sm">Opprett og publiser konsepter for å vise dem her</p>
+              <p>Ingen publiserte tilbud ennå</p>
+              <p className="text-sm">Opprett og publiser tilbud for å vise dem her</p>
             </div> : <div className="space-y-4">
               {concepts.map(concept => <ConceptCard key={concept.id} concept={concept} showActions={false} />)}
             </div>}

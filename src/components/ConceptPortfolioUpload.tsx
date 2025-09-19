@@ -49,9 +49,9 @@ export const ConceptPortfolioUpload = ({
   return (
     <div className="space-y-4">
       <div>
-        <Label>Konsept Portefølje</Label>
+        <Label>Tilbud Portefølje</Label>
         <p className="text-sm text-muted-foreground mb-4">
-          Last opp mediefiler som viser konseptet ditt (bilder, videoer, lyd, dokumenter)
+          Last opp mediefiler som viser tilbudet ditt (bilder, videoer, lyd, dokumenter)
         </p>
         
         <FileUpload

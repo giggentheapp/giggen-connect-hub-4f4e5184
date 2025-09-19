@@ -62,9 +62,9 @@ export const ConceptActionsDialog = ({
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Konsepthandlinger</DialogTitle>
+            <DialogTitle>Tilbudshandlinger</DialogTitle>
             <DialogDescription>
-              Velg en handling for konseptet "{conceptTitle}"
+              Velg en handling for tilbudet "{conceptTitle}"
             </DialogDescription>
           </DialogHeader>
           
@@ -76,7 +76,7 @@ export const ConceptActionsDialog = ({
               disabled={isLoading}
             >
               <X className="h-4 w-4 mr-2" />
-              Avvis konsept
+              Avvis tilbud
             </Button>
             
             <Button
@@ -86,7 +86,7 @@ export const ConceptActionsDialog = ({
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Slett konsept til historikk
+              Slett tilbud til historikk
             </Button>
           </div>
 
@@ -102,9 +102,9 @@ export const ConceptActionsDialog = ({
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Avvis konsept</DialogTitle>
+            <DialogTitle>Avvis tilbud</DialogTitle>
             <DialogDescription>
-              Konseptet vil bli flyttet til historikken. Du kan legge til en valgfri begrunnelse.
+              Tilbudet vil bli flyttet til historikken. Du kan legge til en valgfri begrunnelse.
             </DialogDescription>
           </DialogHeader>
           
@@ -133,7 +133,7 @@ export const ConceptActionsDialog = ({
               onClick={handleReject}
               disabled={isLoading}
             >
-              {isLoading ? 'Avviser...' : 'Avvis konsept'}
+              {isLoading ? "Avviser..." : "Avvis tilbud"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -143,9 +143,9 @@ export const ConceptActionsDialog = ({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Slett konsept til historikk?</AlertDialogTitle>
+            <AlertDialogTitle>Slett tilbud til historikk?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dette vil slette konseptet "{conceptTitle}" og flytte det til historikken. 
+              Dette vil slette tilbudet "{conceptTitle}" og flytte det til historikken. 
               Du kan ikke angre denne handlingen.
             </AlertDialogDescription>
           </AlertDialogHeader>

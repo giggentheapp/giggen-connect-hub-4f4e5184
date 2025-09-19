@@ -205,7 +205,7 @@ export const ConceptViewModal = ({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-3">
-              <span>{concept?.title || 'Laster konsept...'}</span>
+              <span>{concept?.title || "Laster tilbud..."}</span>
               {conceptIds.length > 1 && <Badge variant="outline">
                   {currentConceptIndex + 1} av {conceptIds.length}
                 </Badge>}
@@ -233,7 +233,7 @@ export const ConceptViewModal = ({
 
         {loading ? <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-3">Laster konsept...</span>
+            <span className="ml-3">Laster tilbud...</span>
           </div> : concept ? <div className="space-y-6">
             {/* Concept Header */}
             <Card>
@@ -293,7 +293,7 @@ export const ConceptViewModal = ({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Image className="h-5 w-5" />
-                    Konsept portefølje
+                    Tilbud portefølje
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -395,10 +395,10 @@ export const ConceptViewModal = ({
 
             {/* Created date */}
             <div className="text-xs text-muted-foreground pt-2 border-t text-center">
-              Konsept opprettet: {format(new Date(concept.created_at), 'dd.MM.yyyy HH:mm')}
+              Tilbud opprettet: {format(new Date(concept.created_at), "dd.MM.yyyy HH:mm")}
             </div>
           </div> : <div className="text-center py-8 text-muted-foreground">
-            Konsept ikke funnet
+            Tilbud ikke funnet
           </div>}
       </DialogContent>
       

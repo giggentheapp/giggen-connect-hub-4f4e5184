@@ -257,7 +257,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
               <TabsTrigger value="about">Om meg</TabsTrigger>
               <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
               {currentUserRole === 'maker' && (
-                <TabsTrigger value="concepts">Konsepter</TabsTrigger>
+                <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>
               )}
               <TabsTrigger value="events">Arrangementer</TabsTrigger>
             </TabsList>
@@ -317,7 +317,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
               <TabsContent value="concepts" className="mt-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Konsepter</CardTitle>
+                    <CardTitle>Mine tilbud</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {concepts.length > 0 ? (
@@ -340,7 +340,7 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground italic">Ingen konsepter tilgjengelig</p>
+                      <p className="text-muted-foreground italic">Ingen tilbud tilgjengelig</p>
                     )}
                   </CardContent>
                 </Card>

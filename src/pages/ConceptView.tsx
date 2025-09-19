@@ -95,7 +95,7 @@ const ConceptView = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster konsept...</p>
+          <p>Laster tilbud...</p>
         </div>
       </div>
     );
@@ -129,9 +129,9 @@ const ConceptView = () => {
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Konseptvisning</h1>
+              <h1 className="text-2xl font-bold">Tilbudsvisning</h1>
               <p className="text-sm text-muted-foreground">
-                Se detaljer for dette konseptet
+                Se detaljer for dette tilbudet
               </p>
             </div>
           </div>

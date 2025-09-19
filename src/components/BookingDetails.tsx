@@ -341,18 +341,18 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
       {concepts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Konseptvalg</CardTitle>
+            <CardTitle>Tilbudsvalg</CardTitle>
           </CardHeader>
           <CardContent>
             {concepts.length > 1 && canEdit ? (
               <div className="space-y-2">
-                <Label>Velg konsept for dette arrangementet</Label>
+                <Label>Velg tilbud for dette arrangementet</Label>
                 <Select 
                   value={booking.selected_concept_id || ''} 
                   onValueChange={(value) => handleFieldEdit('selected_concept_id', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Velg konsept..." />
+                    <SelectValue placeholder="Velg tilbud..." />
                   </SelectTrigger>
                   <SelectContent>
                     {concepts.filter(concept => concept && concept.id).map((concept) => (
@@ -376,7 +376,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
                       {concept.id === booking.selected_concept_id && (
-                        <Badge>Valgt konsept</Badge>
+                        <Badge>Valgt tilbud</Badge>
                       )}
                     </div>
                     {concept.description && (

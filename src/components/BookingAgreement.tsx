@@ -252,7 +252,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
             {selectedConcept && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Valgt konsept</CardTitle>
+                  <CardTitle>Valgt tilbud</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">

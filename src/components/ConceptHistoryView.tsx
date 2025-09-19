@@ -109,7 +109,7 @@ export const ConceptHistoryView = ({ userId, onBack }: ConceptHistoryViewProps) 
               Tilbake
             </Button>
           )}
-          <h1 className="text-2xl font-bold">Konsepthistorikk</h1>
+          <h1 className="text-2xl font-bold">Tilbudshistorikk</h1>
         </div>
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -129,9 +129,9 @@ export const ConceptHistoryView = ({ userId, onBack }: ConceptHistoryViewProps) 
           </Button>
         )}
         <div>
-          <h1 className="text-2xl font-bold">Konsepthistorikk</h1>
+          <h1 className="text-2xl font-bold">Tilbudshistorikk</h1>
           <p className="text-muted-foreground">
-            Avviste konsepter og deres begrunnelser
+            Avviste tilbud og deres begrunnelser
           </p>
         </div>
       </div>
@@ -142,7 +142,7 @@ export const ConceptHistoryView = ({ userId, onBack }: ConceptHistoryViewProps) 
             <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Ingen historikk</h3>
             <p className="text-muted-foreground">
-              Det finnes ingen avviste konsepter i historikken ennå.
+              Det finnes ingen avviste tilbud i historikken ennå.
             </p>
           </CardContent>
         </Card>

@@ -73,7 +73,7 @@ export const useConceptActions = () => {
       return { success: true };
     } catch (error: any) {
       console.error('Error rejecting concept:', error);
-      const errorMessage = error.message || 'Kunne ikke avvise konseptet';
+      const errorMessage = error.message || "Kunne ikke avvise tilbudet";
       
       toast({
         title: "Feil ved avvisning",

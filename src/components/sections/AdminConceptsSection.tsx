@@ -53,20 +53,20 @@ export const AdminConceptsSection = ({
       <Card className="bg-slate-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Mine Konsepter</span>
+            <span>Mine tilbud</span>
             <Button onClick={() => setShowWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Nytt konsept
+              Nytt tilbud
             </Button>
           </CardTitle>
           <CardDescription>
-            Opprett og administrer dine kreative konsepter
+            Opprett og administrer dine kreative tilbud
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Laster konsepter...</p>
+              <p>Laster tilbud...</p>
             </div> : <div className="space-y-4">
               {Array.isArray(concepts) ? concepts.filter(concept => concept && concept.id).map(concept => <ConceptCard key={concept.id} concept={concept} showActions={true} showConceptActions={true} onDelete={() => handleDeleteConcept(concept.id)} onConceptAction={action => {
             if (action === 'deleted' || action === 'rejected') {
@@ -77,11 +77,11 @@ export const AdminConceptsSection = ({
               {concepts.length === 0 && <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">
-                    Du har ikke opprettet noen konsepter ennå
+                    Du har ikke opprettet noen tilbud ennå
                   </p>
                   <Button onClick={() => setShowWizard(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Opprett ditt første konsept
+                    Opprett ditt første tilbud
                   </Button>
                 </div>}
             </div>}

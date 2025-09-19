@@ -198,7 +198,7 @@ const ConceptCard = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setShowActionsDialog(true)}>
-                      Konsepthandlinger
+                      Tilbudshandlinger
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -210,7 +210,7 @@ const ConceptCard = ({
                   variant="destructive" 
                   size="sm" 
                   onClick={() => {
-                    if (window.confirm('Er du sikker på at du vil slette dette konseptet?')) {
+                    if (window.confirm("Er du sikker på at du vil slette dette tilbudet?")) {
                       onDelete();
                     }
                   }}
@@ -273,7 +273,7 @@ const ConceptCard = ({
         {/* Concept Portfolio Files - Interactive Media Display */}
         {conceptFiles.length > 0 && (
           <div>
-            <h4 className="font-medium mb-4">Konsept portefølje</h4>
+            <h4 className="font-medium mb-4">Tilbud portefølje</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.isArray(conceptFiles) ? conceptFiles.filter(file => file && file.id).map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
@@ -442,14 +442,14 @@ const ConceptCard = ({
         {/* Loading state */}
         {loading && (
           <div className="text-center py-4">
-            <div className="animate-pulse">Laster konseptdetaljer...</div>
+            <div className="animate-pulse">Laster tilbudsdetaljer...</div>
           </div>
         )}
 
         {/* Empty states */}
         {!loading && conceptFiles.length === 0 && (
           <div className="text-center py-4 text-muted-foreground">
-            Ingen porteføljefiler for dette konseptet
+            Ingen porteføljefiler for dette tilbudet
           </div>
         )}
 

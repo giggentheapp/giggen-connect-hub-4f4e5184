@@ -129,7 +129,7 @@ export const BookingCardStep3 = ({
                 variant="outline"
                 onClick={onConceptClick}
               >
-                Se konsept{booking.concept_ids.length > 1 ? 'er' : ''}
+                Se tilbud{booking.concept_ids.length > 1 ? '' : ''}
               </Button>
             )}
           </div>

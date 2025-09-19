@@ -19,7 +19,7 @@ const Index = () => {
             <div className="text-left">
               <h3 className="font-semibold mb-2">🎨 GiggenMaker</h3>
               <p className="text-sm text-muted-foreground">
-                Opprett konsepter, bygg portefølje og administrer arrangementer. 
+                Opprett tilbud, bygg portefølje og administrer arrangementer. 
                 Vis frem din kreativitet og knytt kontakter.
               </p>
             </div>

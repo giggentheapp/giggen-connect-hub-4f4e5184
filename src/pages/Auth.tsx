@@ -213,7 +213,7 @@ const Auth = () => {
                         <div>
                           <div className="font-medium">GiggenMaker</div>
                           <div className="text-sm text-muted-foreground">
-                            Kan opprette konsepter, laste opp portefølje og administrere arrangementer
+                            Kan opprette tilbud, laste opp portefølje og administrere arrangementer
                           </div>
                         </div>
                       </Label>
