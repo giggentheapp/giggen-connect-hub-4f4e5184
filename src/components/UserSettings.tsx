@@ -391,20 +391,7 @@ export const UserSettings = ({
           </div>
 
           {/* Address Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Adresse</h3>
-            <div>
-              
-              <AddressAutocomplete value={profileData.address || ''} onChange={(address, coordinates) => {
-              setProfileData(prev => ({
-                ...prev,
-                address: address,
-                latitude: coordinates?.lat || null,
-                longitude: coordinates?.lng || null
-              }));
-            }} placeholder="Skriv inn din adresse..." className="w-full" />
-            </div>
-          </div>
+          
 
           {/* Contact Information - Only for Makers */}
           {profileData.role === 'maker' && <div className="space-y-4">
