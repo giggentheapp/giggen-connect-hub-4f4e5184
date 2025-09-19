@@ -87,8 +87,14 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   };
 
   const handleViewProfile = (makerId: string) => {
+    console.log('🎯 GoerExploreSection: handleViewProfile called with makerId:', makerId);
+    console.log('🎯 Current navigate function:', navigate);
+    console.log('🎯 About to navigate to:', `/profile/${makerId}`);
+    
     // Navigate directly to profile page instead of modal
     navigate(`/profile/${makerId}`);
+    
+    console.log('✅ GoerExploreSection: navigate() call completed');
   };
 
   const handleViewEvent = (eventId: string) => {
@@ -101,7 +107,10 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
       {/* Full Screen Map */}
       <div className="absolute inset-0">
         <MapBackground 
-          onProfileClick={handleViewProfile}
+          onProfileClick={(makerId) => {
+            console.log('🗺️ MapBackground: onProfileClick triggered with makerId:', makerId);
+            handleViewProfile(makerId);
+          }}
           filterType={currentFilter}
         />
       </div>

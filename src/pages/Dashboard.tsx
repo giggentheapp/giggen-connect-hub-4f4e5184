@@ -34,13 +34,19 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('🏠 Dashboard: useEffect auth listener setup');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('🏠 Dashboard: Auth state change event:', event);
+        console.log('🏠 Dashboard: Session user:', session?.user?.id);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (!session?.user) {
+          console.log('🏠 Dashboard: No user in session, navigating to /auth');
           navigate('/auth');
         }
       }
@@ -48,14 +54,19 @@ const Dashboard = () => {
 
     // Check for existing session and load profile
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('🏠 Dashboard: Initial session check:', session?.user?.id);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (!session?.user) {
+        console.log('🏠 Dashboard: No user in initial session, navigating to /auth');
         navigate('/auth');
         return;
       }
 
+      console.log('🏠 Dashboard: Loading profile for user:', session.user.id);
+      
       // Load user profile
       const { data: profileData, error } = await supabase
         .from('profiles')
@@ -64,16 +75,18 @@ const Dashboard = () => {
         .single();
 
       if (error) {
-        console.error('Error loading profile:', error);
+        console.error('🏠 Dashboard: Error loading profile:', error);
         toast({
           title: "Feil ved lasting av profil",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('🏠 Dashboard: Profile loaded successfully:', profileData.display_name, profileData.role);
         setProfile(profileData);
       }
       
+      console.log('🏠 Dashboard: Setting loading to false');
       setLoading(false);
     });
 

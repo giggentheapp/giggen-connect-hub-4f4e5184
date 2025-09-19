@@ -54,7 +54,11 @@ interface ProfileSettings {
 }
 
 const Profile = () => {
+  console.log('📄 Profile component: Starting render/re-render');
+  
   const { userId } = useParams();
+  console.log('📄 Profile: userId from params:', userId);
+  
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -69,18 +73,28 @@ const Profile = () => {
   const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
 
   useEffect(() => {
+    console.log('📄 Profile: getCurrentUser useEffect triggered');
     const getCurrentUser = async () => {
+      console.log('📄 Profile: Getting current user...');
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('📄 Profile: Current user fetched:', user?.id, user?.role);
       setCurrentUser(user);
     };
     getCurrentUser();
   }, []);
 
   useEffect(() => {
+    console.log('📄 Profile: fetchProfile useEffect triggered for userId:', userId);
+    
     const fetchProfile = async () => {
-      if (!userId) return;
+      if (!userId) {
+        console.log('📄 Profile: No userId provided, returning early');
+        return;
+      }
       
       try {
+        console.log('📄 Profile: Fetching profile data for userId:', userId);
+        
         // Fetch profile data
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -88,23 +102,29 @@ const Profile = () => {
           .eq('user_id', userId)
           .maybeSingle();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('📄 Profile: Error fetching profile:', profileError);
+          throw profileError;
+        }
         
         if (!profileData) {
-          console.warn('No profile found for user ID:', userId);
+          console.warn('📄 Profile: No profile found for user ID:', userId);
           return; // Don't show error, just redirect to dashboard
         }
         
+        console.log('📄 Profile: Profile data fetched successfully:', profileData);
         setProfile(profileData);
 
         // Fetch privacy settings only if user is a maker
         if (profileData.role === 'maker') {
+          console.log('📄 Profile: Fetching settings for maker');
           const { data: settingsData } = await supabase
             .from('profile_settings')
             .select('*')
             .eq('maker_id', userId)
             .maybeSingle();
 
+          console.log('📄 Profile: Settings fetched:', settingsData);
           setSettings(settingsData || {
             show_about: false,
             show_contact: false,
@@ -113,6 +133,7 @@ const Profile = () => {
             show_events: false
           });
         } else {
+          console.log('📄 Profile: Setting default visibility for goer profile');
           // For goers, set default visibility settings
           setSettings({
             show_about: true,
@@ -124,13 +145,14 @@ const Profile = () => {
         }
 
       } catch (error: any) {
-        console.error('Error fetching profile:', error);
+        console.error('📄 Profile: Error in fetchProfile:', error);
         toast({
           title: "Feil",
           description: "Kunne ikke laste profil",
           variant: "destructive",
         });
       } finally {
+        console.log('📄 Profile: fetchProfile completed, setting loading to false');
         setLoading(false);
       }
     };
@@ -197,12 +219,16 @@ const Profile = () => {
   ), [isOwnProfile]);
 
   if (loading) {
+    console.log('📄 Profile: Rendering loading state');
     return <div className="flex justify-center p-8">Laster profil...</div>;
   }
 
   if (!profile) {
+    console.log('📄 Profile: No profile found, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
+
+  console.log('📄 Profile: Rendering profile for:', profile.display_name, profile.role);
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">

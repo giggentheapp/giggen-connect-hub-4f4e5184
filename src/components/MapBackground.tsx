@@ -354,9 +354,15 @@ export const MapBackground = ({ userId, onProfileClick, filterType = 'makers' }:
         
         if (viewProfileBtn) {
           viewProfileBtn.addEventListener('click', () => {
+            console.log('🗺️ MapBackground: viewProfileBtn clicked for maker:', maker.user_id);
+            console.log('🗺️ MapBackground: onProfileClick function:', onProfileClick);
+            console.log('🗺️ MapBackground: navigate function:', navigate);
+            
             if (onProfileClick) {
+              console.log('🗺️ MapBackground: Calling onProfileClick with:', maker.user_id);
               onProfileClick(maker.user_id);
             } else {
+              console.log('🗺️ MapBackground: No onProfileClick, using navigate directly');
               navigate(`/profile/${maker.user_id}`);
             }
           });
