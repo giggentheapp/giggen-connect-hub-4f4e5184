@@ -44,11 +44,25 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const navigate = useNavigate();
   const { isGoer } = useRole();
 
+  console.log('🚀 GoerExploreSection render:', { 
+    currentViewMode, 
+    currentFilter, 
+    viewMode, 
+    exploreType,
+    profile: profile?.display_name 
+  });
+
   // Auto-fetch data when component mounts
   useEffect(() => {
     fetchMakers();
     fetchEvents();
   }, []);
+
+  // Ensure state doesn't get overridden by props after initial mount
+  useEffect(() => {
+    console.log('🔧 Props changed:', { viewMode, exploreType });
+    // Don't reset state if user has already interacted with toggles
+  }, [viewMode, exploreType]);
 
   const fetchMakers = async () => {    
     try {
@@ -116,52 +130,68 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
         </div>
       )}
       
-      {/* Fixed Controls - Top */}
-      <div className="fixed top-4 left-4 right-4 z-50 flex gap-4">
-        {/* View Mode Toggle */}
-        <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-md p-1">
-          <Button
-            variant={currentViewMode === 'map' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentViewMode('map')}
-            className="flex items-center gap-1"
-          >
-            <Map className="w-4 h-4" />
-            Kart
-          </Button>
-          <Button
-            variant={currentViewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentViewMode('list')}
-            className="flex items-center gap-1"
-          >
-            <List className="w-4 h-4" />
-            Liste
-          </Button>
-        </div>
-        
-        {/* Filter Toggle */}
-        <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-md p-1">
-          <Button
-            variant={currentFilter === 'makers' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentFilter('makers')}
-          >
-            Makere
-          </Button>
-          <Button
-            variant={currentFilter === 'events' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentFilter('events')}
-          >
-            Events
-          </Button>
+      {/* Fixed Controls - Top - ALWAYS VISIBLE */}
+      <div className="fixed top-4 left-4 right-4 z-[9999] flex gap-4">
+        <div className="flex items-center gap-4">
+          {/* View Mode Toggle */}
+          <div className="flex gap-1 bg-white border-2 border-primary shadow-xl rounded-lg p-2">
+            <Button
+              variant={currentViewMode === 'map' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('🔄 View Mode Toggle: switching to map');
+                setCurrentViewMode('map');
+              }}
+              className="flex items-center gap-1 min-w-[80px]"
+            >
+              <Map className="w-4 h-4" />
+              Kart
+            </Button>
+            <Button
+              variant={currentViewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('🔄 View Mode Toggle: switching to list');
+                setCurrentViewMode('list');
+              }}
+              className="flex items-center gap-1 min-w-[80px]"
+            >
+              <List className="w-4 h-4" />
+              Liste
+            </Button>
+          </div>
+          
+          {/* Filter Toggle */}
+          <div className="flex gap-1 bg-white border-2 border-secondary shadow-xl rounded-lg p-2">
+            <Button
+              variant={currentFilter === 'makers' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('🔄 Filter Toggle: switching to makers');
+                setCurrentFilter('makers');
+              }}
+              className="min-w-[80px]"
+            >
+              Makere
+            </Button>
+            <Button
+              variant={currentFilter === 'events' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('🔄 Filter Toggle: switching to events');
+                setCurrentFilter('events');
+              }}
+              className="min-w-[80px]"
+            >
+              Events
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* List Panel */}
       {currentViewMode === 'list' && (
-        <div className="absolute top-20 left-4 right-4 bottom-4 z-10">
+        <div className="absolute top-24 left-4 right-4 bottom-4 z-10">
           <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
             <CardContent className="p-4 h-full overflow-auto">
               <div className="flex items-center justify-between mb-4">
