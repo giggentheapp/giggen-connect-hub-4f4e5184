@@ -94,13 +94,16 @@ const Profile = () => {
       
       try {
         console.log('📄 Profile: Fetching profile data for userId:', userId);
+        console.log('📄 Profile: Current user is:', currentUser?.id, 'with email:', currentUser?.email);
         
-        // Fetch profile data
+        // Fetch profile data using secure function that handles visibility
         const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
+          .rpc('get_secure_profile_data', { 
+            target_user_id: userId 
+          })
           .maybeSingle();
+
+        console.log('📄 Profile: RPC response - data:', profileData, 'error:', profileError);
 
         if (profileError) {
           console.error('📄 Profile: Error fetching profile:', profileError);
@@ -108,12 +111,20 @@ const Profile = () => {
         }
         
         if (!profileData) {
-          console.warn('📄 Profile: No profile found for user ID:', userId);
-          return; // Don't show error, just redirect to dashboard
+          console.warn('📄 Profile: No profile data returned from RPC for user ID:', userId);
+          console.warn('📄 Profile: This could mean the profile doesn\'t exist or isn\'t visible to current user');
+          return; // Don't show error, just show not found message
         }
         
         console.log('📄 Profile: Profile data fetched successfully:', profileData);
-        setProfile(profileData);
+        
+        // Cast the role to proper type since RPC returns string
+        const typedProfileData = {
+          ...profileData,
+          role: profileData.role as 'maker' | 'goer'
+        } as ProfileData;
+        
+        setProfile(typedProfileData);
 
         // Fetch privacy settings only if user is a maker
         if (profileData.role === 'maker') {
