@@ -28,6 +28,14 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo }: WorkingEven
   const { bookings, loading } = useBookings(profile.user_id);
   const publishedEvents = bookings.filter(b => b.status === 'upcoming');
 
+  // Debug logging to check what data we're getting
+  console.log('WorkingEventsDisplay DEBUG:');
+  console.log('Profile user_id:', profile.user_id);
+  console.log('Profile display_name:', profile.display_name);
+  console.log('All bookings:', bookings);
+  console.log('Published events (status=upcoming):', publishedEvents);
+  console.log('Loading state:', loading);
+
   if (loading) {
     return (
       <div className="space-y-4">
