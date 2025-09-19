@@ -31,7 +31,7 @@ interface GoerExploreSectionProps {
   exploreType?: 'makers' | 'events';
 }
 
-export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
+export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
   const [makers, setMakers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,8 +39,8 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>(viewMode);
-  const [currentFilter, setCurrentFilter] = useState<'makers' | 'events'>(exploreType);
+  const [currentViewMode, setCurrentViewMode] = useState<'map' | 'list'>('map'); // Default to map
+  const [currentFilter, setCurrentFilter] = useState<'makers' | 'events'>('makers');
   const navigate = useNavigate();
   const { isGoer } = useRole();
 
@@ -103,140 +103,60 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* CLEAN TOGGLE CONTAINER - ALWAYS VISIBLE */}
-      <div 
-        id="persistent-toggles-container"
-        className="fixed top-4 left-4 right-4 z-50 flex gap-4"
-      >
-        <div className="flex items-center gap-4">
-          {/* View Mode Toggle */}
-          <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-lg p-2">
-            <Button
-              variant={currentViewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentViewMode('map')}
-              className="flex items-center gap-2"
-            >
-              <Map className="w-4 h-4" />
-              Kart
-            </Button>
-            <Button
-              variant={currentViewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentViewMode('list')}
-              className="flex items-center gap-2"
-            >
+      {/* FLOATING TOGGLE BUTTON - TOP RIGHT */}
+      <div className="fixed top-4 right-4 z-[9999] flex gap-2">
+        {/* View Toggle Button */}
+        <Button
+          onClick={() => setCurrentViewMode(currentViewMode === 'map' ? 'list' : 'map')}
+          className="bg-white text-foreground border shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+          size="sm"
+        >
+          {currentViewMode === 'map' ? (
+            <>
               <List className="w-4 h-4" />
               Liste
-            </Button>
-          </div>
-          
-          {/* Filter Toggle */}
-          <div className="flex gap-1 bg-card/95 backdrop-blur-sm border shadow-lg rounded-lg p-2">
-            <Button
-              variant={currentFilter === 'makers' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentFilter('makers')}
-            >
-              Makere
-            </Button>
-            <Button
-              variant={currentFilter === 'events' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentFilter('events')}
-            >
-              Events
-            </Button>
-          </div>
-        </div>
+            </>
+          ) : (
+            <>
+              <Map className="w-4 h-4" />
+              Kart
+            </>
+          )}
+        </Button>
+
+        {/* Filter Toggle Button */}
+        <Button
+          onClick={() => setCurrentFilter(currentFilter === 'makers' ? 'events' : 'makers')}
+          className="bg-white text-foreground border shadow-lg hover:shadow-xl transition-all duration-200"
+          size="sm"
+          variant="outline"
+        >
+          {currentFilter === 'makers' ? 'Events' : 'Makere'}
+        </Button>
       </div>
 
-      {/* MAP CONTAINER - RENDERED WHEN MAP VIEW IS ACTIVE */}
-      {currentViewMode === 'map' && (
-        <div className="absolute inset-0" style={{ zIndex: 1 }}>
+      {/* MAIN CONTENT AREA */}
+      <div className="absolute inset-0">
+        {currentViewMode === 'map' ? (
+          /* MAP VIEW */
           <MapBackground 
-            onProfileClick={(makerId) => {
-              handleViewProfile(makerId);
-            }}
+            onProfileClick={(makerId) => handleViewProfile(makerId)}
             filterType={currentFilter}
           />
-        </div>
-      )}
-      
-      {/* Fixed Controls - Top - ALWAYS VISIBLE */}
-      <div className="fixed top-4 left-4 right-4 z-[9999] flex gap-4">
-        <div className="flex items-center gap-4">
-          {/* View Mode Toggle */}
-          <div className="flex gap-1 bg-white border-2 border-primary shadow-xl rounded-lg p-2">
-            <Button
-              variant={currentViewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('🔄 View Mode Toggle: switching to map');
-                setCurrentViewMode('map');
-              }}
-              className="flex items-center gap-1 min-w-[80px]"
-            >
-              <Map className="w-4 h-4" />
-              Kart
-            </Button>
-            <Button
-              variant={currentViewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('🔄 View Mode Toggle: switching to list');
-                setCurrentViewMode('list');
-              }}
-              className="flex items-center gap-1 min-w-[80px]"
-            >
-              <List className="w-4 h-4" />
-              Liste
-            </Button>
-          </div>
-          
-          {/* Filter Toggle */}
-          <div className="flex gap-1 bg-white border-2 border-secondary shadow-xl rounded-lg p-2">
-            <Button
-              variant={currentFilter === 'makers' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('🔄 Filter Toggle: switching to makers');
-                setCurrentFilter('makers');
-              }}
-              className="min-w-[80px]"
-            >
-              Makere
-            </Button>
-            <Button
-              variant={currentFilter === 'events' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('🔄 Filter Toggle: switching to events');
-                setCurrentFilter('events');
-              }}
-              className="min-w-[80px]"
-            >
-              Events
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* List Panel */}
-      {currentViewMode === 'list' && (
-        <div className="absolute top-24 left-4 right-4 bottom-4 z-10">
-          <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
-            <CardContent className="p-4 h-full overflow-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
+        ) : (
+          /* LIST VIEW */
+          <div className="absolute inset-0 bg-background overflow-auto">
+            <div className="container mx-auto px-4 py-6 max-w-4xl">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold flex items-center gap-2">
                   {currentFilter === 'makers' ? (
                     <>
-                      <Users className="w-5 h-5" />
+                      <Users className="w-6 h-6" />
                       Makere i nettverket
                     </>
                   ) : (
                     <>
-                      <Calendar className="w-5 h-5" />
+                      <Calendar className="w-6 h-6" />
                       Kommende arrangementer
                     </>
                   )}
@@ -252,6 +172,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
               </div>
               
               {currentFilter === 'makers' ? (
+                /* MAKERS LIST */
                 makers.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -260,10 +181,10 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                 ) : (
                   <div className="space-y-4">
                     {makers.map((maker) => (
-                      <Card key={maker.id} className="border bg-background/80 cursor-pointer hover:bg-background/90 transition-colors" onClick={() => handleViewProfile(maker.user_id)}>
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary flex items-center justify-center flex-shrink-0">
+                      <Card key={maker.id} className="border bg-card hover:bg-card/80 cursor-pointer transition-colors" onClick={() => handleViewProfile(maker.user_id)}>
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
                               {maker.avatar_url ? (
                                 <img 
                                   src={maker.avatar_url} 
@@ -271,23 +192,23 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <span className="text-primary-foreground text-sm font-bold">
+                                <span className="text-muted-foreground text-lg font-bold">
                                   {maker.display_name?.charAt(0) || 'M'}
                                 </span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-medium">{maker.display_name}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-3 mt-1">
+                              <h3 className="text-lg font-semibold">{maker.display_name}</h3>
+                              <p className="text-muted-foreground mt-1">
                                 {maker.bio || 'Ingen beskrivelse tilgjengelig'}
                               </p>
-                              <div className="flex items-center gap-2 mt-2">
+                              <div className="flex items-center gap-3 mt-3">
                                 <Badge variant="secondary" className="text-xs">
                                   {maker.role}
                                 </Badge>
                                 {maker.address && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
+                                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <MapPin className="w-4 h-4" />
                                     {maker.address}
                                   </span>
                                 )}
@@ -300,6 +221,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                   </div>
                 )
               ) : (
+                /* EVENTS LIST */
                 events.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -308,42 +230,42 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                 ) : (
                   <div className="space-y-4">
                     {events.map((event) => (
-                      <Card key={event.id} className="border bg-background/80 cursor-pointer hover:bg-background/90 transition-colors" onClick={() => handleViewEvent(event.id)}>
-                        <CardContent className="p-4">
-                          <div className="space-y-2">
-                            <h3 className="font-medium">{event.title}</h3>
+                      <Card key={event.id} className="border bg-card hover:bg-card/80 cursor-pointer transition-colors" onClick={() => handleViewEvent(event.id)}>
+                        <CardContent className="p-6">
+                          <div className="space-y-3">
+                            <h3 className="text-lg font-semibold">{event.title}</h3>
                             {event.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
+                              <p className="text-muted-foreground">
                                 {event.description}
                               </p>
                             )}
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-6 text-sm text-muted-foreground">
                               {event.venue && (
                                 <span className="flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />
+                                  <MapPin className="w-4 h-4" />
                                   {event.venue}
                                 </span>
                               )}
                               {event.date && (
                                 <span className="flex items-center gap-1">
-                                  <Calendar className="w-3 h-3" />
+                                  <Calendar className="w-4 h-4" />
                                   {new Date(event.date).toLocaleDateString('nb-NO')}
                                 </span>
                               )}
                               {event.time && (
                                 <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
+                                  <Clock className="w-4 h-4" />
                                   {event.time}
                                 </span>
                               )}
                             </div>
                             {event.ticket_price && (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
+                              <div className="flex items-center gap-3">
+                                <Badge variant="outline" className="text-sm">
                                   {event.ticket_price} kr
                                 </Badge>
                                 {event.expected_audience && (
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge variant="secondary" className="text-sm">
                                     {event.expected_audience} publikummere
                                   </Badge>
                                 )}
@@ -356,11 +278,10 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                   </div>
                 )
               )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
+            </div>
+          </div>
+        )}
+      </div>
       
       {/* Profile Modal */}
       <ProfileModal 
