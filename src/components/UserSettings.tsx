@@ -394,20 +394,15 @@ export const UserSettings = ({
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Adresse</h3>
             <div>
-              <Label htmlFor="address">Adresse</Label>
-              <AddressAutocomplete
-                value={profileData.address || ''}
-                onChange={(address, coordinates) => {
-                  setProfileData(prev => ({
-                    ...prev,
-                    address: address,
-                    latitude: coordinates?.lat || null,
-                    longitude: coordinates?.lng || null
-                  }));
-                }}
-                placeholder="Skriv inn din adresse..."
-                className="w-full"
-              />
+              
+              <AddressAutocomplete value={profileData.address || ''} onChange={(address, coordinates) => {
+              setProfileData(prev => ({
+                ...prev,
+                address: address,
+                latitude: coordinates?.lat || null,
+                longitude: coordinates?.lng || null
+              }));
+            }} placeholder="Skriv inn din adresse..." className="w-full" />
             </div>
           </div>
 
