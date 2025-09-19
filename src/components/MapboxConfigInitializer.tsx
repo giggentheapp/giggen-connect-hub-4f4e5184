@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 interface MapboxConfigInitializerProps {
   accessToken: string;
@@ -11,6 +13,7 @@ interface MapboxConfigInitializerProps {
 export const MapboxConfigInitializer = ({ accessToken, styleUrl, userId }: MapboxConfigInitializerProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,13 +70,29 @@ export const MapboxConfigInitializer = ({ accessToken, styleUrl, userId }: Mapbo
     initializeConfig();
   }, [accessToken, styleUrl, userId, isInitialized, isInitializing, toast]);
 
-  if (isInitializing) {
+  if (isInitializing && showModal) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="text-center p-6 bg-card rounded-lg border shadow-lg">
+        <div className="text-center p-6 bg-card rounded-lg border shadow-lg relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2"
+            onClick={() => setShowModal(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <h3 className="font-semibold mb-2">Konfigurerer Mapbox</h3>
           <p className="text-sm text-muted-foreground">Lagrer din access token og style URL...</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-3"
+            onClick={() => setShowModal(false)}
+          >
+            Lukk
+          </Button>
         </div>
       </div>
     );
