@@ -44,9 +44,7 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
         profile={updatedProfile}
         onProfileUpdate={handleProfileUpdate}
       />
-      {updatedProfile.role === 'maker' && (
-        <MapboxSettingsSection userId={updatedProfile.user_id} />
-      )}
+      {/* Mapbox settings card removed as requested */}
     </div>
   );
 };
