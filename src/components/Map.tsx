@@ -45,24 +45,172 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     makersCount: makers.length 
   });
 
+  // Test basic database access
+  const testDatabaseAccess = useCallback(async () => {
+    console.log('%c🔍 TESTING DATABASE ACCESS', 'color: orange; font-size: 14px; font-weight: bold;');
+    
+    try {
+      // Test basic Supabase connection
+      console.log('Testing basic Supabase connection...');
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, role')
+        .limit(1);
+      
+      if (profilesError) {
+        console.error('❌ Profiles access blocked:', profilesError);
+        console.error('Error code:', profilesError.code);
+        console.error('Error message:', profilesError.message);
+      } else {
+        console.log('✅ Profiles access OK:', profiles?.length || 0, 'records');
+      }
+      
+      // Test profile_settings (where Mapbox token might be stored)
+      const { data: settings, error: settingsError } = await supabase
+        .from('profile_settings')
+        .select('id, mapbox_access_token')
+        .limit(1);
+      
+      if (settingsError) {
+        console.error('❌ Profile settings access blocked:', settingsError);
+        console.error('Settings error details:', settingsError);
+      } else {
+        console.log('✅ Profile settings access OK:', settings?.length || 0, 'records');
+      }
+      
+      // Test events_market (should be publicly readable)
+      const { data: events, error: eventsError } = await supabase
+        .from('events_market')
+        .select('id, title')
+        .limit(1);
+      
+      if (eventsError) {
+        console.error('❌ Events market blocked:', eventsError);
+      } else {
+        console.log('✅ Events market access OK:', events?.length || 0, 'records');
+      }
+      
+    } catch (error) {
+      console.error('❌ Database test failed with exception:', error);
+    }
+  }, []);
+
+  // Debug all permissions systematically  
+  const debugAllPermissions = useCallback(async () => {
+    console.log('%c=== PERMISSION DEBUG START ===', 'color: red; font-size: 16px; font-weight: bold;');
+    
+    // Test current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log('Current user:', user?.id || 'Not authenticated');
+    console.log('User error:', userError);
+    
+    // Test each table access individually (TypeScript requires explicit table names)
+    try {
+      const { data: profiles, error: profilesError } = await supabase.from('profiles').select('id').limit(1);
+      console.log('📊 profiles:', profilesError ? '❌ BLOCKED' : '✅ OK');
+      if (profilesError) {
+        console.log(`  ❌ Error: ${profilesError.message}`);
+        console.log(`  ❌ Code: ${profilesError.code}`);
+      }
+    } catch (err: any) {
+      console.log('📊 profiles: ❌ EXCEPTION', err.message);
+    }
+
+    try {
+      const { data: settings, error: settingsError } = await supabase.from('profile_settings').select('id').limit(1);
+      console.log('📊 profile_settings:', settingsError ? '❌ BLOCKED' : '✅ OK');
+      if (settingsError) {
+        console.log(`  ❌ Error: ${settingsError.message}`);
+        console.log(`  ❌ Code: ${settingsError.code}`);
+      }
+    } catch (err: any) {
+      console.log('📊 profile_settings: ❌ EXCEPTION', err.message);
+    }
+
+    try {
+      const { data: events, error: eventsError } = await supabase.from('events_market').select('id').limit(1);
+      console.log('📊 events_market:', eventsError ? '❌ BLOCKED' : '✅ OK');
+      if (eventsError) {
+        console.log(`  ❌ Error: ${eventsError.message}`);
+        console.log(`  ❌ Code: ${eventsError.code}`);
+      }
+    } catch (err: any) {
+      console.log('📊 events_market: ❌ EXCEPTION', err.message);
+    }
+
+    try {
+      const { data: bookings, error: bookingsError } = await supabase.from('bookings').select('id').limit(1);
+      console.log('📊 bookings:', bookingsError ? '❌ BLOCKED' : '✅ OK');
+      if (bookingsError) {
+        console.log(`  ❌ Error: ${bookingsError.message}`);
+        console.log(`  ❌ Code: ${bookingsError.code}`);
+      }
+    } catch (err: any) {
+      console.log('📊 bookings: ❌ EXCEPTION', err.message);
+    }
+
+    try {
+      const { data: concepts, error: conceptsError } = await supabase.from('concepts').select('id').limit(1);
+      console.log('📊 concepts:', conceptsError ? '❌ BLOCKED' : '✅ OK');
+      if (conceptsError) {
+        console.log(`  ❌ Error: ${conceptsError.message}`);
+        console.log(`  ❌ Code: ${conceptsError.code}`);
+      }
+    } catch (err: any) {
+      console.log('📊 concepts: ❌ EXCEPTION', err.message);
+    }
+    
+    console.log('%c=== PERMISSION DEBUG END ===', 'color: red; font-size: 16px; font-weight: bold;');
+  }, []);
+
+  // Test with temporary/demo Mapbox token
+  const testWithTempToken = useCallback(async () => {
+    console.log('%c🧪 TESTING WITH DEMO TOKEN', 'color: yellow; font-size: 14px; font-weight: bold;');
+    
+    // Use Mapbox's official demo token (public, limited usage)
+    const DEMO_TOKEN = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    
+    try {
+      mapboxgl.accessToken = DEMO_TOKEN;
+      setMapboxToken(DEMO_TOKEN);
+      setTokenError(null);
+      
+      console.log('✅ Demo token set successfully');
+      console.log('🧪 If map loads now, the issue is security blocking the real token');
+      
+      // Test basic Mapbox API access
+      const testResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=${DEMO_TOKEN}`);
+      console.log('🧪 Mapbox API test status:', testResponse.status);
+      
+      if (testResponse.ok) {
+        console.log('✅ Mapbox API access works with demo token');
+      } else {
+        console.error('❌ Mapbox API blocked even with demo token');
+      }
+      
+    } catch (error) {
+      console.error('❌ Demo token test failed:', error);
+    }
+  }, []);
+
   // Comprehensive security debugging function
   const debugSecurityIssues = useCallback(async () => {
     console.log('%c=== SECURITY DEBUG START ===', 'color: red; font-size: 16px; font-weight: bold;');
     
     try {
-      // Test basic Supabase connection
-      console.log('🔍 Testing basic Supabase connection...');
-      const { data: testData, error: testError } = await supabase.from('profiles').select('id').limit(1);
-      console.log('Basic Supabase access:', testError ? 'BLOCKED' : 'OK');
-      if (testError) console.error('Supabase error:', testError);
+      // Run all tests
+      await testDatabaseAccess();
+      await debugAllPermissions();
       
       // Test authentication state
       console.log('🔍 Checking authentication state...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       console.log('User authenticated:', !!user);
+      console.log('User ID:', user?.id);
+      console.log('User role:', user?.user_metadata?.role);
       console.log('Auth error:', authError);
       
-      // Test edge function access
+      // Test edge function access with detailed logging
       console.log('🔍 Testing edge function access...');
       const { data: tokenData, error: tokenError } = await supabase.functions.invoke('get-mapbox-token');
       console.log('Edge function access:', tokenError ? 'BLOCKED' : 'OK');
@@ -73,27 +221,12 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         console.error('Error code:', tokenError.code);
         console.error('Error message:', tokenError.message);
         console.error('Error details:', tokenError.details);
-      }
-      
-      // Test direct Mapbox API if we have a token
-      if (tokenData?.token) {
-        console.log('🔍 Testing direct Mapbox API access...');
-        try {
-          const testResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=${tokenData.token}`);
-          console.log('Mapbox API response status:', testResponse.status);
-          if (!testResponse.ok) {
-            console.error('❌ Mapbox API error:', testResponse.statusText);
-          } else {
-            console.log('✅ Mapbox API access OK');
-          }
-        } catch (mapboxError) {
-          console.error('❌ Mapbox API fetch error:', mapboxError);
-        }
+        console.error('Error hint:', tokenError.hint);
       }
       
       // Environment check
       console.log('🔍 Environment variables check:');
-      console.log('Node env:', typeof window !== 'undefined' ? 'browser' : 'server');
+      console.log('Running in browser:', typeof window !== 'undefined');
       console.log('Supabase client exists:', !!supabase);
       
     } catch (debugError) {
@@ -101,7 +234,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     }
     
     console.log('%c=== SECURITY DEBUG END ===', 'color: red; font-size: 16px; font-weight: bold;');
-  }, []);
+  }, [testDatabaseAccess, debugAllPermissions]);
 
   // Enhanced token fetching with security debugging
   const getMapboxToken = useCallback(async () => {
@@ -655,13 +788,23 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           🔍 RUN SECURITY DEBUG
         </button>
         <button 
-          onClick={async () => {
-            console.log('🧪 Testing with demo token...');
-            const DEMO_TOKEN = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-            mapboxgl.accessToken = DEMO_TOKEN;
-            setMapboxToken(DEMO_TOKEN);
-            console.log('✅ Demo token set - if map loads, security is blocking real token');
+          onClick={testDatabaseAccess}
+          style={{
+            marginTop: '5px',
+            padding: '8px 12px',
+            backgroundColor: 'cyan',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
           }}
+        >
+          📊 TEST DATABASE ACCESS
+        </button>
+        <button 
+          onClick={testWithTempToken}
           style={{
             marginTop: '5px',
             padding: '8px 12px',
@@ -675,6 +818,22 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           }}
         >
           🧪 TEST DEMO TOKEN
+        </button>
+        <button 
+          onClick={debugAllPermissions}
+          style={{
+            marginTop: '5px',
+            padding: '8px 12px',
+            backgroundColor: 'pink',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🔐 DEBUG PERMISSIONS
         </button>
     </div>
   );
