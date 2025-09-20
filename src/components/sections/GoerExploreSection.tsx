@@ -85,7 +85,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
   };
 
   return (
-    <div className="fixed inset-0 bg-background">
+    <div className="fixed inset-0 bg-background ml-16">
       {/* Coming Soon Map */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <ComingSoonMapSection />
