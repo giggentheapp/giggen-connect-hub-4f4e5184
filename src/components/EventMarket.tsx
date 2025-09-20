@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, DollarSign, Clock } from "lucide-react";
+import { Calendar, MapPin, Banknote, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 import { EventModal } from "@/components/EventModal";
@@ -150,7 +150,7 @@ export const EventMarket = () => {
 
                   {event.ticket_price && (
                     <div className="flex items-center gap-2 text-sm font-semibold">
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <Banknote className="h-4 w-4 text-muted-foreground" />
                       <span>Billetter: {event.ticket_price} kr</span>
                     </div>
                   )}

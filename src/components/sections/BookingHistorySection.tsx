@@ -10,7 +10,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { BookingDetails } from '@/components/BookingDetails';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, MapPin, DollarSign, Search, Filter, Eye, Trash2, Clock, Ban, Check } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Search, Filter, Eye, Trash2, Clock, Ban, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface UserProfile {
@@ -206,7 +206,7 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
             
             {(booking.price_musician || booking.price_ticket) && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <DollarSign className="h-4 w-4" />
+                <Banknote className="h-4 w-4" />
                 <span>
                   {booking.price_musician && `Musiker: ${booking.price_musician} Kr`}
                   {booking.price_musician && booking.price_ticket && ' • '}

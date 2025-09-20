@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, DollarSign, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { EventModal } from '@/components/EventModal';
 
@@ -265,7 +265,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
             
             {ticketPrice && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <DollarSign className="h-4 w-4" />
+                <Banknote className="h-4 w-4" />
                 <span>Billett: {ticketPrice}</span>
               </div>
             )}
@@ -281,7 +281,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
               <>
                 {event.price_musician && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <DollarSign className="h-4 w-4" />
+                    <Banknote className="h-4 w-4" />
                     <span>Musiker: {event.price_musician}</span>
                   </div>
                 )}
@@ -395,7 +395,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                       )}
                       {(selectedEvent.price_ticket || selectedEvent.ticket_price) && (
                         <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4" />
+                          <Banknote className="h-4 w-4" />
                           <span>Billettpris: {selectedEvent.price_ticket || selectedEvent.ticket_price}</span>
                         </div>
                       )}
@@ -407,7 +407,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                       )}
                       {isAdminView && selectedEvent.price_musician && (
                         <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4" />
+                          <Banknote className="h-4 w-4" />
                           <span>Musiker honorar: {selectedEvent.price_musician}</span>
                         </div>
                       )}

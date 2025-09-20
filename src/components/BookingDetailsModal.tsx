@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, X, CreditCard, DollarSign, Phone, Mail, Edit, AlertTriangle } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, X, CreditCard, Banknote, Phone, Mail, Edit, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
@@ -185,7 +185,7 @@ export const BookingDetailsModal = ({
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5" />
+                    <Banknote className="w-5 h-5" />
                     Økonomiske detaljer
                   </CardTitle>
                 </CardHeader>

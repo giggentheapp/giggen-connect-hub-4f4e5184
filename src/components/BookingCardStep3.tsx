@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, DollarSign, Phone, Mail, Eye, Globe } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Phone, Mail, Eye, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 
@@ -75,7 +75,7 @@ export const BookingCardStep3 = ({
           )}
           
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <Banknote className="h-4 w-4 text-green-600" />
             <span>
               <strong>Avtalt honorar:</strong>{' '}
               {booking.door_deal ? (

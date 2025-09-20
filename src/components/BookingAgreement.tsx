@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
-import { Check, X, Calendar, MapPin, DollarSign, Users, FileText, Music } from 'lucide-react';
+import { Check, X, Calendar, MapPin, Banknote, Users, FileText, Music } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingAgreementProps {
@@ -220,7 +220,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
                 {(booking.price_musician || booking.price_ticket || booking.artist_fee || booking.door_deal) && (
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
+                      <Banknote className="h-4 w-4" />
                       Prising
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -264,7 +264,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
                     </div>
                     {selectedConcept.price && (
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
+                        <Banknote className="h-4 w-4" />
                         <span>Pris: {selectedConcept.price} kr</span>
                       </div>
                     )}

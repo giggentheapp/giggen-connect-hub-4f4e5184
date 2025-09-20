@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Users, FileText, Music, Eye } from 'lucide-react';
+import { Check, X, AlertTriangle, Calendar, MapPin, Banknote, Users, FileText, Music, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingConfirmationProps {
@@ -256,7 +256,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
                   {currentBooking.ticket_price && (
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-primary" />
+                      <Banknote className="h-4 w-4 text-primary" />
                       <span>Billettpris: {currentBooking.ticket_price}</span>
                     </div>
                   )}
@@ -266,7 +266,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
                 {(currentBooking.price_musician || currentBooking.artist_fee || currentBooking.door_deal) && (
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
+                      <Banknote className="h-4 w-4" />
                       Artist honorar
                     </h4>
                     <p className="text-sm">

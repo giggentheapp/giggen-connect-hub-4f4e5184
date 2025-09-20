@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, Calendar, MapPin, DollarSign, Users, Settings, FileText, Phone, Eye, ChevronRight, Clock, RefreshCw } from 'lucide-react';
+import { Check, Calendar, MapPin, Banknote, Users, Settings, FileText, Phone, Eye, ChevronRight, Clock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ const SECTIONS = [{
 }, {
   id: 'pricing',
   title: 'Publikum og prising',
-  icon: DollarSign
+  icon: Banknote
 }];
 export const ComprehensiveAgreementReview = ({
   booking: initialBooking,
@@ -252,7 +252,7 @@ export const ComprehensiveAgreementReview = ({
               </div>}
 
             {booking.ticket_price && <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-primary" />
+                <Banknote className="h-5 w-5 text-primary" />
                 <span>Billettpris: <strong>{booking.ticket_price} kr</strong></span>
               </div>}
 

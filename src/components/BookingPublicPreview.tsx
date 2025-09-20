@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, DollarSign, Users, Eye, Check } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingPublicPreviewProps {
@@ -70,7 +70,7 @@ export const BookingPublicPreview = ({
 
                 {booking.ticket_price && (
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-primary" />
+                    <Banknote className="h-4 w-4 text-primary" />
                     <span>Billett: {booking.ticket_price} kr</span>
                   </div>
                 )}

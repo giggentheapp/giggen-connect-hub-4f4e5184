@@ -18,7 +18,7 @@ import {
   Calendar, 
   MapPin, 
   Users, 
-  DollarSign,
+  Banknote,
   Lock,
   Unlock 
 } from 'lucide-react';

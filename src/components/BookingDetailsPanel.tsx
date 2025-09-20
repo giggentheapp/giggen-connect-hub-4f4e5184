@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, Check, X, Edit3, Clock, Users, DollarSign } from 'lucide-react';
+import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface BookingDetailsPanelProps {
   booking: any;

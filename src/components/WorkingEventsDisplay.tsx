@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, DollarSign, Users, Eye } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetailsModal } from '@/components/BookingDetailsModal';
@@ -97,7 +97,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
                 )}
                 {event.ticket_price && (
                   <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="h-4 w-4" />
+                    <Banknote className="h-4 w-4" />
                     {event.ticket_price} kr
                   </div>
                 )}

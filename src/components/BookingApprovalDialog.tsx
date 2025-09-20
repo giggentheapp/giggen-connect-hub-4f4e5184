@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Users, Eye, Settings, Clock, RefreshCw } from 'lucide-react';
+import { Check, X, AlertTriangle, Calendar, MapPin, Banknote, Users, Eye, Settings, Clock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 
@@ -286,7 +286,7 @@ Privat informasjon (kun synlig for partene):
 
                   {booking.ticket_price && (
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-primary" />
+                      <Banknote className="h-4 w-4 text-primary" />
                       <span>Billettpris: {booking.ticket_price} kr</span>
                     </div>
                   )}

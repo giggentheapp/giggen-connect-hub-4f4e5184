@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, DollarSign, MessageCircle, Eye } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, MessageCircle, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
@@ -85,7 +85,7 @@ export const BookingCardStep2 = ({
           )}
           
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Banknote className="h-4 w-4 text-muted-foreground" />
             <span>
               <strong>Priser:</strong> 
               {booking.artist_fee && ` Honorar: ${booking.artist_fee} Kr`}
