@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import LeafletFullscreenMap from '@/components/LeafletFullscreenMap';
+import GoerFullscreenMap from '@/components/GoerFullscreenMap';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const GoerMapPage = () => {
   };
 
   return (
-    <LeafletFullscreenMap 
+    <GoerFullscreenMap 
       onBack={handleBack}
       onMakerClick={handleMakerClick}
     />

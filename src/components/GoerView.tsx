@@ -1,5 +1,5 @@
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
-import { LeafletMap } from '@/components/LeafletMap';
+import { MapBackground } from '@/components/MapBackground';
 
 interface UserProfile {
   id: string;
@@ -25,7 +25,7 @@ export const GoerView = ({ profile }: GoerViewProps) => {
   console.log('🎯 GoerView initialized with profile:', profile);
 
   // Create map component for reuse
-  const mapComponent = <LeafletMap className="h-full" />;
+  const mapComponent = <MapBackground userId={profile.user_id} />;
 
   return (
     <UnifiedSidePanel 

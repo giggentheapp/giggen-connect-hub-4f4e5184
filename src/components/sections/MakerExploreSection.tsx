@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import SafeLeafletMap from '@/components/SafeLeafletMap';
-import { ProfileModal } from '@/components/ProfileModal';
-import { BookingRequest } from '@/components/BookingRequest';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
+import Map from '@/components/Map';
+import { ProfileModal } from '@/components/ProfileModal';
+import { MapBackground } from '@/components/MapBackground';
+import { BookingRequest } from '@/components/BookingRequest';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -28,7 +29,6 @@ interface MakerExploreSectionProps {
 export const MakerExploreSection = ({
   profile
 }: MakerExploreSectionProps) => {
-  console.log('🎯 MakerExploreSection initialized');
   const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,12 +76,7 @@ export const MakerExploreSection = ({
   return <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <div className="w-full h-96 bg-muted flex items-center justify-center rounded-lg border">
-          <div className="text-center">
-            <h3 className="text-lg font-medium">Kart kommer snart tilbake</h3>
-            <p className="text-sm text-muted-foreground">Vi jobber med å forbedre kartopplevelsen</p>
-          </div>
-        </div>
+        <MapBackground onProfileClick={handleViewProfile} />
       </div>
       
       {/* Floating Controls */}
