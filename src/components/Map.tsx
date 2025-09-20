@@ -33,17 +33,11 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
   useEffect(() => {
     const getMapboxToken = async () => {
       try {
-        const directToken = import.meta.env.VITE_MAPBOX_TOKEN;
-        if (directToken && directToken !== 'undefined') {
-          setMapboxToken(directToken);
-          mapboxgl.accessToken = directToken;
-          return;
-        }
-        
+        // Only use the Supabase edge function (VITE_* env vars not supported in Lovable)
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
         if (error) {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+          setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
           return;
         }
         
@@ -51,10 +45,11 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           setMapboxToken(data.token);
           mapboxgl.accessToken = data.token;
         } else {
-          setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+          setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
         }
       } catch (error: any) {
-        setTokenError('Du må legge inn VITE_MAPBOX_TOKEN som miljøvariabel eller MAPBOX_ACCESS_TOKEN som Supabase secret.');
+        console.error('Error getting Mapbox token:', error);
+        setTokenError('Feil ved lasting av kart. Prøv igjen senere.');
       }
     };
     
