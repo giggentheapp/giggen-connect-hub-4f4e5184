@@ -7,7 +7,8 @@ import { MapPin, Users, Eye } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
+import MVPDemoMap from '@/components/MVPDemoMap';
+import MapErrorBoundary from '@/components/MapErrorBoundary';
 import { ProfileModal } from '@/components/ProfileModal';
 
 interface UserProfile {
@@ -70,15 +71,17 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <SimpleMapPlaceholder makers={makers} />
+        <MapErrorBoundary>
+          <MVPDemoMap makers={makers} />
+        </MapErrorBoundary>
       </div>
       
       {/* Floating Controls */}
       <div className="absolute top-4 left-4 right-4 z-10">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-card/95 backdrop-blur-sm border shadow-lg">
-            <TabsTrigger value="map">Kart</TabsTrigger>
-            <TabsTrigger value="list">Liste</TabsTrigger>
+            <TabsTrigger value="map">🗺️ Kart</TabsTrigger>
+            <TabsTrigger value="list">📋 Liste</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

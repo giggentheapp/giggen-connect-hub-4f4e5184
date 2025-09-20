@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
+import MVPDemoMap from '@/components/MVPDemoMap';
+import MapErrorBoundary from '@/components/MapErrorBoundary';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -22,8 +23,10 @@ const GoerMapPage = () => {
         Tilbake
       </Button>
       
-      {/* Map placeholder */}
-      <SimpleMapPlaceholder className="w-full h-full" />
+      {/* Map */}
+      <MapErrorBoundary>
+        <MVPDemoMap />
+      </MapErrorBoundary>
     </div>
   );
 };
