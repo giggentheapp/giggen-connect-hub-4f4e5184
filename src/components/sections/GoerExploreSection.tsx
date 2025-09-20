@@ -36,6 +36,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // Start with loading true
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -47,19 +48,80 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
     fetchAllMakers();
   }, []);
 
+  // Debug function to test goer database access
+  const testGoerDatabaseAccess = async () => {
+    console.log('🔍 Testing Goer database access...');
+    
+    try {
+      // Test current user info
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user?.id);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, display_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        console.log('User profile:', profile);
+      }
+
+      // Test access to maker profiles
+      const { data: makers, error: makersError } = await supabase
+        .from('profiles')
+        .select('id, user_id, display_name, bio, role, avatar_url, address, is_address_public')
+        .eq('role', 'maker')
+        .limit(5);
+      
+      console.log('Makers access:', makersError ? 'FAILED' : 'SUCCESS');
+      console.log('Makers data:', makers);
+      console.log('Makers error:', makersError);
+      
+      return { makers, makersError };
+    } catch (error) {
+      console.error('Database access test failed:', error);
+      return { makers: null, makersError: error };
+    }
+  };
+
   const fetchAllMakers = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Use new function to get all visible makers
-      const { data, error } = await supabase
-        .rpc('get_all_visible_makers');
+      console.log('🎯 Fetching makers for goer user...');
       
-      if (error) throw error;
-      setMakers(data || []);
-      setFilteredMakers(data || []);
-    } catch (err) {
-      console.error('Error fetching makers:', err);
+      // First test database access for debugging
+      const testResult = await testGoerDatabaseAccess();
+      
+      if (testResult.makersError) {
+        console.error('❌ Direct profile access failed, trying RPC function...');
+        
+        // Fallback to RPC function
+        const { data, error: rpcError } = await supabase.rpc('get_all_visible_makers');
+        
+        if (rpcError) {
+          console.error('❌ RPC function also failed:', rpcError);
+          setError('Kunne ikke laste musikere. Kontroller tilganger.');
+          setMakers([]);
+          setFilteredMakers([]);
+          return;
+        }
+        
+        console.log('✅ RPC function succeeded, got makers:', data?.length);
+        setMakers(data || []);
+        setFilteredMakers(data || []);
+      } else {
+        console.log('✅ Direct profile access succeeded, got makers:', testResult.makers?.length);
+        setMakers(testResult.makers || []);
+        setFilteredMakers(testResult.makers || []);
+      }
+    } catch (err: any) {
+      console.error('❌ Error fetching makers:', err);
+      setError(err.message || 'Noe gikk galt ved lasting av musikere');
+      setMakers([]);
+      setFilteredMakers([]);
     } finally {
       setLoading(false);
     }
@@ -190,6 +252,19 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
               <div className="text-center py-12 text-muted-foreground">
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                 <p>Laster makere...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12 text-destructive">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="mb-2">{error}</p>
+                <Button 
+                  onClick={fetchAllMakers} 
+                  variant="outline" 
+                  size="sm"
+                  className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                >
+                  Prøv igjen
+                </Button>
               </div>
             ) : filteredMakers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">

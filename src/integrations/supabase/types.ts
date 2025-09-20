@@ -692,8 +692,6 @@ export type Database = {
           created_at: string
           id: string
           maker_id: string
-          mapbox_access_token: string | null
-          mapbox_style_url: string | null
           show_about: boolean
           show_contact: boolean
           show_events: boolean
@@ -706,8 +704,6 @@ export type Database = {
           created_at?: string
           id?: string
           maker_id: string
-          mapbox_access_token?: string | null
-          mapbox_style_url?: string | null
           show_about?: boolean
           show_contact?: boolean
           show_events?: boolean
@@ -720,8 +716,6 @@ export type Database = {
           created_at?: string
           id?: string
           maker_id?: string
-          mapbox_access_token?: string | null
-          mapbox_style_url?: string | null
           show_about?: boolean
           show_contact?: boolean
           show_events?: boolean
