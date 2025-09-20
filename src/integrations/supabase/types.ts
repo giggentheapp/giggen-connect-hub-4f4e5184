@@ -793,6 +793,7 @@ export type Database = {
           is_address_public: boolean
           latitude: number | null
           longitude: number | null
+          privacy_settings: Json | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
@@ -808,6 +809,7 @@ export type Database = {
           is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
+          privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
@@ -823,6 +825,7 @@ export type Database = {
           is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
+          privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string

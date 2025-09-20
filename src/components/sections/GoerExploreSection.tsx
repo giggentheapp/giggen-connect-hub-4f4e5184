@@ -53,7 +53,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       setLoading(true);
       setError(null);
 
-      console.log('🎯 Fetching makers with simplified approach...');
+      console.log('🎯 Fetching makers with privacy-based filtering...');
       
       // Get current user for role checking
       const { data: { user } } = await supabase.auth.getUser();
@@ -62,7 +62,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
         return;
       }
 
-      // Simple, direct profile query - RLS policies now handle access control
+      // Fetch makers with privacy settings - only those who allow Goer visibility
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select(`
@@ -76,9 +76,11 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           latitude,
           longitude,
           is_address_public,
+          privacy_settings,
           created_at
         `)
         .eq('role', 'maker')
+        .eq('privacy_settings->>show_profile_to_goers', 'true')
         .order('created_at', { ascending: false });
       
       if (profileError) {
@@ -91,21 +93,27 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       
       console.log('✅ Successfully fetched makers:', profileData?.length || 0);
       
-      // Filter out sensitive data at application level for extra security
-      const safeProfileData = (profileData || []).map(maker => ({
-        id: maker.id,
-        user_id: maker.user_id,
-        display_name: maker.display_name,
-        bio: maker.bio,
-        role: maker.role,
-        avatar_url: maker.avatar_url,
-        // Only include location if explicitly public
-        address: maker.is_address_public ? maker.address : null,
-        latitude: maker.is_address_public ? maker.latitude : null,
-        longitude: maker.is_address_public ? maker.longitude : null,
-        is_address_public: maker.is_address_public,
-        created_at: maker.created_at
-      }));
+      // Filter out sensitive data based on privacy settings
+      const safeProfileData = (profileData || []).map(maker => {
+        const privacySettings = (maker.privacy_settings as any) || {};
+        
+        return {
+          id: maker.id,
+          user_id: maker.user_id,
+          display_name: maker.display_name,
+          // Only show bio if allowed in privacy settings
+          bio: privacySettings.show_profile_to_goers ? maker.bio : null,
+          role: maker.role,
+          avatar_url: maker.avatar_url,
+          // Only include location if explicitly public AND privacy allows it
+          address: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.address : null,
+          latitude: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.latitude : null,
+          longitude: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.longitude : null,
+          is_address_public: maker.is_address_public,
+          privacy_settings: privacySettings,
+          created_at: maker.created_at
+        };
+      });
       
       setMakers(safeProfileData);
       setFilteredMakers(safeProfileData);

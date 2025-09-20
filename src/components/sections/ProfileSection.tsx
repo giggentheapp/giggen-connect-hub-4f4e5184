@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Eye, Folder, Lightbulb, Calendar } from 'lucide-react';
+import { User, Eye, Folder, Lightbulb, Calendar, Shield } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { MakerPrivacySettings } from '@/components/MakerPrivacySettings';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -119,5 +120,10 @@ export const ProfileSection = ({
           <UpcomingEventsSection profile={profile} isAdminView={true} />
         </CardContent>
       </Card>
+
+      {/* Privacy Settings Section - Only for Makers */}
+      {profile.role === 'maker' && (
+        <MakerPrivacySettings userId={profile.user_id} />
+      )}
     </div>;
 };
