@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { useNavigate } from 'react-router-dom';
+import { ConceptViewModal } from '@/components/ConceptViewModal';
 
 interface ProfileData {
   id: string;
@@ -39,6 +40,8 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
+  const [isConceptModalOpen, setIsConceptModalOpen] = useState(false);
   const { role: currentUserRole } = useRole();
   const navigate = useNavigate();
 
@@ -144,8 +147,13 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
 
 
   const handleConceptClick = (conceptId: string) => {
-    onClose(); // Close the profile modal
-    navigate(`/concept/${conceptId}`); // Navigate to concept details
+    setSelectedConceptId(conceptId);
+    setIsConceptModalOpen(true);
+  };
+
+  const handleConceptModalClose = () => {
+    setIsConceptModalOpen(false);
+    setSelectedConceptId(null);
   };
 
   if (!profile) {
@@ -376,6 +384,17 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
           </Tabs>
         </div>
       </DialogContent>
+
+      {/* Concept View Modal */}
+      {selectedConceptId && (
+        <ConceptViewModal
+          isOpen={isConceptModalOpen}
+          onClose={handleConceptModalClose}
+          conceptIds={[selectedConceptId]}
+          initialConceptIndex={0}
+          showConceptActions={false}
+        />
+      )}
     </Dialog>
   );
 };
