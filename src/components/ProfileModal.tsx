@@ -66,25 +66,30 @@ export const ProfileModal = ({
         // Add debugging
         console.log('Fetching profile for userId:', userId, 'currentUserRole:', currentUserRole);
 
-        // Fetch secure profile data
+        // Fetch secure profile data with privacy settings
         const {
           data: profileData,
           error: profileError
-        } = await supabase.rpc('get_secure_profile_data', {
-          target_user_id: userId,
-          viewer_role: currentUserRole
-        });
+        } = await supabase
+          .from('profiles')
+          .select(`
+            id, user_id, display_name, role, avatar_url, created_at,
+            bio, address, latitude, longitude, is_address_public,
+            contact_info, privacy_settings
+          `)
+          .eq('user_id', userId)
+          .single();
         console.log('Profile RPC result:', {
           profileData,
           profileError
         });
         if (profileError) {
-          console.error('Profile RPC error:', profileError);
+          console.error('Profile fetch error:', profileError);
           throw profileError;
         }
-        if (profileData && profileData.length > 0) {
-          console.log('Setting profile:', profileData[0]);
-          setProfile(profileData[0]);
+        if (profileData) {
+          console.log('Setting profile:', profileData);
+          setProfile(profileData);
         } else {
           console.warn('No profile data returned for user:', userId);
         }
@@ -92,6 +97,7 @@ export const ProfileModal = ({
         // Fetch portfolio if visible to user
         const isOwnProfile = currentUserId === userId;
         let portfolioData: any[] = [];
+        
         if (isOwnProfile) {
           // Own profile - show all portfolio
           const {
@@ -103,13 +109,11 @@ export const ProfileModal = ({
           portfolioData = data || [];
           setPortfolioVisible(true);
         } else {
-          // Other's profile - check if portfolio should be visible
-          const {
-            data: settingsData,
-            error: settingsError
-          } = await supabase.from('profile_settings').select('show_portfolio').eq('maker_id', userId).maybeSingle();
-          const showPortfolio = settingsData?.show_portfolio === true;
+          // Other's profile - check privacy settings for portfolio visibility
+          const profilePrivacySettings = (profileData?.privacy_settings as any) || {};
+          const showPortfolio = profilePrivacySettings.show_portfolio_to_goers === true;
           setPortfolioVisible(showPortfolio);
+          
           if (showPortfolio) {
             const {
               data,
@@ -269,19 +273,36 @@ export const ProfileModal = ({
                     <CardTitle>Kommende arrangementer</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <WorkingEventsDisplay profile={{
-                    id: profile.id,
-                    user_id: profile.user_id,
-                    display_name: profile.display_name,
-                    bio: profile.bio || null,
-                    role: profile.role as 'maker' | 'goer',
-                    avatar_url: profile.avatar_url || null,
-                    address: profile.address || null,
-                    latitude: profile.latitude || null,
-                    longitude: profile.longitude || null,
-                    is_address_public: profile.is_address_public,
-                    contact_info: profile.contact_info
-                  }} showSensitiveInfo={false} currentUserId={currentUserId} />
+                    {/* Check privacy settings for events visibility */}
+                    {(() => {
+                      const isOwnProfile = currentUserId === userId;
+                      const privacySettings = (profile as any).privacy_settings || {};
+                      const showEvents = isOwnProfile || privacySettings.show_events_to_goers === true;
+                      
+                      if (!showEvents) {
+                        return <p className="text-muted-foreground italic">Arrangementer er ikke offentlig tilgjengelig</p>;
+                      }
+                      
+                      return (
+                        <WorkingEventsDisplay 
+                          profile={{
+                            id: profile.id,
+                            user_id: profile.user_id,
+                            display_name: profile.display_name,
+                            bio: profile.bio || null,
+                            role: profile.role as 'maker' | 'goer',
+                            avatar_url: profile.avatar_url || null,
+                            address: profile.address || null,
+                            latitude: profile.latitude || null,
+                            longitude: profile.longitude || null,
+                            is_address_public: profile.is_address_public,
+                            contact_info: profile.contact_info
+                          }} 
+                          showSensitiveInfo={isOwnProfile} 
+                          currentUserId={currentUserId} 
+                        />
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </TabsContent>
