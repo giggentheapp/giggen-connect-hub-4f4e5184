@@ -35,7 +35,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [activeTab, setActiveTab] = useState('list');
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
