@@ -9,8 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Users, Eye, Settings } from 'lucide-react';
+import { Check, X, AlertTriangle, Calendar, MapPin, DollarSign, Users, Eye, Settings, Clock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 
 interface BookingApprovalDialogProps {
   booking: any;
@@ -19,7 +20,7 @@ interface BookingApprovalDialogProps {
   currentUserId: string;
 }
 
-export const BookingApprovalDialog = ({ booking, isOpen, onClose, currentUserId }: BookingApprovalDialogProps) => {
+export const BookingApprovalDialog = ({ booking: initialBooking, isOpen, onClose, currentUserId }: BookingApprovalDialogProps) => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [privacySettings, setPrivacySettings] = useState<any>({});
   const [publicFieldSettings, setPublicFieldSettings] = useState({
@@ -33,6 +34,8 @@ export const BookingApprovalDialog = ({ booking, isOpen, onClose, currentUserId 
   });
   const [hasReadSummary, setHasReadSummary] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [booking, setBooking] = useState(initialBooking);
+  const [fetchingFreshData, setFetchingFreshData] = useState(false);
 
   const { updateBooking } = useBookings();
   const { toast } = useToast();
@@ -42,12 +45,36 @@ export const BookingApprovalDialog = ({ booking, isOpen, onClose, currentUserId 
   const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
   const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
 
-  // Load user profile and privacy settings
+  // Load user profile, privacy settings, and fresh booking data
   useEffect(() => {
     if (!isOpen || !currentUserId) return;
 
-    const loadUserData = async () => {
+    const loadAllData = async () => {
       try {
+        // Fetch fresh booking data first
+        if (initialBooking?.id) {
+          setFetchingFreshData(true);
+          console.log('🔄 BookingApprovalDialog: Fetching fresh booking data...');
+          
+          const { data: freshBooking, error: bookingError } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('id', initialBooking.id)
+            .single();
+            
+          if (bookingError) throw bookingError;
+          
+          console.log('✅ Fresh booking data loaded:', {
+            id: freshBooking.id,
+            last_modified_at: freshBooking.last_modified_at,
+            event_date: freshBooking.event_date,
+            time: freshBooking.time
+          });
+          
+          setBooking(freshBooking);
+          setFetchingFreshData(false);
+        }
+
         // Get user profile
         const { data: profile } = await supabase
           .from('profiles')
@@ -68,12 +95,16 @@ export const BookingApprovalDialog = ({ booking, isOpen, onClose, currentUserId 
           setPrivacySettings(settings || {});
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
+        console.error('Error loading data:', error);
+        if (initialBooking) {
+          setBooking(initialBooking); // Fallback to initial booking
+        }
+        setFetchingFreshData(false);
       }
     };
 
-    loadUserData();
-  }, [isOpen, currentUserId]);
+    loadAllData();
+  }, [isOpen, currentUserId, initialBooking?.id]);
 
   const handleApproval = async () => {
     if (!hasReadSummary) {
@@ -154,7 +185,13 @@ Privat informasjon (kun synlig for partene):
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Check className="h-5 w-5 text-green-500" />
-            Godkjenn booking - {booking.title}
+            <span>Godkjenn booking - {booking.title}</span>
+            {fetchingFreshData && (
+              <div className="flex items-center gap-1 text-sm font-normal text-muted-foreground ml-auto">
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                <span>Oppdaterer...</span>
+              </div>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -197,6 +234,34 @@ Privat informasjon (kun synlig for partene):
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Prominent Date/Time Section */}
+                {(booking.event_date || booking.time) && (
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                    <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      Dato og tid for arrangementet
+                    </h4>
+                    <div className="text-2xl font-bold text-primary">
+                      {booking.event_date && (
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <span>
+                            {format(new Date(booking.event_date), 'EEEE dd. MMMM yyyy', { locale: nb })}
+                          </span>
+                          {booking.time && (
+                            <>
+                              <Clock className="h-5 w-5 mx-2 hidden sm:block" />
+                              <span>kl. {booking.time}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {!booking.event_date && booking.time && (
+                        <span>Kl. {booking.time}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="font-semibold text-lg mb-2">{booking.title}</h3>
                   {booking.description && (
@@ -205,14 +270,6 @@ Privat informasjon (kun synlig for partene):
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {booking.event_date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span>{format(new Date(booking.event_date), 'dd.MM.yyyy')}</span>
-                      {booking.time && <span>kl. {booking.time}</span>}
-                    </div>
-                  )}
-                  
                   {booking.venue && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-primary" />

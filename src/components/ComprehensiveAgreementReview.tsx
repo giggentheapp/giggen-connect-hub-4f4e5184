@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Check, 
   Calendar, 
@@ -15,9 +16,12 @@ import {
   FileText,
   Phone,
   Eye,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface ComprehensiveAgreementReviewProps {
@@ -42,7 +46,7 @@ const SECTIONS = [
 ];
 
 export const ComprehensiveAgreementReview = ({
-  booking,
+  booking: initialBooking,
   isOpen,
   onClose,
   currentUserId,
@@ -54,6 +58,8 @@ export const ComprehensiveAgreementReview = ({
   const [hasReadConfirmation, setHasReadConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
+  const [booking, setBooking] = useState(initialBooking);
+  const [fetchingFreshData, setFetchingFreshData] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -83,15 +89,51 @@ export const ComprehensiveAgreementReview = ({
     setHasChangedSinceLastApproval(hasChanges);
   }, [booking, userApprovalTimestamp, otherUserApprovalTimestamp, isOpen]);
 
-  // Reset when dialog opens
+  // Fetch fresh booking data when dialog opens
   useEffect(() => {
+    const fetchFreshBookingData = async () => {
+      if (!isOpen || !initialBooking?.id) return;
+      
+      setFetchingFreshData(true);
+      try {
+        console.log('🔄 Fetching fresh booking data for approval...');
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('id', initialBooking.id)
+          .single();
+          
+        if (error) throw error;
+        
+        console.log('✅ Fresh booking data loaded:', {
+          id: data.id,
+          last_modified_at: data.last_modified_at,
+          event_date: data.event_date,
+          time: data.time
+        });
+        
+        setBooking(data);
+      } catch (error) {
+        console.error('❌ Error fetching fresh booking data:', error);
+        toast({
+          title: "Feil ved lasting av ferske data",
+          description: "Bruker cached data. Kontakt support hvis problemet vedvarer.",
+          variant: "destructive",
+        });
+        setBooking(initialBooking);
+      } finally {
+        setFetchingFreshData(false);
+      }
+    };
+
     if (isOpen) {
       setCurrentStep(0);
       setCompletedSections(new Set());
       setCanProceed(false);
       setHasReadConfirmation(false);
+      fetchFreshBookingData();
     }
-  }, [isOpen]);
+  }, [isOpen, initialBooking?.id, toast]);
 
   const handleNext = () => {
     console.log('🔄 handleNext called:', { 
@@ -178,6 +220,34 @@ export const ComprehensiveAgreementReview = ({
       case 'basic':
         return (
           <div className="space-y-4">
+            {/* Prominent Date/Time Section */}
+            {(booking.event_date || booking.time) && (
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
+                <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  Dato og tid for arrangementet
+                </h4>
+                <div className="text-2xl font-bold text-primary">
+                  {booking.event_date && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <span>
+                        {format(new Date(booking.event_date), 'EEEE dd. MMMM yyyy', { locale: nb })}
+                      </span>
+                      {booking.time && (
+                        <>
+                          <Clock className="h-5 w-5 mx-2 hidden sm:block" />
+                          <span>kl. {booking.time}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {!booking.event_date && booking.time && (
+                    <span>Kl. {booking.time}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div>
               <h3 className="font-semibold text-xl mb-2">{booking.title}</h3>
               {booking.description && (
@@ -186,16 +256,6 @@ export const ComprehensiveAgreementReview = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {booking.event_date && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <span className="font-medium">
-                    {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                    {booking.time && ` kl. ${booking.time}`}
-                  </span>
-                </div>
-              )}
-              
               {booking.venue && (
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
@@ -322,9 +382,15 @@ export const ComprehensiveAgreementReview = ({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Gjennomgå avtale før godkjenning</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              Steg {currentStep + 1} av {SECTIONS.length}
-            </span>
+            <div className="flex items-center gap-3 text-sm font-normal text-muted-foreground">
+              {fetchingFreshData && (
+                <div className="flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  <span>Oppdaterer...</span>
+                </div>
+              )}
+              <span>Steg {currentStep + 1} av {SECTIONS.length}</span>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
