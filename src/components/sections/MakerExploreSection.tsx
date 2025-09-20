@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
-import InteractiveNorwayMap from '@/components/InteractiveNorwayMap';
+import ComingSoonMapSection from '@/components/ComingSoonMapSection';
 import { BookingRequest } from '@/components/BookingRequest';
 import { ProfileModal } from '@/components/ProfileModal';
 interface UserProfile {
@@ -73,9 +73,9 @@ export const MakerExploreSection = ({
     });
   };
   return <div className="fixed inset-0 bg-background">
-      {/* Interactive Norway Map */}
-      <div className="absolute inset-0">
-        <InteractiveNorwayMap />
+      {/* Coming Soon Map */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <ComingSoonMapSection />
       </div>
       
       {/* Floating Controls */}

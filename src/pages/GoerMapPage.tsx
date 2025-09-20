@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import InteractiveNorwayMap from '@/components/InteractiveNorwayMap';
+import ComingSoonMapSection from '@/components/ComingSoonMapSection';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -22,8 +22,10 @@ const GoerMapPage = () => {
         Tilbake
       </Button>
       
-      {/* Interactive Norway Map */}
-      <InteractiveNorwayMap />
+      {/* Coming Soon Map */}
+      <div className="flex items-center justify-center h-full p-4">
+        <ComingSoonMapSection />
+      </div>
     </div>
   );
 };
