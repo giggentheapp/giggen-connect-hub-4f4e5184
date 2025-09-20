@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings, Calendar, FolderOpen, LogOut, Search, MapPin, Users, Home, List, Lightbulb, Briefcase, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { UserSettings } from '@/components/UserSettings';
+
 interface UserProfile {
   id: string;
   user_id: string;
@@ -35,18 +36,18 @@ interface UserProfile {
   created_at: string;
   updated_at: string;
 }
+
 interface UnifiedSidePanelProps {
   profile: UserProfile;
-  mapComponent?: ReactNode;
   className?: string;
 }
+
 export const UnifiedSidePanel = ({
   profile,
-  mapComponent,
   className
 }: UnifiedSidePanelProps) => {
   const [activeSection, setActiveSection] = useState('explore');
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // Default to map for better UX
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -182,11 +183,6 @@ export const UnifiedSidePanel = ({
   };
   const navItems = getNavigationItems();
   return <div className={cn("relative min-h-screen", className)}>
-      {/* Full-screen Map Background for Goer Explore mode */}
-      {activeSection === 'explore' && isGoer && mapComponent && <div className="fixed inset-0 z-10">
-          {mapComponent}
-        </div>}
-
       {/* Desktop Sidebar - Sticky collapsed */}
       {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
           <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
@@ -222,11 +218,9 @@ export const UnifiedSidePanel = ({
 
       {/* Main Content */}
       <main className={cn("flex-1 overflow-hidden", !isMobile ? 'ml-16' : '', isMobile ? 'pb-16' : '')}>
-        {activeSection === 'explore' && (isGoer || ismaker) ?
-      // For explore mode, render content directly without container
-      renderActiveSection() : <div className="container mx-auto px-4 py-6 h-full">
-            {renderActiveSection()}
-          </div>}
+        <div className="h-full w-full">
+          {renderActiveSection()}
+        </div>
       </main>
 
       {/* Mobile Navigation */}

@@ -16,7 +16,6 @@ import FeedbackWidget from "./components/FeedbackWidget";
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
 import NotFound from "./pages/NotFound";
-import GoerMapPage from "./pages/GoerMapPage";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,6 @@ const App = () => (
         
         <Route path="/concept/:conceptId" element={<ConceptView />} />
         <Route path="/events" element={<UpcomingEvents />} />
-        <Route path="/goer-map" element={<GoerMapPage />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

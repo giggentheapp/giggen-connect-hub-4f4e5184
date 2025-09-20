@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { MapPin, Users, Eye, MessageSquare, Search, Music } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
-import ComingSoonMapSection from '@/components/ComingSoonMapSection';
 import { BookingRequest } from '@/components/BookingRequest';
 import { ProfileModal } from '@/components/ProfileModal';
 interface UserProfile {
@@ -91,9 +90,13 @@ export const MakerExploreSection = ({
     });
   };
   return <div className="fixed inset-0 bg-background ml-16">
-      {/* Coming Soon Map */}
+      {/* Placeholder for future map implementation */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <ComingSoonMapSection />
+        <div className="text-center">
+          <MapPin className="w-24 h-24 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-semibold mb-2">Explore Makers</h2>
+          <p className="text-muted-foreground">Map view available in future updates</p>
+        </div>
       </div>
       
       {/* Floating Controls */}

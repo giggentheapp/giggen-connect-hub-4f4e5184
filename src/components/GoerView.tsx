@@ -1,5 +1,4 @@
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
-import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
 
 interface UserProfile {
   id: string;
@@ -24,13 +23,9 @@ interface GoerViewProps {
 export const GoerView = ({ profile }: GoerViewProps) => {
   console.log('🎯 GoerView initialized with profile:', profile);
 
-  // Create map placeholder for reuse
-  const mapComponent = <SimpleMapPlaceholder />;
-
   return (
     <UnifiedSidePanel 
       profile={profile}
-      mapComponent={mapComponent}
     />
   );
 };
