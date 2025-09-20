@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
-import Map from '@/components/Map';
+import { LeafletMap } from '@/components/LeafletMap';
 import { ProfileModal } from '@/components/ProfileModal';
-import { MapBackground } from '@/components/MapBackground';
+
 import { BookingRequest } from '@/components/BookingRequest';
 interface UserProfile {
   id: string;
@@ -76,7 +76,7 @@ export const MakerExploreSection = ({
   return <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <MapBackground onProfileClick={handleViewProfile} />
+        <LeafletMap className="h-full" onProfileClick={handleViewProfile} />
       </div>
       
       {/* Floating Controls */}

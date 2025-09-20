@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import ManualPinMap from './ManualPinMap';
+import LeafletManualPinMap from './LeafletManualPinMap';
 interface AddressSuggestion {
   place_name: string;
   center: [number, number]; // [lng, lat]
@@ -174,7 +174,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh]">
-                  <ManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
+                  <LeafletManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
                 </DialogContent>
               </Dialog>}
           </AlertDescription>
@@ -193,7 +193,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh]">
-                <ManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
+                <LeafletManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
               </DialogContent>
             </Dialog>
           </AlertDescription>
