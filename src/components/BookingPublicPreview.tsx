@@ -68,12 +68,7 @@ export const BookingPublicPreview = ({
                   </div>
                 )}
 
-                {booking.ticket_price && (
-                  <div className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-primary" />
-                    <span>Billett: {booking.ticket_price} kr</span>
-                  </div>
-                )}
+                {/* Removed ticket_price display for security - financial data should not be public */}
               </div>
 
               {/* Maker Info */}
@@ -110,6 +105,7 @@ export const BookingPublicPreview = ({
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Artist honorar/betalingsdetaljer</li>
+                <li>• Billettpriser og finansielle detaljer</li>
                 <li>• Kontaktinformasjon</li>
                 <li>• Tekniske spesifikasjoner</li>
                 <li>• Hospitality rider</li>

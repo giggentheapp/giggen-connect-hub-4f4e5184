@@ -11,7 +11,6 @@ interface EventMarketItem {
   id: string;
   title: string;
   description: string | null;
-  ticket_price: number | null;
   venue: string | null;
   date: string;
   time: string | null;
@@ -31,9 +30,10 @@ export const EventMarket = () => {
   const loadPublicEvents = async () => {
     try {
       setLoading(true);
+      // Security: Only select non-sensitive fields for public events
       const { data, error } = await supabase
         .from("events_market")
-        .select("id, title, description, ticket_price, venue, date, time, is_public")
+        .select("id, title, description, venue, date, time, is_public")
         .eq("is_public", true)
         .order("date", { ascending: true });
 
@@ -148,12 +148,7 @@ export const EventMarket = () => {
                     </div>
                   )}
 
-                  {event.ticket_price && (
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                      <Banknote className="h-4 w-4 text-muted-foreground" />
-                      <span>Billetter: {event.ticket_price} kr</span>
-                    </div>
-                  )}
+                  {/* Security: Ticket prices removed from public display */}
                 </div>
               </CardContent>
             </Card>

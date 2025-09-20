@@ -906,6 +906,22 @@ export type Database = {
           show_techspec: boolean
         }[]
       }
+      get_public_booking_data: {
+        Args: { booking_uuid: string }
+        Returns: {
+          audience_estimate: number
+          created_at: string
+          description: string
+          event_date: string
+          event_time: string
+          id: string
+          published_at: string
+          receiver_id: string
+          sender_id: string
+          title: string
+          venue: string
+        }[]
+      }
       get_public_booking_info: {
         Args: { booking_uuid: string }
         Returns: {
@@ -989,6 +1005,10 @@ export type Database = {
       }
       has_active_booking_with_user: {
         Args: { target_user_id: string; viewer_user_id?: string }
+        Returns: boolean
+      }
+      is_booking_public: {
+        Args: { booking_uuid: string }
         Returns: boolean
       }
       is_maker: {

@@ -393,7 +393,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                           <span>{selectedEvent.venue}</span>
                         </div>
                       )}
-                      {(selectedEvent.price_ticket || selectedEvent.ticket_price) && (
+                      {(selectedEvent.price_ticket || selectedEvent.ticket_price) && isAdminView && (
                         <div className="flex items-center gap-2">
                           <Banknote className="h-4 w-4" />
                           <span>Billettpris: {selectedEvent.price_ticket || selectedEvent.ticket_price}</span>
