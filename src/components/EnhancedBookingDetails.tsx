@@ -9,7 +9,7 @@ import { EnhancedBookingDetailsPanel } from './EnhancedBookingDetailsPanel';
 import { BookingConfirmation } from './BookingConfirmation';
 import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Check, X, FileText, Eye, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, X, FileText, Eye, Trash2, Save } from 'lucide-react';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 interface EnhancedBookingDetailsProps {
   bookingId: string;
@@ -190,10 +190,28 @@ export const EnhancedBookingDetails = ({
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             <Tabs defaultValue="details" className="flex flex-col h-full">
               <EnhancedBookingDetailsPanel booking={booking} currentUserId={currentUserId} canEdit={canEdit} />
             </Tabs>
+            
+            {/* Save Changes Button - Bottom Right Corner */}
+            {canEdit && (
+              <div className="absolute bottom-4 right-4">
+                <Button 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+                  onClick={() => {
+                    toast({
+                      title: "Endringer lagret",
+                      description: "Alle endringer er automatisk lagret",
+                    });
+                  }}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Lagre endringer
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
