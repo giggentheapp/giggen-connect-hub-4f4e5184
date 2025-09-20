@@ -171,81 +171,92 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             </div>
           </div>
 
-          {/* List Content */}
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full bg-white mx-6 rounded-lg shadow-sm border">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
-                  <Badge variant="outline" className="text-xs bg-muted">
-                    {filteredMakers.length}
-                  </Badge>
-                </div>
-              </div>
-              
-              {/* List Items */}
-              <div className="flex-1 overflow-auto p-4" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-                {filteredMakers.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>
-                      {loading 
-                        ? 'Laster makere...' 
-                        : searchTerm 
-                          ? 'Ingen makere funnet som matcher søket.'
-                          : 'Ingen makere funnet.'
-                      }
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredMakers.map((maker) => (
-                      <div key={maker.id} className="flex items-start gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors">
-                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Music className="w-5 h-5 text-primary" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-foreground">
-                              {maker.display_name}
-                            </h3>
-                            <Badge variant="secondary" className="text-xs">
-                              {maker.role}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                            {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                          </p>
-                          
-                          {maker.address && maker.is_address_public && (
-                            <div className="flex items-center text-xs text-muted-foreground">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              <span>{maker.address}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Button
-                            onClick={() => handleViewProfile(maker.user_id)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Se profil
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+      {/* List Content */}
+      <div className="flex-1 overflow-hidden px-6">
+        <div className="h-full bg-white rounded-lg shadow-sm border">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
+              <Badge variant="outline" className="text-xs bg-muted">
+                {loading ? '...' : filteredMakers.length}
+              </Badge>
             </div>
           </div>
+          
+          {/* List Items */}
+          <div className="flex-1 overflow-auto p-4" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                <p>Laster makere...</p>
+              </div>
+            ) : filteredMakers.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>
+                  {searchTerm 
+                    ? 'Ingen makere funnet som matcher søket.'
+                    : 'Ingen makere funnet.'
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredMakers.map((maker) => (
+                  <div key={maker.id} className="flex items-start gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors border border-transparent hover:border-muted">
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      {maker.avatar_url ? (
+                        <img 
+                          src={maker.avatar_url} 
+                          alt={maker.display_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <Music className="w-5 h-5 text-primary" />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-foreground text-base">
+                          {maker.display_name}
+                        </h3>
+                        <Badge variant="secondary" className="text-xs">
+                          maker
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                        {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                      </p>
+                      
+                      {maker.address && maker.is_address_public && (
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          <span>{maker.address}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <Button
+                        onClick={() => handleViewProfile(maker.user_id)}
+                        variant="outline"
+                        size="sm"
+                        className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Se profil
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
         </div>
       )}
       
