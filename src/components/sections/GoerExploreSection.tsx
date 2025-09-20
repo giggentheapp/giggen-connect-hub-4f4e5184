@@ -1,15 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Eye, Search, Music } from 'lucide-react';
+import { MapPin, Users, Eye, Search, Music, Grid, List } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import ComingSoonMapSection from '@/components/ComingSoonMapSection';
 import { ProfileModal } from '@/components/ProfileModal';
+import { MakerCard } from '@/components/MakerCard';
+import { SearchFilters } from '@/components/SearchFilters';
+
+interface FilterOptions {
+  location: string;
+  hasPortfolio: boolean;
+  hasEvents: boolean;
+  isVerified: boolean;
+}
 
 interface UserProfile {
   id: string;
@@ -33,15 +42,22 @@ interface GoerExploreSectionProps {
 
 export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
   const [activeTab, setActiveTab] = useState('list');
+  const [listViewMode, setListViewMode] = useState<'grid' | 'list'>('grid');
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<FilterOptions>({
+    location: '',
+    hasPortfolio: false,
+    hasEvents: false,
+    isVerified: false,
+  });
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { isGoer } = useRole();
+  const { isGoer, ismaker } = useRole();
 
   // Auto-fetch makers when component mounts
   useEffect(() => {
@@ -128,23 +144,59 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
     }
   };
 
-  // Filter makers based on search term
-  useEffect(() => {
-    if (!searchTerm) {
-      setFilteredMakers(makers);
-    } else {
-      const filtered = makers.filter(maker =>
+  // Advanced filtering with useMemo for performance
+  const filteredAndSearchedMakers = useMemo(() => {
+    let result = makers;
+
+    // Apply search term
+    if (searchTerm) {
+      result = result.filter(maker =>
         maker.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         maker.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredMakers(filtered);
     }
-  }, [makers, searchTerm]);
+
+    // Apply filters
+    if (filters.location) {
+      result = result.filter(maker => 
+        maker.address?.toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+
+    if (filters.hasPortfolio) {
+      result = result.filter(maker => 
+        maker.privacy_settings?.show_portfolio_to_goers === true
+      );
+    }
+
+    if (filters.hasEvents) {
+      result = result.filter(maker => 
+        maker.privacy_settings?.show_events_to_goers === true
+      );
+    }
+
+    if (filters.isVerified) {
+      // For now, all makers are considered "verified" - this could be enhanced
+      result = result;
+    }
+
+    return result;
+  }, [makers, searchTerm, filters]);
+
+  // Update filtered makers when filters change
+  useEffect(() => {
+    setFilteredMakers(filteredAndSearchedMakers);
+  }, [filteredAndSearchedMakers]);
 
   const handleViewProfile = (makerId: string) => {
     setSelectedUserId(makerId);
     setProfileModalOpen(true);
+  };
+
+  const handleBookMaker = (makerId: string) => {
+    // Navigate to booking flow - this could be enhanced
+    navigate(`/booking/new?maker=${makerId}`);
   };
 
   return (
@@ -218,37 +270,51 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       {/* List View */}
       {activeTab === 'list' && (
         <div className="absolute inset-0 flex flex-col">
-          {/* Search Bar */}
-          <div className="p-6 pb-4">
-            <div className="max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Søk etter musikere..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white border shadow-sm"
-                />
+          {/* Search and Filters */}
+          <div className="p-6 pb-4 bg-background border-b border-border/10">
+            <SearchFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              filters={filters}
+              onFiltersChange={setFilters}
+              resultCount={filteredMakers.length}
+              loading={loading}
+            />
+          </div>
+
+          {/* List Header with View Toggle */}
+          <div className="px-6 py-3 bg-background border-b border-border/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
+                <Badge variant="outline" className="text-xs bg-muted">
+                  {loading ? '...' : filteredMakers.length}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={listViewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setListViewMode('grid')}
+                  className="px-3"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={listViewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setListViewMode('list')}
+                  className="px-3"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           </div>
-
-      {/* List Content */}
-      <div className="flex-1 overflow-hidden px-6">
-        <div className="h-full bg-white rounded-lg shadow-sm border">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
-              <Badge variant="outline" className="text-xs bg-muted">
-                {loading ? '...' : filteredMakers.length}
-              </Badge>
-            </div>
-          </div>
           
-          {/* List Items */}
-          <div className="flex-1 overflow-auto p-4" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-auto px-6 py-4">
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
@@ -270,69 +336,41 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             ) : filteredMakers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>
-                  {searchTerm 
-                    ? 'Ingen makere funnet som matcher søket.'
-                    : 'Ingen makere funnet.'
-                  }
-                </p>
+                <div className="max-w-md mx-auto space-y-2">
+                  <p className="font-medium">
+                    {searchTerm || Object.values(filters).some(Boolean)
+                      ? 'Ingen makere funnet som matcher kriteriene.'
+                      : 'Ingen makere funnet.'
+                    }
+                  </p>
+                  {(searchTerm || Object.values(filters).some(Boolean)) && (
+                    <p className="text-sm">
+                      Prøv å justere søket eller filtrene for å se flere resultater.
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className={`${
+                listViewMode === 'grid' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' 
+                  : 'space-y-3'
+              } animate-fade-in`}>
                 {filteredMakers.map((maker) => (
-                  <div key={maker.id} className="flex items-start gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors border border-transparent hover:border-muted">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      {maker.avatar_url ? (
-                        <img 
-                          src={maker.avatar_url} 
-                          alt={maker.display_name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <Music className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground text-base">
-                          {maker.display_name}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          maker
-                        </Badge>
-                      </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                        {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                      </p>
-                      
-                      {maker.address && maker.is_address_public && (
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          <span>{maker.address}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Button
-                        onClick={() => handleViewProfile(maker.user_id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-primary border-primary/20 hover:bg-primary hover:text-white"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        Se profil
-                      </Button>
-                    </div>
+                  <div 
+                    key={maker.id} 
+                    className={listViewMode === 'list' ? 'animate-fade-in' : ''}
+                  >
+                    <MakerCard
+                      maker={maker}
+                      onViewProfile={handleViewProfile}
+                      onBookMaker={ismaker ? handleBookMaker : undefined}
+                    />
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
-      </div>
         </div>
       )}
       
