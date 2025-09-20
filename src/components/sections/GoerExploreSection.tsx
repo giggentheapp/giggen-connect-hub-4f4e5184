@@ -31,8 +31,8 @@ interface GoerExploreSectionProps {
   exploreType?: 'makers' | 'events';
 }
 
-export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
-  const [activeTab, setActiveTab] = useState('map');
+export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
+  const [activeTab, setActiveTab] = useState('list');
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
