@@ -145,7 +145,6 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
     fetchProfileData();
   }, [userId, isOpen, currentUserRole]);
 
-
   const handleConceptClick = (conceptId: string) => {
     setSelectedConceptId(conceptId);
     setIsConceptModalOpen(true);
@@ -201,12 +200,11 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
     );
   };
 
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-y-auto p-0 gap-0">
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-hidden p-0 gap-0">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b p-6">
+        <div className="bg-background border-b p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
@@ -258,131 +256,135 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          <Tabs defaultValue="about" className="w-full">
-            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b pb-4 -mt-6 pt-6 mb-4">
+        {/* Content with Sticky Navigation */}
+        <div className="flex flex-col h-full overflow-hidden">
+          <Tabs defaultValue="about" className="flex flex-col h-full">
+            {/* Sticky Navigation Bar */}
+            <div className="sticky top-0 z-40 bg-background border-b px-6 py-4">
               <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="about">Om meg</TabsTrigger>
-              <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
-              {currentUserRole === 'maker' && (
-                <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>
-              )}
-              <TabsTrigger value="events">Arrangementer</TabsTrigger>
+                <TabsTrigger value="about">Om meg</TabsTrigger>
+                <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
+                {currentUserRole === 'maker' && (
+                  <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>
+                )}
+                <TabsTrigger value="events">Arrangementer</TabsTrigger>
               </TabsList>
             </div>
-
-            <TabsContent value="about" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Om {profile.display_name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {profile.bio ? (
-                    <p className="text-muted-foreground">{profile.bio}</p>
-                  ) : (
-                    <p className="text-muted-foreground italic">Ingen beskrivelse tilgjengelig</p>
-                  )}
-                  
-                  {/* SECURITY: Contact info is NEVER shown in profile popups */}
-                  {/* Contact info is only available in booking sections when allowed */}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="portfolio" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Portefølje</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {!portfolioVisible ? (
-                    <p className="text-muted-foreground italic">
-                      Portefølje er ikke offentlig tilgjengelig
-                    </p>
-                  ) : portfolio.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {portfolio.map((file) => (
-                        <div key={file.id} className="space-y-2">
-                          {renderFilePreview(file)}
-                          {file.title && (
-                            <h4 className="font-medium">{file.title}</h4>
-                          )}
-                          {file.description && (
-                            <p className="text-sm text-muted-foreground">{file.description}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : portfolioVisible ? (
-                    <p className="text-muted-foreground italic">Ingen porteføljeelementer funnet</p>
-                  ) : (
-                    <p className="text-muted-foreground italic">Portefølje er ikke tilgjengelig</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {currentUserRole === 'maker' && (
-              <TabsContent value="concepts" className="mt-6">
+            
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <TabsContent value="about" className="mt-0">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Mine tilbud</CardTitle>
+                    <CardTitle>Om {profile.display_name}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {concepts.length > 0 ? (
-                      <div className="space-y-4">
-                        {concepts.map((concept) => (
-                          <div 
-                            key={concept.id} 
-                            className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                            onClick={() => handleConceptClick(concept.id)}
-                          >
-                            <h4 className="font-medium">{concept.title}</h4>
-                            {concept.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
+                    {profile.bio ? (
+                      <p className="text-muted-foreground">{profile.bio}</p>
+                    ) : (
+                      <p className="text-muted-foreground italic">Ingen beskrivelse tilgjengelig</p>
+                    )}
+                    
+                    {/* SECURITY: Contact info is NEVER shown in profile popups */}
+                    {/* Contact info is only available in booking sections when allowed */}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="portfolio" className="mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Portefølje</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!portfolioVisible ? (
+                      <p className="text-muted-foreground italic">
+                        Portefølje er ikke offentlig tilgjengelig
+                      </p>
+                    ) : portfolio.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {portfolio.map((file) => (
+                          <div key={file.id} className="space-y-2">
+                            {renderFilePreview(file)}
+                            {file.title && (
+                              <h4 className="font-medium">{file.title}</h4>
                             )}
-                            {concept.price && (
-                              <p className="text-sm mt-2">Pris: {concept.price} kr</p>
+                            {file.description && (
+                              <p className="text-sm text-muted-foreground">{file.description}</p>
                             )}
-                            <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
                           </div>
                         ))}
                       </div>
+                    ) : portfolioVisible ? (
+                      <p className="text-muted-foreground italic">Ingen porteføljeelementer funnet</p>
                     ) : (
-                      <p className="text-muted-foreground italic">Ingen tilbud tilgjengelig</p>
+                      <p className="text-muted-foreground italic">Portefølje er ikke tilgjengelig</p>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
-            )}
 
-            <TabsContent value="events" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kommende arrangementer</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <WorkingEventsDisplay 
-                    profile={{
-                      id: profile.id,
-                      user_id: profile.user_id,
-                      display_name: profile.display_name,
-                      bio: profile.bio || null,
-                      role: profile.role as 'maker' | 'goer',
-                      avatar_url: profile.avatar_url || null,
-                      address: profile.address || null,
-                      latitude: profile.latitude || null,
-                      longitude: profile.longitude || null,
-                      is_address_public: profile.is_address_public,
-                      contact_info: profile.contact_info
-                    }}
-                    showSensitiveInfo={false}
-                    currentUserId={currentUserId}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
+              {currentUserRole === 'maker' && (
+                <TabsContent value="concepts" className="mt-0">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Mine tilbud</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {concepts.length > 0 ? (
+                        <div className="space-y-4">
+                          {concepts.map((concept) => (
+                            <div 
+                              key={concept.id} 
+                              className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                              onClick={() => handleConceptClick(concept.id)}
+                            >
+                              <h4 className="font-medium">{concept.title}</h4>
+                              {concept.description && (
+                                <p className="text-sm text-muted-foreground mt-1">{concept.description}</p>
+                              )}
+                              {concept.price && (
+                                <p className="text-sm mt-2">Pris: {concept.price} kr</p>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground italic">Ingen tilbud tilgjengelig</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+
+              <TabsContent value="events" className="mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Kommende arrangementer</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <WorkingEventsDisplay 
+                      profile={{
+                        id: profile.id,
+                        user_id: profile.user_id,
+                        display_name: profile.display_name,
+                        bio: profile.bio || null,
+                        role: profile.role as 'maker' | 'goer',
+                        avatar_url: profile.avatar_url || null,
+                        address: profile.address || null,
+                        latitude: profile.latitude || null,
+                        longitude: profile.longitude || null,
+                        is_address_public: profile.is_address_public,
+                        contact_info: profile.contact_info
+                      }}
+                      showSensitiveInfo={false}
+                      currentUserId={currentUserId}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </DialogContent>
