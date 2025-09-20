@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          record_id: string | null
+          sensitive_fields: string[] | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          record_id?: string | null
+          sensitive_fields?: string[] | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          record_id?: string | null
+          sensitive_fields?: string[] | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       booking_changes: {
         Row: {
           approved_at: string | null
@@ -852,6 +888,10 @@ export type Database = {
           venue: string
         }[]
       }
+      get_contact_info_with_audit: {
+        Args: { requesting_user_id?: string; target_user_id: string }
+        Returns: Json
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
@@ -954,6 +994,16 @@ export type Database = {
       is_maker: {
         Args: { user_uuid: string }
         Returns: boolean
+      }
+      log_sensitive_access: {
+        Args: {
+          p_action: string
+          p_record_id?: string
+          p_sensitive_fields?: string[]
+          p_table_name?: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       permanently_delete_any_booking: {
         Args: { booking_uuid: string }
