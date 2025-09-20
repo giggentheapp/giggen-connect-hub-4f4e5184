@@ -261,14 +261,16 @@ export const ProfileModal = ({ isOpen, onClose, userId }: ProfileModalProps) => 
         {/* Content */}
         <div className="p-6">
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <div className="sticky top-0 z-20 bg-background pb-4 -mt-6 pt-6 mb-2">
+              <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="about">Om meg</TabsTrigger>
               <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
               {currentUserRole === 'maker' && (
                 <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>
               )}
               <TabsTrigger value="events">Arrangementer</TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
 
             <TabsContent value="about" className="mt-6">
               <Card>
