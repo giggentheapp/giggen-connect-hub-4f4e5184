@@ -12,13 +12,47 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🗺️ Edge Function: Getting Mapbox token from environment')
+    console.log('🗺️ SECURED Edge Function: Getting Mapbox token from environment')
     console.log('🗺️ Request method:', req.method)
     console.log('🗺️ Request origin:', req.headers.get('origin'))
     console.log('🗺️ Has auth header:', !!req.headers.get('authorization'))
     
-    // REMOVED RESTRICTIVE AUTH CHECK - Allow all requests for now to fix access issue
-    // This fixes the permission-denied errors that were blocking map access
+    // SECURITY: Verify user is authenticated before providing Mapbox token
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader) {
+      console.error('❌ No authorization header provided')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Authentication required',
+          debug: {
+            message: 'Authorization header is required to access Mapbox token',
+            timestamp: new Date().toISOString()
+          }
+        }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+    
+    // Additional verification: Check if auth header format is valid
+    if (!authHeader.startsWith('Bearer ')) {
+      console.error('❌ Invalid authorization header format')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid authentication format',
+          debug: {
+            message: 'Authorization header must be Bearer token',
+            timestamp: new Date().toISOString()
+          }
+        }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
     
     // Get Mapbox token from secrets
     const mapboxToken = Deno.env.get('MAPBOX_ACCESS_TOKEN')
