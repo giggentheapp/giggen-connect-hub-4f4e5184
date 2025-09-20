@@ -357,7 +357,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                   <SelectContent>
                     {concepts.filter(concept => concept && concept.id).map((concept) => (
                       <SelectItem key={concept.id} value={concept.id}>
-                        {concept.title || 'Untitled'} - {concept.price ? `${concept.price} kr` : 'Pris ikke satt'}
+                        {concept.title || 'Untitled'} - {concept.price ? `${concept.price} Kr` : 'Pris ikke satt'}
                       </SelectItem>
                     ))}
                   </SelectContent>

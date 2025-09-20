@@ -208,9 +208,9 @@ export const BookingHistorySection = ({ profile }: BookingHistorySectionProps) =
               <div className="flex items-center gap-2 text-muted-foreground">
                 <DollarSign className="h-4 w-4" />
                 <span>
-                  {booking.price_musician && `Musiker: ${booking.price_musician}`}
+                  {booking.price_musician && `Musiker: ${booking.price_musician} Kr`}
                   {booking.price_musician && booking.price_ticket && ' • '}
-                  {booking.price_ticket && `Billett: ${booking.price_ticket}`}
+                  {booking.price_ticket && `Billett: ${booking.price_ticket} Kr`}
                 </span>
               </div>
             )}

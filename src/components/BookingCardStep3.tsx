@@ -83,7 +83,7 @@ export const BookingCardStep3 = ({
               ) : (
                 booking.artist_fee || booking.price_musician || 'Ikke spesifisert'
               )}
-              {booking.ticket_price && ` • Billettpris: ${booking.ticket_price}kr`}
+              {booking.ticket_price && ` • Billettpris: ${booking.ticket_price} Kr`}
             </span>
           </div>
         </div>

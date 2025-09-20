@@ -88,8 +88,8 @@ export const BookingCardStep2 = ({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <span>
               <strong>Priser:</strong> 
-              {booking.artist_fee && ` Honorar: ${booking.artist_fee}kr`}
-              {booking.ticket_price && ` • Billett: ${booking.ticket_price}kr`}
+              {booking.artist_fee && ` Honorar: ${booking.artist_fee} Kr`}
+              {booking.ticket_price && ` • Billett: ${booking.ticket_price} Kr`}
             </span>
           </div>
         </div>

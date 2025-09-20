@@ -202,7 +202,7 @@ export const ConceptHistoryView = ({ userId, onBack }: ConceptHistoryViewProps) 
                   {entry.price && (
                     <div>
                       <span className="font-medium">Pris: </span>
-                      <span>{entry.price} NOK</span>
+                      <span>{entry.price} Kr</span>
                     </div>
                   )}
                   {entry.expected_audience && (

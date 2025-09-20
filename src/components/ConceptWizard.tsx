@@ -357,7 +357,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 {/* Fixed Price Input */}
                 {conceptData.pricing_type === 'fixed' && (
                   <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
-                    <Label htmlFor="price">Pris (NOK) *</Label>
+                    <Label htmlFor="price">Pris (Kr) *</Label>
                     <Input
                       id="price"
                       type="number"
@@ -594,7 +594,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   <div>
                     <strong>Pris:</strong>{' '}
                     {conceptData.pricing_type === 'fixed' && conceptData.price
-                      ? `${conceptData.price} NOK`
+                      ? `${conceptData.price} Kr`
                       : conceptData.pricing_type === 'door_deal' && conceptData.door_percentage
                       ? `${conceptData.door_percentage}% av dørinntekter`
                       : conceptData.pricing_type === 'by_agreement'

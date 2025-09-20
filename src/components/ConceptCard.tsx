@@ -234,7 +234,7 @@ const ConceptCard = ({
                 : concept.price_by_agreement
                 ? 'Ved avtale'
                 : concept.price
-                ? `${concept.price} NOK`
+                ? `${concept.price} Kr`
                 : 'Ikke spesifisert'
               }
             </span>
