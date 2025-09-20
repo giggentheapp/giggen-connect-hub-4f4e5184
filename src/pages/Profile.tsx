@@ -252,17 +252,20 @@ const Profile = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'maker' && <BookingRequest receiverId={profile.user_id} receiverName={profile.display_name} />}
-          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'goer' && <Button variant="outline">
-              <User className="h-4 w-4 mr-2" />
-              Se offentlig profil
-            </Button>}
-          {isOwnProfile && <Button asChild>
+          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'maker' && (
+            <BookingRequest 
+              receiverId={profile.user_id} 
+              receiverName={profile.display_name} 
+            />
+          )}
+          {isOwnProfile && (
+            <Button asChild>
               <Link to={`/profile/${userId}/settings`}>
                 <Settings className="h-4 w-4 mr-2" />
                 Innstillinger
               </Link>
-            </Button>}
+            </Button>
+          )}
         </div>
       </div>
 

@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, User, X } from 'lucide-react';
+import { MapPin, User } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
-import { useNavigate } from 'react-router-dom';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 interface ProfileData {
   id: string;
@@ -46,7 +44,6 @@ export const ProfileModal = ({
   const {
     role: currentUserRole
   } = useRole();
-  const navigate = useNavigate();
   useEffect(() => {
     if (!userId || !isOpen) {
       setProfile(null);
@@ -190,14 +187,12 @@ export const ProfileModal = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {profile.role === 'maker' && currentUserRole === 'maker' && <BookingRequest receiverId={profile.user_id} receiverName={profile.display_name} />}
-              {profile.role === 'maker' && currentUserRole === 'goer' && <Button variant="outline" onClick={() => {
-              navigate(`/profile/${profile.user_id}`);
-              onClose();
-            }}>
-                  Se full profil
-                </Button>}
-              
+              {profile.role === 'maker' && currentUserRole === 'maker' && (
+                <BookingRequest 
+                  receiverId={profile.user_id} 
+                  receiverName={profile.display_name} 
+                />
+              )}
             </div>
           </div>
         </div>
