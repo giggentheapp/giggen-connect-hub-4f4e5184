@@ -11,7 +11,7 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import FeedbackWidget from "./components/FeedbackWidget";
+import { SlidingFeedbackPanel } from "./components/SlidingFeedbackPanel";
 
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
@@ -41,7 +41,7 @@ const App = () => (
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <FeedbackWidget />
+      <SlidingFeedbackPanel />
     </TooltipProvider>
   </QueryClientProvider>
 );
