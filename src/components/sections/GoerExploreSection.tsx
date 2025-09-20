@@ -86,41 +86,78 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
 
   return (
     <div className="fixed inset-0 bg-background ml-16">
-      {/* Coming Soon Map */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <ComingSoonMapSection />
+      {/* Toggle Buttons */}
+      <div className="absolute top-6 left-6 z-20">
+        <div className="flex bg-white rounded-lg shadow-lg border overflow-hidden">
+          <button
+            onClick={() => setActiveTab('map')}
+            className={`flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              activeTab === 'map'
+                ? 'bg-primary text-white'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            Kart
+          </button>
+          <button
+            onClick={() => setActiveTab('list')}
+            className={`flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              activeTab === 'list'
+                ? 'bg-primary text-white'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Liste
+          </button>
+        </div>
       </div>
-      
-      {/* Floating Controls */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg">
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'map'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              Kart
-            </button>
-            <button
-              onClick={() => setActiveTab('list')}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'list'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Liste
-            </button>
+
+      {/* Map View */}
+      {activeTab === 'map' && (
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <div className="text-center max-w-2xl">
+            <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-8">
+              <MapPin className="w-12 h-12 text-primary" />
+            </div>
+            
+            <h1 className="text-3xl font-bold text-foreground mb-8">
+              Interaktivt kart kommer snart
+            </h1>
+            
+            <div className="space-y-4 text-left">
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                <p className="text-muted-foreground">Geografisk oversikt over musikere i Norge</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                <p className="text-muted-foreground">Avstandsbasert søk og filtrering</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                <p className="text-muted-foreground">Visuell oversikt over lokal musikkscene</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                <p className="text-muted-foreground">Enkel identifisering av musikere i ditt område</p>
+              </div>
+            </div>
+            
+            <div className="mt-8">
+              <span className="text-primary font-medium">Under utvikling</span>
+            </div>
           </div>
-          
-          {activeTab === 'list' && (
-            <div className="flex-1">
+        </div>
+      )}
+
+      {/* List View */}
+      {activeTab === 'list' && (
+        <div className="absolute inset-0 flex flex-col">
+          {/* Search Bar */}
+          <div className="p-6 pb-4">
+            <div className="max-w-md">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -128,31 +165,27 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                   placeholder="Søk etter musikere..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-card/95 backdrop-blur-sm border shadow-lg"
+                  className="pl-10 bg-white border shadow-sm"
                 />
               </div>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Floating List Panel */}
-      {activeTab === 'list' && (
-        <div className="absolute top-28 left-4 right-4 bottom-4 z-10 animate-fade-in">
-          <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
-            <CardContent className="p-0 h-full flex flex-col">
+          {/* List Content */}
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full bg-white mx-6 rounded-lg shadow-sm border">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">Makere i nettverket</h2>
-                  <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
+                  <Badge variant="outline" className="text-xs bg-muted">
                     {filteredMakers.length}
                   </Badge>
                 </div>
               </div>
               
-              {/* List Content */}
-              <div className="flex-1 overflow-auto" style={{ paddingBottom: '120px' }}>
+              {/* List Items */}
+              <div className="flex-1 overflow-auto p-4" style={{ maxHeight: 'calc(100vh - 200px)' }}>
                 {filteredMakers.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -166,59 +199,53 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 space-y-3">
+                  <div className="space-y-4">
                     {filteredMakers.map((maker) => (
-                      <Card key={maker.id} className="group border bg-background/90 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Music className="w-5 h-5 text-primary" />
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold text-foreground truncate">
-                                    {maker.display_name}
-                                  </h3>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {maker.role}
-                                  </Badge>
-                                </div>
-                                
-                                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                  {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                                </p>
-                                
-                                {maker.address && maker.is_address_public && (
-                                  <div className="flex items-center text-xs text-muted-foreground">
-                                    <MapPin className="w-3 h-3 mr-1" />
-                                    <span className="truncate">{maker.address}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="ml-4">
-                              <Button 
-                                onClick={() => handleViewProfile(maker.user_id)} 
-                                variant="outline" 
-                                size="sm"
-                                className="text-xs"
-                              >
-                                <Eye className="w-3 h-3 mr-1" />
-                                Se profil
-                              </Button>
-                            </div>
+                      <div key={maker.id} className="flex items-start gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Music className="w-5 h-5 text-primary" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-foreground">
+                              {maker.display_name}
+                            </h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {maker.role}
+                            </Badge>
                           </div>
-                        </CardContent>
-                      </Card>
+                          
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                          </p>
+                          
+                          {maker.address && maker.is_address_public && (
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              <span>{maker.address}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Button
+                            onClick={() => handleViewProfile(maker.user_id)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Se profil
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
       
