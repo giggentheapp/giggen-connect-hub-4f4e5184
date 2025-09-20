@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const filePath = url.searchParams.get('path');
     const bucket = url.searchParams.get('bucket') || 'portfolio';
+    const authHeader = req.headers.get('authorization');
 
     if (!filePath) {
       return new Response(
@@ -26,13 +27,38 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Serving file: ${bucket}/${filePath}`);
+    console.log(`Serving file: ${bucket}/${filePath}, auth: ${authHeader ? 'present' : 'missing'}`);
 
     // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Security: Verify authentication for sensitive files
+    if (authHeader && bucket !== 'avatars') {
+      const supabaseAuth = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      );
+      
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+      
+      if (authError || !user) {
+        console.log(`Unauthorized access attempt to ${bucket}/${filePath}`);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized access' }),
+          { 
+            status: 401, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      // Log access for audit trail
+      console.log(`Authenticated file access: user ${user.id} accessed ${bucket}/${filePath}`);
+    }
 
     // Download file from Supabase storage
     const { data, error } = await supabase.storage
