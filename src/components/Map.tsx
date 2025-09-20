@@ -19,6 +19,10 @@ interface MakerLocation {
 }
 
 const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
+  // FORCE CONSOLE DEBUGGING - SHOULD BE VISIBLE IN BROWSER CONSOLE
+  console.clear();
+  console.log('%c🔴 MAP COMPONENT LOADED - DEBUG ACTIVE', 'color: red; font-size: 20px; font-weight: bold;');
+  console.log('%c🔴 Current time:', 'color: red; font-weight: bold;', new Date().toISOString());
   console.log('🗺️ Map component rendering...', { className, forceRefresh });
   
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -506,37 +510,128 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
 
   console.log('🗺️ Final render state:', { loading, tokenError, mapError });
 
+  // Module-level debug flag to prevent multiple alerts
+  let mapDebugShown = false;
+
+  // EXTREME DEBUG ALERT - WILL POP UP IF COMPONENT RENDERS
+  if (!mapDebugShown) {
+    alert('🔴 MAP COMPONENT IS LOADING - TOKEN: ' + (mapboxToken ? 'EXISTS' : 'MISSING'));
+    mapDebugShown = true;
+  }
+
+  // FORCE VISIBLE DEBUG PANEL COMPONENT
+  const ExtremeDebugPanel = () => (
+    <div 
+      style={{
+        position: 'fixed',
+        top: '10px',
+        left: '10px',
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '20px',
+        zIndex: 99999,
+        border: '3px solid black',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        minWidth: '300px',
+        borderRadius: '5px'
+      }}
+    >
+      <h3 style={{margin: '0 0 10px 0'}}>🔴 MAP DEBUG STATUS</h3>
+      <div>Token: {mapboxToken ? '✅ EXISTS (' + mapboxToken.substring(0, 10) + '...)' : '❌ MISSING'}</div>  
+      <div>Map Ready: {mapReady ? '✅ YES' : '❌ NO'}</div>
+      <div>Loading: {loading ? '🔄 YES' : '✅ NO'}</div>
+      <div>Token Error: {tokenError ? '❌ ' + tokenError : '✅ NONE'}</div>
+      <div>Map Error: {mapError ? '❌ YES' : '✅ NO'}</div>
+      <div>Makers: {makers?.length || 0}</div>
+      <div>Container Ref: {mapContainer.current ? '✅ YES' : '❌ NO'}</div>
+      <div style={{marginTop: '10px', fontSize: '12px'}}>
+        Time: {new Date().toLocaleTimeString()}
+      </div>
+    </div>
+  );
+
   if (loading) {
     console.log('🗺️ Rendering loading state');
     return (
-      <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p>Laster kart...</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Token: {mapboxToken ? 'Tilgjengelig' : 'Venter'} | 
-            Map: {mapReady ? 'Klar' : 'Initialiserer'}
-          </p>
+      <>
+        {/* EXTREME DEBUG PANEL - ALWAYS VISIBLE */}
+        <div 
+          style={{
+            position: 'fixed',
+            top: '10px',
+            left: '10px',
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '20px',
+            zIndex: 99999,
+            border: '3px solid black',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            minWidth: '300px',
+            borderRadius: '5px'
+          }}
+        >
+          <h3 style={{margin: '0 0 10px 0'}}>🔴 MAP DEBUG - LOADING STATE</h3>
+          <div>Token: {mapboxToken ? '✅ EXISTS' : '❌ MISSING'}</div>
+          <div>Loading: ✅ YES</div>
+          <div>Time: {new Date().toLocaleTimeString()}</div>
         </div>
-      </div>
+        
+        <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p>Laster kart...</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Token: {mapboxToken ? 'Tilgjengelig' : 'Venter'} | 
+              Map: {mapReady ? 'Klar' : 'Initialiserer'}
+            </p>
+          </div>
+        </div>
+      </>
     );
   }
 
   if (tokenError) {
     console.log('🗺️ Rendering token error state:', tokenError);
     return (
-      <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
-        <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10">
-          <p className="text-destructive font-medium mb-2">Kartfeil</p>
-          <p className="text-sm text-muted-foreground">{tokenError}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded text-sm"
-          >
-            Prøv igjen
-          </button>
+      <>
+        {/* EXTREME DEBUG PANEL - ALWAYS VISIBLE */}
+        <div 
+          style={{
+            position: 'fixed',
+            top: '10px',
+            left: '10px',
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '20px',
+            zIndex: 99999,
+            border: '3px solid black',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            minWidth: '300px',
+            borderRadius: '5px'
+          }}
+        >
+          <h3 style={{margin: '0 0 10px 0'}}>🔴 MAP DEBUG - TOKEN ERROR</h3>
+          <div>Token: ❌ ERROR</div>
+          <div>Error: {tokenError}</div>  
+          <div>Time: {new Date().toLocaleTimeString()}</div>
         </div>
-      </div>
+        
+        <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
+          <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10">
+            <p className="text-destructive font-medium mb-2">Kartfeil</p>
+            <p className="text-sm text-muted-foreground">{tokenError}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded text-sm"
+            >
+              Prøv igjen
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -564,6 +659,37 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
   console.log('🗺️ Rendering map container');
 
   return (
+    <>
+      {/* EXTREME DEBUG PANEL - ALWAYS VISIBLE */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          backgroundColor: 'red',
+          color: 'white',
+          padding: '20px',
+          zIndex: 99999,
+          border: '3px solid black',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          minWidth: '300px',
+          borderRadius: '5px'
+        }}
+      >
+        <h3 style={{margin: '0 0 10px 0'}}>🔴 MAP DEBUG - MAIN RENDER</h3>
+        <div>Token: {mapboxToken ? '✅ EXISTS (' + mapboxToken.substring(0, 10) + '...)' : '❌ MISSING'}</div>
+        <div>Map Ready: {mapReady ? '✅ YES' : '❌ NO'}</div>
+        <div>Loading: {loading ? '🔄 YES' : '✅ NO'}</div>
+        <div>Token Error: {tokenError ? '❌ ' + tokenError : '✅ NONE'}</div>
+        <div>Map Error: {mapError ? '❌ YES' : '✅ NO'}</div>
+        <div>Makers: {makers?.length || 0}</div>
+        <div>Container Ref: {mapContainer.current ? '✅ YES' : '❌ NO'}</div>
+        <div style={{marginTop: '10px', fontSize: '12px'}}>
+          Time: {new Date().toLocaleTimeString()}
+        </div>
+      </div>
+      
     <div className={`relative w-full h-full ${className}`} style={{ minHeight: '400px' }}>
       {/* Debug Info */}
       <div className="absolute top-2 left-2 z-50 bg-black/80 text-white text-xs p-2 rounded">
@@ -601,6 +727,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
