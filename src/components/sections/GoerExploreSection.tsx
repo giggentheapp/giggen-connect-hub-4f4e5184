@@ -200,13 +200,13 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   };
 
   return (
-    <div className="fixed inset-0 bg-background ml-16">
+    <div className="w-full h-full bg-background">
       {/* Toggle Buttons */}
-      <div className="absolute top-6 left-6 z-20">
-        <div className="flex bg-white rounded-lg shadow-lg border overflow-hidden">
+      <div className="flex items-center justify-center p-4 border-b border-border/10">
+        <div className="flex bg-white rounded-lg shadow-sm border overflow-hidden">
           <button
             onClick={() => setActiveTab('map')}
-            className={`flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center px-6 py-3 text-sm font-medium transition-all duration-200 ${
               activeTab === 'map'
                 ? 'bg-primary text-white'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -217,7 +217,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           </button>
           <button
             onClick={() => setActiveTab('list')}
-            className={`flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center px-6 py-3 text-sm font-medium transition-all duration-200 ${
               activeTab === 'list'
                 ? 'bg-primary text-white'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -231,7 +231,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
       {/* Map View */}
       {activeTab === 'map' && (
-        <div className="absolute inset-0 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center max-w-2xl">
             <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-8">
               <MapPin className="w-12 h-12 text-primary" />
@@ -269,9 +269,9 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
       {/* List View */}
       {activeTab === 'list' && (
-        <div className="absolute inset-0 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Search and Filters */}
-          <div className="p-6 pb-4 bg-background border-b border-border/10">
+          <div className="p-4 bg-background border-b border-border/10 shrink-0">
             <SearchFilters
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -283,7 +283,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           </div>
 
           {/* List Header with View Toggle */}
-          <div className="px-6 py-3 bg-background border-b border-border/10">
+          <div className="px-4 py-3 bg-background border-b border-border/10 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
@@ -314,29 +314,33 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           </div>
           
           {/* Main Content Area */}
-          <div className="flex-1 overflow-auto px-6 py-4">
+          <div className="flex-1 overflow-auto p-4 min-h-0">
             {loading ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                <p>Laster makere...</p>
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p>Laster makere...</p>
+                </div>
               </div>
             ) : error ? (
-              <div className="text-center py-12 text-destructive">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-2">{error}</p>
-                <Button 
-                  onClick={fetchAllMakers} 
-                  variant="outline" 
-                  size="sm"
-                  className="text-primary border-primary/20 hover:bg-primary hover:text-white"
-                >
-                  Prøv igjen
-                </Button>
+              <div className="flex items-center justify-center py-12 text-destructive">
+                <div className="text-center">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="mb-2">{error}</p>
+                  <Button 
+                    onClick={fetchAllMakers} 
+                    variant="outline" 
+                    size="sm"
+                    className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                  >
+                    Prøv igjen
+                  </Button>
+                </div>
               </div>
             ) : filteredMakers.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <div className="max-w-md mx-auto space-y-2">
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center max-w-md space-y-2">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p className="font-medium">
                     {searchTerm || Object.values(filters).some(Boolean)
                       ? 'Ingen makere funnet som matcher kriteriene.'
@@ -353,13 +357,13 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             ) : (
               <div className={`${
                 listViewMode === 'grid' 
-                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
                   : 'space-y-3'
               } animate-fade-in`}>
                 {filteredMakers.map((maker) => (
                   <div 
                     key={maker.id} 
-                    className={listViewMode === 'list' ? 'animate-fade-in' : ''}
+                    className="animate-fade-in"
                   >
                     <MakerCard
                       maker={maker}
