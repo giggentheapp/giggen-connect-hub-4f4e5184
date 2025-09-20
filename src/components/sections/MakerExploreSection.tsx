@@ -3,7 +3,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { MapPin, Users, Eye, MessageSquare, Search, Music } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import ComingSoonMapSection from '@/components/ComingSoonMapSection';
@@ -30,7 +31,9 @@ export const MakerExploreSection = ({
 }: MakerExploreSectionProps) => {
   const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
+  const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [bookingMaker, setBookingMaker] = useState<{
@@ -56,12 +59,27 @@ export const MakerExploreSection = ({
       } = await supabase.rpc('get_all_visible_makers');
       if (error) throw error;
       setMakers(data || []);
+      setFilteredMakers(data || []);
     } catch (err) {
       console.error('Error fetching makers:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  // Filter makers based on search term
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredMakers(makers);
+    } else {
+      const filtered = makers.filter(maker =>
+        maker.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        maker.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMakers(filtered);
+    }
+  }, [makers, searchTerm]);
   const handleViewProfile = (makerId: string) => {
     setSelectedUserId(makerId);
     setProfileModalOpen(true);
@@ -80,74 +98,150 @@ export const MakerExploreSection = ({
       
       {/* Floating Controls */}
       <div className="absolute top-4 left-4 right-4 z-10">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-card/95 backdrop-blur-sm border shadow-lg">
-            <TabsTrigger value="map">🗺️ Kart</TabsTrigger>
-            <TabsTrigger value="list">📋 Liste</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg">
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'map'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Kart
+            </button>
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'list'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Liste
+            </button>
+          </div>
+          
+          {activeTab === 'list' && (
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Søk etter musikere..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-card/95 backdrop-blur-sm border shadow-lg"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating List Panel */}
-      {activeTab === 'list' && <div className="absolute top-20 left-4 right-4 bottom-4 z-10">
+      {activeTab === 'list' && (
+        <div className="absolute top-28 left-4 right-4 bottom-4 z-10 animate-fade-in">
           <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
-            <CardContent className="p-4 h-full overflow-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Makere i nettverket
-                </h2>
-                <Button onClick={fetchAllMakers} disabled={loading} variant="outline" size="sm">
-                  {loading ? 'Laster...' : 'Oppdater makere'}
+            <CardContent className="p-0 h-full flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold">Makere i nettverket</h2>
+                  <Badge variant="secondary" className="text-xs">
+                    {filteredMakers.length}
+                  </Badge>
+                </div>
+                <Button 
+                  onClick={fetchAllMakers} 
+                  disabled={loading} 
+                  variant="outline" 
+                  size="sm"
+                >
+                  {loading ? 'Laster...' : 'Oppdater'}
                 </Button>
               </div>
               
-              {makers.length === 0 ? <div className="text-center py-12 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>{loading ? 'Laster makere...' : 'Ingen makere funnet.'}</p>
-                </div> : <div className="space-y-4">
-                  {makers.map(maker => <Card key={maker.id} className="border bg-background/80">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                              <span className="text-primary-foreground text-sm font-bold">
-                                {maker.display_name?.charAt(0) || 'M'}
-                              </span>
-                            </div>
-                            <div>
-                              <h3 className="font-medium">{maker.display_name}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {maker.role}
-                                </Badge>
-                                {maker.address && maker.is_address_public && <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    {maker.address}
-                                  </span>}
+              {/* List Content */}
+              <div className="flex-1 overflow-auto pb-28">
+                {filteredMakers.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>
+                      {loading 
+                        ? 'Laster makere...' 
+                        : searchTerm 
+                          ? 'Ingen makere funnet som matcher søket.'
+                          : 'Ingen makere funnet.'
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 space-y-3">
+                    {filteredMakers.map((maker) => (
+                      <Card key={maker.id} className="group border bg-background/90 hover:border-primary/50 hover:shadow-md transition-all duration-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Music className="w-5 h-5 text-primary" />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-semibold text-foreground truncate">
+                                    {maker.display_name}
+                                  </h3>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {maker.role}
+                                  </Badge>
+                                </div>
+                                
+                                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                  {maker.bio || 'Ingen beskrivelse tilgjengelig'}
+                                </p>
+                                
+                                {maker.address && maker.is_address_public && (
+                                  <div className="flex items-center text-xs text-muted-foreground">
+                                    <MapPin className="w-3 h-3 mr-1" />
+                                    <span className="truncate">{maker.address}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
+                            
+                            <div className="flex flex-col gap-2 ml-4">
+                              <Button 
+                                onClick={() => handleViewProfile(maker.user_id)} 
+                                variant="outline" 
+                                size="sm"
+                                className="text-xs"
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                Se profil
+                              </Button>
+                              <Button 
+                                onClick={() => handleStartBooking(maker.user_id, maker.display_name)} 
+                                size="sm"
+                                className="text-xs"
+                              >
+                                <MessageSquare className="w-3 h-3 mr-1" />
+                                Booking
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button onClick={() => handleViewProfile(maker.user_id)} variant="outline" size="sm">
-                              <Eye className="w-4 h-4 mr-2" />
-                              Se profil
-                            </Button>
-                            <Button onClick={() => handleStartBooking(maker.user_id, maker.display_name)} size="sm">
-                              <MessageSquare className="w-4 h-4 mr-2" />
-                              Booking
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>)}
-                </div>}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-        </div>}
+        </div>
+      )}
       
       {/* Profile Modal */}
       <ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} userId={selectedUserId} />
