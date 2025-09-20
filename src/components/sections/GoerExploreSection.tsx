@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { MapPin, ArrowLeft, List, Globe, Users, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Eye } from 'lucide-react';
-import { useRole } from '@/contexts/RoleProvider';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { LeafletMap } from '@/components/LeafletMap';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SafeLeafletMap from '@/components/SafeLeafletMap';
 import { ProfileModal } from '@/components/ProfileModal';
+import { useNavigate } from 'react-router-dom';
+import { useRole } from '@/contexts/RoleProvider';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -71,14 +71,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        {/* Temporarily use a placeholder instead of LeafletMap */}
-        <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-lg font-medium">Kart kommer snart tilbake</p>
-            <p className="text-sm text-muted-foreground">Midlertidig deaktivert for debugging</p>
-          </div>
-        </div>
+        <SafeLeafletMap className="h-full" onProfileClick={handleViewProfile} />
       </div>
       
       {/* Floating Controls */}
