@@ -46,7 +46,6 @@ export const UnifiedSidePanel = ({
   className
 }: UnifiedSidePanelProps) => {
   const [activeSection, setActiveSection] = useState('explore');
-  const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map'); // Default to map for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
@@ -79,9 +78,6 @@ export const UnifiedSidePanel = ({
   };
   const handleNavigation = (section: string) => {
     setActiveSection(section);
-    if (isMobile) {
-      setIsExpanded(false);
-    }
   };
 
   // Role-based navigation items - simplified role-specific navigation  
@@ -191,20 +187,17 @@ export const UnifiedSidePanel = ({
           {mapComponent}
         </div>}
 
-      {/* Desktop Sidebar - Floating overlay */}
-      {!isMobile && <div className="fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out" onMouseEnter={() => setIsExpanded(true)} onMouseLeave={() => setIsExpanded(false)}>
-          <div className={cn("h-full bg-card/95 backdrop-blur-sm border-r border-border shadow-lg transition-all duration-300 overflow-y-auto", isExpanded ? "w-64" : "w-16")}>
+      {/* Desktop Sidebar - Sticky collapsed */}
+      {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
+          <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
             {/* Logo */}
             <div className="p-4 border-b border-border">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center">
                 <img 
                   src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
                   alt="GIGGEN Logo" 
                   className="w-8 h-8 object-contain"
                 />
-                {isExpanded && <span className="font-bold text-lg text-foreground opacity-0 animate-fade-in">
-                    GIGGEN
-                  </span>}
               </div>
             </div>
 
@@ -214,24 +207,21 @@ export const UnifiedSidePanel = ({
             const Icon = item.icon;
             const isActive = activeSection === item.id;
             return <div key={item.id}>
-                    <button onClick={() => handleNavigation(item.id)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left', isActive ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}>
-                      <Icon className="h-5 w-5 flex-shrink-0" />
-                      {isExpanded && <span className="opacity-0 animate-fade-in flex-1">
-                          {item.label}
-                        </span>}
+                    <button 
+                      onClick={() => handleNavigation(item.id)} 
+                      className={cn('w-full flex items-center justify-center p-3 rounded-lg transition-colors', isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
+                      title={item.label}
+                    >
+                      <Icon className="h-5 w-5" />
                     </button>
                   </div>;
           })}
-
-              
-              {/* Logout Button */}
-              
             </nav>
           </div>
         </div>}
 
       {/* Main Content */}
-      <main className={cn("flex-1 overflow-hidden", !isMobile ? activeSection === 'explore' ? '' : 'ml-20' : '', isMobile ? 'pb-16' : '')}>
+      <main className={cn("flex-1 overflow-hidden", !isMobile ? 'ml-16' : '', isMobile ? 'pb-16' : '')}>
         {activeSection === 'explore' && (isGoer || ismaker) ?
       // For explore mode, render content directly without container
       renderActiveSection() : <div className="container mx-auto px-4 py-6 h-full">
