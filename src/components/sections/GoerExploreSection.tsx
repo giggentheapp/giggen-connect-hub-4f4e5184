@@ -48,14 +48,16 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
     fetchAllMakers();
   }, []);
 
-  // Debug function to test goer database access
-  const testGoerDatabaseAccess = async () => {
-    console.log('🔍 Testing Goer database access...');
-    
+  const fetchAllMakers = async () => {
     try {
-      // Test current user info
+      setLoading(true);
+      setError(null);
+
+      console.log('🎯 Testing Goer database access...');
+      
+      // First test: Check current user role for debugging
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('Current user:', user?.id);
+      console.log('Current user ID:', user?.id);
       
       if (user) {
         const { data: profile } = await supabase
@@ -63,60 +65,66 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           .select('role, display_name')
           .eq('user_id', user.id)
           .single();
-        
-        console.log('User profile:', profile);
+        console.log('User role:', profile?.role, 'Name:', profile?.display_name);
       }
 
-      // Test access to maker profiles
-      const { data: makers, error: makersError } = await supabase
+      // Primary method: Try RPC function first
+      console.log('🎯 Fetching all makers from RPC function...');
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_visible_makers');
+      
+      if (!rpcError && rpcData) {
+        console.log('✅ RPC Success - makers found:', rpcData.length);
+        console.log('📄 Sample maker data:', rpcData[0]);
+        setMakers(rpcData);
+        setFilteredMakers(rpcData);
+        return;
+      }
+
+      console.log('⚠️ RPC failed, trying direct profile query...', rpcError);
+      
+      // Fallback: Direct profile query with new RLS permissions
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, user_id, display_name, bio, role, avatar_url, address, is_address_public')
+        .select(`
+          id,
+          user_id,
+          display_name,
+          bio,
+          role,
+          avatar_url,
+          address,
+          latitude,
+          longitude,
+          is_address_public,
+          created_at
+        `)
         .eq('role', 'maker')
-        .limit(5);
+        .order('created_at', { ascending: false });
       
-      console.log('Makers access:', makersError ? 'FAILED' : 'SUCCESS');
-      console.log('Makers data:', makers);
-      console.log('Makers error:', makersError);
-      
-      return { makers, makersError };
-    } catch (error) {
-      console.error('Database access test failed:', error);
-      return { makers: null, makersError: error };
-    }
-  };
-
-  const fetchAllMakers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('🎯 Fetching makers for goer user...');
-      
-      // First test database access for debugging
-      const testResult = await testGoerDatabaseAccess();
-      
-      if (testResult.makersError) {
-        console.error('❌ Direct profile access failed, trying RPC function...');
-        
-        // Fallback to RPC function
-        const { data, error: rpcError } = await supabase.rpc('get_all_visible_makers');
-        
-        if (rpcError) {
-          console.error('❌ RPC function also failed:', rpcError);
-          setError('Kunne ikke laste musikere. Kontroller tilganger.');
-          setMakers([]);
-          setFilteredMakers([]);
-          return;
-        }
-        
-        console.log('✅ RPC function succeeded, got makers:', data?.length);
-        setMakers(data || []);
-        setFilteredMakers(data || []);
-      } else {
-        console.log('✅ Direct profile access succeeded, got makers:', testResult.makers?.length);
-        setMakers(testResult.makers || []);
-        setFilteredMakers(testResult.makers || []);
+      if (profileError) {
+        console.error('❌ Direct query also failed:', profileError);
+        setError('Kunne ikke laste musikere. Sjekk tilkoblinger og prøv igjen.');
+        setMakers([]);
+        setFilteredMakers([]);
+        return;
       }
+      
+      console.log('✅ Direct query success - makers found:', profileData?.length || 0);
+      setMakers(profileData || []);
+      setFilteredMakers(profileData || []);
+      
+      // Test portfolio access for debugging
+      if (profileData?.length > 0) {
+        const testMakerId = profileData[0].user_id;
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('profile_portfolio')
+          .select('id, title, file_type')
+          .eq('user_id', testMakerId)
+          .limit(1);
+        
+        console.log('🎨 Portfolio access test:', portfolioError ? 'BLOCKED/FAILED' : 'SUCCESS', portfolioData);
+      }
+      
     } catch (err: any) {
       console.error('❌ Error fetching makers:', err);
       setError(err.message || 'Noe gikk galt ved lasting av musikere');
