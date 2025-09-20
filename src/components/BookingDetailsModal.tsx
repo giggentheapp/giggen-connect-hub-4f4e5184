@@ -95,14 +95,11 @@ export const BookingDetailsModal = ({
               <h2 className="text-2xl font-bold">{booking.title}</h2>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="secondary">{booking.status}</Badge>
-                {isOwner && <Badge variant="outline">Ditt arrangement</Badge>}
+                {isOwner}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {isOwner && <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Rediger
-                </Button>}
+              {isOwner}
               <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="w-4 h-4" />
               </Button>
