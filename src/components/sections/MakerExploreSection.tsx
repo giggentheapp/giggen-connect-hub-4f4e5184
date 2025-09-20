@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SafeLeafletMap from '@/components/SafeLeafletMap';
+// import SafeLeafletMap from '@/components/SafeLeafletMap';
 import { ProfileModal } from '@/components/ProfileModal';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useRole } from '@/contexts/RoleProvider';
@@ -76,7 +76,12 @@ export const MakerExploreSection = ({
   return <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <SafeLeafletMap className="h-full" onProfileClick={handleViewProfile} />
+        <div className="w-full h-96 bg-muted flex items-center justify-center rounded-lg border">
+          <div className="text-center">
+            <h3 className="text-lg font-medium">Kart kommer snart tilbake</h3>
+            <p className="text-sm text-muted-foreground">Vi jobber med å forbedre kartopplevelsen</p>
+          </div>
+        </div>
       </div>
       
       {/* Floating Controls */}
