@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import MVPDemoMap from '@/components/MVPDemoMap';
 import MapErrorBoundary from '@/components/MapErrorBoundary';
+import NoSSRMap from '@/components/NoSSRMap';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -24,9 +25,11 @@ const GoerMapPage = () => {
       </Button>
       
       {/* Map */}
-      <MapErrorBoundary>
-        <MVPDemoMap />
-      </MapErrorBoundary>
+      <NoSSRMap>
+        <MapErrorBoundary>
+          <MVPDemoMap />
+        </MapErrorBoundary>
+      </NoSSRMap>
     </div>
   );
 };

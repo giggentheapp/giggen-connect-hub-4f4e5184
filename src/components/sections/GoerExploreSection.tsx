@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MVPDemoMap from '@/components/MVPDemoMap';
 import MapErrorBoundary from '@/components/MapErrorBoundary';
+import NoSSRMap from '@/components/NoSSRMap';
 import { ProfileModal } from '@/components/ProfileModal';
 
 interface UserProfile {
@@ -71,9 +72,11 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <MapErrorBoundary>
-          <MVPDemoMap makers={makers} />
-        </MapErrorBoundary>
+        <NoSSRMap>
+          <MapErrorBoundary>
+            <MVPDemoMap makers={makers} />
+          </MapErrorBoundary>
+        </NoSSRMap>
       </div>
       
       {/* Floating Controls */}

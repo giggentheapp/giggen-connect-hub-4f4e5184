@@ -4,14 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '@/integrations/supabase/client';
 
-// Fix Leaflet default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 interface Maker {
   id: string;
   user_id: string;
@@ -27,6 +19,20 @@ interface MVPDemoMapProps {
 
 const MVPDemoMap = ({ makers: propMakers }: MVPDemoMapProps) => {
   const [makers, setMakers] = useState<Maker[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Fix Leaflet icons and ensure client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+    
+    // CRITICAL: Fix marker icons
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+  }, []);
   
   // Hent makers fra database eller bruk props
   useEffect(() => {
@@ -105,43 +111,63 @@ const MVPDemoMap = ({ makers: propMakers }: MVPDemoMapProps) => {
     // For MVP demo - kan kobles til profil modal senere
   };
   
-  return (
-    <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg">
-      <MapContainer 
-        center={[59.9139, 10.7522]} // Oslo
-        zoom={8} 
-        className="w-full h-full"
-        zoomControl={true}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        
-        {makers.map((maker) => (
-          <Marker 
-            key={maker.id} 
-            position={[maker.latitude, maker.longitude]}
-          >
-            <Popup>
-              <div className="p-2 min-w-[180px]">
-                <h3 className="font-bold text-base mb-1">{maker.display_name}</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {maker.bio || 'Musiker i nettverket'}
-                </p>
-                <button 
-                  className="w-full px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                  onClick={() => handleProfileClick(maker)}
-                >
-                  Se profil
-                </button>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
-  );
+  // Don't render until client-side is ready
+  if (!isClient) {
+    return (
+      <div className="w-full h-96 bg-gray-100 flex items-center justify-center rounded-lg">
+        <p className="text-muted-foreground">Laster kart...</p>
+      </div>
+    );
+  }
+  
+  try {
+    return (
+      <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg">
+        <MapContainer 
+          center={[59.9139, 10.7522]} // Oslo
+          zoom={8} 
+          className="w-full h-full"
+          zoomControl={true}
+          scrollWheelZoom={true}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          
+          {makers.map((maker) => (
+            <Marker 
+              key={maker.id} 
+              position={[maker.latitude, maker.longitude]}
+            >
+              <Popup>
+                <div className="p-2 min-w-[180px]">
+                  <h3 className="font-bold text-base mb-1">{maker.display_name}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {maker.bio || 'Musiker i nettverket'}
+                  </p>
+                  <button 
+                    className="w-full px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                    onClick={() => handleProfileClick(maker)}
+                  >
+                    Se profil
+                  </button>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    );
+  } catch (error) {
+    console.error('Map rendering error:', error);
+    return (
+      <div className="w-full h-96 bg-red-50 flex items-center justify-center rounded-lg">
+        <p className="text-destructive">Kart kunne ikke lastes</p>
+      </div>
+    );
+  }
 };
 
 export default MVPDemoMap;
