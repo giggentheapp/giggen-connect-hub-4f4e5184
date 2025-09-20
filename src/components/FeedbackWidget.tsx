@@ -1,8 +1,23 @@
 const FeedbackWidget = () => {
   const handleClick = () => {
-    // Fallback in case Tally script hasn't loaded yet
-    if ((window as any).Tally) {
+    console.log('Feedback button clicked');
+    console.log('Tally object available:', !!(window as any).Tally);
+    
+    // Check if Tally script loaded
+    if (!(window as any).Tally) {
+      console.error('Tally script not loaded');
+      // Fallback: open form in new tab
+      window.open('https://tally.so/r/nr7Bq5', '_blank');
+      return;
+    }
+    
+    try {
+      console.log('Opening Tally popup...');
       (window as any).Tally.openPopup('nr7Bq5');
+    } catch (error) {
+      console.error('Error opening Tally popup:', error);
+      // Fallback: open form in new tab
+      window.open('https://tally.so/r/nr7Bq5', '_blank');
     }
   };
 
