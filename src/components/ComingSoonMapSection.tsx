@@ -10,7 +10,7 @@ const ComingSoonMapSection = () => {
         </div>
         
         <h3 className="text-xl font-semibold text-foreground mb-4">
-          Interaktivt kart kommer snart
+          Kartvisning
         </h3>
         
         <div className="max-w-md space-y-3 text-sm text-muted-foreground">
@@ -33,7 +33,7 @@ const ComingSoonMapSection = () => {
         </div>
         
         <div className="mt-6 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
-          Under utvikling
+          Tilgjengelig senere
         </div>
       </div>
     </div>

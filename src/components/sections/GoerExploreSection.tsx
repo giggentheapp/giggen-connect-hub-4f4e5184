@@ -8,7 +8,6 @@ import { MapPin, Users, Eye, Search, Music, Grid, List } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import ComingSoonMapSection from '@/components/ComingSoonMapSection';
 import { ProfileModal } from '@/components/ProfileModal';
 import { MakerCard } from '@/components/MakerCard';
 import { SearchFilters } from '@/components/SearchFilters';

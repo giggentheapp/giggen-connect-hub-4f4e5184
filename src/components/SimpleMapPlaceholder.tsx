@@ -18,10 +18,10 @@ const SimpleMapPlaceholder: React.FC<SimpleMapPlaceholderProps> = ({
             <MapPin className="w-8 h-8 text-purple-600" />
           </div>
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Interaktivt kart kommer snart
+            Kartvisning
           </h3>
           <p className="text-sm text-gray-500 max-w-xs">
-            Vi jobber med å implementere kartfunksjonalitet for bedre oversikt
+            Geografisk oversikt tilgjengelig senere
           </p>
         </div>
         
