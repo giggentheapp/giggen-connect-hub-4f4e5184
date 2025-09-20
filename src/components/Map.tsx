@@ -45,45 +45,135 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     makersCount: makers.length 
   });
 
+  // Comprehensive security debugging function
+  const debugSecurityIssues = useCallback(async () => {
+    console.log('%c=== SECURITY DEBUG START ===', 'color: red; font-size: 16px; font-weight: bold;');
+    
+    try {
+      // Test basic Supabase connection
+      console.log('🔍 Testing basic Supabase connection...');
+      const { data: testData, error: testError } = await supabase.from('profiles').select('id').limit(1);
+      console.log('Basic Supabase access:', testError ? 'BLOCKED' : 'OK');
+      if (testError) console.error('Supabase error:', testError);
+      
+      // Test authentication state
+      console.log('🔍 Checking authentication state...');
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log('User authenticated:', !!user);
+      console.log('Auth error:', authError);
+      
+      // Test edge function access
+      console.log('🔍 Testing edge function access...');
+      const { data: tokenData, error: tokenError } = await supabase.functions.invoke('get-mapbox-token');
+      console.log('Edge function access:', tokenError ? 'BLOCKED' : 'OK');
+      console.log('Edge function response:', { data: tokenData, error: tokenError });
+      
+      if (tokenError) {
+        console.error('❌ Edge function BLOCKED:', tokenError);
+        console.error('Error code:', tokenError.code);
+        console.error('Error message:', tokenError.message);
+        console.error('Error details:', tokenError.details);
+      }
+      
+      // Test direct Mapbox API if we have a token
+      if (tokenData?.token) {
+        console.log('🔍 Testing direct Mapbox API access...');
+        try {
+          const testResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=${tokenData.token}`);
+          console.log('Mapbox API response status:', testResponse.status);
+          if (!testResponse.ok) {
+            console.error('❌ Mapbox API error:', testResponse.statusText);
+          } else {
+            console.log('✅ Mapbox API access OK');
+          }
+        } catch (mapboxError) {
+          console.error('❌ Mapbox API fetch error:', mapboxError);
+        }
+      }
+      
+      // Environment check
+      console.log('🔍 Environment variables check:');
+      console.log('Node env:', typeof window !== 'undefined' ? 'browser' : 'server');
+      console.log('Supabase client exists:', !!supabase);
+      
+    } catch (debugError) {
+      console.error('❌ Security debug error:', debugError);
+    }
+    
+    console.log('%c=== SECURITY DEBUG END ===', 'color: red; font-size: 16px; font-weight: bold;');
+  }, []);
+
+  // Enhanced token fetching with security debugging
+  const getMapboxToken = useCallback(async () => {
+    console.log('🗺️ Token fetch started...');
+    
+    // Run security debug first
+    await debugSecurityIssues();
+    
+    try {
+      console.log('🗺️ Attempting to fetch Mapbox token from edge function...');
+      
+      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+      
+      console.log('🗺️ Edge function response:', { 
+        hasData: !!data, 
+        hasError: !!error,
+        dataKeys: data ? Object.keys(data) : [],
+        errorType: error?.constructor?.name
+      });
+      
+      if (error) {
+        console.error('❌ Edge function error DETAILED:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: error.status
+        });
+        setTokenError(`Edge function fejl: ${error.message}`);
+        return;
+      }
+      
+      if (data?.token && data.token !== 'undefined') {
+        console.log('✅ Token received successfully!');
+        console.log('🗺️ Token details:', {
+          length: data.token.length,
+          startsWithPk: data.token.startsWith('pk.'),
+          preview: data.token.substring(0, 20) + '...'
+        });
+        
+        // Test token validity by trying to set it
+        try {
+          mapboxgl.accessToken = data.token;
+          console.log('✅ Mapbox access token set globally');
+          setMapboxToken(data.token);
+        } catch (tokenSetError) {
+          console.error('❌ Error setting Mapbox token:', tokenSetError);
+          setTokenError('Feil ved setting av Mapbox token');
+        }
+      } else {
+        console.error('❌ Invalid token response:', {
+          data,
+          hasToken: !!data?.token,
+          tokenValue: data?.token
+        });
+        setTokenError('Ugyldig token response fra server');
+      }
+    } catch (error: any) {
+      console.error('❌ Critical error getting Mapbox token:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setTokenError(`Kritisk feil: ${error.message}`);
+    }
+  }, [debugSecurityIssues]);
+
   // Get Mapbox token
   useEffect(() => {
     console.log('🗺️ Token fetch useEffect triggered');
-    
-    const getMapboxToken = async () => {
-      try {
-        console.log('🗺️ Attempting to fetch Mapbox token from edge function...');
-        
-        // Only use the Supabase edge function (VITE_* env vars not supported in Lovable)
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        console.log('🗺️ Edge function response:', { data, error });
-        
-        if (error) {
-          console.error('❌ Edge function error:', error);
-          setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
-          return;
-        }
-        
-        if (data?.token && data.token !== 'undefined') {
-          console.log('✅ Token received successfully:', data.token.substring(0, 20) + '...');
-          console.log('🗺️ Token length:', data.token.length);
-          console.log('🗺️ Token starts with pk.:', data.token.startsWith('pk.'));
-          
-          setMapboxToken(data.token);
-          mapboxgl.accessToken = data.token;
-          console.log('✅ Mapbox access token set globally');
-        } else {
-          console.error('❌ No valid token in response:', data);
-          setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
-        }
-      } catch (error: any) {
-        console.error('❌ Error getting Mapbox token:', error);
-        setTokenError('Feil ved lasting av kart. Prøv igjen senere.');
-      }
-    };
-    
     getMapboxToken();
-  }, []);
+  }, [getMapboxToken]);
 
   // Fetch makers function
   const fetchMakers = useCallback(async (retryCount = 0) => {
@@ -545,9 +635,47 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
       <div>Map Error: {mapError ? '❌ YES' : '✅ NO'}</div>
       <div>Makers: {makers?.length || 0}</div>
       <div>Container Ref: {mapContainer.current ? '✅ YES' : '❌ NO'}</div>
-      <div style={{marginTop: '10px', fontSize: '12px'}}>
-        Time: {new Date().toLocaleTimeString()}
-      </div>
+        <div style={{marginTop: '10px', fontSize: '12px'}}>
+          Time: {new Date().toLocaleTimeString()}
+        </div>
+        <button 
+          onClick={debugSecurityIssues}
+          style={{
+            marginTop: '10px',
+            padding: '8px 12px',
+            backgroundColor: 'yellow',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🔍 RUN SECURITY DEBUG
+        </button>
+        <button 
+          onClick={async () => {
+            console.log('🧪 Testing with demo token...');
+            const DEMO_TOKEN = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+            mapboxgl.accessToken = DEMO_TOKEN;
+            setMapboxToken(DEMO_TOKEN);
+            console.log('✅ Demo token set - if map loads, security is blocking real token');
+          }}
+          style={{
+            marginTop: '5px',
+            padding: '8px 12px',
+            backgroundColor: 'orange',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🧪 TEST DEMO TOKEN
+        </button>
     </div>
   );
 
