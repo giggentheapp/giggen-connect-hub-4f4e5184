@@ -1,9 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import MVPDemoMap from '@/components/MVPDemoMap';
-import MapErrorBoundary from '@/components/MapErrorBoundary';
-import NoSSRMap from '@/components/NoSSRMap';
+import InteractiveNorwayMap from '@/components/InteractiveNorwayMap';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -24,12 +22,8 @@ const GoerMapPage = () => {
         Tilbake
       </Button>
       
-      {/* Map */}
-      <NoSSRMap>
-        <MapErrorBoundary>
-          <MVPDemoMap />
-        </MapErrorBoundary>
-      </NoSSRMap>
+      {/* Interactive Norway Map */}
+      <InteractiveNorwayMap />
     </div>
   );
 };

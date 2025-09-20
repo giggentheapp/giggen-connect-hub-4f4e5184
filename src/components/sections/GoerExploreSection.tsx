@@ -7,9 +7,7 @@ import { MapPin, Users, Eye } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import MVPDemoMap from '@/components/MVPDemoMap';
-import MapErrorBoundary from '@/components/MapErrorBoundary';
-import NoSSRMap from '@/components/NoSSRMap';
+import InteractiveNorwayMap from '@/components/InteractiveNorwayMap';
 import { ProfileModal } from '@/components/ProfileModal';
 
 interface UserProfile {
@@ -70,13 +68,9 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
 
   return (
     <div className="fixed inset-0 bg-background">
-      {/* Full Screen Map */}
+      {/* Interactive Norway Map */}
       <div className="absolute inset-0">
-        <NoSSRMap>
-          <MapErrorBoundary>
-            <MVPDemoMap makers={makers} />
-          </MapErrorBoundary>
-        </NoSSRMap>
+        <InteractiveNorwayMap />
       </div>
       
       {/* Floating Controls */}
