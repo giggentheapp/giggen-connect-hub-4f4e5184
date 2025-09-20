@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { UserSettings } from '@/components/UserSettings';
-import { MapboxSettingsSection } from '@/components/MapboxSettingsSection';
-import { MapboxConfigInitializer } from '@/components/MapboxConfigInitializer';
+// Mapbox settings removed - simplified admin section
 
 interface UserProfile {
   id: string;

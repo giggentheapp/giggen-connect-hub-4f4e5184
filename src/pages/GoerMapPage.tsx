@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import GoerFullscreenMap from '@/components/GoerFullscreenMap';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
 
 const GoerMapPage = () => {
   const navigate = useNavigate();
@@ -8,15 +10,21 @@ const GoerMapPage = () => {
     navigate('/dashboard');
   };
 
-  const handleMakerClick = (makerId: string) => {
-    navigate(`/profile/${makerId}`);
-  };
-
   return (
-    <GoerFullscreenMap 
-      onBack={handleBack}
-      onMakerClick={handleMakerClick}
-    />
+    <div className="relative w-full h-screen">
+      {/* Back button */}
+      <Button
+        variant="outline"
+        onClick={handleBack}
+        className="absolute top-4 left-4 z-10 bg-white shadow-md"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Tilbake
+      </Button>
+      
+      {/* Map placeholder */}
+      <SimpleMapPlaceholder className="w-full h-full" />
+    </div>
   );
 };
 

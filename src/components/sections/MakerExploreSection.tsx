@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Users, Eye, MessageSquare } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
-import Map from '@/components/Map';
-import { ProfileModal } from '@/components/ProfileModal';
-import { MapBackground } from '@/components/MapBackground';
+import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
 import { BookingRequest } from '@/components/BookingRequest';
+import { ProfileModal } from '@/components/ProfileModal';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -76,7 +75,7 @@ export const MakerExploreSection = ({
   return <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <MapBackground onProfileClick={handleViewProfile} />
+        <SimpleMapPlaceholder makers={makers} />
       </div>
       
       {/* Floating Controls */}

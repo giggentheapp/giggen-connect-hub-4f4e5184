@@ -7,7 +7,7 @@ import { MapPin, Users, Eye } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MapBackground } from '@/components/MapBackground';
+import SimpleMapPlaceholder from '@/components/SimpleMapPlaceholder';
 import { ProfileModal } from '@/components/ProfileModal';
 
 interface UserProfile {
@@ -70,7 +70,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <MapBackground onProfileClick={handleViewProfile} />
+        <SimpleMapPlaceholder makers={makers} />
       </div>
       
       {/* Floating Controls */}

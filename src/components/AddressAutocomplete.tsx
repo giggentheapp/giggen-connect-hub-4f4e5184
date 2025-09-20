@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MapPin, AlertCircle, Target } from 'lucide-react';
+import { MapPin, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import ManualPinMap from './ManualPinMap';
+
+// Manual pin map removed - simplified address input only
+
 interface AddressSuggestion {
   place_name: string;
   center: [number, number]; // [lng, lat]
@@ -16,6 +15,7 @@ interface AddressSuggestion {
     address?: string;
   };
 }
+
 interface AddressAutocompleteProps {
   value: string;
   onChange: (address: string, coordinates?: {
@@ -25,179 +25,104 @@ interface AddressAutocompleteProps {
   className?: string;
   placeholder?: string;
 }
+
 const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   value,
   onChange,
   className,
-  placeholder = "Skriv inn adresse..."
+  placeholder = "Søk etter adresse..."
 }) => {
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showManualPin, setShowManualPin] = useState(false);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  // Simple address validation without external geocoding
+  const [validationError, setValidationError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Get Mapbox token on component mount
+  // Simple validation only - no external geocoding for now
   useEffect(() => {
-    const getMapboxToken = async () => {
-      try {
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('get-mapbox-token');
-        if (error) throw error;
-        setMapboxToken(data.token);
-      } catch (error) {
-        console.error('Failed to get Mapbox token:', error);
-        setError('Kunne ikke laste kartfunksjonalitet');
+    const validateAddress = () => {
+      if (!value.trim()) {
+        setValidationError('');
+        return;
+      }
+
+      if (value.trim().length < 3) {
+        setValidationError('');
+        return;
+      }
+
+      // Simple address validation - just check if it looks like an address
+      const addressPattern = /[\d\w\s,.-]+/;
+      if (addressPattern.test(value)) {
+        setValidationError('');
+      } else {
+        setValidationError('Ugyldig adresseformat');
       }
     };
-    getMapboxToken();
-  }, []);
-  const searchAddresses = async (query: string) => {
-    if (!query.trim() || !mapboxToken) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&country=no&types=address,poi&limit=5&language=no`);
-      if (!response.ok) {
-        throw new Error('Feil ved søk etter adresser');
-      }
-      const data = await response.json();
-      setSuggestions(data.features || []);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error('Address search error:', error);
-      setError('Kunne ikke søke etter adresser. Prøv å sett pin manuelt.');
-      setSuggestions([]);
-      setShowManualPin(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+    const timeoutId = setTimeout(validateAddress, 300);
+    return () => clearTimeout(timeoutId);
+  }, [value]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
+  };
 
-    // Clear previous timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Reset states
-    setError(null);
-    setShowManualPin(false);
-    if (newValue.trim().length >= 3) {
-      // Debounce search
-      timeoutRef.current = setTimeout(() => {
-        searchAddresses(newValue);
-      }, 300);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Just save the address without coordinates for now
+      onChange(value);
     }
   };
-  const handleSuggestionClick = async (suggestion: AddressSuggestion) => {
-    onChange(suggestion.place_name, {
-      lat: suggestion.center[1],
-      lng: suggestion.center[0]
-    });
-    setSuggestions([]);
-    setShowSuggestions(false);
-    setError(null);
-    setShowManualPin(false);
-  };
-  const handleManualPin = () => {
-    setShowManualPin(true);
-    setError(null);
-  };
-  const handleManualPinCoordinates = (lat: number, lng: number, reverseAddress?: string) => {
-    const finalAddress = reverseAddress || value || 'Manuelt valgt posisjon';
-    onChange(finalAddress, {
-      lat,
-      lng
-    });
-    setShowManualPin(false);
-    setError(null);
-  };
-  const handleCancelManualPin = () => {
-    setShowManualPin(false);
-  };
 
-  // Hide suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  return <div className={cn("relative", className)}>
+  return (
+    <div className={cn("space-y-2", className)}>
+      <Label htmlFor="address-input" className="flex items-center gap-2">
+        <MapPin className="h-4 w-4" />
+        Adresse
+      </Label>
       
-      <div className="relative" ref={inputRef}>
-        <Input id="address" value={value} onChange={handleInputChange} placeholder={placeholder} className="pr-8" />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <MapPin className="h-4 w-4 text-muted-foreground" />}
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          id="address-input"
+          type="text"
+          value={value}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={cn(
+            "pr-10",
+            validationError && "border-destructive focus:border-destructive"
+          )}
+        />
+        
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
         </div>
-
-        {/* Suggestions dropdown */}
-        {showSuggestions && Array.isArray(suggestions) && suggestions.length > 0 && <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {suggestions.filter(suggestion => suggestion && suggestion.place_name).map((suggestion, index) => <button key={suggestion.place_name || `suggestion-${index}`} onClick={() => handleSuggestionClick(suggestion)} className="w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors border-b border-border last:border-b-0 text-sm">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="truncate">{suggestion.place_name || 'Unknown address'}</span>
-                </div>
-              </button>)}
-          </div>}
       </div>
 
-      {/* Guide text */}
-      <p className="text-xs text-muted-foreground mt-1">
-        Skriv inn full adresse med gatenavn, husnummer, postnummer og by. Velg riktig forslag fra listen som dukker opp.
-      </p>
-
-      {/* Error message */}
-      {error && <Alert className="mt-2">
+      {/* Validation error */}
+      {validationError && (
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>{error}</span>
-            {showManualPin && <Dialog open={showManualPin} onOpenChange={setShowManualPin}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={handleManualPin} className="ml-2">
-                    <Target className="h-3 w-3 mr-1" />
-                    Sett pin manuelt
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh]">
-                  <ManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
-                </DialogContent>
-              </Dialog>}
+          <AlertDescription>
+            {validationError}
           </AlertDescription>
-        </Alert>}
+        </Alert>
+      )}
 
-      {/* No results message */}
-      {showSuggestions && suggestions.length === 0 && !isLoading && value.trim().length >= 3 && <Alert className="mt-2">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>Ingen adresser funnet. Prøv en annen søketerm eller sett pin manuelt.</span>
-            <Dialog open={showManualPin} onOpenChange={setShowManualPin}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" onClick={handleManualPin} className="ml-2">
-                  <Target className="h-3 w-3 mr-1" />
-                  Sett pin manuelt
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh]">
-                <ManualPinMap onCoordinatesSelected={handleManualPinCoordinates} onCancel={handleCancelManualPin} initialCoordinates={value ? undefined : undefined} />
-              </DialogContent>
-            </Dialog>
+      {/* Info message about simplified functionality */}
+      {value.trim() && !validationError && (
+        <Alert>
+          <MapPin className="h-4 w-4" />
+          <AlertDescription>
+            Adresse lagret. Kartfunksjonalitet kommer snart for bedre posisjonering.
           </AlertDescription>
-        </Alert>}
-    </div>;
+        </Alert>
+      )}
+    </div>
+  );
 };
+
 export default AddressAutocomplete;
