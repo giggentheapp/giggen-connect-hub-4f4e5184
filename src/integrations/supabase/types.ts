@@ -840,6 +840,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_contact_info: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       clean_booking_sensitive_data: {
         Args: { booking_uuid: string }
         Returns: undefined
