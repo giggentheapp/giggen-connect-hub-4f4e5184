@@ -25,27 +25,23 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <div className="flex">
-        <div className="flex-1 pr-16">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/start" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            
-            <Route path="/concept/:conceptId" element={<ConceptView />} />
-            <Route path="/events" element={<UpcomingEvents />} />
-            <Route path="/goer-map" element={<GoerMapPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-        <FeedbackWidget />
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/start" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        
+        <Route path="/concept/:conceptId" element={<ConceptView />} />
+        <Route path="/events" element={<UpcomingEvents />} />
+        <Route path="/goer-map" element={<GoerMapPage />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <FeedbackWidget />
     </TooltipProvider>
   </QueryClientProvider>
 );
