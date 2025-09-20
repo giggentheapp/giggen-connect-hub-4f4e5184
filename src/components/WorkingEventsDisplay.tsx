@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
+import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
 import { BookingDetailsModal } from '@/components/BookingDetailsModal';
 import { useState } from 'react';
@@ -26,13 +27,32 @@ interface WorkingEventsDisplayProps {
   profile: UserProfile;
   showSensitiveInfo: boolean; // true for own profile, false for others
   currentUserId?: string; // Add current user ID to determine ownership
+  viewerRole?: 'maker' | 'goer'; // Add viewer role to determine data source
 }
 
-export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId }: WorkingEventsDisplayProps) => {
-  const { bookings, loading } = useBookings(profile.user_id);
-  const publishedEvents = bookings.filter(b => b.status === 'upcoming');
+export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId, viewerRole }: WorkingEventsDisplayProps) => {
+  // Determine which data source to use based on viewer role and ownership
+  const isOwnProfile = currentUserId === profile.user_id;
+  const isGoerViewing = viewerRole === 'goer' && !isOwnProfile;
+  
+  // Use different data sources based on the viewing context
+  const { bookings, loading: bookingsLoading } = useBookings(isGoerViewing ? undefined : profile.user_id);
+  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isGoerViewing ? profile.user_id : '');
+  
+  // Select the appropriate data source
+  const loading = isGoerViewing ? publicLoading : bookingsLoading;
+  const eventsData = isGoerViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
+  
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  console.log('🎭 WorkingEventsDisplay render:', {
+    isOwnProfile,
+    isGoerViewing,
+    viewerRole,
+    eventsCount: eventsData.length,
+    loading
+  });
 
   const handleEventClick = (bookingId: string) => {
     console.log('Event clicked:', bookingId);
@@ -59,10 +79,12 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
     );
   }
 
-  if (publishedEvents.length === 0) {
+  if (eventsData.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">No upcoming events</div>
+        <div className="text-sm text-muted-foreground">
+          {isGoerViewing ? "Ingen offentlige arrangementer" : "No upcoming events"}
+        </div>
       </div>
     );
   }
@@ -70,7 +92,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
   return (
     <>
       <div className="space-y-4">
-        {publishedEvents.map((event) => (
+        {eventsData.map((event) => (
           <Card 
             key={event.id} 
             className="p-4 cursor-pointer hover:shadow-md transition-shadow"
@@ -131,7 +153,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
         onClose={handleModalClose}
         bookingId={selectedBookingId}
         currentUserId={currentUserId}
-        isOwner={selectedBookingId ? isBookingOwner(publishedEvents.find(e => e.id === selectedBookingId)) : false}
+        isOwner={selectedBookingId ? isBookingOwner(eventsData.find(e => e.id === selectedBookingId)) : false}
       />
     </>
   );

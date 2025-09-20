@@ -299,7 +299,8 @@ export const ProfileModal = ({
                             contact_info: profile.contact_info
                           }} 
                           showSensitiveInfo={isOwnProfile} 
-                          currentUserId={currentUserId} 
+                          currentUserId={currentUserId}
+                          viewerRole={currentUserRole}
                         />
                       );
                     })()}
