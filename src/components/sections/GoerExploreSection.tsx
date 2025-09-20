@@ -199,7 +199,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                               </div>
                             </div>
                             
-                            <div className="flex flex-col gap-2 ml-4">
+                            <div className="ml-4">
                               <Button 
                                 onClick={() => handleViewProfile(maker.user_id)} 
                                 variant="outline" 
