@@ -31,6 +31,7 @@ interface GoerExploreSectionProps {
 }
 
 export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'makers' }: GoerExploreSectionProps) => {
+  console.log('🎯 GoerExploreSection initialized');
   const [activeTab, setActiveTab] = useState('map');
   const [makers, setMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -70,7 +71,14 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
     <div className="fixed inset-0 bg-background">
       {/* Full Screen Map */}
       <div className="absolute inset-0">
-        <LeafletMap className="h-full" onProfileClick={handleViewProfile} />
+        {/* Temporarily use a placeholder instead of LeafletMap */}
+        <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+          <div className="text-center">
+            <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-lg font-medium">Kart kommer snart tilbake</p>
+            <p className="text-sm text-muted-foreground">Midlertidig deaktivert for debugging</p>
+          </div>
+        </div>
       </div>
       
       {/* Floating Controls */}

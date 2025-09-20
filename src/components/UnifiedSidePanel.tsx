@@ -138,14 +138,28 @@ export const UnifiedSidePanel = ({
     if (roleLoading) {
       return <div className="flex items-center justify-center py-8">Laster...</div>;
     }
+    
+    // Debug logging
+    console.log('🎯 UnifiedSidePanel renderActiveSection:', { activeSection, isGoer, ismaker, profile: profile?.role });
     switch (activeSection) {
       case 'explore':
-        if (isGoer) {
-          return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (ismaker) {
-          return <MakerExploreSection profile={profile} />;
+        try {
+          if (isGoer) {
+            console.log('🎯 Rendering GoerExploreSection');
+            return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
+          } else if (ismaker) {
+            console.log('🎯 Rendering MakerExploreSection');
+            return <MakerExploreSection profile={profile} />;
+          }
+          return null;
+        } catch (error) {
+          console.error('❌ Error rendering explore section:', error);
+          return (
+            <div className="flex items-center justify-center py-8 text-red-500">
+              Feil ved lasting av utforsk-seksjonen. Prøv å laste siden på nytt.
+            </div>
+          );
         }
-        return null;
       // Loading state
 
       case 'profile':
