@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
+import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -16,6 +17,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<'maker' | 'goer'>('goer');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,15 +176,38 @@ const Auth = () => {
             
             <div className="space-y-2">
               <Label htmlFor="password">Passord</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isSubmitting}
-                minLength={6}
-              />
+              {isLogin ? (
+                // Simple password input for login
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted/50"
+                  >
+                    {showPassword ? '🙈' : '👁️'}
+                  </Button>
+                </div>
+              ) : (
+                // Enhanced password validation for signup
+                <PasswordStrengthValidator
+                  password={password}
+                  onPasswordChange={setPassword}
+                  showPassword={showPassword}
+                  onToggleShowPassword={() => setShowPassword(!showPassword)}
+                  placeholder="Opprett et sterkt passord..."
+                />
+              )}
             </div>
 
             {!isLogin && (

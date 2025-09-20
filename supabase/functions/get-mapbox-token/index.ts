@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,12 +13,23 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🗺️ SECURED Edge Function: Getting Mapbox token from environment')
+    console.log('🗺️ SECURED Edge Function: Getting Mapbox token with proper JWT validation')
     console.log('🗺️ Request method:', req.method)
     console.log('🗺️ Request origin:', req.headers.get('origin'))
     console.log('🗺️ Has auth header:', !!req.headers.get('authorization'))
     
-    // SECURITY: Verify user is authenticated before providing Mapbox token
+    // SECURITY ENHANCEMENT: Proper JWT validation with Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')! // Use service role for edge functions
+    
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+    
+    // Verify user authentication
     const authHeader = req.headers.get('authorization')
     if (!authHeader) {
       console.error('❌ No authorization header provided')
@@ -36,7 +48,7 @@ serve(async (req) => {
       )
     }
     
-    // Additional verification: Check if auth header format is valid
+    // Validate JWT token format and authenticity
     if (!authHeader.startsWith('Bearer ')) {
       console.error('❌ Invalid authorization header format')
       return new Response(
@@ -52,6 +64,44 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
+    }
+    
+    // Extract and validate JWT with Supabase
+    const jwt = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
+    
+    if (authError || !user) {
+      console.error('❌ JWT validation failed:', authError?.message)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid authentication token',
+          debug: {
+            message: authError?.message || 'Token validation failed',
+            timestamp: new Date().toISOString()
+          }
+        }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+    
+    console.log('✅ User authenticated successfully:', user.id)
+    
+    // SECURITY AUDIT: Log token access
+    try {
+      await supabase
+        .from('audit_logs')
+        .insert({
+          user_id: user.id,
+          action: 'MAPBOX_TOKEN_ACCESS',
+          table_name: 'system',
+          record_id: null,
+          sensitive_fields: ['mapbox_token']
+        })
+    } catch (auditError) {
+      console.warn('⚠️ Failed to log audit entry:', auditError)
     }
     
     // Get Mapbox token from secrets
