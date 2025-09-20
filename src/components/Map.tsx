@@ -19,6 +19,8 @@ interface MakerLocation {
 }
 
 const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
+  console.log('🗺️ Map component rendering...', { className, forceRefresh });
+  
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -27,28 +29,51 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState(false);
   const { toast } = useToast();
+
+  console.log('🗺️ Map state:', { 
+    loading, 
+    mapboxToken: mapboxToken ? `${mapboxToken.substring(0, 10)}...` : 'null',
+    tokenError, 
+    mapReady, 
+    mapError,
+    makersCount: makers.length 
+  });
 
   // Get Mapbox token
   useEffect(() => {
+    console.log('🗺️ Token fetch useEffect triggered');
+    
     const getMapboxToken = async () => {
       try {
+        console.log('🗺️ Attempting to fetch Mapbox token from edge function...');
+        
         // Only use the Supabase edge function (VITE_* env vars not supported in Lovable)
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
+        console.log('🗺️ Edge function response:', { data, error });
+        
         if (error) {
+          console.error('❌ Edge function error:', error);
           setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
           return;
         }
         
         if (data?.token && data.token !== 'undefined') {
+          console.log('✅ Token received successfully:', data.token.substring(0, 20) + '...');
+          console.log('🗺️ Token length:', data.token.length);
+          console.log('🗺️ Token starts with pk.:', data.token.startsWith('pk.'));
+          
           setMapboxToken(data.token);
           mapboxgl.accessToken = data.token;
+          console.log('✅ Mapbox access token set globally');
         } else {
+          console.error('❌ No valid token in response:', data);
           setTokenError('Mapbox token ikke tilgjengelig. Kontakt support.');
         }
       } catch (error: any) {
-        console.error('Error getting Mapbox token:', error);
+        console.error('❌ Error getting Mapbox token:', error);
         setTokenError('Feil ved lasting av kart. Prøv igjen senere.');
       }
     };
@@ -58,11 +83,15 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
 
   // Fetch makers function
   const fetchMakers = useCallback(async (retryCount = 0) => {
+      console.log('🗺️ Fetching makers...', { retryCount });
+      
       try {
         setLoading(true);
         
         const { data, error } = await supabase
           .rpc('get_all_visible_makers');
+
+        console.log('🗺️ Makers RPC response:', { data: data?.length, error });
 
         if (error) {
           throw error;
@@ -81,10 +110,19 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           return isValid;
         }) || [];
 
+        console.log('✅ Processed makers data:', { 
+          total: data?.length || 0, 
+          valid: makersData.length,
+          makers: makersData.map(m => ({ name: m.display_name, coords: [m.latitude, m.longitude] }))
+        });
+
         setMakers(makersData);
         
       } catch (error: any) {
+        console.error('❌ Error fetching makers:', error);
+        
         if (retryCount < 2) {
+          console.log('🔄 Retrying makers fetch in 1 second...');
           setTimeout(() => fetchMakers(retryCount + 1), 1000);
           return;
         }
@@ -108,11 +146,40 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken || map.current) {
+    console.log('🗺️ Map initialization useEffect triggered');
+    console.log('🗺️ Dependencies check:', {
+      hasContainer: !!mapContainer.current,
+      hasToken: !!mapboxToken,
+      hasExistingMap: !!map.current,
+      containerDimensions: mapContainer.current ? {
+        width: mapContainer.current.offsetWidth,
+        height: mapContainer.current.offsetHeight
+      } : 'no container'
+    });
+
+    if (!mapContainer.current) {
+      console.error('❌ Map container ref not available');
+      return;
+    }
+
+    if (!mapboxToken) {
+      console.error('❌ Mapbox token not available for map initialization');
+      return;
+    }
+
+    if (map.current) {
+      console.log('🗺️ Map already exists, skipping initialization');
       return;
     }
 
     try {
+      console.log('🗺️ Attempting to create Mapbox map instance...');
+      console.log('🗺️ Using token:', mapboxToken.substring(0, 20) + '...');
+      console.log('🗺️ Container element:', mapContainer.current);
+      
+      // Ensure token is set globally
+      mapboxgl.accessToken = mapboxToken;
+      
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
@@ -121,6 +188,8 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         pitch: 15,
       });
 
+      console.log('✅ Map instance created successfully:', map.current);
+
       map.current.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
@@ -128,23 +197,44 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         'top-right'
       );
 
+      console.log('✅ Navigation controls added');
+
       map.current.on('load', () => {
+        console.log('🎉 Map loaded successfully!');
         setMapReady(true);
+        setMapError(false);
       });
 
       map.current.on('error', (e) => {
-        // Map error occurred
+        console.error('❌ Map error occurred:', e);
+        setMapError(true);
+        toast({
+          title: "Kartfeil",
+          description: `Map error: ${e.error?.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
+      });
+
+      map.current.on('styledata', () => {
+        console.log('🎨 Map style loaded');
+      });
+
+      map.current.on('sourcedata', (e) => {
+        console.log('📊 Map source data event:', e.sourceId);
       });
 
     } catch (error: any) {
+      console.error('❌ Error creating map instance:', error);
+      setMapError(true);
       toast({
         title: "Kartfeil",
-        description: "Kunne ikke laste kartet",
+        description: `Kunne ikke laste kartet: ${error.message}`,
         variant: "destructive",
       });
     }
 
     return () => {
+      console.log('🧹 Cleaning up map instance');
       if (map.current) {
         markersRef.current.forEach(marker => marker.remove());
         markersRef.current = [];
@@ -157,9 +247,19 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
 
   // Add markers when data is ready
   useEffect(() => {
+    console.log('🗺️ Markers useEffect triggered', {
+      hasMap: !!map.current,
+      mapReady,
+      makersCount: makers.length,
+      makers: makers.map(m => ({ name: m.display_name, coords: [m.latitude, m.longitude] }))
+    });
+
     if (!map.current || !mapReady || !makers.length) {
+      console.log('🗺️ Skipping markers - conditions not met');
       return;
     }
+
+    console.log('🗺️ Adding markers to map...');
 
     // Clean up existing markers
     markersRef.current.forEach(marker => {
@@ -168,13 +268,16 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     markersRef.current = [];
 
     // Create markers for each maker
-    makers.forEach((maker) => {
+    makers.forEach((maker, index) => {
+      console.log(`🗺️ Creating marker ${index + 1}/${makers.length} for:`, maker.display_name);
+      
       try {
         if (isNaN(maker.latitude) || isNaN(maker.longitude)) {
+          console.warn('⚠️ Invalid coordinates for maker:', maker.display_name);
           return;
         }
         
-        // Create marker container
+        // Create marker container (keeping existing styling)
         const markerContainer = document.createElement('div');
         markerContainer.className = 'mapbox-marker-container';
         markerContainer.style.cssText = `
@@ -185,7 +288,7 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           cursor: pointer;
         `;
 
-        // Create marker element with profile picture
+        // Create marker element with profile picture (keeping existing code)
         const markerEl = document.createElement('div');
         markerEl.className = 'mapbox-marker';
         
@@ -363,6 +466,8 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         // Add marker to map
         const markerCoords: [number, number] = [maker.longitude, maker.latitude];
         
+        console.log(`🗺️ Adding marker for ${maker.display_name} at:`, markerCoords);
+        
         const marker = new mapboxgl.Marker({
           element: markerContainer,
           anchor: 'bottom'
@@ -372,14 +477,18 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           .addTo(map.current!);
           
         markersRef.current.push(marker);
+        console.log(`✅ Marker added successfully for ${maker.display_name}`);
         
       } catch (error: any) {
-        // Failed to create marker - continue with other markers
+        console.error(`❌ Failed to create marker for ${maker.display_name}:`, error);
       }
     });
 
+    console.log(`✅ Added ${markersRef.current.length} markers to map`);
+
     // Fit map to show all markers
     if (makers.length > 0) {
+      console.log('🗺️ Fitting map bounds to show all markers...');
       const bounds = new mapboxgl.LngLatBounds();
       makers.forEach(maker => {
         bounds.extend([maker.longitude, maker.latitude]);
@@ -390,34 +499,80 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
         maxZoom: 14,
         duration: 1000
       });
+      console.log('✅ Map bounds set');
     }
     
   }, [makers, mapReady]);
 
+  console.log('🗺️ Final render state:', { loading, tokenError, mapError });
+
   if (loading) {
+    console.log('🗺️ Rendering loading state');
     return (
       <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
           <p>Laster kart...</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Token: {mapboxToken ? 'Tilgjengelig' : 'Venter'} | 
+            Map: {mapReady ? 'Klar' : 'Initialiserer'}
+          </p>
         </div>
       </div>
     );
   }
 
   if (tokenError) {
+    console.log('🗺️ Rendering token error state:', tokenError);
     return (
       <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
         <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10">
           <p className="text-destructive font-medium mb-2">Kartfeil</p>
           <p className="text-sm text-muted-foreground">{tokenError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded text-sm"
+          >
+            Prøv igjen
+          </button>
         </div>
       </div>
     );
   }
 
+  if (mapError) {
+    console.log('🗺️ Rendering map error state');
+    return (
+      <div className={`flex items-center justify-center h-96 ${className}`} style={{ minHeight: '400px' }}>
+        <div className="text-center p-6 border border-destructive rounded-lg bg-destructive/10">
+          <p className="text-destructive font-medium mb-2">Kart laster ikke</p>
+          <p className="text-sm text-muted-foreground">Det oppstod en feil ved lasting av kartet</p>
+          <button 
+            onClick={() => {
+              setMapError(false);
+              window.location.reload();
+            }} 
+            className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded text-sm"
+          >
+            Last på nytt
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('🗺️ Rendering map container');
+
   return (
-    <div className={`relative w-full h-full ${className}`}>
+    <div className={`relative w-full h-full ${className}`} style={{ minHeight: '400px' }}>
+      {/* Debug Info */}
+      <div className="absolute top-2 left-2 z-50 bg-black/80 text-white text-xs p-2 rounded">
+        <div>Token: {mapboxToken ? '✓' : '✗'}</div>
+        <div>Map: {mapReady ? '✓' : '✗'}</div>
+        <div>Makers: {makers.length}</div>
+        <div>Error: {mapError ? '✗' : '✓'}</div>
+      </div>
+
       {/* Token Error Display */}
       {tokenError && (
         <div className="absolute top-4 right-4 z-10 bg-destructive/90 backdrop-blur-sm text-destructive-foreground rounded-lg p-4 shadow-lg border max-w-md">
@@ -427,7 +582,24 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
       )}
 
       {/* Map Container */}
-      <div ref={mapContainer} className="w-full h-full" />
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full" 
+        style={{ 
+          minHeight: '400px',
+          background: '#f0f0f0' // Visible background to see if container exists
+        }} 
+      />
+      
+      {/* Loading Overlay */}
+      {!mapReady && mapboxToken && (
+        <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-40">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm">Initialiserer kart...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
