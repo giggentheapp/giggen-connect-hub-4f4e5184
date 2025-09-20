@@ -41,7 +41,6 @@ interface GoerExploreSectionProps {
 }
 
 export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
-  const [activeTab, setActiveTab] = useState('list');
   const [listViewMode, setListViewMode] = useState<'grid' | 'list'>('grid');
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
@@ -201,182 +200,114 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
 
   return (
     <div className="w-full h-full bg-background">
-      {/* Toggle Buttons */}
-      <div className="flex items-center justify-center p-4 border-b border-border/10">
-        <div className="flex bg-white rounded-lg shadow-sm border overflow-hidden">
-          <button
-            onClick={() => setActiveTab('map')}
-            className={`flex items-center px-6 py-3 text-sm font-medium transition-all duration-200 ${
-              activeTab === 'map'
-                ? 'bg-primary text-white'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
-          >
-            <MapPin className="w-4 h-4 mr-2" />
-            Kart
-          </button>
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`flex items-center px-6 py-3 text-sm font-medium transition-all duration-200 ${
-              activeTab === 'list'
-                ? 'bg-primary text-white'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
-          >
-            <Users className="w-4 h-4 mr-2" />
-            Liste
-          </button>
+      {/* List View */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Search and Filters */}
+        <div className="p-4 bg-background border-b border-border/10 shrink-0">
+          <SearchFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filters={filters}
+            onFiltersChange={setFilters}
+            resultCount={filteredMakers.length}
+            loading={loading}
+          />
+        </div>
+
+        {/* List Header with View Toggle */}
+        <div className="px-4 py-3 bg-background border-b border-border/10 shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
+              <Badge variant="outline" className="text-xs bg-muted">
+                {loading ? '...' : filteredMakers.length}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant={listViewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setListViewMode('grid')}
+                className="px-3"
+              >
+                <Grid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={listViewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setListViewMode('list')}
+                className="px-3"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-auto p-4 min-h-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12 text-muted-foreground">
+              <div className="text-center">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                <p>Laster makere...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12 text-destructive">
+              <div className="text-center">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="mb-2">{error}</p>
+                <Button 
+                  onClick={fetchAllMakers} 
+                  variant="outline" 
+                  size="sm"
+                  className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                >
+                  Prøv igjen
+                </Button>
+              </div>
+            </div>
+          ) : filteredMakers.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-muted-foreground">
+              <div className="text-center max-w-md space-y-2">
+                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">
+                  {searchTerm || Object.values(filters).some(Boolean)
+                    ? 'Ingen makere funnet som matcher kriteriene.'
+                    : 'Ingen makere funnet.'
+                  }
+                </p>
+                {(searchTerm || Object.values(filters).some(Boolean)) && (
+                  <p className="text-sm">
+                    Prøv å justere søket eller filtrene for å se flere resultater.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={`${
+              listViewMode === 'grid' 
+                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
+                : 'space-y-3'
+            } animate-fade-in`}>
+              {filteredMakers.map((maker) => (
+                <div 
+                  key={maker.id} 
+                  className="animate-fade-in"
+                >
+                  <MakerCard
+                    maker={maker}
+                    onViewProfile={handleViewProfile}
+                    onBookMaker={ismaker ? handleBookMaker : undefined}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Map View */}
-      {activeTab === 'map' && (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-2xl">
-            <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-8">
-              <MapPin className="w-12 h-12 text-primary" />
-            </div>
-            
-            <h1 className="text-3xl font-bold text-foreground mb-8">
-              Interaktivt kart kommer snart
-            </h1>
-            
-            <div className="space-y-4 text-left">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <p className="text-muted-foreground">Geografisk oversikt over musikere i Norge</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <p className="text-muted-foreground">Avstandsbasert søk og filtrering</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <p className="text-muted-foreground">Visuell oversikt over lokal musikkscene</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <p className="text-muted-foreground">Enkel identifisering av musikere i ditt område</p>
-              </div>
-            </div>
-            
-            <div className="mt-8">
-              <span className="text-primary font-medium">Under utvikling</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* List View */}
-      {activeTab === 'list' && (
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Search and Filters */}
-          <div className="p-4 bg-background border-b border-border/10 shrink-0">
-            <SearchFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              filters={filters}
-              onFiltersChange={setFilters}
-              resultCount={filteredMakers.length}
-              loading={loading}
-            />
-          </div>
-
-          {/* List Header with View Toggle */}
-          <div className="px-4 py-3 bg-background border-b border-border/10 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
-                <Badge variant="outline" className="text-xs bg-muted">
-                  {loading ? '...' : filteredMakers.length}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={listViewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setListViewMode('grid')}
-                  className="px-3"
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={listViewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setListViewMode('list')}
-                  className="px-3"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Main Content Area */}
-          <div className="flex-1 overflow-auto p-4 min-h-0">
-            {loading ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
-                <div className="text-center">
-                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                  <p>Laster makere...</p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center py-12 text-destructive">
-                <div className="text-center">
-                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="mb-2">{error}</p>
-                  <Button 
-                    onClick={fetchAllMakers} 
-                    variant="outline" 
-                    size="sm"
-                    className="text-primary border-primary/20 hover:bg-primary hover:text-white"
-                  >
-                    Prøv igjen
-                  </Button>
-                </div>
-              </div>
-            ) : filteredMakers.length === 0 ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
-                <div className="text-center max-w-md space-y-2">
-                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">
-                    {searchTerm || Object.values(filters).some(Boolean)
-                      ? 'Ingen makere funnet som matcher kriteriene.'
-                      : 'Ingen makere funnet.'
-                    }
-                  </p>
-                  {(searchTerm || Object.values(filters).some(Boolean)) && (
-                    <p className="text-sm">
-                      Prøv å justere søket eller filtrene for å se flere resultater.
-                    </p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className={`${
-                listViewMode === 'grid' 
-                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
-                  : 'space-y-3'
-              } animate-fade-in`}>
-                {filteredMakers.map((maker) => (
-                  <div 
-                    key={maker.id} 
-                    className="animate-fade-in"
-                  >
-                    <MakerCard
-                      maker={maker}
-                      onViewProfile={handleViewProfile}
-                      onBookMaker={ismaker ? handleBookMaker : undefined}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       
       {/* Profile Modal */}
       <ProfileModal 
