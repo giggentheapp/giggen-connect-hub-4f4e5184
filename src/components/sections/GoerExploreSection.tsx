@@ -149,18 +149,10 @@ export const GoerExploreSection = ({ profile, viewMode = 'map', exploreType = 'm
                     {filteredMakers.length}
                   </Badge>
                 </div>
-                <Button 
-                  onClick={fetchAllMakers} 
-                  disabled={loading} 
-                  variant="outline" 
-                  size="sm"
-                >
-                  {loading ? 'Laster...' : 'Oppdater'}
-                </Button>
               </div>
               
               {/* List Content */}
-              <div className="flex-1 overflow-auto pb-28">
+              <div className="flex-1 overflow-auto" style={{ paddingBottom: '120px' }}>
                 {filteredMakers.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />

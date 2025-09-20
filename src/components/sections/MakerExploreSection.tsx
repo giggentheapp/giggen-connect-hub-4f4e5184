@@ -154,18 +154,10 @@ export const MakerExploreSection = ({
                     {filteredMakers.length}
                   </Badge>
                 </div>
-                <Button 
-                  onClick={fetchAllMakers} 
-                  disabled={loading} 
-                  variant="outline" 
-                  size="sm"
-                >
-                  {loading ? 'Laster...' : 'Oppdater'}
-                </Button>
               </div>
               
               {/* List Content */}
-              <div className="flex-1 overflow-auto pb-28">
+              <div className="flex-1 overflow-auto" style={{ paddingBottom: '120px' }}>
                 {filteredMakers.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -212,7 +204,7 @@ export const MakerExploreSection = ({
                               </div>
                             </div>
                             
-                            <div className="flex flex-col gap-2 ml-4">
+                            <div className="ml-4">
                               <Button 
                                 onClick={() => handleViewProfile(maker.user_id)} 
                                 variant="outline" 
@@ -221,14 +213,6 @@ export const MakerExploreSection = ({
                               >
                                 <Eye className="w-3 h-3 mr-1" />
                                 Se profil
-                              </Button>
-                              <Button 
-                                onClick={() => handleStartBooking(maker.user_id, maker.display_name)} 
-                                size="sm"
-                                className="text-xs"
-                              >
-                                <MessageSquare className="w-3 h-3 mr-1" />
-                                Booking
                               </Button>
                             </div>
                           </div>
