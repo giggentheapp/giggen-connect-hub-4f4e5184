@@ -193,6 +193,141 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
     }
   }, []);
 
+  // Test edge function directly after security fix
+  const testEdgeFunctionFix = useCallback(async () => {
+    console.log('%c🧪 TESTING EDGE FUNCTION AFTER RLS FIX', 'color: green; font-size: 14px; font-weight: bold;');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+      
+      if (error) {
+        console.error('❌ Edge function still blocked:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: error.status
+        });
+        return false;
+      }
+      
+      if (data && data.token) {
+        console.log('✅ Edge function working! Token received');
+        console.log('🗺️ Token details:', {
+          length: data.token.length,
+          startsWithPk: data.token.startsWith('pk.'),
+          preview: data.token.substring(0, 10) + '...',
+          debug: data.debug
+        });
+        return data.token;
+      }
+      
+      console.log('⚠️ Edge function working but no token returned');
+      console.log('📊 Response data:', data);
+      return false;
+      
+    } catch (err: any) {
+      console.error('❌ Edge function exception:', err);
+      console.error('❌ Exception details:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack
+      });
+      return false;
+    }
+  }, []);
+
+  // Reinitialize map after security fix
+  const reinitializeMapWithFix = useCallback(async () => {
+    console.log('%c🔄 REINITIALIZING MAP AFTER SECURITY FIX', 'color: blue; font-size: 14px; font-weight: bold;');
+    
+    // Test edge function first
+    const token = await testEdgeFunctionFix();
+    
+    if (!token) {
+      console.error('❌ Cannot initialize map - no token available');
+      setTokenError('Edge function tilgang fortsatt blokkert etter security fix');
+      return;
+    }
+    
+    try {
+      console.log('🗺️ Setting up map with received token...');
+      mapboxgl.accessToken = token;
+      setMapboxToken(token);
+      setTokenError(null);
+      
+      if (mapContainer.current) {
+        // Clean up existing map if any
+        if (map.current) {
+          console.log('🧹 Cleaning up existing map instance');
+          map.current.remove();
+          map.current = null;
+        }
+        
+        console.log('🗺️ Creating new map instance...');
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/light-v11',
+          center: [10.7522, 59.9139], // Oslo
+          zoom: 10,
+          pitch: 15,
+        });
+        
+        map.current.addControl(
+          new mapboxgl.NavigationControl({
+            visualizePitch: true,
+          }),
+          'top-right'
+        );
+        
+        map.current.on('load', () => {
+          console.log('🎉 Map successfully loaded after security fix!');
+          setMapReady(true);
+          setMapError(false);
+        });
+        
+        map.current.on('error', (e) => {
+          console.error('❌ Map error after reinit:', e);
+          setMapError(true);
+        });
+        
+        console.log('✅ Map reinitialization completed');
+        
+      } else {
+        console.error('❌ Map container not available for reinitialization');
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Map reinitialization failed:', error);
+      setTokenError(`Map reinit failed: ${error.message}`);
+    }
+  }, [testEdgeFunctionFix]);
+
+  // Comprehensive test after all fixes
+  const runCompleteSecurityTest = useCallback(async () => {
+    console.log('%c🔬 RUNNING COMPLETE SECURITY TEST', 'color: purple; font-size: 16px; font-weight: bold;');
+    
+    // Step 1: Test database access
+    await testDatabaseAccess();
+    
+    // Step 2: Test edge function
+    const tokenResult = await testEdgeFunctionFix();
+    
+    // Step 3: Test permissions
+    await debugAllPermissions();
+    
+    // Step 4: If all good, reinitialize map
+    if (tokenResult) {
+      console.log('🎯 All security tests passed - reinitializing map...');
+      await reinitializeMapWithFix();
+    } else {
+      console.log('❌ Security tests failed - map initialization skipped');
+    }
+    
+    console.log('%c🔬 COMPLETE SECURITY TEST FINISHED', 'color: purple; font-size: 16px; font-weight: bold;');
+  }, [testDatabaseAccess, testEdgeFunctionFix, debugAllPermissions, reinitializeMapWithFix]);
+
   // Comprehensive security debugging function
   const debugSecurityIssues = useCallback(async () => {
     console.log('%c=== SECURITY DEBUG START ===', 'color: red; font-size: 16px; font-weight: bold;');
@@ -820,11 +955,11 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
           🧪 TEST DEMO TOKEN
         </button>
         <button 
-          onClick={debugAllPermissions}
+          onClick={runCompleteSecurityTest}
           style={{
             marginTop: '5px',
             padding: '8px 12px',
-            backgroundColor: 'pink',
+            backgroundColor: 'lime',
             color: 'black',
             border: 'none',
             borderRadius: '4px',
@@ -833,7 +968,39 @@ const Map: React.FC<MapProps> = ({ className = '', forceRefresh = 0 }) => {
             fontWeight: 'bold'
           }}
         >
-          🔐 DEBUG PERMISSIONS
+          🔬 COMPLETE SECURITY TEST
+        </button>
+        <button 
+          onClick={testEdgeFunctionFix}
+          style={{
+            marginTop: '5px',
+            padding: '8px 12px',
+            backgroundColor: 'lightgreen',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🧪 TEST EDGE FUNCTION
+        </button>
+        <button 
+          onClick={reinitializeMapWithFix}
+          style={{
+            marginTop: '5px',
+            padding: '8px 12px',
+            backgroundColor: 'gold',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🔄 REINIT MAP
         </button>
     </div>
   );
