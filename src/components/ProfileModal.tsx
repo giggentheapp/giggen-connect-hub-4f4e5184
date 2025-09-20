@@ -205,9 +205,9 @@ export const ProfileModal = ({
         {/* Content with Sticky Navigation */}
         <div className="flex flex-col h-full overflow-hidden">
           <Tabs defaultValue="about" className="flex flex-col h-full">
-            {/* Sticky Navigation Bar */}
-            <div className="sticky top-0 z-40 bg-background border-b px-6 py-4">
-              <TabsList className="grid w-full grid-cols-4">
+            {/* Fixed Navigation Bar - Always Visible */}
+            <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b px-6 py-3 shadow-sm">
+              <TabsList className={`grid w-full ${currentUserRole === 'maker' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="about">Om meg</TabsTrigger>
                 <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
                 {currentUserRole === 'maker' && <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>}
