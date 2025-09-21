@@ -524,108 +524,113 @@ export const UserSettings = ({
               )}
             </div>
 
-            <div>
-              <Label htmlFor="bio">Biografi</Label>
-              <Textarea
-                id="bio"
-                value={profileData.bio || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setProfileData(prev => ({ ...prev, bio: value }));
+            {/* Only show bio, address, and contact info for makers */}
+            {profileData.role === 'maker' && (
+              <>
+                <div>
+                  <Label htmlFor="bio">Biografi</Label>
+                  <Textarea
+                    id="bio"
+                    value={profileData.bio || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setProfileData(prev => ({ ...prev, bio: value }));
+                      
+                      // Validate bio
+                      const validation = validateBio(value);
+                      setValidationErrors(prev => ({
+                        ...prev,
+                        bio: validation.isValid ? '' : validation.error || ''
+                      }));
+                    }}
+                    placeholder="Fortell litt om deg selv, din musikk og erfaring..."
+                    rows={4}
+                  />
+                  {validationErrors.bio && (
+                    <p className="text-sm text-red-500 mt-1">{validationErrors.bio}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label>Adresse</Label>
+                  <AddressAutocomplete
+                    value={profileData.address || ''}
+                    onChange={(address, coordinates) => {
+                      setProfileData(prev => ({
+                        ...prev,
+                        address: address,
+                        latitude: coordinates?.lat || null,
+                        longitude: coordinates?.lng || null
+                      }));
+                    }}
+                    placeholder="Din adresse (valgfri)"
+                  />
+                </div>
+
+                {/* Contact Information - Only for Makers */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">Kontaktinformasjon</h3>
+                  </div>
                   
-                  // Validate bio
-                  const validation = validateBio(value);
-                  setValidationErrors(prev => ({
-                    ...prev,
-                    bio: validation.isValid ? '' : validation.error || ''
-                  }));
-                }}
-                placeholder="Fortell litt om deg selv, din musikk og erfaring..."
-                rows={4}
-              />
-              {validationErrors.bio && (
-                <p className="text-sm text-red-500 mt-1">{validationErrors.bio}</p>
-              )}
-            </div>
-            
-            <div>
-              <Label>Adresse</Label>
-              <AddressAutocomplete
-                value={profileData.address || ''}
-                onChange={(address, coordinates) => {
-                  setProfileData(prev => ({
-                    ...prev,
-                    address: address,
-                    latitude: coordinates?.lat || null,
-                    longitude: coordinates?.lng || null
-                  }));
-                }}
-                placeholder="Din adresse (valgfri)"
-              />
-            </div>
-          </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        E-post
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={contactInfo.email}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setContactInfo(prev => ({ ...prev, email: value }));
 
-          {/* Contact Information - Collapsible */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Kontaktinformasjon</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  E-post
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={contactInfo.email}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setContactInfo(prev => ({ ...prev, email: value }));
+                          // Validate email
+                          const validation = validateEmail(value);
+                          setValidationErrors(prev => ({
+                            ...prev,
+                            email: validation.isValid ? '' : validation.error || ''
+                          }));
+                        }}
+                        placeholder="din@epost.no"
+                      />
+                      {validationErrors.email && (
+                        <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="phone" className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        Telefonnummer
+                      </Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={contactInfo.phone}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setContactInfo(prev => ({ ...prev, phone: value }));
 
-                    // Validate email
-                    const validation = validateEmail(value);
-                    setValidationErrors(prev => ({
-                      ...prev,
-                      email: validation.isValid ? '' : validation.error || ''
-                    }));
-                  }}
-                  placeholder="din@epost.no"
-                />
-                {validationErrors.email && (
-                  <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
-                )}
-              </div>
-              
-              <div>
-                <Label htmlFor="phone" className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Telefonnummer
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={contactInfo.phone}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setContactInfo(prev => ({ ...prev, phone: value }));
-
-                    // Validate phone
-                    const validation = validatePhone(value);
-                    setValidationErrors(prev => ({
-                      ...prev,
-                      phone: validation.isValid ? '' : validation.error || ''
-                    }));
-                  }}
-                  placeholder="+47 123 45 678"
-                />
-                {validationErrors.phone && (
-                  <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
-                )}
-              </div>
-            </div>
+                          // Validate phone
+                          const validation = validatePhone(value);
+                          setValidationErrors(prev => ({
+                            ...prev,
+                            phone: validation.isValid ? '' : validation.error || ''
+                          }));
+                        }}
+                        placeholder="+47 123 45 678"
+                      />
+                      {validationErrors.phone && (
+                        <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <Button onClick={handleProfileSubmit} disabled={loading} className="w-full md:w-auto">

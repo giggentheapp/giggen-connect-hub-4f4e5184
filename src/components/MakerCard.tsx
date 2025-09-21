@@ -78,25 +78,25 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
           </div>
         )}
 
-        {/* Features preview - only if privacy allows */}
+        {/* Features badges - matching reference design */}
         <div className="px-4 pb-3">
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 flex-wrap">
             {showPortfolio && (
-              <div className="flex items-center gap-1">
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
                 <Image className="w-3 h-3" />
-                <span>Portefølje</span>
-              </div>
+                Portefølje
+              </Badge>
             )}
             {showEvents && (
-              <div className="flex items-center gap-1">
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                <span>Arrangement</span>
-              </div>
+                Arrangement
+              </Badge>
             )}
-            <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs flex items-center gap-1">
               <Star className="w-3 h-3" />
-              <span>Verifisert</span>
-            </div>
+              Verifisert
+            </Badge>
           </div>
         </div>
 
