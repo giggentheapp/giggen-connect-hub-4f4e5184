@@ -11,6 +11,8 @@ export const translations = {
     
     // Landing Page
     welcome: "Velkommen til booking-plattformen for musikere",
+    heroTitle: "En bro mellom live-musikk og mennesker",
+    heroSubtitle: "En plattform som gjør det enklere for musikere og arrangører å finne hverandre, og for publikum å finne lokale arrangementer",
     getStarted: "Kom i gang",
     signUp: "Registrer deg",
     signIn: "Logg inn",
@@ -18,6 +20,40 @@ export const translations = {
     about: "Om oss",
     privacy: "Personvern",
     terms: "Vilkår",
+    
+    // Features Section
+    keyFeatures: "Hovedfunksjoner",
+    listTitle: "Liste",
+    listDescription: "Utforsk musikere og arrangementer i en strukturert liste. Se hvem som er aktive i ditt område og oppdag nye talenter.",
+    bookingTitle: "Booking",
+    bookingDescription: "Koble musikere med arrangører basert på sjanger, lokasjon og tilgjengelighet. Trygg 3-stegs booking-prosess.",
+    profilesTitle: "Fullverdige Profiler",
+    profilesDescription: "Detaljerte profiler med portefølje, tilbud, priser og tekniske krav. Alt du trenger for å ta informerte beslutninger.",
+    
+    // For Users Section
+    forMusicians: "For Musikere",
+    musicianFeature1: "Vis dine tilbud og konserter",
+    musicianFeature2: "Motta booking-forespørsler",
+    musicianFeature3: "Bygg ditt profesjonelle nettverk",
+    musicianFeature4: "Kontroller din synlighet",
+    
+    forOrganizers: "For Arrangører",
+    organizerFeature1: "Søk og filtrer musikere",
+    organizerFeature2: "Se tilgjengelige artister på kart",
+    organizerFeature3: "Trygg booking med godkjenning",
+    organizerFeature4: "Oppdag nye talenter lokalt",
+    
+    forAudience: "For Publikum",
+    audienceFeature1: "Oppdag nye arrangementer",
+    audienceFeature2: "Finn konserter i ditt område",
+    audienceFeature3: "Se informasjon om artister",
+    audienceFeature4: "Hold deg oppdatert på lokale event",
+    
+    // Footer
+    legal: "Juridisk",
+    privacyPolicy: "Personvernerklæring",
+    termsConditions: "Vilkår og betingelser",
+    cookiePolicy: "Cookie-policy",
     
     // Explore Section
     searchPlaceholder: "Søk etter musikere, genre, lokasjon...",
@@ -93,6 +129,8 @@ export const translations = {
     
     // Landing Page
     welcome: "Welcome to the booking platform for musicians",
+    heroTitle: "A bridge between live music and people",
+    heroSubtitle: "A platform that makes it easier for musicians and organizers to find each other, and for audiences to find local events",
     getStarted: "Get Started",
     signUp: "Sign Up",
     signIn: "Sign In",
@@ -100,6 +138,40 @@ export const translations = {
     about: "About",
     privacy: "Privacy",
     terms: "Terms",
+    
+    // Features Section
+    keyFeatures: "Key Features",
+    listTitle: "List",
+    listDescription: "Explore musicians and events in a structured list. See who's active in your area and discover new talents.",
+    bookingTitle: "Booking",
+    bookingDescription: "Connect musicians with organizers based on genre, location and availability. Secure 3-step booking process.",
+    profilesTitle: "Complete Profiles",
+    profilesDescription: "Detailed profiles with portfolio, offers, prices and technical requirements. Everything you need to make informed decisions.",
+    
+    // For Users Section
+    forMusicians: "For Musicians",
+    musicianFeature1: "Show your offers and concerts",
+    musicianFeature2: "Receive booking requests",
+    musicianFeature3: "Build your professional network",
+    musicianFeature4: "Control your visibility",
+    
+    forOrganizers: "For Organizers",
+    organizerFeature1: "Search and filter musicians",
+    organizerFeature2: "See available artists on map",
+    organizerFeature3: "Secure booking with approval",
+    organizerFeature4: "Discover new local talents",
+    
+    forAudience: "For Audience",
+    audienceFeature1: "Discover new events",
+    audienceFeature2: "Find concerts in your area",
+    audienceFeature3: "See information about artists",
+    audienceFeature4: "Stay updated on local events",
+    
+    // Footer
+    legal: "Legal",
+    privacyPolicy: "Privacy Policy",
+    termsConditions: "Terms and Conditions",
+    cookiePolicy: "Cookie Policy",
     
     // Explore Section
     searchPlaceholder: "Search for musicians, genre, location...",
