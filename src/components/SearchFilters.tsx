@@ -33,6 +33,7 @@ interface SearchFiltersProps {
   onFiltersChange: (filters: FilterOptions) => void;
   resultCount: number;
   loading?: boolean;
+  onMapClick?: () => void; // Add map click handler
 }
 
 export const SearchFilters = ({ 
@@ -41,7 +42,8 @@ export const SearchFilters = ({
   filters, 
   onFiltersChange,
   resultCount,
-  loading = false
+  loading = false,
+  onMapClick
 }: SearchFiltersProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -102,6 +104,18 @@ export const SearchFilters = ({
             </Badge>
           )}
         </Button>
+
+        {/* Map button */}
+        {onMapClick && (
+          <Button
+            variant="outline"
+            onClick={onMapClick}
+            className="px-3"
+          >
+            <MapPin className="w-4 h-4 mr-1" />
+            Kart
+          </Button>
+        )}
       </div>
 
       {/* Advanced filters */}

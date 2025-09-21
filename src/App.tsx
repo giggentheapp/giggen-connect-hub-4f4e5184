@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Map from "./pages/Map";
 import FeedbackWidget from "./components/FeedbackWidget";
 
 import ConceptView from "./pages/ConceptView";
@@ -36,6 +37,7 @@ const App = () => (
         
         <Route path="/concept/:conceptId" element={<ConceptView />} />
         <Route path="/events" element={<UpcomingEvents />} />
+        <Route path="/map" element={<Map />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

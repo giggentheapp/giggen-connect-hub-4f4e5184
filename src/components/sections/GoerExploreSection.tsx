@@ -210,6 +210,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             onFiltersChange={setFilters}
             resultCount={filteredMakers.length}
             loading={loading}
+            onMapClick={() => navigate('/map')}
           />
         </div>
 
