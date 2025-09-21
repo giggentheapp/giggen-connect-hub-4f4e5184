@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRole } from '@/contexts/RoleProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 // Import sections
 import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
@@ -51,15 +52,9 @@ export const UnifiedSidePanel = ({
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const {
-    role: userRole,
-    ismaker,
-    isGoer,
-    loading: roleLoading
-  } = useRole();
+  const { toast } = useToast();
+  const { role: userRole, ismaker, isGoer, loading: roleLoading } = useRole();
+  const { t } = useAppTranslation();
 
   // Use role from context as single source of truth
   const currentRole = userRole || profile.role;
@@ -69,7 +64,7 @@ export const UnifiedSidePanel = ({
     } = await supabase.auth.signOut();
     if (error) {
       toast({
-        title: "Feil ved utlogging",
+        title: t('signOutError'),
         description: error.message,
         variant: "destructive"
       });
@@ -81,50 +76,50 @@ export const UnifiedSidePanel = ({
     setActiveSection(section);
   };
 
-  // Role-based navigation items - simplified role-specific navigation  
+  // Role-based navigation items
   const getNavigationItems = () => {
     if (isGoer) {
       return [
         {
           id: 'profile',
-          label: 'Profil',
+          label: t('profile'),
           icon: User
         },
         {
           id: 'explore',
-          label: 'Utforsk',
+          label: t('explore'),
           icon: MapPin
         },
         {
           id: 'settings',
-          label: 'Innstillinger',
+          label: t('settings'),
           icon: Settings
         }
       ];
     } else if (ismaker) {
       return [{
         id: 'profile',
-        label: 'Profil',
+        label: t('profile'),
         icon: User
       }, {
         id: 'explore',
-        label: 'Utforsk',
+        label: t('explore'),
         icon: MapPin
       }, {
         id: 'admin-files',
-        label: 'Filer',
+        label: 'Filer', // Keep as is for now
         icon: FileText
       }, {
         id: 'admin-concepts',
-        label: 'Mine tilbud',
+        label: t('myOffers'),
         icon: Lightbulb
       }, {
         id: 'bookings',
-        label: 'Booking',
+        label: t('bookings'),
         icon: Briefcase
       }, {
         id: 'settings',
-        label: 'Innstillinger',
+        label: t('settings'),
         icon: Settings
       }];
     }
@@ -133,7 +128,7 @@ export const UnifiedSidePanel = ({
   const renderActiveSection = () => {
     // Block content rendering if role loading
     if (roleLoading) {
-      return <div className="flex items-center justify-center py-8">Laster...</div>;
+      return <div className="flex items-center justify-center py-8">{t('loading')}</div>;
     }
     switch (activeSection) {
       case 'explore':

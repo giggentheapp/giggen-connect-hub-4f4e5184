@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProfileModal } from '@/components/ProfileModal';
 import { MakerCard } from '@/components/MakerCard';
 import { SearchFilters } from '@/components/SearchFilters';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface FilterOptions {
   location: string;
@@ -57,7 +57,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const { isGoer, ismaker } = useRole();
-  const { t } = useTranslation();
+  const { t } = useAppTranslation();
 
   // Auto-fetch makers when component mounts
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings } from 'lucide-react';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface DesktopSidebarProps {
   activeSection: string;
@@ -8,7 +8,7 @@ interface DesktopSidebarProps {
 }
 
 export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSidebarProps) => {
-  const { t } = useTranslation();
+  const { t } = useAppTranslation();
   
   const navItems = [
     { id: 'explore', label: t('explore'), icon: Compass },

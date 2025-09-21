@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UserSettings } from '@/components/UserSettings';
-// Mapbox settings removed - simplified admin section
+import { Settings } from '@/pages/Settings';
 
 interface UserProfile {
   id: string;
@@ -31,19 +31,14 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
 
   return (
     <div className="space-y-6">
-      {/* Temporarily disabled Mapbox initialization to prevent blocking modal */}
-      {/* 
-      <MapboxConfigInitializer 
-        accessToken="pk.eyJ1IjoiZ2lnZ2VudGhlYXBwIiwiYSI6ImNtZmNiem5qNjF4bDgyanFzNjRlMnZsc3MifQ.pdpTiiX4bL8K_dF6PKxQvA"
-        styleUrl="mapbox://styles/giggentheapp/cmdc04yqm004m01qzbafib4fl"
-        userId={updatedProfile.user_id}
-      />
-      */}
+      {/* Language and App Settings */}
+      <Settings />
+      
+      {/* User Profile Settings */}
       <UserSettings 
         profile={updatedProfile}
         onProfileUpdate={handleProfileUpdate}
       />
-      {/* Mapbox settings card removed as requested */}
     </div>
   );
 };

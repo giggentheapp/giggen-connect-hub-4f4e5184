@@ -8,7 +8,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerView } from '@/components/GoerView';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface UserProfile {
   id: string;
@@ -33,7 +33,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t } = useAppTranslation();
 
   useEffect(() => {
     // Set up auth state listener
