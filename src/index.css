@@ -8,145 +8,126 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light gray business-friendly palette */
-    --background: 220 9% 97%;
-    --foreground: 210 11% 15%;
+    /* Neon-inspired warm amber theme */
+    --background: 220 5% 24%; /* Dark charcoal background */
+    --foreground: 42 100% 96%; /* Warm white text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
+    --card: 220 5% 29%; /* Lighter charcoal for cards */
+    --card-foreground: 42 100% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 11% 15%;
+    --popover: 220 5% 29%;
+    --popover-foreground: 42 100% 96%;
 
-    /* Purple accent colors for CTAs */
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --primary-light: 262 83% 70%;
-    --primary-dark: 262 83% 45%;
+    /* Warm amber primary colors */
+    --primary: 25 100% 63%; /* Warm amber #FF8C42 */
+    --primary-foreground: 220 20% 11%; /* Dark text on amber */
+    --primary-light: 30 100% 70%; /* Lighter amber #FFB366 */
+    --primary-dark: 20 100% 55%; /* Darker amber #FF6B1A */
+    --primary-glow: 25 100% 63%;
 
-    /* Light gray secondary palette */
-    --secondary: 220 9% 92%;
-    --secondary-foreground: 210 11% 15%;
+    /* Soft secondary palette */
+    --secondary: 42 45% 92%; /* Cream #F5F5F0 */
+    --secondary-foreground: 220 20% 11%;
 
-    --muted: 220 9% 95%;
-    --muted-foreground: 210 9% 45%;
+    --muted: 220 5% 34%;
+    --muted-foreground: 42 10% 75%; /* Soft gray #D0D0D0 */
 
-    /* Subtle accent colors */
-    --accent: 220 9% 92%;
-    --accent-foreground: 210 11% 15%;
-    --accent-pink: 330 81% 75%;
-    --accent-blue: 217 91% 60%;
-    --accent-green: 142 76% 73%;
-    --accent-orange: 25 95% 70%;
+    /* Accent colors */
+    --accent: 220 5% 34%;
+    --accent-foreground: 42 100% 96%;
+    --accent-amber: 25 100% 63%;
+    --accent-cream: 42 45% 92%;
+    --accent-warm: 30 100% 70%;
+    --accent-glow: 20 100% 55%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 42 100% 96%;
 
-    --border: 220 9% 90%;
-    --input: 220 9% 90%;
-    --ring: 262 83% 58%;
+    --border: 25 100% 63% / 0.2; /* Subtle amber border */
+    --input: 220 5% 29%;
+    --ring: 25 100% 63%;
 
     --radius: 0.75rem;
 
-    /* Beautiful gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(330 81% 75%), hsl(262 83% 58%));
-    --gradient-accent: linear-gradient(135deg, hsl(32 98% 83%), hsl(25 95% 70%));
-    --gradient-cool: linear-gradient(135deg, hsl(217 91% 60%), hsl(142 76% 73%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 70%), hsl(330 81% 75%));
-    --gradient-rainbow: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%), hsl(142 76% 73%), hsl(32 98% 83%));
+    /* Neon-inspired gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(25 100% 63%), hsl(30 100% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(42 45% 92%), hsl(42 100% 96%));
+    --gradient-background: linear-gradient(135deg, hsl(220 5% 23%), hsl(220 5% 29%));
+    --gradient-warm: linear-gradient(135deg, hsl(25 100% 63%), hsl(20 100% 55%));
+    --gradient-glow: linear-gradient(135deg, hsl(25 100% 63% / 0.3), hsl(30 100% 70% / 0.2));
 
-    /* Enhanced shadows with color */
-    --shadow-primary: 0 10px 30px hsla(262 83% 58% / 0.3);
-    --shadow-secondary: 0 8px 25px hsla(217 91% 60% / 0.2);
-    --shadow-accent: 0 6px 20px hsla(330 81% 75% / 0.25);
-    --shadow-glow: 0 0 40px hsla(262 83% 58% / 0.4);
+    /* Enhanced neon shadows */
+    --shadow-primary: 0 4px 20px hsl(25 100% 63% / 0.3);
+    --shadow-secondary: 0 2px 15px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 6px 25px hsl(25 100% 63% / 0.5);
+    --shadow-soft-glow: 0 0 20px hsl(25 100% 63% / 0.2);
+    --shadow-card-hover: 0 4px 20px hsl(25 100% 63% / 0.1);
 
-    /* Map colors and gradients */
-    --map-primary-gradient: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%));
-    --map-marker-shadow: 0 8px 25px hsla(262 83% 58% / 0.3);
-    --map-marker-hover-shadow: 0 12px 35px hsla(262 83% 58% / 0.4);
+    /* Sidebar colors */
+    --sidebar-background: hsl(220 5% 29%);
+    --sidebar-foreground: hsl(42 100% 96%);
+    --sidebar-primary: hsl(25 100% 63%);
+    --sidebar-primary-foreground: hsl(220 20% 11%);
+    --sidebar-accent: hsl(220 5% 34%);
+    --sidebar-accent-foreground: hsl(42 100% 96%);
+    --sidebar-border: hsl(25 100% 63% / 0.1);
+    --sidebar-ring: hsl(25 100% 63%);
 
     /* Animation colors */
-    --animate-pulse-from: hsl(262 83% 58% / 0.1);
-    --animate-pulse-to: hsl(262 83% 58% / 0.3);
-
-    --sidebar-background: 0 0% 100%;
-
-    --sidebar-foreground: 210 11% 15%;
-
-    --sidebar-primary: 262 83% 58%;
-
-    --sidebar-primary-foreground: 0 0% 100%;
-
-    --sidebar-accent: 220 9% 92%;
-
-    --sidebar-accent-foreground: 210 11% 15%;
-
-    --sidebar-border: 220 9% 90%;
-
-    --sidebar-ring: 262 83% 58%;
+    --animate-pulse-from: hsl(25 100% 63% / 0.1);
+    --animate-pulse-to: hsl(25 100% 63% / 0.3);
+    --animate-glow-from: hsl(25 100% 63% / 0.5);
+    --animate-glow-to: hsl(25 100% 63% / 0.8);
   }
 
   .dark {
-    /* Dark mode with vibrant accents */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Enhanced dark mode with stronger neon effects */
+    --background: 220 5% 18%; /* Deeper dark background */
+    --foreground: 42 100% 96%;
 
-    --card: 217.2 32.6% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 5% 24%;
+    --card-foreground: 42 100% 96%;
 
-    --popover: 217.2 32.6% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 5% 24%;
+    --popover-foreground: 42 100% 96%;
 
-    /* Vibrant primary in dark mode */
-    --primary: 262 83% 65%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-light: 262 83% 75%;
-    --primary-dark: 262 83% 55%;
+    /* Brighter neon colors in dark mode */
+    --primary: 25 100% 68%; /* Brighter amber for dark mode */
+    --primary-foreground: 220 20% 8%;
+    --primary-light: 30 100% 75%;
+    --primary-dark: 20 100% 60%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 262 83% 65%;
+    --secondary: 220 5% 32%;
+    --secondary-foreground: 25 100% 68%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 5% 28%;
+    --muted-foreground: 42 15% 80%;
 
-    /* Dark mode accent colors */
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 262 83% 65%;
-    --accent-pink: 330 81% 65%;
-    --accent-blue: 217 91% 70%;
-    --accent-green: 142 76% 65%;
-    --accent-orange: 25 95% 65%;
+    --accent: 220 5% 28%;
+    --accent-foreground: 25 100% 68%;
 
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 210 40% 98%;
+    --border: 25 100% 68% / 0.2;
+    --input: 220 5% 24%;
+    --ring: 25 100% 68%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 65%;
+    /* Enhanced dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(25 100% 68%), hsl(30 100% 75%));
+    --gradient-background: linear-gradient(135deg, hsl(220 5% 18%), hsl(220 5% 24%));
+    --gradient-warm: linear-gradient(135deg, hsl(25 100% 68%), hsl(20 100% 60%));
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 65%), hsl(217 91% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(330 81% 65%), hsl(262 83% 65%));
-    --gradient-accent: linear-gradient(135deg, hsl(32 98% 73%), hsl(25 95% 65%));
-    --gradient-cool: linear-gradient(135deg, hsl(217 91% 70%), hsl(142 76% 65%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 65%), hsl(330 81% 65%));
-    --gradient-rainbow: linear-gradient(135deg, hsl(262 83% 65%), hsl(217 91% 70%), hsl(142 76% 65%), hsl(32 98% 73%));
-
-    /* Dark mode shadows */
-    --shadow-primary: 0 10px 30px hsla(262 83% 65% / 0.4);
-    --shadow-secondary: 0 8px 25px hsla(217 91% 70% / 0.3);
-    --shadow-accent: 0 6px 20px hsla(330 81% 65% / 0.35);
-    --shadow-glow: 0 0 40px hsla(262 83% 65% / 0.5);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Stronger shadows in dark mode */
+    --shadow-primary: 0 4px 20px hsl(25 100% 68% / 0.4);
+    --shadow-glow: 0 6px 25px hsl(25 100% 68% / 0.6);
+    --shadow-soft-glow: 0 0 20px hsl(25 100% 68% / 0.3);
+    
+    --sidebar-background: hsl(220 5% 20%);
+    --sidebar-foreground: hsl(42 100% 96%);
+    --sidebar-primary: hsl(25 100% 68%);
+    --sidebar-primary-foreground: hsl(220 20% 8%);
+    --sidebar-accent: hsl(220 5% 28%);
+    --sidebar-accent-foreground: hsl(42 100% 96%);
+    --sidebar-border: hsl(25 100% 68% / 0.15);
+    --sidebar-ring: hsl(25 100% 68%);
   }
 }
 
@@ -157,10 +138,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, hsl(var(--background)), hsl(220 9% 94%));
+    background: var(--gradient-background);
+    min-height: 100vh;
   }
 
-  /* Colorful utility classes */
+  /* Neon-inspired utility classes */
   .gradient-primary {
     background: var(--gradient-primary);
   }
@@ -169,20 +151,16 @@ All colors MUST be HSL.
     background: var(--gradient-secondary);
   }
 
-  .gradient-accent {
-    background: var(--gradient-accent);
-  }
-
-  .gradient-cool {
-    background: var(--gradient-cool);
+  .gradient-background {
+    background: var(--gradient-background);
   }
 
   .gradient-warm {
     background: var(--gradient-warm);
   }
 
-  .gradient-rainbow {
-    background: var(--gradient-rainbow);
+  .gradient-glow {
+    background: var(--gradient-glow);
   }
 
   .shadow-primary {
@@ -193,12 +171,16 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-secondary);
   }
 
-  .shadow-accent {
-    box-shadow: var(--shadow-accent);
-  }
-
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-soft-glow {
+    box-shadow: var(--shadow-soft-glow);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
   }
 
   .text-gradient {
@@ -208,10 +190,62 @@ All colors MUST be HSL.
     background-clip: text;
   }
 
-  .border-gradient {
-    border: 2px solid transparent;
-    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
-                var(--gradient-primary) border-box;
+  .text-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  .border-glow {
+    border: 1px solid hsl(var(--primary) / 0.2);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .border-glow:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: var(--shadow-soft-glow);
+  }
+
+  .neon-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--primary) / 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neon-card:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .neon-button {
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+    border: none;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neon-button:hover {
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+  }
+
+  .neon-input {
+    background: hsl(var(--input));
+    border: 1px solid hsl(var(--primary) / 0.2);
+    color: hsl(var(--foreground));
+    transition: all 0.3s ease;
+  }
+
+  .neon-input:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+    outline: none;
+  }
+
+  /* Profile image glow */
+  .profile-glow {
+    border: 2px solid hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
   }
 
   /* Enhanced animations */
@@ -220,20 +254,54 @@ All colors MUST be HSL.
   }
 
   .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
+    animation: neon-glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out forwards;
   }
 
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
   }
 
-  @keyframes glow {
-    from { box-shadow: 0 0 20px hsla(var(--primary) / 0.5); }
-    to { box-shadow: 0 0 30px hsla(var(--primary) / 0.8); }
+  @keyframes neon-glow {
+    from { 
+      box-shadow: var(--shadow-primary);
+    }
+    to { 
+      box-shadow: var(--shadow-glow);
+    }
   }
 
-  /* Floating Feedback Button */
+  @keyframes fade-in {
+    from { 
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from { 
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Enhanced Floating Feedback Button with Neon Theme */
   .floating-feedback-btn {
     position: fixed;
     bottom: 20px;
@@ -241,7 +309,7 @@ All colors MUST be HSL.
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: hsl(var(--primary));
+    background: var(--gradient-primary);
     color: hsl(var(--primary-foreground));
     border: none;
     cursor: pointer;
@@ -251,10 +319,11 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-primary);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
+    font-size: 24px;
   }
 
   .floating-feedback-btn:hover {
-    background: hsl(var(--primary-dark));
+    background: var(--gradient-warm);
     transform: scale(1.1);
     box-shadow: var(--shadow-glow);
   }

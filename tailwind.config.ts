@@ -28,7 +28,8 @@ export default {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
 					light: 'hsl(var(--primary-light))',
-					dark: 'hsl(var(--primary-dark))'
+					dark: 'hsl(var(--primary-dark))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -45,10 +46,10 @@ export default {
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))',
-					pink: 'hsl(var(--accent-pink))',
-					blue: 'hsl(var(--accent-blue))',
-					green: 'hsl(var(--accent-green))',
-					orange: 'hsl(var(--accent-orange))'
+					amber: 'hsl(var(--accent-amber))',
+					cream: 'hsl(var(--accent-cream))',
+					warm: 'hsl(var(--accent-warm))',
+					glow: 'hsl(var(--accent-glow))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -77,16 +78,16 @@ export default {
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-secondary': 'var(--gradient-secondary)',
-				'gradient-accent': 'var(--gradient-accent)',
-				'gradient-cool': 'var(--gradient-cool)',
+				'gradient-background': 'var(--gradient-background)',
 				'gradient-warm': 'var(--gradient-warm)',
-				'gradient-rainbow': 'var(--gradient-rainbow)'
+				'gradient-glow': 'var(--gradient-glow)'
 			},
 			boxShadow: {
 				'primary': 'var(--shadow-primary)',
 				'secondary': 'var(--shadow-secondary)',
-				'accent': 'var(--shadow-accent)',
-				'glow': 'var(--shadow-glow)'
+				'glow': 'var(--shadow-glow)',
+				'soft-glow': 'var(--shadow-soft-glow)',
+				'card-hover': 'var(--shadow-card-hover)'
 			},
 			keyframes: {
 				'accordion-down': {

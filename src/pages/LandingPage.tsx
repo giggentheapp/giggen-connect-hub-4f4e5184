@@ -129,27 +129,36 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
       {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-glow bg-card/90 backdrop-blur-md sticky top-0 z-50 shadow-soft-glow">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold text-primary">GIGGEN</div>
+            <div className="flex items-center gap-3 animate-fade-in">
+              <div className="relative">
+                <img 
+                  src="/logo-guitar-lightbulb.png" 
+                  alt="GIGGEN Logo" 
+                  className="w-10 h-10 object-contain animate-glow profile-glow rounded-lg p-1"
+                />
+              </div>
+              <div className="text-2xl font-bold text-gradient">GIGGEN</div>
+            </div>
             
             <nav className="hidden md:flex items-center space-x-8">
               <button 
                 onClick={() => navigate('/about')}
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-all duration-300 hover:text-glow"
               >
                 {t.nav.about}
               </button>
               <button 
                 onClick={() => navigate('/privacy')}
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-all duration-300 hover:text-glow"
               >
                 {t.nav.privacy}
               </button>
               <button 
                 onClick={() => navigate('/terms')}
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-all duration-300 hover:text-glow"
               >
                 {t.nav.terms}
               </button>
@@ -160,13 +169,13 @@ const LandingPage = () => {
                 <select 
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as 'no' | 'en')}
-                  className="bg-secondary border border-border rounded-md px-3 py-1 text-sm"
+                  className="neon-input bg-input border-glow rounded-md px-3 py-1 text-sm"
                 >
                   <option value="no">🇳🇴 Norsk</option>
                   <option value="en">🇬🇧 English</option>
                 </select>
               </div>
-              <Button onClick={() => navigate('/auth')} variant="outline">
+              <Button onClick={() => navigate('/auth')} className="neon-button">
                 {t.nav.login}
               </Button>
             </div>
@@ -190,7 +199,7 @@ const LandingPage = () => {
             <Button 
               onClick={() => navigate('/auth')}
               size="lg"
-              className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 transition-all transform hover:scale-105"
+              className="neon-button text-lg px-8 py-6 animate-glow"
             >
               <Music className="mr-2 h-5 w-5" />
               {t.hero.cta}
