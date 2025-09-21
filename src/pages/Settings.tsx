@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Languages } from 'lucide-react';
-import { SocialMediaSettings } from '@/components/SocialMediaSettings';
 import { UserSettings } from '@/components/UserSettings';
 import { useRoleData } from '@/hooks/useRole';
 import { useState, useEffect } from 'react';

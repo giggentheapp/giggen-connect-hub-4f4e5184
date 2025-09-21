@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
+import { AvatarCropModal } from '@/components/AvatarCropModal';
 
 interface UserProfile {
   id: string;
@@ -83,6 +84,7 @@ export const UserSettings = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [showAvatarCrop, setShowAvatarCrop] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -303,7 +305,30 @@ export const UserSettings = ({
     try {
       setLoading(true);
 
-      // Prepare updates object
+      // Prepare updates object with proper validation
+      const isValidUrl = (url: string) => {
+        try {
+          new URL(url.startsWith('http') ? url : 'https://' + url);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      };
+
+      // Validate social media URLs
+      const validatedSocialLinks: Record<string, string> = {};
+      for (const [key, value] of Object.entries(socialLinks)) {
+        if (value.trim() && !isValidUrl(value.trim())) {
+          toast({
+            title: "Ugyldig URL",
+            description: `Ugyldig URL for ${key}: ${value}`,
+            variant: "destructive"
+          });
+          return;
+        }
+        validatedSocialLinks[key] = value.trim();
+      }
+
       const updates: Partial<UserProfile> = {
         display_name: profileData.display_name,
         bio: profileData.bio,
@@ -312,7 +337,7 @@ export const UserSettings = ({
         longitude: profileData.longitude,
         is_address_public: profileData.is_address_public,
         contact_info: contactInfo,
-        social_media_links: socialLinks
+        social_media_links: validatedSocialLinks
       };
 
       // Update profile
@@ -463,7 +488,11 @@ export const UserSettings = ({
               <p className="text-sm text-muted-foreground">
                 Velg et profilbilde som representerer deg
               </p>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAvatarCrop(true)}
+              >
                 <Camera className="h-4 w-4 mr-2" />
                 Endre bilde
               </Button>
@@ -732,6 +761,11 @@ export const UserSettings = ({
                 onChange={(e) => setSocialLinks(prev => ({ ...prev, website: e.target.value }))}
               />
             </div>
+
+            <Button onClick={handleProfileSubmit} disabled={loading} className="w-full">
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Lagrer sosiale medier...' : 'Lagre sosiale medier'}
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -1029,6 +1063,18 @@ export const UserSettings = ({
           </AlertDialog>
         </CardContent>
       </Card>
+
+      {/* Avatar Crop Modal */}
+      <AvatarCropModal
+        isOpen={showAvatarCrop}
+        onClose={() => setShowAvatarCrop(false)}
+        onAvatarUpdate={(avatarUrl) => {
+          setProfileData(prev => ({ ...prev, avatar_url: avatarUrl }));
+          onProfileUpdate?.({ ...profileData, avatar_url: avatarUrl });
+        }}
+        currentAvatarUrl={profileData.avatar_url}
+        userId={profile.user_id}
+      />
     </div>
   );
 };
