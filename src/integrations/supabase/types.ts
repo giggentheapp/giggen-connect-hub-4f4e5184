@@ -987,6 +987,31 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_safe_public_booking_data: {
+        Args: { booking_uuid: string }
+        Returns: {
+          created_at: string
+          description: string
+          event_date: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          title: string
+          venue: string
+        }[]
+      }
+      get_safe_public_profile_data: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          id: string
+          role: string
+          user_id: string
+        }[]
+      }
       get_secure_profile_data: {
         Args: { target_user_id: string; viewer_role?: string }
         Returns: {
