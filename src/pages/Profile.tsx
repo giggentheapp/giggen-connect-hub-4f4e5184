@@ -14,6 +14,7 @@ import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
+import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 interface ProfileData {
@@ -28,6 +29,7 @@ interface ProfileData {
   latitude: number | null;
   longitude: number | null;
   is_address_public: boolean;
+  social_media_links?: any;
 }
 interface ProfileSettings {
   show_about: boolean;
@@ -283,6 +285,13 @@ const Profile = () => {
               <p className="text-foreground leading-relaxed">
                 {profile.bio || (isOwnProfile ? "Ingen beskrivelse lagt til. Legg til en beskrivelse i innstillingene." : "Ingen beskrivelse tilgjengelig.")}
               </p>
+              
+              {/* Social Media Links */}
+              {profile.social_media_links && (
+                <div className="mt-4">
+                  <SocialMediaLinks socialLinks={profile.social_media_links} />
+                </div>
+              )}
             </CardContent>
           </Card>}
 

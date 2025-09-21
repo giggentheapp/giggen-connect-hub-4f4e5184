@@ -6,6 +6,8 @@ import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 
+import { SocialMediaLinks } from '@/components/SocialMediaLinks';
+
 interface UserProfile {
   id: string;
   user_id: string;
@@ -18,6 +20,7 @@ interface UserProfile {
   longitude: number | null;
   is_address_public: boolean;
   contact_info: any;
+  social_media_links?: any;
 }
 interface ProfileSectionProps {
   profile: UserProfile;
@@ -60,7 +63,10 @@ export const ProfileSection = ({
             </div>
           </div>
 
-          
+          {/* Social Media Links */}
+          {profile.social_media_links && (
+            <SocialMediaLinks socialLinks={profile.social_media_links} />
+          )}
         </CardContent>
       </Card>
 

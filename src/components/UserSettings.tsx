@@ -68,8 +68,7 @@ export const UserSettings = ({
   });
   const [contactInfo, setContactInfo] = useState({
     phone: '',
-    email: '',
-    website: ''
+    email: ''
   });
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -101,8 +100,7 @@ export const UserSettings = ({
           const info = currentProfile.contact_info as any;
           setContactInfo({
             phone: info.phone || '',
-            email: info.email || '',
-            website: info.website || ''
+            email: info.email || ''
           });
         }
       }
@@ -572,17 +570,6 @@ export const UserSettings = ({
                 {validationErrors.phone && (
                   <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
                 )}
-              </div>
-              
-              <div>
-                <Label htmlFor="website">Nettside</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  value={contactInfo.website}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, website: e.target.value }))}
-                  placeholder="https://dinside.no"
-                />
               </div>
             </div>
           </div>
