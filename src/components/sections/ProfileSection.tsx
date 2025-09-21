@@ -5,7 +5,7 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
-import { MakerPrivacySettings } from '@/components/MakerPrivacySettings';
+
 interface UserProfile {
   id: string;
   user_id: string;
@@ -121,9 +121,5 @@ export const ProfileSection = ({
         </CardContent>
       </Card>
 
-      {/* Privacy Settings Section - Only for Makers */}
-      {profile.role === 'maker' && (
-        <MakerPrivacySettings userId={profile.user_id} />
-      )}
     </div>;
 };
