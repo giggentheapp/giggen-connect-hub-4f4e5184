@@ -343,6 +343,30 @@ export const UserSettings = ({
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+
+      toast({
+        title: 'Logget ut',
+        description: 'Du har blitt logget ut av kontoen din'
+      });
+      
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: 'Feil ved utlogging',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (deleteConfirmation !== 'SLETT') {
       toast({
@@ -793,10 +817,29 @@ export const UserSettings = ({
         </CardContent>
       </Card>
 
-      {/* Delete Account */}
-      <Card className="border-destructive">
+      {/* Logout */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
+          <CardTitle className="flex items-center gap-2">
+            <LogOut className="h-5 w-5" />
+            Logg ut
+          </CardTitle>
+          <CardDescription>
+            Logg ut av kontoen din og returner til startsiden
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full">
+            <LogOut className="h-4 w-4 mr-2" />
+            {loading ? 'Logger ut...' : 'Logg ut'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <Trash2 className="h-5 w-5" />
             Slett konto
           </CardTitle>
@@ -807,7 +850,7 @@ export const UserSettings = ({
         <CardContent>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full">
+              <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Slett konto permanent
               </Button>
