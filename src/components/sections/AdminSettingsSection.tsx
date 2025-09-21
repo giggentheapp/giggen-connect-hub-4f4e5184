@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { UserSettings } from '@/components/UserSettings';
 import { Settings } from '@/pages/Settings';
 
 interface UserProfile {
@@ -21,24 +19,10 @@ interface AdminSettingsSectionProps {
 }
 
 export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => {
-  const [updatedProfile, setUpdatedProfile] = useState(profile);
-
-  const handleProfileUpdate = (newProfile: UserProfile) => {
-    setUpdatedProfile(newProfile);
-    // Trigger real-time update by broadcasting the change
-    window.dispatchEvent(new CustomEvent('profileUpdated', { detail: newProfile }));
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Language and App Settings */}
+    <div className="w-full">
+      {/* Settings component already includes UserSettings internally - no need to duplicate */}
       <Settings />
-      
-      {/* User Profile Settings */}
-      <UserSettings 
-        profile={updatedProfile}
-        onProfileUpdate={handleProfileUpdate}
-      />
     </div>
   );
 };
