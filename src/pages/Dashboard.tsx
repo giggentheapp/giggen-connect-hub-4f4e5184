@@ -8,6 +8,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerView } from '@/components/GoerView';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface UserProfile {
   id: string;
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Set up auth state listener
@@ -66,7 +68,7 @@ const Dashboard = () => {
       if (error) {
         console.error('Dashboard: Error loading profile:', error);
         toast({
-          title: "Feil ved lasting av profil",
+          title: t('profileLoadError'),
           description: error.message,
           variant: "destructive",
         });
@@ -93,7 +95,7 @@ const Dashboard = () => {
     if (error) {
       console.error('❌ Dashboard.tsx: Sign out error:', error);
       toast({
-        title: "Feil ved utlogging",
+        title: t('signOutError'),
         description: error.message,
         variant: "destructive",
       });
@@ -108,7 +110,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4 shadow-glow"></div>
-          <p className="text-lg font-medium bg-gradient-primary bg-clip-text text-transparent">Laster dashboard...</p>
+          <p className="text-lg font-medium bg-gradient-primary bg-clip-text text-transparent">{t('loadingDashboard')}</p>
         </div>
       </div>
     );
@@ -120,10 +122,10 @@ const Dashboard = () => {
         <Card className="w-full max-w-md shadow-glow border-gradient">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground mb-4">
-              Kunne ikke laste brukerdata
+              {t('couldNotLoadUserData')}
             </p>
             <Button variant="gradient" onClick={() => navigate('/auth')} className="w-full">
-              Gå til innlogging
+              {t('goToLogin')}
             </Button>
           </CardContent>
         </Card>

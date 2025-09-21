@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProfileModal } from '@/components/ProfileModal';
 import { MakerCard } from '@/components/MakerCard';
 import { SearchFilters } from '@/components/SearchFilters';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface FilterOptions {
   location: string;
@@ -56,6 +57,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const { isGoer, ismaker } = useRole();
+  const { t } = useTranslation();
 
   // Auto-fetch makers when component mounts
   useEffect(() => {
@@ -72,7 +74,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       // Get current user for role checking
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError('Du må være logget inn for å se makere.');
+        setError(t('loginRequired'));
         return;
       }
 
@@ -99,7 +101,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       
       if (profileError) {
         console.error('❌ Failed to fetch makers:', profileError);
-        setError('Kunne ikke laste musikere. Prøv igjen senere.');
+        setError(t('couldNotLoadMusicians'));
         setMakers([]);
         setFilteredMakers([]);
         return;
@@ -134,7 +136,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       
     } catch (err: any) {
       console.error('❌ Error fetching makers:', err);
-      setError(err.message || 'Noe gikk galt ved lasting av musikere');
+      setError(err.message || t('somethingWentWrong'));
       setMakers([]);
       setFilteredMakers([]);
     } finally {
@@ -218,7 +220,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
         <div className="px-4 py-3 bg-background border-b border-border/10 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-foreground">Makere i nettverket</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t('makersInNetwork')}</h2>
               <Badge variant="outline" className="text-xs bg-muted">
                 {loading ? '...' : filteredMakers.length}
               </Badge>
@@ -251,7 +253,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             <div className="flex items-center justify-center py-12 text-muted-foreground">
               <div className="text-center">
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                <p>Laster makere...</p>
+                <p>{t('loadingMakers')}</p>
               </div>
             </div>
           ) : error ? (
@@ -265,7 +267,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                   size="sm"
                   className="text-primary border-primary/20 hover:bg-primary hover:text-white"
                 >
-                  Prøv igjen
+                  {t('tryAgain')}
                 </Button>
               </div>
             </div>
@@ -275,13 +277,13 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p className="font-medium">
                   {searchTerm || Object.values(filters).some(Boolean)
-                    ? 'Ingen makere funnet som matcher kriteriene.'
-                    : 'Ingen makere funnet.'
+                    ? t('noMakersFoundFiltered')
+                    : t('noMakersFound')
                   }
                 </p>
                 {(searchTerm || Object.values(filters).some(Boolean)) && (
                   <p className="text-sm">
-                    Prøv å justere søket eller filtrene for å se flere resultater.
+                    {t('adjustFilters')}
                   </p>
                 )}
               </div>
