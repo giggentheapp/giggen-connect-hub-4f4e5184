@@ -16,18 +16,13 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
   return (
     <aside className="hidden md:flex flex-col w-60 bg-sidebar-background border-r border-sidebar-border h-full">
       <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3 animate-fade-in">
-          <div className="relative">
-            <img 
-              src="/logo-guitar-lightbulb.png" 
-              alt="GIGGEN Logo" 
-              className="w-10 h-10 object-contain animate-glow profile-glow rounded-lg p-1"
-            />
-          </div>
-          <div>
-            <span className="text-xl font-bold text-gradient">GIGGEN</span>
-            <p className="text-xs text-muted-foreground">Connect Hub</p>
-          </div>
+        <div className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+            alt="GIGGEN Logo" 
+            className="w-8 h-8 object-contain"
+          />
+          <span className="text-lg font-semibold text-sidebar-foreground">GIGGEN</span>
         </div>
       </div>
       
