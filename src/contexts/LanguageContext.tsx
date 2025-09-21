@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { LanguageService } from '../services/languageService';
 
 interface LanguageContextType {
   language: 'no' | 'en';
@@ -20,25 +21,32 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguage] = useState<'no' | 'en'>('no'); // Default to Norwegian
+  const [language, setLanguage] = useState<'no' | 'en'>('no');
 
   useEffect(() => {
-    // Get language from localStorage or URL parameter
-    const savedLanguage = localStorage.getItem('appLanguage') as 'no' | 'en' || 'no';
+    // Read initial language from shared service
+    const currentLang = LanguageService.getCurrentLanguage();
+    console.log('Main app reading language:', currentLang);
+    setLanguage(currentLang);
+    
+    // Listen for language changes from any part of the app
+    const unsubscribe = LanguageService.onLanguageChange((newLang) => {
+      console.log('Main app received language change:', newLang);
+      setLanguage(newLang);
+    });
+    
+    // Check URL parameter on app startup
     const urlParams = new URLSearchParams(window.location.search);
     const urlLanguage = urlParams.get('lang') as 'no' | 'en';
-    
     if (urlLanguage && ['no', 'en'].includes(urlLanguage)) {
-      setLanguage(urlLanguage);
-      localStorage.setItem('appLanguage', urlLanguage);
-    } else {
-      setLanguage(savedLanguage);
+      LanguageService.setLanguage(urlLanguage);
     }
+    
+    return unsubscribe;
   }, []);
 
   const changeLanguage = (newLanguage: 'no' | 'en') => {
-    setLanguage(newLanguage);
-    localStorage.setItem('appLanguage', newLanguage);
+    LanguageService.setLanguage(newLanguage);
   };
 
   return (

@@ -1,14 +1,48 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Users, FileText, Music, Calendar, Star } from 'lucide-react';
-import { useTranslation } from '@/hooks/useTranslation';
-import { LanguageSelector } from '@/components/LanguageSelector';
+import { LanguageService } from '@/services/languageService';
+import { translations } from '@/translations';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { t, language } = useTranslation();
+  const [language, setLanguage] = useState<'no' | 'en'>('no');
+  
+  useEffect(() => {
+    // Get initial language from shared service
+    const currentLang = LanguageService.getCurrentLanguage();
+    setLanguage(currentLang);
+    
+    // Listen for language changes
+    const unsubscribe = LanguageService.onLanguageChange((newLang) => {
+      setLanguage(newLang);
+    });
+    
+    return unsubscribe;
+  }, []);
+  
+  const changeLanguage = (newLang: 'no' | 'en') => {
+    LanguageService.setLanguage(newLang);
+  };
+  
+  const t = (key: string): string => {
+    const keys = key.split('.');
+    let value: any = translations[language];
+    
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    
+    return typeof value === 'string' ? value : key;
+  };
+
+  const navigateToApp = () => {
+    // Pass language to app via URL parameter to ensure connection
+    navigate(`/dashboard?lang=${language}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
@@ -40,7 +74,25 @@ const LandingPage = () => {
             </nav>
 
             <div className="flex items-center space-x-4">
-              <LanguageSelector variant="compact" />
+              {/* Language selector */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={language === 'no' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => changeLanguage('no')}
+                  className="transition-all"
+                >
+                  🇳🇴 Norsk
+                </Button>
+                <Button
+                  variant={language === 'en' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => changeLanguage('en')}
+                  className="transition-all"
+                >
+                  🇬🇧 English
+                </Button>
+              </div>
               <Button onClick={() => navigate('/auth')} variant="outline">
                 {t('login')}
               </Button>
@@ -63,7 +115,7 @@ const LandingPage = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => navigate('/auth')}
+              onClick={navigateToApp}
               size="lg"
               className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 transition-all transform hover:scale-105"
             >
@@ -245,7 +297,7 @@ const LandingPage = () => {
                   {t('cookiePolicy')}
                 </a>
                 <Button 
-                  onClick={() => navigate('/auth')}
+                  onClick={navigateToApp}
                   className="w-full mt-4"
                 >
                   {t('getStarted')}
