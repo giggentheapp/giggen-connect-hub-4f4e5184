@@ -90,13 +90,89 @@ export const MakerExploreSection = ({
     });
   };
   return <div className="fixed inset-0 bg-background ml-16">
-      {/* Placeholder for future map implementation */}
+      {/* Coming Soon Map Message */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="text-center">
-          <MapPin className="w-24 h-24 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">Explore Makers</h2>
-          <p className="text-muted-foreground">Map view available in future updates</p>
-        </div>
+        <Card className="max-w-2xl w-full bg-card/95 backdrop-blur-sm border shadow-lg">
+          <CardContent className="p-8 text-center">
+            {/* Map Icon */}
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <MapPin className="w-10 h-10 text-primary" />
+            </div>
+
+            {/* Main Title */}
+            <h2 className="text-2xl font-bold text-foreground mb-4">Kart kommer snart!</h2>
+            
+            {/* Description */}
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Vi jobber med å lage et interaktivt kart som gjør det enklere å finne 
+              arrangementer i ditt område.
+            </p>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Upcoming Events */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Search className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Kommende arrangementer</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Se alle arrangementer på kartet med dato og tid
+                  </p>
+                </div>
+              </div>
+
+              {/* Musicians Nearby */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Music className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Musikere i nærheten</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Finn talentfulle musikere og artister i ditt område
+                  </p>
+                </div>
+              </div>
+
+              {/* Local Community */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Lokalsamfunn</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Utforsk det lokale musikksamfunnet rundt deg
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Interim Message */}
+            <p className="text-muted-foreground mb-6">
+              I mellomtiden kan du utforske musikere og arrangementer i listen.
+            </p>
+
+            {/* Action Button */}
+            <Button 
+              onClick={() => setActiveTab('list')}
+              size="lg"
+              className="mb-4"
+            >
+              Gå til utforsk-siden
+            </Button>
+
+            {/* Status Badge */}
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <Badge variant="secondary" className="text-xs">
+                Under utvikling
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       {/* Floating Controls */}
