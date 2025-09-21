@@ -112,6 +112,14 @@ export const ProfileModal = ({
           // Other's profile - check privacy settings for portfolio visibility
           const profilePrivacySettings = (profileData?.privacy_settings as any) || {};
           const showPortfolio = profilePrivacySettings.show_portfolio_to_goers === true;
+          
+          console.log('📁 Portfolio visibility check:', {
+            userId,
+            privacySettings: profilePrivacySettings,
+            showPortfolio,
+            currentUserRole
+          });
+          
           setPortfolioVisible(showPortfolio);
           
           if (showPortfolio) {
@@ -121,7 +129,16 @@ export const ProfileModal = ({
             } = await supabase.from('profile_portfolio').select('*').eq('user_id', userId).eq('is_public', true).order('created_at', {
               ascending: false
             });
+            
+            if (error) {
+              console.error('❌ Error fetching portfolio:', error);
+            } else {
+              console.log('✅ Portfolio data fetched:', data?.length || 0);
+            }
+            
             portfolioData = data || [];
+          } else {
+            console.log('❌ Portfolio not visible due to privacy settings');
           }
         }
         setPortfolio(portfolioData);
@@ -235,17 +252,27 @@ export const ProfileModal = ({
                   <CardHeader>
                     <CardTitle>Portefølje</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    {!portfolioVisible ? <p className="text-muted-foreground italic">
-                        Portefølje er ikke offentlig tilgjengelig
-                      </p> : portfolio.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {portfolio.map(file => <div key={file.id} className="space-y-2">
-                            {renderFilePreview(file)}
-                            {file.title && <h4 className="font-medium">{file.title}</h4>}
-                            {file.description && <p className="text-sm text-muted-foreground">{file.description}</p>}
-                          </div>)}
-                      </div> : portfolioVisible ? <p className="text-muted-foreground italic">Ingen porteføljeelementer funnet</p> : <p className="text-muted-foreground italic">Portefølje er ikke tilgjengelig</p>}
-                  </CardContent>
+                   <CardContent>
+                     {!portfolioVisible ? (
+                       <p className="text-muted-foreground italic">
+                         Portefølje er ikke offentlig tilgjengelig
+                       </p>
+                     ) : portfolio.length > 0 ? (
+                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                         {portfolio.map(file => (
+                           <div key={file.id} className="space-y-2">
+                             {renderFilePreview(file)}
+                             {file.title && <h4 className="font-medium">{file.title}</h4>}
+                             {file.description && <p className="text-sm text-muted-foreground">{file.description}</p>}
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-muted-foreground italic">
+                         Ingen porteføljeelementer funnet
+                       </p>
+                     )}
+                   </CardContent>
                 </Card>
               </TabsContent>
 
