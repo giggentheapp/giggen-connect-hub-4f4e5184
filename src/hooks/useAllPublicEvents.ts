@@ -17,20 +17,20 @@ interface PublicEvent {
   published_at: string | null;
 }
 
-export const usePublicEvents = (makerId: string) => {
+export const useAllPublicEvents = () => {
   const [events, setEvents] = useState<PublicEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPublicEvents = useCallback(async () => {
+  const fetchAllPublicEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🎭 Fetching public events for maker:', makerId);
+      console.log('🎭 Fetching all public events for Goer view...');
 
-      // Fetch published events for this maker using the enhanced public access policy  
-      // This will use the new "goers_can_view_published_events" policy for Goers
+      // Fetch all published events that Goers can see
+      // This uses the "goers_can_view_published_events" RLS policy
       const { data, error: fetchError } = await supabase
         .from('bookings')
         .select(`
@@ -40,31 +40,28 @@ export const usePublicEvents = (makerId: string) => {
         `)
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true)
-        .or(`sender_id.eq.${makerId},receiver_id.eq.${makerId}`)
         .order('event_date', { ascending: true, nullsFirst: false });
 
       if (fetchError) {
-        console.error('❌ Error fetching public events:', fetchError);
+        console.error('❌ Error fetching all public events:', fetchError);
         throw fetchError;
       }
 
-      console.log('✅ Fetched public events:', data?.length || 0);
+      console.log('✅ Fetched all public events:', data?.length || 0);
       setEvents(data || []);
 
     } catch (err: any) {
-      console.error('❌ Error in fetchPublicEvents:', err);
+      console.error('❌ Error in fetchAllPublicEvents:', err);
       setError(err.message);
       setEvents([]);
     } finally {
       setLoading(false);
     }
-  }, [makerId]);
+  }, []);
 
   useEffect(() => {
-    if (makerId) {
-      fetchPublicEvents();
-    }
-  }, [makerId, fetchPublicEvents]);
+    fetchAllPublicEvents();
+  }, [fetchAllPublicEvents]);
 
-  return { events, loading, error, refetch: fetchPublicEvents };
+  return { events, loading, error, refetch: fetchAllPublicEvents };
 };
