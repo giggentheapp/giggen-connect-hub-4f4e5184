@@ -33,14 +33,20 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       setLoading(true);
       setError(null);
 
+      console.log('🎨 Fetching portfolio for user:', userId);
+
       const { data, error: fetchError } = await supabase
         .from('profile_portfolio')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('❌ Portfolio fetch error:', fetchError);
+        throw fetchError;
+      }
 
+      console.log('✅ Portfolio fetched successfully:', data?.length || 0);
       setFiles(data || []);
     } catch (err: any) {
       console.error('Error fetching portfolio:', err);

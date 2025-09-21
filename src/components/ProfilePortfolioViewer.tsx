@@ -41,7 +41,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
           <p className="text-sm text-muted-foreground">
             {showControls || isOwnProfile
               ? "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp."
-              : "Ingen offentlige porteføljefiler tilgjengelig"
+              : "Ingen offentlige porteføljefiler tilgjengelig eller eieren har ikke tillatt visning av portefølje"
             }
           </p>
         </CardContent>
