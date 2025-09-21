@@ -331,7 +331,6 @@ export const useBookings = (userId?: string) => {
     deleteBookingSecurely,
     rejectBooking,
     permanentlyDeleteBooking,
-    refetch: fetchBookings,
-    fetchHistorical: fetchBookings // Same as refetch - no need for separate function
+    refetch: fetchBookings
   };
 };

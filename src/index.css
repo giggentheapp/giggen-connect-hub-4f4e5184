@@ -262,4 +262,65 @@ All colors MUST be HSL.
   .floating-feedback-btn:active {
     transform: scale(0.95);
   }
+
+  /* Safari-specific CSS fixes for booking section */
+  .safari-compatible {
+    /* Safari flexbox fixes */
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    
+    /* Safari height issues */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* Safari button fixes */
+  .safari-compatible button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari input fixes */
+  .safari-compatible input,
+  .safari-compatible textarea,
+  .safari-compatible select {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari scroll fixes */
+  .safari-compatible {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+
+  /* Safari performance optimizations */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .safari-compatible {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+    
+    /* Prevent Safari memory leaks */
+    .safari-compatible * {
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /* Safari-specific error boundary styling */
+  .safari-error-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    padding: 2rem;
+    text-align: center;
+  }
 }

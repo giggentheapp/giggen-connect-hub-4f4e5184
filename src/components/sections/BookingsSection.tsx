@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -36,18 +37,32 @@ interface BookingsSectionProps {
 export const BookingsSection = ({
   profile
 }: BookingsSectionProps) => {
+  // Safari compatibility - Add error handling and performance optimizations
+  useEffect(() => {
+    // Safari-specific initialization
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      // Enable smooth scrolling for Safari (use setAttribute to avoid TS errors)
+      document.documentElement.setAttribute('style', 'overflow-scrolling: touch; -webkit-overflow-scrolling: touch;');
+      
+      // Safari performance logging (with type safety)
+      const perf = window.performance as any;
+      if (perf?.memory) {
+        console.log('Safari memory usage:', perf.memory);
+      }
+    }
+  }, []);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
   const {
     bookings,
     loading,
     updateBooking,
-    refetch,
-    fetchHistorical
+    refetch
   } = useBookings(profile.user_id);
   const {
     toast
@@ -74,10 +89,7 @@ export const BookingsSection = ({
     b.status === 'upcoming'
   );
   
-  const historicalBookings = bookings.filter(b => 
-    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    (b.status === 'cancelled' || b.status === 'completed')
-  );
+  // Remove historical bookings - we now permanently delete all bookings
 
   // Helper functions for booking status display with new workflow
   const getStatusColor = (status: string) => {
@@ -200,7 +212,8 @@ export const BookingsSection = ({
         <p>Laster bookinger...</p>
       </div>;
   }
-  return <div className="space-y-6">
+  return <SafariErrorBoundary>
+    <div className="space-y-6 safari-compatible">
 
       {/* Tab Navigation - New Workflow */}
       <div className="flex gap-2 border-b flex-wrap">
@@ -219,14 +232,6 @@ export const BookingsSection = ({
         <Button variant={activeTab === 'upcoming' ? 'default' : 'ghost'} onClick={() => setActiveTab('upcoming')} className="flex items-center gap-2">
           <Check className="h-4 w-4" />
           Kommende arrangementer ({upcomingEvents.length})
-        </Button>
-        <Button 
-          variant={activeTab === 'history' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('history')} 
-          className="flex items-center gap-2"
-        >
-          <Clock className="h-4 w-4" />
-          Historikk ({historicalBookings.length})
         </Button>
       </div>
 
@@ -290,20 +295,7 @@ export const BookingsSection = ({
               </Card> : upcomingEvents.map(booking => <BookingCard key={booking.id} booking={booking} />)}
           </>}
 
-        {activeTab === 'history' && <>
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Historikk</h3>
-              <p className="text-sm text-muted-foreground">
-                Avviste, avlyste eller slettede bookinger. Sensitiv data er fjernet for personvern.
-              </p>
-            </div>
-            {historicalBookings.length === 0 ? <Card>
-                <CardContent className="text-center py-8">
-                  <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen historiske bookinger</p>
-                </CardContent>
-              </Card> : historicalBookings.map(booking => <BookingCard key={booking.id} booking={booking} />)}
-          </>}
+        {/* History tab removed - all deletions are now permanent */}
       </div>
 
       {/* Enhanced Booking Details Dialog */}
@@ -319,5 +311,6 @@ export const BookingsSection = ({
         }
       }} />
         </>}
-    </div>;
+    </div>
+  </SafariErrorBoundary>;
 };

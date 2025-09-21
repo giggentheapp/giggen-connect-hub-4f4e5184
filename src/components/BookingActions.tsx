@@ -111,23 +111,12 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      if (booking.status === 'pending') {
-        // This is rejection of a pending request - use permanent deletion
-        await rejectBooking(booking.id);
-        toast({
-          title: "Forespørsel avvist",
-          description: "Forespørselen er permanent slettet fra systemet"
-        });
-      } else {
-        // This is cancellation of an approved booking - use soft deletion
-        await updateBooking(booking.id, {
-          status: 'cancelled'
-        });
-        toast({
-          title: "Avtale avlyst",
-          description: "Avtalen har blitt avlyst og flyttet til historikk"
-        });
-      }
+      // Always use permanent deletion - no more history
+      await rejectBooking(booking.id);
+      toast({
+        title: "Forespørsel avvist",
+        description: "Forespørselen er permanent slettet fra systemet"
+      });
       onAction?.();
     } catch (error) {
       // Error handled in hook
@@ -152,22 +141,12 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      // For historical bookings (cancelled/completed), use permanent deletion
-      // since they're already in history status
-      if (booking.status === 'cancelled' || booking.status === 'completed') {
-        await permanentlyDeleteBooking(booking.id);
-        toast({
-          title: "Arrangement permanent slettet",
-          description: "Arrangementet er fjernet fra historikken og kan ikke gjenopprettes"
-        });
-      } else {
-        // For active bookings, use secure deletion (archiving)
-        await deleteBookingSecurely(booking.id, 'Bruker slettet bookingen');
-        toast({
-          title: "Arrangement arkivert",
-          description: "Arrangementet er flyttet til historikk"
-        });
-      }
+      // Always use permanent deletion - no more history
+      await permanentlyDeleteBooking(booking.id);
+      toast({
+        title: "Booking permanent slettet",
+        description: "Bookingen er permanent fjernet fra systemet og kan ikke gjenopprettes"
+      });
       onAction?.();
     } catch (error: any) {
       console.error('Error deleting booking:', error);
@@ -176,14 +155,10 @@ export const BookingActions = ({
     }
   };
   const getDeleteWarningText = () => {
-    if (booking.status === 'cancelled' || booking.status === 'completed') {
-      return "Dette vil PERMANENT slette arrangementet fra historikken. Handlingen kan ikke angres.";
-    } else if (booking.status === 'upcoming') {
-      return "Dette vil slette et publisert arrangement. ADVARSEL: Dette kan påvirke andre brukere som har sett arrangementet.";
-    } else if (booking.status === 'both_parties_approved') {
-      return "Dette vil avlyse en pågående avtale og flytte den til historikk.";
+    if (booking.status === 'upcoming') {
+      return "Dette vil PERMANENT slette et publisert arrangement. ADVARSEL: Dette kan påvirke andre brukere som har sett arrangementet.";
     }
-    return "Bookingen vil bli flyttet til historikk-seksjonen.";
+    return "Dette vil PERMANENT slette bookingen fra systemet. Handlingen kan ikke angres.";
   };
   const showPublishingSummary = () => {
     setShowSummaryDialog(true);
@@ -329,8 +304,8 @@ export const BookingActions = ({
             </AlertDialogContent>
           </AlertDialog>}
 
-        {/* Delete button for historical bookings */}
-        {(booking.status === 'cancelled' || booking.status === 'completed' || booking.status === 'upcoming') && <AlertDialog>
+        {/* Delete button for all bookings except pending (which use reject) */}
+        {booking.status === 'upcoming' && <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
                 <Trash className="h-4 w-4 mr-1" />
@@ -340,10 +315,7 @@ export const BookingActions = ({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {booking.status === 'cancelled' || booking.status === 'completed' 
-                    ? 'Slett permanent fra historikk?' 
-                    : 'Slett booking?'
-                  }
+                  Slett booking permanent?
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   {getDeleteWarningText()}
@@ -352,10 +324,7 @@ export const BookingActions = ({
               <AlertDialogFooter>
                 <AlertDialogCancel>Avbryt</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {booking.status === 'cancelled' || booking.status === 'completed' 
-                    ? 'Slett permanent' 
-                    : 'Slett'
-                  }
+                  Slett permanent
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
