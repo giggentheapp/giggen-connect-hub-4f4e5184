@@ -4,10 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Languages, Shield, Bell, User } from 'lucide-react';
+import { SocialMediaSettings } from '@/components/SocialMediaSettings';
+import { useRoleData } from '@/hooks/useRole';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Settings = () => {
   const { t } = useAppTranslation();
   const { language, changeLanguage } = useAppLanguage();
+  const { role } = useRoleData();
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
   
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
@@ -65,6 +79,14 @@ export const Settings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Social Media Settings - Only for Makers */}
+      {role === 'maker' && userId && (
+        <SocialMediaSettings 
+          userRole={role} 
+          userId={userId} 
+        />
+      )}
 
       {/* Privacy Settings Preview */}
       <Card className="border-2 hover:border-accent-green/50 transition-all">

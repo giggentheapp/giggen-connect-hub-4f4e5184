@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
+import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 interface ProfileData {
   id: string;
   user_id: string;
@@ -22,6 +23,15 @@ interface ProfileData {
   longitude?: number;
   is_address_public: boolean;
   contact_info?: any;
+  social_media_links?: {
+    instagram?: string;
+    facebook?: string;
+    youtube?: string;
+    spotify?: string;
+    soundcloud?: string;
+    tiktok?: string;
+    website?: string;
+  };
 }
 interface ProfileModalProps {
   isOpen: boolean;
@@ -75,7 +85,7 @@ export const ProfileModal = ({
           .select(`
             id, user_id, display_name, role, avatar_url, created_at,
             bio, address, latitude, longitude, is_address_public,
-            contact_info, privacy_settings
+            contact_info, privacy_settings, social_media_links
           `)
           .eq('user_id', userId)
           .single();
@@ -89,7 +99,12 @@ export const ProfileModal = ({
         }
         if (profileData) {
           console.log('Setting profile:', profileData);
-          setProfile(profileData);
+          // Type conversion for social_media_links
+          const profileWithTypedSocialLinks = {
+            ...profileData,
+            social_media_links: profileData.social_media_links as ProfileData['social_media_links']
+          };
+          setProfile(profileWithTypedSocialLinks);
         } else {
           console.warn('No profile data returned for user:', userId);
         }
@@ -240,6 +255,13 @@ export const ProfileModal = ({
                   </CardHeader>
                   <CardContent>
                     {profile.bio ? <p className="text-muted-foreground">{profile.bio}</p> : <p className="text-muted-foreground italic">Ingen beskrivelse tilgjengelig</p>}
+                    
+                    {/* Social Media Links */}
+                    {profile.social_media_links && (
+                      <div className="mt-6">
+                        <SocialMediaLinks socialLinks={profile.social_media_links} />
+                      </div>
+                    )}
                     
                     {/* SECURITY: Contact info is NEVER shown in profile popups */}
                     {/* Contact info is only available in booking sections when allowed */}

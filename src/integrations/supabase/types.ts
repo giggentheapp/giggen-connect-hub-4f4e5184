@@ -795,6 +795,7 @@ export type Database = {
           longitude: number | null
           privacy_settings: Json | null
           role: Database["public"]["Enums"]["user_role"]
+          social_media_links: Json | null
           updated_at: string
           user_id: string
         }
@@ -811,6 +812,7 @@ export type Database = {
           longitude?: number | null
           privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          social_media_links?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -827,6 +829,7 @@ export type Database = {
           longitude?: number | null
           privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          social_media_links?: Json | null
           updated_at?: string
           user_id?: string
         }

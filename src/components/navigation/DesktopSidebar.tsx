@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface DesktopSidebarProps {
   activeSection: string;
@@ -9,12 +10,40 @@ interface DesktopSidebarProps {
 
 export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSidebarProps) => {
   const { t } = useAppTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const navItems = [
-    { id: 'explore', label: t('explore'), icon: Compass },
-    { id: 'profile', label: t('profile'), icon: User },
-    { id: 'admin', label: t('administration'), icon: Settings },
+    { id: 'explore', label: t('explore'), icon: Compass, type: 'section' },
+    { id: 'profile', label: t('profile'), icon: User, type: 'section' },
+    { id: 'admin', label: t('administration'), icon: Settings, type: 'section' },
   ];
+
+  // Add Settings link for direct route navigation
+  const settingsItem = { 
+    id: 'settings', 
+    label: t('settings'), 
+    icon: Settings, 
+    type: 'route',
+    path: '/settings' 
+  };
+
+  const allItems = [...navItems, settingsItem];
+
+  const handleItemClick = (item: any) => {
+    if (item.type === 'route') {
+      navigate(item.path);
+    } else {
+      onSectionChange(item.id);
+    }
+  };
+
+  const isActiveItem = (item: any) => {
+    if (item.type === 'route') {
+      return location.pathname === item.path;
+    }
+    return activeSection === item.id;
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-60 bg-sidebar-background border-r border-sidebar-border h-full">
@@ -31,14 +60,14 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
       
       <nav className="flex-1 px-3">
         <ul className="space-y-1">
-          {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
+          {Array.isArray(allItems) ? allItems.filter(item => item && item.id).map((item) => {
             const Icon = item.icon;
-            const isActive = activeSection === item.id;
+            const isActive = isActiveItem(item);
             
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => onSectionChange(item.id)}
+                  onClick={() => handleItemClick(item)}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
                     isActive

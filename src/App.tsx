@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import { Settings } from "./pages/Settings";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -47,6 +48,11 @@ const App = () => (
           <Route path="/map" element={
             <AppLanguageProvider>
               <Map />
+            </AppLanguageProvider>
+          } />
+          <Route path="/settings" element={
+            <AppLanguageProvider>
+              <Settings />
             </AppLanguageProvider>
           } />
           
