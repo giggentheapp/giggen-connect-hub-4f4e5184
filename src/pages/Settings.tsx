@@ -13,14 +13,11 @@ import { supabase } from '@/integrations/supabase/client';
 export const Settings = () => {
   const { t } = useAppTranslation();
   const { language, changeLanguage } = useAppLanguage();
-  const { role } = useRoleData();
-  const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
   
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
       
       if (user?.id) {
         const { data: profileData } = await supabase
@@ -51,7 +48,7 @@ export const Settings = () => {
             size="sm"
             className={`transition-all ${language === 'no' ? 'shadow-glow' : ''}`}
           >
-            🇳🇴
+            Norsk
           </Button>
           <Button 
             onClick={() => changeLanguage('en')}
@@ -59,24 +56,16 @@ export const Settings = () => {
             size="sm"
             className={`transition-all ${language === 'en' ? 'shadow-glow' : ''}`}
           >
-            🇬🇧
+            English
           </Button>
         </div>
       </div>
 
-      {/* Profile Settings */}
+      {/* All Settings in UserSettings Component */}
       {profile && (
         <UserSettings 
           profile={profile} 
           onProfileUpdate={setProfile}
-        />
-      )}
-
-      {/* Social Media Settings - Only for Makers */}
-      {role === 'maker' && userId && (
-        <SocialMediaSettings 
-          userRole={role} 
-          userId={userId} 
         />
       )}
     </div>

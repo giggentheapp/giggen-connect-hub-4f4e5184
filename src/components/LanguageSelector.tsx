@@ -18,8 +18,8 @@ export const LanguageSelector = ({ variant = 'default', className }: LanguageSel
           onChange={(e) => changeLanguage(e.target.value as 'no' | 'en')}
           className="bg-secondary border border-border rounded-md px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         >
-          <option value="no">🇳🇴 Norsk</option>
-          <option value="en">🇬🇧 English</option>
+          <option value="no">Norsk</option>
+          <option value="en">English</option>
         </select>
       </div>
     );
@@ -36,7 +36,7 @@ export const LanguageSelector = ({ variant = 'default', className }: LanguageSel
           language === 'no' && "shadow-glow"
         )}
       >
-        🇳🇴 Norsk
+        Norsk
       </Button>
       <Button
         variant={language === 'en' ? 'default' : 'outline'}
@@ -47,7 +47,7 @@ export const LanguageSelector = ({ variant = 'default', className }: LanguageSel
           language === 'en' && "shadow-glow"
         )}
       >
-        🇬🇧 English
+        English
       </Button>
     </div>
   );

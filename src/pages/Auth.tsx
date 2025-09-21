@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
+import { Eye, EyeOff } from 'lucide-react';
 import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
 
 const Auth = () => {
@@ -195,7 +196,7 @@ const Auth = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted/50"
                   >
-                    {showPassword ? '🙈' : '👁️'}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               ) : (

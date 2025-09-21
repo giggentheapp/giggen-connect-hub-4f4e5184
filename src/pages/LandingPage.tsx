@@ -82,7 +82,7 @@ const LandingPage = () => {
                   onClick={() => changeLanguage('no')}
                   className="transition-all"
                 >
-                  🇳🇴 Norsk
+                  Norsk
                 </Button>
                 <Button
                   variant={language === 'en' ? 'default' : 'outline'}
@@ -90,7 +90,7 @@ const LandingPage = () => {
                   onClick={() => changeLanguage('en')}
                   className="transition-all"
                 >
-                  🇬🇧 English
+                  English
                 </Button>
               </div>
               <Button onClick={() => navigate('/auth')} variant="outline">
