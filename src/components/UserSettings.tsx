@@ -570,215 +570,187 @@ export const UserSettings = ({
         </CardContent>
       </Card>
 
-      {/* Privacy Settings - Only for Makers */}
+      {/* Consolidated Privacy Settings for Makers */}
       {profileData.role === 'maker' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Personvern og synlighet
+              Synlighet og personvern
             </CardTitle>
             <CardDescription>
-              Kontroller hva andre kan se av profilen din. Disse innstillingene bestemmer hvilke deler av profilen som vises til andre brukere.
+              Kontroller hvem som kan se hvilken informasjon fra profilen din
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            
-            {/* Map Visibility */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Globe className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Vis på kart</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  La andre finne deg på kartet. Krever at adressen din også er offentlig.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_on_map || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_on_map: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* About Me Section */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <User className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Om meg-seksjon</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Vis biografien din til andre brukere som besøker profilen din.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_about || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_about: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Contact Information */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Mail className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Kontaktinformasjon</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Del kontaktinformasjon med andre brukere når dere har en bekreftet booking.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_contact || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Portfolio */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Camera className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Portefølje</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  La andre se bildene og videoene i porteføljen din.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_portfolio || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_portfolio: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Technical Specifications */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Tekniske spesifikasjoner</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Del tekniske krav og spesifikasjoner med potensielle samarbeidspartnere.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_techspec || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_techspec: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Events */}
-            <div className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Bell className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Arrangementer</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Vis dine planlagte arrangementer og konserter til andre brukere.
-                </p>
-              </div>
-              <Switch
-                checked={profileSettings?.show_events || false}
-                onCheckedChange={(checked) => updateProfileSettings({ show_events: checked })}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Address Privacy */}
-            <div className="border-t pt-4">
-              <div className="flex items-start justify-between space-x-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Globe className="h-4 w-4" />
-                    <Label className="text-sm font-medium">Offentlig adresse</Label>
-                  </div>
+            {/* Master Profile Toggle */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Offentlig profil</Label>
                   <p className="text-sm text-muted-foreground">
-                    Gjør adressen din synlig for andre brukere. Dette er nødvendig for å vises på kartet.
+                    Gjør profilen din synlig for andre på plattformen
                   </p>
                 </div>
                 <Switch
-                  checked={profileData.is_address_public || false}
+                  checked={privacySettings.show_profile_to_goers || false}
                   onCheckedChange={(checked) => {
-                    setProfileData(prev => ({ ...prev, is_address_public: checked }));
-                    // If making address private, also disable map visibility
+                    updatePrivacySettings({ show_profile_to_goers: checked });
                     if (!checked) {
-                      updateProfileSettings({ show_on_map: false });
+                      // If disabling public profile, also disable dependent settings
+                      updatePrivacySettings({ 
+                        show_portfolio_to_goers: false,
+                        show_events_to_goers: false 
+                      });
+                      updateProfileSettings({
+                        show_about: false,
+                        show_portfolio: false,
+                        show_events: false,
+                        show_on_map: false
+                      });
                     }
                   }}
                   disabled={loading}
                 />
               </div>
+
+              {/* Profile Content Settings - Only shown if public profile is enabled */}
+              {privacySettings.show_profile_to_goers && (
+                <>
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-foreground">Profilinnhold</h4>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Biografi og beskrivelse</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Vis din biografi for alle brukere
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profileSettings?.show_about || false}
+                        onCheckedChange={(checked) => updateProfileSettings({ show_about: checked })}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Portefølje og arbeider</Label>
+                        <p className="text-sm text-muted-foreground">
+                          La andre se eksempler på ditt arbeid
+                        </p>
+                      </div>
+                      <Switch
+                        checked={(profileSettings?.show_portfolio || false) && (privacySettings.show_portfolio_to_goers || false)}
+                        onCheckedChange={(checked) => {
+                          updateProfileSettings({ show_portfolio: checked });
+                          updatePrivacySettings({ show_portfolio_to_goers: checked });
+                        }}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Arrangementer og konserter</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Vis dine kommende arrangementer
+                        </p>
+                      </div>
+                      <Switch
+                        checked={(profileSettings?.show_events || false) && (privacySettings.show_events_to_goers || false)}
+                        onCheckedChange={(checked) => {
+                          updateProfileSettings({ show_events: checked });
+                          updatePrivacySettings({ show_events_to_goers: checked });
+                        }}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Tekniske spesifikasjoner</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Del tekniske krav og utstyrsbehov
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profileSettings?.show_techspec || false}
+                        onCheckedChange={(checked) => updateProfileSettings({ show_techspec: checked })}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4 space-y-4">
+                    <h4 className="text-sm font-medium text-foreground">Lokasjon og kontakt</h4>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Vis på kart</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Vis din lokasjon på kartet (krever offentlig adresse)
+                        </p>
+                      </div>
+                      <Switch
+                        checked={(profileSettings?.show_on_map || false) && (profileData.is_address_public || false)}
+                        onCheckedChange={(checked) => {
+                          updateProfileSettings({ show_on_map: checked });
+                          if (checked && !profileData.is_address_public) {
+                            setProfileData(prev => ({ ...prev, is_address_public: true }));
+                          }
+                        }}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Offentlig adresse</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Gjør adressen din synlig for andre brukere
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profileData.is_address_public || false}
+                        onCheckedChange={(checked) => {
+                          setProfileData(prev => ({ ...prev, is_address_public: checked }));
+                          if (!checked) {
+                            updateProfileSettings({ show_on_map: false });
+                          }
+                        }}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Kontaktinformasjon</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Del kontaktinfo med andre brukere (kun i bookinger)
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profileSettings?.show_contact || false}
+                        onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div className="text-sm text-blue-800 dark:text-blue-200">
+                        <p className="font-medium mb-1">Sikkerhet først</p>
+                        <p>Sensitive opplysninger som priser og personlige meldinger deles kun i godkjente bookinger.</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-
-            {/* Goer-specific visibility settings */}
-            <div className="border-t pt-6 space-y-4">
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-foreground mb-2">Synlighet for Goers</h4>
-                <p className="text-sm text-muted-foreground">
-                  Kontroller hvilken informasjon Goers kan se fra profilen din
-                </p>
-              </div>
-
-              <div className="flex items-start justify-between space-x-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <User className="h-4 w-4" />
-                    <Label className="text-sm font-medium">Vis profil til Goers</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    La Goers se navn, bilde og beskrivelse
-                  </p>
-                </div>
-                <Switch
-                  checked={privacySettings.show_profile_to_goers}
-                  onCheckedChange={(checked) => updatePrivacySettings({ show_profile_to_goers: checked })}
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="flex items-start justify-between space-x-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Camera className="h-4 w-4" />
-                    <Label className="text-sm font-medium">Vis portefølje til Goers</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    La Goers se eksempler på ditt arbeid
-                  </p>
-                </div>
-                <Switch
-                  checked={privacySettings.show_portfolio_to_goers}
-                  onCheckedChange={(checked) => updatePrivacySettings({ show_portfolio_to_goers: checked })}
-                  disabled={loading || !privacySettings.show_profile_to_goers}
-                />
-              </div>
-
-              <div className="flex items-start justify-between space-x-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Bell className="h-4 w-4" />
-                    <Label className="text-sm font-medium">Vis arrangementer til Goers</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    La Goers se dine kommende arrangementer
-                  </p>
-                </div>
-                <Switch
-                  checked={privacySettings.show_events_to_goers}
-                  onCheckedChange={(checked) => updatePrivacySettings({ show_events_to_goers: checked })}
-                  disabled={loading || !privacySettings.show_profile_to_goers}
-                />
-              </div>
-            </div>
-
           </CardContent>
         </Card>
       )}
