@@ -15,26 +15,24 @@ const LandingPage = () => {
         about: "Om oss",
         privacy: "Personvern", 
         terms: "Vilkår",
-        contact: "Kontakt",
         login: "Logg inn"
       },
       hero: {
-        title: "Hvor musikk møter muligheter",
-        subtitle: "Plattformen som samler musikere og arrangører på ett sted. Utforsk talenter, book artister, og bygg ditt musikk-nettverk med interaktive kart og smart matching.",
-        ctaMusician: "Logg inn som Musiker",
-        ctaOrganizer: "Logg inn som Arrangør"
+        title: "En bro mellom live-musikk og mennesker",
+        subtitle: "En plattform som gjør det enklere for musikere og arrangører å finne hverandre, og for publikum å finne lokale arrangementer",
+        cta: "Kom i gang"
       },
       features: {
         map: {
-          title: "Interaktivt Kart",
-          description: "Utforsk musikere og arrangementer geografisk. Se hvem som er aktive i ditt område og oppdag nye talenter på kartet."
+          title: "Liste",
+          description: "Utforsk musikere og arrangementer i en strukturert liste. Se hvem som er aktive i ditt område og oppdag nye talenter."
         },
         matching: {
-          title: "Smart Matching",
+          title: "Booking",
           description: "Koble musikere med arrangører basert på sjanger, lokasjon og tilgjengelighet. Trygg 3-stegs booking-prosess."
         },
         profiles: {
-          title: "Komplette Profiler",
+          title: "Fullverdige Profiler",
           description: "Detaljerte profiler med portefølje, tilbud, priser og tekniske krav. Alt du trenger for å ta informerte beslutninger."
         }
       },
@@ -56,44 +54,37 @@ const LandingPage = () => {
             "Trygg booking med godkjenning",
             "Oppdag nye talenter lokalt"
           ]
-        }
-      },
-      testimonials: [
-        {
-          quote: "Giggen gjorde det enkelt å finne den perfekte jazztrioen til vårt arrangement.",
-          author: "Maria, Event Manager"
         },
-        {
-          quote: "Fantastisk å kunne vise mine tilbud visuelt og nå nye kunder.",
-          author: "Erik, Bassist"
-        },
-        {
-          quote: "Kartet hjalp oss å finne lokale musikere vi aldri hadde hørt om før.",
-          author: "Café Sentrum"
+        audience: {
+          title: "For Publikum",
+          features: [
+            "Oppdag nye arrangementer",
+            "Finn konserter i ditt område",
+            "Se informasjon om artister",
+            "Hold deg oppdatert på lokale event"
+          ]
         }
-      ]
+      }
     },
     en: {
       nav: {
         about: "About",
         privacy: "Privacy",
         terms: "Terms", 
-        contact: "Contact",
         login: "Login"
       },
       hero: {
-        title: "Where music meets opportunities",
-        subtitle: "The platform that brings musicians and organizers together. Explore talents, book artists, and build your music network with interactive maps and smart matching.",
-        ctaMusician: "Login as Musician",
-        ctaOrganizer: "Login as Organizer"
+        title: "A bridge between live music and people",
+        subtitle: "A platform that makes it easier for musicians and organizers to find each other, and for audiences to find local events",
+        cta: "Get Started"
       },
       features: {
         map: {
-          title: "Interactive Map",
-          description: "Explore musicians and events geographically. See who's active in your area and discover new talents on the map."
+          title: "List",
+          description: "Explore musicians and events in a structured list. See who's active in your area and discover new talents."
         },
         matching: {
-          title: "Smart Matching",
+          title: "Booking",
           description: "Connect musicians with organizers based on genre, location and availability. Secure 3-step booking process."
         },
         profiles: {
@@ -119,22 +110,17 @@ const LandingPage = () => {
             "Secure booking with approval",
             "Discover new local talents"
           ]
-        }
-      },
-      testimonials: [
-        {
-          quote: "Giggen made it easy to find the perfect jazz trio for our event.",
-          author: "Maria, Event Manager"
         },
-        {
-          quote: "Amazing to be able to showcase my offers visually and reach new customers.",
-          author: "Erik, Bassist"
-        },
-        {
-          quote: "The map helped us find local musicians we had never heard of before.",
-          author: "Café Sentrum"
+        audience: {
+          title: "For Audience",
+          features: [
+            "Discover new events",
+            "Find concerts in your area",
+            "See information about artists",
+            "Stay updated on local events"
+          ]
         }
-      ]
+      }
     }
   };
 
@@ -167,12 +153,6 @@ const LandingPage = () => {
               >
                 {t.nav.terms}
               </button>
-              <a 
-                href="mailto:info@giggen.org"
-                className="text-foreground hover:text-primary transition-colors"
-              >
-                {t.nav.contact}
-              </a>
             </nav>
 
             <div className="flex items-center space-x-4">
@@ -213,16 +193,7 @@ const LandingPage = () => {
               className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 transition-all transform hover:scale-105"
             >
               <Music className="mr-2 h-5 w-5" />
-              {t.hero.ctaMusician}
-            </Button>
-            <Button 
-              onClick={() => navigate('/auth')}
-              variant="outline"
-              size="lg" 
-              className="text-lg px-8 py-6 border-2 hover:bg-primary hover:text-primary-foreground transition-all transform hover:scale-105"
-            >
-              <Calendar className="mr-2 h-5 w-5" />
-              {t.hero.ctaOrganizer}
+              {t.hero.cta}
             </Button>
           </div>
         </div>
@@ -272,7 +243,7 @@ const LandingPage = () => {
       {/* For Users Split Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-3 gap-8">
             <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
@@ -310,37 +281,25 @@ const LandingPage = () => {
                 </ul>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
 
-      {/* Testimonials */}
-      <section className="py-16 px-4 bg-card/30">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-12 text-foreground">
-            Hva våre brukere sier
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {t.testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/30">
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <div className="flex text-accent-orange mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground italic leading-relaxed">
-                      "{testimonial.quote}"
-                    </p>
+            <Card className="overflow-hidden border-2 hover:border-accent-blue/50 transition-all">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <div className="p-3 bg-gradient-to-br from-accent-blue/10 to-accent-blue/20 rounded-lg mr-4">
+                    <Users className="h-8 w-8 text-accent-blue" />
                   </div>
-                  <div className="border-t border-border pt-3">
-                    <p className="font-medium text-foreground">{testimonial.author}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="text-2xl font-bold text-foreground">{t.forUsers.audience.title}</h3>
+                </div>
+                <ul className="space-y-3">
+                  {t.forUsers.audience.features.map((feature, index) => (
+                    <li key={index} className="flex items-center text-muted-foreground">
+                      <div className="w-2 h-2 bg-accent-blue rounded-full mr-3 flex-shrink-0"></div>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -348,12 +307,11 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border py-12 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-2xl font-bold text-primary mb-4">GIGGEN</h3>
               <div className="space-y-2 text-muted-foreground">
-                <p>Giggen AS</p>
-                <p>info@giggen.org</p>
+                <p>giggen.main@gmail.com</p>
                 <p>Oslo, Norge</p>
               </div>
             </div>
@@ -379,18 +337,6 @@ const LandingPage = () => {
                 >
                   Cookie-policy
                 </a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Kontakt</h4>
-              <div className="space-y-2">
-                <a 
-                  href="mailto:info@giggen.org"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Send e-post
-                </a>
                 <Button 
                   onClick={() => navigate('/auth')}
                   className="w-full mt-4"
@@ -399,10 +345,6 @@ const LandingPage = () => {
                 </Button>
               </div>
             </div>
-          </div>
-          
-          <div className="border-t border-border mt-8 pt-6 text-center text-muted-foreground">
-            <p>&copy; 2024 Giggen AS. Alle rettigheter forbeholdt.</p>
           </div>
         </div>
       </footer>
