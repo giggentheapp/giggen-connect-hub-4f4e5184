@@ -2,9 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Users, CreditCard, AlertTriangle } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 const Terms = () => {
   const navigate = useNavigate();
+  const { t } = useAppTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
@@ -18,11 +20,11 @@ const Terms = () => {
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake
+              {t('back')}
             </Button>
             <div className="text-2xl font-bold text-primary">GIGGEN</div>
             <Button onClick={() => navigate('/auth')} variant="outline">
-              Logg inn
+              {t('signIn')}
             </Button>
           </div>
         </div>
@@ -36,9 +38,9 @@ const Terms = () => {
             <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
               <FileText className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 text-foreground">Vilkår og betingelser</h1>
+            <h1 className="text-4xl font-bold mb-4 text-foreground">{t('termsAndConditions')}</h1>
             <p className="text-lg text-muted-foreground">
-              Sist oppdatert: 19. september 2024
+              {t('lastUpdated')}: 19. september 2024
             </p>
           </div>
 
@@ -46,9 +48,7 @@ const Terms = () => {
           <Card className="mb-8 border-2">
             <CardContent className="p-8">
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Velkommen til Giggen! Disse vilkårene og betingelsene ("Vilkår") regulerer din bruk 
-                av Giggen-plattformen ("Tjenesten") som drives av Giggen AS ("vi", "oss", "vår"). 
-                Ved å bruke vår tjeneste godtar du disse vilkårene.
+                {t('welcomeToGiggen')}
               </p>
             </CardContent>
           </Card>
@@ -58,28 +58,28 @@ const Terms = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Users className="h-6 w-6 text-primary mr-3" />
-                Brukeransvar
+                {t('userResponsibility')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Som bruker forplikter du deg til å:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('asUserYouCommit')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Oppgi korrekt og oppdatert informasjon</li>
-                  <li>• Holde din konto sikker og konfidentiell</li>
-                  <li>• Ikke misbruke eller skade tjenesten</li>
-                  <li>• Respektere andre brukeres rettigheter</li>
-                  <li>• Ikke publisere upassende eller ulovlig innhold</li>
-                  <li>• Følge alle relevante lover og reguleringer</li>
+                  <li>• {t('provideCorrectInfo')}</li>
+                  <li>• {t('keepAccountSecure')}</li>
+                  <li>• {t('notMisuseService')}</li>
+                  <li>• {t('respectUserRights')}</li>
+                  <li>• {t('noInappropriateContent')}</li>
+                  <li>• {t('followLaws')}</li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Forbudt bruk:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('prohibitedUse')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Spam eller uønsket kommunikasjon</li>
-                  <li>• Falske profiler eller villedende informasjon</li>
-                  <li>• Krenkelse av opphavsrett eller andre rettigheter</li>
-                  <li>• Virus, malware eller skadelig kode</li>
+                  <li>• {t('spamCommunication')}</li>
+                  <li>• {t('fakeProfiles')}</li>
+                  <li>• {t('copyrightViolation')}</li>
+                  <li>• {t('malwareVirus')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -90,26 +90,26 @@ const Terms = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CreditCard className="h-6 w-6 text-accent-green mr-3" />
-                Booking-prosess og ansvar
+                {t('bookingProcessAndResponsibility')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">3-stegs booking-prosess:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('threeStepBooking')}</h4>
                 <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                  <li>Arrangør sender booking-forespørsel til musiker</li>
-                  <li>Musiker godkjenner eller avslår forespørselen</li>
-                  <li>Ved godkjenning inngås bindende avtale mellom partene</li>
+                  <li>{t('organizerSendsRequest')}</li>
+                  <li>{t('musicianApprovesRejects')}</li>
+                  <li>{t('bindingAgreement')}</li>
                 </ol>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Ansvar og forpliktelser:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('responsibilitiesObligations')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Giggen er kun en formidlingsplattform</li>
-                  <li>• Avtaler inngås direkte mellom musiker og arrangør</li>
-                  <li>• Begge parter er ansvarlige for å overholde inngåtte avtaler</li>
-                  <li>• Giggen er ikke ansvarlig for kvalitet eller utførelse</li>
-                  <li>• Avbestilling må følge partenes avtale</li>
+                  <li>• {t('giggenIsIntermediaryOnly')}</li>
+                  <li>• {t('agreementsDirectly')}</li>
+                  <li>• {t('bothPartiesResponsible')}</li>
+                  <li>• {t('giggenNotResponsibleQuality')}</li>
+                  <li>• {t('cancellationFollowAgreement')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -120,24 +120,24 @@ const Terms = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CreditCard className="h-6 w-6 text-accent-orange mr-3" />
-                Betalingsvilkår
+                {t('paymentTerms')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Tjenesten er for øyeblikket gratis, men:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('serviceCurrentlyFree')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Vi forbeholder oss retten til å innføre avgifter</li>
-                  <li>• Minst 30 dagers varsel vil bli gitt før endringer</li>
-                  <li>• Eksisterende brukere vil få informasjon om nye priser</li>
+                  <li>• {t('reserveRightIntroduceFees')}</li>
+                  <li>• {t('thirtyDaysNotice')}</li>
+                  <li>• {t('existingUsersInformed')}</li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Fremtidige betalingstjenester:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('futurePaymentServices')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Vi kan tilby integrerte betalingsløsninger</li>
-                  <li>• Standardavgifter kan påløpe for transaksjoner</li>
-                  <li>• Alle avgifter vil være tydelig kommunisert</li>
+                  <li>• {t('integratedPaymentSolutions')}</li>
+                  <li>• {t('standardFeesApply')}</li>
+                  <li>• {t('feesWillBeCommunicated')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -146,23 +146,23 @@ const Terms = () => {
           {/* Intellectual Property */}
           <Card className="mb-8 border-2 hover:border-accent-pink/50 transition-all">
             <CardHeader>
-              <CardTitle className="text-foreground">Opphavsrett og immaterielle rettigheter</CardTitle>
+              <CardTitle className="text-foreground">{t('copyrightIntellectualRights')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Ditt innhold:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('yourContent')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Du beholder alle rettigheter til innholdet du laster opp</li>
-                  <li>• Du gir oss lisens til å vise og distribuere innholdet på plattformen</li>
-                  <li>• Du er ansvarlig for at du har nødvendige rettigheter</li>
+                  <li>• {t('retainAllRights')}</li>
+                  <li>• {t('grantUsLicense')}</li>
+                  <li>• {t('responsibleForRights')}</li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Vår plattform:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('ourPlatform')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Giggen-plattformen og dens innhold er beskyttet av opphavsrett</li>
-                  <li>• Du kan ikke kopiere, reprodusere eller distribuere vår kode</li>
-                  <li>• Handelsnavn og logoer er våre registrerte varemerker</li>
+                  <li>• {t('giggenPlatformProtected')}</li>
+                  <li>• {t('cannotCopyCode')}</li>
+                  <li>• {t('trademarksRegistered')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -173,23 +173,22 @@ const Terms = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <AlertTriangle className="h-6 w-6 text-destructive mr-3" />
-                Ansvarsfraskrivelse
+                {t('disclaimerTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Giggen er ikke ansvarlig for:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('giggenNotResponsibleFor')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Kvaliteten på musikere eller arrangementer</li>
-                  <li>• Kontraktbrudd mellom brukere</li>
-                  <li>• Direkte eller indirekte tap som følge av bruk av tjenesten</li>
-                  <li>• Tjenesteavbrudd eller tekniske problemer</li>
-                  <li>• Innhold eller oppførsel fra andre brukere</li>
+                  <li>• {t('qualityOfMusicians')}</li>
+                  <li>• {t('contractBreaches')}</li>
+                  <li>• {t('directIndirectLoss')}</li>
+                  <li>• {t('serviceInterruptions')}</li>
+                  <li>• {t('contentFromOtherUsers')}</li>
                 </ul>
               </div>
               <p className="text-muted-foreground">
-                Tjenesten leveres "som den er" uten garantier av noe slag. Din bruk av 
-                tjenesten skjer på egen risiko.
+                {t('serviceAsIs')}
               </p>
             </CardContent>
           </Card>
@@ -197,22 +196,22 @@ const Terms = () => {
           {/* Termination */}
           <Card className="mb-8 border-2">
             <CardHeader>
-              <CardTitle className="text-foreground">Oppsigelse</CardTitle>
+              <CardTitle className="text-foreground">{t('termination')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Du kan:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('youCan')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Slette din konto når som helst</li>
-                  <li>• Slutte å bruke tjenesten uten varsel</li>
+                  <li>• {t('deleteAccountAnytime')}</li>
+                  <li>• {t('stopUsingService')}</li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Vi kan:</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('weCan')}</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Suspendere eller slette kontoer som bryter vilkårene</li>
-                  <li>• Avslutte tjenesten med 30 dagers varsel</li>
-                  <li>• Endre vilkårene med rimelig forhåndsvarsel</li>
+                  <li>• {t('suspendDeleteAccounts')}</li>
+                  <li>• {t('terminateServiceNotice')}</li>
+                  <li>• {t('changeTermsNotice')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -221,21 +220,20 @@ const Terms = () => {
           {/* Contact */}
           <Card className="border-2 hover:border-primary/50 transition-all">
             <CardHeader>
-              <CardTitle className="text-foreground">Kontakt og gjeldende lov</CardTitle>
+              <CardTitle className="text-foreground">{t('contactApplicableLaw')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Spørsmål om vilkårene?</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('questionsAboutTerms')}</h4>
                 <div className="space-y-2 text-muted-foreground">
-                  <p><strong>E-post:</strong> juridisk@giggen.org</p>
-                  <p><strong>Post:</strong> Giggen AS, Oslo, Norge</p>
+                  <p><strong>{t('email')}:</strong> juridisk@giggen.org</p>
+                  <p><strong>{t('mail')}:</strong> {t('giggenASAddress')}</p>
                 </div>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Gjeldende lov</h4>
+                <h4 className="font-semibold text-foreground mb-2">{t('applicableLaw')}</h4>
                 <p className="text-muted-foreground">
-                  Disse vilkårene er underlagt norsk lov. Eventuelle tvister skal løses 
-                  ved norske domstoler med Oslo som verneting.
+                  {t('termsUnderNorwegianLaw')}
                 </p>
               </div>
             </CardContent>
@@ -251,22 +249,22 @@ const Terms = () => {
               onClick={() => navigate('/about')}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Om oss
+              {t('aboutUs')}
             </button>
             <button 
               onClick={() => navigate('/privacy')}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Personvern
+              {t('privacyPolicy')}
             </button>
             <a 
               href="mailto:info@giggen.org"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Kontakt
+              {t('contact')}
             </a>
           </div>
-          <p className="text-muted-foreground">&copy; 2024 Giggen AS. Alle rettigheter forbeholdt.</p>
+          <p className="text-muted-foreground">&copy; 2024 Giggen AS. {t('allRightsReserved')}</p>
         </div>
       </footer>
     </div>

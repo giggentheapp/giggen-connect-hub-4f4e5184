@@ -2,9 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Music, Users, MapPin, Target, Heart } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 const About = () => {
   const navigate = useNavigate();
+  const { t } = useAppTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
@@ -18,11 +20,11 @@ const About = () => {
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake
+              {t('back')}
             </Button>
             <div className="text-2xl font-bold text-primary">GIGGEN</div>
             <Button onClick={() => navigate('/auth')} variant="outline">
-              Logg inn
+              {t('signIn')}
             </Button>
           </div>
         </div>
@@ -34,12 +36,10 @@ const About = () => {
           {/* Hero */}
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-accent-orange to-accent-pink bg-clip-text text-transparent">
-              Om Giggen
+              {t('aboutGiggen')}
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              Giggen er Norges ledende plattform for musikk-booking og networking. 
-              Vi kobler musikere med arrangører gjennom innovative teknologier som 
-              interaktive kart og smart matching.
+              {t('aboutGiggenDescription')}
             </p>
           </div>
 
@@ -50,13 +50,10 @@ const About = () => {
                 <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg mr-4">
                   <Target className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground">Vår Visjon</h2>
+                <h2 className="text-3xl font-bold text-foreground">{t('ourVision')}</h2>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Vi ønsker å gjøre det enklere for musikere å nå sitt publikum og for 
-                arrangører å finne den perfekte artisten til deres arrangement. Gjennom 
-                teknologi og innovasjon bygger vi broer i musikkmiljøet og skaper nye 
-                muligheter for alle parter.
+                {t('visionDescription')}
               </p>
             </CardContent>
           </Card>
@@ -68,10 +65,9 @@ const About = () => {
                 <div className="p-4 bg-gradient-to-br from-accent-blue/10 to-accent-blue/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <MapPin className="h-8 w-8 text-accent-blue" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground">Geografisk Oppdagelse</h3>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">{t('geographicDiscovery')}</h3>
                 <p className="text-muted-foreground">
-                  Vårt interaktive kart gjør det enkelt å finne og oppdage musikere 
-                  og arrangementer i ditt område.
+                  {t('geographicDescription')}
                 </p>
               </CardContent>
             </Card>
@@ -81,10 +77,9 @@ const About = () => {
                 <div className="p-4 bg-gradient-to-br from-accent-green/10 to-accent-green/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Users className="h-8 w-8 text-accent-green" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground">Smart Matching</h3>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">{t('smartMatching')}</h3>
                 <p className="text-muted-foreground">
-                  Vår algoritme matcher musikere og arrangører basert på 
-                  kompatibilitet, preferanser og tilgjengelighet.
+                  {t('smartMatchingDescription')}
                 </p>
               </CardContent>
             </Card>
@@ -94,10 +89,9 @@ const About = () => {
                 <div className="p-4 bg-gradient-to-br from-accent-orange/10 to-accent-orange/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Music className="h-8 w-8 text-accent-orange" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground">Profesjonelle Profiler</h3>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">{t('professionalProfiles')}</h3>
                 <p className="text-muted-foreground">
-                  Detaljerte profiler med portefølje, priser og tekniske 
-                  spesifikasjoner for informerte beslutninger.
+                  {t('professionalProfilesDescription')}
                 </p>
               </CardContent>
             </Card>
@@ -110,22 +104,17 @@ const About = () => {
                 <div className="p-3 bg-gradient-to-br from-accent-pink/10 to-accent-pink/20 rounded-lg mr-4">
                   <Heart className="h-8 w-8 text-accent-pink" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground">Vårt Oppdrag</h2>
+                <h2 className="text-3xl font-bold text-foreground">{t('ourMission')}</h2>
               </div>
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  Musikk har kraft til å forene mennesker og skape minner som varer livet ut. 
-                  Hos Giggen tror vi på at alle musikere fortjener en plattform hvor de kan 
-                  vise frem sitt talent og nå sitt publikum.
+                  {t('missionDescription')}
                 </p>
                 <p>
-                  Samtidig ønsker vi å gjøre det enklere for arrangører å finne akkurat den 
-                  musikken som passer til deres arrangement, enten det er et intimt bryllup 
-                  eller en stor festival.
+                  {t('missionDescription2')}
                 </p>
                 <p>
-                  Gjennom innovativ teknologi og et sterkt fokus på brukervennlighet bygger 
-                  vi fremtidens musikk-økosystem i Norge.
+                  {t('missionDescription3')}
                 </p>
               </div>
             </CardContent>
@@ -133,9 +122,9 @@ const About = () => {
 
           {/* Contact CTA */}
           <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4 text-foreground">Bli med på reisen</h3>
+            <h3 className="text-2xl font-bold mb-4 text-foreground">{t('joinTheJourney')}</h3>
             <p className="text-lg text-muted-foreground mb-8">
-              Enten du er musiker eller arrangør, vi inviterer deg til å bli del av Giggen-fellesskapet.
+              {t('inviteToJoin')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -143,7 +132,7 @@ const About = () => {
                 size="lg"
                 className="bg-gradient-to-r from-primary to-primary-dark hover:opacity-90"
               >
-                Registrer deg som Musiker
+                {t('registerAsMusician')}
               </Button>
               <Button 
                 onClick={() => navigate('/auth')}
@@ -151,7 +140,7 @@ const About = () => {
                 size="lg"
                 className="border-2 hover:bg-primary hover:text-primary-foreground"
               >
-                Registrer deg som Arrangør
+                {t('registerAsOrganizer')}
               </Button>
             </div>
           </div>
@@ -166,22 +155,22 @@ const About = () => {
               onClick={() => navigate('/privacy')}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Personvern
+              {t('privacyPolicy')}
             </button>
             <button 
               onClick={() => navigate('/terms')}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Vilkår
+              {t('termsAndConditions')}
             </button>
             <a 
               href="mailto:info@giggen.org"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Kontakt
+              {t('contact')}
             </a>
           </div>
-          <p className="text-muted-foreground">&copy; 2024 Giggen AS. Alle rettigheter forbeholdt.</p>
+          <p className="text-muted-foreground">&copy; 2024 Giggen AS. {t('allRightsReserved')}</p>
         </div>
       </footer>
     </div>
