@@ -141,6 +141,7 @@ export const appTranslations = {
     update: "Oppdater",
 
     // File management
+    fileManagement: "Filhåndtering",
     uploadFile: "Last opp fil",
     replaceFile: "Erstatt fil", 
     downloadFile: "Last ned fil",
@@ -528,6 +529,7 @@ export const appTranslations = {
     update: "Update",
 
     // File management
+    fileManagement: "File Management",
     uploadFile: "Upload File",
     replaceFile: "Replace File",
     downloadFile: "Download File",

@@ -56,10 +56,22 @@ const App = () => (
             </AppLanguageProvider>
           } />
           
-          {/* Static pages use landing page language system */}
-          <Route path="/about" element={<About />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
+          {/* Static pages with AppLanguageProvider */}
+          <Route path="/about" element={
+            <AppLanguageProvider>
+              <About />
+            </AppLanguageProvider>
+          } />
+          <Route path="/privacy" element={
+            <AppLanguageProvider>
+              <Privacy />
+            </AppLanguageProvider>
+          } />
+          <Route path="/terms" element={
+            <AppLanguageProvider>
+              <Terms />
+            </AppLanguageProvider>
+          } />
           
           <Route path="/concept/:conceptId" element={<ConceptView />} />
           <Route path="/events" element={<UpcomingEvents />} />

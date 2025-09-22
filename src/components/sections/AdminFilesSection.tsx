@@ -30,7 +30,7 @@ export const AdminFilesSection = ({
   return <div className="space-y-6">
     <Card className="bg-slate-200">
       <CardHeader>
-        <CardTitle>Filhåndtering</CardTitle>
+        <CardTitle>{t('fileManagement')}</CardTitle>
         <CardDescription>
           {t('managePortfolioFiles')}
         </CardDescription>
