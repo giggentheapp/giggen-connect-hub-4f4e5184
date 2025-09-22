@@ -111,7 +111,12 @@ export const BookingDetailsPanel = ({
     }
     
     setEditingField(null);
-    setTempValues({});
+    // Keep other temp values, only clear the current field's temp value
+    setTempValues(prev => {
+      const newValues = { ...prev };
+      delete newValues[fieldName];
+      return newValues;
+    });
   };
   const EditableField = ({
     fieldName,
@@ -125,7 +130,7 @@ export const BookingDetailsPanel = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isEditing = editingField === fieldName;
-    const tempValue = tempValues[fieldName] ?? value;
+    const tempValue = tempValues[fieldName] !== undefined ? tempValues[fieldName] : value;
     useEffect(() => {
       if (isEditing) {
         if (type === 'textarea' && textareaRef.current) {
@@ -137,16 +142,26 @@ export const BookingDetailsPanel = ({
     }, [isEditing, type]);
     const startEditing = () => {
       setEditingField(fieldName);
-      setTempValues({
+      setTempValues(prev => ({
+        ...prev,
         [fieldName]: value
-      });
+      }));
     };
     const cancelEditing = () => {
       setEditingField(null);
-      setTempValues({});
+      setTempValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[fieldName];
+        return newValues;
+      });
     };
     const confirmEdit = () => {
       onPropose(fieldName, value, tempValue);
+      setTempValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[fieldName];
+        return newValues;
+      });
     };
     if (type === 'date') {
       return <div className="space-y-2">
@@ -164,12 +179,21 @@ export const BookingDetailsPanel = ({
                     {tempValue ? format(new Date(tempValue), "dd.MM.yyyy") : "Velg dato"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={tempValue ? new Date(tempValue) : undefined} onSelect={date => setTempValues(prev => ({
-                ...prev,
-                [fieldName]: date?.toISOString()
-              }))} disabled={date => date < new Date()} initialFocus />
-                </PopoverContent>
+                 <PopoverContent className="w-auto p-0">
+                   <Calendar 
+                     mode="single" 
+                     selected={tempValue ? new Date(tempValue) : undefined} 
+                     onSelect={date => {
+                       setTempValues(prev => ({
+                         ...prev,
+                         [fieldName]: date?.toISOString()
+                       }));
+                     }} 
+                     disabled={date => date < new Date()} 
+                     initialFocus 
+                     className="pointer-events-auto"
+                   />
+                 </PopoverContent>
               </Popover>
               <Button size="sm" onClick={confirmEdit}>
                 <Check className="h-4 w-4" />
@@ -223,13 +247,31 @@ export const BookingDetailsPanel = ({
             </Button>}
         </Label>
         {isEditing ? <div className="flex gap-2">
-            {type === 'textarea' ? <Textarea ref={textareaRef} value={tempValue || ''} onChange={e => setTempValues(prev => ({
-          ...prev,
-          [fieldName]: e.target.value
-        }))} placeholder={placeholder} rows={3} /> : <Input ref={inputRef} type={type} value={tempValue || ''} onChange={e => setTempValues(prev => ({
-          ...prev,
-          [fieldName]: e.target.value
-        }))} placeholder={placeholder} />}
+            {type === 'textarea' ? (
+              <Textarea 
+                ref={textareaRef} 
+                value={tempValue || ''} 
+                onChange={e => setTempValues(prev => ({
+                  ...prev,
+                  [fieldName]: e.target.value
+                }))} 
+                placeholder={placeholder} 
+                rows={3}
+                autoFocus
+              />
+            ) : (
+              <Input 
+                ref={inputRef} 
+                type={type} 
+                value={tempValue || ''} 
+                onChange={e => setTempValues(prev => ({
+                  ...prev,
+                  [fieldName]: e.target.value
+                }))} 
+                placeholder={placeholder}
+                autoFocus
+              />
+            )}
             <Button size="sm" onClick={confirmEdit}>
               <Check className="h-4 w-4" />
             </Button>
@@ -269,29 +311,88 @@ export const BookingDetailsPanel = ({
             <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
           </div>
 
-          {canEdit ? (
-            <div className="space-y-2">
-              <AddressAutocomplete 
-                value={booking.venue || ''} 
-                onChange={(address, coordinates) => {
-                  handleFieldUpdate('venue', booking.venue, address);
-                  if (coordinates) {
-                    // Store coordinates separately if needed
-                    console.log('Venue coordinates:', coordinates);
-                  }
-                }}
-                placeholder="F.eks. Rockefeller Music Hall, Oslo" 
-              />
-            </div>
-          ) : (
-            <EditableField 
-              fieldName="venue" 
-              label="Spillested" 
-              value={booking.venue} 
-              placeholder="F.eks. Rockefeller Music Hall" 
-              onPropose={handleFieldUpdate} 
-            />
-          )}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              Spillested
+              {canEdit && editingField !== 'venue' && (
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => {
+                    setEditingField('venue');
+                    setTempValues(prev => ({
+                      ...prev,
+                      venue: booking.venue || ''
+                    }));
+                  }}
+                >
+                  <Edit3 className="h-3 w-3" />
+                </Button>
+              )}
+            </Label>
+
+            {editingField === 'venue' ? (
+              <div className="flex gap-2">
+                <AddressAutocomplete 
+                  value={tempValues.venue || booking.venue || ''} 
+                  onChange={(address, coordinates) => {
+                    setTempValues(prev => ({
+                      ...prev,
+                      venue: address
+                    }));
+                    if (coordinates) {
+                      console.log('Venue coordinates:', coordinates);
+                    }
+                  }}
+                  placeholder="F.eks. Rockefeller Music Hall, Oslo" 
+                />
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    handleFieldUpdate('venue', booking.venue, tempValues.venue);
+                    setEditingField(null);
+                    setTempValues(prev => {
+                      const newValues = { ...prev };
+                      delete newValues.venue;
+                      return newValues;
+                    });
+                  }}
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => {
+                    setEditingField(null);
+                    setTempValues(prev => {
+                      const newValues = { ...prev };
+                      delete newValues.venue;
+                      return newValues;
+                    });
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div 
+                className={cn(
+                  "p-2 border rounded", 
+                  canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
+                )} 
+                onClick={canEdit ? () => {
+                  setEditingField('venue');
+                  setTempValues(prev => ({
+                    ...prev,
+                    venue: booking.venue || ''
+                  }));
+                } : undefined}
+              >
+                {booking.venue || 'F.eks. Rockefeller Music Hall'}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
