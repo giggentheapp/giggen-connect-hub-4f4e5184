@@ -13,11 +13,22 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    updateBookingInParent?: (id: string, updates: any) => void;
+  }
+}
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
+
 interface BookingDetailsPanelProps {
   booking: any;
   currentUserId: string;
   canEdit: boolean;
 }
+
 interface EditableFieldProps {
   fieldName: string;
   label: string;
@@ -30,8 +41,6 @@ interface EditableFieldProps {
   }>;
   onPropose: (fieldName: string, oldValue: any, newValue: any) => void;
 }
-import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import AddressAutocomplete from '@/components/AddressAutocomplete';
 export const BookingDetailsPanel = ({
   booking,
   currentUserId,
@@ -96,13 +105,22 @@ export const BookingDetailsPanel = ({
         });
       }
 
-      await updateBooking(booking.id, updates);
+      console.log('🔄 Updating booking field:', fieldName, 'from', oldValue, 'to', newValue);
+      const result = await updateBooking(booking.id, updates);
       
-      toast({
-        title: "Oppdatert",
-        description: `${fieldName} er oppdatert`,
-      });
+      if (result) {
+        // Force immediate update in parent component through callback
+        if (window.updateBookingInParent) {
+          window.updateBookingInParent(booking.id, updates);
+        }
+        
+        toast({
+          title: "Oppdatert",
+          description: `${fieldName} er oppdatert`,
+        });
+      }
     } catch (error) {
+      console.error('❌ Error updating field:', error);
       toast({
         title: "Feil",
         description: "Kunne ikke oppdatere feltet",
@@ -417,47 +435,116 @@ export const BookingDetailsPanel = ({
               <div className="space-y-3">
                 {/* Payment Type Selection */}
                 <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      handleFieldUpdate('door_deal', booking.door_deal, false);
-                      handleFieldUpdate('by_agreement', booking.by_agreement, false);
-                    }}
-                    disabled={!canEdit}
-                    className="h-auto p-3 flex flex-col items-center gap-1"
-                  >
-                    <span className="font-medium">Fast honorar</span>
-                    <span className="text-xs opacity-70">Garantert beløp</span>
-                  </Button>
-                  
-                  <Button
-                    variant={booking.door_deal ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      handleFieldUpdate('door_deal', booking.door_deal, true);
-                      handleFieldUpdate('by_agreement', booking.by_agreement, false);
-                    }}
-                    disabled={!canEdit}
-                    className="h-auto p-3 flex flex-col items-center gap-1"
-                  >
-                    <span className="font-medium">Spiller for døra</span>
-                    <span className="text-xs opacity-70">Andel av inntekt</span>
-                  </Button>
-                  
-                  <Button
-                    variant={booking.by_agreement ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      handleFieldUpdate('door_deal', booking.door_deal, false);
-                      handleFieldUpdate('by_agreement', booking.by_agreement, true);
-                    }}
-                    disabled={!canEdit}
-                    className="h-auto p-3 flex flex-col items-center gap-1"
-                  >
-                    <span className="font-medium">Ved avtale</span>
-                    <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
-                  </Button>
+                   <Button
+                     variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
+                     size="sm"
+                     onClick={async () => {
+                       if (!canEdit) return;
+                       
+                       const updates = {
+                         door_deal: false,
+                         by_agreement: false,
+                         last_modified_by: currentUserId,
+                         last_modified_at: new Date().toISOString()
+                       };
+                       
+                       try {
+                         await updateBooking(booking.id, updates);
+                         if (window.updateBookingInParent) {
+                           window.updateBookingInParent(booking.id, updates);
+                         }
+                         toast({
+                           title: "Oppdatert",
+                           description: "Betalingstype satt til fast honorar",
+                         });
+                       } catch (error) {
+                         toast({
+                           title: "Feil",
+                           description: "Kunne ikke oppdatere betalingstype",
+                           variant: "destructive"
+                         });
+                       }
+                     }}
+                     disabled={!canEdit}
+                     className="h-auto p-3 flex flex-col items-center gap-1"
+                   >
+                     <span className="font-medium">Fast honorar</span>
+                     <span className="text-xs opacity-70">Garantert beløp</span>
+                   </Button>
+                   
+                   <Button
+                     variant={booking.door_deal ? "default" : "outline"}
+                     size="sm"
+                     onClick={async () => {
+                       if (!canEdit) return;
+                       
+                       const updates = {
+                         door_deal: true,
+                         by_agreement: false,
+                         last_modified_by: currentUserId,
+                         last_modified_at: new Date().toISOString()
+                       };
+                       
+                       try {
+                         await updateBooking(booking.id, updates);
+                         if (window.updateBookingInParent) {
+                           window.updateBookingInParent(booking.id, updates);
+                         }
+                         toast({
+                           title: "Oppdatert",
+                           description: "Betalingstype satt til spiller for døra",
+                         });
+                       } catch (error) {
+                         toast({
+                           title: "Feil",
+                           description: "Kunne ikke oppdatere betalingstype",
+                           variant: "destructive"
+                         });
+                       }
+                     }}
+                     disabled={!canEdit}
+                     className="h-auto p-3 flex flex-col items-center gap-1"
+                   >
+                     <span className="font-medium">Spiller for døra</span>
+                     <span className="text-xs opacity-70">Andel av inntekt</span>
+                   </Button>
+                   
+                   <Button
+                     variant={booking.by_agreement ? "default" : "outline"}
+                     size="sm"
+                     onClick={async () => {
+                       if (!canEdit) return;
+                       
+                       const updates = {
+                         door_deal: false,
+                         by_agreement: true,
+                         last_modified_by: currentUserId,
+                         last_modified_at: new Date().toISOString()
+                       };
+                       
+                       try {
+                         await updateBooking(booking.id, updates);
+                         if (window.updateBookingInParent) {
+                           window.updateBookingInParent(booking.id, updates);
+                         }
+                         toast({
+                           title: "Oppdatert",
+                           description: "Betalingstype satt til ved avtale",
+                         });
+                       } catch (error) {
+                         toast({
+                           title: "Feil",
+                           description: "Kunne ikke oppdatere betalingstype",
+                           variant: "destructive"
+                         });
+                       }
+                     }}
+                     disabled={!canEdit}
+                     className="h-auto p-3 flex flex-col items-center gap-1"
+                   >
+                     <span className="font-medium">Ved avtale</span>
+                     <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
+                   </Button>
                 </div>
 
                 {/* Payment Details */}

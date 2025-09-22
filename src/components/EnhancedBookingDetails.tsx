@@ -11,6 +11,13 @@ import { BookingAgreement } from './BookingAgreement';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Check, X, FileText, Eye, Trash2, Save } from 'lucide-react';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
+
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    updateBookingInParent?: (id: string, updates: any) => void;
+  }
+}
 interface EnhancedBookingDetailsProps {
   bookingId: string;
   isOpen: boolean;
@@ -50,6 +57,16 @@ export const EnhancedBookingDetails = ({
         } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
         if (error) throw error;
         setBooking(data);
+        
+        // Set up callback for immediate updates
+        window.updateBookingInParent = (id: string, updates: any) => {
+          if (id === bookingId) {
+            setBooking(prev => ({
+              ...prev,
+              ...updates
+            }));
+          }
+        };
       } catch (error: any) {
         toast({
           title: "Feil ved lasting av booking",
@@ -61,6 +78,11 @@ export const EnhancedBookingDetails = ({
       }
     };
     fetchBooking();
+    
+    // Cleanup callback on unmount
+    return () => {
+      delete window.updateBookingInParent;
+    };
   }, [bookingId, isOpen, toast]);
 
   // Real-time subscription for booking updates
@@ -72,10 +94,8 @@ export const EnhancedBookingDetails = ({
       table: 'bookings',
       filter: `id=eq.${booking.id}`
     }, payload => {
-      setBooking(prev => ({
-        ...prev,
-        ...payload.new
-      }));
+      console.log('🔄 Real-time booking update received:', payload.new);
+      setBooking(payload.new);
     }).subscribe();
     return () => {
       supabase.removeChannel(channel);
