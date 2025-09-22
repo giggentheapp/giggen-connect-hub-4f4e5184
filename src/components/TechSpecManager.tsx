@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Edit2, Save, X } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface TechSpecItem {
   id: string;
@@ -29,6 +30,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   useEffect(() => {
     fetchItems();
@@ -47,8 +49,8 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
     } catch (error: any) {
       console.error('Error fetching tech specs:', error);
       toast({
-        title: "Feil",
-        description: "Kunne ikke laste tech specs",
+        title: t('error'),
+        description: t('couldNotLoadTechSpecs'),
         variant: "destructive",
       });
     } finally {
@@ -60,8 +62,8 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
     // FileUpload component now handles database insertion directly for tech specs
     setItems(prev => [fileData, ...prev]);
     toast({
-      title: "Tech spec lastet opp",
-      description: "Tech spec filen er klar til bruk i konsepter",
+      title: t('techSpecUploaded'),
+      description: t('techSpecReady'),
     });
   };
 
@@ -86,13 +88,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       setEditName('');
 
       toast({
-        title: "Oppdatert",
-        description: "Tech spec navnet er oppdatert",
+        title: t('fileUpdateSuccess'),
+        description: t('techSpecNameUpdated'),
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke oppdatere tech spec",
+        title: t('error'),
+        description: t('couldNotUpdateTechSpec'),
         variant: "destructive",
       });
     }
@@ -110,13 +112,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       setItems(prev => prev.filter(item => item.id !== itemId));
 
       toast({
-        title: "Slettet",
-        description: "Tech spec er slettet",
+        title: t('fileDeleteSuccess'),
+        description: t('techSpecDeleted'),
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke slette tech spec",
+        title: t('error'),
+        description: t('couldNotDeleteTechSpec'),
         variant: "destructive",
       });
     }
@@ -148,7 +150,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
         />
 
         {loading ? (
-          <div className="text-center py-4">Laster tech specs...</div>
+          <div className="text-center py-4">{t('loadingTechSpecs')}</div>
         ) : (
           <div className="space-y-4">
             {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
@@ -156,7 +158,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                 {editingItem === item.id ? (
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="name">Navn</Label>
+                      <Label htmlFor="name">{t('fileName')}</Label>
                       <Input
                         id="name"
                         value={editName}
@@ -169,7 +171,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                         onClick={() => handleUpdateItem(item.id)}
                       >
                         <Save className="h-4 w-4 mr-1" />
-                        Lagre
+                        {t('save')}
                       </Button>
                       <Button 
                         size="sm" 
@@ -177,7 +179,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                         onClick={cancelEditing}
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Avbryt
+                        {t('cancel')}
                       </Button>
                     </div>
                   </div>
@@ -186,7 +188,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                     <div className="flex-1">
                       <h4 className="font-medium">{item.filename}</h4>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Type: {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
+                        {t('fileType')}: {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -211,7 +213,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
             )) : []}
             {items.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Ingen tech spec filer ennå. Last opp dokumenter som beskriver tekniske krav.
+                {t('noTechSpecFiles')}
               </div>
             )}
           </div>

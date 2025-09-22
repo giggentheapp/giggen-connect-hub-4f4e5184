@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Edit2, Save, X } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface ProfilePortfolioItem {
   id: string;
   user_id: string;
@@ -37,9 +38,8 @@ const ProfilePortfolioManager = ({
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { t } = useAppTranslation();
   useEffect(() => {
     fetchItems();
   }, [userId]);
@@ -56,8 +56,8 @@ const ProfilePortfolioManager = ({
     } catch (error: any) {
       console.error('Error fetching portfolio items:', error);
       toast({
-        title: "Feil",
-        description: "Kunne ikke laste portefølje",
+        title: t('error'),
+        description: t('couldNotLoadPortfolio'),
         variant: "destructive"
       });
     } finally {
@@ -84,12 +84,12 @@ const ProfilePortfolioManager = ({
       if (error) throw error;
       setItems(prev => [data, ...prev]);
       toast({
-        title: "Fil lastet opp",
-        description: "Filen er lagt til i porteføljen din"
+        title: t('fileUploadSuccess'),
+        description: t('fileAddedToPortfolio')
       });
     } catch (error: any) {
       toast({
-        title: "Feil ved opplasting",
+        title: t('fileUploadError'),
         description: error.message,
         variant: "destructive"
       });
@@ -115,13 +115,13 @@ const ProfilePortfolioManager = ({
       setEditTitle('');
       setEditDescription('');
       toast({
-        title: "Oppdatert",
-        description: "Portfolio elementet er oppdatert"
+        title: t('fileUpdateSuccess'),
+        description: t('portfolioElementUpdated')
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke oppdatere elementet",
+        title: t('error'),
+        description: t('couldNotUpdateElement'),
         variant: "destructive"
       });
     }
@@ -134,13 +134,13 @@ const ProfilePortfolioManager = ({
       if (error) throw error;
       setItems(prev => prev.filter(item => item.id !== itemId));
       toast({
-        title: "Slettet",
-        description: "Portfolio elementet er slettet"
+        title: t('fileDeleteSuccess'),
+        description: t('portfolioElementDeleted')
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke slette elementet",
+        title: t('error'),
+        description: t('couldNotDeleteElement'),
         variant: "destructive"
       });
     }
@@ -163,33 +163,50 @@ const ProfilePortfolioManager = ({
       <CardContent className="space-y-6">
         <FileUpload bucketName="portfolio" folderPath={userId} onFileUploaded={handleFileUploaded} acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx" />
 
-        {loading ? <div className="text-center py-4">Laster portefølje...</div> : <div className="space-y-4">
-            {Array.isArray(items) ? items.filter(item => item && item.id).map(item => <div key={item.id} className="border rounded-lg p-4">
-                {editingItem === item.id ? <div className="space-y-3">
+        {loading ? (
+          <div className="text-center py-4">{t('loadingPortfolio')}</div>
+        ) : (
+          <div className="space-y-4">
+            {Array.isArray(items) ? items.filter(item => item && item.id).map(item => (
+              <div key={item.id} className="border rounded-lg p-4">
+                {editingItem === item.id ? (
+                  <div className="space-y-3">
                     <div>
-                      <Label htmlFor="title">Tittel</Label>
-                      <Input id="title" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
+                      <Label htmlFor="title">{t('title')}</Label>
+                      <Input 
+                        id="title" 
+                        value={editTitle} 
+                        onChange={e => setEditTitle(e.target.value)} 
+                      />
                     </div>
                     <div>
-                      <Label htmlFor="description">Beskrivelse</Label>
-                      <Textarea id="description" value={editDescription} onChange={e => setEditDescription(e.target.value)} />
+                      <Label htmlFor="description">{t('description')}</Label>
+                      <Textarea 
+                        id="description" 
+                        value={editDescription} 
+                        onChange={e => setEditDescription(e.target.value)} 
+                      />
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => handleUpdateItem(item.id)}>
                         <Save className="h-4 w-4 mr-1" />
-                        Lagre
+                        {t('save')}
                       </Button>
                       <Button size="sm" variant="outline" onClick={cancelEditing}>
                         <X className="h-4 w-4 mr-1" />
-                        Avbryt
+                        {t('cancel')}
                       </Button>
                     </div>
-                  </div> : <div className="flex justify-between items-start">
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h4 className="font-medium">{item.title || item.filename}</h4>
-                      {item.description && <p className="text-sm text-muted-foreground mt-1">
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-1">
                           {item.description}
-                        </p>}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mt-2">
                         {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                       </p>
@@ -202,12 +219,17 @@ const ProfilePortfolioManager = ({
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                  </div>}
-              </div>) : []}
-            {items.length === 0 && <div className="text-center py-8 text-muted-foreground">
-                Ingen filer i porteføljen ennå
-              </div>}
-          </div>}
+                  </div>
+                )}
+              </div>
+            )) : []}
+            {items.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                {t('noPortfolioFiles')}
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>;
 };

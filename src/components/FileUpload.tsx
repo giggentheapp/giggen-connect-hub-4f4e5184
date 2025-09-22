@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, File, Image, Video, Music } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface FileUploadProps {
   bucketName: 'portfolio' | 'concepts' | 'avatars';
@@ -18,6 +19,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   const getFileType = (mimeType: string): string => {
     // Categorize MIME types for database constraints
@@ -83,7 +85,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         // For avatars, we don't save to database tables, just return file info
         onFileUploaded({ publicUrl });
         toast({
-          title: "Fil lastet opp",
+          title: t('fileUploadSuccess'),
           description: `${file.name} ble lastet opp successfully`,
         });
         
@@ -187,7 +189,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       onFileUploaded(dbData);
 
       toast({
-        title: "Fil lastet opp",
+        title: t('fileUploadSuccess'),
         description: `${file.name} ble lastet opp successfully`,
       });
 
@@ -209,7 +211,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       }
       
       toast({
-        title: "Feil ved opplasting",
+        title: t('fileUploadError'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -223,10 +225,10 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-4 w-4" />
-          Last opp fil
+          {t('uploadFile')}
         </CardTitle>
         <CardDescription>
-          Støttede formater: Bilder (JPG, PNG, GIF), Video (MP4, MOV), Lyd (MP3, WAV), Dokumenter (PDF, DOCX, TXT)
+          {t('supportedFormatsDetailed')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -243,7 +245,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
             disabled={uploading}
             variant="outline"
           >
-            {uploading ? 'Laster opp...' : 'Velg fil'}
+            {uploading ? t('uploadingFile') : t('selectFile')}
           </Button>
         </div>
       </CardContent>

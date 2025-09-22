@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Edit2, Save, X } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface HospitalityRiderItem {
   id: string;
@@ -29,6 +30,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   useEffect(() => {
     fetchItems();
@@ -47,8 +49,8 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
     } catch (error: any) {
       console.error('Error fetching hospitality riders:', error);
       toast({
-        title: "Feil",
-        description: "Kunne ikke laste hospitality riders",
+        title: t('error'),
+        description: t('couldNotLoadHospitalityRiders'),
         variant: "destructive",
       });
     } finally {
@@ -60,8 +62,8 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
     // FileUpload component now handles database insertion directly for hospitality riders
     setItems(prev => [fileData, ...prev]);
     toast({
-      title: "Hospitality rider lastet opp",
-      description: "Hospitality rider filen er klar til bruk i konsepter",
+      title: t('hospitalityRiderUploaded'),
+      description: t('hospitalityRiderReady'),
     });
   };
 
@@ -86,13 +88,13 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
       setEditName('');
 
       toast({
-        title: "Oppdatert",
-        description: "Hospitality rider navnet er oppdatert",
+        title: t('fileUpdateSuccess'),
+        description: t('hospitalityRiderNameUpdated'),
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke oppdatere hospitality rider",
+        title: t('error'),
+        description: t('couldNotUpdateHospitalityRider'),
         variant: "destructive",
       });
     }
@@ -110,13 +112,13 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
       setItems(prev => prev.filter(item => item.id !== itemId));
 
       toast({
-        title: "Slettet",
-        description: "Hospitality rider er slettet",
+        title: t('fileDeleteSuccess'),
+        description: t('hospitalityRiderDeleted'),
       });
     } catch (error: any) {
       toast({
-        title: "Feil",
-        description: "Kunne ikke slette hospitality rider",
+        title: t('error'),
+        description: t('couldNotDeleteHospitalityRider'),
         variant: "destructive",
       });
     }
@@ -148,7 +150,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
         />
 
         {loading ? (
-          <div className="text-center py-4">Laster hospitality riders...</div>
+          <div className="text-center py-4">{t('loadingHospitalityRiders')}</div>
         ) : (
           <div className="space-y-4">
             {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
@@ -156,7 +158,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                 {editingItem === item.id ? (
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="name">Navn</Label>
+                      <Label htmlFor="name">{t('fileName')}</Label>
                       <Input
                         id="name"
                         value={editName}
@@ -169,7 +171,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                         onClick={() => handleUpdateItem(item.id)}
                       >
                         <Save className="h-4 w-4 mr-1" />
-                        Lagre
+                        {t('save')}
                       </Button>
                       <Button 
                         size="sm" 
@@ -177,7 +179,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                         onClick={cancelEditing}
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Avbryt
+                        {t('cancel')}
                       </Button>
                     </div>
                   </div>
@@ -186,7 +188,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                     <div className="flex-1">
                       <h4 className="font-medium">{item.filename}</h4>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Type: {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
+                        {t('fileType')}: {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -211,7 +213,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
             )) : []}
             {items.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Ingen hospitality rider filer ennå. Last opp dokumenter som beskriver hospitality krav.
+                {t('noHospitalityFiles')}
               </div>
             )}
           </div>
