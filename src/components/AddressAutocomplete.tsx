@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MapPin, AlertCircle } from 'lucide-react';
+import { MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-// Manual pin map removed - simplified address input only
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddressSuggestion {
   place_name: string;
@@ -32,60 +32,104 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   className,
   placeholder = "Søk etter adresse..."
 }) => {
-  // Simple address validation without external geocoding
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{lat: number, lng: number} | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Simple validation only - no external geocoding for now
-  useEffect(() => {
-    const validateAddress = () => {
-      if (!value.trim()) {
-        setValidationError('');
+  // Geocode address using Supabase Edge Function
+  const geocodeAddress = async (address: string) => {
+    if (!address.trim() || address.trim().length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setValidationError('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('geocode-address', {
+        body: { address: address.trim() }
+      });
+
+      if (error) {
+        console.error('Geocoding error:', error);
+        setValidationError('Kunne ikke finne adresse');
+        setSuggestions([]);
+        setShowSuggestions(false);
         return;
       }
 
-      if (value.trim().length < 3) {
-        setValidationError('');
-        return;
-      }
-
-      // Simple address validation - just check if it looks like an address
-      const addressPattern = /[\d\w\s,.-]+/;
-      if (addressPattern.test(value)) {
-        setValidationError('');
+      if (data && data.features && data.features.length > 0) {
+        const formattedSuggestions: AddressSuggestion[] = data.features.map((feature: any) => ({
+          place_name: feature.place_name,
+          center: feature.center,
+          text: feature.text,
+          properties: feature.properties
+        }));
+        
+        setSuggestions(formattedSuggestions);
+        setShowSuggestions(true);
       } else {
-        setValidationError('Ugyldig adresseformat');
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setValidationError('Ingen adresser funnet');
       }
-    };
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      setValidationError('Feil ved adressesøk');
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const timeoutId = setTimeout(validateAddress, 300);
+  // Debounced geocoding
+  useEffect(() => {
+    const timeoutId = setTimeout(() => geocodeAddress(value), 500);
     return () => clearTimeout(timeoutId);
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
+    if (!newValue.trim()) {
+      setSelectedCoordinates(null);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: AddressSuggestion) => {
+    const coordinates = {
+      lat: suggestion.center[1],
+      lng: suggestion.center[0]
+    };
+    
+    setSelectedCoordinates(coordinates);
+    onChange(suggestion.place_name, coordinates);
+    setShowSuggestions(false);
+    setSuggestions([]);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    } else if (e.key === 'Enter' && suggestions.length > 0) {
       e.preventDefault();
-      // Just save the address without coordinates for now
-      onChange(value);
+      handleSuggestionClick(suggestions[0]);
     }
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label htmlFor="address-input" className="flex items-center gap-2">
-        <MapPin className="h-4 w-4" />
-        Adresse
-      </Label>
-      
+    <div className={cn("relative space-y-2", className)}>
       <div className="relative">
         <Input
           ref={inputRef}
-          id="address-input"
           type="text"
           value={value}
           onChange={handleInputChange}
@@ -98,9 +142,36 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         />
         
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+          ) : (
+            <MapPin className={cn(
+              "h-4 w-4",
+              selectedCoordinates ? "text-green-600" : "text-muted-foreground"
+            )} />
+          )}
         </div>
       </div>
+
+      {/* Suggestions dropdown */}
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-50 w-full bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+          {suggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              type="button"
+              className="w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b last:border-b-0 flex items-start gap-2"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate">{suggestion.text}</div>
+                <div className="text-xs text-muted-foreground truncate">{suggestion.place_name}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Validation error */}
       {validationError && (
@@ -112,12 +183,12 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         </Alert>
       )}
 
-      {/* Info message about simplified functionality */}
-      {value.trim() && !validationError && (
+      {/* Success message with coordinates */}
+      {selectedCoordinates && !validationError && (
         <Alert>
           <MapPin className="h-4 w-4" />
           <AlertDescription>
-            Adresse lagret. Kartfunksjonalitet kommer snart for bedre posisjonering.
+            ✅ Adresse georeferert - Koordinater: {selectedCoordinates.lat.toFixed(4)}, {selectedCoordinates.lng.toFixed(4)}
           </AlertDescription>
         </Alert>
       )}
