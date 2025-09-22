@@ -63,6 +63,13 @@ export const BookingCardStep1 = ({
             </div>
           )}
           
+          {booking.address && (
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span>Adresse: {booking.address}</span>
+            </div>
+          )}
+          
           {booking.personal_message && (
             <div className="flex items-start gap-2 text-sm">
               <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />

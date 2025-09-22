@@ -276,7 +276,7 @@ export const BookingDetailsPanel = ({
               <Edit3 className="h-3 w-3" />
             </Button>}
         </Label>
-        {isEditing ? <div className="flex gap-2">
+          {isEditing ? <div className="flex gap-2">
             {type === 'textarea' ? (
               <Textarea 
                 ref={textareaRef} 
@@ -295,6 +295,40 @@ export const BookingDetailsPanel = ({
                   // Maintain cursor position
                   const length = e.target.value.length;
                   setTimeout(() => {
+                    e.target.setSelectionRange(length, length);
+                  }, 0);
+                }}
+              />
+            ) : type === 'time' ? (
+              <Input 
+                ref={inputRef} 
+                type="text"
+                value={tempValue || ''} 
+                onChange={e => {
+                  let newValue = e.target.value.replace(/[^\d]/g, ''); // Only digits
+                  
+                  // Format as HH:MM while typing
+                  if (newValue.length >= 3) {
+                    newValue = newValue.slice(0, 2) + ':' + newValue.slice(2, 4);
+                  }
+                  
+                  // Limit to 5 characters (HH:MM)
+                  if (newValue.length > 5) {
+                    newValue = newValue.slice(0, 5);
+                  }
+                  
+                  setTempValues(prev => ({
+                    ...prev,
+                    [fieldName]: newValue
+                  }));
+                }} 
+                placeholder={placeholder}
+                autoFocus
+                maxLength={5}
+                onFocus={e => {
+                  // Set cursor to end for time input
+                  setTimeout(() => {
+                    const length = e.target.value.length;
                     e.target.setSelectionRange(length, length);
                   }, 0);
                 }}
@@ -361,87 +395,178 @@ export const BookingDetailsPanel = ({
             <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
           </div>
 
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              Spillested
-              {canEdit && editingField !== 'venue' && (
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Venue/Spillested field */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                Spillested
+                {canEdit && editingField !== 'venue' && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => {
+                      setEditingField('venue');
+                      setTempValues(prev => ({
+                        ...prev,
+                        venue: booking.venue || ''
+                      }));
+                    }}
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                )}
+              </Label>
+
+              {editingField === 'venue' ? (
+                <div className="flex gap-2">
+                  <Input 
+                    value={tempValues.venue || booking.venue || ''} 
+                    onChange={(e) => {
+                      setTempValues(prev => ({
+                        ...prev,
+                        venue: e.target.value
+                      }));
+                    }}
+                    placeholder="Spillested" 
+                    autoFocus
+                    onFocus={e => {
+                      const length = e.target.value.length;
+                      setTimeout(() => {
+                        e.target.setSelectionRange(length, length);
+                      }, 0);
+                    }}
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      handleFieldUpdate('venue', booking.venue, tempValues.venue);
+                      setEditingField(null);
+                      setTempValues(prev => {
+                        const newValues = { ...prev };
+                        delete newValues.venue;
+                        return newValues;
+                      });
+                    }}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditingField(null);
+                      setTempValues(prev => {
+                        const newValues = { ...prev };
+                        delete newValues.venue;
+                        return newValues;
+                      });
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className={cn(
+                    "p-2 border rounded", 
+                    canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
+                  )} 
+                  onClick={canEdit ? () => {
                     setEditingField('venue');
                     setTempValues(prev => ({
                       ...prev,
                       venue: booking.venue || ''
                     }));
-                  }}
+                  } : undefined}
                 >
-                  <Edit3 className="h-3 w-3" />
-                </Button>
+                  {booking.venue || 'Spillested'}
+                </div>
               )}
-            </Label>
+            </div>
 
-            {editingField === 'venue' ? (
-              <div className="flex gap-2">
-                <AddressAutocomplete 
-                  value={tempValues.venue || booking.venue || ''} 
-                  onChange={(address, coordinates) => {
+            {/* Address field */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                Adresse
+                {canEdit && editingField !== 'address' && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => {
+                      setEditingField('address');
+                      setTempValues(prev => ({
+                        ...prev,
+                        address: booking.address || ''
+                      }));
+                    }}
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                )}
+              </Label>
+
+              {editingField === 'address' ? (
+                <div className="flex gap-2">
+                  <AddressAutocomplete 
+                    value={tempValues.address || booking.address || ''} 
+                    onChange={(address, coordinates) => {
+                      setTempValues(prev => ({
+                        ...prev,
+                        address: address
+                      }));
+                      if (coordinates) {
+                        console.log('Address coordinates:', coordinates);
+                      }
+                    }}
+                    placeholder="Adresse" 
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      handleFieldUpdate('address', booking.address, tempValues.address);
+                      setEditingField(null);
+                      setTempValues(prev => {
+                        const newValues = { ...prev };
+                        delete newValues.address;
+                        return newValues;
+                      });
+                    }}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditingField(null);
+                      setTempValues(prev => {
+                        const newValues = { ...prev };
+                        delete newValues.address;
+                        return newValues;
+                      });
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className={cn(
+                    "p-2 border rounded", 
+                    canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
+                  )} 
+                  onClick={canEdit ? () => {
+                    setEditingField('address');
                     setTempValues(prev => ({
                       ...prev,
-                      venue: address
+                      address: booking.address || ''
                     }));
-                    if (coordinates) {
-                      console.log('Venue coordinates:', coordinates);
-                    }
-                  }}
-                  placeholder="F.eks. Rockefeller Music Hall, Oslo" 
-                />
-                <Button 
-                  size="sm" 
-                  onClick={() => {
-                    handleFieldUpdate('venue', booking.venue, tempValues.venue);
-                    setEditingField(null);
-                    setTempValues(prev => {
-                      const newValues = { ...prev };
-                      delete newValues.venue;
-                      return newValues;
-                    });
-                  }}
+                  } : undefined}
                 >
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => {
-                    setEditingField(null);
-                    setTempValues(prev => {
-                      const newValues = { ...prev };
-                      delete newValues.venue;
-                      return newValues;
-                    });
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div 
-                className={cn(
-                  "p-2 border rounded", 
-                  canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
-                )} 
-                onClick={canEdit ? () => {
-                  setEditingField('venue');
-                  setTempValues(prev => ({
-                    ...prev,
-                    venue: booking.venue || ''
-                  }));
-                } : undefined}
-              >
-                {booking.venue || 'F.eks. Rockefeller Music Hall'}
-              </div>
-            )}
+                  {booking.address || 'Adresse'}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

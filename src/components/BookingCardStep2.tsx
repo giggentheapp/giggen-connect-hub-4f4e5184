@@ -73,7 +73,14 @@ export const BookingCardStep2 = ({
           {booking.venue && (
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span><strong>Sted:</strong> {booking.venue}</span>
+              <span><strong>Spillested:</strong> {booking.venue}</span>
+            </div>
+          )}
+          
+          {booking.address && (
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span><strong>Adresse:</strong> {booking.address}</span>
             </div>
           )}
           

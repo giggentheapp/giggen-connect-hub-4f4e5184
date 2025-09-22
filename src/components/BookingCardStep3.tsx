@@ -67,6 +67,13 @@ export const BookingCardStep3 = ({
             </div>
           )}
           
+          {booking.address && (
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-green-600" />
+              <span><strong>Adresse:</strong> {booking.address}</span>
+            </div>
+          )}
+          
           {booking.audience_estimate && (
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-green-600" />
