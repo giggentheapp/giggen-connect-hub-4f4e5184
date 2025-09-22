@@ -1,135 +1,25 @@
 export const appTranslations = {
   no: {
-    // Navigation & Sidebar
-    explore: "Utforsk",
-    profile: "Profil", 
-    administration: "Administrasjon",
+    // Language
+    norwegian: "Norsk",
+    english: "English",
+
+    // Navigation
+    dashboard: "Dashboard",
+    profile: "Profil",
     settings: "Innstillinger",
-    bookings: "Bookinger",
-    
-    // Explore Section
-    makersInNetwork: "Makere i nettverket",
-    loadingMakers: "Laster makere...",
-    loginRequired: "Du må være logget inn for å se makere.",
-    couldNotLoadMusicians: "Kunne ikke laste musikere. Prøv igjen senere.",
-    tryAgain: "Prøv igjen",
-    somethingWentWrong: "Noe gikk galt ved lasting av musikere",
-    noMakersFoundFiltered: "Ingen makere funnet som matcher filtrene.",
-    noMakersFound: "Ingen makere funnet.",
-    adjustFilters: "Prøv å justere søket eller filtrene for å se flere resultater.",
-    searchPlaceholder: "Søk etter musikere...",
-    
-    // Map Section
-    mapComingSoon: "Kart kommer snart!",
-    mapDescription: "Vi jobber med å lage et interaktivt kart som gjør det enklere å finne arrangementer i ditt område.",
-    upcomingEvents: "Kommende arrangementer",
-    upcomingEventsDesc: "Se alle arrangementer på kartet med dato og tid",
-    musiciansNearby: "Musikere i nærheten", 
-    musiciansNearbyDesc: "Finn talentfulle musikere og artister i ditt område",
-    localCommunity: "Lokalsamfunn",
-    localCommunityDesc: "Utforsk det lokale musikksamfunnet rundt deg",
-    interimMessage: "I mellomtiden kan du utforske musikere og arrangementer i listen.",
-    goToExplorePage: "Gå til utforsk-siden",
-    underDevelopment: "Under utvikling",
+    back: "Tilbake",
+    menu: "Meny",
+    myProfile: "Min profil",
+    explore: "Utforsk",
     map: "Kart",
-    list: "Liste",
-    
-    // Booking Section
-    loadingBookings: "Laster bookinger...",
-    incomingRequests: "Innkommende forespørsler",
-    sentRequest: "Sendt forespørsel", 
-    ongoingAgreements: "Pågående avtaler",
-    upcomingEventsBookings: "Kommende arrangementer",
-    noIncomingRequests: "Ingen innkommende forespørsler",
-    noSentRequests: "Ingen sendte forespørsler", 
-    noOngoingAgreements: "Ingen pågående avtaler",
-    noUpcomingEvents: "Ingen kommende arrangementer",
-    
-    // Booking descriptions
-    incomingRequestsDesc: "Forespørsler du har mottatt som venter på ditt svar.",
-    sentRequestsDesc: "Forespørsler du har sendt som venter på svar fra mottakeren.",
-    ongoingAgreementsDesc: "Tillatte avtaler hvor dere kan redigere detaljer og se hverandres kontaktinfo og dokumenter.",
-    bookingUpcomingEventsDesc: "Publiserte arrangementer som er synlige for andre brukere (med begrenset info). Avtaler er låst for redigering.",
-    
-    // Booking status
-    waitingResponse: "Venter svar",
-    allowed: "Tillatt",
-    approved: "Godkjent", 
-    published: "Publisert",
-    completed: "Gjennomført",
-    cancelled: "Avlyst",
-    
-    // Booking phases
-    requestPhase: "1. Forespørsel",
-    sentRequestPhase: "Sendt forespørsel",
-    ongoingAgreementEditablePhase: "2. Pågående avtale - Kan redigeres",
-    ongoingAgreementReadyPhase: "2. Pågående avtale - Klar for publisering", 
-    publishedEventPhase: "3. Publisert arrangement",
-    completedPhase: "Gjennomført",
-    cancelledPhase: "Avlyst",
-    unknownStatus: "Ukjent status",
-    
-    // Actions & Buttons
-    seeDetails: "Se detaljer",
-    seeProfile: "Se profil",
-    
-    // Error handling
-    couldNotUpdateList: "Kunne ikke oppdatere listen",
-    tryRefreshManually: "Prøv å oppdatere siden manuelt",
-    somethingWentWrongGeneric: "Noe gikk galt",
-    couldNotLoadPage: "Det ser ut som nettleseren din har problemer med å laste denne siden.",
-    tryAgainButton: "Prøv igjen",
-    
-    // Common
-    noDescription: "Ingen beskrivelse tilgjengelig",
+    events: "Arrangementer",
+    help: "Hjelp",
+    loading: "Laster...",
+    error: "Feil",
+    success: "Suksess",
 
-    // Landing Page
-    termsAndConditions: "Vilkår og betingelser",
-    privacyPolicy: "Personvernerklæring", 
-    aboutGiggen: "Om GIGGEN",
-    signIn: "Logg inn",
-
-    // Profile Page - Maker Cards
-    profileInformation: "Profilinformasjon",
-    myPortfolio: "Min portefølje",
-    myPublishedOffers: "Mine publiserte tilbud",
-    myUpcomingEvents: "Mine kommende arrangementer",
-
-    // File Management Page
-    profilePortfolio: "Profilportefølje",
-    technicalSpecifications: "Tekniske spesifikasjoner", 
-    hospitalityRiders: "Hospitality riders",
-
-    // My Offers Page
-    myOffers: "Mine tilbud",
-
-    // Settings Page - All Cards
-    profileInformationSettings: "Profilinformasjon",
-    socialMedia: "Sosiale medier",
-    visibilityAndPrivacy: "Synlighet og personvern",
-    changePassword: "Endre passord",
-    logOut: "Logg ut",
-    deleteAccount: "Slett konto",
-
-    // Additional profile/settings content
-    updateProfileDetails: "Oppdater dine grunnleggende profildetaljer som vises til andre brukere",
-    addSocialMediaProfiles: "Legg til dine sosiale medier profiler som vil vises på profilen din",
-    managePrivacySettings: "Administrer hvem som kan se hvilken informasjon om deg",
-    updateAccountPassword: "Endre passordet for kontoen din",
-    signOutOfAccount: "Logg ut av kontoen din",
-    permanentlyDeleteAccount: "Slett kontoen din permanent - denne handlingen kan ikke angres",
-
-    // Form labels and placeholders
-    displayName: "Visningsnavn",
-    biography: "Biografi", 
-    location: "Lokasjon",
-    email: "E-post",
-    phoneNumber: "Telefonnummer",
-    currentPassword: "Nåværende passord",
-    newPassword: "Nytt passord",
-    confirmPassword: "Bekreft passord",
-
-    // Actions
+    // Common actions  
     save: "Lagre",
     cancel: "Avbryt",
     delete: "Slett",
@@ -139,33 +29,22 @@ export const appTranslations = {
     remove: "Fjern",
     add: "Legg til",
     update: "Oppdater",
-
-    // File management
-    fileManagement: "Filhåndtering",
-    uploadFile: "Last opp fil",
-    replaceFile: "Erstatt fil", 
-    downloadFile: "Last ned fil",
-    removeFile: "Fjern fil",
-    noFilesUploaded: "Ingen filer lastet opp",
-    supportedFormats: "Støttede formater",
-
-    // Success/Error messages
-    profileUpdated: "Profil oppdatert",
-    passwordChanged: "Passord endret",
-    fileUploaded: "Fil lastet opp",
-    fileRemoved: "Fil fjernet", 
-    changesSaved: "Endringer lagret",
-    errorOccurred: "En feil oppstod",
-    pleaseCorrectErrors: "Vennligst rett opp feilene",
+    close: "Lukk",
+    confirm: "Bekreft",
+    continue: "Fortsett",
 
     // Authentication
+    signIn: "Logg inn",
+    signUp: "Registrer deg",
+    signOut: "Logg ut",
     loginToAccount: "Logg inn på din konto",
     createNewAccount: "Opprett ny konto",
-    signUp: "Registrer deg",
+    email: "E-post",
+    password: "Passord",
+    displayName: "Visningsnavn",
     yourName: "Ditt navn",
     selectUserType: "Velg brukertype",
     working: "Arbeider...",
-    loading: "Laster...",
     dontHaveAccount: "Har du ikke konto? Registrer deg her",
     alreadyHaveAccount: "Har du allerede konto? Logg inn her",
     loginError: "Feil ved innlogging",
@@ -179,37 +58,192 @@ export const appTranslations = {
     makerDescription: "Kan opprette tilbud, laste opp portefølje og administrere arrangementer",
     goerDescription: "Kan se portefølje, arrangementer og profilene til Makers",
 
-    // Confirmation dialogs
+    // Settings page
+    settingsDescription: "Administrer dine app-innstillinger og preferanser",
+
+    // Profile
+    profileInformation: "Profilinformasjon",
+    profileInformationSettings: "Profilinformasjon",
+    updateProfileDetails: "Oppdater dine grunnleggende profildetaljer som vises til andre brukere",
+    profilePicture: "Profilbilde",
+    selectProfilePicture: "Velg et profilbilde som representerer deg",
+    changePicture: "Endre bilde",
+    biography: "Biografi",
+    biographyPlaceholder: "Fortell litt om deg selv, din musikk og erfaring...",
+    location: "Lokasjon",
+    addressPlaceholder: "Din adresse (valgfri)",
+    contactInformation: "Kontaktinformasjon",
+    emailPlaceholder: "din@epost.no",
+    phoneNumber: "Telefonnummer",
+    phoneNumberPlaceholder: "+47 123 45 678",
+    saveChanges: "Lagre endringer",
+    role: "Rolle",
+    maker: "maker",
+    goer: "goer",
+
+    // Social Media
+    socialMedia: "Sosiale medier",
+    addSocialMediaProfiles: "Legg til dine sosiale medier profiler som vil vises på profilen din",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    youtube: "YouTube", 
+    spotify: "Spotify",
+    soundcloud: "SoundCloud",
+    tiktok: "TikTok",
+    website: "Nettside",
+    instagramPlaceholder: "https://instagram.com/yourhandle",
+    facebookPlaceholder: "https://facebook.com/yourpage",
+    youtubePlaceholder: "https://youtube.com/yourchannel",
+    spotifyPlaceholder: "https://open.spotify.com/artist/...",
+    soundcloudPlaceholder: "https://soundcloud.com/yourprofile",
+    tiktokPlaceholder: "https://tiktok.com/@yourhandle",
+    websitePlaceholder: "https://yourwebsite.com",
+    saveSocialMedia: "Lagre sosiale medier",
+    updating: "Oppdaterer...",
+
+    // Privacy Settings
+    visibilityAndPrivacy: "Synlighet og personvern",
+    managePrivacySettings: "Administrer hvem som kan se hvilken informasjon om deg",
+    controlWhoSees: "Kontroller hvem som kan se hvilken informasjon fra profilen din",
+    publicProfile: "Offentlig profil",
+    makeProfileVisible: "Gjør profilen din synlig for andre på plattformen",
+    profileContent: "Profilinnhold",
+    biographyDescription: "Biografi og beskrivelse",
+    showBiographyToAll: "Vis din biografi for alle brukere",
+    portfolioWork: "Portefølje og arbeider",
+    showWorkExamples: "La andre se eksempler på ditt arbeid",
+    eventsAndConcerts: "Arrangementer og konserter",
+    showUpcomingEvents: "Vis dine kommende arrangementer",
+    technicalSpecifications: "Technical Specifications",
+    shareTechRequirements: "Del tekniske krav og utstyrsbehov",
+    locationAndContact: "Lokasjon og kontakt",
+    showOnMap: "Vis på kart",
+    showLocationOnMap: "Vis din lokasjon på kartet (krever offentlig adresse)",
+    publicAddress: "Offentlig adresse",
+    makeAddressVisible: "Gjør adressen din synlig for andre brukere",
+    contactInfoTitle: "Kontaktinformasjon",
+    shareContactInfo: "Del kontaktinfo med andre brukere (kun i bookinger)",
+    securityFirst: "Sikkerhet først",
+    sensitiveInfoNote: "Sensitive opplysninger som priser og personlige meldinger deles kun i godkjente bookinger.",
+
+    // Password Settings
+    changePassword: "Endre passord",
+    updateAccountPassword: "Endre passordet for kontoen din",
+    updatePasswordSecurity: "Oppdater ditt passord for økt sikkerhet",
+    currentPassword: "Nåværende passord", 
+    newPassword: "Nytt passord",
+    confirmPassword: "Bekreft passord",
+    minSixCharacters: "Minst 6 tegn",
+    repeatPassword: "Gjenta passordet",
+
+    // Account Management
+    logOut: "Logg ut",
+    signOutOfAccount: "Logg ut av kontoen din",
+    deleteAccount: "Slett konto",
+    permanentlyDeleteAccount: "Slett kontoen din permanent - denne handlingen kan ikke angres",
+    permanentDeletion: "Permanent sletting av brukerdata. Denne handlingen kan ikke angres.",
+
+    // File Management
+    fileManagement: "Filhåndtering",
+    managePortfolioFiles: "Administrer portefølje, tekniske spesifikasjoner og hospitality riders",
+    profilePortfolio: "Profilportefølje",
+    uploadPortfolioFiles: "Last opp bilder, videoer og andre filer som viser frem ditt arbeid",
+    hospitalityRiders: "Hospitality Riders",
+    uploadHospitalityRiders: "Last opp hospitality rider-dokumenter for arrangementer",
+    uploadTechSpecs: "Last opp tekniske spesifikasjoner og rider-dokumenter",
+    
+    // File Upload UI
+    uploadFile: "Last opp fil",
+    supportedFormats: "Støttede formater",
+    supportedFormatsDetailed: "Støttede formater: Bilder (JPG, PNG, GIF), Video (MP4, MOV), Lyd (MP3, WAV), Dokumenter (PDF, DOCX, TXT)",
+    noFileSelected: "Ingen fil valgt",
+    selectFile: "Velg fil",
+    uploadingFile: "Laster opp fil...",
+    noFilesUploaded: "Ingen filer lastet opp",
+    replaceFile: "Erstatt fil",
+    downloadFile: "Last ned fil",
+    removeFile: "Fjern fil",
+    noPortfolioFiles: "Ingen filer i porteføljen ennå",
+    noTechSpecFiles: "Ingen tech spec filer ennå. Last opp dokumenter som beskriver tekniske krav.",
+    noHospitalityFiles: "Ingen hospitality rider filer ennå. Last opp dokumenter som beskriver hospitality krav.",
+
+    // File Management Messages
+    fileUploadSuccess: "Fil lastet opp",
+    fileUploadError: "Feil ved opplasting",
+    fileDeleteSuccess: "Slettet",
+    fileUpdateSuccess: "Oppdatert",
+    fileAddedToPortfolio: "Filen er lagt til i porteføljen din",
+    loadingPortfolio: "Laster portefølje...",
+    couldNotLoadPortfolio: "Kunne ikke laste portefølje",
+    portfolioElementUpdated: "Portfolio elementet er oppdatert",
+    portfolioElementDeleted: "Portfolio elementet er slettet",
+    couldNotUpdateElement: "Kunne ikke oppdatere elementet",
+    couldNotDeleteElement: "Kunne ikke slette elementet",
+
+    // Tech Spec and Hospitality UI
+    fileName: "Navn",
+    fileType: "Type",
+    title: "Tittel",
+    description: "Beskrivelse",
+    loadingTechSpecs: "Laster tech specs...",
+    loadingHospitalityRiders: "Laster hospitality riders...",
+    techSpecUploaded: "Tech spec lastet opp",
+    hospitalityRiderUploaded: "Hospitality rider lastet opp",
+    techSpecReady: "Tech spec filen er klar til bruk i konsepter",
+    hospitalityRiderReady: "Hospitality rider filen er klar til bruk i konsepter",
+    techSpecNameUpdated: "Tech spec navnet er oppdatert",
+    hospitalityRiderNameUpdated: "Hospitality rider navnet er oppdatert",
+    couldNotLoadTechSpecs: "Kunne ikke laste tekniske spesifikasjoner",
+    couldNotLoadHospitalityRiders: "Kunne ikke laste hospitality riders",
+    couldNotUpdateTechSpec: "Kunne ikke oppdatere tech spec",
+    couldNotUpdateHospitalityRider: "Kunne ikke oppdatere hospitality rider",
+    techSpecDeleted: "Tech spec er slettet",
+    hospitalityRiderDeleted: "Hospitality rider er slettet",
+    couldNotDeleteTechSpec: "Kunne ikke slette tech spec",
+    couldNotDeleteHospitalityRider: "Kunne ikke slette hospitality rider",
+
+    // Profile Page Cards
+    myPortfolio: "Min portefølje",
+    howPortfolioAppears: "Slik vises porteføljen din til andre makere",
+    noPortfolioUploaded: "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp.",
+    myPublishedOffers: "Mine publiserte tilbud",
+    yourVisibleOffers: "Tilbudene dine som er synlige for andre makere",
+    noPublishedOffers: "Ingen publiserte tilbud ennå",
+    createPublishOffers: "Opprett og publiser tilbud for å vise dem her",
+    myUpcomingEvents: "Mine kommende arrangementer",
+    eventsYouAreInvolvedIn: "Arrangementer du er involvert i",
+    privacyNote: "Personvern: Kun offentlig arrangementinfo vises til andre brukere. Sensitive detaljer som honorar og kontaktinfo er kun synlig for deg og samarbeidspartneren.",
+    noUpcomingEvents: "Du har ingen kommende arrangementer",
+
+    // Offers/Concepts
+    createAndManageOffers: "Opprett og administrer dine kreative tilbud",
+    newOffer: "nytt tilbud",
+    noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
+    createFirstOffer: "Opprett ditt første tilbud",
+
+    // Success/Error Messages
+    profileUpdated: "Profil oppdatert",
+    passwordChanged: "Passord endret",
+    fileUploaded: "Fil lastet opp",
+    fileRemoved: "Fil fjernet",
+    changesSaved: "Endringer lagret",
+    errorOccurred: "En feil oppstod",
+    pleaseCorrectErrors: "Vennligst rett opp feilene",
+
+    // Confirmation Dialogs
     confirmLogout: "Er du sikker på at du vil logge ut?",
     confirmDeleteAccount: "Er du sikker på at du vil slette kontoen din? Denne handlingen kan ikke angres.",
     confirmDeleteFile: "Er du sikker på at du vil slette denne filen?",
     yes: "Ja",
     no: "Nei",
 
-    // File management descriptions
-    managePortfolioFiles: "Administrer portefølje, tekniske spesifikasjoner og hospitality riders",
-    uploadPortfolioFiles: "Last opp bilder, videoer og andre filer som viser frem ditt arbeid",
-    uploadTechSpecs: "Last opp tekniske spesifikasjoner og rider-dokumenter",
-    uploadHospitalityRiders: "Last opp hospitality rider-dokumenter for arrangementer",
+    // Landing Page
+    termsAndConditions: "Vilkår og betingelser",
+    privacyPolicy: "Personvernerklæring",
+    aboutGiggen: "Om GIGGEN",
+    aboutGiggenDescription: "Giggen er Norges ledende plattform for musikk-booking og networking. Vi kobler musikere med arrangører gjennom innovative teknologier som interaktive kart og smart matching.",
 
-    // Additional texts
-    couldNotLoadTechSpecs: "Kunne ikke laste tekniske spesifikasjoner",
-    noTechSpecsUploaded: "Ingen tekniske spesifikasjoner lastet opp. Gå til innstillinger for å laste opp.",
-    noTechSpecsAvailable: "Ingen tekniske spesifikasjoner tilgjengelig",
-    couldNotLoadHospitalityRiders: "Kunne ikke laste hospitality riders",
-    loadingHospitalityRiders: "Laster hospitality riders...",
-    savingSocialMedia: "Lagrer sosiale medier...",
-    saveSocialMedia: "Lagre sosiale medier",
-    updating: "Oppdaterer...",
-    loggingOut: "Logger ut...",
-
-    // Additional profile and settings
-    updateProfileDetailsDescription: "Oppdater dine grunnleggende profildetaljer som vises til andre brukere",
-    profilePicture: "Profilbilde",
-    selectProfilePicture: "Velg et profilbilde som representerer deg",
-    back: "Tilbake",
-
-    // Terms and Conditions page
+    // Terms Page Content
     lastUpdated: "Sist oppdatert",
     welcomeToGiggen: "Velkommen til Giggen! Disse vilkårene og betingelsene (\"Vilkår\") regulerer din bruk av Giggen-plattformen (\"Tjenesten\") som drives av Giggen AS (\"vi\", \"oss\", \"vår\"). Ved å bruke vår tjeneste godtar du disse vilkårene.",
     userResponsibility: "Brukeransvar",
@@ -225,6 +259,8 @@ export const appTranslations = {
     fakeProfiles: "Falske profiler eller villedende informasjon",
     copyrightViolation: "Krenkelse av opphavsrett eller andre rettigheter",
     malwareVirus: "Virus, malware eller skadelig kode",
+
+    // Terms - Booking Process
     bookingProcessAndResponsibility: "Booking-prosess og ansvar",
     threeStepBooking: "3-stegs booking-prosess:",
     organizerSendsRequest: "Arrangør sender booking-forespørsel til musiker",
@@ -236,6 +272,8 @@ export const appTranslations = {
     bothPartiesResponsible: "Begge parter er ansvarlige for å overholde inngåtte avtaler",
     giggenNotResponsibleQuality: "Giggen er ikke ansvarlig for kvalitet eller utførelse",
     cancellationFollowAgreement: "Avbestilling må følge partenes avtale",
+
+    // Terms - Payment
     paymentTerms: "Betalingsvilkår",
     serviceCurrentlyFree: "Tjenesten er for øyeblikket gratis, men:",
     reserveRightIntroduceFees: "Vi forbeholder oss retten til å innføre avgifter",
@@ -245,6 +283,8 @@ export const appTranslations = {
     integratedPaymentSolutions: "Vi kan tilby integrerte betalingsløsninger",
     standardFeesApply: "Standardavgifter kan påløpe for transaksjoner",
     feesWillBeCommunicated: "Alle avgifter vil være tydelig kommunisert",
+
+    // Terms - Copyright
     copyrightIntellectualRights: "Opphavsrett og immaterielle rettigheter",
     yourContent: "Ditt innhold:",
     retainAllRights: "Du beholder alle rettigheter til innholdet du laster opp",
@@ -254,6 +294,8 @@ export const appTranslations = {
     giggenPlatformProtected: "Giggen-plattformen og dens innhold er beskyttet av opphavsrett",
     cannotCopyCode: "Du kan ikke kopiere, reprodusere eller distribuere vår kode",
     trademarksRegistered: "Handelsnavn og logoer er våre registrerte varemerker",
+
+    // Terms - Disclaimer
     disclaimerTitle: "Ansvarsfraskrivelse",
     giggenNotResponsibleFor: "Giggen er ikke ansvarlig for:",
     qualityOfMusicians: "Kvaliteten på musikere eller arrangementer",
@@ -262,6 +304,8 @@ export const appTranslations = {
     serviceInterruptions: "Tjenesteavbrudd eller tekniske problemer",
     contentFromOtherUsers: "Innhold eller oppførsel fra andre brukere",
     serviceAsIs: "Tjenesten leveres \"som den er\" uten garantier av noe slag. Din bruk av tjenesten skjer på egen risiko.",
+
+    // Terms - Termination
     termination: "Oppsigelse",
     youCan: "Du kan:",
     deleteAccountAnytime: "Slette din konto når som helst",
@@ -270,6 +314,8 @@ export const appTranslations = {
     suspendDeleteAccounts: "Suspendere eller slette kontoer som bryter vilkårene",
     terminateServiceNotice: "Avslutte tjenesten med 30 dagers varsel",
     changeTermsNotice: "Endre vilkårene med rimelig forhåndsvarsel",
+
+    // Terms - Contact
     contactApplicableLaw: "Kontakt og gjeldende lov",
     questionsAboutTerms: "Spørsmål om vilkårene?",
     mail: "Post",
@@ -278,335 +324,55 @@ export const appTranslations = {
     termsUnderNorwegianLaw: "Disse vilkårene er underlagt norsk lov. Eventuelle tvister skal løses ved norske domstoler med Oslo som verneting.",
     aboutUs: "Om oss",
     contact: "Kontakt",
-    allRightsReserved: "Alle rettigheter forbeholdt.",
-
-    // Privacy Policy page
-    privacyPolicyTitle: "Personvernerklæring",
-    giggenRespectsPrivacy: "Giggen AS (\"vi\", \"oss\", \"vår\") respekterer ditt personvern og er forpliktet til å beskytte dine personopplysninger. Denne personvernerklæringen forklarer hvordan vi samler inn, bruker, deler og beskytter informasjonen din når du bruker vår tjeneste.",
-    whatDataWeCollect: "Hvilke data vi samler inn",
-    personalInformation: "Personlig informasjon",
-    nameEmailPhone: "Navn, e-postadresse og telefonnummer",
-    profileInfoPortfolio: "Profilinformasjon og portefølje-innhold",
-    geographicLocation: "Geografisk lokasjon (hvis tillatt)",
-    bookingHistoryCommunication: "Booking-historikk og kommunikasjon",
-    technicalInformation: "Teknisk informasjon",
-    ipAddressDevice: "IP-adresse og enhetsinformasjon",
-    browserTypeVersion: "Nettlesertype og -versjon",
-    usagePatternsPreferences: "Bruksmønstre og preferanser",
-    cookiesSimilarTech: "Cookies og lignende teknologier",
-    howWeUseData: "Hvordan vi bruker dine data",
-    deliverImproveServices: "Levere og forbedre våre tjenester",
-    matchMusiciansOpportunities: "Matche musikere med relevante booking-muligheter",
-    communicateAboutService: "Kommunisere med deg om tjenesten",
-    ensureSafeUse: "Sikre trygg bruk av plattformen",
-    complyLegalObligations: "Overholde juridiske forpliktelser",
-    sharingInformation: "Deling av informasjon",
-    neverSellPersonalData: "Vi selger aldri dine personopplysninger. Vi deler kun informasjon i følgende tilfeller:",
-    withYourConsent: "Med ditt samtykke eller på din instruks",
-    withOtherUsers: "Med andre brukere som del av booking-prosessen",
-    withServiceProviders: "Med tjenesteleverandører som hjelper oss å drifte plattformen",
-    whenRequiredByLaw: "Når det kreves av lov eller for å beskytte rettigheter",
-    yourRights: "Dine rettigheter",
-    rightToAccess: "Få tilgang til dine data",
-    rightToCorrect: "Rette unøyaktige data",
-    rightToDelete: "Slette dine data",
-    rightToLimit: "Begrense behandling",
-    youCanAlso: "Du kan også:",
-    transferData: "Overføre data til andre tjenester",
-    objectToProcessing: "Motsette deg behandling",
-    withdrawConsent: "Trekke tilbake samtykke",
-    complainToAuthority: "Klage til Datatilsynet",
-    security: "Sikkerhet",
-    securityMeasures: "Vi implementerer passende tekniske og organisatoriske tiltak for å beskytte dine personopplysninger mot uautorisert tilgang, endring, avsløring eller ødeleggelse. Dette inkluderer kryptering, tilgangskontroll og regelmessige sikkerhetsgjennomganger.",
-    contactUs: "Kontakt oss",
-    privacyQuestions: "Har du spørsmål om denne personvernerklæringen eller ønsker å utøve dine rettigheter, kan du kontakte oss:",
-    privacyEmail: "personvern@giggen.org",
-
-    // Profile settings form
-    changePicture: "Endre bilde",
-    biographyPlaceholder: "Fortell litt om deg selv, din musikk og erfaring...",
-    addressPlaceholder: "Din adresse (valgfri)",
-    contactInformation: "Kontaktinformasjon",
-    emailPlaceholder: "din@epost.no",
-    phoneNumberPlaceholder: "+47 123 45 678",
-    saveChanges: "Lagre endringer",
-
-    // Privacy settings
-    controlWhoSees: "Kontroller hvem som kan se hvilken informasjon fra profilen din",
-    publicProfile: "Offentlig profil",
-    makeProfileVisible: "Gjør profilen din synlig for andre på plattformen",
-    profileContent: "Profilinnhold",
-    biographyDescription: "Biografi og beskrivelse",
-    showBiographyToAll: "Vis din biografi for alle brukere",
-    portfolioWork: "Portefølje og arbeider",
-    showWorkExamples: "La andre se eksempler på ditt arbeid",
-    eventsAndConcerts: "Arrangementer og konserter",
-    showUpcomingEvents: "Vis dine kommende arrangementer",
-    shareTechRequirements: "Del tekniske krav og utstyrsbehov",
-    locationAndContact: "Lokasjon og kontakt",
-    showOnMap: "Vis på kart",
-    showLocationOnMap: "Vis din lokasjon på kartet (krever offentlig adresse)",
-    publicAddress: "Offentlig adresse",
-    makeAddressVisible: "Gjør adressen din synlig for andre brukere",
-    contactInfoTitle: "Kontaktinformasjon",
-    shareContactInfo: "Del kontaktinfo med andre brukere (kun i bookinger)",
-    securityFirst: "Sikkerhet først",
-    sensitiveInfoNote: "Sensitive opplysninger som priser og personlige meldinger deles kun i godkjente bookinger.",
-
-    // Password settings
-    updatePasswordSecurity: "Oppdater ditt passord for økt sikkerhet",
-    minSixCharacters: "Minst 6 tegn",
-    repeatPassword: "Gjenta passordet",
-
-    // Account deletion
-    permanentDeletion: "Permanent sletting av brukerdata. Denne handlingen kan ikke angres.",
-
-    // Concepts/Offers
-    createAndManageOffers: "Opprett og administrer dine kreative tilbud",
-    newOffer: "nytt tilbud",
-    noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
-    createFirstOffer: "Opprett ditt første tilbud",
-
-    // Tech spec and hospitality rider UI
-    fileName: "Navn",
-    fileType: "Type",
-    loadingTechSpecs: "Laster tech specs...",
-    techSpecUploaded: "Tech spec lastet opp",
-    hospitalityRiderUploaded: "Hospitality rider lastet opp",
-    techSpecReady: "Tech spec filen er klar til bruk i konsepter",
-    hospitalityRiderReady: "Hospitality rider filen er klar til bruk i konsepter",
-    techSpecNameUpdated: "Tech spec navnet er oppdatert",
-    hospitalityRiderNameUpdated: "Hospitality rider navnet er oppdatert",
-    couldNotUpdateTechSpec: "Kunne ikke oppdatere tech spec",
-    couldNotUpdateHospitalityRider: "Kunne ikke oppdatere hospitality rider",
-    techSpecDeleted: "Tech spec er slettet",
-    hospitalityRiderDeleted: "Hospitality rider er slettet",
-    couldNotDeleteTechSpec: "Kunne ikke slette tech spec",
-    couldNotDeleteHospitalityRider: "Kunne ikke slette hospitality rider",
-    fileUploadError: "Feil ved opplasting",
-    fileUploadSuccess: "Fil lastet opp",
-    fileDeleteSuccess: "Slettet",
-    fileUpdateSuccess: "Oppdatert",
-    loadingPortfolio: "Laster portefølje...",
-    title: "Tittel",
-    description: "Beskrivelse",
-    couldNotLoadPortfolio: "Kunne ikke laste portefølje",
-    couldNotUpdateElement: "Kunne ikke oppdatere elementet", 
-    couldNotDeleteElement: "Kunne ikke slette elementet",
-    portfolioElementUpdated: "Portfolio elementet er oppdatert",
-    portfolioElementDeleted: "Portfolio elementet er slettet",
-    fileAddedToPortfolio: "Filen er lagt til i porteføljen din",
-    noFileSelected: "Ingen fil valgt",
-    selectFile: "Velg fil",
-    noPortfolioFiles: "Ingen filer i porteføljen ennå",
-    noTechSpecFiles: "Ingen tech spec filer ennå. Last opp dokumenter som beskriver tekniske krav.",
-    noHospitalityFiles: "Ingen hospitality rider filer ennå. Last opp dokumenter som beskriver hospitality krav.",
-
-    // Portfolio viewer
-    howPortfolioAppears: "Slik vises porteføljen din til andre makere",
-    noPortfolioUploaded: "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp.",
-
-    // Published offers
-    yourVisibleOffers: "Tilbudene dine som er synlige for andre makere",
-    noPublishedOffers: "Ingen publiserte tilbud ennå",
-    createPublishOffers: "Opprett og publiser tilbud for å vise dem her",
-
-    // Working events
-    eventsYouAreInvolvedIn: "Arrangementer du er involvert i",
-    privacyNote: "Personvern: Kun offentlig arrangementinfo vises til andre brukere. Sensitive detaljer som honorar og kontaktinfo er kun synlig for deg og samarbeidspartneren.",
-    
-    // Profile roles
-    role: "Rolle",
-    maker: "maker",
-    goer: "goer",
-
-    // About page
-    aboutGiggenDescription: "Giggen er Norges ledende plattform for musikk-booking og networking. Vi kobler musikere med arrangører gjennom innovative teknologier som interaktive kart og smart matching.",
-    ourVision: "Vår Visjon",
-    visionDescription: "Vi ønsker å gjøre det enklere for musikere å nå sitt publikum og for arrangører å finne den perfekte artisten til deres arrangement. Gjennom teknologi og innovasjon bygger vi broer i musikkmiljøet og skaper nye muligheter for alle parter.",
-    geographicDiscovery: "Geografisk Oppdagelse",
-    geographicDescription: "Vårt interaktive kart gjør det enkelt å finne og oppdage musikere og arrangementer i ditt område.",
-    smartMatching: "Smart Matching",
-    smartMatchingDescription: "Vår algoritme matcher musikere og arrangører basert på kompatibilitet, preferanser og tilgjengelighet.",
-    professionalProfiles: "Profesjonelle Profiler",
-    professionalProfilesDescription: "Detaljerte profiler med portefølje, priser og tekniske spesifikasjoner for informerte beslutninger.",
-    ourMission: "Vårt Oppdrag",
-    missionDescription: "Musikk har kraft til å forene mennesker og skape minner som varer livet ut. Hos Giggen tror vi på at alle musikere fortjener en plattform hvor de kan vise frem sitt talent og nå sitt publikum.",
-    missionDescription2: "Samtidig ønsker vi å gjøre det enklere for arrangører å finne akkurat den musikken som passer til deres arrangement, enten det er et intimt bryllup eller en stor festival.",
-    missionDescription3: "Gjennom innovativ teknologi og et sterkt fokus på brukervennlighet bygger vi fremtidens musikk-økosystem i Norge.",
-    joinTheJourney: "Bli med på reisen",
-    inviteToJoin: "Enten du er musiker eller arrangør, vi inviterer deg til å bli del av Giggen-fellesskapet.",
-    registerAsMusician: "Registrer deg som Musiker",
-    registerAsOrganizer: "Registrer deg som Arrangør"
+    allRightsReserved: "Alle rettigheter forbeholdt."
   },
   
   en: {
-    // Navigation & Sidebar
-    explore: "Explore",
-    profile: "Profile",
-    administration: "Administration", 
+    // Language
+    norwegian: "Norwegian",
+    english: "English",
+
+    // Navigation
+    dashboard: "Dashboard",
+    profile: "Profile", 
     settings: "Settings",
-    bookings: "Bookings",
-    
-    // Explore Section
-    makersInNetwork: "Makers in Network",
-    loadingMakers: "Loading makers...",
-    loginRequired: "You must be logged in to see makers.",
-    couldNotLoadMusicians: "Could not load musicians. Please try again later.",
-    tryAgain: "Try again",
-    somethingWentWrong: "Something went wrong loading musicians",
-    noMakersFoundFiltered: "No makers found matching the filters.",
-    noMakersFound: "No makers found.",
-    adjustFilters: "Try adjusting the search or filters to see more results.",
-    searchPlaceholder: "Search for musicians...",
-    
-    // Map Section
-    mapComingSoon: "Map coming soon!",
-    mapDescription: "We are working on creating an interactive map that makes it easier to find events in your area.",
-    upcomingEvents: "Upcoming Events",
-    upcomingEventsDesc: "See all events on the map with date and time",
-    musiciansNearby: "Musicians Nearby",
-    musiciansNearbyDesc: "Find talented musicians and artists in your area", 
-    localCommunity: "Local Community",
-    localCommunityDesc: "Explore the local music community around you",
-    interimMessage: "In the meantime, you can explore musicians and events in the list.",
-    goToExplorePage: "Go to explore page",
-    underDevelopment: "Under Development",
-    map: "Map",
-    list: "List",
-    
-    // Booking Section
-    loadingBookings: "Loading bookings...",
-    incomingRequests: "Incoming Requests",
-    sentRequest: "Sent Request",
-    ongoingAgreements: "Ongoing Agreements", 
-    upcomingEventsBookings: "Upcoming Events",
-    noIncomingRequests: "No incoming requests",
-    noSentRequests: "No sent requests",
-    noOngoingAgreements: "No ongoing agreements",
-    noUpcomingEvents: "No upcoming events",
-    
-    // Booking descriptions
-    incomingRequestsDesc: "Requests you have received waiting for your response.",
-    sentRequestsDesc: "Requests you have sent waiting for response from the recipient.",
-    ongoingAgreementsDesc: "Allowed agreements where you can edit details and see each other's contact info and documents.",
-    bookingUpcomingEventsDesc: "Published events visible to other users (with limited info). Agreements are locked for editing.",
-    
-    // Booking status
-    waitingResponse: "Waiting response",
-    allowed: "Allowed", 
-    approved: "Approved",
-    published: "Published",
-    completed: "Completed",
-    cancelled: "Cancelled",
-    
-    // Booking phases
-    requestPhase: "1. Request",
-    sentRequestPhase: "Sent request",
-    ongoingAgreementEditablePhase: "2. Ongoing agreement - Can be edited",
-    ongoingAgreementReadyPhase: "2. Ongoing agreement - Ready for publishing",
-    publishedEventPhase: "3. Published event", 
-    completedPhase: "Completed",
-    cancelledPhase: "Cancelled",
-    unknownStatus: "Unknown status",
-    
-    // Actions & Buttons
-    seeDetails: "See details",
-    seeProfile: "View profile",
-    
-    // Error handling
-    couldNotUpdateList: "Could not update list",
-    tryRefreshManually: "Try refreshing the page manually",
-    somethingWentWrongGeneric: "Something went wrong",
-    couldNotLoadPage: "It looks like your browser is having trouble loading this page.",
-    tryAgainButton: "Try again",
-    
-    // Common
-    noDescription: "No description available",
+    back: "Back",
+    menu: "Menu",
+    myProfile: "My Profile",
+    explore: "Explore",
+    map: "Map", 
+    events: "Events",
+    help: "Help",
+    loading: "Loading...",
+    error: "Error",
+    success: "Success",
 
-    // Landing Page
-    termsAndConditions: "Terms and Conditions",
-    privacyPolicy: "Privacy Policy",
-    aboutGiggen: "About GIGGEN", 
-    signIn: "Sign In",
-
-    // Profile Page - Maker Cards
-    profileInformation: "Profile Information",
-    myPortfolio: "My Portfolio",
-    myPublishedOffers: "My Published Offers",
-    myUpcomingEvents: "My Upcoming Events",
-
-    // File Management Page
-    profilePortfolio: "Profile Portfolio",
-    technicalSpecifications: "Technical Specifications",
-    hospitalityRiders: "Hospitality Riders",
-
-    // My Offers Page
-    myOffers: "My Offers",
-
-    // Settings Page - All Cards
-    profileInformationSettings: "Profile Information",
-    socialMedia: "Social Media",
-    visibilityAndPrivacy: "Visibility and Privacy", 
-    changePassword: "Change Password",
-    logOut: "Log Out",
-    deleteAccount: "Delete Account",
-
-    // Additional profile/settings content
-    updateProfileDetails: "Update your basic profile details that are shown to other users",
-    addSocialMediaProfiles: "Add your social media profiles that will be displayed on your profile",
-    managePrivacySettings: "Manage who can see what information about you",
-    updateAccountPassword: "Change the password for your account",
-    signOutOfAccount: "Sign out of your account",
-    permanentlyDeleteAccount: "Permanently delete your account - this action cannot be undone",
-
-    // Form labels and placeholders
-    displayName: "Display Name",
-    biography: "Biography",
-    location: "Location", 
-    email: "Email",
-    phoneNumber: "Phone Number",
-    currentPassword: "Current Password",
-    newPassword: "New Password", 
-    confirmPassword: "Confirm Password",
-
-    // Actions
+    // Common actions
     save: "Save",
     cancel: "Cancel",
     delete: "Delete",
     edit: "Edit",
     upload: "Upload",
-    download: "Download", 
+    download: "Download",
     remove: "Remove",
     add: "Add",
     update: "Update",
-
-    // File management
-    fileManagement: "File Management",
-    uploadFile: "Upload File",
-    replaceFile: "Replace File",
-    downloadFile: "Download File",
-    removeFile: "Remove File",
-    noFilesUploaded: "No files uploaded",
-    supportedFormats: "Supported formats",
-
-    // Success/Error messages
-    profileUpdated: "Profile updated",
-    passwordChanged: "Password changed",
-    fileUploaded: "File uploaded",
-    fileRemoved: "File removed", 
-    changesSaved: "Changes saved",
-    errorOccurred: "An error occurred",
-    pleaseCorrectErrors: "Please correct the errors",
+    close: "Close",
+    confirm: "Confirm",
+    continue: "Continue",
 
     // Authentication
+    signIn: "Sign In",
+    signUp: "Sign Up", 
+    signOut: "Sign Out",
     loginToAccount: "Log in to your account",
     createNewAccount: "Create new account",
-    signUp: "Sign Up",
+    email: "Email",
+    password: "Password",
+    displayName: "Display Name",
     yourName: "Your name",
     selectUserType: "Select user type",
-    working: "Working...", 
-    loading: "Loading...",
+    working: "Working...",
     dontHaveAccount: "Don't have an account? Sign up here",
     alreadyHaveAccount: "Already have an account? Sign in here",
     loginError: "Login error",
@@ -620,161 +386,54 @@ export const appTranslations = {
     makerDescription: "Can create offers, upload portfolio and manage events",
     goerDescription: "Can view portfolio, events and Maker profiles",
 
-    // Confirmation dialogs
-    confirmLogout: "Are you sure you want to log out?",
-    confirmDeleteAccount: "Are you sure you want to delete your account? This action cannot be undone.",
-    confirmDeleteFile: "Are you sure you want to delete this file?",
-    yes: "Yes",
-    no: "No",
+    // Settings page
+    settingsDescription: "Manage your app settings and preferences",
 
-    // File management descriptions
-    managePortfolioFiles: "Manage portfolio, technical specifications and hospitality riders",
-    uploadPortfolioFiles: "Upload images, videos and other files that showcase your work",
-    uploadTechSpecs: "Upload technical specifications and rider documents",
-    uploadHospitalityRiders: "Upload hospitality rider documents for events",
-
-    // Additional texts
-    couldNotLoadTechSpecs: "Could not load technical specifications",
-    noTechSpecsUploaded: "No technical specifications uploaded. Go to settings to upload.",
-    noTechSpecsAvailable: "No technical specifications available",
-    couldNotLoadHospitalityRiders: "Could not load hospitality riders",
-    loadingHospitalityRiders: "Loading hospitality riders...",
-    savingSocialMedia: "Saving social media...",
-    saveSocialMedia: "Save social media",
-    updating: "Updating...",
-    loggingOut: "Logging out...",
-
-    // Additional profile and settings
-    updateProfileDetailsDescription: "Update your basic profile details that are shown to other users",
+    // Profile
+    profileInformation: "Profile Information",
+    profileInformationSettings: "Profile Information",
+    updateProfileDetails: "Update your basic profile details that are shown to other users",
     profilePicture: "Profile Picture",
     selectProfilePicture: "Choose a profile picture that represents you",
-    back: "Back",
-
-    // Terms and Conditions page
-    lastUpdated: "Last updated",
-    welcomeToGiggen: "Welcome to Giggen! These terms and conditions (\"Terms\") govern your use of the Giggen platform (\"Service\") operated by Giggen AS (\"we\", \"us\", \"our\"). By using our service, you accept these terms.",
-    userResponsibility: "User Responsibility",
-    asUserYouCommit: "As a user you commit to:",
-    provideCorrectInfo: "Provide accurate and updated information",
-    keepAccountSecure: "Keep your account secure and confidential",
-    notMisuseService: "Not misuse or damage the service",
-    respectUserRights: "Respect other users' rights",
-    noInappropriateContent: "Not publish inappropriate or illegal content",
-    followLaws: "Follow all relevant laws and regulations",
-    prohibitedUse: "Prohibited use:",
-    spamCommunication: "Spam or unwanted communication",
-    fakeProfiles: "Fake profiles or misleading information",
-    copyrightViolation: "Copyright infringement or other rights violations",
-    malwareVirus: "Virus, malware or harmful code",
-    bookingProcessAndResponsibility: "Booking process and responsibility",
-    threeStepBooking: "3-step booking process:",
-    organizerSendsRequest: "Organizer sends booking request to musician",
-    musicianApprovesRejects: "Musician approves or rejects the request",
-    bindingAgreement: "Upon approval, a binding agreement is made between the parties",
-    responsibilitiesObligations: "Responsibilities and obligations:",
-    giggenIsIntermediaryOnly: "Giggen is only an intermediary platform",
-    agreementsDirectly: "Agreements are made directly between musician and organizer",
-    bothPartiesResponsible: "Both parties are responsible for adhering to agreements made",
-    giggenNotResponsibleQuality: "Giggen is not responsible for quality or performance",
-    cancellationFollowAgreement: "Cancellation must follow the parties' agreement",
-    paymentTerms: "Payment Terms",
-    serviceCurrentlyFree: "The service is currently free, but:",
-    reserveRightIntroduceFees: "We reserve the right to introduce fees",
-    thirtyDaysNotice: "At least 30 days notice will be given before changes",
-    existingUsersInformed: "Existing users will be informed about new prices",
-    futurePaymentServices: "Future payment services:",
-    integratedPaymentSolutions: "We may offer integrated payment solutions",
-    standardFeesApply: "Standard fees may apply for transactions",
-    feesWillBeCommunicated: "All fees will be clearly communicated",
-    copyrightIntellectualRights: "Copyright and intellectual rights",
-    yourContent: "Your content:",
-    retainAllRights: "You retain all rights to content you upload",
-    grantUsLicense: "You grant us license to display and distribute content on the platform",
-    responsibleForRights: "You are responsible for having necessary rights",
-    ourPlatform: "Our platform:",
-    giggenPlatformProtected: "The Giggen platform and its content are protected by copyright",
-    cannotCopyCode: "You cannot copy, reproduce or distribute our code",
-    trademarksRegistered: "Trade names and logos are our registered trademarks",
-    disclaimerTitle: "Disclaimer",
-    giggenNotResponsibleFor: "Giggen is not responsible for:",
-    qualityOfMusicians: "The quality of musicians or events",
-    contractBreaches: "Contract breaches between users",
-    directIndirectLoss: "Direct or indirect loss resulting from use of the service",
-    serviceInterruptions: "Service interruptions or technical problems",
-    contentFromOtherUsers: "Content or behavior from other users",
-    serviceAsIs: "The service is provided \"as is\" without warranties of any kind. Your use of the service is at your own risk.",
-    termination: "Termination",
-    youCan: "You can:",
-    deleteAccountAnytime: "Delete your account at any time",
-    stopUsingService: "Stop using the service without notice",
-    weCan: "We can:",
-    suspendDeleteAccounts: "Suspend or delete accounts that break the terms",
-    terminateServiceNotice: "Terminate the service with 30 days notice",
-    changeTermsNotice: "Change the terms with reasonable advance notice",
-    contactApplicableLaw: "Contact and applicable law",
-    questionsAboutTerms: "Questions about the terms?",
-    mail: "Mail",
-    giggenASAddress: "Giggen AS, Oslo, Norway",
-    applicableLaw: "Applicable law",
-    termsUnderNorwegianLaw: "These terms are subject to Norwegian law. Any disputes shall be resolved by Norwegian courts with Oslo as venue.",
-    aboutUs: "About Us",
-    contact: "Contact",
-    allRightsReserved: "All rights reserved.",
-
-    // Privacy Policy page
-    privacyPolicyTitle: "Privacy Policy",
-    giggenRespectsPrivacy: "Giggen AS (\"we\", \"us\", \"our\") respects your privacy and is committed to protecting your personal information. This privacy policy explains how we collect, use, share and protect your information when you use our service.",
-    whatDataWeCollect: "What data we collect",
-    personalInformation: "Personal information",
-    nameEmailPhone: "Name, email address and phone number",
-    profileInfoPortfolio: "Profile information and portfolio content",
-    geographicLocation: "Geographic location (if permitted)",
-    bookingHistoryCommunication: "Booking history and communication",
-    technicalInformation: "Technical information",
-    ipAddressDevice: "IP address and device information",
-    browserTypeVersion: "Browser type and version",
-    usagePatternsPreferences: "Usage patterns and preferences",
-    cookiesSimilarTech: "Cookies and similar technologies",
-    howWeUseData: "How we use your data",
-    deliverImproveServices: "Deliver and improve our services",
-    matchMusiciansOpportunities: "Match musicians with relevant booking opportunities",
-    communicateAboutService: "Communicate with you about the service",
-    ensureSafeUse: "Ensure safe use of the platform",
-    complyLegalObligations: "Comply with legal obligations",
-    sharingInformation: "Sharing of information",
-    neverSellPersonalData: "We never sell your personal information. We only share information in the following cases:",
-    withYourConsent: "With your consent or at your instruction",
-    withOtherUsers: "With other users as part of the booking process",
-    withServiceProviders: "With service providers who help us operate the platform",
-    whenRequiredByLaw: "When required by law or to protect rights",
-    yourRights: "Your rights",
-    rightToAccess: "Access your data",
-    rightToCorrect: "Correct inaccurate data",
-    rightToDelete: "Delete your data",
-    rightToLimit: "Limit processing",
-    youCanAlso: "You can also:",
-    transferData: "Transfer data to other services",
-    objectToProcessing: "Object to processing",
-    withdrawConsent: "Withdraw consent",
-    complainToAuthority: "Complain to the Data Protection Authority",
-    security: "Security",
-    securityMeasures: "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure or destruction. This includes encryption, access control and regular security reviews.",
-    contactUs: "Contact us",
-    privacyQuestions: "If you have questions about this privacy policy or wish to exercise your rights, you can contact us:",
-    privacyEmail: "privacy@giggen.org",
-
-    // Profile settings form
     changePicture: "Change Picture",
+    biography: "Biography",
     biographyPlaceholder: "Tell us about yourself, your music and experience...",
+    location: "Location",
     addressPlaceholder: "Your address (optional)",
     contactInformation: "Contact Information",
     emailPlaceholder: "your@email.com",
+    phoneNumber: "Phone Number",
     phoneNumberPlaceholder: "+47 123 45 678",
     saveChanges: "Save Changes",
+    role: "Role",
+    maker: "maker",
+    goer: "goer",
 
-    // Privacy settings
+    // Social Media
+    socialMedia: "Social Media",
+    addSocialMediaProfiles: "Add your social media profiles that will be displayed on your profile",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    youtube: "YouTube",
+    spotify: "Spotify", 
+    soundcloud: "SoundCloud",
+    tiktok: "TikTok",
+    website: "Website",
+    instagramPlaceholder: "https://instagram.com/yourhandle",
+    facebookPlaceholder: "https://facebook.com/yourpage",
+    youtubePlaceholder: "https://youtube.com/yourchannel",
+    spotifyPlaceholder: "https://open.spotify.com/artist/...",
+    soundcloudPlaceholder: "https://soundcloud.com/yourprofile",
+    tiktokPlaceholder: "https://tiktok.com/@yourhandle", 
+    websitePlaceholder: "https://yourwebsite.com",
+    saveSocialMedia: "Save social media",
+    updating: "Updating...",
+
+    // Privacy Settings
+    visibilityAndPrivacy: "Visibility and Privacy",
+    managePrivacySettings: "Manage who can see what information about you",
     controlWhoSees: "Control who can see what information from your profile",
-    publicProfile: "Public Profile",
+    publicProfile: "Public profile",
     makeProfileVisible: "Make your profile visible to others on the platform",
     profileContent: "Profile Content",
     biographyDescription: "Biography and description",
@@ -783,6 +442,7 @@ export const appTranslations = {
     showWorkExamples: "Let others see examples of your work",
     eventsAndConcerts: "Events and Concerts",
     showUpcomingEvents: "Show your upcoming events",
+    technicalSpecifications: "Technical Specifications",
     shareTechRequirements: "Share technical requirements and equipment needs",
     locationAndContact: "Location and Contact",
     showOnMap: "Show on Map",
@@ -794,96 +454,204 @@ export const appTranslations = {
     securityFirst: "Security First",
     sensitiveInfoNote: "Sensitive information like prices and personal messages are only shared in approved bookings.",
 
-    // Password settings
+    // Password Settings
+    changePassword: "Change Password",
+    updateAccountPassword: "Change the password for your account",
     updatePasswordSecurity: "Update your password for increased security",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
     minSixCharacters: "At least 6 characters",
     repeatPassword: "Repeat the password",
 
-    // Account deletion
+    // Account Management
+    logOut: "Log Out",
+    signOutOfAccount: "Sign out of your account",
+    deleteAccount: "Delete Account",
+    permanentlyDeleteAccount: "Permanently delete your account - this action cannot be undone",
     permanentDeletion: "Permanent deletion of user data. This action cannot be undone.",
 
-    // Concepts/Offers
-    createAndManageOffers: "Create and manage your creative offers",
-    newOffer: "new offer",
-    noOffersCreated: "You haven't created any offers yet",
-    createFirstOffer: "Create your first offer",
+    // File Management
+    fileManagement: "File Management",
+    managePortfolioFiles: "Manage portfolio, technical specifications and hospitality riders",
+    profilePortfolio: "Profile Portfolio",
+    uploadPortfolioFiles: "Upload images, videos and other files that showcase your work",
+    hospitalityRiders: "Hospitality Riders",
+    uploadHospitalityRiders: "Upload hospitality rider documents for events",
+    uploadTechSpecs: "Upload technical specifications and rider documents",
+    
+    // File Upload UI
+    uploadFile: "Upload File",
+    supportedFormats: "Supported formats",
+    supportedFormatsDetailed: "Supported formats: Images (JPG, PNG, GIF), Video (MP4, MOV), Audio (MP3, WAV), Documents (PDF, DOCX, TXT)",
+    noFileSelected: "No file selected",
+    selectFile: "Select file",
+    uploadingFile: "Uploading file...",
+    noFilesUploaded: "No files uploaded",
+    replaceFile: "Replace File",
+    downloadFile: "Download File",
+    removeFile: "Remove File",
+    noPortfolioFiles: "No files in portfolio yet",
+    noTechSpecFiles: "No tech spec files yet. Upload documents describing technical requirements.",
+    noHospitalityFiles: "No hospitality rider files yet. Upload documents describing hospitality requirements.",
 
-    // Tech spec and hospitality rider UI
+    // File Management Messages
+    fileUploadSuccess: "File uploaded",
+    fileUploadError: "File upload error",
+    fileDeleteSuccess: "Deleted",
+    fileUpdateSuccess: "Updated",
+    fileAddedToPortfolio: "File added to your portfolio",
+    loadingPortfolio: "Loading portfolio...",
+    couldNotLoadPortfolio: "Could not load portfolio",
+    portfolioElementUpdated: "Portfolio element updated",
+    portfolioElementDeleted: "Portfolio element deleted",
+    couldNotUpdateElement: "Could not update element",
+    couldNotDeleteElement: "Could not delete element",
+
+    // Tech Spec and Hospitality UI
     fileName: "Name",
-    fileType: "Type",
+    fileType: "Type", 
+    title: "Title",
+    description: "Description",
     loadingTechSpecs: "Loading tech specs...",
+    loadingHospitalityRiders: "Loading hospitality riders...",
     techSpecUploaded: "Tech spec uploaded",
     hospitalityRiderUploaded: "Hospitality rider uploaded",
     techSpecReady: "Tech spec file is ready for use in concepts",
     hospitalityRiderReady: "Hospitality rider file is ready for use in concepts",
     techSpecNameUpdated: "Tech spec name updated",
     hospitalityRiderNameUpdated: "Hospitality rider name updated",
+    couldNotLoadTechSpecs: "Could not load technical specifications",
+    couldNotLoadHospitalityRiders: "Could not load hospitality riders",
     couldNotUpdateTechSpec: "Could not update tech spec",
     couldNotUpdateHospitalityRider: "Could not update hospitality rider",
     techSpecDeleted: "Tech spec deleted",
     hospitalityRiderDeleted: "Hospitality rider deleted",
     couldNotDeleteTechSpec: "Could not delete tech spec",
     couldNotDeleteHospitalityRider: "Could not delete hospitality rider",
-    
-    // File upload UI  
-    uploadingFile: "Uploading file...",
-    fileUploadError: "File upload error",
-    fileUploadSuccess: "File uploaded",
-    fileDeleteSuccess: "Deleted",
-    fileUpdateSuccess: "Updated",
-    loadingPortfolio: "Loading portfolio...",
-    title: "Title",
-    description: "Description",
-    couldNotLoadPortfolio: "Could not load portfolio",
-    couldNotUpdateElement: "Could not update element",
-    couldNotDeleteElement: "Could not delete element", 
-    portfolioElementUpdated: "Portfolio element updated",
-    portfolioElementDeleted: "Portfolio element deleted",
-    fileAddedToPortfolio: "File added to your portfolio",
-    
-    // File upload
-    supportedFormatsDetailed: "Supported formats: Images (JPG, PNG, GIF), Video (MP4, MOV), Audio (MP3, WAV), Documents (PDF, DOCX, TXT)",
-    noFileSelected: "No file selected",
-    selectFile: "Select file",
-    noPortfolioFiles: "No files in portfolio yet",
-    noTechSpecFiles: "No tech spec files yet. Upload documents describing technical requirements.",
-    noHospitalityFiles: "No hospitality rider files yet. Upload documents describing hospitality requirements.",
 
-    // Portfolio viewer
+    // Profile Page Cards
+    myPortfolio: "My Portfolio",
     howPortfolioAppears: "How your portfolio appears to other makers",
     noPortfolioUploaded: "No portfolio files uploaded. Go to settings to upload.",
-
-    // Published offers
+    myPublishedOffers: "My Published Offers",
     yourVisibleOffers: "Your offers that are visible to other makers",
     noPublishedOffers: "No published offers yet",
     createPublishOffers: "Create and publish offers to show them here",
-
-    // Working events
+    myUpcomingEvents: "My Upcoming Events",
     eventsYouAreInvolvedIn: "Events you are involved in",
     privacyNote: "Privacy: Only public event info is shown to other users. Sensitive details like fees and contact info are only visible to you and your collaboration partner.",
-    
-    // Profile roles
-    role: "Role",
-    maker: "maker",
-    goer: "goer",
+    noUpcomingEvents: "You have no upcoming events",
 
-    // About page
+    // Offers/Concepts
+    createAndManageOffers: "Create and manage your creative offers",
+    newOffer: "new offer",
+    noOffersCreated: "You haven't created any offers yet",
+    createFirstOffer: "Create your first offer",
+
+    // Success/Error Messages
+    profileUpdated: "Profile updated",
+    passwordChanged: "Password changed",
+    fileUploaded: "File uploaded",
+    fileRemoved: "File removed",
+    changesSaved: "Changes saved",
+    errorOccurred: "An error occurred",
+    pleaseCorrectErrors: "Please correct the errors",
+
+    // Confirmation Dialogs
+    confirmLogout: "Are you sure you want to log out?",
+    confirmDeleteAccount: "Are you sure you want to delete your account? This action cannot be undone.",
+    confirmDeleteFile: "Are you sure you want to delete this file?",
+    yes: "Yes",
+    no: "No",
+
+    // Landing Page
+    termsAndConditions: "Terms and Conditions",
+    privacyPolicy: "Privacy Policy",
+    aboutGiggen: "About GIGGEN",
     aboutGiggenDescription: "Giggen is Norway's leading platform for music booking and networking. We connect musicians with organizers through innovative technologies like interactive maps and smart matching.",
-    ourVision: "Our Vision",
-    visionDescription: "We want to make it easier for musicians to reach their audience and for organizers to find the perfect artist for their event. Through technology and innovation, we build bridges in the music community and create new opportunities for all parties.",
-    geographicDiscovery: "Geographic Discovery",
-    geographicDescription: "Our interactive map makes it easy to find and discover musicians and events in your area.",
-    smartMatching: "Smart Matching",
-    smartMatchingDescription: "Our algorithm matches musicians and organizers based on compatibility, preferences and availability.",
-    professionalProfiles: "Professional Profiles",
-    professionalProfilesDescription: "Detailed profiles with portfolio, prices and technical specifications for informed decisions.",
-    ourMission: "Our Mission",
-    missionDescription: "Music has the power to unite people and create memories that last a lifetime. At Giggen, we believe that all musicians deserve a platform where they can showcase their talent and reach their audience.",
-    missionDescription2: "At the same time, we want to make it easier for organizers to find exactly the music that fits their event, whether it's an intimate wedding or a large festival.",
-    missionDescription3: "Through innovative technology and a strong focus on user-friendliness, we are building the future music ecosystem in Norway.",
-    joinTheJourney: "Join the Journey",
-    inviteToJoin: "Whether you are a musician or organizer, we invite you to become part of the Giggen community.",
-    registerAsMusician: "Register as Musician",
-    registerAsOrganizer: "Register as Organizer"
+
+    // Terms Page Content
+    lastUpdated: "Last updated",
+    welcomeToGiggen: "Welcome to Giggen! These terms and conditions (\"Terms\") govern your use of the Giggen platform (\"Service\") operated by Giggen AS (\"we\", \"us\", \"our\"). By using our service, you accept these terms.",
+    userResponsibility: "User Responsibility",
+    asUserYouCommit: "As a user, you commit to:",
+    provideCorrectInfo: "Provide correct and updated information",
+    keepAccountSecure: "Keep your account secure and confidential",
+    notMisuseService: "Not misuse or damage the service",
+    respectUserRights: "Respect other users' rights",
+    noInappropriateContent: "Not publish inappropriate or illegal content",
+    followLaws: "Follow all relevant laws and regulations",
+    prohibitedUse: "Prohibited use:",
+    spamCommunication: "Spam or unwanted communication",
+    fakeProfiles: "Fake profiles or misleading information",
+    copyrightViolation: "Violation of copyright or other rights",
+    malwareVirus: "Virus, malware or harmful code",
+
+    // Terms - Booking Process
+    bookingProcessAndResponsibility: "Booking process and responsibility",
+    threeStepBooking: "3-step booking process:",
+    organizerSendsRequest: "Organizer sends booking request to musician",
+    musicianApprovesRejects: "Musician approves or rejects the request",
+    bindingAgreement: "Upon approval, a binding agreement is entered into between the parties",
+    responsibilitiesObligations: "Responsibilities and obligations:",
+    giggenIsIntermediaryOnly: "Giggen is only an intermediary platform",
+    agreementsDirectly: "Agreements are entered into directly between musician and organizer",
+    bothPartiesResponsible: "Both parties are responsible for complying with agreements entered into",
+    giggenNotResponsibleQuality: "Giggen is not responsible for quality or performance",
+    cancellationFollowAgreement: "Cancellation must follow the parties' agreement",
+
+    // Terms - Payment  
+    paymentTerms: "Payment Terms",
+    serviceCurrentlyFree: "The service is currently free, but:",
+    reserveRightIntroduceFees: "We reserve the right to introduce fees",
+    thirtyDaysNotice: "At least 30 days notice will be given before changes",
+    existingUsersInformed: "Existing users will be informed about new prices",
+    futurePaymentServices: "Future payment services:",
+    integratedPaymentSolutions: "We may offer integrated payment solutions",
+    standardFeesApply: "Standard fees may apply for transactions",
+    feesWillBeCommunicated: "All fees will be clearly communicated",
+
+    // Terms - Copyright
+    copyrightIntellectualRights: "Copyright and intellectual rights",
+    yourContent: "Your content:",
+    retainAllRights: "You retain all rights to the content you upload",
+    grantUsLicense: "You grant us license to display and distribute the content on the platform",
+    responsibleForRights: "You are responsible for having the necessary rights",
+    ourPlatform: "Our platform:",
+    giggenPlatformProtected: "The Giggen platform and its content are protected by copyright",
+    cannotCopyCode: "You may not copy, reproduce or distribute our code",
+    trademarksRegistered: "Trade names and logos are our registered trademarks",
+
+    // Terms - Disclaimer
+    disclaimerTitle: "Disclaimer",
+    giggenNotResponsibleFor: "Giggen is not responsible for:",
+    qualityOfMusicians: "The quality of musicians or events",
+    contractBreaches: "Contract breaches between users",
+    directIndirectLoss: "Direct or indirect loss resulting from use of the service",
+    serviceInterruptions: "Service interruptions or technical problems",
+    contentFromOtherUsers: "Content or behavior from other users",
+    serviceAsIs: "The service is provided \"as is\" without warranties of any kind. Your use of the service is at your own risk.",
+
+    // Terms - Termination
+    termination: "Termination",
+    youCan: "You can:",
+    deleteAccountAnytime: "Delete your account at any time",
+    stopUsingService: "Stop using the service without notice",
+    weCan: "We can:",
+    suspendDeleteAccounts: "Suspend or delete accounts that break the terms",
+    terminateServiceNotice: "Terminate the service with 30 days notice",
+    changeTermsNotice: "Change the terms with reasonable advance notice",
+
+    // Terms - Contact
+    contactApplicableLaw: "Contact and applicable law",
+    questionsAboutTerms: "Questions about the terms?",
+    mail: "Mail",
+    giggenASAddress: "Giggen AS, Oslo, Norway",
+    applicableLaw: "Applicable law",
+    termsUnderNorwegianLaw: "These terms are subject to Norwegian law. Any disputes shall be resolved by Norwegian courts with Oslo as venue.",
+    aboutUs: "About Us",
+    contact: "Contact",
+    allRightsReserved: "All rights reserved."
   }
 };

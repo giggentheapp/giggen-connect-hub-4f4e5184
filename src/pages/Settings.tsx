@@ -36,7 +36,7 @@ export const Settings = () => {
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">{t('settings')}</h1>
-          <p className="text-muted-foreground">Administrer dine app-innstillinger og preferanser</p>
+          <p className="text-muted-foreground">{t('settingsDescription')}</p>
         </div>
         
         {/* Language Settings - Top Right */}
