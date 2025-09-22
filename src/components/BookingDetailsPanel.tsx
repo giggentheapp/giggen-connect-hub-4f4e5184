@@ -300,39 +300,53 @@ export const BookingDetailsPanel = ({
                 }}
               />
             ) : type === 'time' ? (
-              <Input 
-                ref={inputRef} 
-                type="text"
-                value={tempValue || ''} 
-                onChange={e => {
-                  let newValue = e.target.value.replace(/[^\d]/g, ''); // Only digits
-                  
-                  // Format as HH:MM while typing
-                  if (newValue.length >= 3) {
-                    newValue = newValue.slice(0, 2) + ':' + newValue.slice(2, 4);
-                  }
-                  
-                  // Limit to 5 characters (HH:MM)
-                  if (newValue.length > 5) {
-                    newValue = newValue.slice(0, 5);
-                  }
-                  
-                  setTempValues(prev => ({
-                    ...prev,
-                    [fieldName]: newValue
-                  }));
-                }} 
-                placeholder={placeholder}
-                autoFocus
-                maxLength={5}
-                onFocus={e => {
-                  // Set cursor to end for time input
-                  setTimeout(() => {
-                    const length = e.target.value.length;
-                    e.target.setSelectionRange(length, length);
-                  }, 0);
-                }}
-              />
+              <div className="flex items-center gap-2">
+                <Input 
+                  ref={inputRef} 
+                  type="text"
+                  value={tempValue || ''} 
+                  onChange={e => {
+                    const input = e.target.value.replace(/[^\d]/g, '');
+                    let formattedTime = '';
+                    
+                    if (input.length >= 1) {
+                      const hours = input.slice(0, 2);
+                      const minutes = input.slice(2, 4);
+                      
+                      if (input.length <= 2) {
+                        formattedTime = hours;
+                      } else {
+                        formattedTime = hours + ':' + minutes;
+                      }
+                    }
+                    
+                    setTempValues(prev => ({
+                      ...prev,
+                      [fieldName]: formattedTime
+                    }));
+                  }} 
+                  placeholder="18:00"
+                  autoFocus
+                  maxLength={5}
+                  className="text-center"
+                  onKeyDown={e => {
+                    // Allow backspace, delete, tab, escape, enter
+                    if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                        (e.keyCode === 65 && e.ctrlKey === true) ||
+                        (e.keyCode === 67 && e.ctrlKey === true) ||
+                        (e.keyCode === 86 && e.ctrlKey === true) ||
+                        (e.keyCode === 88 && e.ctrlKey === true)) {
+                      return;
+                    }
+                    // Ensure that it is a number and stop the keypress
+                    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+                <span className="text-xs text-muted-foreground">HH:MM</span>
+              </div>
             ) : (
               <Input 
                 ref={inputRef} 
@@ -397,176 +411,22 @@ export const BookingDetailsPanel = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Venue/Spillested field */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                Spillested
-                {canEdit && editingField !== 'venue' && (
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={() => {
-                      setEditingField('venue');
-                      setTempValues(prev => ({
-                        ...prev,
-                        venue: booking.venue || ''
-                      }));
-                    }}
-                  >
-                    <Edit3 className="h-3 w-3" />
-                  </Button>
-                )}
-              </Label>
+            <EditableField 
+              fieldName="venue" 
+              label="" 
+              value={booking.venue} 
+              placeholder="Spillested" 
+              onPropose={handleFieldUpdate} 
+            />
 
-              {editingField === 'venue' ? (
-                <div className="flex gap-2">
-                  <Input 
-                    value={tempValues.venue || booking.venue || ''} 
-                    onChange={(e) => {
-                      setTempValues(prev => ({
-                        ...prev,
-                        venue: e.target.value
-                      }));
-                    }}
-                    placeholder="Spillested" 
-                    autoFocus
-                    onFocus={e => {
-                      const length = e.target.value.length;
-                      setTimeout(() => {
-                        e.target.setSelectionRange(length, length);
-                      }, 0);
-                    }}
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={() => {
-                      handleFieldUpdate('venue', booking.venue, tempValues.venue);
-                      setEditingField(null);
-                      setTempValues(prev => {
-                        const newValues = { ...prev };
-                        delete newValues.venue;
-                        return newValues;
-                      });
-                    }}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => {
-                      setEditingField(null);
-                      setTempValues(prev => {
-                        const newValues = { ...prev };
-                        delete newValues.venue;
-                        return newValues;
-                      });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div 
-                  className={cn(
-                    "p-2 border rounded", 
-                    canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
-                  )} 
-                  onClick={canEdit ? () => {
-                    setEditingField('venue');
-                    setTempValues(prev => ({
-                      ...prev,
-                      venue: booking.venue || ''
-                    }));
-                  } : undefined}
-                >
-                  {booking.venue || 'Spillested'}
-                </div>
-              )}
-            </div>
-
-            {/* Address field */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                Adresse
-                {canEdit && editingField !== 'address' && (
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={() => {
-                      setEditingField('address');
-                      setTempValues(prev => ({
-                        ...prev,
-                        address: booking.address || ''
-                      }));
-                    }}
-                  >
-                    <Edit3 className="h-3 w-3" />
-                  </Button>
-                )}
-              </Label>
-
-              {editingField === 'address' ? (
-                <div className="flex gap-2">
-                  <AddressAutocomplete 
-                    value={tempValues.address || booking.address || ''} 
-                    onChange={(address, coordinates) => {
-                      setTempValues(prev => ({
-                        ...prev,
-                        address: address
-                      }));
-                      if (coordinates) {
-                        console.log('Address coordinates:', coordinates);
-                      }
-                    }}
-                    placeholder="Adresse" 
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={() => {
-                      handleFieldUpdate('address', booking.address, tempValues.address);
-                      setEditingField(null);
-                      setTempValues(prev => {
-                        const newValues = { ...prev };
-                        delete newValues.address;
-                        return newValues;
-                      });
-                    }}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => {
-                      setEditingField(null);
-                      setTempValues(prev => {
-                        const newValues = { ...prev };
-                        delete newValues.address;
-                        return newValues;
-                      });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div 
-                  className={cn(
-                    "p-2 border rounded", 
-                    canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
-                  )} 
-                  onClick={canEdit ? () => {
-                    setEditingField('address');
-                    setTempValues(prev => ({
-                      ...prev,
-                      address: booking.address || ''
-                    }));
-                  } : undefined}
-                >
-                  {booking.address || 'Adresse'}
-                </div>
-              )}
-            </div>
+            {/* Address field - need to update database schema to support this */}
+            <EditableField 
+              fieldName="venue" 
+              label="" 
+              value={booking.venue} 
+              placeholder="Adresse" 
+              onPropose={handleFieldUpdate} 
+            />
           </div>
         </CardContent>
       </Card>

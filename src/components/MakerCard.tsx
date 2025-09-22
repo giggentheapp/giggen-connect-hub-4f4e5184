@@ -38,8 +38,18 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
                 {maker.avatar_url ? (
                   <img 
                     src={maker.avatar_url} 
-                    alt={maker.display_name}
+                    alt={maker.display_name || 'Profile'}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.log('Avatar load error for maker:', maker.user_id, maker.avatar_url);
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement?.appendChild(
+                        Object.assign(document.createElement('div'), {
+                          innerHTML: '<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>',
+                          className: 'w-6 h-6 text-primary flex items-center justify-center'
+                        })
+                      );
+                    }}
                   />
                 ) : (
                   <Music className="w-6 h-6 text-primary" />
