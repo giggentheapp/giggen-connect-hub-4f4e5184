@@ -62,7 +62,10 @@ export const BookingPublicPreview = ({
                   {booking.venue && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-primary" />
-                      <span>{booking.venue}</span>
+                      <span>
+                        {booking.venue}
+                        {booking.address && ` - ${booking.address}`}
+                      </span>
                     </div>
                   )}
 

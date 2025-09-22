@@ -419,11 +419,11 @@ export const BookingDetailsPanel = ({
               onPropose={handleFieldUpdate} 
             />
 
-            {/* Address field - need to update database schema to support this */}
+            {/* Address field - now properly mapped to booking.address */}
             <EditableField 
-              fieldName="venue" 
+              fieldName="address" 
               label="" 
-              value={booking.venue} 
+              value={booking.address} 
               placeholder="Adresse" 
               onPropose={handleFieldUpdate} 
             />

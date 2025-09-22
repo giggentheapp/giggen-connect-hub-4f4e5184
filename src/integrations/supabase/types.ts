@@ -117,6 +117,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          address: string | null
           agreement_summary_text: string | null
           allowed_at: string | null
           approved_at: string | null
@@ -171,6 +172,7 @@ export type Database = {
           venue: string | null
         }
         Insert: {
+          address?: string | null
           agreement_summary_text?: string | null
           allowed_at?: string | null
           approved_at?: string | null
@@ -225,6 +227,7 @@ export type Database = {
           venue?: string | null
         }
         Update: {
+          address?: string | null
           agreement_summary_text?: string | null
           allowed_at?: string | null
           approved_at?: string | null
