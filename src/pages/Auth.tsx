@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
 import { Eye, EyeOff } from 'lucide-react';
 import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -24,6 +25,7 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   useEffect(() => {
     // Clear any existing session first - CRITICAL FIX
@@ -83,15 +85,15 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Feil ved innlogging",
+          title: t('loginError'),
           description: error.message,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Feil ved innlogging",
-        description: "En uventet feil oppstod",
+        title: t('loginError'),
+        description: t('unexpectedError'),
         variant: "destructive",
       });
     } finally {
@@ -120,20 +122,20 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Feil ved registrering",
+          title: t('signupError'),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Registrering vellykket",
-          description: "Sjekk e-posten din for å bekrefte kontoen.",
+          title: t('signupSuccess'),
+          description: t('checkEmailConfirm'),
         });
       }
     } catch (error) {
       toast({
-        title: "Feil ved registrering",
-        description: "En uventet feil oppstod",
+        title: t('signupError'),
+        description: t('unexpectedError'),
         variant: "destructive",
       });
     } finally {
@@ -146,7 +148,7 @@ const Auth = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Laster...</p>
+          <p>{t('loading')}</p>
         </div>
       </div>
     );
@@ -158,13 +160,13 @@ const Auth = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">GIGGEN</CardTitle>
           <CardDescription>
-            {isLogin ? 'Logg inn på din konto' : 'Opprett ny konto'}
+            {isLogin ? t('loginToAccount') : t('createNewAccount')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-post</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -176,7 +178,7 @@ const Auth = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Passord</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               {isLogin ? (
                 // Simple password input for login
                 <div className="relative">
@@ -206,7 +208,7 @@ const Auth = () => {
                   onPasswordChange={setPassword}
                   showPassword={showPassword}
                   onToggleShowPassword={() => setShowPassword(!showPassword)}
-                  placeholder="Opprett et sterkt passord..."
+                  placeholder={t('createStrongPassword')}
                 />
               )}
             </div>
@@ -214,7 +216,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="displayName">Visningsnavn</Label>
+                  <Label htmlFor="displayName">{t('displayName')}</Label>
                   <Input
                     id="displayName"
                     type="text"
@@ -222,12 +224,12 @@ const Auth = () => {
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    placeholder="Ditt navn"
+                    placeholder={t('yourName')}
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label>Velg brukertype</Label>
+                  <Label>{t('selectUserType')}</Label>
                   <RadioGroup
                     value={role}
                     onValueChange={(value) => setRole(value as 'maker' | 'goer')}
@@ -237,9 +239,9 @@ const Auth = () => {
                       <RadioGroupItem value="maker" id="maker" />
                       <Label htmlFor="maker" className="font-normal">
                         <div>
-                          <div className="font-medium">GiggenMaker</div>
+                          <div className="font-medium">{t('giggenMaker')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Kan opprette tilbud, laste opp portefølje og administrere arrangementer
+                            {t('makerDescription')}
                           </div>
                         </div>
                       </Label>
@@ -248,9 +250,9 @@ const Auth = () => {
                       <RadioGroupItem value="goer" id="goer" />
                       <Label htmlFor="goer" className="font-normal">
                         <div>
-                          <div className="font-medium">GiggenGoer</div>
+                          <div className="font-medium">{t('giggenGoer')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Kan se portefølje, arrangementer og profilene til Makers
+                            {t('goerDescription')}
                           </div>
                         </div>
                       </Label>
@@ -265,7 +267,7 @@ const Auth = () => {
               className="w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Arbeider...' : (isLogin ? 'Logg inn' : 'Registrer deg')}
+              {isSubmitting ? t('working') : (isLogin ? t('signIn') : t('signUp'))}
             </Button>
           </form>
 
@@ -276,8 +278,8 @@ const Auth = () => {
               disabled={isSubmitting}
             >
               {isLogin 
-                ? 'Har du ikke konto? Registrer deg her' 
-                : 'Har du allerede konto? Logg inn her'
+                ? t('dontHaveAccount')
+                : t('alreadyHaveAccount')
               }
             </Button>
           </div>

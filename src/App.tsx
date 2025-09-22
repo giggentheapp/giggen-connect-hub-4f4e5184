@@ -32,7 +32,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/start" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={
+            <AppLanguageProvider>
+              <Auth />
+            </AppLanguageProvider>
+          } />
           
           {/* Main app routes wrapped with AppLanguageProvider */}
           <Route path="/dashboard" element={
