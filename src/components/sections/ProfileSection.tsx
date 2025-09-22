@@ -59,7 +59,7 @@ export const ProfileSection = ({
           <div className="space-y-2">
             <h3 className="font-semibold">{t('profileInformation')}</h3>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Rolle: {profile.role}</p>
+              <p>{t('role')}: {t(profile.role)}</p>
               {profile.address && profile.is_address_public && <p>Lokasjon: {profile.address}</p>}
             </div>
           </div>
@@ -79,7 +79,7 @@ export const ProfileSection = ({
             {t('myPortfolio')}
           </CardTitle>
           <CardDescription>
-            Slik vises porteføljen din til andre makere
+            {t('howPortfolioAppears')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -95,20 +95,28 @@ export const ProfileSection = ({
             {t('myPublishedOffers')}
           </CardTitle>
           <CardDescription>
-            Tilbudene dine som er synlige for andre makere
+            {t('yourVisibleOffers')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {conceptsLoading ? <div className="text-center py-8">
+          {conceptsLoading ? (
+            <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Laster tilbud...</p>
-            </div> : concepts.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+            </div>
+          ) : concepts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
               <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p>Ingen publiserte tilbud ennå</p>
-              <p className="text-sm">Opprett og publiser tilbud for å vise dem her</p>
-            </div> : <div className="space-y-4">
-              {concepts.map(concept => <ConceptCard key={concept.id} concept={concept} showActions={false} />)}
-            </div>}
+              <p>{t('noPublishedOffers')}</p>
+              <p className="text-sm">{t('createPublishOffers')}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {concepts.map(concept => (
+                <ConceptCard key={concept.id} concept={concept} showActions={false} />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -120,11 +128,19 @@ export const ProfileSection = ({
             {t('myUpcomingEvents')}
           </CardTitle>
           <CardDescription>
-            Arrangementer du er involvert i
+            {t('eventsYouAreInvolvedIn')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <UpcomingEventsSection profile={profile} isAdminView={true} />
+          <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              {t('privacyNote')}
+            </p>
+          </div>
+          
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
+          </div>
         </CardContent>
       </Card>
 

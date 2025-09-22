@@ -387,6 +387,11 @@ export const appTranslations = {
     // Working events
     eventsYouAreInvolvedIn: "Arrangementer du er involvert i",
     privacyNote: "Personvern: Kun offentlig arrangementinfo vises til andre brukere. Sensitive detaljer som honorar og kontaktinfo er kun synlig for deg og samarbeidspartneren.",
+    
+    // Profile roles
+    role: "Rolle",
+    maker: "maker",
+    goer: "goer",
 
     // About page
     aboutGiggenDescription: "Giggen er Norges ledende plattform for musikk-booking og networking. Vi kobler musikere med arrangører gjennom innovative teknologier som interaktive kart og smart matching.",
@@ -796,6 +801,11 @@ export const appTranslations = {
     // Working events
     eventsYouAreInvolvedIn: "Events you are involved in",
     privacyNote: "Privacy: Only public event info is shown to other users. Sensitive details like fees and contact info are only visible to you and your collaboration partner.",
+    
+    // Profile roles
+    role: "Role",
+    maker: "maker",
+    goer: "goer",
 
     // About page
     aboutGiggenDescription: "Giggen is Norway's leading platform for music booking and networking. We connect musicians with organizers through innovative technologies like interactive maps and smart matching.",

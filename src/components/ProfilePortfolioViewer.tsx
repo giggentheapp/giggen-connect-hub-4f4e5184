@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Play, Volume2, Image as ImageIcon, File } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -11,6 +12,7 @@ interface ProfilePortfolioViewerProps {
 
 export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
   const { files, loading, error } = useProfilePortfolio(userId);
+  const { t } = useAppTranslation();
 
   if (loading) {
     return (
@@ -40,7 +42,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
             {showControls || isOwnProfile
-              ? "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp."
+              ? t('noPortfolioUploaded')
               : "Ingen offentlige porteføljefiler tilgjengelig eller eieren har ikke tillatt visning av portefølje"
             }
           </p>
