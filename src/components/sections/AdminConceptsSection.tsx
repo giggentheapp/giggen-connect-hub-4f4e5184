@@ -6,6 +6,7 @@ import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { supabase } from '@/integrations/supabase/client';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -25,6 +26,7 @@ interface AdminConceptsSectionProps {
 export const AdminConceptsSection = ({
   profile
 }: AdminConceptsSectionProps) => {
+  const { t } = useAppTranslation();
   const [showWizard, setShowWizard] = useState(false);
   const {
     concepts,
@@ -53,7 +55,7 @@ export const AdminConceptsSection = ({
       <Card className="bg-slate-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Mine tilbud</span>
+            <span>{t('myOffers')}</span>
             <Button onClick={() => setShowWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nytt tilbud

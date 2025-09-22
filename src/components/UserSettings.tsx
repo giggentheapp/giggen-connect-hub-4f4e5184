@@ -15,6 +15,7 @@ import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Tras
 import { useNavigate } from 'react-router-dom';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { AvatarCropModal } from '@/components/AvatarCropModal';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface UserProfile {
   id: string;
@@ -57,6 +58,7 @@ export const UserSettings = ({
   profile,
   onProfileUpdate
 }: UserSettingsProps) => {
+  const { t } = useAppTranslation();
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [profileData, setProfileData] = useState<UserProfile>(profile);
@@ -468,7 +470,7 @@ export const UserSettings = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Profilinformasjon
+            {t('profileInformationSettings')}
           </CardTitle>
           <CardDescription>
             Oppdater dine grunnleggende profildetaljer som vises til andre brukere
@@ -648,10 +650,10 @@ export const UserSettings = ({
               <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
                 <Share2 className="h-5 w-5 text-primary" />
               </div>
-              Sosiale medier
+              {t('socialMedia')}
             </CardTitle>
             <CardDescription>
-              Legg til dine sosiale medier profiler som vil vises på profilen din
+              {t('addSocialMediaProfiles')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -769,7 +771,7 @@ export const UserSettings = ({
 
             <Button onClick={handleProfileSubmit} disabled={loading} className="w-full">
               <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Lagrer sosiale medier...' : 'Lagre sosiale medier'}
+              {loading ? t('savingSocialMedia') : t('saveSocialMedia')}
             </Button>
           </CardContent>
         </Card>
@@ -781,7 +783,7 @@ export const UserSettings = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Synlighet og personvern
+              {t('visibilityAndPrivacy')}
             </CardTitle>
             <CardDescription>
               Kontroller hvem som kan se hvilken informasjon fra profilen din
@@ -875,7 +877,7 @@ export const UserSettings = ({
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Tekniske spesifikasjoner</Label>
+                        <Label>{t('technicalSpecifications')}</Label>
                         <p className="text-sm text-muted-foreground">
                           Del tekniske krav og utstyrsbehov
                         </p>
@@ -965,7 +967,7 @@ export const UserSettings = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />
-            Endre passord
+            {t('changePassword')}
           </CardTitle>
           <CardDescription>
             Oppdater ditt passord for økt sikkerhet
@@ -993,7 +995,7 @@ export const UserSettings = ({
             />
           </div>
           <Button onClick={handlePasswordChange} disabled={loading || !newPassword}>
-            {loading ? 'Oppdaterer...' : 'Endre passord'}
+            {loading ? t('updating') : t('changePassword')}
           </Button>
         </CardContent>
       </Card>
@@ -1003,16 +1005,16 @@ export const UserSettings = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <LogOut className="h-5 w-5" />
-            Logg ut
+            {t('logOut')}
           </CardTitle>
           <CardDescription>
-            Logg ut av kontoen din og returner til startsiden
+            {t('signOutOfAccount')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full">
             <LogOut className="h-4 w-4 mr-2" />
-            {loading ? 'Logger ut...' : 'Logg ut'}
+            {loading ? t('loggingOut') : t('logOut')}
           </Button>
         </CardContent>
       </Card>
@@ -1022,7 +1024,7 @@ export const UserSettings = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trash2 className="h-5 w-5" />
-            Slett konto
+            {t('deleteAccount')}
           </CardTitle>
           <CardDescription>
             Permanent sletting av brukerdata. Denne handlingen kan ikke angres.
@@ -1033,7 +1035,7 @@ export const UserSettings = ({
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
-                Slett konto permanent
+                {t('deleteAccount')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

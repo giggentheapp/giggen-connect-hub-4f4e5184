@@ -5,8 +5,8 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
-
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface UserProfile {
   id: string;
@@ -28,6 +28,7 @@ interface ProfileSectionProps {
 export const ProfileSection = ({
   profile
 }: ProfileSectionProps) => {
+  const { t } = useAppTranslation();
   console.log('🚨 ProfileSection RENDERED for user:', profile.user_id);
   console.log('🚨 ProfileSection will call UpcomingEventsSection with isAdminView=true');
   
@@ -56,7 +57,7 @@ export const ProfileSection = ({
             </div>}
 
           <div className="space-y-2">
-            <h3 className="font-semibold">Profilinformasjon</h3>
+            <h3 className="font-semibold">{t('profileInformation')}</h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>Rolle: {profile.role}</p>
               {profile.address && profile.is_address_public && <p>Lokasjon: {profile.address}</p>}
@@ -75,7 +76,7 @@ export const ProfileSection = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Folder className="h-5 w-5" />
-            Min Portefølje
+            {t('myPortfolio')}
           </CardTitle>
           <CardDescription>
             Slik vises porteføljen din til andre makere
@@ -91,7 +92,7 @@ export const ProfileSection = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5" />
-            Mine publiserte tilbud
+            {t('myPublishedOffers')}
           </CardTitle>
           <CardDescription>
             Tilbudene dine som er synlige for andre makere
@@ -116,7 +117,7 @@ export const ProfileSection = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Mine Kommende Arrangementer
+            {t('myUpcomingEvents')}
           </CardTitle>
           <CardDescription>
             Arrangementer du er involvert i

@@ -43,6 +43,7 @@ export const ProfileModal = ({
   onClose,
   userId
 }: ProfileModalProps) => {
+  const { t } = useAppTranslation();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [concepts, setConcepts] = useState<any[]>([]);
@@ -241,7 +242,7 @@ export const ProfileModal = ({
               <TabsList className={`grid w-full ${currentUserRole === 'maker' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="about">Om meg</TabsTrigger>
                 <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
-                {currentUserRole === 'maker' && <TabsTrigger value="concepts">Mine tilbud</TabsTrigger>}
+                {currentUserRole === 'maker' && <TabsTrigger value="concepts">{t('myOffers')}</TabsTrigger>}
                 <TabsTrigger value="events">Arrangementer</TabsTrigger>
               </TabsList>
             </div>
@@ -301,7 +302,7 @@ export const ProfileModal = ({
               {currentUserRole === 'maker' && <TabsContent value="concepts" className="mt-0">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Mine tilbud</CardTitle>
+                      <CardTitle>{t('myOffers')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {concepts.length > 0 ? <div className="space-y-4">

@@ -81,7 +81,105 @@ export const appTranslations = {
     tryAgainButton: "Prøv igjen",
     
     // Common
-    noDescription: "Ingen beskrivelse tilgjengelig"
+    noDescription: "Ingen beskrivelse tilgjengelig",
+
+    // Landing Page
+    termsAndConditions: "Vilkår og betingelser",
+    privacyPolicy: "Personvernerklæring", 
+    aboutGiggen: "Om GIGGEN",
+    signIn: "Logg inn",
+
+    // Profile Page - Maker Cards
+    profileInformation: "Profilinformasjon",
+    myPortfolio: "Min portefølje",
+    myPublishedOffers: "Mine publiserte tilbud",
+    myUpcomingEvents: "Mine kommende arrangementer",
+
+    // File Management Page
+    profilePortfolio: "Profilportefølje",
+    technicalSpecifications: "Tekniske spesifikasjoner", 
+    hospitalityRiders: "Hospitality riders",
+
+    // My Offers Page
+    myOffers: "Mine tilbud",
+
+    // Settings Page - All Cards
+    profileInformationSettings: "Profilinformasjon",
+    socialMedia: "Sosiale medier",
+    visibilityAndPrivacy: "Synlighet og personvern",
+    changePassword: "Endre passord",
+    logOut: "Logg ut",
+    deleteAccount: "Slett konto",
+
+    // Additional profile/settings content
+    updateProfileDetails: "Oppdater dine grunnleggende profildetaljer som vises til andre brukere",
+    addSocialMediaProfiles: "Legg til dine sosiale medier profiler som vil vises på profilen din",
+    managePrivacySettings: "Administrer hvem som kan se hvilken informasjon om deg",
+    updateAccountPassword: "Endre passordet for kontoen din",
+    signOutOfAccount: "Logg ut av kontoen din",
+    permanentlyDeleteAccount: "Slett kontoen din permanent - denne handlingen kan ikke angres",
+
+    // Form labels and placeholders
+    displayName: "Visningsnavn",
+    biography: "Biografi", 
+    location: "Lokasjon",
+    email: "E-post",
+    phoneNumber: "Telefonnummer",
+    currentPassword: "Nåværende passord",
+    newPassword: "Nytt passord",
+    confirmPassword: "Bekreft passord",
+
+    // Actions
+    save: "Lagre",
+    cancel: "Avbryt",
+    delete: "Slett",
+    edit: "Rediger",
+    upload: "Last opp",
+    download: "Last ned",
+    remove: "Fjern",
+    add: "Legg til",
+    update: "Oppdater",
+
+    // File management
+    uploadFile: "Last opp fil",
+    replaceFile: "Erstatt fil", 
+    downloadFile: "Last ned fil",
+    removeFile: "Fjern fil",
+    noFilesUploaded: "Ingen filer lastet opp",
+    supportedFormats: "Støttede formater",
+
+    // Success/Error messages
+    profileUpdated: "Profil oppdatert",
+    passwordChanged: "Passord endret",
+    fileUploaded: "Fil lastet opp",
+    fileRemoved: "Fil fjernet", 
+    changesSaved: "Endringer lagret",
+    errorOccurred: "En feil oppstod",
+    pleaseCorrectErrors: "Vennligst rett opp feilene",
+
+    // Confirmation dialogs
+    confirmLogout: "Er du sikker på at du vil logge ut?",
+    confirmDeleteAccount: "Er du sikker på at du vil slette kontoen din? Denne handlingen kan ikke angres.",
+    confirmDeleteFile: "Er du sikker på at du vil slette denne filen?",
+    yes: "Ja",
+    no: "Nei",
+
+    // File management descriptions
+    managePortfolioFiles: "Administrer portefølje, tekniske spesifikasjoner og hospitality riders",
+    uploadPortfolioFiles: "Last opp bilder, videoer og andre filer som viser frem ditt arbeid",
+    uploadTechSpecs: "Last opp tekniske spesifikasjoner og rider-dokumenter",
+    uploadHospitalityRiders: "Last opp hospitality rider-dokumenter for arrangementer",
+
+    // Additional texts
+    couldNotLoadTechSpecs: "Kunne ikke laste tekniske spesifikasjoner",
+    noTechSpecsUploaded: "Ingen tekniske spesifikasjoner lastet opp. Gå til innstillinger for å laste opp.",
+    noTechSpecsAvailable: "Ingen tekniske spesifikasjoner tilgjengelig",
+    couldNotLoadHospitalityRiders: "Kunne ikke laste hospitality riders",
+    loadingHospitalityRiders: "Laster hospitality riders...",
+    savingSocialMedia: "Lagrer sosiale medier...",
+    saveSocialMedia: "Lagre sosiale medier",
+    updating: "Oppdaterer...",
+    loggingOut: "Logger ut..."
   },
   
   en: {
@@ -166,6 +264,104 @@ export const appTranslations = {
     tryAgainButton: "Try again",
     
     // Common
-    noDescription: "No description available"
+    noDescription: "No description available",
+
+    // Landing Page
+    termsAndConditions: "Terms and Conditions",
+    privacyPolicy: "Privacy Policy",
+    aboutGiggen: "About GIGGEN", 
+    signIn: "Sign In",
+
+    // Profile Page - Maker Cards
+    profileInformation: "Profile Information",
+    myPortfolio: "My Portfolio",
+    myPublishedOffers: "My Published Offers",
+    myUpcomingEvents: "My Upcoming Events",
+
+    // File Management Page
+    profilePortfolio: "Profile Portfolio",
+    technicalSpecifications: "Technical Specifications",
+    hospitalityRiders: "Hospitality Riders",
+
+    // My Offers Page
+    myOffers: "My Offers",
+
+    // Settings Page - All Cards
+    profileInformationSettings: "Profile Information",
+    socialMedia: "Social Media",
+    visibilityAndPrivacy: "Visibility and Privacy", 
+    changePassword: "Change Password",
+    logOut: "Log Out",
+    deleteAccount: "Delete Account",
+
+    // Additional profile/settings content
+    updateProfileDetails: "Update your basic profile details that are shown to other users",
+    addSocialMediaProfiles: "Add your social media profiles that will be displayed on your profile",
+    managePrivacySettings: "Manage who can see what information about you",
+    updateAccountPassword: "Change the password for your account",
+    signOutOfAccount: "Sign out of your account",
+    permanentlyDeleteAccount: "Permanently delete your account - this action cannot be undone",
+
+    // Form labels and placeholders
+    displayName: "Display Name",
+    biography: "Biography",
+    location: "Location", 
+    email: "Email",
+    phoneNumber: "Phone Number",
+    currentPassword: "Current Password",
+    newPassword: "New Password", 
+    confirmPassword: "Confirm Password",
+
+    // Actions
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    upload: "Upload",
+    download: "Download", 
+    remove: "Remove",
+    add: "Add",
+    update: "Update",
+
+    // File management
+    uploadFile: "Upload File",
+    replaceFile: "Replace File",
+    downloadFile: "Download File",
+    removeFile: "Remove File",
+    noFilesUploaded: "No files uploaded",
+    supportedFormats: "Supported formats",
+
+    // Success/Error messages
+    profileUpdated: "Profile updated",
+    passwordChanged: "Password changed",
+    fileUploaded: "File uploaded",
+    fileRemoved: "File removed", 
+    changesSaved: "Changes saved",
+    errorOccurred: "An error occurred",
+    pleaseCorrectErrors: "Please correct the errors",
+
+    // Confirmation dialogs
+    confirmLogout: "Are you sure you want to log out?",
+    confirmDeleteAccount: "Are you sure you want to delete your account? This action cannot be undone.",
+    confirmDeleteFile: "Are you sure you want to delete this file?",
+    yes: "Yes",
+    no: "No",
+
+    // File management descriptions
+    managePortfolioFiles: "Manage portfolio, technical specifications and hospitality riders",
+    uploadPortfolioFiles: "Upload images, videos and other files that showcase your work",
+    uploadTechSpecs: "Upload technical specifications and rider documents",
+    uploadHospitalityRiders: "Upload hospitality rider documents for events",
+
+    // Additional texts
+    couldNotLoadTechSpecs: "Could not load technical specifications",
+    noTechSpecsUploaded: "No technical specifications uploaded. Go to settings to upload.",
+    noTechSpecsAvailable: "No technical specifications available",
+    couldNotLoadHospitalityRiders: "Could not load hospitality riders",
+    loadingHospitalityRiders: "Loading hospitality riders...",
+    savingSocialMedia: "Saving social media...",
+    saveSocialMedia: "Save social media",
+    updating: "Updating...",
+    loggingOut: "Logging out..."
   }
 };
