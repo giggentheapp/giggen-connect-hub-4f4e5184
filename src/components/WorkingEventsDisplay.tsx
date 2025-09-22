@@ -65,9 +65,9 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
     setSelectedBookingId(null);
   };
 
-  // Determine if current user is owner of the booking
+  // Determine if current user is owner of the booking (only for own profile events, not public events)
   const isBookingOwner = (booking: any) => {
-    if (!currentUserId) return false;
+    if (!currentUserId || isGoerViewing) return false; // Never owner when viewing as goer or for public events
     return booking.sender_id === currentUserId || booking.receiver_id === currentUserId;
   };
 

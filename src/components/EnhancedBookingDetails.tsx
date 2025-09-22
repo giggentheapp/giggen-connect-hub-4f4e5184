@@ -211,34 +211,6 @@ export const EnhancedBookingDetails = ({
 
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-6 p-4">
-              {/* Agreement Status */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Avtale status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      {booking.sender_read_agreement ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <X className="h-4 w-4 text-red-500" />
-                      )}
-                      <span>Avsender har lest avtale</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {booking.receiver_read_agreement ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <X className="h-4 w-4 text-red-500" />
-                      )}
-                      <span>Mottaker har lest avtale</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Event Details */}
               <Card>
                 <CardHeader>
@@ -390,20 +362,6 @@ export const EnhancedBookingDetails = ({
                 </CardContent>
               </Card>
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t mt-6">
-                <div className="flex items-center gap-3">
-                  <Checkbox
-                    id="read-agreement"
-                    checked={false}
-                    onCheckedChange={() => {}}
-                  />
-                  <span className="text-sm">Jeg har lest alt</span>
-                </div>
-                <Button variant="outline" onClick={onClose}>
-                  Lukk
-                </Button>
-              </div>
             </div>
           </div>
         </DialogContent>

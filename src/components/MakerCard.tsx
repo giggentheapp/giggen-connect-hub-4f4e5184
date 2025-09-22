@@ -41,7 +41,12 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
                     alt={maker.display_name || 'Profile'}
                     className="w-full h-full object-cover rounded-full"
                     loading="lazy"
+                    onLoad={(e) => {
+                      // Ensure image is visible on successful load
+                      e.currentTarget.style.display = 'block';
+                    }}
                     onError={(e) => {
+                      console.log('Image failed to load:', maker.avatar_url);
                       const target = e.currentTarget;
                       target.style.display = 'none';
                       const parent = target.parentElement;
