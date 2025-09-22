@@ -118,6 +118,18 @@ export const BookingCardStep3 = ({
           </div>
         )}
 
+        {/* Portfolio information if available */}
+        {booking.portfolio_available && (
+          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded border border-blue-200 dark:border-blue-800">
+            <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+              📁 Portefølje tilgjengelig
+            </h4>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Artistens arbeider, referanser og kreative innhold kan ses i fullt omfang for dette arrangementet.
+            </p>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center justify-between pt-3 border-t">
           <div className="flex gap-2">
@@ -151,9 +163,14 @@ export const BookingCardStep3 = ({
           </div>
         </div>
 
-        {/* Public visibility info */}
+        {/* Public visibility info with portfolio note */}
         <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
           🌐 Arrangementet er synlig for andre brukere. Kun tittel, beskrivelse, dato og sted er offentlig.
+          {booking.portfolio_available && (
+            <div className="mt-1 text-blue-600 dark:text-blue-400">
+              📁 Porteføljeinnhold er også tilgjengelig for dette arrangementet.
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

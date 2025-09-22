@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 
 // Extend Window interface for TypeScript
 declare global {
@@ -20,8 +22,6 @@ declare global {
     updateBookingInParent?: (id: string, updates: any) => void;
   }
 }
-import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import AddressAutocomplete from '@/components/AddressAutocomplete';
 
 interface BookingDetailsPanelProps {
   booking: any;
@@ -427,14 +427,96 @@ export const BookingDetailsPanel = ({
               onPropose={handleFieldUpdate} 
             />
 
-            {/* Address field - now properly mapped to booking.address */}
-            <EditableField 
-              fieldName="address" 
-              label="" 
-              value={booking.address} 
-              placeholder="Adresse" 
-              onPropose={handleFieldUpdate} 
-            />
+            {/* Address field - Custom implementation for AddressAutocomplete */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                {editingField !== 'address' && canEdit && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => {
+                      setEditingField('address');
+                      setTempValues(prev => ({
+                        ...prev,
+                        address: booking.address || ''
+                      }));
+                    }}
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                )}
+              </Label>
+
+              {editingField === 'address' ? (
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1">
+                    <AddressAutocomplete 
+                      value={tempValues.address || booking.address || ''} 
+                      onChange={(address, coordinates) => {
+                        setTempValues(prev => ({
+                          ...prev,
+                          address: address
+                        }));
+                        
+                        // Auto-save when coordinates are selected
+                        if (coordinates) {
+                          handleFieldUpdate('address', booking.address, {
+                            address: address,
+                            coordinates: coordinates
+                          });
+                          setEditingField(null);
+                        }
+                      }}
+                      placeholder="Adresse" 
+                    />
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      handleFieldUpdate('address', booking.address, tempValues.address);
+                      setEditingField(null);
+                    }}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditingField(null);
+                      setTempValues(prev => {
+                        const newValues = { ...prev };
+                        delete newValues.address;
+                        return newValues;
+                      });
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className={cn(
+                    "p-2 border rounded", 
+                    canEdit ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
+                  )} 
+                  onClick={canEdit ? () => {
+                    setEditingField('address');
+                    setTempValues(prev => ({
+                      ...prev,
+                      address: booking.address || ''
+                    }));
+                  } : undefined}
+                >
+                  {booking.address || 'Adresse'}
+                  {booking.latitude && booking.longitude && (
+                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      ✅ Koordinater: {booking.latitude.toFixed(4)}, {booking.longitude.toFixed(4)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
