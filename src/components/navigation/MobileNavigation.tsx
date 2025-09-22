@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings, Calendar } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface MobileNavigationProps {
   activeSection: string;
@@ -7,11 +8,13 @@ interface MobileNavigationProps {
 }
 
 export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationProps) => {
+  const { t } = useAppTranslation();
+  
   const navItems = [
-    { id: 'explore', label: 'Utforsk', icon: Compass },
-    { id: 'profile', label: 'Profil', icon: User },
-    { id: 'bookings', label: 'Bookinger', icon: Calendar },
-    { id: 'admin', label: 'Admin', icon: Settings },
+    { id: 'explore', label: t('explore'), icon: Compass },
+    { id: 'profile', label: t('profile'), icon: User },
+    { id: 'bookings', label: t('bookings'), icon: Calendar },
+    { id: 'admin', label: t('administration'), icon: Settings },
   ];
 
   return (

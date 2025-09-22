@@ -9,6 +9,7 @@ import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { ProfileModal } from '@/components/ProfileModal';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -42,6 +43,7 @@ export const MakerExploreSection = ({
   const {
     role
   } = useRole();
+  const { t } = useAppTranslation();
 
   // Auto-fetch makers when component mounts
   useEffect(() => {
@@ -100,12 +102,11 @@ export const MakerExploreSection = ({
             </div>
 
             {/* Main Title */}
-            <h2 className="text-2xl font-bold text-foreground mb-4">Kart kommer snart!</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
             
             {/* Description */}
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              Vi jobber med å lage et interaktivt kart som gjør det enklere å finne 
-              arrangementer i ditt område.
+              {t('mapDescription')}
             </p>
 
             {/* Features Grid */}
@@ -116,9 +117,9 @@ export const MakerExploreSection = ({
                   <Search className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">Kommende arrangementer</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Se alle arrangementer på kartet med dato og tid
+                    {t('upcomingEventsDesc')}
                   </p>
                 </div>
               </div>
@@ -129,9 +130,9 @@ export const MakerExploreSection = ({
                   <Music className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">Musikere i nærheten</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Finn talentfulle musikere og artister i ditt område
+                    {t('musiciansNearbyDesc')}
                   </p>
                 </div>
               </div>
@@ -142,9 +143,9 @@ export const MakerExploreSection = ({
                   <Users className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">Lokalsamfunn</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('localCommunity')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Utforsk det lokale musikksamfunnet rundt deg
+                    {t('localCommunityDesc')}
                   </p>
                 </div>
               </div>
@@ -152,7 +153,7 @@ export const MakerExploreSection = ({
 
             {/* Interim Message */}
             <p className="text-muted-foreground mb-6">
-              I mellomtiden kan du utforske musikere og arrangementer i listen.
+              {t('interimMessage')}
             </p>
 
             {/* Action Button */}
@@ -161,14 +162,14 @@ export const MakerExploreSection = ({
               size="lg"
               className="mb-4"
             >
-              Gå til utforsk-siden
+              {t('goToExplorePage')}
             </Button>
 
             {/* Status Badge */}
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
               <Badge variant="secondary" className="text-xs">
-                Under utvikling
+                {t('underDevelopment')}
               </Badge>
             </div>
           </CardContent>
@@ -188,7 +189,7 @@ export const MakerExploreSection = ({
               }`}
             >
               <MapPin className="w-4 h-4 mr-2" />
-              Kart
+              {t('map')}
             </button>
             <button
               onClick={() => setActiveTab('list')}
@@ -199,7 +200,7 @@ export const MakerExploreSection = ({
               }`}
             >
               <Users className="w-4 h-4 mr-2" />
-              Liste
+              {t('list')}
             </button>
           </div>
           
@@ -209,7 +210,7 @@ export const MakerExploreSection = ({
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Søk etter musikere..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-card/95 backdrop-blur-sm border shadow-lg"
@@ -228,7 +229,7 @@ export const MakerExploreSection = ({
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">Makere i nettverket</h2>
+                  <h2 className="text-lg font-semibold">{t('makersInNetwork')}</h2>
                   <Badge variant="secondary" className="text-xs">
                     {filteredMakers.length}
                   </Badge>
@@ -242,10 +243,10 @@ export const MakerExploreSection = ({
                     <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>
                       {loading 
-                        ? 'Laster makere...' 
+                        ? t('loadingMakers')
                         : searchTerm 
-                          ? 'Ingen makere funnet som matcher søket.'
-                          : 'Ingen makere funnet.'
+                          ? t('noMakersFoundFiltered')
+                          : t('noMakersFound')
                       }
                     </p>
                   </div>
@@ -270,9 +271,9 @@ export const MakerExploreSection = ({
                                   </Badge>
                                 </div>
                                 
-                                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                  {maker.bio || 'Ingen beskrivelse tilgjengelig'}
-                                </p>
+                                 <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                   {maker.bio || t('noDescription')}
+                                 </p>
                                 
                                 {maker.address && maker.is_address_public && (
                                   <div className="flex items-center text-xs text-muted-foreground">
@@ -291,7 +292,7 @@ export const MakerExploreSection = ({
                                 className="text-xs"
                               >
                                 <Eye className="w-3 h-3 mr-1" />
-                                Se profil
+                                {t('seeProfile')}
                               </Button>
                             </div>
                           </div>

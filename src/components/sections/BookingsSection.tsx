@@ -18,6 +18,7 @@ import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -60,6 +61,7 @@ export const BookingsSection = ({
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   // Real-time subscription for booking updates
   useEffect(() => {
@@ -147,17 +149,17 @@ export const BookingsSection = ({
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'Venter svar';
+        return t('waitingResponse');
       case 'allowed':
-        return 'Tillatt';
+        return t('allowed');
       case 'approved_by_both':
-        return 'Godkjent';
+        return t('approved');
       case 'upcoming':
-        return 'Publisert';
+        return t('published');
       case 'completed':
-        return 'Gjennomført';
+        return t('completed');
       case 'cancelled':
-        return 'Avlyst';
+        return t('cancelled');
       default:
         return status;
     }
@@ -165,19 +167,19 @@ export const BookingsSection = ({
   const getPhaseText = (booking: any) => {
     switch (booking.status) {
       case 'pending':
-        return booking.receiver_id === profile.user_id ? '1. Forespørsel' : 'Sendt forespørsel';
+        return booking.receiver_id === profile.user_id ? t('requestPhase') : t('sentRequestPhase');
       case 'allowed':
-        return '2. Pågående avtale - Kan redigeres';
+        return t('ongoingAgreementEditablePhase');
       case 'approved_by_both':
-        return '2. Pågående avtale - Klar for publisering';
+        return t('ongoingAgreementReadyPhase');
       case 'upcoming':
-        return '3. Publisert arrangement';
+        return t('publishedEventPhase');
       case 'completed':
-        return 'Gjennomført';
+        return t('completedPhase');
       case 'cancelled':
-        return 'Avlyst';
+        return t('cancelledPhase');
       default:
-        return 'Ukjent status';
+        return t('unknownStatus');
     }
   };
   const handleBookingAction = async () => {
@@ -189,8 +191,8 @@ export const BookingsSection = ({
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({
-        title: "Kunne ikke oppdatere listen",
-        description: "Prøv å oppdatere siden manuelt",
+        title: t('couldNotUpdateList'),
+        description: t('tryRefreshManually'),
         variant: "destructive"
       });
     }
@@ -243,7 +245,7 @@ export const BookingsSection = ({
         <CardContent>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={handleDetailsClick}>
-              Se detaljer
+              {t('seeDetails')}
             </Button>
             <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
           </div>
@@ -253,7 +255,7 @@ export const BookingsSection = ({
   if (loading) {
     return <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p>Laster bookinger...</p>
+        <p>{t('loadingBookings')}</p>
       </div>;
   }
   return <SafariErrorBoundary>
@@ -263,19 +265,19 @@ export const BookingsSection = ({
       <div className="flex gap-2 border-b flex-wrap">
         <Button variant={activeTab === 'incoming' ? 'default' : 'ghost'} onClick={() => setActiveTab('incoming')} className="flex items-center gap-2">
           <Inbox className="h-4 w-4" />
-          Innkommende forespørsler ({incomingRequests.length})
+          {t('incomingRequests')} ({incomingRequests.length})
         </Button>
         <Button variant={activeTab === 'sent' ? 'default' : 'ghost'} onClick={() => setActiveTab('sent')} className="flex items-center gap-2">
           <Send className="h-4 w-4" />
-          Sendt forespørsel ({sentRequests.length})
+          {t('sentRequest')} ({sentRequests.length})
         </Button>
         <Button variant={activeTab === 'ongoing' ? 'default' : 'ghost'} onClick={() => setActiveTab('ongoing')} className="flex items-center gap-2">
           <Clock className="h-4 w-4" />
-          Pågående avtaler ({ongoingAgreements.length})
+          {t('ongoingAgreements')} ({ongoingAgreements.length})
         </Button>
         <Button variant={activeTab === 'upcoming' ? 'default' : 'ghost'} onClick={() => setActiveTab('upcoming')} className="flex items-center gap-2">
           <Check className="h-4 w-4" />
-          Kommende arrangementer ({upcomingEvents.length})
+          {t('upcomingEventsBookings')} ({upcomingEvents.length})
         </Button>
       </div>
 
@@ -283,13 +285,15 @@ export const BookingsSection = ({
       <div className="space-y-4">
         {activeTab === 'incoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Innkommende forespørsler</h3>
-              
+              <h3 className="text-lg font-medium mb-2">{t('incomingRequests')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t('incomingRequestsDesc')}
+              </p>
             </div>
             {incomingRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
+                  <p className="text-muted-foreground">{t('noIncomingRequests')}</p>
                 </CardContent>
               </Card> : incomingRequests.map(booking => (
                 <BookingCard 
@@ -301,15 +305,15 @@ export const BookingsSection = ({
 
         {activeTab === 'sent' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Sendt forespørsel</h3>
+              <h3 className="text-lg font-medium mb-2">{t('sentRequest')}</h3>
               <p className="text-sm text-muted-foreground">
-                Forespørsler du har sendt som venter på svar fra mottakeren.
+                {t('sentRequestsDesc')}
               </p>
             </div>
             {sentRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen sendte forespørsler</p>
+                  <p className="text-muted-foreground">{t('noSentRequests')}</p>
                 </CardContent>
               </Card> : sentRequests.map(booking => (
                 <BookingCard 
@@ -321,15 +325,15 @@ export const BookingsSection = ({
 
         {activeTab === 'ongoing' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Pågående avtaler</h3>
+              <h3 className="text-lg font-medium mb-2">{t('ongoingAgreements')}</h3>
               <p className="text-sm text-muted-foreground">
-                Tillatte avtaler hvor dere kan redigere detaljer og se hverandres kontaktinfo og dokumenter.
+                {t('ongoingAgreementsDesc')}
               </p>
             </div>
             {ongoingAgreements.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen pågående avtaler</p>
+                  <p className="text-muted-foreground">{t('noOngoingAgreements')}</p>
                 </CardContent>
               </Card> : ongoingAgreements.map(booking => (
                 <BookingCard 
@@ -341,15 +345,15 @@ export const BookingsSection = ({
 
         {activeTab === 'upcoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Kommende arrangementer</h3>
+              <h3 className="text-lg font-medium mb-2">{t('upcomingEventsBookings')}</h3>
               <p className="text-sm text-muted-foreground">
-                Publiserte arrangementer som er synlige for andre brukere (med begrenset info). Avtaler er låst for redigering.
+                {t('bookingUpcomingEventsDesc')}
               </p>
             </div>
             {upcomingEvents.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Ingen kommende arrangementer</p>
+                  <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
                 </CardContent>
               </Card> : upcomingEvents.map(booking => (
                 <BookingCard 
