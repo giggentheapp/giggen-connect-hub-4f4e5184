@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,9 +14,9 @@ serve(async (req) => {
   try {
     const { address } = await req.json()
     
-    if (!address) {
+    if (!address || address.trim().length < 3) {
       return new Response(
-        JSON.stringify({ error: 'Address is required' }),
+        JSON.stringify({ error: 'Address must be at least 3 characters' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -28,8 +27,9 @@ serve(async (req) => {
     // Get Mapbox token from secrets
     const mapboxToken = Deno.env.get('MAPBOX_ACCESS_TOKEN')
     if (!mapboxToken) {
+      console.error('MAPBOX_ACCESS_TOKEN not found in environment')
       return new Response(
-        JSON.stringify({ error: 'Mapbox token not configured' }),
+        JSON.stringify({ error: 'Geocoding service not configured' }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -37,31 +37,53 @@ serve(async (req) => {
       )
     }
 
-    // Call Mapbox Geocoding API
-    const encodedAddress = encodeURIComponent(address)
-    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${mapboxToken}&country=NO&limit=1`
+    // Call Mapbox Geocoding API with enhanced options for Norway
+    const encodedAddress = encodeURIComponent(address.trim())
+    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${mapboxToken}&country=NO&limit=5&types=address,poi,place&language=no`
+    
+    console.log('Calling Mapbox API:', geocodeUrl.replace(mapboxToken, '[REDACTED]'))
     
     const response = await fetch(geocodeUrl)
-    const data = await response.json()
-
-    if (!data.features || data.features.length === 0) {
+    
+    if (!response.ok) {
+      console.error('Mapbox API error:', response.status, response.statusText)
       return new Response(
-        JSON.stringify({ error: 'Address not found' }),
+        JSON.stringify({ error: 'Geocoding service unavailable' }),
         { 
-          status: 404,
+          status: 503,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
 
-    const feature = data.features[0]
-    const [longitude, latitude] = feature.center
+    const data = await response.json()
+    console.log('Mapbox response:', JSON.stringify(data, null, 2))
+
+    if (!data.features || data.features.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'No addresses found',
+          features: []
+        }),
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Format response for AddressAutocomplete component
+    const formattedFeatures = data.features.map((feature: any) => ({
+      place_name: feature.place_name,
+      center: feature.center, // [longitude, latitude]
+      text: feature.text,
+      properties: feature.properties
+    }))
 
     return new Response(
       JSON.stringify({
-        latitude,
-        longitude,
-        formatted_address: feature.place_name
+        features: formattedFeatures,
+        query: address
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -71,7 +93,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Geocoding error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal geocoding error',
+        details: error.message 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

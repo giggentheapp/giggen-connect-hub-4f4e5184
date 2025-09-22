@@ -87,6 +87,14 @@ export const BookingDetailsPanel = ({
         last_modified_at: new Date().toISOString()
       };
 
+      // Handle coordinates for address field
+      if (fieldName === 'address' && typeof newValue === 'object' && newValue.coordinates) {
+        updates.address = newValue.address;
+        updates.latitude = newValue.coordinates.lat;
+        updates.longitude = newValue.coordinates.lng;
+        console.log('📍 Storing coordinates:', newValue.coordinates);
+      }
+
       // If either party has approved, reset their approval when changes are made
       const isSender = currentUserId === booking.sender_id;
       const isReceiver = currentUserId === booking.receiver_id;

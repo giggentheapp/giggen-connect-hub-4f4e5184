@@ -143,6 +143,8 @@ export type Database = {
           is_public_after_approval: boolean | null
           last_modified_at: string | null
           last_modified_by: string | null
+          latitude: number | null
+          longitude: number | null
           personal_message: string | null
           price_musician: string | null
           price_ticket: string | null
@@ -198,6 +200,8 @@ export type Database = {
           is_public_after_approval?: boolean | null
           last_modified_at?: string | null
           last_modified_by?: string | null
+          latitude?: number | null
+          longitude?: number | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
@@ -253,6 +257,8 @@ export type Database = {
           is_public_after_approval?: boolean | null
           last_modified_at?: string | null
           last_modified_by?: string | null
+          latitude?: number | null
+          longitude?: number | null
           personal_message?: string | null
           price_musician?: string | null
           price_ticket?: string | null
