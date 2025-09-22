@@ -124,36 +124,36 @@ export const BookingPublicPreview = ({
             </CardContent>
           </Card>
 
-          {/* What only the owners will see - Less intense colors */}
-          <Card className="border-2 border-orange-300/40 bg-orange-50/30 dark:bg-orange-950/10">
+          {/* What only the owners will see - Subtle styling */}
+          <Card className="border border-muted bg-muted/20">
             <CardHeader>
-              <CardTitle className="text-lg text-orange-700 dark:text-orange-300 flex items-center gap-2">
+              <CardTitle className="text-base text-muted-foreground flex items-center gap-2">
                 🔒 PRIVAT INFORMASJON - Kun synlig for dere som parter
               </CardTitle>
-              <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">
+              <p className="text-sm text-muted-foreground">
                 ⚠️ Følgende informasjon vil ALDRI bli vist til publikum eller andre brukere
               </p>
             </CardHeader>
             <CardContent>
-              <div className="bg-orange-50/50 dark:bg-orange-950/15 p-4 rounded-lg border border-orange-200/60 dark:border-orange-800/40">
+              <div className="bg-background/50 p-4 rounded-lg border border-border">
                 <div className="space-y-4">
-                  {/* Financial details - Less intense */}
-                  <div className="bg-white dark:bg-gray-900 p-3 rounded border-l-4 border-orange-400">
-                    <h4 className="font-bold text-orange-800 dark:text-orange-200 mb-2 flex items-center gap-2">
+                  {/* Financial details - Subtle styling */}
+                  <div className="bg-card p-3 rounded border-l-4 border-primary">
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                       💰 Økonomiske detaljer (KONFIDENSIELT)
                     </h4>
-                    <div className="text-sm space-y-2 bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                    <div className="text-sm space-y-2 bg-muted p-2 rounded">
                       {booking.door_deal ? (
                         <>
-                          <p className="font-medium">• Artist honorar: <span className="text-green-600 dark:text-green-400">{booking.door_percentage || 'X'}% av dørinntekter</span></p>
+                          <p className="font-medium">• Artist honorar: <span className="text-primary">{booking.door_percentage || 'X'}% av dørinntekter</span></p>
                           {booking.audience_estimate && booking.ticket_price && (
-                            <p>• Estimert artist inntekt: <span className="font-bold text-green-600 dark:text-green-400">{Math.round((booking.audience_estimate * booking.ticket_price * (booking.door_percentage || 0)) / 100).toLocaleString('nb-NO')} kr</span></p>
+                            <p>• Estimert artist inntekt: <span className="font-bold text-primary">{Math.round((booking.audience_estimate * booking.ticket_price * (booking.door_percentage || 0)) / 100).toLocaleString('nb-NO')} kr</span></p>
                           )}
                         </>
                       ) : booking.by_agreement ? (
-                        <p className="font-medium">• Artist honorar: <span className="text-blue-600 dark:text-blue-400">Avtales direkte mellom partene</span></p>
+                        <p className="font-medium">• Artist honorar: <span className="text-primary">Avtales direkte mellom partene</span></p>
                       ) : (
-                        <p className="font-medium">• Fast artist honorar: <span className="text-green-600 dark:text-green-400">{booking.artist_fee ? `${booking.artist_fee} kr` : 'Ikke spesifisert'}</span></p>
+                        <p className="font-medium">• Fast artist honorar: <span className="text-primary">{booking.artist_fee ? `${booking.artist_fee} kr` : 'Ikke spesifisert'}</span></p>
                       )}
                       
                       {booking.audience_estimate && booking.ticket_price && (
@@ -162,48 +162,54 @@ export const BookingPublicPreview = ({
                     </div>
                   </div>
 
-                  {/* Contact and private info - Less intense */}
-                  <div className="bg-white dark:bg-gray-900 p-3 rounded border-l-4 border-blue-400">
-                    <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+                  {/* Contact and private info - Subtle styling */}
+                  <div className="bg-card p-3 rounded border-l-4 border-secondary">
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                       📞 Sensitive personopplysninger (BESKYTTET)
                     </h4>
-                    <div className="bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded">
+                    <div className="bg-muted p-2 rounded">
                       <ul className="text-sm space-y-1">
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Kontaktinformasjon (telefonnummer, e-post, personlige adresser)
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Tekniske spesifikasjoner og hospitality rider
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Private meldinger mellom partene
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Komplett booking historikk og endringer
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Interne notater og avtaledetaljer
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Fullstendige økonomiske avtaler og betalingsinformasjon
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full"></span>
                           Porteføljeinnhold og kreative arbeider (hvis tilgjengelig)
                         </li>
+                        {makerProfile?.hasPortfolio && (
+                          <li className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-primary rounded-full"></span>
+                            Portefølje med arbeider og referanser tilgjengelig for avtaleparter
+                          </li>
+                        )}
                       </ul>
                     </div>
                   </div>
 
-                  {/* Privacy guarantee - Less intense */}
-                  <div className="bg-green-100/60 dark:bg-green-950/15 p-3 rounded border border-green-300/60 dark:border-green-700/40">
-                    <p className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                  {/* Privacy guarantee - Subtle styling */}
+                  <div className="bg-primary/10 p-3 rounded border border-primary/20">
+                    <p className="text-sm font-medium text-foreground flex items-center gap-2">
                       ✅ PERSONVERNGARANTI: All sensitiv informasjon forblir privat mellom dere som parter i avtalen.
                     </p>
                   </div>

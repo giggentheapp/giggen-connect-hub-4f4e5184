@@ -202,7 +202,7 @@ export const EnhancedBookingDetails = ({
                 
                 {isConfirmationPhase && <Button variant="outline" onClick={() => setShowAgreement(true)}>
                     <FileText className="h-4 w-4 mr-2" />
-                    Vis avtale
+                    Se finale detaljer
                   </Button>}
                 
                 

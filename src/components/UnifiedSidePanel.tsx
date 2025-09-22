@@ -142,7 +142,11 @@ export const UnifiedSidePanel = ({
 
       case 'profile':
         if (isGoer) {
-          return <ProfileGoerSection profile={profile} />;
+          return <ProfileGoerSection 
+            profile={profile} 
+            currentUserId={profile.user_id}
+            viewerRole={profile.role}
+          />;
         } else if (ismaker) {
           return <ProfileSection profile={profile} />;
         }

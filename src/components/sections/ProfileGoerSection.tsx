@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Eye, MapPin, Mail, Phone } from 'lucide-react';
+import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -16,12 +17,15 @@ interface UserProfile {
 }
 interface ProfileGoerSectionProps {
   profile: UserProfile;
+  currentUserId?: string;
+  viewerRole?: 'maker' | 'goer';
 }
 export const ProfileGoerSection = ({
-  profile
+  profile,
+  currentUserId,
+  viewerRole
 }: ProfileGoerSectionProps) => {
   return <div className="space-y-6">
-
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
@@ -30,8 +34,27 @@ export const ProfileGoerSection = ({
           <CardTitle className="text-2xl">{profile.display_name}</CardTitle>
           <CardDescription className="text-lg capitalize">{profile.role}</CardDescription>
         </CardHeader>
-        
-        
+      </Card>
+
+      {/* Upcoming Events */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            Kommende arrangementer
+          </CardTitle>
+          <CardDescription>
+            Arrangementer som andre brukere kan se, inkludert portefølje hvis tilgjengelig
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <WorkingEventsDisplay 
+            profile={profile}
+            showSensitiveInfo={false}
+            currentUserId={currentUserId}
+            viewerRole={viewerRole}
+          />
+        </CardContent>
       </Card>
     </div>;
 };
