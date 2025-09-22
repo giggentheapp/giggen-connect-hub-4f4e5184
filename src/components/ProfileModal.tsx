@@ -10,6 +10,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface ProfileData {
   id: string;
   user_id: string;
