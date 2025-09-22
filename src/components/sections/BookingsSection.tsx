@@ -58,15 +58,49 @@ export const BookingsSection = ({
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
-  const {
-    bookings,
-    loading,
-    updateBooking,
-    refetch
-  } = useBookings(profile.user_id);
-  const {
-    toast
-  } = useToast();
+  const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
+  const { toast } = useToast();
+
+  // Real-time subscription for booking updates
+  useEffect(() => {
+    if (!profile.user_id) return;
+
+    const channel = supabase
+      .channel('bookings-section-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `sender_id=eq.${profile.user_id}`,
+        },
+        (payload) => {
+          console.log('📝 Booking updated (as sender):', payload.new);
+          // Force refetch to ensure UI is in sync
+          refetch();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `receiver_id=eq.${profile.user_id}`,
+        },
+        (payload) => {
+          console.log('📝 Booking updated (as receiver):', payload.new);
+          // Force refetch to ensure UI is in sync
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile.user_id, refetch]);
 
   // Stable filtering - always filter from complete dataset
   const incomingRequests = bookings.filter(b => 
@@ -166,6 +200,16 @@ export const BookingsSection = ({
   }: {
     booking: any;
   }) => {
+    // Force re-render when booking data changes by using booking ID + updated_at as key
+    const bookingKey = `${booking.id}-${booking.updated_at || booking.created_at}`;
+    
+    console.log('🎴 Rendering BookingCard:', {
+      id: booking.id,
+      title: booking.title,
+      status: booking.status,
+      updated_at: booking.updated_at,
+      key: bookingKey
+    });
     const handleDetailsClick = () => {
       setSelectedBooking(booking);
       setDetailsOpen(true);
@@ -247,7 +291,12 @@ export const BookingsSection = ({
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
                 </CardContent>
-              </Card> : incomingRequests.map(booking => <BookingCard key={booking.id} booking={booking} />)}
+              </Card> : incomingRequests.map(booking => (
+                <BookingCard 
+                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
+                  booking={booking} 
+                />
+              ))}
           </>}
 
         {activeTab === 'sent' && <>
@@ -262,7 +311,12 @@ export const BookingsSection = ({
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">Ingen sendte forespørsler</p>
                 </CardContent>
-              </Card> : sentRequests.map(booking => <BookingCard key={booking.id} booking={booking} />)}
+              </Card> : sentRequests.map(booking => (
+                <BookingCard 
+                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
+                  booking={booking} 
+                />
+              ))}
           </>}
 
         {activeTab === 'ongoing' && <>
@@ -277,7 +331,12 @@ export const BookingsSection = ({
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">Ingen pågående avtaler</p>
                 </CardContent>
-              </Card> : ongoingAgreements.map(booking => <BookingCard key={booking.id} booking={booking} />)}
+              </Card> : ongoingAgreements.map(booking => (
+                <BookingCard 
+                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
+                  booking={booking} 
+                />
+              ))}
           </>}
 
         {activeTab === 'upcoming' && <>
@@ -292,7 +351,12 @@ export const BookingsSection = ({
                   <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">Ingen kommende arrangementer</p>
                 </CardContent>
-              </Card> : upcomingEvents.map(booking => <BookingCard key={booking.id} booking={booking} />)}
+              </Card> : upcomingEvents.map(booking => (
+                <BookingCard 
+                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
+                  booking={booking} 
+                />
+              ))}
           </>}
 
         {/* History tab removed - all deletions are now permanent */}

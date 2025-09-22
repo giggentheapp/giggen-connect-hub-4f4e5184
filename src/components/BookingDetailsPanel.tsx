@@ -152,9 +152,21 @@ export const BookingDetailsPanel = ({
     useEffect(() => {
       if (isEditing) {
         if (type === 'textarea' && textareaRef.current) {
-          textareaRef.current.focus();
+          const textarea = textareaRef.current;
+          textarea.focus();
+          // Set cursor to end of text
+          setTimeout(() => {
+            const length = textarea.value.length;
+            textarea.setSelectionRange(length, length);
+          }, 0);
         } else if (inputRef.current) {
-          inputRef.current.focus();
+          const input = inputRef.current;
+          input.focus();
+          // Set cursor to end of text
+          setTimeout(() => {
+            const length = input.value.length;
+            input.setSelectionRange(length, length);
+          }, 0);
         }
       }
     }, [isEditing, type]);
@@ -269,25 +281,45 @@ export const BookingDetailsPanel = ({
               <Textarea 
                 ref={textareaRef} 
                 value={tempValue || ''} 
-                onChange={e => setTempValues(prev => ({
-                  ...prev,
-                  [fieldName]: e.target.value
-                }))} 
+                onChange={e => {
+                  const newValue = e.target.value;
+                  setTempValues(prev => ({
+                    ...prev,
+                    [fieldName]: newValue
+                  }));
+                }} 
                 placeholder={placeholder} 
                 rows={3}
                 autoFocus
+                onFocus={e => {
+                  // Maintain cursor position
+                  const length = e.target.value.length;
+                  setTimeout(() => {
+                    e.target.setSelectionRange(length, length);
+                  }, 0);
+                }}
               />
             ) : (
               <Input 
                 ref={inputRef} 
                 type={type} 
                 value={tempValue || ''} 
-                onChange={e => setTempValues(prev => ({
-                  ...prev,
-                  [fieldName]: e.target.value
-                }))} 
+                onChange={e => {
+                  const newValue = e.target.value;
+                  setTempValues(prev => ({
+                    ...prev,
+                    [fieldName]: newValue
+                  }));
+                }} 
                 placeholder={placeholder}
                 autoFocus
+                onFocus={e => {
+                  // Maintain cursor position
+                  const length = e.target.value.length;
+                  setTimeout(() => {
+                    e.target.setSelectionRange(length, length);
+                  }, 0);
+                }}
               />
             )}
             <Button size="sm" onClick={confirmEdit}>
