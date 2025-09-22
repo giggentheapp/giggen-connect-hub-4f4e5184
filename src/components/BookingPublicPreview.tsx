@@ -128,10 +128,10 @@ export const BookingPublicPreview = ({
           <Card className="border border-muted bg-muted/20">
             <CardHeader>
               <CardTitle className="text-base text-muted-foreground flex items-center gap-2">
-                🔒 PRIVAT INFORMASJON - Kun synlig for dere som parter
+                PRIVAT INFORMASJON - Kun synlig for dere som parter
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                ⚠️ Følgende informasjon vil ALDRI bli vist til publikum eller andre brukere
+                Følgende informasjon vil ALDRI bli vist til publikum eller andre brukere
               </p>
             </CardHeader>
             <CardContent>
@@ -140,7 +140,7 @@ export const BookingPublicPreview = ({
                   {/* Financial details - Subtle styling */}
                   <div className="bg-card p-3 rounded border-l-4 border-primary">
                     <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                      💰 Økonomiske detaljer (KONFIDENSIELT)
+                      Økonomiske detaljer (KONFIDENSIELT)
                     </h4>
                     <div className="text-sm space-y-2 bg-muted p-2 rounded">
                       {booking.door_deal ? (
@@ -165,7 +165,7 @@ export const BookingPublicPreview = ({
                   {/* Contact and private info - Subtle styling */}
                   <div className="bg-card p-3 rounded border-l-4 border-secondary">
                     <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                      📞 Sensitive personopplysninger (BESKYTTET)
+                      Sensitive personopplysninger (BESKYTTET)
                     </h4>
                     <div className="bg-muted p-2 rounded">
                       <ul className="text-sm space-y-1">
@@ -210,7 +210,7 @@ export const BookingPublicPreview = ({
                   {/* Privacy guarantee - Subtle styling */}
                   <div className="bg-primary/10 p-3 rounded border border-primary/20">
                     <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                      ✅ PERSONVERNGARANTI: All sensitiv informasjon forblir privat mellom dere som parter i avtalen.
+                      PERSONVERNGARANTI: All sensitiv informasjon forblir privat mellom dere som parter i avtalen.
                     </p>
                   </div>
                 </div>

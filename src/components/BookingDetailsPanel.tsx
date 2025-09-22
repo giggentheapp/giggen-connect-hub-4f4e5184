@@ -510,8 +510,8 @@ export const BookingDetailsPanel = ({
                 >
                   {booking.address || 'Adresse'}
                   {booking.latitude && booking.longitude && (
-                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      ✅ Koordinater: {booking.latitude.toFixed(4)}, {booking.longitude.toFixed(4)}
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Adresse georeferert
                     </div>
                   )}
                 </div>

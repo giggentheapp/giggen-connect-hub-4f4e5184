@@ -188,7 +188,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         <Alert>
           <MapPin className="h-4 w-4" />
           <AlertDescription>
-            ✅ Adresse georeferert - Koordinater: {selectedCoordinates.lat.toFixed(4)}, {selectedCoordinates.lng.toFixed(4)}
+            Adresse georeferert
           </AlertDescription>
         </Alert>
       )}
