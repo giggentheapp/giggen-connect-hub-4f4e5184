@@ -8,6 +8,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { BookingDetailsModal } from '@/components/BookingDetailsModal';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface UserProfile {
   id: string;
@@ -31,6 +32,7 @@ interface WorkingEventsDisplayProps {
 }
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId, viewerRole }: WorkingEventsDisplayProps) => {
+  const { t } = useAppTranslation();
   // Determine which data source to use based on viewer role and ownership
   const isOwnProfile = currentUserId === profile.user_id;
   const isGoerViewing = viewerRole === 'goer' && !isOwnProfile;
@@ -83,7 +85,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
     return (
       <div className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          {isGoerViewing ? "Ingen offentlige arrangementer" : "No upcoming events"}
+          {isGoerViewing ? t('noPublicEvents') : t('noUpcomingEvents')}
         </div>
       </div>
     );
@@ -137,10 +139,10 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
               </div>
               <div className="mt-3 flex items-center justify-between">
                 <Badge variant="secondary">{event.status}</Badge>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  Se detaljer
-                </Button>
+                 <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                   <Eye className="h-4 w-4" />
+                   {t('viewDetails')}
+                 </Button>
               </div>
             </CardContent>
           </Card>

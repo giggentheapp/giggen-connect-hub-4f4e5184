@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Music, Eye, Calendar, Image, Star } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface MakerCardProps {
   maker: {
@@ -22,6 +23,7 @@ interface MakerCardProps {
 
 export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps) => {
   const { ismaker } = useRole();
+  const { t } = useAppTranslation();
   
   const privacySettings = maker.privacy_settings || {};
   const showPortfolio = privacySettings.show_portfolio_to_goers;
@@ -72,7 +74,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
                   {maker.display_name}
                 </h3>
                 <Badge variant="secondary" className="text-xs shrink-0">
-                  maker
+                  {t(maker.role)}
                 </Badge>
               </div>
               
@@ -101,18 +103,18 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             {showPortfolio && (
               <Badge variant="secondary" className="text-xs flex items-center gap-1">
                 <Image className="w-3 h-3" />
-                Portefølje
+                {t('filterPortfolio')}
               </Badge>
             )}
             {showEvents && (
               <Badge variant="secondary" className="text-xs flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                Arrangement
+                {t('filterEvents')}
               </Badge>
             )}
             <Badge variant="secondary" className="text-xs flex items-center gap-1">
               <Star className="w-3 h-3" />
-              Verifisert
+              {t('verified')}
             </Badge>
           </div>
         </div>
@@ -126,7 +128,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             className="flex-1 text-primary border-primary/20 hover:bg-primary hover:text-white transition-colors"
           >
             <Eye className="w-4 h-4 mr-1.5" />
-            Se profil
+            {t('viewProfile')}
           </Button>
           
           {/* Only show Book button to Makers */}
@@ -137,7 +139,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
               className="flex-1 bg-primary hover:bg-primary/90"
             >
               <Music className="w-4 h-4 mr-1.5" />
-              Book
+              {t('book')}
             </Button>
           )}
         </div>

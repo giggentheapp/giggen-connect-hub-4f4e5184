@@ -186,9 +186,9 @@ export const ProfileModal = ({
   if (!profile) {
     return <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-          <div className="p-6 text-center">
-            {loading ? 'Laster profil...' : 'Profil ikke funnet'}
-          </div>
+           <div className="p-6 text-center">
+             {loading ? t('loadingProfile') : t('profileNotFound')}
+           </div>
         </DialogContent>
       </Dialog>;
   }
@@ -241,10 +241,10 @@ export const ProfileModal = ({
             {/* Fixed Navigation Bar - Always Visible */}
             <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b px-6 py-3 shadow-sm">
               <TabsList className={`grid w-full ${currentUserRole === 'maker' ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                <TabsTrigger value="about">Om meg</TabsTrigger>
-                <TabsTrigger value="portfolio">Portefølje</TabsTrigger>
+                <TabsTrigger value="about">{t('aboutMe')}</TabsTrigger>
+                <TabsTrigger value="portfolio">{t('filterPortfolio')}</TabsTrigger>
                 {currentUserRole === 'maker' && <TabsTrigger value="concepts">{t('myOffers')}</TabsTrigger>}
-                <TabsTrigger value="events">Arrangementer</TabsTrigger>
+                <TabsTrigger value="events">{t('filterEvents')}</TabsTrigger>
               </TabsList>
             </div>
             
@@ -252,11 +252,11 @@ export const ProfileModal = ({
             <div className="flex-1 overflow-y-auto px-6 py-6">
               <TabsContent value="about" className="mt-0">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Om {profile.display_name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {profile.bio ? <p className="text-muted-foreground">{profile.bio}</p> : <p className="text-muted-foreground italic">Ingen beskrivelse tilgjengelig</p>}
+                   <CardHeader>
+                     <CardTitle>{t('aboutUser')} {profile.display_name}</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {profile.bio ? <p className="text-muted-foreground">{profile.bio}</p> : <p className="text-muted-foreground italic">{t('noDescriptionAvailable')}</p>}
                     
                     {/* Social Media Links */}
                     {profile.social_media_links && (
@@ -272,32 +272,32 @@ export const ProfileModal = ({
               </TabsContent>
 
               <TabsContent value="portfolio" className="mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Portefølje</CardTitle>
-                  </CardHeader>
-                   <CardContent>
-                     {!portfolioVisible ? (
-                       <p className="text-muted-foreground italic">
-                         Portefølje er ikke offentlig tilgjengelig
-                       </p>
-                     ) : portfolio.length > 0 ? (
-                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                         {portfolio.map(file => (
-                           <div key={file.id} className="space-y-2">
-                             {renderFilePreview(file)}
-                             {file.title && <h4 className="font-medium">{file.title}</h4>}
-                             {file.description && <p className="text-sm text-muted-foreground">{file.description}</p>}
-                           </div>
-                         ))}
-                       </div>
-                     ) : (
-                       <p className="text-muted-foreground italic">
-                         Ingen porteføljeelementer funnet
-                       </p>
-                     )}
-                   </CardContent>
-                </Card>
+                 <Card>
+                   <CardHeader>
+                     <CardTitle>{t('filterPortfolio')}</CardTitle>
+                   </CardHeader>
+                    <CardContent>
+                      {!portfolioVisible ? (
+                        <p className="text-muted-foreground italic">
+                          {t('portfolioNotPublic')}
+                        </p>
+                      ) : portfolio.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {portfolio.map(file => (
+                            <div key={file.id} className="space-y-2">
+                              {renderFilePreview(file)}
+                              {file.title && <h4 className="font-medium">{file.title}</h4>}
+                              {file.description && <p className="text-sm text-muted-foreground">{file.description}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground italic">
+                          {t('noPortfolioItems')}
+                        </p>
+                      )}
+                    </CardContent>
+                 </Card>
               </TabsContent>
 
               {currentUserRole === 'maker' && <TabsContent value="concepts" className="mt-0">
@@ -313,26 +313,26 @@ export const ProfileModal = ({
                               {concept.price && <p className="text-sm mt-2">Pris: {concept.price} kr</p>}
                               <p className="text-xs text-muted-foreground mt-2">Klikk for å se detaljer</p>
                             </div>)}
-                        </div> : <p className="text-muted-foreground italic">Ingen tilbud tilgjengelig</p>}
+                        </div> : <p className="text-muted-foreground italic">{t('noOffersAvailable')}</p>}
                     </CardContent>
                   </Card>
                 </TabsContent>}
 
               <TabsContent value="events" className="mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Kommende arrangementer</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Check privacy settings for events visibility */}
-                    {(() => {
-                      const isOwnProfile = currentUserId === userId;
-                      const privacySettings = (profile as any).privacy_settings || {};
-                      const showEvents = isOwnProfile || privacySettings.show_events_to_goers === true;
-                      
-                      if (!showEvents) {
-                        return <p className="text-muted-foreground italic">Arrangementer er ikke offentlig tilgjengelig</p>;
-                      }
+                 <Card>
+                   <CardHeader>
+                     <CardTitle>{t('upcomingEvents')}</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {/* Check privacy settings for events visibility */}
+                     {(() => {
+                       const isOwnProfile = currentUserId === userId;
+                       const privacySettings = (profile as any).privacy_settings || {};
+                       const showEvents = isOwnProfile || privacySettings.show_events_to_goers === true;
+                       
+                       if (!showEvents) {
+                         return <p className="text-muted-foreground italic">{t('eventsNotPublic')}</p>;
+                       }
                       
                       return (
                         <WorkingEventsDisplay 
