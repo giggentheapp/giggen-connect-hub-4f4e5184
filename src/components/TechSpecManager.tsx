@@ -142,8 +142,8 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       </CardHeader>
       <CardContent className="space-y-6">
         <FileUpload
-          bucketName="portfolio"
-          folderPath={`techspec/${userId}`}
+          bucketName="tech-specs"
+          folderPath={userId}
           onFileUploaded={handleFileUploaded}
           acceptedTypes=".pdf,.doc,.docx,.txt,.md"
           targetTable="profile_tech_specs"

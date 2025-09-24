@@ -142,8 +142,8 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
       </CardHeader>
       <CardContent className="space-y-6">
         <FileUpload
-          bucketName="portfolio"
-          folderPath={`hospitality/${userId}`}
+          bucketName="hospitality"
+          folderPath={userId}
           onFileUploaded={handleFileUploaded}
           acceptedTypes=".pdf,.doc,.docx,.txt,.md"
           targetTable="hospitality_riders"

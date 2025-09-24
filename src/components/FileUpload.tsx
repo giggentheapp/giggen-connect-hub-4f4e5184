@@ -8,7 +8,7 @@ import { Upload, File, Image, Video, Music } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface FileUploadProps {
-  bucketName: 'portfolio' | 'concepts' | 'avatars';
+  bucketName: 'portfolio' | 'concepts' | 'avatars' | 'hospitality' | 'tech-specs';
   folderPath: string;
   onFileUploaded: (file: any) => void;
   acceptedTypes?: string;
@@ -58,6 +58,9 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
       
       if (bucketName === 'concepts') {
         // For concepts, put user ID first to match RLS policy
+        filePath = `${user.id}/${fileName}`;
+      } else if (bucketName === 'hospitality' || bucketName === 'tech-specs') {
+        // For hospitality and tech-specs, use user ID as folder for RLS policy
         filePath = `${user.id}/${fileName}`;
       } else {
         filePath = `${folderPath}/${fileName}`;
