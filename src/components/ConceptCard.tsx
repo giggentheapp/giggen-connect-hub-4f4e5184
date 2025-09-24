@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
 import { useConceptActions } from '@/hooks/useConceptActions';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +74,7 @@ const ConceptCard = ({
 }: ConceptCardProps) => {
   console.log('ConceptCard rendering with concept:', concept.id);
   
+  const { t } = useAppTranslation();
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
@@ -179,7 +181,7 @@ const ConceptCard = ({
             <div className="flex items-center gap-2 mb-2">
               <CardTitle className="text-xl">{concept.title}</CardTitle>
               <Badge variant={concept.is_published ? "default" : "secondary"}>
-                {concept.is_published ? 'Publisert' : 'Utkast'}
+                {concept.is_published ? t('conceptCard.published') : t('conceptCard.draft')}
               </Badge>
             </div>
             {concept.description && (
@@ -198,7 +200,7 @@ const ConceptCard = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setShowActionsDialog(true)}>
-                      Tilbudshandlinger
+                      {t('conceptCard.offerActions')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -210,12 +212,12 @@ const ConceptCard = ({
                   variant="destructive" 
                   size="sm" 
                   onClick={() => {
-                    if (window.confirm("Er du sikker på at du vil slette dette tilbudet?")) {
+                    if (window.confirm(t('conceptCard.deleteConfirm'))) {
                       onDelete();
                     }
                   }}
                 >
-                  Slett
+                  {t('conceptCard.delete')}
                 </Button>
               )}
             </div>
@@ -227,22 +229,22 @@ const ConceptCard = ({
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-medium">Pris:</span>
+            <span className="font-medium">{t('conceptCard.price')}</span>
             <span>
               {concept.door_deal && concept.door_percentage
-                ? `${concept.door_percentage}% av dørinntekter`
+                ? `${concept.door_percentage}% ${t('conceptCard.ofDoorRevenue')}`
                 : concept.price_by_agreement
-                ? 'Ved avtale'
+                ? t('conceptCard.byAgreement')
                 : concept.price
                 ? `${concept.price} Kr`
-                : 'Ikke spesifisert'
+                : t('conceptCard.notSpecified')
               }
             </span>
           </div>
           {concept.expected_audience && (
             <div className="flex items-center gap-2">
-              <span className="font-medium">Publikum:</span>
-              <span>{concept.expected_audience} personer</span>
+              <span className="font-medium">{t('conceptCard.audience')}</span>
+              <span>{concept.expected_audience} {t('conceptCard.people')}</span>
             </div>
           )}
         </div>
@@ -252,12 +254,12 @@ const ConceptCard = ({
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <CalendarIcon className="h-4 w-4" />
-              Tilgjengelige datoer
+              {t('conceptCard.availableDates')}
             </h4>
             <div className="flex flex-wrap gap-2">
               {isIndefinite ? (
                 <Badge variant="outline">
-                  Ubestemt / Ved avtale
+                  {t('conceptCard.indefiniteByAgreement')}
                 </Badge>
                ) : (
                 Array.isArray(availableDates) ? availableDates.filter(date => date).map((date: string, index: number) => (
@@ -273,7 +275,7 @@ const ConceptCard = ({
         {/* Concept Portfolio Files - Interactive Media Display */}
         {conceptFiles.length > 0 && (
           <div>
-            <h4 className="font-medium mb-4">Tilbud portefølje</h4>
+            <h4 className="font-medium mb-4">{t('conceptCard.offerPortfolio')}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.isArray(conceptFiles) ? conceptFiles.filter(file => file && file.id).map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
@@ -296,7 +298,7 @@ const ConceptCard = ({
                       >
                         <source src={file.file_url} type={file.mime_type || 'video/mp4'} />
                         <source src={file.file_url} type="video/mp4" />
-                        Din nettleser støtter ikke video-avspilling.
+                        {t('conceptCard.videoNotSupported')}
                       </video>
                     </div>
                   )}
@@ -324,11 +326,11 @@ const ConceptCard = ({
                   {/* Audio Display */}
                   {(file.file_type === 'audio' || file.mime_type?.startsWith('audio/') || 
                    file.filename.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) && (
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Music className="h-5 w-5 text-primary" />
-                        <span className="font-medium text-sm">Lydfil</span>
-                      </div>
+                      <div className="p-4">
+                       <div className="flex items-center gap-2 mb-3">
+                         <Music className="h-5 w-5 text-primary" />
+                         <span className="font-medium text-sm">{t('conceptCard.audioFile')}</span>
+                       </div>
                       <audio 
                         controls 
                         className="w-full"
@@ -338,8 +340,8 @@ const ConceptCard = ({
                           console.error('Failed to load audio:', file.file_url, e);
                         }}
                       >
-                        <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
-                        Din nettleser støtter ikke lyd-avspilling.
+                         <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
+                         {t('conceptCard.audioNotSupported')}
                       </audio>
                     </div>
                   )}
@@ -355,14 +357,14 @@ const ConceptCard = ({
                      <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
                        <FileText className="h-12 w-12 text-primary mb-2" />
                        <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => window.open(file.file_url, '_blank')}
-                       >
-                         <Download className="h-3 w-3 mr-1" />
-                         Last ned
-                       </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(file.file_url, '_blank')}
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          {t('conceptCard.download')}
+                        </Button>
                      </div>
                    )}
                   
@@ -386,7 +388,7 @@ const ConceptCard = ({
           <div>
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Teknisk spesifikasjon
+              {t('conceptCard.technicalSpec')}
             </h4>
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="flex items-center justify-between">
@@ -394,7 +396,7 @@ const ConceptCard = ({
                   <FileText className="h-8 w-8 text-primary" />
                   <div>
                     <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
-                    <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                    <p className="text-xs text-muted-foreground">{t('conceptCard.technicalSpec')}</p>
                   </div>
                 </div>
                 <Button
@@ -403,7 +405,7 @@ const ConceptCard = ({
                   onClick={() => window.open(techSpecFile.file_url, '_blank')}
                 >
                   <Download className="h-3 w-3 mr-1" />
-                  Last ned
+                  {t('conceptCard.download')}
                 </Button>
               </div>
             </div>
@@ -415,7 +417,7 @@ const ConceptCard = ({
           <div>
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Hospitality Rider
+              {t('conceptCard.hospitalityRider')}
             </h4>
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="flex items-center justify-between">
@@ -423,7 +425,7 @@ const ConceptCard = ({
                   <FileText className="h-8 w-8 text-primary" />
                   <div>
                     <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
-                    <p className="text-xs text-muted-foreground">Hospitality Rider</p>
+                    <p className="text-xs text-muted-foreground">{t('conceptCard.hospitalityRider')}</p>
                   </div>
                 </div>
                 <Button
@@ -432,7 +434,7 @@ const ConceptCard = ({
                   onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}
                 >
                   <Download className="h-3 w-3 mr-1" />
-                  Last ned
+                  {t('conceptCard.download')}
                 </Button>
               </div>
             </div>
@@ -442,20 +444,20 @@ const ConceptCard = ({
         {/* Loading state */}
         {loading && (
           <div className="text-center py-4">
-            <div className="animate-pulse">Laster tilbudsdetaljer...</div>
+            <div className="animate-pulse">{t('conceptCard.loadingDetails')}</div>
           </div>
         )}
 
         {/* Empty states */}
         {!loading && conceptFiles.length === 0 && (
           <div className="text-center py-4 text-muted-foreground">
-            Ingen porteføljefiler for dette tilbudet
+            {t('conceptCard.noPortfolioFiles')}
           </div>
         )}
 
         {/* Created date */}
         <div className="text-xs text-muted-foreground pt-2 border-t">
-          Opprettet: {format(new Date(concept.created_at), 'dd.MM.yyyy HH:mm')}
+          {t('conceptCard.created')} {format(new Date(concept.created_at), 'dd.MM.yyyy HH:mm')}
         </div>
       </CardContent>
       

@@ -465,7 +465,34 @@ export const appTranslations = {
     termsUnderNorwegianLaw: "Disse vilkårene er underlagt norsk lov. Eventuelle tvister skal løses ved norske domstoler med Oslo som verneting.",
     aboutUs: "Om oss",
     contact: "Kontakt",
-    allRightsReserved: "Alle rettigheter forbeholdt."
+    allRightsReserved: "Alle rettigheter forbeholdt.",
+    
+    // ConceptCard translations
+    conceptCard: {
+      published: "Publisert",
+      draft: "Utkast", 
+      offerActions: "Tilbudshandlinger",
+      delete: "Slett",
+      deleteConfirm: "Er du sikker på at du vil slette dette tilbudet?",
+      price: "Pris:",
+      ofDoorRevenue: "av dørinntekter",
+      byAgreement: "Ved avtale",
+      notSpecified: "Ikke spesifisert",
+      audience: "Publikum:",
+      people: "personer",
+      availableDates: "Tilgjengelige datoer",
+      indefiniteByAgreement: "Ubestemt / Ved avtale",
+      offerPortfolio: "Tilbud portefølje",
+      technicalSpec: "Teknisk spesifikasjon",
+      hospitalityRider: "Hospitality Rider",
+      download: "Last ned",
+      videoNotSupported: "Din nettleser støtter ikke video-avspilling.",
+      audioFile: "Lydfil",
+      audioNotSupported: "Din nettleser støtter ikke lyd-avspilling.",
+      loadingDetails: "Laster tilbudsdetaljer...",
+      noPortfolioFiles: "Ingen porteføljefiler for dette tilbudet",
+      created: "Opprettet:"
+    }
   },
   
   en: {
@@ -934,6 +961,33 @@ export const appTranslations = {
     termsUnderNorwegianLaw: "These terms are subject to Norwegian law. Any disputes shall be resolved by Norwegian courts with Oslo as venue.",
     aboutUs: "About Us",
     contact: "Contact",
-    allRightsReserved: "All rights reserved."
+    allRightsReserved: "All rights reserved.",
+    
+    // ConceptCard translations
+    conceptCard: {
+      published: "Published",
+      draft: "Draft",
+      offerActions: "Offer Actions", 
+      delete: "Delete",
+      deleteConfirm: "Are you sure you want to delete this offer?",
+      price: "Price:",
+      ofDoorRevenue: "of door revenue",
+      byAgreement: "By agreement",
+      notSpecified: "Not specified",
+      audience: "Audience:",
+      people: "people",
+      availableDates: "Available dates",
+      indefiniteByAgreement: "Indefinite / By agreement",
+      offerPortfolio: "Offer portfolio",
+      technicalSpec: "Technical specification",
+      hospitalityRider: "Hospitality Rider",
+      download: "Download",
+      videoNotSupported: "Your browser doesn't support video playback.",
+      audioFile: "Audio file",
+      audioNotSupported: "Your browser doesn't support audio playback.",
+      loadingDetails: "Loading offer details...",
+      noPortfolioFiles: "No portfolio files for this offer",
+      created: "Created:"
+    }
   }
 };
