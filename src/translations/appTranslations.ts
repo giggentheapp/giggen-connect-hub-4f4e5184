@@ -270,6 +270,98 @@ export const appTranslations = {
     noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
     createFirstOffer: "Opprett ditt første tilbud",
 
+    // Concept Wizard
+    conceptWizard: {
+      title: "Opprett nytt tilbud",
+      steps: {
+        basic: { title: "Grunnleggende info", description: "Tittel og beskrivelse" },
+        details: { title: "Detaljer", description: "Pris og publikum" },
+        portfolio: { title: "Portefølje", description: "Last opp mediefiler" },
+        technical: { title: "Tekniske krav", description: "Velg teknisk spesifikasjon" },
+        dates: { title: "Tilgjengelighet", description: "Velg tilgjengelige datoer" },
+        preview: { title: "Forhåndsvisning", description: "Se over og lagre" }
+      },
+      basic: {
+        titleLabel: "Tilbudstittel *",
+        titlePlaceholder: "F.eks. Live akustisk konsert",
+        descriptionLabel: "Beskrivelse",
+        descriptionPlaceholder: "Beskriv tilbudet ditt i detalj..."
+      },
+      details: {
+        pricingModel: "Prismodell *",
+        fixedPrice: "Fast pris",
+        doorDeal: "Spiller for døra",
+        byAgreement: "Ved avtale",
+        priceLabel: "Pris (Kr) *",
+        pricePlaceholder: "F.eks. 5000",
+        priceDescription: "Garantert utbetaling uavhengig av billettsalg",
+        doorPercentageLabel: "Andel av dørinntekter (%) *",
+        doorPercentagePlaceholder: "F.eks. 70",
+        doorPercentageDescription: "Artist får {percentage}% av total dørinntekt",
+        byAgreementDescription: "Pris avtales direkte med interesserte parter",
+        audienceLabel: "Forventet publikum (antall) *",
+        audiencePlaceholder: "F.eks. 50"
+      },
+      technical: {
+        techSpecLabel: "Teknisk spesifikasjon",
+        techSpecDescription: "Velg en teknisk spesifikasjon fra din profil",
+        techSpecPlaceholder: "Velg teknisk spesifikasjon...",
+        hospitalityRiderLabel: "Hospitality Rider",
+        hospitalityRiderDescription: "Velg en hospitality rider fra din profil",
+        hospitalityRiderPlaceholder: "Velg hospitality rider...",
+        loading: "Laster...",
+        noTechSpecs: "Ingen tech spec filer funnet",
+        noHospitalityRiders: "Ingen hospitality rider filer funnet",
+        unnamedFile: "Unnamed file",
+        techSpecUploadTip: "Last opp tech spec dokumenter i din profil for å velge dem her",
+        hospitalityRiderUploadTip: "Last opp hospitality rider dokumenter i din profil for å velge dem her"
+      },
+      dates: {
+        availableDatesLabel: "Tilgjengelige datoer *",
+        availableDatesDescription: "Velg enten spesifikke datoer eller \"Ubestemt / Ved avtale\"",
+        indefiniteLabel: "Ubestemt / Ved avtale",
+        indefiniteDescription: "Tilgjengelighet avtales direkte med interesserte parter",
+        addDate: "Legg til dato",
+        noDatesSelected: "Ingen datoer valgt"
+      },
+      preview: {
+        price: "Pris:",
+        expectedAudience: "Forventet publikum:",
+        portfolioFiles: "Portefølje filer:",
+        availableDates: "Tilgjengelige datoer:",
+        people: "personer",
+        indefinite: "Ubestemt / Ved avtale",
+        notSpecified: "Ikke spesifisert",
+        doorRevenue: "{percentage}% av dørinntekter",
+        byAgreement: "Ved avtale",
+        file: "fil",
+        saveAsDraft: "Lagre som utkast",
+        publishOffer: "Publiser tilbud"
+      },
+      navigation: {
+        previous: "Forrige",
+        next: "Neste"
+      },
+      confirmDialog: {
+        title: "Er du sikker?",
+        description: "Når tilbudet er opprettet vil det ikke kunne redigeres. Er du sikker på at du vil fortsette?",
+        cancel: "Avbryt",
+        saveDraft: "Lagre tilbud",
+        publish: "Publiser tilbud"
+      },
+      messages: {
+        invalidFileData: "Ugyldig fildata mottatt",
+        saveError: "Feil ved lagring",
+        unknownError: "En ukjent feil oppstod",
+        draftSaved: "Tilbud lagret!",
+        draftSavedDescription: "Tilbudet er lagret som utkast",
+        published: "Tilbud publisert!",
+        publishedDescription: "Tilbudet er nå tilgjengelig for andre",
+        filesSaveWarning: "Advarsel",
+        filesSaveWarningDescription: "Tilbud lagret, men noen filer kunne ikke lagres. Prøv å laste dem opp på nytt."
+      }
+    },
+
     // Success/Error Messages
     profileUpdated: "Profil oppdatert",
     passwordChanged: "Passord endret",
@@ -646,6 +738,98 @@ export const appTranslations = {
     newOffer: "new offer",
     noOffersCreated: "You haven't created any offers yet",
     createFirstOffer: "Create your first offer",
+
+    // Concept Wizard
+    conceptWizard: {
+      title: "Create New Offer",
+      steps: {
+        basic: { title: "Basic Info", description: "Title and description" },
+        details: { title: "Details", description: "Price and audience" },
+        portfolio: { title: "Portfolio", description: "Upload media files" },
+        technical: { title: "Technical Requirements", description: "Select technical specification" },
+        dates: { title: "Availability", description: "Choose available dates" },
+        preview: { title: "Preview", description: "Review and save" }
+      },
+      basic: {
+        titleLabel: "Offer Title *",
+        titlePlaceholder: "E.g. Live acoustic concert",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Describe your offer in detail..."
+      },
+      details: {
+        pricingModel: "Pricing Model *",
+        fixedPrice: "Fixed Price",
+        doorDeal: "Door Deal",
+        byAgreement: "By Agreement",
+        priceLabel: "Price (Kr) *",
+        pricePlaceholder: "E.g. 5000",
+        priceDescription: "Guaranteed payout regardless of ticket sales",
+        doorPercentageLabel: "Share of door revenue (%) *",
+        doorPercentagePlaceholder: "E.g. 70",
+        doorPercentageDescription: "Artist gets {percentage}% of total door revenue",
+        byAgreementDescription: "Price to be agreed directly with interested parties",
+        audienceLabel: "Expected Audience (number) *",
+        audiencePlaceholder: "E.g. 50"
+      },
+      technical: {
+        techSpecLabel: "Technical Specification",
+        techSpecDescription: "Select a technical specification from your profile",
+        techSpecPlaceholder: "Select technical specification...",
+        hospitalityRiderLabel: "Hospitality Rider",
+        hospitalityRiderDescription: "Select a hospitality rider from your profile",
+        hospitalityRiderPlaceholder: "Select hospitality rider...",
+        loading: "Loading...",
+        noTechSpecs: "No tech spec files found",
+        noHospitalityRiders: "No hospitality rider files found",
+        unnamedFile: "Unnamed file",
+        techSpecUploadTip: "Upload tech spec documents in your profile to select them here",
+        hospitalityRiderUploadTip: "Upload hospitality rider documents in your profile to select them here"
+      },
+      dates: {
+        availableDatesLabel: "Available Dates *",
+        availableDatesDescription: "Choose either specific dates or \"Indefinite / By Agreement\"",
+        indefiniteLabel: "Indefinite / By Agreement",
+        indefiniteDescription: "Availability to be agreed directly with interested parties",
+        addDate: "Add Date",
+        noDatesSelected: "No dates selected"
+      },
+      preview: {
+        price: "Price:",
+        expectedAudience: "Expected Audience:",
+        portfolioFiles: "Portfolio Files:",
+        availableDates: "Available Dates:",
+        people: "people",
+        indefinite: "Indefinite / By Agreement",
+        notSpecified: "Not specified",
+        doorRevenue: "{percentage}% of door revenue",
+        byAgreement: "By Agreement",
+        file: "file",
+        saveAsDraft: "Save as Draft",
+        publishOffer: "Publish Offer"
+      },
+      navigation: {
+        previous: "Previous",
+        next: "Next"
+      },
+      confirmDialog: {
+        title: "Are you sure?",
+        description: "Once the offer is created it cannot be edited. Are you sure you want to continue?",
+        cancel: "Cancel",
+        saveDraft: "Save Offer",
+        publish: "Publish Offer"
+      },
+      messages: {
+        invalidFileData: "Invalid file data received",
+        saveError: "Error saving",
+        unknownError: "An unknown error occurred",
+        draftSaved: "Offer Saved!",
+        draftSavedDescription: "The offer has been saved as a draft",
+        published: "Offer Published!",
+        publishedDescription: "The offer is now available to others",
+        filesSaveWarning: "Warning",
+        filesSaveWarningDescription: "Offer saved, but some files could not be saved. Try uploading them again."
+      }
+    },
 
     // Success/Error Messages
     profileUpdated: "Profile updated",

@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface ConceptData {
   title: string;
@@ -45,12 +46,12 @@ interface ConceptWizardProps {
 }
 
 const STEPS = [
-  { id: 'basic', title: 'Grunnleggende info', description: 'Tittel og beskrivelse' },
-  { id: 'details', title: 'Detaljer', description: 'Pris og publikum' },
-  { id: 'portfolio', title: 'Portefølje', description: 'Last opp mediefiler' },
-  { id: 'technical', title: 'Tekniske krav', description: 'Velg teknisk spesifikasjon' },
-  { id: 'dates', title: 'Tilgjengelighet', description: 'Velg tilgjengelige datoer' },
-  { id: 'preview', title: 'Forhåndsvisning', description: 'Se over og lagre' },
+  { id: 'basic', title: 'basic', description: 'basic' },
+  { id: 'details', title: 'details', description: 'details' },
+  { id: 'portfolio', title: 'portfolio', description: 'portfolio' },
+  { id: 'technical', title: 'technical', description: 'technical' },
+  { id: 'dates', title: 'dates', description: 'dates' },
+  { id: 'preview', title: 'preview', description: 'preview' },
 ];
 
 export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWizardProps) => {
@@ -62,6 +63,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
   const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders, loading: hospitalityRidersLoading } = useHospitalityRiders(userId);
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   const [conceptData, setConceptData] = useState<ConceptData>(() => ({
     title: '',
@@ -87,8 +89,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
     // Add comprehensive validation
     if (!fileData || !fileData.filename || !fileData.file_path) {
       toast({
-        title: "Feil",
-        description: "Ugyldig fildata mottatt",
+        title: t('conceptWizard.messages.invalidFileData'),
+        description: t('conceptWizard.messages.invalidFileData'),
         variant: "destructive",
       });
       return;
@@ -203,16 +205,16 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           console.error('Error creating concept files:', filesError);
           // Don't throw here - concept was created successfully, just log the file error
           toast({
-            title: "Advarsel",
-            description: "Tilbud lagret, men noen filer kunne ikke lagres. Prøv å laste dem opp på nytt.",
+            title: t('conceptWizard.messages.filesSaveWarning'),
+            description: t('conceptWizard.messages.filesSaveWarningDescription'),
             variant: "destructive",
           });
         }
       }
 
       toast({
-        title: isPublished ? "Tilbud publisert!" : "Tilbud lagret!",
-        description: isPublished ? "Tilbudet er nå tilgjengelig for andre" : "Tilbudet er lagret som utkast",
+        title: isPublished ? t('conceptWizard.messages.published') : t('conceptWizard.messages.draftSaved'),
+        description: isPublished ? t('conceptWizard.messages.publishedDescription') : t('conceptWizard.messages.draftSavedDescription'),
       });
 
       onSuccess();
@@ -220,8 +222,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
     } catch (error: any) {
       console.error('Save error:', error);
       toast({
-        title: "Feil ved lagring",
-        description: error.message || "En ukjent feil oppstod",
+        title: t('conceptWizard.messages.saveError'),
+        description: error.message || t('conceptWizard.messages.unknownError'),
         variant: "destructive",
       });
     } finally {
@@ -260,10 +262,10 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>
-              Opprett nytt tilbud
+              {t('conceptWizard.title')}
             </CardTitle>
             <CardDescription>
-              {STEPS[currentStep].title} - {STEPS[currentStep].description}
+              {t(`conceptWizard.steps.${STEPS[currentStep].title}.title`)} - {t(`conceptWizard.steps.${STEPS[currentStep].description}.description`)}
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -302,19 +304,19 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           {currentStep === 0 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Tilbudstittel *</Label>
+                <Label htmlFor="title">{t('conceptWizard.basic.titleLabel')}</Label>
                 <Input
                   id="title"
-                  placeholder="F.eks. Live akustisk konsert"
+                  placeholder={t('conceptWizard.basic.titlePlaceholder')}
                   value={conceptData.title}
                   onChange={(e) => updateConceptData('title', e.target.value)}
                 />
               </div>
               <div>
-                <Label htmlFor="description">Beskrivelse</Label>
+                <Label htmlFor="description">{t('conceptWizard.basic.descriptionLabel')}</Label>
                 <Textarea
                   id="description"
-                  placeholder="Beskriv tilbudet ditt i detalj..."
+                  placeholder={t('conceptWizard.basic.descriptionPlaceholder')}
                   value={conceptData.description}
                   onChange={(e) => updateConceptData('description', e.target.value)}
                   className="min-h-[120px]"
@@ -327,7 +329,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
             <div className="space-y-6">
               {/* Pricing Section */}
               <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-                <Label className="text-base font-semibold">Prismodell *</Label>
+                <Label className="text-base font-semibold">{t('conceptWizard.details.pricingModel')}</Label>
                 <RadioGroup
                   value={conceptData.pricing_type}
                   onValueChange={(value: 'fixed' | 'door_deal' | 'by_agreement') => {
@@ -340,34 +342,34 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="fixed" id="fixed-price" />
-                    <Label htmlFor="fixed-price" className="cursor-pointer">Fast pris</Label>
+                    <Label htmlFor="fixed-price" className="cursor-pointer">{t('conceptWizard.details.fixedPrice')}</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="door_deal" id="door-deal" />
-                    <Label htmlFor="door-deal" className="cursor-pointer">Spiller for døra</Label>
+                    <Label htmlFor="door-deal" className="cursor-pointer">{t('conceptWizard.details.doorDeal')}</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="by_agreement" id="by-agreement" />
-                    <Label htmlFor="by-agreement" className="cursor-pointer">Ved avtale</Label>
+                    <Label htmlFor="by-agreement" className="cursor-pointer">{t('conceptWizard.details.byAgreement')}</Label>
                   </div>
                 </RadioGroup>
 
                 {/* Fixed Price Input */}
                 {conceptData.pricing_type === 'fixed' && (
                   <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
-                    <Label htmlFor="price">Pris (Kr) *</Label>
+                    <Label htmlFor="price">{t('conceptWizard.details.priceLabel')}</Label>
                     <Input
                       id="price"
                       type="number"
-                      placeholder="F.eks. 5000"
+                      placeholder={t('conceptWizard.details.pricePlaceholder')}
                       value={conceptData.price}
                       onChange={(e) => updateConceptData('price', e.target.value)}
                       className="mt-1"
                     />
                     <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      Garantert utbetaling uavhengig av billettsalg
+                      {t('conceptWizard.details.priceDescription')}
                     </p>
                   </div>
                 )}
@@ -375,17 +377,17 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 {/* Door Deal Input */}
                 {conceptData.pricing_type === 'door_deal' && (
                   <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
-                    <Label htmlFor="door-percentage">Andel av dørinntekter (%) *</Label>
+                    <Label htmlFor="door-percentage">{t('conceptWizard.details.doorPercentageLabel')}</Label>
                     <Input
                       id="door-percentage"
                       type="number"
-                      placeholder="F.eks. 70"
+                      placeholder={t('conceptWizard.details.doorPercentagePlaceholder')}
                       value={conceptData.door_percentage}
                       onChange={(e) => updateConceptData('door_percentage', e.target.value)}
                       className="mt-1"
                     />
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      Artist får {conceptData.door_percentage || 'X'}% av total dørinntekt
+                      {t('conceptWizard.details.doorPercentageDescription').replace('{percentage}', conceptData.door_percentage || 'X')}
                     </p>
                   </div>
                 )}
@@ -394,7 +396,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 {conceptData.pricing_type === 'by_agreement' && (
                   <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
                     <p className="text-xs text-amber-600 dark:text-amber-400">
-                      Pris avtales direkte med interesserte parter
+                      {t('conceptWizard.details.byAgreementDescription')}
                     </p>
                   </div>
                 )}
@@ -402,11 +404,11 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
 
               {/* Audience Section */}
               <div>
-                <Label htmlFor="audience">Forventet publikum (antall) *</Label>
+                <Label htmlFor="audience">{t('conceptWizard.details.audienceLabel')}</Label>
                 <Input
                   id="audience"
                   type="number"
-                  placeholder="F.eks. 50"
+                  placeholder={t('conceptWizard.details.audiencePlaceholder')}
                   value={conceptData.expected_audience}
                   onChange={(e) => updateConceptData('expected_audience', e.target.value)}
                 />
@@ -426,30 +428,30 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           {currentStep === 3 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="techspec">Teknisk spesifikasjon</Label>
+                <Label htmlFor="techspec">{t('conceptWizard.technical.techSpecLabel')}</Label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Velg en teknisk spesifikasjon fra din profil
+                  {t('conceptWizard.technical.techSpecDescription')}
                 </p>
                 <Select
                   value={conceptData.selected_tech_spec_file}
                   onValueChange={(value) => updateConceptData('selected_tech_spec_file', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Velg teknisk spesifikasjon..." />
+                    <SelectValue placeholder={t('conceptWizard.technical.techSpecPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {techSpecsLoading ? (
                       <SelectItem value="loading" disabled>
-                        Laster...
+                        {t('conceptWizard.technical.loading')}
                       </SelectItem>
                     ) : availableTechSpecs.length === 0 ? (
                       <SelectItem value="none" disabled>
-                        Ingen tech spec filer funnet
+                        {t('conceptWizard.technical.noTechSpecs')}
                       </SelectItem>
                      ) : (
                        Array.isArray(availableTechSpecs) ? availableTechSpecs.filter(file => file && file.id).map((file) => (
                          <SelectItem key={file.id} value={file.id}>
-                           {file.filename || 'Unnamed file'}
+                           {file.filename || t('conceptWizard.technical.unnamedFile')}
                          </SelectItem>
                        )) : <></>
                      )}
@@ -457,36 +459,36 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 </Select>
                 {availableTechSpecs.length === 0 && !techSpecsLoading && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Last opp tech spec dokumenter i din profil for å velge dem her
+                    {t('conceptWizard.technical.techSpecUploadTip')}
                   </p>
                 )}
               </div>
               
               <div>
-                <Label htmlFor="hospitalityrider">Hospitality Rider</Label>
+                <Label htmlFor="hospitalityrider">{t('conceptWizard.technical.hospitalityRiderLabel')}</Label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Velg en hospitality rider fra din profil
+                  {t('conceptWizard.technical.hospitalityRiderDescription')}
                 </p>
                 <Select
                   value={conceptData.selected_hospitality_rider_file}
                   onValueChange={(value) => updateConceptData('selected_hospitality_rider_file', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Velg hospitality rider..." />
+                    <SelectValue placeholder={t('conceptWizard.technical.hospitalityRiderPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {hospitalityRidersLoading ? (
                       <SelectItem value="loading" disabled>
-                        Laster...
+                        {t('conceptWizard.technical.loading')}
                       </SelectItem>
                     ) : availableHospitalityRiders.length === 0 ? (
                       <SelectItem value="none" disabled>
-                        Ingen hospitality rider filer funnet
+                        {t('conceptWizard.technical.noHospitalityRiders')}
                       </SelectItem>
                      ) : (
                        Array.isArray(availableHospitalityRiders) ? availableHospitalityRiders.filter(file => file && file.id).map((file) => (
                          <SelectItem key={file.id} value={file.id}>
-                           {file.filename || 'Unnamed file'}
+                           {file.filename || t('conceptWizard.technical.unnamedFile')}
                          </SelectItem>
                        )) : <></>
                      )}
@@ -494,7 +496,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 </Select>
                 {availableHospitalityRiders.length === 0 && !hospitalityRidersLoading && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Last opp hospitality rider dokumenter i din profil for å velge dem her
+                    {t('conceptWizard.technical.hospitalityRiderUploadTip')}
                   </p>
                 )}
               </div>
@@ -504,9 +506,9 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
           {currentStep === 4 && (
             <div className="space-y-6">
               <div>
-                <Label>Tilgjengelige datoer *</Label>
+                <Label>{t('conceptWizard.dates.availableDatesLabel')}</Label>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Velg enten spesifikke datoer eller "Ubestemt / Ved avtale"
+                  {t('conceptWizard.dates.availableDatesDescription')}
                 </p>
                 
                 <div className="flex items-center space-x-2 mb-4">
@@ -521,14 +523,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                     }}
                   />
                   <Label htmlFor="indefinite-mode">
-                    Ubestemt / Ved avtale
+                    {t('conceptWizard.dates.indefiniteLabel')}
                   </Label>
                 </div>
 
                 {conceptData.is_indefinite ? (
                   <div className="bg-muted/50 p-4 rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Tilgjengelighet avtales direkte med interesserte parter
+                      {t('conceptWizard.dates.indefiniteDescription')}
                     </p>
                   </div>
                 ) : (
@@ -559,7 +561,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                           disabled={conceptData.is_indefinite}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          Legg til dato
+                          {t('conceptWizard.dates.addDate')}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -592,24 +594,24 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <strong>Pris:</strong>{' '}
+                    <strong>{t('conceptWizard.preview.price')}</strong>{' '}
                     {conceptData.pricing_type === 'fixed' && conceptData.price
                       ? `${conceptData.price} Kr`
                       : conceptData.pricing_type === 'door_deal' && conceptData.door_percentage
-                      ? `${conceptData.door_percentage}% av dørinntekter`
+                      ? t('conceptWizard.preview.doorRevenue').replace('{percentage}', conceptData.door_percentage)
                       : conceptData.pricing_type === 'by_agreement'
-                      ? 'Ved avtale'
-                      : 'Ikke spesifisert'
+                      ? t('conceptWizard.preview.byAgreement')
+                      : t('conceptWizard.preview.notSpecified')
                     }
                   </div>
                   <div>
-                    <strong>Forventet publikum:</strong> {conceptData.expected_audience} personer
+                    <strong>{t('conceptWizard.preview.expectedAudience')}</strong> {conceptData.expected_audience} {t('conceptWizard.preview.people')}
                   </div>
                 </div>
 
                 {conceptData.portfolio_files.length > 0 && (
                   <div>
-                    <strong>Portefølje filer:</strong>
+                    <strong>{t('conceptWizard.preview.portfolioFiles')}</strong>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                         {Array.isArray(conceptData.portfolio_files) ? conceptData.portfolio_files.filter(file => file && (file.tempId || file.id || file.filename)).map((file, index) => (
                           <div key={file.tempId || file.id || file.filename || `file-${index}`} className="bg-muted/30 rounded-lg overflow-hidden">
@@ -647,7 +649,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                             
                             <div className="p-2">
                               <p className="text-xs font-medium truncate">{file.filename}</p>
-                              <p className="text-xs text-muted-foreground">{file.file_type?.split('/')[0] || 'fil'}</p>
+                              <p className="text-xs text-muted-foreground">{file.file_type?.split('/')[0] || t('conceptWizard.preview.file')}</p>
                             </div>
                           </div>
                         )) : <></>}
@@ -655,14 +657,12 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   </div>
                 )}
 
-                {/* Tech Spec Reference - Hidden from Preview as per requirements */}
-
                 <div>
-                  <strong>Tilgjengelige datoer:</strong>
+                  <strong>{t('conceptWizard.preview.availableDates')}</strong>
                   {conceptData.is_indefinite ? (
                     <div className="mt-2">
                       <span className="bg-muted text-muted-foreground px-2 py-1 rounded text-sm">
-                        Ubestemt / Ved avtale
+                        {t('conceptWizard.preview.indefinite')}
                       </span>
                     </div>
                   ) : conceptData.available_dates.length > 0 ? (
@@ -675,7 +675,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                     </div>
                   ) : (
                     <div className="mt-2">
-                      <span className="text-muted-foreground text-sm">Ingen datoer valgt</span>
+                      <span className="text-muted-foreground text-sm">{t('conceptWizard.dates.noDatesSelected')}</span>
                     </div>
                   )}
                 </div>
@@ -692,7 +692,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   className="flex-1"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Lagre som utkast
+                  {t('conceptWizard.preview.saveAsDraft')}
                 </Button>
                 <Button
                   onClick={() => {
@@ -703,7 +703,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   className="flex-1"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  Publiser tilbud
+                  {t('conceptWizard.preview.publishOffer')}
                 </Button>
               </div>
             </div>
@@ -714,14 +714,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+              <AlertDialogTitle>{t('conceptWizard.confirmDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Når tilbudet er opprettet vil det ikke kunne redigeres. Er du sikker på at du vil fortsette?
+                {t('conceptWizard.confirmDialog.description')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
-                Avbryt
+                {t('conceptWizard.confirmDialog.cancel')}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
@@ -730,7 +730,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                 }}
                 disabled={saving}
               >
-                {saveAsPublished ? "Publiser tilbud" : "Lagre tilbud"}
+                {saveAsPublished ? t('conceptWizard.confirmDialog.publish') : t('conceptWizard.confirmDialog.saveDraft')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -745,14 +745,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
               disabled={currentStep === 0}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
-              Forrige
+              {t('conceptWizard.navigation.previous')}
             </Button>
             
             <Button
               onClick={nextStep}
               disabled={!isStepValid()}
             >
-              Neste
+              {t('conceptWizard.navigation.next')}
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
