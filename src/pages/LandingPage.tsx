@@ -6,6 +6,7 @@ import { MapPin, Users, FileText, Music, Calendar, Star } from 'lucide-react';
 import { useAppLanguage } from '@/contexts/AppLanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguageNotification } from '@/hooks/useLanguageNotification';
+import giggenLogo from '@/assets/giggen-logo.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,13 @@ const LandingPage = () => {
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold text-primary">GIGGEN</div>
+            <div className="flex items-center">
+              <img 
+                src={giggenLogo} 
+                alt="GIGGEN" 
+                className="h-8 w-auto"
+              />
+            </div>
             
             <nav className="hidden md:flex items-center space-x-8">
               <button 
@@ -240,7 +247,13 @@ const LandingPage = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-bold text-primary mb-4">GIGGEN</h3>
+              <div className="flex items-center mb-4">
+                <img 
+                  src={giggenLogo} 
+                  alt="GIGGEN" 
+                  className="h-6 w-auto"
+                />
+              </div>
               <div className="space-y-2 text-muted-foreground">
                 <p>giggen.main@gmail.com</p>
                 <p>Oslo, Norge</p>

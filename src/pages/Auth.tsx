@@ -11,6 +11,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { Eye, EyeOff } from 'lucide-react';
 import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import giggenLogo from '@/assets/giggen-logo.png';
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -158,7 +159,13 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">GIGGEN</CardTitle>
+          <div className="flex justify-center mb-4">
+            <img 
+              src={giggenLogo} 
+              alt="GIGGEN" 
+              className="h-12 w-auto"
+            />
+          </div>
           <CardDescription>
             {isLogin ? t('loginToAccount') : t('createNewAccount')}
           </CardDescription>
