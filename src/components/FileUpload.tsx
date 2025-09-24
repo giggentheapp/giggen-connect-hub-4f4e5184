@@ -61,7 +61,7 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
           filePrefix = 'hospitality-';
           break;
         case 'tech-spec':
-          filePrefix = 'techspec-';
+          filePrefix = 'tech-specs-';
           break;
         case 'concepts':
           filePrefix = 'concept-';
