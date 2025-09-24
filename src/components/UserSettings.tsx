@@ -473,7 +473,7 @@ export const UserSettings = ({
             {t('profileInformationSettings')}
           </CardTitle>
           <CardDescription>
-            Oppdater dine grunnleggende profildetaljer som vises til andre brukere
+            {t('updateProfileDetails')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -486,9 +486,9 @@ export const UserSettings = ({
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Profilbilde</h3>
+              <h3 className="text-sm font-medium">{t('profilePicture')}</h3>
               <p className="text-sm text-muted-foreground">
-                Velg et profilbilde som representerer deg
+                {t('selectProfilePicture')}
               </p>
               <Button 
                 variant="outline" 
@@ -496,7 +496,7 @@ export const UserSettings = ({
                 onClick={() => setShowAvatarCrop(true)}
               >
                 <Camera className="h-4 w-4 mr-2" />
-                Endre bilde
+                {t('changePicture')}
               </Button>
             </div>
           </div>
@@ -504,7 +504,7 @@ export const UserSettings = ({
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="display_name">Visningsnavn</Label>
+              <Label htmlFor="display_name">{t('displayName')}</Label>
               <Input
                 id="display_name"
                 value={profileData.display_name}
@@ -519,7 +519,7 @@ export const UserSettings = ({
                     display_name: validation.isValid ? '' : validation.error || ''
                   }));
                 }}
-                placeholder="Ditt navn eller artistnavn"
+                placeholder={t('yourName')}
               />
               {validationErrors.display_name && (
                 <p className="text-sm text-red-500 mt-1">{validationErrors.display_name}</p>
@@ -530,7 +530,7 @@ export const UserSettings = ({
             {profileData.role === 'maker' && (
               <>
                 <div>
-                  <Label htmlFor="bio">Biografi</Label>
+                  <Label htmlFor="bio">{t('biography')}</Label>
                   <Textarea
                     id="bio"
                     value={profileData.bio || ''}
@@ -545,7 +545,7 @@ export const UserSettings = ({
                         bio: validation.isValid ? '' : validation.error || ''
                       }));
                     }}
-                    placeholder="Fortell litt om deg selv, din musikk og erfaring..."
+                    placeholder={t('biographyPlaceholder')}
                     rows={4}
                   />
                   {validationErrors.bio && (
@@ -554,7 +554,7 @@ export const UserSettings = ({
                 </div>
                 
                 <div>
-                  <Label>Adresse</Label>
+                  <Label>{t('location')}</Label>
                   <AddressAutocomplete
                     value={profileData.address || ''}
                     onChange={(address, coordinates) => {
@@ -565,21 +565,21 @@ export const UserSettings = ({
                         longitude: coordinates?.lng || null
                       }));
                     }}
-                    placeholder="Din adresse (valgfri)"
+                    placeholder={t('addressPlaceholder')}
                   />
                 </div>
 
                 {/* Contact Information - Only for Makers */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">Kontaktinformasjon</h3>
+                    <h3 className="text-sm font-medium">{t('contactInformation')}</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="email" className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        E-post
+                        <Label htmlFor="email" className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          {t('email')}
                       </Label>
                       <Input
                         id="email"
@@ -596,7 +596,7 @@ export const UserSettings = ({
                             email: validation.isValid ? '' : validation.error || ''
                           }));
                         }}
-                        placeholder="din@epost.no"
+                        placeholder={t('emailPlaceholder')}
                       />
                       {validationErrors.email && (
                         <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
@@ -604,9 +604,9 @@ export const UserSettings = ({
                     </div>
                     
                     <div>
-                      <Label htmlFor="phone" className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        Telefonnummer
+                        <Label htmlFor="phone" className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          {t('phoneNumber')}
                       </Label>
                       <Input
                         id="phone"
@@ -623,7 +623,7 @@ export const UserSettings = ({
                             phone: validation.isValid ? '' : validation.error || ''
                           }));
                         }}
-                        placeholder="+47 123 45 678"
+                        placeholder={t('phoneNumberPlaceholder')}
                       />
                       {validationErrors.phone && (
                         <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
@@ -637,7 +637,7 @@ export const UserSettings = ({
 
           <Button onClick={handleProfileSubmit} disabled={loading} className="w-full md:w-auto">
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Lagrer...' : 'Lagre endringer'}
+            {loading ? t('updating') : t('saveChanges')}
           </Button>
         </CardContent>
       </Card>
