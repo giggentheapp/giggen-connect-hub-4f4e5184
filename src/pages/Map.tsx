@@ -2,9 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { MapPin, ArrowLeft, Calendar, Music, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 export default function Map() {
   const navigate = useNavigate();
+  const { t } = useAppTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -19,11 +21,11 @@ export default function Map() {
               className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Tilbake
+              {t('back')}
             </Button>
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
-              <h1 className="text-xl font-semibold">Kart</h1>
+              <h1 className="text-xl font-semibold">{t('map')}</h1>
             </div>
           </div>
         </div>
@@ -38,9 +40,9 @@ export default function Map() {
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-10 h-10 text-primary" />
               </div>
-              <CardTitle className="text-2xl">Kart kommer snart!</CardTitle>
+              <CardTitle className="text-2xl">{t('mapComingSoon')}</CardTitle>
               <CardDescription className="text-lg mt-2">
-                Vi jobber med å lage et interaktivt kart som gjør det enklere å finne arrangementer i ditt område.
+                {t('mapComingSoonDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -48,23 +50,23 @@ export default function Map() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
                   <Calendar className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">Kommende arrangementer</h3>
+                  <h3 className="font-medium mb-1">{t('upcomingEvents')}</h3>
                   <p className="text-sm text-muted-foreground text-center">
-                    Se alle arrangementer på kartet med dato og tid
+                    {t('seeAllEventsOnMap')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
                   <Music className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">Musikere i nærheten</h3>
+                  <h3 className="font-medium mb-1">{t('musiciansNearby')}</h3>
                   <p className="text-sm text-muted-foreground text-center">
-                    Finn talentfulle musikere og artister i ditt område
+                    {t('findTalentedMusicians')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
                   <Users className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">Lokalsamfunn</h3>
+                  <h3 className="font-medium mb-1">{t('localCommunity')}</h3>
                   <p className="text-sm text-muted-foreground text-center">
-                    Utforsk det lokale musikksamfunnet rundt deg
+                    {t('exploreLocalMusic')}
                   </p>
                 </div>
               </div>
@@ -72,13 +74,13 @@ export default function Map() {
               {/* Call to action */}
               <div className="pt-4">
                 <p className="text-muted-foreground mb-4">
-                  I mellomtiden kan du utforske musikere og arrangementer i listen.
+                  {t('inTheMeantime')}
                 </p>
                 <Button 
                   onClick={() => navigate('/')}
                   className="w-full md:w-auto"
                 >
-                  Gå til utforsk-siden
+                  {t('goToExplore')}
                 </Button>
               </div>
             </CardContent>
@@ -88,7 +90,7 @@ export default function Map() {
           <div className="mt-8 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              Under utvikling
+              {t('underDevelopment')}
             </div>
           </div>
         </div>

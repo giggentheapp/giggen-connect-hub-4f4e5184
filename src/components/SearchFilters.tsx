@@ -18,6 +18,7 @@ import {
   Calendar,
   Star 
 } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface FilterOptions {
   location: string;
@@ -45,6 +46,7 @@ export const SearchFilters = ({
   loading = false,
   onMapClick
 }: SearchFiltersProps) => {
+  const { t } = useAppTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
@@ -74,7 +76,7 @@ export const SearchFilters = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Søk etter musikere, genre, lokasjon..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10 bg-white border shadow-sm"
@@ -97,7 +99,7 @@ export const SearchFilters = ({
           className={`px-3 ${showAdvanced ? 'bg-muted' : ''}`}
         >
           <Filter className="w-4 h-4 mr-1" />
-          Filter
+          {t('filter')}
           {activeFilterCount > 0 && (
             <Badge variant="secondary" className="ml-1 h-4 min-w-4 text-xs">
               {activeFilterCount}
@@ -113,7 +115,7 @@ export const SearchFilters = ({
             className="px-3"
           >
             <MapPin className="w-4 h-4 mr-1" />
-            Kart
+            {t('mapButton')}
           </Button>
         )}
       </div>
@@ -124,16 +126,16 @@ export const SearchFilters = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location filter */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">Lokasjon</label>
+              <label className="text-sm font-medium text-foreground">{t('filterLocation')}</label>
               <Select
                 value={filters.location}
                 onValueChange={(value) => toggleFilter('location', value)}
               >
                 <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Alle steder" />
+                  <SelectValue placeholder={t('allPlaces')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle steder</SelectItem>
+                  <SelectItem value="">{t('allPlaces')}</SelectItem>
                   <SelectItem value="oslo">Oslo</SelectItem>
                   <SelectItem value="bergen">Bergen</SelectItem>
                   <SelectItem value="trondheim">Trondheim</SelectItem>
@@ -145,7 +147,7 @@ export const SearchFilters = ({
 
             {/* Quick filter toggles */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Egenskaper</label>
+              <label className="text-sm font-medium text-foreground">{t('properties')}</label>
               <div className="flex flex-wrap gap-1">
                 <Button
                   variant={filters.hasPortfolio ? "default" : "outline"}
@@ -154,7 +156,7 @@ export const SearchFilters = ({
                   className="h-7 text-xs"
                 >
                   <Music className="w-3 h-3 mr-1" />
-                  Portefølje
+                  {t('filterPortfolio')}
                 </Button>
                 <Button
                   variant={filters.hasEvents ? "default" : "outline"}
@@ -163,7 +165,7 @@ export const SearchFilters = ({
                   className="h-7 text-xs"
                 >
                   <Calendar className="w-3 h-3 mr-1" />
-                  Arrangement
+                  {t('filterEvents')}
                 </Button>
                 <Button
                   variant={filters.isVerified ? "default" : "outline"}
@@ -172,7 +174,7 @@ export const SearchFilters = ({
                   className="h-7 text-xs"
                 >
                   <Star className="w-3 h-3 mr-1" />
-                  Verifisert
+                  {t('verified')}
                 </Button>
               </div>
             </div>
@@ -182,7 +184,7 @@ export const SearchFilters = ({
           {activeFilterCount > 0 && (
             <div className="mt-3 pt-3 border-t flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {activeFilterCount} filter{activeFilterCount !== 1 ? 'e' : ''} aktive
+                {activeFilterCount} {t('filtersActive')}
               </span>
               <Button
                 variant="ghost"
@@ -191,7 +193,7 @@ export const SearchFilters = ({
                 className="text-primary hover:text-primary"
               >
                 <X className="w-3 h-3 mr-1" />
-                Fjern alle
+                {t('removeAll')}
               </Button>
             </div>
           )}
@@ -202,10 +204,10 @@ export const SearchFilters = ({
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {loading ? (
-            'Søker...'
+            t('searching')
           ) : (
             <>
-              {resultCount} maker{resultCount !== 1 ? 'e' : ''} funnet
+              {resultCount} {t('makersFound')}
               {searchTerm && (
                 <span> for "{searchTerm}"</span>
               )}
@@ -225,19 +227,19 @@ export const SearchFilters = ({
             {filters.hasPortfolio && (
               <Badge variant="secondary" className="text-xs">
                 <Music className="w-3 h-3 mr-1" />
-                Portefølje
+                {t('filterPortfolio')}
               </Badge>
             )}
             {filters.hasEvents && (
               <Badge variant="secondary" className="text-xs">
                 <Calendar className="w-3 h-3 mr-1" />
-                Arrangement
+                {t('filterEvents')}
               </Badge>
             )}
             {filters.isVerified && (
               <Badge variant="secondary" className="text-xs">
                 <Star className="w-3 h-3 mr-1" />
-                Verifisert
+                {t('verified')}
               </Badge>
             )}
           </div>
