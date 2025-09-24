@@ -7,7 +7,6 @@ const FeedbackButton = () => {
   
   // Use different Tally form IDs based on language
   const tallyId = language === 'en' ? 'mOvdxY' : 'nr7Bq5';
-  const flagEmoji = language === 'en' ? '🇬🇧' : '🇳🇴';
   
   return (
     <button 
@@ -18,8 +17,7 @@ const FeedbackButton = () => {
       title={t('feedback')}
       aria-label={t('feedback')}
     >
-      <span className="feedback-icon">💬</span>
-      <span className="flag-icon">{flagEmoji}</span>
+      <span className="feedback-text">{t('feedback')}</span>
     </button>
   );
 };
