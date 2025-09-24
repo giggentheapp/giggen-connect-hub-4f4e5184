@@ -1,3 +1,4 @@
+import { MessageCircle } from 'lucide-react';
 import { useAppTranslation } from '../hooks/useAppTranslation';
 import { useAppLanguage } from '../contexts/AppLanguageContext';
 
@@ -13,11 +14,16 @@ const FeedbackButton = () => {
       data-tally-open={tallyId}
       data-tally-emoji-text="👋" 
       data-tally-emoji-animation="wave"
-      className="floating-feedback-btn"
+      className="floating-feedback-btn-mobile"
       title={t('feedback')}
       aria-label={t('feedback')}
     >
-      <span className="feedback-text">{t('feedback')}</span>
+      <div className="feedback-icon-wrapper">
+        <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+        <div className="feedback-bubble">
+          <span className="feedback-bubble-text">{t('feedback')}</span>
+        </div>
+      </div>
     </button>
   );
 };

@@ -32,53 +32,53 @@ export default function Map() {
       </div>
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 py-4 md:px-4 md:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Coming soon card */}
-          <Card className="text-center">
-            <CardHeader className="pb-4">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MapPin className="w-10 h-10 text-primary" />
+          <Card className="text-center mx-2 md:mx-0">
+            <CardHeader className="pb-4 px-4 md:px-6">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 md:w-10 md:h-10 text-primary" />
               </div>
-              <CardTitle className="text-2xl">{t('mapComingSoon')}</CardTitle>
-              <CardDescription className="text-lg mt-2">
+              <CardTitle className="text-xl md:text-2xl">{t('mapComingSoon')}</CardTitle>
+              <CardDescription className="text-base md:text-lg mt-2 px-2">
                 {t('mapComingSoonDescription')}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 md:space-y-6 px-4 md:px-6">
               {/* Features preview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                  <Calendar className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">{t('upcomingEvents')}</h3>
-                  <p className="text-sm text-muted-foreground text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
+                  <h3 className="font-medium mb-1 text-sm md:text-base">{t('upcomingEvents')}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground text-center">
                     {t('seeAllEventsOnMap')}
                   </p>
                 </div>
-                <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                  <Music className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">{t('musiciansNearby')}</h3>
-                  <p className="text-sm text-muted-foreground text-center">
+                <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <Music className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
+                  <h3 className="font-medium mb-1 text-sm md:text-base">{t('musiciansNearby')}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground text-center">
                     {t('findTalentedMusicians')}
                   </p>
                 </div>
-                <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                  <Users className="w-8 h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1">{t('localCommunity')}</h3>
-                  <p className="text-sm text-muted-foreground text-center">
+                <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <Users className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
+                  <h3 className="font-medium mb-1 text-sm md:text-base">{t('localCommunity')}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground text-center">
                     {t('exploreLocalMusic')}
                   </p>
                 </div>
               </div>
 
               {/* Call to action */}
-              <div className="pt-4">
-                <p className="text-muted-foreground mb-4">
+              <div className="pt-2 md:pt-4">
+                <p className="text-muted-foreground mb-4 text-sm md:text-base px-2">
                   {t('inTheMeantime')}
                 </p>
                 <Button 
                   onClick={() => navigate('/')}
-                  className="w-full md:w-auto"
+                  className="w-full md:w-auto min-h-[44px]"
                 >
                   {t('goToExplore')}
                 </Button>
@@ -87,8 +87,8 @@ export default function Map() {
           </Card>
 
           {/* Progress indicator */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm">
+          <div className="mt-6 md:mt-8 text-center px-4">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-primary/10 text-primary rounded-full text-xs md:text-sm">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
               {t('underDevelopment')}
             </div>

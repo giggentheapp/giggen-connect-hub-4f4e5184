@@ -395,3 +395,91 @@ All colors MUST be HSL.
     opacity: 1;
   }
 }
+
+/* Mobile-optimized feedback button */
+.floating-feedback-btn-mobile {
+  position: fixed;
+  bottom: 80px; /* Above mobile navigation */
+  right: 16px;
+  z-index: 1000;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.floating-feedback-btn-mobile:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.feedback-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feedback-bubble {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-secondary);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.feedback-bubble::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-left-color: hsl(var(--card));
+}
+
+.floating-feedback-btn-mobile:hover .feedback-bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Desktop version */
+@media (min-width: 768px) {
+  .floating-feedback-btn-mobile {
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .feedback-bubble {
+    right: 68px;
+    font-size: 16px;
+  }
+}
+
+/* Ensure it doesn't interfere with mobile navigation */
+@media (max-width: 767px) {
+  .floating-feedback-btn-mobile {
+    bottom: 90px; /* Well above the 64px high mobile nav */
+  }
+}

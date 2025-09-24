@@ -177,43 +177,43 @@ export const MakerExploreSection = ({
       </div>
       
       {/* Floating Controls */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg">
+      <div className="absolute top-4 left-2 right-2 md:left-4 md:right-4 z-10">
+        <div className="flex items-center gap-2 md:gap-3 max-w-full">
+          <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg flex-shrink-0">
             <button
               onClick={() => setActiveTab('map')}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
                 activeTab === 'map'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <MapPin className="w-4 h-4 mr-2" />
-              {t('map')}
+              <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">{t('map')}</span>
             </button>
             <button
               onClick={() => setActiveTab('list')}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
                 activeTab === 'list'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Users className="w-4 h-4 mr-2" />
-              {t('list')}
+              <Users className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">{t('list')}</span>
             </button>
           </div>
           
           {activeTab === 'list' && (
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder={t('searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-card/95 backdrop-blur-sm border shadow-lg"
+                  className="pl-8 md:pl-10 bg-card/95 backdrop-blur-sm border shadow-lg text-xs md:text-sm h-8 md:h-10"
                 />
               </div>
             </div>
@@ -223,13 +223,13 @@ export const MakerExploreSection = ({
 
       {/* Floating List Panel */}
       {activeTab === 'list' && (
-        <div className="absolute top-28 left-4 right-4 bottom-4 z-10 animate-fade-in">
+        <div className="absolute top-20 md:top-28 left-2 right-2 md:left-4 md:right-4 bottom-20 md:bottom-4 z-10 animate-fade-in">
           <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
             <CardContent className="p-0 h-full flex flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">{t('makersInNetwork')}</h2>
+                  <h2 className="text-base md:text-lg font-semibold">{t('makersInNetwork')}</h2>
                   <Badge variant="secondary" className="text-xs">
                     {filteredMakers.length}
                   </Badge>
@@ -237,11 +237,11 @@ export const MakerExploreSection = ({
               </div>
               
               {/* List Content */}
-              <div className="flex-1 overflow-auto" style={{ paddingBottom: '120px' }}>
+              <div className="flex-1 overflow-auto mobile-scroll">
                 {filteredMakers.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>
+                  <div className="text-center py-8 md:py-12 text-muted-foreground px-4">
+                    <Music className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm md:text-base">
                       {loading 
                         ? t('loadingMakers')
                         : searchTerm 
@@ -251,19 +251,19 @@ export const MakerExploreSection = ({
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 space-y-3">
+                  <div className="p-3 md:p-4 space-y-2 md:space-y-3">
                     {filteredMakers.map((maker) => (
                       <Card key={maker.id} className="group border bg-background/90 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 md:p-4">
                           <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Music className="w-5 h-5 text-primary" />
+                            <div className="flex items-start gap-2 md:gap-3 flex-1 min-w-0">
+                              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Music className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                               </div>
                               
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold text-foreground truncate">
+                                  <h3 className="font-semibold text-foreground truncate text-sm md:text-base">
                                     {maker.display_name}
                                   </h3>
                                   <Badge variant="secondary" className="text-xs">
@@ -271,7 +271,7 @@ export const MakerExploreSection = ({
                                   </Badge>
                                 </div>
                                 
-                                 <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                 <p className="text-xs md:text-sm text-muted-foreground mb-2 line-clamp-2">
                                    {maker.bio || t('noDescription')}
                                  </p>
                                 
@@ -284,15 +284,16 @@ export const MakerExploreSection = ({
                               </div>
                             </div>
                             
-                            <div className="ml-4">
+                            <div className="ml-2 md:ml-4">
                               <Button 
                                 onClick={() => handleViewProfile(maker.user_id)} 
                                 variant="outline" 
                                 size="sm"
-                                className="text-xs"
+                                className="text-xs min-h-[36px] px-2 md:px-3"
                               >
                                 <Eye className="w-3 h-3 mr-1" />
-                                {t('seeProfile')}
+                                <span className="hidden sm:inline">{t('seeProfile')}</span>
+                                <span className="sm:hidden">{t('view')}</span>
                               </Button>
                             </div>
                           </div>
