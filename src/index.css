@@ -246,6 +246,7 @@ All colors MUST be HSL.
     border: none;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-primary);
@@ -261,6 +262,18 @@ All colors MUST be HSL.
 
   .floating-feedback-btn:active {
     transform: scale(0.95);
+  }
+
+  .floating-feedback-btn .feedback-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .floating-feedback-btn .flag-icon {
+    font-size: 12px;
+    line-height: 1;
+    margin-top: 2px;
+    filter: drop-shadow(0 1px 2px hsl(var(--foreground) / 0.1));
   }
 
   /* Safari-specific CSS fixes for booking section */

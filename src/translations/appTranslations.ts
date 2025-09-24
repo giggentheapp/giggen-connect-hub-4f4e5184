@@ -152,6 +152,9 @@ export const appTranslations = {
     uploadHospitalityRiders: "Last opp hospitality rider-dokumenter for arrangementer",
     uploadTechSpecs: "Last opp tekniske spesifikasjoner og rider-dokumenter",
     
+    // Feedback
+    feedback: "Tilbakemelding",
+    
     // File Upload UI
     uploadFile: "Last opp fil",
     supportedFormats: "Støttede formater",
@@ -647,6 +650,9 @@ export const appTranslations = {
     hospitalityRiders: "Hospitality Riders",
     uploadHospitalityRiders: "Upload hospitality rider documents for events",
     uploadTechSpecs: "Upload technical specifications and rider documents",
+    
+    // Feedback
+    feedback: "Feedback",
     
     // File Upload UI
     uploadFile: "Upload File",
