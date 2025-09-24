@@ -51,33 +51,30 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
         throw new Error('Must be authenticated to upload files');
       }
 
-      // Always use portfolio bucket (it already exists and works)
-      const bucketName = 'portfolio';
-      
-      // Add prefix to filename to organize different file types
-      let filePrefix;
+      // Use separate buckets for different file types
+      let bucketName;
       switch(fileType) {
         case 'hospitality':
-          filePrefix = 'hospitality-';
+          bucketName = 'hospitality';
           break;
         case 'tech-spec':
-          filePrefix = 'tech-specs-';
+          bucketName = 'tech-specs'; // Note: with hyphen
           break;
         case 'concepts':
-          filePrefix = 'concept-';
+          bucketName = 'concepts';
           break;
         case 'avatars':
-          filePrefix = 'avatar-';
+          bucketName = 'avatars';
           break;
         case 'portfolio':
         default:
-          filePrefix = 'portfolio-';
+          bucketName = 'portfolio';
           break;
       }
 
-      // Create unique filename with type prefix
+      // Create unique filename (no prefix needed since buckets are separate)
       const timestamp = Date.now();
-      const fileName = `${filePrefix}${timestamp}-${file.name}`;
+      const fileName = `${timestamp}-${file.name}`;
       const filePath = `${user.id}/${fileName}`;
 
       console.log(`Uploading to bucket: ${bucketName}, path: ${filePath}`);
