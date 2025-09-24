@@ -93,19 +93,6 @@ export const SearchFilters = ({
           )}
         </div>
         
-        <Button
-          variant="outline"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`px-3 ${showAdvanced ? 'bg-muted' : ''}`}
-        >
-          <Filter className="w-4 h-4 mr-1" />
-          {t('filter')}
-          {activeFilterCount > 0 && (
-            <Badge variant="secondary" className="ml-1 h-4 min-w-4 text-xs">
-              {activeFilterCount}
-            </Badge>
-          )}
-        </Button>
 
         {/* Map button */}
         {onMapClick && (

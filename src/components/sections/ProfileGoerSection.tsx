@@ -36,25 +36,5 @@ export const ProfileGoerSection = ({
         </CardHeader>
       </Card>
 
-      {/* Upcoming Events */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Kommende arrangementer
-          </CardTitle>
-          <CardDescription>
-            Arrangementer som andre brukere kan se, inkludert portefølje hvis tilgjengelig
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <WorkingEventsDisplay 
-            profile={profile}
-            showSensitiveInfo={false}
-            currentUserId={currentUserId}
-            viewerRole={viewerRole}
-          />
-        </CardContent>
-      </Card>
     </div>;
 };
