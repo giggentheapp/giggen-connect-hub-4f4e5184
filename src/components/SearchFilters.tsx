@@ -79,30 +79,45 @@ export const SearchFilters = ({
             placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 bg-white border shadow-sm"
+            className="pl-10 bg-white border shadow-sm text-base md:text-sm min-h-[44px]"
+            inputMode="search"
           />
           {searchTerm && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onSearchChange('')}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted touch-target"
             >
-              <X className="w-3 h-3" />
+              <X className="w-4 h-4" />
             </Button>
           )}
         </div>
         
+        <Button
+          variant="outline"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="px-3 min-h-[44px] touch-target"
+        >
+          <Filter className="w-4 h-4 mr-1" />
+          <span className="hidden sm:inline">{t('filters')}</span>
+          {activeFilterCount > 0 && (
+            <span className="ml-1 bg-primary text-primary-foreground rounded-full h-5 w-5 text-xs flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
+        </Button>
 
         {/* Map button */}
         {onMapClick && (
           <Button
             variant="outline"
             onClick={onMapClick}
-            className="px-3"
+            className="px-3 min-h-[44px] touch-target"
           >
             <MapPin className="w-4 h-4 mr-1" />
-            {t('mapButton')}
+            <span className="hidden sm:inline">{t('mapButton')}</span>
+            <span className="sm:hidden">{t('map')}</span>
           </Button>
         )}
       </div>

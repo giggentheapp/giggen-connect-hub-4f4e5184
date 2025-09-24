@@ -259,25 +259,49 @@ export const BookingsSection = ({
       </div>;
   }
   return <SafariErrorBoundary>
-    <div className="space-y-6 safari-compatible">
+    <div className="space-y-6 safari-compatible mobile-optimized">
 
       {/* Tab Navigation - New Workflow */}
-      <div className="flex gap-2 border-b flex-wrap">
-        <Button variant={activeTab === 'incoming' ? 'default' : 'ghost'} onClick={() => setActiveTab('incoming')} className="flex items-center gap-2">
+      <div className="flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
+        <Button 
+          variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
+          onClick={() => setActiveTab('incoming')} 
+          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
+        >
           <Inbox className="h-4 w-4" />
-          {t('incomingRequests')} ({incomingRequests.length})
+          <span className="hidden sm:inline">{t('incomingRequests')}</span>
+          <span className="sm:hidden">{t('incoming')}</span>
+          ({incomingRequests.length})
         </Button>
-        <Button variant={activeTab === 'sent' ? 'default' : 'ghost'} onClick={() => setActiveTab('sent')} className="flex items-center gap-2">
+        <Button 
+          variant={activeTab === 'sent' ? 'default' : 'ghost'} 
+          onClick={() => setActiveTab('sent')} 
+          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
+        >
           <Send className="h-4 w-4" />
-          {t('sentRequest')} ({sentRequests.length})
+          <span className="hidden sm:inline">{t('sentRequest')}</span>
+          <span className="sm:hidden">{t('sent')}</span>
+          ({sentRequests.length})
         </Button>
-        <Button variant={activeTab === 'ongoing' ? 'default' : 'ghost'} onClick={() => setActiveTab('ongoing')} className="flex items-center gap-2">
+        <Button 
+          variant={activeTab === 'ongoing' ? 'default' : 'ghost'} 
+          onClick={() => setActiveTab('ongoing')} 
+          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
+        >
           <Clock className="h-4 w-4" />
-          {t('ongoingAgreements')} ({ongoingAgreements.length})
+          <span className="hidden sm:inline">{t('ongoingAgreements')}</span>
+          <span className="sm:hidden">{t('ongoing')}</span>
+          ({ongoingAgreements.length})
         </Button>
-        <Button variant={activeTab === 'upcoming' ? 'default' : 'ghost'} onClick={() => setActiveTab('upcoming')} className="flex items-center gap-2">
+        <Button 
+          variant={activeTab === 'upcoming' ? 'default' : 'ghost'} 
+          onClick={() => setActiveTab('upcoming')} 
+          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
+        >
           <Check className="h-4 w-4" />
-          {t('upcomingEventsBookings')} ({upcomingEvents.length})
+          <span className="hidden sm:inline">{t('upcomingEventsBookings')}</span>
+          <span className="sm:hidden">{t('upcoming')}</span>
+          ({upcomingEvents.length})
         </Button>
       </div>
 

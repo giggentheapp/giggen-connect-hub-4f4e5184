@@ -74,7 +74,7 @@ const LandingPage = () => {
                   English
                 </Button>
               </div>
-              <Button onClick={() => navigate('/auth')} variant="outline">
+              <Button onClick={() => navigate('/auth')} variant="outline" className="touch-target min-h-[44px]">
                 {t('login')}
               </Button>
             </div>

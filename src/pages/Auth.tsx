@@ -157,16 +157,16 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md mobile-optimized">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
               src={giggenLogo} 
               alt="GIGGEN" 
-              className="h-12 w-auto"
+              className="h-16 w-auto md:h-12"
             />
           </div>
-          <CardDescription>
+          <CardDescription className="text-base md:text-sm">
             {isLogin ? t('loginToAccount') : t('createNewAccount')}
           </CardDescription>
         </CardHeader>
@@ -271,7 +271,7 @@ const Auth = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full min-h-[48px] text-base md:text-sm"
               disabled={isSubmitting}
             >
               {isSubmitting ? t('working') : (isLogin ? t('signIn') : t('signUp'))}
@@ -283,6 +283,7 @@ const Auth = () => {
               variant="link"
               onClick={() => setIsLogin(!isLogin)}
               disabled={isSubmitting}
+              className="min-h-[44px] touch-target text-base md:text-sm"
             >
               {isLogin 
                 ? t('dontHaveAccount')

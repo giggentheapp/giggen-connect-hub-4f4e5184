@@ -30,7 +30,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
   const showEvents = privacySettings.show_events_to_goers;
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02] border border-border/50 hover:border-primary/20">
+    <Card className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02] border border-border/50 hover:border-primary/20 mobile-optimized">
       <CardContent className="p-0">
         {/* Header with avatar and basic info */}
         <div className="p-4 pb-3">
@@ -125,10 +125,11 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             onClick={() => onViewProfile(maker.user_id)}
             variant="outline"
             size="sm"
-            className="flex-1 text-primary border-primary/20 hover:bg-primary hover:text-white transition-colors"
+            className="flex-1 text-primary border-primary/20 hover:bg-primary hover:text-white transition-colors min-h-[44px] touch-target"
           >
             <Eye className="w-4 h-4 mr-1.5" />
-            {t('viewProfile')}
+            <span className="hidden sm:inline">{t('viewProfile')}</span>
+            <span className="sm:hidden">{t('view')}</span>
           </Button>
           
           {/* Only show Book button to Makers */}
@@ -136,7 +137,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             <Button
               onClick={() => onBookMaker(maker.user_id)}
               size="sm"
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-primary hover:bg-primary/90 min-h-[44px] touch-target"
             >
               <Music className="w-4 h-4 mr-1.5" />
               {t('book')}

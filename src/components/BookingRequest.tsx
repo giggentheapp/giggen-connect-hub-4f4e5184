@@ -167,9 +167,10 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           Send forespørsel
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto mobile-modal mobile-optimized">
+        <div className="mobile-modal-content">
         <DialogHeader>
-          <DialogTitle>Send booking-forespørsel</DialogTitle>
+          <DialogTitle className="text-lg md:text-base">Send booking-forespørsel</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -249,7 +250,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                   placeholder="Skriv en personlig melding til mottakeren..."
                   value={personalMessage}
                   onChange={(e) => setPersonalMessage(e.target.value)}
-                  className="min-h-[120px]"
+                  className="min-h-[120px] text-base md:text-sm"
                   required
                 />
               </div>
@@ -282,6 +283,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             <Button 
               type="submit" 
               disabled={submitting || !selectedConcept || !personalMessage.trim()}
+              className="min-h-[48px] touch-target"
             >
               {submitting ? "Sender..." : "Send forespørsel"}
             </Button>
@@ -293,6 +295,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           onConfirm={handleContactDialogConfirm}
           onCancel={handleContactDialogCancel}
         />
+        </div>
       </DialogContent>
     </Dialog>
   );

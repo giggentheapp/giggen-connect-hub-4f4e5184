@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { AppLanguageProvider } from "@/contexts/AppLanguageContext";
+import { MobileLayoutOptimizer } from "@/components/MobileLayoutOptimizer";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -26,25 +27,27 @@ const App = () => (
   <AppLanguageProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/start" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/concept/:conceptId" element={<ConceptView />} />
-          <Route path="/events" element={<UpcomingEvents />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <FeedbackButton />
+        <MobileLayoutOptimizer>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/start" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/concept/:conceptId" element={<ConceptView />} />
+            <Route path="/events" element={<UpcomingEvents />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <FeedbackButton />
+        </MobileLayoutOptimizer>
       </TooltipProvider>
     </QueryClientProvider>
   </AppLanguageProvider>

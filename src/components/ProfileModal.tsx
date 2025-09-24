@@ -205,7 +205,8 @@ export const ProfileModal = ({
       </div>;
   };
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-hidden p-0 gap-0">
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-hidden p-0 gap-0 mobile-modal mobile-optimized">
+        <div className="mobile-modal-content">
         {/* Header */}
         <div className="bg-background border-b p-6">
           <div className="flex items-center justify-between">
@@ -360,6 +361,7 @@ export const ProfileModal = ({
               </TabsContent>
             </div>
           </Tabs>
+        </div>
         </div>
       </DialogContent>
 
