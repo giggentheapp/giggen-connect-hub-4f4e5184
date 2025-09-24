@@ -58,11 +58,11 @@ export const AdminConceptsSection = ({
             <span>{t('myOffers')}</span>
             <Button onClick={() => setShowWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Nytt tilbud
+              {t('newOffer')}
             </Button>
           </CardTitle>
           <CardDescription>
-            Opprett og administrer dine kreative tilbud
+            {t('createAndManageOffers')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,11 +79,11 @@ export const AdminConceptsSection = ({
               {concepts.length === 0 && <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">
-                    Du har ikke opprettet noen tilbud ennå
+                    {t('noOffersCreated')}
                   </p>
                   <Button onClick={() => setShowWizard(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Opprett ditt første tilbud
+                    {t('createFirstOffer')}
                   </Button>
                 </div>}
             </div>}
