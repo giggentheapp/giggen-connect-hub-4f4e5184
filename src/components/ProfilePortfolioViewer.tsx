@@ -85,6 +85,15 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
         <audio 
           controls 
           className="w-full"
+          preload="metadata"
+          onError={(e) => {
+            console.error('Audio playback error:', e);
+            console.error('Audio file URL:', file.file_url);
+            console.error('Audio mime type:', file.mime_type);
+          }}
+          onLoadStart={() => {
+            console.log('Audio loading started for:', file.filename);
+          }}
         >
           <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
           Lyden kan ikke spilles i nettleseren din.
