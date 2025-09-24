@@ -204,51 +204,56 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
       {/* List View */}
       <div className="flex-1 flex flex-col min-h-0">
         {/* Search and Filters */}
-        <div className="p-4 bg-background border-b border-border/10 shrink-0">
-          <SearchFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filters={filters}
-            onFiltersChange={setFilters}
-            resultCount={filteredMakers.length}
-            loading={loading}
-            onMapClick={() => navigate('/map')}
-          />
+        <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+          <div className="max-w-4xl mx-auto">
+            <SearchFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              filters={filters}
+              onFiltersChange={setFilters}
+              resultCount={filteredMakers.length}
+              loading={loading}
+              onMapClick={() => navigate('/map')}
+            />
+          </div>
         </div>
 
         {/* List Header with View Toggle */}
-        <div className="px-4 py-3 bg-background border-b border-border/10 shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-foreground">{t('makersInNetwork')}</h2>
-              <Badge variant="outline" className="text-xs bg-muted">
-                {loading ? '...' : filteredMakers.length}
-              </Badge>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant={listViewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setListViewMode('grid')}
-                className="px-3"
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={listViewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setListViewMode('list')}
-                className="px-3"
-              >
-                <List className="w-4 h-4" />
-              </Button>
+        <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base md:text-lg font-semibold text-foreground">{t('makersInNetwork')}</h2>
+                <Badge variant="outline" className="text-xs bg-muted">
+                  {loading ? '...' : filteredMakers.length}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={listViewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setListViewMode('grid')}
+                  className="px-2 md:px-3"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={listViewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setListViewMode('list')}
+                  className="px-2 md:px-3"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto p-4 min-h-0">
+        <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+          <div className="max-w-4xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
               <div className="text-center">
@@ -307,7 +312,8 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                 </div>
               ))}
             </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
       

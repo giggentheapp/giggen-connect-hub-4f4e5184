@@ -69,17 +69,17 @@ export const SearchFilters = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {/* Main search bar */}
       <div className="flex gap-2">
-        <div className="relative flex-1">
+        <div className="relative flex-1 max-w-md md:max-w-none">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 bg-white border shadow-sm text-base md:text-sm min-h-[44px]"
+            className="pl-10 bg-white border shadow-sm text-sm min-h-[40px] md:min-h-[44px]"
             inputMode="search"
           />
           {searchTerm && (
@@ -97,12 +97,12 @@ export const SearchFilters = ({
         <Button
           variant="outline"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-3 min-h-[44px] touch-target"
+          className="px-2 md:px-3 min-h-[40px] md:min-h-[44px] touch-target flex-shrink-0"
         >
-          <Filter className="w-4 h-4 mr-1" />
-          <span className="hidden sm:inline">{t('filters')}</span>
+          <Filter className="w-4 h-4 md:mr-1" />
+          <span className="hidden md:inline">{t('filters')}</span>
           {activeFilterCount > 0 && (
-            <span className="ml-1 bg-primary text-primary-foreground rounded-full h-5 w-5 text-xs flex items-center justify-center">
+            <span className="ml-1 md:ml-1 bg-primary text-primary-foreground rounded-full h-5 w-5 text-xs flex items-center justify-center">
               {activeFilterCount}
             </span>
           )}
@@ -113,11 +113,10 @@ export const SearchFilters = ({
           <Button
             variant="outline"
             onClick={onMapClick}
-            className="px-3 min-h-[44px] touch-target"
+            className="px-2 md:px-3 min-h-[40px] md:min-h-[44px] touch-target flex-shrink-0"
           >
-            <MapPin className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">{t('mapButton')}</span>
-            <span className="sm:hidden">{t('map')}</span>
+            <MapPin className="w-4 h-4 md:mr-1" />
+            <span className="hidden md:inline">{t('mapButton')}</span>
           </Button>
         )}
       </div>

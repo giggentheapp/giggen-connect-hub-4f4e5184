@@ -91,11 +91,11 @@ export const MakerExploreSection = ({
       name: receiverName
     });
   };
-  return <div className="fixed inset-0 bg-background ml-16">
+  return <div className="fixed inset-0 bg-background md:ml-16">
       {/* Coming Soon Map Message */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <Card className="max-w-2xl w-full bg-card/95 backdrop-blur-sm border shadow-lg">
-          <CardContent className="p-8 text-center">
+      <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4">
+        <Card className="max-w-2xl w-full mx-auto bg-card/95 backdrop-blur-sm border shadow-lg">
+          <CardContent className="p-4 md:p-8 text-center">
             {/* Map Icon */}
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <MapPin className="w-10 h-10 text-primary" />
@@ -177,64 +177,67 @@ export const MakerExploreSection = ({
       </div>
       
       {/* Floating Controls */}
-      <div className="absolute top-4 left-2 right-2 md:left-4 md:right-4 z-10">
-        <div className="flex items-center gap-2 md:gap-3 max-w-full">
-          <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg flex-shrink-0">
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
-                activeTab === 'map'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">{t('map')}</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('list')}
-              className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
-                activeTab === 'list'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Users className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">{t('list')}</span>
-            </button>
-          </div>
-          
-          {activeTab === 'list' && (
-            <div className="flex-1 min-w-0">
-              <div className="relative">
-                <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder={t('searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 md:pl-10 bg-card/95 backdrop-blur-sm border shadow-lg text-xs md:text-sm h-8 md:h-10"
-                />
-              </div>
+      <div className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-10">
+        <div className="w-full max-w-3xl mx-auto">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg flex-shrink-0">
+              <button
+                onClick={() => setActiveTab('map')}
+                className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'map'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">{t('map')}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('list')}
+                className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'list'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Users className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">{t('list')}</span>
+              </button>
             </div>
-          )}
+            
+            {activeTab === 'list' && (
+              <div className="flex-1 min-w-0 max-w-xs md:max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder={t('searchPlaceholder')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8 md:pl-10 bg-card/95 backdrop-blur-sm border shadow-lg text-xs md:text-sm h-8 md:h-10"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Floating List Panel */}
       {activeTab === 'list' && (
-        <div className="absolute top-20 md:top-28 left-2 right-2 md:left-4 md:right-4 bottom-20 md:bottom-4 z-10 animate-fade-in">
-          <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
-            <CardContent className="p-0 h-full flex flex-col">
-              {/* Header */}
-              <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base md:text-lg font-semibold">{t('makersInNetwork')}</h2>
-                  <Badge variant="secondary" className="text-xs">
-                    {filteredMakers.length}
-                  </Badge>
+        <div className="absolute top-16 md:top-20 left-3 right-3 md:left-4 md:right-4 bottom-20 md:bottom-4 z-10 animate-fade-in">
+          <div className="h-full max-w-4xl mx-auto">
+            <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
+              <CardContent className="p-0 h-full flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base md:text-lg font-semibold">{t('makersInNetwork')}</h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {filteredMakers.length}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
               
               {/* List Content */}
               <div className="flex-1 overflow-auto mobile-scroll">
@@ -305,6 +308,7 @@ export const MakerExploreSection = ({
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       )}
       
