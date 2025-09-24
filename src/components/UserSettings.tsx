@@ -825,14 +825,14 @@ export const UserSettings = ({
               {privacySettings.show_profile_to_goers && (
                 <>
                   <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">Profilinnhold</h4>
+                    <h4 className="text-sm font-medium text-foreground">{t('profileContent')}</h4>
                     
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Biografi og beskrivelse</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Vis din biografi for alle brukere
-                        </p>
+                         <Label>{t('biographyDescription')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('showBiographyToAll')}
+                         </p>
                       </div>
                       <Switch
                         checked={profileSettings?.show_about || false}
@@ -843,10 +843,10 @@ export const UserSettings = ({
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Portefølje og arbeider</Label>
-                        <p className="text-sm text-muted-foreground">
-                          La andre se eksempler på ditt arbeid
-                        </p>
+                         <Label>{t('portfolioWork')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('showWorkExamples')}
+                         </p>
                       </div>
                       <Switch
                         checked={(profileSettings?.show_portfolio || false) && (privacySettings.show_portfolio_to_goers || false)}
@@ -860,10 +860,10 @@ export const UserSettings = ({
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Arrangementer og konserter</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Vis dine kommende arrangementer
-                        </p>
+                         <Label>{t('eventsAndConcerts')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('showUpcomingEvents')}
+                         </p>
                       </div>
                       <Switch
                         checked={(profileSettings?.show_events || false) && (privacySettings.show_events_to_goers || false)}
@@ -878,9 +878,9 @@ export const UserSettings = ({
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <Label>{t('technicalSpecifications')}</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Del tekniske krav og utstyrsbehov
-                        </p>
+                         <p className="text-sm text-muted-foreground">
+                           {t('shareTechRequirements')}
+                         </p>
                       </div>
                       <Switch
                         checked={profileSettings?.show_techspec || false}
@@ -891,14 +891,14 @@ export const UserSettings = ({
                   </div>
 
                   <div className="border-t pt-4 space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">Lokasjon og kontakt</h4>
+                    <h4 className="text-sm font-medium text-foreground">{t('locationAndContact')}</h4>
                     
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Vis på kart</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Vis din lokasjon på kartet (krever offentlig adresse)
-                        </p>
+                         <Label>{t('showOnMap')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('showLocationOnMap')}
+                         </p>
                       </div>
                       <Switch
                         checked={(profileSettings?.show_on_map || false) && (profileData.is_address_public || false)}
@@ -914,10 +914,10 @@ export const UserSettings = ({
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Offentlig adresse</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Gjør adressen din synlig for andre brukere
-                        </p>
+                         <Label>{t('publicAddress')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('makeAddressVisible')}
+                         </p>
                       </div>
                       <Switch
                         checked={profileData.is_address_public || false}
@@ -933,10 +933,10 @@ export const UserSettings = ({
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label>Kontaktinformasjon</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Del kontaktinfo med andre brukere (kun i bookinger)
-                        </p>
+                         <Label>{t('contactInfoTitle')}</Label>
+                         <p className="text-sm text-muted-foreground">
+                           {t('shareContactInfo')}
+                         </p>
                       </div>
                       <Switch
                         checked={profileSettings?.show_contact || false}
@@ -950,8 +950,8 @@ export const UserSettings = ({
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                       <div className="text-sm text-blue-800 dark:text-blue-200">
-                        <p className="font-medium mb-1">Sikkerhet først</p>
-                        <p>Sensitive opplysninger som priser og personlige meldinger deles kun i godkjente bookinger.</p>
+                         <p className="font-medium mb-1">{t('securityFirst')}</p>
+                         <p>{t('sensitiveInfoNote')}</p>
                       </div>
                     </div>
                   </div>
