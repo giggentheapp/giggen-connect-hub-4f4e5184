@@ -8,14 +8,14 @@ import { Upload, File, Image, Video, Music } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface FileUploadProps {
-  bucketName: 'portfolio' | 'concepts' | 'avatars' | 'hospitality' | 'tech-specs';
+  fileType: 'portfolio' | 'hospitality' | 'tech-spec' | 'concepts' | 'avatars';
   folderPath: string;
   onFileUploaded: (file: any) => void;
   acceptedTypes?: string;
   targetTable?: 'profile_portfolio' | 'profile_tech_specs' | 'concept_files' | 'hospitality_riders' | null;
 }
 
-const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.docx,.txt", targetTable = null }: FileUploadProps) => {
+const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.docx,.txt", targetTable = null }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -51,20 +51,36 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         throw new Error('Must be authenticated to upload files');
       }
 
-      // Generate unique filename with user ID in path for RLS policies
-      const timestamp = Date.now();
-      const fileName = `${timestamp}-${file.name}`;
-      let filePath: string;
+      // Always use portfolio bucket (it already exists and works)
+      const bucketName = 'portfolio';
       
-      if (bucketName === 'concepts') {
-        // For concepts, put user ID first to match RLS policy
-        filePath = `${user.id}/${fileName}`;
-      } else if (bucketName === 'hospitality' || bucketName === 'tech-specs') {
-        // For hospitality and tech-specs, use user ID as folder for RLS policy
-        filePath = `${user.id}/${fileName}`;
-      } else {
-        filePath = `${folderPath}/${fileName}`;
+      // Add prefix to filename to organize different file types
+      let filePrefix;
+      switch(fileType) {
+        case 'hospitality':
+          filePrefix = 'hospitality-';
+          break;
+        case 'tech-spec':
+          filePrefix = 'techspec-';
+          break;
+        case 'concepts':
+          filePrefix = 'concept-';
+          break;
+        case 'avatars':
+          filePrefix = 'avatar-';
+          break;
+        case 'portfolio':
+        default:
+          filePrefix = 'portfolio-';
+          break;
       }
+
+      // Create unique filename with type prefix
+      const timestamp = Date.now();
+      const fileName = `${filePrefix}${timestamp}-${file.name}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      console.log(`Uploading to bucket: ${bucketName}, path: ${filePath}`);
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -81,10 +97,10 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
         .getPublicUrl(filePath);
 
       // Save metadata to database
-      const fileType = getFileType(file.type);
+      const dbFileType = getFileType(file.type);
       
-      // Determine which table to use based on bucket
-      if (bucketName === 'avatars') {
+      // Determine which table to use based on fileType
+      if (fileType === 'avatars') {
         // For avatars, we don't save to database tables, just return file info
         onFileUploaded({ publicUrl });
         toast({
@@ -101,7 +117,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
 
       const baseFileData = {
         user_id: user.id,
-        file_type: fileType,
+        file_type: dbFileType,
         filename: file.name,
         file_path: filePath,
         file_size: file.size,
@@ -119,7 +135,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
             file_url: publicUrl,
             file_path: filePath,
             filename: file.name,
-            file_type: fileType,
+            file_type: dbFileType,
             mime_type: file.type,
             file_size: file.size,
             is_public: true,
@@ -137,7 +153,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
             file_url: publicUrl,
             file_path: filePath,
             filename: file.name,
-            file_type: fileType,
+            file_type: dbFileType,
             mime_type: file.type,
             file_size: file.size
           })
@@ -153,7 +169,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
             file_url: publicUrl,
             file_path: filePath,
             filename: file.name,
-            file_type: fileType,
+            file_type: dbFileType,
             mime_type: file.type,
             file_size: file.size
           })
@@ -169,7 +185,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           publicUrl,
           filename: file.name,
           file_path: filePath,
-          file_type: fileType,
+          file_type: dbFileType,
           file_size: file.size,
           mime_type: file.type,
           creator_id: user.id
@@ -181,7 +197,7 @@ const FileUpload = ({ bucketName, folderPath, onFileUploaded, acceptedTypes = ".
           publicUrl,
           filename: file.name,
           file_path: filePath,
-          file_type: fileType,
+          file_type: dbFileType,
           file_size: file.size,
           mime_type: file.type,
           creator_id: user.id

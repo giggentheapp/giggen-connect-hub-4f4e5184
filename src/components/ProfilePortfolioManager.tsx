@@ -161,7 +161,7 @@ const ProfilePortfolioManager = ({
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <FileUpload bucketName="portfolio" folderPath={userId} onFileUploaded={handleFileUploaded} acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx" />
+        <FileUpload fileType="portfolio" folderPath={userId} onFileUploaded={handleFileUploaded} acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx" />
 
         {loading ? (
           <div className="text-center py-4">{t('loadingPortfolio')}</div>

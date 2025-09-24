@@ -55,7 +55,7 @@ export const ConceptPortfolioUpload = ({
         </p>
         
         <FileUpload
-          bucketName="concepts"
+          fileType="concepts"
           folderPath={`portfolio/${userId}`}
           onFileUploaded={onFileUploaded}
           acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx"
