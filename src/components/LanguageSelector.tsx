@@ -1,4 +1,4 @@
-import { useLanguage } from '../contexts/LanguageContext';
+import { useAppLanguage } from '../contexts/AppLanguageContext';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 
@@ -8,7 +8,7 @@ interface LanguageSelectorProps {
 }
 
 export const LanguageSelector = ({ variant = 'default', className }: LanguageSelectorProps) => {
-  const { language, changeLanguage } = useLanguage();
+  const { language, changeLanguage } = useAppLanguage();
   
   if (variant === 'compact') {
     return (

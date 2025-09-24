@@ -1,47 +1,21 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Users, FileText, Music, Calendar, Star } from 'lucide-react';
-import { LanguageService } from '@/services/languageService';
-import { translations } from '@/translations';
+import { useAppLanguage } from '@/contexts/AppLanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useLanguageNotification } from '@/hooks/useLanguageNotification';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [language, setLanguage] = useState<'no' | 'en'>('no');
-  
-  useEffect(() => {
-    // Get initial language from shared service
-    const currentLang = LanguageService.getCurrentLanguage();
-    setLanguage(currentLang);
-    
-    // Listen for language changes
-    const unsubscribe = LanguageService.onLanguageChange((newLang) => {
-      setLanguage(newLang);
-    });
-    
-    return unsubscribe;
-  }, []);
-  
-  const changeLanguage = (newLang: 'no' | 'en') => {
-    LanguageService.setLanguage(newLang);
-  };
-  
-  const t = (key: string): string => {
-    const keys = key.split('.');
-    let value: any = translations[language];
-    
-    for (const k of keys) {
-      value = value?.[k];
-    }
-    
-    return typeof value === 'string' ? value : key;
-  };
+  const { language, changeLanguage } = useAppLanguage();
+  const { t } = useTranslation();
+  useLanguageNotification(); // Add visual feedback for language changes
 
   const navigateToApp = () => {
-    // Pass language to app via URL parameter to ensure connection
-    navigate(`/dashboard?lang=${language}`);
+    console.log('Navigating to main app with language:', language);
+    navigate('/dashboard');
   };
 
   return (

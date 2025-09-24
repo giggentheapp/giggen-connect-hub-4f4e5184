@@ -1,5 +1,6 @@
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useAppLanguage } from '@/contexts/AppLanguageContext';
+import { useLanguageNotification } from '@/hooks/useLanguageNotification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const Settings = () => {
   const { t } = useAppTranslation();
   const { language, changeLanguage } = useAppLanguage();
+  useLanguageNotification(); // Add visual feedback for language changes
   const [profile, setProfile] = useState<any>(null);
   
   useEffect(() => {

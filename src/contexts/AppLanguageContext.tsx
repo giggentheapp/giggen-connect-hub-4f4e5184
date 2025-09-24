@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { LanguageService } from '../services/languageService';
 
 interface AppLanguageContextType {
   language: 'no' | 'en';
   changeLanguage: (newLanguage: 'no' | 'en') => void;
+  availableLanguages: readonly string[];
 }
 
 const AppLanguageContext = createContext<AppLanguageContextType | undefined>(undefined);
@@ -20,23 +22,43 @@ interface AppLanguageProviderProps {
 }
 
 export const AppLanguageProvider = ({ children }: AppLanguageProviderProps) => {
-  const [language, setLanguage] = useState<'no' | 'en'>('no'); // Default Norwegian
+  const [language, setLanguageState] = useState(() => {
+    return LanguageService.initializeLanguage();
+  });
 
   useEffect(() => {
-    // Read from localStorage (app-specific key)
-    const savedLang = localStorage.getItem('mainAppLanguage') as 'no' | 'en' || 'no';
-    console.log('App language context loading:', savedLang);
-    setLanguage(savedLang);
+    console.log('AppLanguageProvider initialized with language:', language);
+    
+    // Initialize from URL parameter
+    LanguageService.initializeFromURL();
+    
+    // Listen for language changes from any source
+    const unsubscribe = LanguageService.onLanguageChange((newLanguage, timestamp) => {
+      console.log('AppLanguageProvider received language change:', newLanguage, timestamp);
+      setLanguageState(newLanguage);
+      
+      // Update document language for accessibility
+      document.documentElement.setAttribute('lang', newLanguage);
+    });
+    
+    return unsubscribe;
   }, []);
 
-  const changeLanguage = (newLang: 'no' | 'en') => {
-    console.log('App language context changing to:', newLang);
-    setLanguage(newLang);
-    localStorage.setItem('mainAppLanguage', newLang);
+  const changeLanguage = (newLanguage: 'no' | 'en') => {
+    const success = LanguageService.setLanguage(newLanguage);
+    if (success) {
+      console.log('Language changed successfully to:', newLanguage);
+    } else {
+      console.error('Failed to change language to:', newLanguage);
+    }
   };
 
   return (
-    <AppLanguageContext.Provider value={{ language, changeLanguage }}>
+    <AppLanguageContext.Provider value={{ 
+      language, 
+      changeLanguage,
+      availableLanguages: LanguageService.SUPPORTED_LANGUAGES
+    }}>
       {children}
     </AppLanguageContext.Provider>
   );

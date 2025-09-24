@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppLanguageProvider } from "@/contexts/AppLanguageContext";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
@@ -24,7 +23,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <LanguageProvider>
+  <AppLanguageProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -32,51 +31,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/start" element={<Index />} />
-          <Route path="/auth" element={
-            <AppLanguageProvider>
-              <Auth />
-            </AppLanguageProvider>
-          } />
-          
-          {/* Main app routes wrapped with AppLanguageProvider */}
-          <Route path="/dashboard" element={
-            <AppLanguageProvider>
-              <Dashboard />
-            </AppLanguageProvider>
-          } />
-          <Route path="/profile/:userId" element={
-            <AppLanguageProvider>
-              <Profile />
-            </AppLanguageProvider>
-          } />
-          <Route path="/map" element={
-            <AppLanguageProvider>
-              <Map />
-            </AppLanguageProvider>
-          } />
-          <Route path="/settings" element={
-            <AppLanguageProvider>
-              <Settings />
-            </AppLanguageProvider>
-          } />
-          
-          {/* Static pages with AppLanguageProvider */}
-          <Route path="/about" element={
-            <AppLanguageProvider>
-              <About />
-            </AppLanguageProvider>
-          } />
-          <Route path="/privacy" element={
-            <AppLanguageProvider>
-              <Privacy />
-            </AppLanguageProvider>
-          } />
-          <Route path="/terms" element={
-            <AppLanguageProvider>
-              <Terms />
-            </AppLanguageProvider>
-          } />
-          
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/concept/:conceptId" element={<ConceptView />} />
           <Route path="/events" element={<UpcomingEvents />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -85,7 +47,7 @@ const App = () => (
         <FeedbackButton />
       </TooltipProvider>
     </QueryClientProvider>
-  </LanguageProvider>
+  </AppLanguageProvider>
 );
 
 export default App;
