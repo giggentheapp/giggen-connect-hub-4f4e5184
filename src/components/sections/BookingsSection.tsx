@@ -42,23 +42,30 @@ export const BookingsSection = ({
   const [isLoading, setIsLoading] = useState(true);
   const [browserSupported, setBrowserSupported] = useState(true);
 
-  // Safari compatibility - Add error handling and performance optimizations
+  // Enhanced Safari/mobile compatibility with better detection
   useEffect(() => {
-    // Safari compatibility check
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isMobile = window.innerWidth < 768;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const isIOSChrome = /CriOS/i.test(navigator.userAgent);
     
-    if (isSafari || isMobile) {
-      // Add Safari-specific initialization delay
-      setTimeout(() => setIsLoading(false), 500);
+    console.log('🌍 Browser detection:', { isSafari, isMobile, isIOSChrome, userAgent: navigator.userAgent });
+    
+    if (isSafari || isMobile || isIOSChrome) {
+      // Increased delay for Safari/mobile to ensure proper initialization
+      setTimeout(() => {
+        console.log('🚀 Safari/mobile initialization complete');
+        setIsLoading(false);
+      }, 1000);
       
-      // Enable smooth scrolling for Safari (use setAttribute to avoid TS errors)
-      document.documentElement.setAttribute('style', 'overflow-scrolling: touch; -webkit-overflow-scrolling: touch;');
-      
-      // Safari performance logging (with type safety)
-      const perf = window.performance as any;
-      if (perf?.memory) {
-        console.log('Safari memory usage:', perf.memory);
+      // Safari-specific optimizations
+      try {
+        const documentStyle = document.documentElement.style as any;
+        documentStyle.webkitOverflowScrolling = 'touch';
+        documentStyle.overflowScrolling = 'touch';
+        // Alternative approach using setProperty
+        document.documentElement.style.setProperty('-webkit-overflow-scrolling', 'touch');
+      } catch (e) {
+        console.warn('Safari styling failed:', e);
       }
     } else {
       setIsLoading(false);
@@ -72,25 +79,54 @@ export const BookingsSection = ({
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
+  
+  // Add debugging for Safari/mobile
+  useEffect(() => {
+    console.log('📊 Bookings hook state:', { 
+      bookingsCount: bookings?.length || 0, 
+      loading, 
+      userId: profile.user_id,
+      userAgent: navigator.userAgent.substring(0, 50) + '...'
+    });
+  }, [bookings, loading, profile.user_id]);
   const { toast } = useToast();
   const { t } = useAppTranslation();
 
-  // Add timeout for mobile/Safari
+  // Enhanced timeout with better Safari/mobile handling
   useEffect(() => {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const timeoutDuration = (isSafari || isMobile) ? 8000 : 5000; // Longer timeout for Safari/mobile
+    
     const timeout = setTimeout(() => {
       if (loading) {
-        console.warn('Bookings timeout - falling back to simple view');
+        console.warn(`⏰ Bookings timeout (${timeoutDuration}ms) - Safari/mobile fallback activated`);
+        console.log('🔍 Current state at timeout:', { 
+          loading, 
+          bookingsCount: bookings?.length || 0,
+          userId: profile.user_id 
+        });
         setBrowserSupported(false);
       }
-    }, 5000);
+    }, timeoutDuration);
     
     return () => clearTimeout(timeout);
-  }, [loading]);
+  }, [loading, bookings, profile.user_id]);
 
-  // Real-time subscription for booking updates
+  // Simplified real-time subscription - disable for Safari/mobile to prevent crashes
   useEffect(() => {
     if (!profile.user_id) return;
+    
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+    
+    // Skip real-time subscriptions on Safari/mobile to prevent white screen issues
+    if (isSafari || isMobile) {
+      console.log('🚫 Skipping real-time subscriptions on Safari/mobile for stability');
+      return;
+    }
 
+    console.log('🔄 Setting up real-time subscriptions for desktop browsers');
     const channel = supabase
       .channel('bookings-section-updates')
       .on(
@@ -103,7 +139,6 @@ export const BookingsSection = ({
         },
         (payload) => {
           console.log('📝 Booking updated (as sender):', payload.new);
-          // Force refetch to ensure UI is in sync
           refetch();
         }
       )
@@ -117,7 +152,6 @@ export const BookingsSection = ({
         },
         (payload) => {
           console.log('📝 Booking updated (as receiver):', payload.new);
-          // Force refetch to ensure UI is in sync
           refetch();
         }
       )
@@ -276,30 +310,51 @@ export const BookingsSection = ({
         </CardContent>
       </Card>;
   };
-  // Safari loading state
+  // Enhanced loading state with Safari/mobile compatibility
   if (isLoading || loading) {
     return (
-      <div className="bookings-loading text-center py-8">
+      <div className="bookings-loading text-center py-8 min-h-[200px] flex flex-col justify-center">
         <div className="loading-spinner animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p>{t('Loading Bookings')}</p>
+        <p className="text-muted-foreground">{t('Loading Bookings')}</p>
+        <p className="text-xs text-muted-foreground mt-2">Safari/Mobile optimizations enabled</p>
       </div>
     );
   }
 
-  // Safari fallback state
+  // Enhanced Safari/mobile fallback with better error handling
   if (!browserSupported) {
     return (
-      <div className="safari-error-fallback text-center py-8">
-        <h2 className="text-xl font-semibold mb-4">{t('Bookings Unavailable')}</h2>
-        <p className="text-muted-foreground mb-4">{t('Please try refreshing the page or use Chrome desktop.')}</p>
-        <Button onClick={() => window.location.reload()}>
-          {t('Refresh Page')}
-        </Button>
+      <div className="safari-error-fallback text-center py-8 min-h-[300px] flex flex-col justify-center">
+        <h2 className="text-xl font-semibold mb-4 text-destructive">{t('Bookings Loading Issue')}</h2>
+        <p className="text-muted-foreground mb-4">Safari/mobile compatibility mode activated</p>
+        <div className="space-y-2">
+          <Button onClick={() => window.location.reload()} className="mr-2">
+            {t('Reload Page')}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setBrowserSupported(true);
+              setIsLoading(true);
+            }}
+          >
+            Try Again
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-4">
+          Try using Chrome desktop for the best experience
+        </p>
       </div>
     );
   }
   return <SafariErrorBoundary>
-    <div className="bookings-page space-y-6 safari-compatible mobile-optimized">
+    <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
+      {/* Debug info for Safari/mobile */}
+      {(navigator.userAgent.includes('Safari') || window.innerWidth < 768) && (
+        <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
+          🧭 Safari/Mobile Mode | Bookings: {bookings?.length || 0} | Loading: {loading ? 'Yes' : 'No'}
+        </div>
+      )}
 
       {/* Tab Navigation - New Workflow */}
       <div className="booking-tabs flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
