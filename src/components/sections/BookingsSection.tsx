@@ -269,7 +269,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Inbox className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('incomingRequests')}</span>
+          <span className="hidden sm:inline">{t('Incoming Requests')}</span>
           <span className="sm:hidden">{t('incoming')}</span>
           ({incomingRequests.length})
         </Button>
