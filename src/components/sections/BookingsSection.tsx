@@ -311,13 +311,13 @@ export const BookingsSection = ({
             <div className="mb-4">
               <h3 className="text-lg font-medium mb-2">{t('Incoming Requests')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('incomingRequestsDesc')}
+                {t('Incoming Requests')}
               </p>
             </div>
             {incomingRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noIncomingRequests')}</p>
+                  <p className="text-muted-foreground">{t('No Incoming Requests')}</p>
                 </CardContent>
               </Card> : incomingRequests.map(booking => (
                 <BookingCard 
@@ -329,7 +329,7 @@ export const BookingsSection = ({
 
         {activeTab === 'sent' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('sentRequest')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('<Sent Request')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('sentRequestsDesc')}
               </p>
@@ -337,7 +337,7 @@ export const BookingsSection = ({
             {sentRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noSentRequests')}</p>
+                  <p className="text-muted-foreground">{t('No Sent Requests')}</p>
                 </CardContent>
               </Card> : sentRequests.map(booking => (
                 <BookingCard 
@@ -349,7 +349,7 @@ export const BookingsSection = ({
 
         {activeTab === 'ongoing' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('ongoingAgreements')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Ongoing Agreements')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('ongoingAgreementsDesc')}
               </p>
@@ -357,7 +357,7 @@ export const BookingsSection = ({
             {ongoingAgreements.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noOngoingAgreements')}</p>
+                  <p className="text-muted-foreground">{t('No Ongoing Agreements')}</p>
                 </CardContent>
               </Card> : ongoingAgreements.map(booking => (
                 <BookingCard 
@@ -369,7 +369,7 @@ export const BookingsSection = ({
 
         {activeTab === 'upcoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('upcomingEventsBookings')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Upcoming Events')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('bookingUpcomingEventsDesc')}
               </p>
@@ -377,7 +377,7 @@ export const BookingsSection = ({
             {upcomingEvents.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
+                  <p className="text-muted-foreground">{t('No Upcoming Events')}</p>
                 </CardContent>
               </Card> : upcomingEvents.map(booking => (
                 <BookingCard 
