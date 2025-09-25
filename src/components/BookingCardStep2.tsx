@@ -12,6 +12,8 @@ interface BookingCardStep2Props {
   onDetailsClick: () => void;
   onConceptClick: () => void;
   onAction: () => void;
+  onConfirmationClick?: () => void;
+  onAgreementClick?: () => void;
 }
 
 export const BookingCardStep2 = ({ 
@@ -19,7 +21,9 @@ export const BookingCardStep2 = ({
   currentUserId, 
   onDetailsClick, 
   onConceptClick, 
-  onAction 
+  onAction,
+  onConfirmationClick,
+  onAgreementClick
 }: BookingCardStep2Props) => {
   const isApprovedByBoth = booking.status === 'approved_by_both';
   const canEdit = canBeEditedByParties(booking.status as BookingStatus) || isApprovedByBoth;

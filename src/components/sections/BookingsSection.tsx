@@ -110,6 +110,10 @@ export const BookingsSection = ({
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'allowed':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'approved_by_sender':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'approved_by_receiver':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       case 'approved_by_both':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'upcoming':
@@ -117,7 +121,7 @@ export const BookingsSection = ({
       case 'completed':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'cancelled':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
@@ -126,17 +130,21 @@ export const BookingsSection = ({
     try {
       switch (status) {
         case 'pending':
-          return safeT('waitingResponse');
+          return 'Venter på svar';
         case 'allowed':
-          return safeT('allowed');
+          return 'Tillatt - kan redigeres';
+        case 'approved_by_sender':
+          return 'Godkjent av avsender';
+        case 'approved_by_receiver':
+          return 'Godkjent av mottaker';
         case 'approved_by_both':
-          return safeT('approved');
+          return 'Godkjent av begge';
         case 'upcoming':
-          return safeT('published');
+          return 'Publisert';
         case 'completed':
-          return safeT('completed');
+          return 'Gjennomført';
         case 'cancelled':
-          return safeT('cancelled');
+          return 'Avlyst';
         default:
           return status;
       }
@@ -149,23 +157,27 @@ export const BookingsSection = ({
     try {
       switch (booking?.status) {
         case 'pending':
-          return booking.receiver_id === profile.user_id ? safeT('Request Phase') : safeT('Sent Request Phase');
+          return booking.receiver_id === profile.user_id ? 'Mottatt forespørsel' : 'Sendt forespørsel';
         case 'allowed':
-          return safeT('Ongoing Agreement Editable Phase');
+          return 'Forhandlingsfase - kan redigeres';
+        case 'approved_by_sender':
+          return 'Godkjent av avsender - venter på mottaker';
+        case 'approved_by_receiver':
+          return 'Godkjent av mottaker - venter på avsender';
         case 'approved_by_both':
-          return safeT('Ongoing Agreement Ready Phase');
+          return 'Godkjent av begge - klar for publisering';
         case 'upcoming':
-          return safeT('Published Event Phase');
+          return 'Publisert arrangement';
         case 'completed':
-          return safeT('Completed Phase');
+          return 'Gjennomført arrangement';
         case 'cancelled':
-          return safeT('Cancelled Phase');
+          return 'Avlyst arrangement';
         default:
-          return safeT('Unknown Status');
+          return 'Ukjent status';
       }
     } catch (error) {
       console.warn('Error in getPhaseText:', error);
-      return 'Unknown Status';
+      return 'Ukjent status';
     }
   };
   const handleBookingAction = async () => {
@@ -194,32 +206,61 @@ export const BookingsSection = ({
       setConceptViewOpen(true);
     };
 
+    const handleConfirmationClick = () => {
+      setSelectedBooking(booking);
+      setConfirmationOpen(true);
+    };
+
+    const handleAgreementClick = () => {
+      setSelectedBooking(booking);
+      setAgreementOpen(true);
+    };
+
     // Use different card components based on booking status
     if (booking.status === 'pending') {
-      return <BookingCardStep1 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} />;
+      return <BookingCardStep1 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
-    if (booking.status === 'allowed' || booking.status === 'approved_by_both') {
-      return <BookingCardStep2 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} />;
+    if (booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') {
+      return <BookingCardStep2 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
     if (booking.status === 'upcoming') {
-      return <BookingCardStep3 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} />;
+      return <BookingCardStep3 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
 
     // Fallback for other statuses (cancelled, completed, etc.)
     return <Card className="booking-card hover:shadow-md transition-shadow">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg">{booking.title}</CardTitle>
+            <div className="flex-1">
+              <CardTitle className="text-lg">{booking.title}</CardTitle>
+              {booking.description && (
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {booking.description}
+                </p>
+              )}
+            </div>
             <Badge className={getStatusColor(booking.status)}>
               {getStatusText(booking.status)}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={handleDetailsClick}>
-              {safeT('seeDetails')}
-            </Button>
+          <div className="flex items-center justify-between pt-3 border-t">
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={handleDetailsClick}>
+                <Eye className="h-4 w-4 mr-1" />
+                Se detaljer
+              </Button>
+              {booking.concept_ids && booking.concept_ids.length > 0 && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleConceptClick}
+                >
+                  Se tilbud
+                </Button>
+              )}
+            </div>
             <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
           </div>
         </CardContent>

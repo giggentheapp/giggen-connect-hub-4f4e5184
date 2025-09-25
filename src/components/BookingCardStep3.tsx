@@ -11,6 +11,8 @@ interface BookingCardStep3Props {
   onDetailsClick: () => void;
   onConceptClick: () => void;
   onAction: () => void;
+  onConfirmationClick?: () => void;
+  onAgreementClick?: () => void;
 }
 
 export const BookingCardStep3 = ({ 
@@ -18,7 +20,9 @@ export const BookingCardStep3 = ({
   currentUserId, 
   onDetailsClick, 
   onConceptClick, 
-  onAction 
+  onAction,
+  onConfirmationClick,
+  onAgreementClick
 }: BookingCardStep3Props) => {
   // Get contact info from sender_contact_info
   const contactInfo = booking.sender_contact_info || {};

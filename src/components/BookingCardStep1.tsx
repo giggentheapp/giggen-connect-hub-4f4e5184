@@ -11,6 +11,8 @@ interface BookingCardStep1Props {
   onDetailsClick: () => void;
   onConceptClick: () => void;
   onAction: () => void;
+  onConfirmationClick?: () => void;
+  onAgreementClick?: () => void;
 }
 
 export const BookingCardStep1 = ({ 
@@ -18,7 +20,9 @@ export const BookingCardStep1 = ({
   currentUserId, 
   onDetailsClick, 
   onConceptClick, 
-  onAction 
+  onAction,
+  onConfirmationClick,
+  onAgreementClick
 }: BookingCardStep1Props) => {
   const isReceiver = currentUserId === booking.receiver_id;
   const isSender = currentUserId === booking.sender_id;
