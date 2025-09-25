@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, MapPin, Users, Banknote, Clock, Phone, Mail, FileText } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Clock, Phone, Mail, FileText, Image } from 'lucide-react';
 import { SafeBooking, useBookingsSafe } from '@/hooks/useBookingsSafe';
 import { useToast } from '@/hooks/use-toast';
+import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
+import { useUserConcepts } from '@/hooks/useUserConcepts';
 
 interface SafeBookingDetailsModalProps {
   booking: SafeBooking | null;
@@ -123,6 +125,38 @@ export const SafeBookingDetailsModal = ({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Portfolio/Concept Information - Show in Phase 1 */}
+          {booking.status === 'pending' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Portefølje/Konsept
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {booking.selected_concept_id && (
+                    <div>
+                      <h4 className="font-medium mb-2">Valgt konsept</h4>
+                      <div className="p-3 bg-muted rounded-lg">
+                        <p className="text-sm">Konsept ID: {booking.selected_concept_id}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-medium mb-3">Portefølje fra {isSender ? 'deg' : 'avsender'}</h4>
+                    <ProfilePortfolioViewer 
+                      userId={booking.sender_id} 
+                      showControls={false}
+                      isOwnProfile={isSender}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Basic Information */}
           <Card>
             <CardHeader>

@@ -105,53 +105,145 @@ export const SafeBookingActions = ({
   const otherPartyApproved = isSender ? booking.approved_by_receiver : booking.approved_by_sender;
   const currentUserApproved = isSender ? booking.approved_by_sender : booking.approved_by_receiver;
 
-  // Agreement Summary Component
+  // Comprehensive Agreement Summary Component
   const AgreementSummary = () => (
     <Dialog open={showAgreementSummary} onOpenChange={setShowAgreementSummary}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Avtaleoversikt - {booking.title}</DialogTitle>
+          <DialogTitle>Fullstendig avtaleoversikt - {booking.title}</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Gjennomgå alle detaljer før endelig godkjenning
+          </p>
         </DialogHeader>
         <div className="space-y-4">
+          {/* Arrangement informasjon */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Detaljer</CardTitle>
+              <CardTitle className="text-lg">Arrangementinformasjon</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p><strong>Dato:</strong> {booking.event_date ? new Date(booking.event_date).toLocaleDateString('nb-NO') : 'Ikke satt'}</p>
-              {booking.time && <p><strong>Tid:</strong> {booking.time}</p>}
-              {booking.venue && <p><strong>Venue:</strong> {booking.venue}</p>}
-              {booking.audience_estimate && <p><strong>Forventet publikum:</strong> {booking.audience_estimate} personer</p>}
-              {booking.ticket_price && <p><strong>Billettpris:</strong> {booking.ticket_price} kr</p>}
-              {booking.artist_fee && <p><strong>Artisthonorar:</strong> {booking.artist_fee} kr</p>}
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium">Tittel</p>
+                  <p className="text-sm text-muted-foreground">{booking.title}</p>
+                </div>
+                <div>
+                  <p className="font-medium">Status</p>
+                  <p className="text-sm text-muted-foreground capitalize">{booking.status}</p>
+                </div>
+              </div>
+              {booking.description && (
+                <div>
+                  <p className="font-medium">Beskrivelse</p>
+                  <p className="text-sm text-muted-foreground">{booking.description}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
-          
-          {booking.description && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Beskrivelse</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>{booking.description}</p>
-              </CardContent>
-            </Card>
-          )}
 
+          {/* Dato og sted */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Tid og sted</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium">Dato</p>
+                  <p className="text-sm text-muted-foreground">
+                    {booking.event_date ? new Date(booking.event_date).toLocaleDateString('nb-NO') : 'Ikke fastsatt'}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Tid</p>
+                  <p className="text-sm text-muted-foreground">{booking.time || 'Ikke fastsatt'}</p>
+                </div>
+              </div>
+              {booking.venue && (
+                <div>
+                  <p className="font-medium">Venue</p>
+                  <p className="text-sm text-muted-foreground">{booking.venue}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Økonomiske forhold */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Økonomi</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                {booking.ticket_price && (
+                  <div>
+                    <p className="font-medium">Billettpris</p>
+                    <p className="text-sm text-muted-foreground">{booking.ticket_price} kr</p>
+                  </div>
+                )}
+                {booking.artist_fee && (
+                  <div>
+                    <p className="font-medium">Artisthonorar</p>
+                    <p className="text-sm text-muted-foreground">{booking.artist_fee} kr</p>
+                  </div>
+                )}
+              </div>
+              {booking.audience_estimate && (
+                <div>
+                  <p className="font-medium">Forventet publikum</p>
+                  <p className="text-sm text-muted-foreground">{booking.audience_estimate} personer</p>
+                </div>
+              )}
+              {booking.price_musician && (
+                <div>
+                  <p className="font-medium">Betalingsbetingelser</p>
+                  <p className="text-sm text-muted-foreground">{booking.price_musician}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Personlig melding */}
           {booking.personal_message && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Personlig melding</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>{booking.personal_message}</p>
+                <p className="text-sm">{booking.personal_message}</p>
               </CardContent>
             </Card>
           )}
 
+          {/* Godkjenningsstatus */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Godkjenningsstatus</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${booking.approved_by_sender ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <span className="text-sm">Avsender {booking.approved_by_sender ? 'godkjent' : 'ikke godkjent'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${booking.approved_by_receiver ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <span className="text-sm">Mottaker {booking.approved_by_receiver ? 'godkjent' : 'ikke godkjent'}</span>
+                </div>
+              </div>
+              {booking.both_parties_approved && (
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-800 font-medium">
+                    ✅ Begge parter har godkjent avtalen - klar for publisering!
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="flex gap-2 pt-4">
             <Button onClick={() => setShowAgreementSummary(false)} variant="outline">
-              Lukk
+              Lukk oversikt
             </Button>
           </div>
         </div>
