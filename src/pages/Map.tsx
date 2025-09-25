@@ -52,21 +52,21 @@ export default function Map() {
                   <Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
                   <h3 className="font-medium mb-1 text-sm md:text-base">{t('upcomingEvents')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('seeAllEventsOnMap')}
+                    {t('seeUpcomingEventsInArea')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
                   <Music className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
                   <h3 className="font-medium mb-1 text-sm md:text-base">{t('musiciansNearby')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('findTalentedMusicians')}
+                    {t('findMusiciansCooperate')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
                   <Users className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
-                  <h3 className="font-medium mb-1 text-sm md:text-base">{t('localCommunity')}</h3>
+                  <h3 className="font-medium mb-1 text-sm md:text-base">{t('localVenues')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('exploreLocalMusic')}
+                    {t('findHiddenVenues')}
                   </p>
                 </div>
               </div>
@@ -80,7 +80,7 @@ export default function Map() {
                   onClick={() => navigate('/')}
                   className="w-full md:w-auto min-h-[44px]"
                 >
-                  {t('goToExplore')}
+                  {t('goToExplorePage')}
                 </Button>
               </div>
             </CardContent>
