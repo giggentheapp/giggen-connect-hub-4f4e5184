@@ -20,6 +20,7 @@ import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
+import { BookingsErrorBoundary } from '@/components/BookingsErrorBoundary';
 import { UserSettings } from '@/components/UserSettings';
 
 interface UserProfile {
@@ -154,7 +155,11 @@ export const UnifiedSidePanel = ({
       case 'bookings':
         // Only available to makers
         if (ismaker) {
-          return <BookingsSection profile={profile} />;
+          return (
+            <BookingsErrorBoundary>
+              <BookingsSection profile={profile} />
+            </BookingsErrorBoundary>
+          );
         }
         return null;
       case 'admin-files':
