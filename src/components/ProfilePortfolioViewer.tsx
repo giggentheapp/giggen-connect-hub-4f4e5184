@@ -80,24 +80,44 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       );
     }
 
-    if (file.file_type.includes('audio')) {
+    // Enhanced audio detection - check file type, mime type, and file extension
+    const isAudioFile = file.file_type.includes('audio') || 
+                        file.mime_type?.includes('audio') ||
+                        /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(file.filename);
+
+    if (isAudioFile) {
+      console.log('🎵 Rendering audio player for:', file.filename, {
+        file_type: file.file_type,
+        mime_type: file.mime_type,
+        file_url: file.file_url
+      });
+      
       return (
-        <audio 
-          controls 
-          className="w-full"
-          preload="metadata"
-          onError={(e) => {
-            console.error('Audio playback error:', e);
-            console.error('Audio file URL:', file.file_url);
-            console.error('Audio mime type:', file.mime_type);
-          }}
-          onLoadStart={() => {
-            console.log('Audio loading started for:', file.filename);
-          }}
-        >
-          <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
-          Lyden kan ikke spilles i nettleseren din.
-        </audio>
+        <div className="w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <Volume2 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">{file.filename}</span>
+          </div>
+          <audio 
+            controls 
+            className="w-full rounded-md"
+            preload="metadata"
+            onError={(e) => {
+              console.error('Audio playback error:', e);
+              console.error('Audio file URL:', file.file_url);
+              console.error('Audio mime type:', file.mime_type);
+            }}
+            onLoadStart={() => {
+              console.log('Audio loading started for:', file.filename);
+            }}
+          >
+            <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
+            {file.mime_type?.includes('wav') && (
+              <source src={file.file_url} type="audio/wav" />
+            )}
+            Lyden kan ikke spilles i nettleseren din.
+          </audio>
+        </div>
       );
     }
 
