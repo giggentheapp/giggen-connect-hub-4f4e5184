@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { EnhancedBookingDetails } from '@/components/EnhancedBookingDetails';
+import { BookingEditModal } from '@/components/BookingEditModal';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
 import { BookingAgreement } from '@/components/BookingAgreement';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
@@ -44,6 +45,7 @@ export const BookingsSection = ({
   // Simplified state management
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
@@ -201,6 +203,12 @@ export const BookingsSection = ({
       setSelectedBooking(booking);
       setDetailsOpen(true);
     };
+
+    const handleEditClick = () => {
+      setSelectedBooking(booking);
+      setEditOpen(true);
+    };
+
     const handleConceptClick = () => {
       setSelectedBooking(booking);
       setConceptViewOpen(true);
@@ -218,13 +226,13 @@ export const BookingsSection = ({
 
     // Use different card components based on booking status
     if (booking.status === 'pending') {
-      return <BookingCardStep1 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
+      return <BookingCardStep1 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onEditClick={handleEditClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
     if (booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') {
-      return <BookingCardStep2 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
+      return <BookingCardStep2 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onEditClick={handleEditClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
     if (booking.status === 'upcoming') {
-      return <BookingCardStep3 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
+      return <BookingCardStep3 booking={booking} currentUserId={profile.user_id} onDetailsClick={handleDetailsClick} onEditClick={handleEditClick} onConceptClick={handleConceptClick} onAction={handleBookingAction} onConfirmationClick={handleConfirmationClick} onAgreementClick={handleAgreementClick} />;
     }
 
     // Fallback for other statuses (cancelled, completed, etc.)
@@ -403,6 +411,14 @@ export const BookingsSection = ({
                 bookingId={selectedBooking.id}
                 isOpen={detailsOpen}
                 onClose={() => setDetailsOpen(false)}
+              />
+
+              <BookingEditModal
+                booking={selectedBooking}
+                isOpen={editOpen}
+                onClose={() => setEditOpen(false)}
+                currentUserId={profile.user_id}
+                onSaved={handleBookingAction}
               />
 
               <BookingConfirmation

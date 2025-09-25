@@ -10,6 +10,7 @@ interface BookingCardStep2Props {
   booking: any;
   currentUserId: string;
   onDetailsClick: () => void;
+  onEditClick: () => void;
   onConceptClick: () => void;
   onAction: () => void;
   onConfirmationClick?: () => void;
@@ -20,6 +21,7 @@ export const BookingCardStep2 = ({
   booking, 
   currentUserId, 
   onDetailsClick, 
+  onEditClick,
   onConceptClick, 
   onAction,
   onConfirmationClick,
@@ -173,14 +175,25 @@ export const BookingCardStep2 = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-3 border-t">
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onDetailsClick}
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              {canEdit ? 'Rediger detaljer' : 'Se detaljer'}
-            </Button>
+            {canEdit ? (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={onEditClick}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                Rediger detaljer
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={onDetailsClick}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                Se detaljer
+              </Button>
+            )}
             
             {booking.concept_ids && booking.concept_ids.length > 0 && booking.status !== 'pending' && (
               <Button 

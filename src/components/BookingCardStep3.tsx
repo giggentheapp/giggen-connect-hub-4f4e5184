@@ -9,6 +9,7 @@ interface BookingCardStep3Props {
   booking: any;
   currentUserId: string;
   onDetailsClick: () => void;
+  onEditClick: () => void;
   onConceptClick: () => void;
   onAction: () => void;
   onConfirmationClick?: () => void;
@@ -18,7 +19,8 @@ interface BookingCardStep3Props {
 export const BookingCardStep3 = ({ 
   booking, 
   currentUserId, 
-  onDetailsClick, 
+  onDetailsClick,
+  onEditClick, 
   onConceptClick, 
   onAction,
   onConfirmationClick,
