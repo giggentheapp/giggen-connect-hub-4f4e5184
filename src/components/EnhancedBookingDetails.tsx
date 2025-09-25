@@ -100,7 +100,6 @@ export const EnhancedBookingDetails = ({
       table: 'bookings',
       filter: `id=eq.${booking.id}`
     }, payload => {
-      console.log('🔄 Real-time booking update received:', payload.new);
       setBooking(payload.new);
     }).subscribe();
     return () => {

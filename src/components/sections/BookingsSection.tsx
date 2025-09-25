@@ -48,12 +48,9 @@ export const BookingsSection = ({
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
     const isIOSChrome = /CriOS/i.test(navigator.userAgent);
     
-    console.log('🌍 Browser detection:', { isSafari, isMobile, isIOSChrome, userAgent: navigator.userAgent });
-    
     if (isSafari || isMobile || isIOSChrome) {
       // Increased delay for Safari/mobile to ensure proper initialization
       setTimeout(() => {
-        console.log('🚀 Safari/mobile initialization complete');
         setIsLoading(false);
       }, 1000);
       
@@ -79,16 +76,6 @@ export const BookingsSection = ({
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
-  
-  // Add debugging for Safari/mobile
-  useEffect(() => {
-    console.log('📊 Bookings hook state:', { 
-      bookingsCount: bookings?.length || 0, 
-      loading, 
-      userId: profile.user_id,
-      userAgent: navigator.userAgent.substring(0, 50) + '...'
-    });
-  }, [bookings, loading, profile.user_id]);
   const { toast } = useToast();
   const { t } = useAppTranslation();
 
@@ -100,12 +87,6 @@ export const BookingsSection = ({
     
     const timeout = setTimeout(() => {
       if (loading) {
-        console.warn(`⏰ Bookings timeout (${timeoutDuration}ms) - Safari/mobile fallback activated`);
-        console.log('🔍 Current state at timeout:', { 
-          loading, 
-          bookingsCount: bookings?.length || 0,
-          userId: profile.user_id 
-        });
         setBrowserSupported(false);
       }
     }, timeoutDuration);
@@ -122,11 +103,9 @@ export const BookingsSection = ({
     
     // Skip real-time subscriptions on Safari/mobile to prevent white screen issues
     if (isSafari || isMobile) {
-      console.log('🚫 Skipping real-time subscriptions on Safari/mobile for stability');
       return;
     }
 
-    console.log('🔄 Setting up real-time subscriptions for desktop browsers');
     const channel = supabase
       .channel('bookings-section-updates')
       .on(
@@ -137,10 +116,7 @@ export const BookingsSection = ({
           table: 'bookings',
           filter: `sender_id=eq.${profile.user_id}`,
         },
-        (payload) => {
-          console.log('📝 Booking updated (as sender):', payload.new);
-          refetch();
-        }
+        () => refetch()
       )
       .on(
         'postgres_changes',
@@ -150,10 +126,7 @@ export const BookingsSection = ({
           table: 'bookings',
           filter: `receiver_id=eq.${profile.user_id}`,
         },
-        (payload) => {
-          console.log('📝 Booking updated (as receiver):', payload.new);
-          refetch();
-        }
+        () => refetch()
       )
       .subscribe();
 
@@ -241,11 +214,8 @@ export const BookingsSection = ({
     }
   };
   const handleBookingAction = async () => {
-    // Always fetch all bookings - no need to check active tab
-    console.log('📄 Refreshing all bookings after action...');
     try {
       await refetch();
-      console.log('✅ All bookings refreshed successfully');
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({
@@ -260,16 +230,6 @@ export const BookingsSection = ({
   }: {
     booking: any;
   }) => {
-    // Force re-render when booking data changes by using booking ID + updated_at as key
-    const bookingKey = `${booking.id}-${booking.updated_at || booking.created_at}`;
-    
-    console.log('🎴 Rendering BookingCard:', {
-      id: booking.id,
-      title: booking.title,
-      status: booking.status,
-      updated_at: booking.updated_at,
-      key: bookingKey
-    });
     const handleDetailsClick = () => {
       setSelectedBooking(booking);
       setDetailsOpen(true);
@@ -349,12 +309,6 @@ export const BookingsSection = ({
   }
   return <SafariErrorBoundary>
     <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
-      {/* Debug info for Safari/mobile */}
-      {(navigator.userAgent.includes('Safari') || window.innerWidth < 768) && (
-        <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
-          🧭 Safari/Mobile Mode | Bookings: {bookings?.length || 0} | Loading: {loading ? 'Yes' : 'No'}
-        </div>
-      )}
 
       {/* Tab Navigation - New Workflow */}
       <div className="booking-tabs flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
@@ -490,7 +444,6 @@ export const BookingsSection = ({
           <EnhancedBookingDetails bookingId={selectedBooking.id} isOpen={detailsOpen} onClose={() => setDetailsOpen(false)} />
 
           <ConceptViewModal isOpen={conceptViewOpen} onClose={() => setConceptViewOpen(false)} conceptIds={selectedBooking?.concept_ids || []} initialConceptIndex={0} showConceptActions={true} onConceptAction={(conceptId, action) => {
-        console.log(`Concept ${conceptId} ${action}`);
         setConceptViewOpen(false);
         // Refresh bookings after concept action
         if (action === 'deleted' || action === 'rejected') {

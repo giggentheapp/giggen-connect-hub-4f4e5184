@@ -58,7 +58,6 @@ export const BookingActions = ({
 
   // Step 2: Open comprehensive agreement review before approval
   const openAgreementReview = () => {
-    console.log('📋 Opening agreement review for approval');
     setShowAgreementReview(true);
   };
 
@@ -66,16 +65,6 @@ export const BookingActions = ({
   const handlePublishBooking = async () => {
     if (loading) return;
     setLoading(true);
-    
-    console.log('📢 Publishing booking:', {
-      bookingId: booking.id,
-      title: booking.title,
-      currentUser: isSender ? 'sender' : 'receiver',
-      currentStatus: booking.status,
-      event_date: booking.event_date,
-      published_by_sender: booking.published_by_sender,
-      published_by_receiver: booking.published_by_receiver
-    });
     
     try {
       const publishField = isSender ? 'published_by_sender' : 'published_by_receiver';
@@ -86,16 +75,7 @@ export const BookingActions = ({
         published_at: new Date().toISOString()
       };
       
-      console.log('🔄 Updating booking with:', updates);
-      
       const result = await updateBooking(booking.id, updates);
-      
-      console.log('✅ Booking published successfully:', {
-        bookingId: booking.id,
-        newStatus: result?.status,
-        published_by_sender: result?.published_by_sender,
-        published_by_receiver: result?.published_by_receiver
-      });
       
       toast({
         title: "Du har publisert arrangementet!",

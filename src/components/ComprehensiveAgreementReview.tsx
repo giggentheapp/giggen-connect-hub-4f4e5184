@@ -341,7 +341,6 @@ export const ComprehensiveAgreementReview = ({
               if (isLastStep && checked) {
                 const newCompleted = new Set([...completedSections, currentSection.id]);
                 setCompletedSections(newCompleted);
-                console.log('✅ Last section completed via checkbox:', Array.from(newCompleted));
               }
             }} className="rounded" />
               <span>Jeg har lest og forstått denne delen</span>

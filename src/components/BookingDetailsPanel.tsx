@@ -53,18 +53,7 @@ export const BookingDetailsPanel = ({
 
   // DEBUG: Log booking data to see door deal transfer
   useEffect(() => {
-    console.log('🔍 BookingDetailsPanel - Booking data received:');
-    console.log('  - door_deal:', booking.door_deal);
-    console.log('  - door_percentage:', booking.door_percentage);
-    console.log('  - artist_fee:', booking.artist_fee);
-    console.log('  - price_musician:', booking.price_musician);
-    console.log('  - Complete booking object:', booking);
-    
-    if (booking.door_deal) {
-      console.log('  ✅ Door deal detected - should show percentage field');
-    } else {
-      console.log('  ❌ No door deal - should show fixed fee field');
-    }
+    // Data is loaded, no need for logging
   }, [booking]);
   const handleFieldUpdate = async (fieldName: string, oldValue: any, newValue: any) => {
     if (!canEdit) {
@@ -113,7 +102,6 @@ export const BookingDetailsPanel = ({
         });
       }
 
-      console.log('🔄 Updating booking field:', fieldName, 'from', oldValue, 'to', newValue);
       const result = await updateBooking(booking.id, updates);
       
       if (result) {

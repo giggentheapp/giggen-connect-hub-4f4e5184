@@ -54,7 +54,6 @@ export const BookingApprovalDialog = ({ booking: initialBooking, isOpen, onClose
         // Fetch fresh booking data first
         if (initialBooking?.id) {
           setFetchingFreshData(true);
-          console.log('🔄 BookingApprovalDialog: Fetching fresh booking data...');
           
           const { data: freshBooking, error: bookingError } = await supabase
             .from('bookings')
@@ -63,13 +62,6 @@ export const BookingApprovalDialog = ({ booking: initialBooking, isOpen, onClose
             .single();
             
           if (bookingError) throw bookingError;
-          
-          console.log('✅ Fresh booking data loaded:', {
-            id: freshBooking.id,
-            last_modified_at: freshBooking.last_modified_at,
-            event_date: freshBooking.event_date,
-            time: freshBooking.time
-          });
           
           setBooking(freshBooking);
           setFetchingFreshData(false);
