@@ -280,7 +280,7 @@ export const ProfileModal = ({
                     <CardContent>
                       {!portfolioVisible ? (
                         <p className="text-muted-foreground italic">
-                          {t('portfolioNotPublic')}
+                          {t('Portfolio Not Public')}
                         </p>
                       ) : portfolio.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -294,7 +294,7 @@ export const ProfileModal = ({
                         </div>
                       ) : (
                         <p className="text-muted-foreground italic">
-                          {t('noPortfolioItems')}
+                          {t('No Portfolio Items')}
                         </p>
                       )}
                     </CardContent>

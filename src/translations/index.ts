@@ -119,13 +119,13 @@ export const translations = {
   
   en: {
     // Navigation
-    explore: "Explore",
-    favorites: "Favorites",
-    settings: "Settings", 
-    myOffers: "My Offers",
-    bookings: "Bookings",
-    profile: "Profile",
-    administration: "Administration",
+    Explore: "Explore",
+    Favorites: "Favorites",
+    Settings: "Settings", 
+    My Offers: "My Offers",
+    Bookings: "Bookings",
+    Profile: "Profile",
+    Administration: "Administration",
     
     // Landing Page
     welcome: "Welcome to the booking platform for musicians",
