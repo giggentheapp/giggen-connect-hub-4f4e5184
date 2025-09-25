@@ -265,13 +265,13 @@ export const BookingsSection = ({
       <div className="flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
         <Button 
           variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('Incoming')} 
+          onClick={() => setActiveTab('incoming')} 
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Inbox className="h-4 w-4" />
           <span className="hidden sm:inline">{t('incomingRequests')}</span>
           <span className="sm:hidden">{t('Incoming')}</span>
-          ({ncomingRequests.length})
+          ({incomingRequests.length})
         </Button>
         <Button 
           variant={activeTab === 'sent' ? 'default' : 'ghost'} 
