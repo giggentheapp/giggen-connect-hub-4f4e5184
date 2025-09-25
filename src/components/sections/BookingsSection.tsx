@@ -279,7 +279,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Send className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('sentRequest')}</span>
+          <span className="hidden sm:inline">{t('Sent Request')}</span>
           <span className="sm:hidden">{t('sent')}</span>
           ({sentRequests.length})
         </Button>
@@ -289,7 +289,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Clock className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('ongoingAgreements')}</span>
+          <span className="hidden sm:inline">{t('Ongoing Agreements')}</span>
           <span className="sm:hidden">{t('ongoing')}</span>
           ({ongoingAgreements.length})
         </Button>
@@ -299,7 +299,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Check className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('upcomingEventsBookings')}</span>
+          <span className="hidden sm:inline">{t('Upcoming Events')}</span>
           <span className="sm:hidden">{t('upcoming')}</span>
           ({upcomingEvents.length})
         </Button>
@@ -309,7 +309,7 @@ export const BookingsSection = ({
       <div className="space-y-4">
         {activeTab === 'incoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('incomingRequests')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Incoming Requests')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('incomingRequestsDesc')}
               </p>
