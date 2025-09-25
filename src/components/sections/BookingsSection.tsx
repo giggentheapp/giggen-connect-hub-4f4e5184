@@ -167,19 +167,19 @@ export const BookingsSection = ({
   const getPhaseText = (booking: any) => {
     switch (booking.status) {
       case 'pending':
-        return booking.receiver_id === profile.user_id ? t('requestPhase') : t('sentRequestPhase');
+        return booking.receiver_id === profile.user_id ? t('Request Phase') : t('Sent Request Phase');
       case 'allowed':
-        return t('ongoingAgreementEditablePhase');
+        return t('Ongoing Agreement Editable Phase');
       case 'approved_by_both':
-        return t('ongoingAgreementReadyPhase');
+        return t('Ongoing Agreement Ready Phase');
       case 'upcoming':
-        return t('publishedEventPhase');
+        return t('Published Event Phase');
       case 'completed':
-        return t('completedPhase');
+        return t('Completed Phase');
       case 'cancelled':
-        return t('cancelledPhase');
+        return t('Cancelled Phase');
       default:
-        return t('unknownStatus');
+        return t('Unknown Status');
     }
   };
   const handleBookingAction = async () => {
@@ -255,7 +255,7 @@ export const BookingsSection = ({
   if (loading) {
     return <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p>{t('loadingBookings')}</p>
+        <p>{t('Loading Bookings')}</p>
       </div>;
   }
   return <SafariErrorBoundary>
@@ -265,13 +265,13 @@ export const BookingsSection = ({
       <div className="flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
         <Button 
           variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('incoming')} 
+          onClick={() => setActiveTab('Incoming')} 
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Inbox className="h-4 w-4" />
           <span className="hidden sm:inline">{t('incomingRequests')}</span>
-          <span className="sm:hidden">{t('incoming')}</span>
-          ({incomingRequests.length})
+          <span className="sm:hidden">{t('Incoming')}</span>
+          ({ncomingRequests.length})
         </Button>
         <Button 
           variant={activeTab === 'sent' ? 'default' : 'ghost'} 
@@ -279,7 +279,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Send className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('sentRequest')}</span>
+          <span className="hidden sm:inline">{t('Sent Request')}</span>
           <span className="sm:hidden">{t('sent')}</span>
           ({sentRequests.length})
         </Button>
@@ -289,7 +289,7 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Clock className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('ongoingAgreements')}</span>
+          <span className="hidden sm:inline">{t('Ongoing Agreements')}</span>
           <span className="sm:hidden">{t('ongoing')}</span>
           ({ongoingAgreements.length})
         </Button>
@@ -299,8 +299,8 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Check className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('bookingUpcomingEvents')}</span>
-          <span className="sm:hidden">{t('upcoming')}</span>
+          <span className="hidden sm:inline">{t('Upcoming Events')}</span>
+          <span className="sm:hidden">{t('Upcoming')}</span>
           ({upcomingEvents.length})
         </Button>
       </div>
@@ -309,7 +309,7 @@ export const BookingsSection = ({
       <div className="space-y-4">
         {activeTab === 'incoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('incomingRequests')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Incoming Requests')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('incomingRequests')}
               </p>
@@ -317,7 +317,7 @@ export const BookingsSection = ({
             {incomingRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noIncomingRequests')}</p>
+                  <p className="text-muted-foreground">{t('No Incoming Requests')}</p>
                 </CardContent>
               </Card> : incomingRequests.map(booking => (
                 <BookingCard 
@@ -329,7 +329,7 @@ export const BookingsSection = ({
 
         {activeTab === 'sent' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('sentRequest')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Sent Request')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('sentRequestsDesc')}
               </p>
@@ -337,7 +337,7 @@ export const BookingsSection = ({
             {sentRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noSentRequests')}</p>
+                  <p className="text-muted-foreground">{t('No Sent Requests')}</p>
                 </CardContent>
               </Card> : sentRequests.map(booking => (
                 <BookingCard 
@@ -349,7 +349,7 @@ export const BookingsSection = ({
 
         {activeTab === 'ongoing' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('ongoingAgreements')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Ongoing Agreements')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('ongoingAgreementsDesc')}
               </p>
@@ -357,7 +357,7 @@ export const BookingsSection = ({
             {ongoingAgreements.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noOngoingAgreements')}</p>
+                  <p className="text-muted-foreground">{t('No Ongoing Agreements')}</p>
                 </CardContent>
               </Card> : ongoingAgreements.map(booking => (
                 <BookingCard 
@@ -369,7 +369,7 @@ export const BookingsSection = ({
 
         {activeTab === 'upcoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('bookingUpcomingEvents')}</h3>
+              <h3 className="text-lg font-medium mb-2">{t('Booking Upcoming Events')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('bookingUpcomingEventsDesc')}
               </p>
@@ -377,7 +377,7 @@ export const BookingsSection = ({
             {upcomingEvents.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
+                  <p className="text-muted-foreground">{t('No Upcoming Events')}</p>
                 </CardContent>
               </Card> : upcomingEvents.map(booking => (
                 <BookingCard 
