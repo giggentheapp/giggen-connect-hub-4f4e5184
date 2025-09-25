@@ -58,47 +58,99 @@ export const BookingCardStep2 = ({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Detailed negotiable information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          {booking.event_date && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>
-                <strong>Dato:</strong> {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                {booking.time && ` kl. ${booking.time}`}
-              </span>
+        {/* Comprehensive booking details - all editable in negotiation phase */}
+        <div className="space-y-4">
+          {/* Event Information */}
+          <div className="p-4 bg-muted/20 rounded-lg">
+            <h4 className="font-medium mb-3 text-sm">📅 Arrangementsdetaljer</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              {booking.event_date && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    <strong>Dato:</strong> {format(new Date(booking.event_date), 'dd.MM.yyyy')}
+                    {booking.time && ` kl. ${booking.time}`}
+                  </span>
+                </div>
+              )}
+              
+              {booking.venue && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span><strong>Spillested:</strong> {booking.venue}</span>
+                </div>
+              )}
+              
+              {booking.address && (
+                <div className="flex items-center gap-2 col-span-full">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span><strong>Adresse:</strong> {booking.address}</span>
+                </div>
+              )}
+              
+              {booking.audience_estimate && (
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span><strong>Forventet publikum:</strong> {booking.audience_estimate} personer</span>
+                </div>
+              )}
             </div>
-          )}
-          
-          {booking.venue && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span><strong>Spillested:</strong> {booking.venue}</span>
-            </div>
-          )}
-          
-          {booking.address && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span><strong>Adresse:</strong> {booking.address}</span>
-            </div>
-          )}
-          
-          {booking.audience_estimate && (
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span><strong>Publikum:</strong> {booking.audience_estimate} personer</span>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-2">
-            <Banknote className="h-4 w-4 text-muted-foreground" />
-            <span>
-              <strong>Priser:</strong> 
-              {booking.artist_fee && ` Honorar: ${booking.artist_fee} Kr`}
-              {booking.ticket_price && ` • Billett: ${booking.ticket_price} Kr`}
-            </span>
           </div>
+
+          {/* Pricing Information */}
+          <div className="p-4 bg-muted/20 rounded-lg">
+            <h4 className="font-medium mb-3 text-sm">💰 Prising og økonomi</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Banknote className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  <strong>Musiker honorar:</strong> 
+                  {booking.door_deal ? (
+                    ` ${booking.door_percentage || 50}% av dørinntekter`
+                  ) : booking.by_agreement ? (
+                    ' Avtales direkte mellom partene'
+                  ) : (
+                    ` ${booking.artist_fee || booking.price_musician || 'Ikke spesifisert'} Kr`
+                  )}
+                </span>
+              </div>
+              
+              {booking.ticket_price && (
+                <div className="flex items-center gap-2">
+                  <Banknote className="h-4 w-4 text-muted-foreground" />
+                  <span><strong>Billettpris:</strong> {booking.ticket_price} Kr</span>
+                </div>
+              )}
+
+              {(booking.door_deal || booking.by_agreement) && (
+                <div className="text-xs text-muted-foreground ml-6">
+                  {booking.door_deal && '💡 Døravtale - honorar basert på billettsalg'}
+                  {booking.by_agreement && '🤝 Fleksibel avtale - pris justeres etter behov'}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Technical and Hospitality */}
+          {(booking.tech_spec || booking.hospitality_rider) && (
+            <div className="p-4 bg-muted/20 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">🎛️ Teknisk og hospitality</h4>
+              <div className="space-y-2 text-sm">
+                {booking.tech_spec && (
+                  <div>
+                    <strong>Tekniske krav:</strong>
+                    <p className="text-muted-foreground mt-1">{booking.tech_spec}</p>
+                  </div>
+                )}
+                {booking.hospitality_rider && (
+                  <div>
+                    <strong>Hospitality rider:</strong>
+                    <p className="text-muted-foreground mt-1">{booking.hospitality_rider}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Personal message if exists */}
