@@ -106,7 +106,7 @@ export const MakerExploreSection = ({
             
             {/* Description */}
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              {t('mapDescription')}
+              {t('Map Description')}
             </p>
 
             {/* Features Grid */}
@@ -162,14 +162,14 @@ export const MakerExploreSection = ({
               size="lg"
               className="mb-4"
             >
-              {t('goToExplorePage')}
+              {t('Go To Explore Page')}
             </Button>
 
             {/* Status Badge */}
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
               <Badge variant="secondary" className="text-xs">
-                {t('U nder Development')}
+                {t('Under Development')}
               </Badge>
             </div>
           </CardContent>
