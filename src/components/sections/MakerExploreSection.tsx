@@ -119,7 +119,7 @@ export const MakerExploreSection = ({
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('upcomingEventsDesc')}
+                    {t('Upcoming Events')}
                   </p>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export const MakerExploreSection = ({
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('musiciansNearbyDesc')}
+                    {t('Musicians Nearby')}
                   </p>
                 </div>
               </div>
@@ -145,7 +145,7 @@ export const MakerExploreSection = ({
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">{t('localCommunity')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('localCommunityDesc')}
+                    {t('Local Community')}
                   </p>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export const MakerExploreSection = ({
 
             {/* Interim Message */}
             <p className="text-muted-foreground mb-6">
-              {t('interimMessage')}
+              {t('Interim Message')}
             </p>
 
             {/* Action Button */}
@@ -169,7 +169,7 @@ export const MakerExploreSection = ({
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
               <Badge variant="secondary" className="text-xs">
-                {t('underDevelopment')}
+                {t('U nder Development')}
               </Badge>
             </div>
           </CardContent>
@@ -211,7 +211,7 @@ export const MakerExploreSection = ({
                   <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder={t('searchPlaceholder')}
+                    placeholder={t('Search Placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8 md:pl-10 bg-card/95 backdrop-blur-sm border shadow-lg text-xs md:text-sm h-8 md:h-10"
@@ -246,10 +246,10 @@ export const MakerExploreSection = ({
                     <Music className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
                     <p className="text-sm md:text-base">
                       {loading 
-                        ? t('loadingMakers')
+                        ? t('Loading Makers')
                         : searchTerm 
-                          ? t('noMakersFoundFiltered')
-                          : t('noMakersFound')
+                          ? t('No Makers Found Filtered')
+                          : t('No Makers Found')
                       }
                     </p>
                   </div>
@@ -275,7 +275,7 @@ export const MakerExploreSection = ({
                                 </div>
                                 
                                  <p className="text-xs md:text-sm text-muted-foreground mb-2 line-clamp-2">
-                                   {maker.bio || t('noDescription')}
+                                   {maker.bio || t('No Description')}
                                  </p>
                                 
                                 {maker.address && maker.is_address_public && (

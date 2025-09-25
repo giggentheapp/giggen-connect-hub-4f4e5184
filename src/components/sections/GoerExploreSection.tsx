@@ -258,7 +258,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
             <div className="flex items-center justify-center py-12 text-muted-foreground">
               <div className="text-center">
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                <p>{t('loadingMakers')}</p>
+                <p>{t('Loading Makers')}</p>
               </div>
             </div>
           ) : error ? (
@@ -282,13 +282,13 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                 <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p className="font-medium">
                   {searchTerm || Object.values(filters).some(Boolean)
-                    ? t('noMakersFoundFiltered')
-                    : t('noMakersFound')
+                    ? t('No Makers Found Filtered')
+                    : t('No Makers Found')
                   }
                 </p>
                 {(searchTerm || Object.values(filters).some(Boolean)) && (
                   <p className="text-sm">
-                    {t('adjustFilters')}
+                    {t('Adjust Filters')}
                   </p>
                 )}
               </div>
