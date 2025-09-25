@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Inbox, Send, Clock, Check, RefreshCw } from 'lucide-react';
 import { useBookingsSafe, SafeBooking } from '@/hooks/useBookingsSafe';
 import { SafeBookingCard } from './SafeBookingCard';
-import { SafeBookingDetailsModal } from './SafeBookingDetailsModal';
 
 interface UserProfile {
   id: string;
@@ -28,8 +27,6 @@ type TabType = 'incoming' | 'sent' | 'ongoing' | 'upcoming';
 
 export const SafeBookingsSection = ({ profile }: SafeBookingsSectionProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('incoming');
-  const [selectedBooking, setSelectedBooking] = useState<SafeBooking | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const { bookings, loading, error, refetch } = useBookingsSafe(profile.user_id);
 
   console.log('🎯 SafeBookingsSection render:', { 
@@ -189,12 +186,11 @@ export const SafeBookingsSection = ({ profile }: SafeBookingsSectionProps) => {
                 currentUserId={profile.user_id}
                 onDetailsClick={() => {
                   console.log('Details clicked for booking:', booking.id);
-                  setSelectedBooking(booking);
-                  setDetailsOpen(true);
+                  // TODO: Implement details modal
                 }}
                 onAction={() => {
                   console.log('Action clicked for booking:', booking.id);
-                  refetch(); // Refresh bookings after action
+                  // TODO: Implement action handling
                 }}
               />
             ))
@@ -209,17 +205,6 @@ export const SafeBookingsSection = ({ profile }: SafeBookingsSectionProps) => {
           Oppdater liste
         </Button>
       </div>
-
-      {/* Booking Details Modal */}
-      <SafeBookingDetailsModal
-        booking={selectedBooking}
-        isOpen={detailsOpen}
-        onClose={() => {
-          setDetailsOpen(false);
-          setSelectedBooking(null);
-        }}
-        currentUserId={profile.user_id}
-      />
     </div>
   );
 };

@@ -2,9 +2,8 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, Banknote } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, Banknote } from 'lucide-react';
 import { SafeBooking } from '@/hooks/useBookingsSafe';
-import { SafeBookingActions } from './SafeBookingActions';
 
 interface SafeBookingCardProps {
   booking: SafeBooking;
@@ -78,8 +77,6 @@ export const SafeBookingCard = memo(({
   onDetailsClick, 
   onAction 
 }: SafeBookingCardProps) => {
-  console.log('🎯 Rendering SafeBookingCard:', booking.id, booking.status);
-
   if (!booking?.id) {
     return (
       <Card className="border-destructive/50">
@@ -160,11 +157,29 @@ export const SafeBookingCard = memo(({
             </Button>
           )}
           
-          <SafeBookingActions 
-            booking={booking}
-            currentUserId={currentUserId}
-            onAction={onAction}
-          />
+          {booking.status === 'pending' && isReceiver && (
+            <Button size="sm" onClick={onAction}>
+              Svar på forespørsel
+            </Button>
+          )}
+          
+          {booking.status === 'allowed' && (
+            <Button size="sm" onClick={onAction}>
+              Rediger avtale
+            </Button>
+          )}
+          
+          {booking.status === 'approved_by_both' && (
+            <Button size="sm" onClick={onAction}>
+              Publiser arrangement
+            </Button>
+          )}
+          
+          {booking.status === 'both_parties_approved' && (
+            <Button size="sm" onClick={onAction}>
+              Publiser arrangement
+            </Button>
+          )}
         </div>
 
         {/* Status Help Text */}

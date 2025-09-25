@@ -74,73 +74,42 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       console.log('🚨 isAdminView:', isAdminView);
       console.log('🚨 profile.user_id:', profile.user_id);
       
-      let allEvents: any[] = [];
+      let query;
       
       if (isAdminView) {
-        // ADMIN VIEW: Get upcoming bookings from bookings table
-        console.log('🚨 ADMIN VIEW: Fetching upcoming bookings');
+        // COPY EXACT WORKING QUERY FROM BOOKINGS SECTION
+        console.log('🚨 ADMIN VIEW: Using simple bookings query (no profile joins)');
         
-        const { data: bookingsData, error: bookingsError } = await supabase
+        query = supabase
           .from('bookings')
           .select('*')
           .eq('status', 'upcoming')
           .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
           .order('created_at', { ascending: false });
-
-        if (bookingsError) {
-          console.error('❌ Bookings query error:', bookingsError);
-          throw bookingsError;
-        }
-        
-        console.log('🚨 ADMIN BOOKINGS DATA:', bookingsData?.length || 0);
-        allEvents = bookingsData || [];
       } else {
-        // PUBLIC VIEW: Get both events_market and published bookings
-        console.log('🚨 PUBLIC VIEW: Fetching from events_market and published bookings');
-        
-        // Get events from events_market
-        const { data: eventsMarketData, error: eventsError } = await supabase
+        // Public view: get from events_market table - filter by the profile owner's events
+        console.log('🚨 PUBLIC VIEW: fetching from events_market for user:', profile.user_id);
+        query = supabase
           .from('events_market')
           .select('*')
           .eq('is_public', true)
           .eq('created_by', profile.user_id)
           .gte('date', new Date().toISOString().split('T')[0])
           .order('date', { ascending: true });
+      }
 
-        if (eventsError) {
-          console.error('❌ Events market error:', eventsError);
-          throw eventsError;
-        }
+      const { data, error } = await query;
 
-        // Get published bookings (where user is involved)
-        const { data: publishedBookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('status', 'upcoming')
-          .eq('is_public_after_approval', true)
-          .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .order('event_date', { ascending: true });
-
-        if (bookingsError) {
-          console.error('❌ Published bookings error:', bookingsError);
-          throw bookingsError;
-        }
-
-        console.log('🚨 EVENTS MARKET DATA:', eventsMarketData?.length || 0);
-        console.log('🚨 PUBLISHED BOOKINGS DATA:', publishedBookings?.length || 0);
-        
-        // Combine and deduplicate events
-        allEvents = [
-          ...(eventsMarketData || []),
-          ...(publishedBookings || []).map(booking => ({
-            ...booking,
-            source: 'booking' // Mark source for distinction
-          }))
-        ];
+      if (error) {
+        console.error('❌ Query error:', error);
+        throw error;
       }
       
-      console.log('🚨 TOTAL EVENTS:', allEvents.length);
-      setUpcomingEvents(allEvents);
+      console.log('🚨 FETCHED DATA:', data?.length || 0, 'events');
+      console.log('🚨 RAW DATA:', data);
+      
+      // NO COMPLEX FILTERING - JUST SET THE DATA
+      setUpcomingEvents(data || []);
     } catch (error: any) {
       console.error('❌ Error fetching upcoming events:', error);
       toast({
