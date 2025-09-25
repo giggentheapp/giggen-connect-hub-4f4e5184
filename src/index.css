@@ -483,3 +483,47 @@ All colors MUST be HSL.
     bottom: 90px; /* Well above the 64px high mobile nav */
   }
 }
+
+/* Safari and mobile compatibility fixes */
+.safari-compatible {
+  /* Fix Safari flexbox issues */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.mobile-optimized {
+  /* Prevent zoom on input focus (iOS Safari) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  
+  /* Better touch handling */
+  touch-action: manipulation;
+  
+  /* Smooth scrolling for all mobile browsers */
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* Fix white screen issues on mobile Safari/Chrome */
+@supports (-webkit-touch-callout: none) {
+  .safari-compatible {
+    /* Force hardware acceleration on Safari */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    
+    /* Ensure proper rendering */
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+}
+
+/* Chrome mobile specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
+  .mobile-optimized {
+    /* Fix Chrome mobile rendering issues */
+    will-change: transform;
+    contain: layout style paint;
+  }
+}

@@ -222,7 +222,52 @@ export const translations = {
     agreementRead: "Avtale lest! 📋",
     otherPartyReadAgreement: "Den andre parten har lest avtalen",
     doorRevenuePercentage: "% av dørinntekter",
-    noDescription: "Ingen beskrivelse"
+    noDescription: "Ingen beskrivelse",
+    
+    // Booking Section
+    incomingRequests: "Innkommende forespørsler",
+    sentRequest: "Sendte forespørsler", 
+    ongoingAgreements: "Pågående avtaler",
+    bookingUpcomingEvents: "Kommende arrangementer",
+    incoming: "Innkommende",
+    sent: "Sendt",
+    ongoing: "Pågående", 
+    upcoming: "Kommende",
+    noIncomingRequests: "Ingen innkommende forespørsler",
+    noSentRequests: "Ingen sendte forespørsler",
+    noOngoingAgreements: "Ingen pågående avtaler",
+    noUpcomingEvents: "Ingen kommende arrangementer",
+    sentRequestsDesc: "Forespørsler du har sendt til andre",
+    ongoingAgreementsDesc: "Avtaler som er i prosess",
+    bookingUpcomingEventsDesc: "Arrangementer som er publisert og kommer snart",
+    loadingBookings: "Laster bookinger...",
+    seeDetails: "Se detaljer",
+    couldNotUpdateList: "Kunne ikke oppdatere listen",
+    tryRefreshManually: "Prøv å oppdatere manuelt",
+    
+    // Status texts
+    waitingResponse: "Venter på svar",
+    allowed: "Tillatt",
+    approved: "Godkjent", 
+    published: "Publisert",
+    completed: "Fullført",
+    cancelled: "Avlyst",
+    requestPhase: "Forespørselsfase",
+    sentRequestPhase: "Sendt forespørsel",
+    ongoingAgreementEditablePhase: "Pågående avtale (redigerbar)",
+    ongoingAgreementReadyPhase: "Pågående avtale (klar)",
+    publishedEventPhase: "Publisert arrangement",
+    completedPhase: "Fullført fase",
+    cancelledPhase: "Avlyst fase",
+    unknownStatus: "Ukjent status",
+    
+    // Safari Error Boundary
+    bookingSomethingWentWrong: "Noe gikk galt",
+    errorLoadingBookings: "Det oppstod en feil ved lasting av bookinger. Dette kan skyldes nettleserkompabilitet.",
+    safariUserMessage: "Safari-bruker: Prøv å oppdatere siden eller bruke en annen nettleser som Chrome eller Firefox.",
+    reloadPage: "Oppdater siden",
+    tryAgain2: "Prøv igjen",
+    technicalInfo: "Teknisk informasjon (for utvikling)"
   },
   
   en: {
@@ -448,6 +493,51 @@ export const translations = {
     agreementRead: "Agreement Read! 📋",
     otherPartyReadAgreement: "The other party has read the agreement",
     doorRevenuePercentage: "% of door revenue",
-    noDescription: "No description"
+    noDescription: "No description",
+    
+    // Booking Section
+    incomingRequests: "Incoming Requests",
+    sentRequest: "Sent Requests",
+    ongoingAgreements: "Ongoing Agreements", 
+    bookingUpcomingEvents: "Upcoming Events",
+    incoming: "Incoming",
+    sent: "Sent",
+    ongoing: "Ongoing",
+    upcoming: "Upcoming",
+    noIncomingRequests: "No Incoming Requests",
+    noSentRequests: "No Sent Requests",
+    noOngoingAgreements: "No Ongoing Agreements",
+    noUpcomingEvents: "No Upcoming Events",
+    sentRequestsDesc: "Requests you have sent to others",
+    ongoingAgreementsDesc: "Agreements that are in progress",
+    bookingUpcomingEventsDesc: "Events that are published and coming soon",
+    loadingBookings: "Loading bookings...",
+    seeDetails: "See Details",
+    couldNotUpdateList: "Could not update list",
+    tryRefreshManually: "Try refreshing manually",
+    
+    // Status texts
+    waitingResponse: "Waiting for response",
+    allowed: "Allowed",
+    approved: "Approved",
+    published: "Published", 
+    completed: "Completed",
+    cancelled: "Cancelled",
+    requestPhase: "Request phase",
+    sentRequestPhase: "Sent request",
+    ongoingAgreementEditablePhase: "Ongoing agreement (editable)",
+    ongoingAgreementReadyPhase: "Ongoing agreement (ready)",
+    publishedEventPhase: "Published event",
+    completedPhase: "Completed phase",
+    cancelledPhase: "Cancelled phase",
+    unknownStatus: "Unknown status",
+    
+    // Safari Error Boundary
+    bookingSomethingWentWrong: "Something went wrong",
+    errorLoadingBookings: "An error occurred while loading bookings. This might be due to browser compatibility.",
+    safariUserMessage: "Safari user: Try refreshing the page or use another browser like Chrome or Firefox.",
+    reloadPage: "Reload page",
+    tryAgain2: "Try again",
+    technicalInfo: "Technical information (for development)"
   }
 };
