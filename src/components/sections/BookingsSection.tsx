@@ -19,7 +19,7 @@ import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
-import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { SafeBookingsSection } from '@/components/SafeBookingsSection';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -53,14 +53,13 @@ export const BookingsSection = ({
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
   
-  // Safe translation with fallback
+  // Safe translation function
   const safeT = (key: string) => {
     try {
-      const { t } = useAppTranslation();
-      return t(key);
+      return key; // Just return the key as fallback for now
     } catch (error) {
       console.warn('Translation failed for key:', key);
-      return key; // Return the key as fallback
+      return key;
     }
   };
 
@@ -237,153 +236,8 @@ export const BookingsSection = ({
     );
   }
 
-  console.log('🎯 Rendering main BookingsSection content');
-  return <SafariErrorBoundary>
-    <BookingErrorBoundary>
-      <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
-
-      {/* Tab Navigation - New Workflow */}
-      <div className="booking-tabs flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
-        <Button 
-          variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('incoming')} 
-          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
-        >
-          <Inbox className="h-4 w-4" />
-          <span className="hidden sm:inline">{safeT('incomingRequests')}</span>
-          <span className="sm:hidden">{safeT('Incoming')}</span>
-          ({incomingRequests.length})
-        </Button>
-        <Button 
-          variant={activeTab === 'sent' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('sent')} 
-          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
-        >
-          <Send className="h-4 w-4" />
-          <span className="hidden sm:inline">{safeT('Sent Request')}</span>
-          <span className="sm:hidden">{safeT('sent')}</span>
-          ({sentRequests.length})
-        </Button>
-        <Button 
-          variant={activeTab === 'ongoing' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('ongoing')} 
-          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
-        >
-          <Clock className="h-4 w-4" />
-          <span className="hidden sm:inline">{safeT('Ongoing Agreements')}</span>
-          <span className="sm:hidden">{safeT('ongoing')}</span>
-          ({ongoingAgreements.length})
-        </Button>
-        <Button 
-          variant={activeTab === 'upcoming' ? 'default' : 'ghost'} 
-          onClick={() => setActiveTab('upcoming')} 
-          className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
-        >
-          <Check className="h-4 w-4" />
-          <span className="hidden sm:inline">{safeT('Upcoming Events')}</span>
-          <span className="sm:hidden">{safeT('Upcoming')}</span>
-          ({upcomingEvents.length})
-        </Button>
-      </div>
-
-      {/* Bookings List - New Workflow */}
-      <div className="space-y-4">
-        {activeTab === 'incoming' && <>
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{safeT('Incoming Requests')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {safeT('incomingRequests')}
-              </p>
-            </div>
-            {incomingRequests.length === 0 ? <Card>
-                <CardContent className="text-center py-8">
-                  <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{safeT('No Incoming Requests')}</p>
-                </CardContent>
-              </Card> : incomingRequests.map(booking => (
-                <BookingCard 
-                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
-                  booking={booking} 
-                />
-              ))}
-          </>}
-
-        {activeTab === 'sent' && <>
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{safeT('Sent Request')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {safeT('sentRequestsDesc')}
-              </p>
-            </div>
-            {sentRequests.length === 0 ? <Card>
-                <CardContent className="text-center py-8">
-                  <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{safeT('No Sent Requests')}</p>
-                </CardContent>
-              </Card> : sentRequests.map(booking => (
-                <BookingCard 
-                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
-                  booking={booking} 
-                />
-              ))}
-          </>}
-
-        {activeTab === 'ongoing' && <>
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{safeT('Ongoing Agreements')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {safeT('ongoingAgreementsDesc')}
-              </p>
-            </div>
-            {ongoingAgreements.length === 0 ? <Card>
-                <CardContent className="text-center py-8">
-                  <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{safeT('No Ongoing Agreements')}</p>
-                </CardContent>
-              </Card> : ongoingAgreements.map(booking => (
-                <BookingCard 
-                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
-                  booking={booking} 
-                />
-              ))}
-          </>}
-
-        {activeTab === 'upcoming' && <>
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{safeT('Booking Upcoming Events')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {safeT('bookingUpcomingEventsDesc')}
-              </p>
-            </div>
-            {upcomingEvents.length === 0 ? <Card>
-                <CardContent className="text-center py-8">
-                  <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{safeT('No Upcoming Events')}</p>
-                </CardContent>
-              </Card> : upcomingEvents.map(booking => (
-                <BookingCard 
-                  key={`${booking.id}-${booking.updated_at || booking.created_at}`} 
-                  booking={booking} 
-                />
-              ))}
-          </>}
-
-        {/* History tab removed - all deletions are now permanent */}
-      </div>
-
-      {/* Enhanced Booking Details Dialog */}
-      {selectedBooking && <>
-          <EnhancedBookingDetails bookingId={selectedBooking.id} isOpen={detailsOpen} onClose={() => setDetailsOpen(false)} />
-
-          <ConceptViewModal isOpen={conceptViewOpen} onClose={() => setConceptViewOpen(false)} conceptIds={selectedBooking?.concept_ids || []} initialConceptIndex={0} showConceptActions={true} onConceptAction={(conceptId, action) => {
-        setConceptViewOpen(false);
-        // Refresh bookings after concept action
-        if (action === 'deleted' || action === 'rejected') {
-          handleBookingAction();
-        }
-      }} />
-        </>}
-    </div>
-    </BookingErrorBoundary>
-  </SafariErrorBoundary>;
+  // Use the safe version instead of the complex version
+  return (
+    <SafeBookingsSection profile={profile} />
+  );
 };
