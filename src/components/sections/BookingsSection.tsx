@@ -38,11 +38,20 @@ interface BookingsSectionProps {
 export const BookingsSection = ({
   profile
 }: BookingsSectionProps) => {
+  // Safari compatibility state
+  const [isLoading, setIsLoading] = useState(true);
+  const [browserSupported, setBrowserSupported] = useState(true);
+
   // Safari compatibility - Add error handling and performance optimizations
   useEffect(() => {
-    // Safari-specific initialization
+    // Safari compatibility check
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
+    const isMobile = window.innerWidth < 768;
+    
+    if (isSafari || isMobile) {
+      // Add Safari-specific initialization delay
+      setTimeout(() => setIsLoading(false), 500);
+      
       // Enable smooth scrolling for Safari (use setAttribute to avoid TS errors)
       document.documentElement.setAttribute('style', 'overflow-scrolling: touch; -webkit-overflow-scrolling: touch;');
       
@@ -51,8 +60,11 @@ export const BookingsSection = ({
       if (perf?.memory) {
         console.log('Safari memory usage:', perf.memory);
       }
+    } else {
+      setIsLoading(false);
     }
   }, []);
+
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -62,6 +74,18 @@ export const BookingsSection = ({
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
   const { t } = useAppTranslation();
+
+  // Add timeout for mobile/Safari
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Bookings timeout - falling back to simple view');
+        setBrowserSupported(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   // Real-time subscription for booking updates
   useEffect(() => {
@@ -233,7 +257,7 @@ export const BookingsSection = ({
     }
 
     // Fallback for other statuses (cancelled, completed, etc.)
-    return <Card className="hover:shadow-md transition-shadow">
+    return <Card className="booking-card hover:shadow-md transition-shadow">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <CardTitle className="text-lg">{booking.title}</CardTitle>
@@ -252,17 +276,33 @@ export const BookingsSection = ({
         </CardContent>
       </Card>;
   };
-  if (loading) {
-    return <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+  // Safari loading state
+  if (isLoading || loading) {
+    return (
+      <div className="bookings-loading text-center py-8">
+        <div className="loading-spinner animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
         <p>{t('Loading Bookings')}</p>
-      </div>;
+      </div>
+    );
+  }
+
+  // Safari fallback state
+  if (!browserSupported) {
+    return (
+      <div className="safari-error-fallback text-center py-8">
+        <h2 className="text-xl font-semibold mb-4">{t('Bookings Unavailable')}</h2>
+        <p className="text-muted-foreground mb-4">{t('Please try refreshing the page or use Chrome desktop.')}</p>
+        <Button onClick={() => window.location.reload()}>
+          {t('Refresh Page')}
+        </Button>
+      </div>
+    );
   }
   return <SafariErrorBoundary>
-    <div className="space-y-6 safari-compatible mobile-optimized">
+    <div className="bookings-page space-y-6 safari-compatible mobile-optimized">
 
       {/* Tab Navigation - New Workflow */}
-      <div className="flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
+      <div className="booking-tabs flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
         <Button 
           variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
           onClick={() => setActiveTab('incoming')} 

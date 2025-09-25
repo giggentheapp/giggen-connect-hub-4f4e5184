@@ -527,3 +527,49 @@ All colors MUST be HSL.
     contain: layout style paint;
   }
 }
+
+/* Safari-specific fixes for bookings */
+.bookings-page {
+  -webkit-overflow-scrolling: touch;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+.booking-card {
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+}
+
+.bookings-loading {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Mobile Safari fixes for bookings */
+@media screen and (max-width: 768px) {
+  .bookings-section {
+    padding: 16px 8px;
+  }
+  
+  .booking-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .booking-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .booking-card {
+    margin-bottom: 12px;
+  }
+}
