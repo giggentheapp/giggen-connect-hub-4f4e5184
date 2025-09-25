@@ -1,4 +1,4 @@
-import { MinimalBookingTest } from '@/components/MinimalBookingTest';
+import { SafeBookingsSection } from '@/components/SafeBookingsSection';
 
 interface UserProfile {
   id: string;
@@ -21,6 +21,6 @@ interface BookingsSectionProps {
 export const BookingsSection = ({ profile }: BookingsSectionProps) => {
   console.log('🔄 BookingsSection rendering safely for user:', profile.user_id);
   
-  // Use minimal test first to ensure no crashes
-  return <MinimalBookingTest profile={profile} />;
+  // Use the complete safe booking system with all 4 phases
+  return <SafeBookingsSection profile={profile} />;
 };

@@ -25,6 +25,11 @@ export interface SafeBooking {
   sender_contact_info?: any;
   both_parties_approved?: boolean;
   is_public_after_approval?: boolean;
+  // Approval tracking fields
+  approved_by_sender?: boolean;
+  approved_by_receiver?: boolean;
+  sender_approved_at?: string;
+  receiver_approved_at?: string;
 }
 
 export const useBookingsSafe = (userId?: string) => {
@@ -93,6 +98,10 @@ export const useBookingsSafe = (userId?: string) => {
         sender_contact_info: booking.sender_contact_info || undefined,
         both_parties_approved: booking.both_parties_approved || false,
         is_public_after_approval: booking.is_public_after_approval || false,
+        approved_by_sender: booking.approved_by_sender || false,
+        approved_by_receiver: booking.approved_by_receiver || false,
+        sender_approved_at: booking.sender_approved_at || undefined,
+        receiver_approved_at: booking.receiver_approved_at || undefined,
       }));
 
       setBookings(safeBookings);
