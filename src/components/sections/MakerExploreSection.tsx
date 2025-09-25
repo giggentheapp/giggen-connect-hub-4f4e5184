@@ -117,7 +117,7 @@ export const MakerExploreSection = ({
                   <Search className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('Upcoming Events')}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t('Upcoming Events')}
                   </p>
@@ -130,7 +130,7 @@ export const MakerExploreSection = ({
                   <Music className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('Musicians Nearby')}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t('Musicians Nearby')}
                   </p>
