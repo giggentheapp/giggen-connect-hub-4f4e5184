@@ -10,6 +10,7 @@ import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactInfoSharingDialog } from '@/components/ContactInfoSharingDialog';
 import { Send } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { cn } from '@/lib/utils';
 
 interface BookingRequestProps {
@@ -28,6 +29,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
   const { createBooking } = useBookings();
   const { toast } = useToast();
+  const { t } = useAppTranslation();
 
   // Get current user's concepts
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -46,8 +48,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     
     if (!personalMessage.trim() || !selectedConcept) {
       toast({
-        title: "Manglende informasjon",
-        description: "Personlig melding og tilbudsvalg er påkrevd",
+        title: t('missingInformation'),
+        description: t('personalMessageAndOfferRequired'),
         variant: "destructive",
       });
       return;
@@ -133,8 +135,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       setOpen(false);
       
       toast({
-        title: "Forespørsel sendt",
-        description: "Bookingforespørselen er sendt til mottakeren",
+        title: t('requestSent'),
+        description: t('bookingRequestSent'),
       });
       
       onSuccess?.();
@@ -164,24 +166,24 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       <DialogTrigger asChild>
         <Button>
           <Send className="h-4 w-4 mr-2" />
-          Send forespørsel
+          {t('sendRequest')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto mobile-modal mobile-optimized">
         <div className="mobile-modal-content">
         <DialogHeader>
-          <DialogTitle className="text-lg md:text-base">Send booking-forespørsel</DialogTitle>
+          <DialogTitle className="text-lg md:text-base">{t('sendBookingRequest')}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Concept Selection */}
           <div className="space-y-3">
             <Label className="text-base font-medium">
-              Velg tilbud
+              {t('selectOffer')}
             </Label>
             {concepts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Du må først opprette tilbud før du kan sende forespørsler.
+                {t('mustCreateOffersFirst')}
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
@@ -224,12 +226,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             <>
               {/* Selected Concept Info */}
               <div className="space-y-2">
-                <Label className="text-base font-medium">Valgt tilbud</Label>
+                <Label className="text-base font-medium">{t('selectedOffer')}</Label>
                 <Card className="bg-muted/50">
                   <CardContent className="p-3">
                     <h4 className="font-medium">{selectedConcept.title}</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {selectedConcept.description || 'Ingen beskrivelse'}
+                      {selectedConcept.description || t('noDescription')}
                     </p>
                   </CardContent>
                 </Card>
@@ -239,15 +241,15 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               <div className="space-y-3">
                 <div>
                   <Label htmlFor="message" className="text-base font-medium">
-                    Personlig melding *
+                    {t('personalMessage')} *
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Dette sendes separat fra tilbudsbeskrivelsen
+                    {t('personalMessageNote')}
                   </p>
                 </div>
                 <Textarea
                   id="message"
-                  placeholder="Skriv en personlig melding til mottakeren..."
+                  placeholder={t('personalMessagePlaceholder')}
                   value={personalMessage}
                   onChange={(e) => setPersonalMessage(e.target.value)}
                   className="min-h-[120px] text-base md:text-sm"
@@ -258,14 +260,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               {/* Next Steps Information */}
               <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                 <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                  Hva skjer videre?
+                  {t('whatHappensNext')}
                 </h4>
                 <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-                  <p>• Mottakeren får en melding om forespørselen din</p>
-                  <p>• De kan se tilbudsdetaljene og din personlige melding</p>
-                  <p>• Ved interesse kan de tillate forespørselen</p>
-                  <p>• Dere får da tilgang til hverandres kontaktinformasjon</p>
-                  <p>• Detaljerte forhandlinger kan starte direkte mellom dere</p>
+                  <p>• {t('receiverGetsNotification')}</p>
+                  <p>• {t('canSeeOfferDetails')}</p>
+                  <p>• {t('canAllowRequest')}</p>
+                  <p>• {t('getContactAccess')}</p>
+                  <p>• {t('negotiationsCanStart')}</p>
                 </div>
               </div>
             </>
@@ -278,14 +280,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               variant="outline" 
               onClick={() => setOpen(false)}
             >
-              Avbryt
+              {t('cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={submitting || !selectedConcept || !personalMessage.trim()}
               className="min-h-[48px] touch-target"
             >
-              {submitting ? "Sender..." : "Send forespørsel"}
+              {submitting ? t('sending') : t('sendRequest')}
             </Button>
           </div>
         </form>
