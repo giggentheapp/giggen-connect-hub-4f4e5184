@@ -304,7 +304,7 @@ export const ProfileModal = ({
               {currentUserRole === 'maker' && <TabsContent value="concepts" className="mt-0">
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('myOffers')}</CardTitle>
+                      <CardTitle>{t('My Offers')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {concepts.length > 0 ? <div className="space-y-4">
