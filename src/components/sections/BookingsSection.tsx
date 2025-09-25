@@ -39,123 +39,68 @@ interface BookingsSectionProps {
 export const BookingsSection = ({
   profile
 }: BookingsSectionProps) => {
-  // Safari compatibility state
-  const [isLoading, setIsLoading] = useState(true);
-  const [browserSupported, setBrowserSupported] = useState(true);
-
-  // Enhanced Safari/mobile compatibility with better detection
-  useEffect(() => {
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
-    const isIOSChrome = /CriOS/i.test(navigator.userAgent);
-    
-    if (isSafari || isMobile || isIOSChrome) {
-      // Increased delay for Safari/mobile to ensure proper initialization
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-      
-      // Safari-specific optimizations
-      try {
-        const documentStyle = document.documentElement.style as any;
-        documentStyle.webkitOverflowScrolling = 'touch';
-        documentStyle.overflowScrolling = 'touch';
-        // Alternative approach using setProperty
-        document.documentElement.style.setProperty('-webkit-overflow-scrolling', 'touch');
-      } catch (e) {
-        console.warn('Safari styling failed:', e);
-      }
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
-
+  console.log('🔄 BookingsSection rendering for user:', profile.user_id);
+  
+  // Simplified state management
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [conceptViewOpen, setConceptViewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
+  
+  // Hooks with error handling
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
-  const { t } = useAppTranslation();
-
-  // Enhanced timeout with better Safari/mobile handling
-  useEffect(() => {
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
-    const timeoutDuration = (isSafari || isMobile) ? 8000 : 5000; // Longer timeout for Safari/mobile
-    
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setBrowserSupported(false);
-      }
-    }, timeoutDuration);
-    
-    return () => clearTimeout(timeout);
-  }, [loading, bookings, profile.user_id]);
-
-  // Simplified real-time subscription - disable for Safari/mobile to prevent crashes
-  useEffect(() => {
-    if (!profile.user_id) return;
-    
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
-    
-    // Skip real-time subscriptions on Safari/mobile to prevent white screen issues
-    if (isSafari || isMobile) {
-      return;
+  
+  // Safe translation with fallback
+  const safeT = (key: string) => {
+    try {
+      const { t } = useAppTranslation();
+      return t(key);
+    } catch (error) {
+      console.warn('Translation failed for key:', key);
+      return key; // Return the key as fallback
     }
+  };
 
-    const channel = supabase
-      .channel('bookings-section-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `sender_id=eq.${profile.user_id}`,
-        },
-        () => refetch()
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `receiver_id=eq.${profile.user_id}`,
-        },
-        () => refetch()
-      )
-      .subscribe();
+  console.log('📊 Bookings data:', { 
+    bookingsCount: bookings?.length || 0, 
+    loading, 
+    userId: profile.user_id 
+  });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [profile.user_id, refetch]);
-
-  // Stable filtering - always filter from complete dataset
-  const incomingRequests = bookings.filter(b => 
-    b.receiver_id === profile.user_id && 
-    b.status === 'pending'
-  );
+  // Safe filtering with error handling
+  let incomingRequests: any[] = [];
+  let sentRequests: any[] = [];
+  let ongoingAgreements: any[] = [];
+  let upcomingEvents: any[] = [];
   
-  const sentRequests = bookings.filter(b => 
-    b.sender_id === profile.user_id && 
-    b.status === 'pending'
-  );
-  
-  const ongoingAgreements = bookings.filter(b => 
-    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    (b.status === 'allowed' || b.status === 'approved_by_sender' || b.status === 'approved_by_receiver' || b.status === 'approved_by_both')
-  );
-  
-  const upcomingEvents = bookings.filter(b => 
-    (b.sender_id === profile.user_id || b.receiver_id === profile.user_id) && 
-    b.status === 'upcoming'
-  );
+  try {
+    if (Array.isArray(bookings)) {
+      incomingRequests = bookings.filter(b => 
+        b?.receiver_id === profile.user_id && 
+        b?.status === 'pending'
+      );
+      
+      sentRequests = bookings.filter(b => 
+        b?.sender_id === profile.user_id && 
+        b?.status === 'pending'
+      );
+      
+      ongoingAgreements = bookings.filter(b => 
+        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
+        (b?.status === 'allowed' || b?.status === 'approved_by_sender' || b?.status === 'approved_by_receiver' || b?.status === 'approved_by_both')
+      );
+      
+      upcomingEvents = bookings.filter(b => 
+        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
+        b?.status === 'upcoming'
+      );
+    }
+  } catch (error) {
+    console.error('Error filtering bookings:', error);
+  }
   
   // Remove historical bookings - we now permanently delete all bookings
 
@@ -179,39 +124,49 @@ export const BookingsSection = ({
     }
   };
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return t('waitingResponse');
-      case 'allowed':
-        return t('allowed');
-      case 'approved_by_both':
-        return t('approved');
-      case 'upcoming':
-        return t('published');
-      case 'completed':
-        return t('completed');
-      case 'cancelled':
-        return t('cancelled');
-      default:
-        return status;
+    try {
+      switch (status) {
+        case 'pending':
+          return safeT('waitingResponse');
+        case 'allowed':
+          return safeT('allowed');
+        case 'approved_by_both':
+          return safeT('approved');
+        case 'upcoming':
+          return safeT('published');
+        case 'completed':
+          return safeT('completed');
+        case 'cancelled':
+          return safeT('cancelled');
+        default:
+          return status;
+      }
+    } catch (error) {
+      console.warn('Error in getStatusText:', error);
+      return status;
     }
   };
   const getPhaseText = (booking: any) => {
-    switch (booking.status) {
-      case 'pending':
-        return booking.receiver_id === profile.user_id ? t('Request Phase') : t('Sent Request Phase');
-      case 'allowed':
-        return t('Ongoing Agreement Editable Phase');
-      case 'approved_by_both':
-        return t('Ongoing Agreement Ready Phase');
-      case 'upcoming':
-        return t('Published Event Phase');
-      case 'completed':
-        return t('Completed Phase');
-      case 'cancelled':
-        return t('Cancelled Phase');
-      default:
-        return t('Unknown Status');
+    try {
+      switch (booking?.status) {
+        case 'pending':
+          return booking.receiver_id === profile.user_id ? safeT('Request Phase') : safeT('Sent Request Phase');
+        case 'allowed':
+          return safeT('Ongoing Agreement Editable Phase');
+        case 'approved_by_both':
+          return safeT('Ongoing Agreement Ready Phase');
+        case 'upcoming':
+          return safeT('Published Event Phase');
+        case 'completed':
+          return safeT('Completed Phase');
+        case 'cancelled':
+          return safeT('Cancelled Phase');
+        default:
+          return safeT('Unknown Status');
+      }
+    } catch (error) {
+      console.warn('Error in getPhaseText:', error);
+      return 'Unknown Status';
     }
   };
   const handleBookingAction = async () => {
@@ -220,8 +175,8 @@ export const BookingsSection = ({
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({
-        title: t('couldNotUpdateList'),
-        description: t('tryRefreshManually'),
+        title: safeT('couldNotUpdateList'),
+        description: safeT('tryRefreshManually'),
         variant: "destructive"
       });
     }
@@ -264,50 +219,25 @@ export const BookingsSection = ({
         <CardContent>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={handleDetailsClick}>
-              {t('seeDetails')}
+              {safeT('seeDetails')}
             </Button>
             <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
           </div>
         </CardContent>
       </Card>;
   };
-  // Enhanced loading state with Safari/mobile compatibility
-  if (isLoading || loading) {
+  // Simple loading state
+  if (loading) {
+    console.log('📱 Showing loading state');
     return (
       <div className="bookings-loading text-center py-8 min-h-[200px] flex flex-col justify-center">
         <div className="loading-spinner animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">{t('Loading Bookings')}</p>
-        <p className="text-xs text-muted-foreground mt-2">Safari/Mobile optimizations enabled</p>
+        <p className="text-muted-foreground">Loading Bookings...</p>
       </div>
     );
   }
 
-  // Enhanced Safari/mobile fallback with better error handling
-  if (!browserSupported) {
-    return (
-      <div className="safari-error-fallback text-center py-8 min-h-[300px] flex flex-col justify-center">
-        <h2 className="text-xl font-semibold mb-4 text-destructive">{t('Bookings Loading Issue')}</h2>
-        <p className="text-muted-foreground mb-4">Safari/mobile compatibility mode activated</p>
-        <div className="space-y-2">
-          <Button onClick={() => window.location.reload()} className="mr-2">
-            {t('Reload Page')}
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setBrowserSupported(true);
-              setIsLoading(true);
-            }}
-          >
-            Try Again
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-4">
-          Try using Chrome desktop for the best experience
-        </p>
-      </div>
-    );
-  }
+  console.log('🎯 Rendering main BookingsSection content');
   return <SafariErrorBoundary>
     <BookingErrorBoundary>
       <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
@@ -320,8 +250,8 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Inbox className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('incomingRequests')}</span>
-          <span className="sm:hidden">{t('Incoming')}</span>
+          <span className="hidden sm:inline">{safeT('incomingRequests')}</span>
+          <span className="sm:hidden">{safeT('Incoming')}</span>
           ({incomingRequests.length})
         </Button>
         <Button 
@@ -330,8 +260,8 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Send className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('Sent Request')}</span>
-          <span className="sm:hidden">{t('sent')}</span>
+          <span className="hidden sm:inline">{safeT('Sent Request')}</span>
+          <span className="sm:hidden">{safeT('sent')}</span>
           ({sentRequests.length})
         </Button>
         <Button 
@@ -340,8 +270,8 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Clock className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('Ongoing Agreements')}</span>
-          <span className="sm:hidden">{t('ongoing')}</span>
+          <span className="hidden sm:inline">{safeT('Ongoing Agreements')}</span>
+          <span className="sm:hidden">{safeT('ongoing')}</span>
           ({ongoingAgreements.length})
         </Button>
         <Button 
@@ -350,8 +280,8 @@ export const BookingsSection = ({
           className="flex items-center gap-2 min-h-[44px] touch-target flex-shrink-0"
         >
           <Check className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('Upcoming Events')}</span>
-          <span className="sm:hidden">{t('Upcoming')}</span>
+          <span className="hidden sm:inline">{safeT('Upcoming Events')}</span>
+          <span className="sm:hidden">{safeT('Upcoming')}</span>
           ({upcomingEvents.length})
         </Button>
       </div>
@@ -360,15 +290,15 @@ export const BookingsSection = ({
       <div className="space-y-4">
         {activeTab === 'incoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('Incoming Requests')}</h3>
+              <h3 className="text-lg font-medium mb-2">{safeT('Incoming Requests')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('incomingRequests')}
+                {safeT('incomingRequests')}
               </p>
             </div>
             {incomingRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('No Incoming Requests')}</p>
+                  <p className="text-muted-foreground">{safeT('No Incoming Requests')}</p>
                 </CardContent>
               </Card> : incomingRequests.map(booking => (
                 <BookingCard 
@@ -380,15 +310,15 @@ export const BookingsSection = ({
 
         {activeTab === 'sent' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('Sent Request')}</h3>
+              <h3 className="text-lg font-medium mb-2">{safeT('Sent Request')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('sentRequestsDesc')}
+                {safeT('sentRequestsDesc')}
               </p>
             </div>
             {sentRequests.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('No Sent Requests')}</p>
+                  <p className="text-muted-foreground">{safeT('No Sent Requests')}</p>
                 </CardContent>
               </Card> : sentRequests.map(booking => (
                 <BookingCard 
@@ -400,15 +330,15 @@ export const BookingsSection = ({
 
         {activeTab === 'ongoing' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('Ongoing Agreements')}</h3>
+              <h3 className="text-lg font-medium mb-2">{safeT('Ongoing Agreements')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('ongoingAgreementsDesc')}
+                {safeT('ongoingAgreementsDesc')}
               </p>
             </div>
             {ongoingAgreements.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('No Ongoing Agreements')}</p>
+                  <p className="text-muted-foreground">{safeT('No Ongoing Agreements')}</p>
                 </CardContent>
               </Card> : ongoingAgreements.map(booking => (
                 <BookingCard 
@@ -420,15 +350,15 @@ export const BookingsSection = ({
 
         {activeTab === 'upcoming' && <>
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">{t('Booking Upcoming Events')}</h3>
+              <h3 className="text-lg font-medium mb-2">{safeT('Booking Upcoming Events')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('bookingUpcomingEventsDesc')}
+                {safeT('bookingUpcomingEventsDesc')}
               </p>
             </div>
             {upcomingEvents.length === 0 ? <Card>
                 <CardContent className="text-center py-8">
                   <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('No Upcoming Events')}</p>
+                  <p className="text-muted-foreground">{safeT('No Upcoming Events')}</p>
                 </CardContent>
               </Card> : upcomingEvents.map(booking => (
                 <BookingCard 
