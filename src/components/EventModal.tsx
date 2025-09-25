@@ -3,8 +3,9 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, X, CreditCard } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, X, CreditCard, Music, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 
 interface EventData {
   id: string;
@@ -27,6 +28,7 @@ interface EventModalProps {
 
 export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
   const [event, setEvent] = useState<EventData | null>(null);
+  const [makerProfile, setMakerProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
     const fetchEventData = async () => {
       try {
         setLoading(true);
+        // Fetch event data
         const { data, error } = await supabase
           .from('events_market')
           .select('*')
@@ -46,6 +49,17 @@ export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
 
         if (error) throw error;
         setEvent(data);
+
+        // Fetch maker profile for portfolio
+        if (data.created_by) {
+          const { data: profileData, error: profileError } = await supabase
+            .rpc('get_secure_profile_data', { target_user_id: data.created_by })
+            .maybeSingle();
+
+          if (!profileError && profileData) {
+            setMakerProfile(profileData);
+          }
+        }
       } catch (error) {
         console.error('Error fetching event data:', error);
       } finally {
@@ -70,7 +84,7 @@ export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b p-6">
           <div className="flex items-center justify-between">
@@ -172,6 +186,35 @@ export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Portefølje */}
+          {makerProfile && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Music className="h-5 w-5" />
+                  Portefølje - {makerProfile.display_name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                  <User className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <h3 className="font-semibold">{makerProfile.display_name}</h3>
+                    <p className="text-sm text-muted-foreground">Artist/Maker</p>
+                    {makerProfile.bio && (
+                      <p className="text-sm mt-1 line-clamp-2">{makerProfile.bio}</p>
+                    )}
+                  </div>
+                </div>
+                
+                <ProfilePortfolioViewer 
+                  userId={makerProfile.user_id} 
+                  isOwnProfile={false}
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </DialogContent>
     </Dialog>

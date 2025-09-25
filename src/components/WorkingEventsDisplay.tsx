@@ -5,7 +5,7 @@ import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
-import { BookingDetailsModal } from '@/components/BookingDetailsModal';
+import { PublishedEventDetailsModal } from '@/components/PublishedEventDetailsModal';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -75,18 +75,23 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">Loading events...</div>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Laster arrangementer...</p>
       </div>
     );
   }
 
   if (eventsData.length === 0) {
     return (
-      <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">
-          {isGoerViewing ? t('noPublicEvents') : t('noUpcomingEvents')}
-        </div>
+      <div className="text-center py-8">
+        <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">
+          {isGoerViewing 
+            ? 'Ingen publiserte arrangementer for øyeblikket'
+            : (isOwnProfile ? 'Du har ingen publiserte arrangementer' : 'Ingen publiserte arrangementer')
+          }
+        </p>
       </div>
     );
   }
@@ -138,24 +143,26 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between">
-                <Badge variant="secondary">{event.status}</Badge>
-                 <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                   <Eye className="h-4 w-4" />
-                   {t('viewDetails')}
-                 </Button>
+                <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  Publisert
+                </Badge>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  Se detaljer
+                </Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Booking Details Modal */}
-      <BookingDetailsModal
+      {/* Published Event Details Modal */}
+      <PublishedEventDetailsModal
+        bookingId={selectedBookingId || ''}
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        bookingId={selectedBookingId}
-        currentUserId={currentUserId}
-        isOwner={selectedBookingId ? isBookingOwner(eventsData.find(e => e.id === selectedBookingId)) : false}
+        currentUserId={currentUserId || ''}
+        showSensitiveInfo={showSensitiveInfo}
       />
     </>
   );

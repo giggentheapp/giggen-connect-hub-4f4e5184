@@ -371,7 +371,12 @@ const Profile = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <WorkingEventsDisplay profile={profile} showSensitiveInfo={isOwnProfile} />
+            <WorkingEventsDisplay 
+              profile={profile} 
+              showSensitiveInfo={isOwnProfile}
+              currentUserId={currentUserId}
+              viewerRole={currentUserProfile?.role}
+            />
           </CardContent>
         </Card>
 
