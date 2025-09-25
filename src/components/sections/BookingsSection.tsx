@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
+import { BookingErrorBoundary } from '@/components/BookingErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -308,7 +309,8 @@ export const BookingsSection = ({
     );
   }
   return <SafariErrorBoundary>
-    <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
+    <BookingErrorBoundary>
+      <div className="bookings-page space-y-6 safari-compatible mobile-optimized" style={{ minHeight: '400px' }}>
 
       {/* Tab Navigation - New Workflow */}
       <div className="booking-tabs flex gap-2 border-b flex-wrap overflow-x-auto mobile-scroll">
@@ -452,5 +454,6 @@ export const BookingsSection = ({
       }} />
         </>}
     </div>
+    </BookingErrorBoundary>
   </SafariErrorBoundary>;
 };

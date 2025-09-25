@@ -63,9 +63,17 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     }
   }, [isOpen, booking]);
 
-  // Real-time subscription for booking updates
+  // Enhanced real-time subscription with better error handling for mobile
   useEffect(() => {
     if (!booking?.id) return;
+    
+    const isMobileOrSafari = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                           /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    // Skip real-time subscriptions on mobile/Safari to prevent crashes
+    if (isMobileOrSafari) {
+      return;
+    }
 
     const channel = supabase
       .channel('booking-updates')
@@ -78,33 +86,41 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
           filter: `id=eq.${booking.id}`
         },
         (payload) => {
-          const updatedBooking = payload.new;
-          setRealtimeBooking(prev => ({ ...prev, ...updatedBooking }));
-          
-          // Show notification when other party confirms
-          const isSender = currentUserId === booking.sender_id;
-          const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
-          const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
-          
-          if (updatedBooking[otherUserConfirmedField] && !booking[otherUserConfirmedField]) {
-            toast({
-              title: "Booking bekreftet! 🎉",
-              description: "Den andre parten har bekreftet bookingen",
-            });
-          }
-          
-          if (updatedBooking[otherUserReadField] && !booking[otherUserReadField]) {
-            toast({
-              title: "Avtale lest! 📋",
-              description: "Den andre parten har lest avtalen",
-            });
+          try {
+            const updatedBooking = payload.new;
+            setRealtimeBooking(prev => ({ ...prev, ...updatedBooking }));
+            
+            // Show notification when other party confirms
+            const isSender = currentUserId === booking.sender_id;
+            const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
+            const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
+            
+            if (updatedBooking[otherUserConfirmedField] && !booking[otherUserConfirmedField]) {
+              toast({
+                title: "Booking bekreftet! 🎉",
+                description: "Den andre parten har bekreftet bookingen",
+              });
+            }
+            
+            if (updatedBooking[otherUserReadField] && !booking[otherUserReadField]) {
+              toast({
+                title: "Avtale lest! 📋",
+                description: "Den andre parten har lest avtalen",
+              });
+            }
+          } catch (error) {
+            console.warn('Error handling real-time update:', error);
           }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch (error) {
+        console.warn('Error removing channel:', error);
+      }
     };
   }, [booking?.id, currentUserId, booking?.sender_confirmed, booking?.receiver_confirmed, booking?.sender_read_agreement, booking?.receiver_read_agreement, toast]);
 

@@ -79,10 +79,13 @@ export const BookingDetailsModal = ({
   }
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'EEEE d. MMMM yyyy', {
-        locale: nb
-      });
-    } catch {
+      const date = new Date(dateString);
+      // Validate date
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+      return format(date, 'EEEE d. MMMM yyyy', { locale: nb });
+    } catch (error) {
       return dateString;
     }
   };

@@ -91,19 +91,37 @@ export const EnhancedBookingDetails = ({
     };
   }, [bookingId, isOpen, toast]);
 
-  // Real-time subscription for booking updates
+  // Enhanced real-time subscription with better error handling
   useEffect(() => {
     if (!booking?.id) return;
+    
+    const isMobileOrSafari = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                           /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    // Skip real-time subscriptions on mobile/Safari to prevent crashes
+    if (isMobileOrSafari) {
+      return;
+    }
+    
     const channel = supabase.channel('enhanced-booking-updates').on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
       table: 'bookings',
       filter: `id=eq.${booking.id}`
     }, payload => {
-      setBooking(payload.new);
+      try {
+        setBooking(payload.new);
+      } catch (error) {
+        console.warn('Error handling real-time update:', error);
+      }
     }).subscribe();
+    
     return () => {
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch (error) {
+        console.warn('Error removing channel:', error);
+      }
     };
   }, [booking?.id]);
   if (!isOpen) return null;
@@ -225,7 +243,19 @@ export const EnhancedBookingDetails = ({
 
                   <div className="space-y-2">
                     {booking.event_date && (
-                      <p>{new Date(booking.event_date).toLocaleDateString('no-NO')} {booking.time && booking.time}</p>
+                      <p>
+                        {(() => {
+                          try {
+                            const date = new Date(booking.event_date);
+                            if (isNaN(date.getTime())) {
+                              return booking.event_date;
+                            }
+                            return date.toLocaleDateString('nb-NO');
+                          } catch (error) {
+                            return booking.event_date;
+                          }
+                        })()} {booking.time && booking.time}
+                      </p>
                     )}
                     
                     {booking.address && (
