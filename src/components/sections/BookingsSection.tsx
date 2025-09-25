@@ -236,8 +236,158 @@ export const BookingsSection = ({
     );
   }
 
-  // Use the safe version instead of the complex version
+  // Use the original booking flow
   return (
-    <SafeBookingsSection profile={profile} />
+    <SafariErrorBoundary>
+      <BookingErrorBoundary>
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="flex gap-2 border-b overflow-x-auto pb-2">
+            <Button 
+              variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
+              onClick={() => setActiveTab('incoming')} 
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Inbox className="h-4 w-4" />
+              Innkommende ({incomingRequests.length})
+            </Button>
+            
+            <Button 
+              variant={activeTab === 'sent' ? 'default' : 'ghost'} 
+              onClick={() => setActiveTab('sent')} 
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Send className="h-4 w-4" />
+              Sendt ({sentRequests.length})
+            </Button>
+            
+            <Button 
+              variant={activeTab === 'ongoing' ? 'default' : 'ghost'} 
+              onClick={() => setActiveTab('ongoing')} 
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Clock className="h-4 w-4" />
+              Pågående ({ongoingAgreements.length})
+            </Button>
+            
+            <Button 
+              variant={activeTab === 'upcoming' ? 'default' : 'ghost'} 
+              onClick={() => setActiveTab('upcoming')} 
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Check className="h-4 w-4" />
+              Publisert ({upcomingEvents.length})
+            </Button>
+          </div>
+
+          {/* Current Tab Content */}
+          <div className="space-y-4">
+            {activeTab === 'incoming' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Innkommende forespørsler</h3>
+                {incomingRequests.length === 0 ? (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  incomingRequests.map((booking) => (
+                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === 'sent' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Sendte forespørsler</h3>
+                {sentRequests.length === 0 ? (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">Ingen sendte forespørsler</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  sentRequests.map((booking) => (
+                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === 'ongoing' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Pågående avtaler</h3>
+                {ongoingAgreements.length === 0 ? (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">Ingen pågående avtaler</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  ongoingAgreements.map((booking) => (
+                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === 'upcoming' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Publiserte arrangementer</h3>
+                {upcomingEvents.length === 0 ? (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  upcomingEvents.map((booking) => (
+                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Modals */}
+          {selectedBooking && (
+            <>
+              <EnhancedBookingDetails
+                bookingId={selectedBooking.id}
+                isOpen={detailsOpen}
+                onClose={() => setDetailsOpen(false)}
+              />
+
+              <BookingConfirmation
+                booking={selectedBooking}
+                isOpen={confirmationOpen}
+                onClose={() => setConfirmationOpen(false)}
+                currentUserId={profile.user_id}
+              />
+
+              <BookingAgreement
+                booking={selectedBooking}
+                isOpen={agreementOpen}
+                onClose={() => setAgreementOpen(false)}
+                currentUserId={profile.user_id}
+              />
+
+              <ConceptViewModal
+                isOpen={conceptViewOpen}
+                onClose={() => setConceptViewOpen(false)}
+                conceptIds={selectedBooking?.concept_ids || []}
+                initialConceptIndex={selectedBooking?.concept_ids?.findIndex((id: string) => id === selectedBooking?.selected_concept_id) || 0}
+              />
+            </>
+          )}
+        </div>
+      </BookingErrorBoundary>
+    </SafariErrorBoundary>
   );
 };
