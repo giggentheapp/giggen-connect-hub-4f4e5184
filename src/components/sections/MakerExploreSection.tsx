@@ -159,7 +159,7 @@ export const MakerExploreSection = ({
                       <div>
                         <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {t('seeUpcomingEventsInArea')}
+                          {t('')}
                         </p>
                       </div>
                     </div>
@@ -172,7 +172,7 @@ export const MakerExploreSection = ({
                       <div>
                         <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {t('findMusiciansCooperate')}
+                          {t('')}
                         </p>
                       </div>
                     </div>
@@ -185,7 +185,7 @@ export const MakerExploreSection = ({
                       <div>
                         <h3 className="font-semibold text-foreground mb-2">{t('localVenues')}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {t('findHiddenVenues')}
+                          {t('')}
                         </p>
                       </div>
                     </div>
