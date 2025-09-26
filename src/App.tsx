@@ -20,6 +20,10 @@ import FeedbackButton from "./components/FeedbackButton";
 import ConceptView from "./pages/ConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
 import NotFound from "./pages/NotFound";
+import BookingDetails from "./pages/BookingDetails";
+import BookingEdit from "./pages/BookingEdit";
+import BookingConfirmationPage from "./pages/BookingConfirmationPage";
+import BookingAgreementPage from "./pages/BookingAgreementPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +47,10 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/concept/:conceptId" element={<ConceptView />} />
             <Route path="/events" element={<UpcomingEvents />} />
+            <Route path="/booking/:bookingId/details" element={<BookingDetails />} />
+            <Route path="/booking/:bookingId/edit" element={<BookingEdit />} />
+            <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
+            <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

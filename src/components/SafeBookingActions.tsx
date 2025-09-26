@@ -134,28 +134,6 @@ export const SafeBookingActions = ({
               <Check className="h-4 w-4 mr-1" />
               Godkjenn avtale
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="sm" variant="outline" disabled={loading}>
-                  <Trash className="h-4 w-4 mr-1" />
-                  Avbryt
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Avbryt booking?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Dette vil permanent slette bookingen.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleRejectBooking}>
-                    Slett booking
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </>
         );
 
@@ -174,30 +152,7 @@ export const SafeBookingActions = ({
 
       case 'upcoming':
       case 'completed':
-        return (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="sm" variant="outline" disabled={loading}>
-                <Trash className="h-4 w-4 mr-1" />
-                Slett
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Slett arrangement?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Dette vil permanent fjerne arrangementet.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleRejectBooking}>
-                  Slett arrangement
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        );
+        return null; // Delete functionality handled by BookingActions
 
       default:
         return null;

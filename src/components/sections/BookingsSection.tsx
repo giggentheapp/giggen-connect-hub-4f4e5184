@@ -5,16 +5,8 @@ import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
 import { BookingErrorBoundary } from '@/components/BookingErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
-import { EnhancedBookingDetails } from '@/components/EnhancedBookingDetails';
-import { BookingEditModal } from '@/components/BookingEditModal';
-import { BookingConfirmation } from '@/components/BookingConfirmation';
-import { BookingAgreement } from '@/components/BookingAgreement';
-import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { Send, Inbox, Clock, Eye, Check } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
@@ -22,6 +14,7 @@ import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
 import { SafeBookingsSection } from '@/components/SafeBookingsSection';
+import { useNavigate } from 'react-router-dom';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -43,13 +36,7 @@ export const BookingsSection = ({
 }: BookingsSectionProps) => {
   console.log('🔄 BookingsSection rendering for user:', profile.user_id);
   
-  // Simplified state management
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [agreementOpen, setAgreementOpen] = useState(false);
-  const [conceptViewOpen, setConceptViewOpen] = useState(false);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
   
   // Hooks with error handling
@@ -201,28 +188,26 @@ export const BookingsSection = ({
     booking: any;
   }) => {
     const handleDetailsClick = () => {
-      setSelectedBooking(booking);
-      setDetailsOpen(true);
+      navigate(`/booking/${booking.id}/details`);
     };
 
     const handleEditClick = () => {
-      setSelectedBooking(booking);
-      setEditOpen(true);
+      navigate(`/booking/${booking.id}/edit`);
     };
 
     const handleConceptClick = () => {
-      setSelectedBooking(booking);
-      setConceptViewOpen(true);
+      if (booking.concept_ids?.length > 0) {
+        const firstConceptId = booking.concept_ids[0];
+        navigate(`/concept/${firstConceptId}`);
+      }
     };
 
     const handleConfirmationClick = () => {
-      setSelectedBooking(booking);
-      setConfirmationOpen(true);
+      navigate(`/booking/${booking.id}/confirm`);
     };
 
     const handleAgreementClick = () => {
-      setSelectedBooking(booking);
-      setAgreementOpen(true);
+      navigate(`/booking/${booking.id}/agreement`);
     };
 
     // Use different card components based on booking status
@@ -454,45 +439,6 @@ export const BookingsSection = ({
             </Tabs>
           </div>
 
-          {/* Modals */}
-          {selectedBooking && (
-            <>
-              <EnhancedBookingDetails
-                bookingId={selectedBooking.id}
-                isOpen={detailsOpen}
-                onClose={() => setDetailsOpen(false)}
-              />
-
-              <BookingEditModal
-                booking={selectedBooking}
-                isOpen={editOpen}
-                onClose={() => setEditOpen(false)}
-                currentUserId={profile.user_id}
-                onSaved={handleBookingAction}
-              />
-
-              <BookingConfirmation
-                booking={selectedBooking}
-                isOpen={confirmationOpen}
-                onClose={() => setConfirmationOpen(false)}
-                currentUserId={profile.user_id}
-              />
-
-              <BookingAgreement
-                booking={selectedBooking}
-                isOpen={agreementOpen}
-                onClose={() => setAgreementOpen(false)}
-                currentUserId={profile.user_id}
-              />
-
-              <ConceptViewModal
-                isOpen={conceptViewOpen}
-                onClose={() => setConceptViewOpen(false)}
-                conceptIds={selectedBooking?.concept_ids || []}
-                initialConceptIndex={selectedBooking?.concept_ids?.findIndex((id: string) => id === selectedBooking?.selected_concept_id) || 0}
-              />
-            </>
-          )}
         </div>
       </BookingErrorBoundary>
     </SafariErrorBoundary>

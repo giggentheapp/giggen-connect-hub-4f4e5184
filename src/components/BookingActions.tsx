@@ -461,12 +461,11 @@ export const BookingActions = ({
           </AlertDialog>
         )}
 
-        {/* Delete button for all bookings except pending (which use reject) */}
+        {/* Delete button for upcoming bookings only */}
         {booking.status === 'upcoming' && <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
-                <Trash className="h-4 w-4 mr-1" />
-                Slett
+                <Trash className="h-3 w-3" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

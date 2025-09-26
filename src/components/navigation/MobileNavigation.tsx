@@ -36,7 +36,6 @@ export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavig
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium truncate">{item.label}</span>
             </button>
           );
         }) : []}
