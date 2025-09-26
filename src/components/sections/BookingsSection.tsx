@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
 import { BookingErrorBoundary } from '@/components/BookingErrorBoundary';
 import { Button } from '@/components/ui/button';
@@ -289,119 +290,168 @@ export const BookingsSection = ({
   return (
     <SafariErrorBoundary>
       <BookingErrorBoundary>
-        <div className="space-y-6">
-          {/* Tab Navigation */}
-          <div className="flex gap-2 border-b overflow-x-auto pb-2">
-            <Button 
-              variant={activeTab === 'incoming' ? 'default' : 'ghost'} 
-              onClick={() => setActiveTab('incoming')} 
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Inbox className="h-4 w-4" />
-              Innkommende ({incomingRequests.length})
-            </Button>
-            
-            <Button 
-              variant={activeTab === 'sent' ? 'default' : 'ghost'} 
-              onClick={() => setActiveTab('sent')} 
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Send className="h-4 w-4" />
-              Sendt ({sentRequests.length})
-            </Button>
-            
-            <Button 
-              variant={activeTab === 'ongoing' ? 'default' : 'ghost'} 
-              onClick={() => setActiveTab('ongoing')} 
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Clock className="h-4 w-4" />
-              Pågående ({ongoingAgreements.length})
-            </Button>
-            
-            <Button 
-              variant={activeTab === 'upcoming' ? 'default' : 'ghost'} 
-              onClick={() => setActiveTab('upcoming')} 
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Check className="h-4 w-4" />
-              Publisert ({upcomingEvents.length})
-            </Button>
+        <div className="w-full h-full bg-background">
+          {/* Tab Navigation Header */}
+          <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+            <div className="max-w-4xl mx-auto">
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 max-w-[600px]">
+                  <TabsTrigger value="incoming" className="flex items-center gap-2">
+                    <Inbox className="w-4 h-4" />
+                    <span className="hidden sm:inline">Innkommende</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {incomingRequests.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="sent" className="flex items-center gap-2">
+                    <Send className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sendt</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {sentRequests.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="ongoing" className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="hidden sm:inline">Pågående</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {ongoingAgreements.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="upcoming" className="flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    <span className="hidden sm:inline">Publisert</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {upcomingEvents.length}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
 
-          {/* Current Tab Content */}
-          <div className="space-y-4">
-            {activeTab === 'incoming' && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Innkommende forespørsler</h3>
-                {incomingRequests.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-12">
-                      <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  incomingRequests.map((booking) => (
-                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                  ))
-                )}
-              </div>
-            )}
+          {/* Tab Content */}
+          <div className="flex-1 overflow-hidden">
+            <Tabs value={activeTab} className="h-full">
+              {/* Incoming Tab Content */}
+              <TabsContent value="incoming" className="h-full m-0">
+                <div className="flex-1 flex flex-col h-full">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Innkommende forespørsler</h2>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {incomingRequests.length === 0 ? (
+                        <Card>
+                          <CardContent className="text-center py-12">
+                            <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                            <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        incomingRequests.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-            {activeTab === 'sent' && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Sendte forespørsler</h3>
-                {sentRequests.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-12">
-                      <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Ingen sendte forespørsler</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  sentRequests.map((booking) => (
-                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                  ))
-                )}
-              </div>
-            )}
+              {/* Sent Tab Content */}
+              <TabsContent value="sent" className="h-full m-0">
+                <div className="flex-1 flex flex-col h-full">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Sendte forespørsler</h2>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {sentRequests.length === 0 ? (
+                        <Card>
+                          <CardContent className="text-center py-12">
+                            <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                            <p className="text-muted-foreground">Ingen sendte forespørsler</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        sentRequests.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-            {activeTab === 'ongoing' && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Pågående avtaler</h3>
-                {ongoingAgreements.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-12">
-                      <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Ingen pågående avtaler</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  ongoingAgreements.map((booking) => (
-                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                  ))
-                )}
-              </div>
-            )}
+              {/* Ongoing Tab Content */}
+              <TabsContent value="ongoing" className="h-full m-0">
+                <div className="flex-1 flex flex-col h-full">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Pågående avtaler</h2>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {ongoingAgreements.length === 0 ? (
+                        <Card>
+                          <CardContent className="text-center py-12">
+                            <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                            <p className="text-muted-foreground">Ingen pågående avtaler</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        ongoingAgreements.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-            {activeTab === 'upcoming' && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Publiserte arrangementer</h3>
-                {upcomingEvents.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-12">
-                      <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  upcomingEvents.map((booking) => (
-                    <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                  ))
-                )}
-              </div>
-            )}
+              {/* Published Tab Content */}
+              <TabsContent value="upcoming" className="h-full m-0">
+                <div className="flex-1 flex flex-col h-full">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Publiserte arrangementer</h2>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {upcomingEvents.length === 0 ? (
+                        <Card>
+                          <CardContent className="text-center py-12">
+                            <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                            <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        upcomingEvents.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Modals */}
