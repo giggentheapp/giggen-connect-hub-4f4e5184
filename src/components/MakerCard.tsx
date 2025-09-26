@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Music, Eye, Calendar, Image, Star } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useNavigate } from 'react-router-dom';
 
 interface MakerCardProps {
   maker: {
@@ -24,6 +25,7 @@ interface MakerCardProps {
 export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps) => {
   const { ismaker } = useRole();
   const { t } = useAppTranslation();
+  const navigate = useNavigate();
   
   const privacySettings = maker.privacy_settings || {};
   const showPortfolio = privacySettings.show_portfolio_to_goers;
@@ -133,9 +135,9 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
           </Button>
           
           {/* Only show Book button to Makers */}
-          {ismaker && onBookMaker && (
+          {ismaker && (
             <Button
-              onClick={() => onBookMaker(maker.user_id)}
+              onClick={() => navigate(`/booking/create/${maker.user_id}`)}
               size="sm"
               className="flex-1 bg-primary hover:bg-primary/90 min-h-[44px] touch-target"
             >
