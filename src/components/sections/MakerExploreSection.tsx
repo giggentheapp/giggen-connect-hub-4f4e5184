@@ -146,7 +146,7 @@ export const MakerExploreSection = ({
                   
                   {/* Description */}
                   <p className="text-muted-foreground mb-8 leading-relaxed">
-                    {t('mapComingSoonDescription')}
+                    {t('Map Coming Soon Description')}
                   </p>
 
                   {/* Features Grid */}
@@ -170,7 +170,7 @@ export const MakerExploreSection = ({
                         <Music className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
+                        <h3 className="font-semibold text-foreground mb-2">{t('Musicians Nearby')}</h3>
                         <p className="text-sm text-muted-foreground">
                           {t('')}
                         </p>
@@ -183,7 +183,7 @@ export const MakerExploreSection = ({
                         <Users className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground mb-2">{t('localVenues')}</h3>
+                        <h3 className="font-semibold text-foreground mb-2">{t('Lokale Spillesteder')}</h3>
                         <p className="text-sm text-muted-foreground">
                           {t('')}
                         </p>
@@ -193,7 +193,7 @@ export const MakerExploreSection = ({
 
                   {/* Interim Message */}
                   <p className="text-muted-foreground mb-6">
-                    {t('inTheMeantime')}
+                    {t('In The Meantime')}
                   </p>
 
                   {/* Action Button */}
@@ -209,7 +209,7 @@ export const MakerExploreSection = ({
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                     <Badge variant="secondary" className="text-xs">
-                      {t('Under Development')}
+                      {t('Under Utvikling')}
                     </Badge>
                   </div>
                 </CardContent>
@@ -301,7 +301,7 @@ export const MakerExploreSection = ({
                                   className="text-xs"
                                 >
                                   <Eye className="w-3 h-3 mr-2" />
-                                  {t('seeProfile')}
+                                  {t('See Profile')}
                                 </Button>
                               </div>
                             </div>
