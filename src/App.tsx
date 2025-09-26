@@ -25,6 +25,7 @@ import BookingEdit from "./pages/BookingEdit";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import BookingAgreementPage from "./pages/BookingAgreementPage";
 import BookingRequestPage from "./pages/BookingRequestPage";
+import Bookings from "./pages/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/concept/:conceptId" element={<ConceptView />} />
             <Route path="/events" element={<UpcomingEvents />} />
+            <Route path="/bookings" element={<Bookings />} />
             <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
             <Route path="/booking/:bookingId/details" element={<BookingDetails />} />
             <Route path="/booking/:bookingId/edit" element={<BookingEdit />} />

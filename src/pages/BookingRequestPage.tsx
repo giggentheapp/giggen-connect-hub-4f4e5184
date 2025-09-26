@@ -64,8 +64,8 @@ const BookingRequestPage = () => {
         description: 'Your booking request has been sent successfully.',
       });
 
-      // Navigate back to dashboard bookings
-      navigate('/dashboard');
+      // Navigate back to bookings
+      navigate('/bookings');
       
     } catch (err) {
       console.error('Booking request error:', err);
