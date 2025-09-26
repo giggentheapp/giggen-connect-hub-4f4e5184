@@ -202,14 +202,14 @@ export const MakerExploreSection = ({
                     size="lg"
                     className="mb-4"
                   >
-                    {t('goToExplorePage')}
+                    {t('Gå til liste')}
                   </Button>
 
                   {/* Status Badge */}
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                     <Badge variant="secondary" className="text-xs">
-                      {t('underDevelopment')}
+                      {t('Under Development')}
                     </Badge>
                   </div>
                 </CardContent>
