@@ -313,106 +313,153 @@ export const BookingActions = ({
     </Dialog>
   );
   return <>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-1.5 items-center flex-wrap">
         {/* STEP 1: Allow booking (receiver only, pending status) */}
-        {isReceiver && booking.status === 'pending' && <>
-            <Button onClick={handleAllowBooking} disabled={loading} className="bg-green-600 hover:bg-green-700">
-              <Check className="h-4 w-4 mr-1" />
-              Tillat (1/3)
+        {isReceiver && booking.status === 'pending' && (
+          <div className="flex gap-1.5">
+            <Button 
+              onClick={handleAllowBooking} 
+              disabled={loading} 
+              size="sm"
+              className="h-7 px-2 text-xs bg-green-600 hover:bg-green-700"
+            >
+              <Check className="h-3 w-3 mr-1" />
+              Tillat
             </Button>
-            <Button variant="outline" onClick={handleRejectBooking} disabled={loading}>
-              <X className="h-4 w-4 mr-1" />
+            <Button 
+              variant="outline" 
+              onClick={handleRejectBooking} 
+              disabled={loading}
+              size="sm"
+              className="h-7 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50"
+            >
+              <X className="h-3 w-3 mr-1" />
               Avvis
             </Button>
-          </>}
+          </div>
+        )}
 
         {/* STEP 2: Individual approval (each party approves separately) */}
-        {booking.status === 'allowed' && <>
-            {/* Show current user's approval status */}
-            {!booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] ? <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
-                <Check className="h-4 w-4 mr-1" />
-                Godkjenn for publisering (2/3)
-              </Button> : <Badge variant="outline" className="text-green-700 border-green-300">
-                Du har godkjent ✓
-                {booking.status !== 'approved_by_both' && ' - Venter på motpart'}
-              </Badge>}
-          </>}
+        {booking.status === 'allowed' && (
+          <div className="flex gap-1.5 items-center">
+            {!booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] ? (
+              <Button 
+                onClick={openAgreementReview} 
+                disabled={loading} 
+                size="sm"
+                className="h-7 px-2 text-xs bg-purple-600 hover:bg-purple-700"
+              >
+                <Check className="h-3 w-3 mr-1" />
+                Godkjenn
+              </Button>
+            ) : (
+              <Badge variant="secondary" className="text-xs text-green-700 bg-green-50 border-green-200">
+                ✓ Godkjent
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Progressive approval statuses */}
-        {(booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') && <>
-            {booking.status === 'approved_by_sender' && isSender && <Badge variant="outline" className="text-green-700 border-green-300">
-                Du har godkjent ✓ - Venter på motpart
-              </Badge>}
-            {booking.status === 'approved_by_receiver' && isReceiver && <Badge variant="outline" className="text-green-700 border-green-300">
-                Du har godkjent ✓ - Venter på motpart
-              </Badge>}
-            {booking.status === 'approved_by_sender' && isReceiver && <>
-                <Badge variant="outline" className="text-orange-700 border-orange-300">
-                  Motpart har godkjent - Din tur!
-                </Badge>
-                <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
-                  <Check className="h-4 w-4 mr-1" />
-                  Godkjenn for publisering (2/3)
-                </Button>
-              </>}
-            {booking.status === 'approved_by_receiver' && isSender && <>
-                <Badge variant="outline" className="text-orange-700 border-orange-300">
-                  Motpart har godkjent - Din tur!
-                </Badge>
-                <Button onClick={openAgreementReview} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
-                  <Check className="h-4 w-4 mr-1" />
-                  Godkjenn for publisering (2/3)
-                </Button>
-              </>}
-          </>}
+        {(booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') && (
+          <div className="flex gap-1.5 items-center">
+            {booking.status === 'approved_by_sender' && isSender && (
+              <Badge variant="secondary" className="text-xs text-green-700 bg-green-50 border-green-200">
+                ✓ Du har godkjent
+              </Badge>
+            )}
+            {booking.status === 'approved_by_receiver' && isReceiver && (
+              <Badge variant="secondary" className="text-xs text-green-700 bg-green-50 border-green-200">
+                ✓ Du har godkjent
+              </Badge>
+            )}
+            {booking.status === 'approved_by_sender' && isReceiver && (
+              <Button 
+                onClick={openAgreementReview} 
+                disabled={loading} 
+                size="sm"
+                className="h-7 px-2 text-xs bg-purple-600 hover:bg-purple-700"
+              >
+                <Check className="h-3 w-3 mr-1" />
+                Godkjenn
+              </Button>
+            )}
+            {booking.status === 'approved_by_receiver' && isSender && (
+              <Button 
+                onClick={openAgreementReview} 
+                disabled={loading} 
+                size="sm"
+                className="h-7 px-2 text-xs bg-purple-600 hover:bg-purple-700"
+              >
+                <Check className="h-3 w-3 mr-1" />
+                Godkjenn
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* STEP 3: Publish (both parties, approved_by_both status) */}
-        {booking.status === 'approved_by_both' && <>
-            {/* Show current user's publish status */}
-            {!booking[isSender ? 'published_by_sender' : 'published_by_receiver'] ? <Button onClick={showPublishingSummary} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
-                <ArrowRight className="h-4 w-4 mr-1" />
-                Publiser arrangement (3/3)
-              </Button> : <Badge variant="outline" className="text-blue-700 border-blue-300">
-                Du har publisert ✓
-              </Badge>}
-            
-            {/* Show other party's publish status */}
-            {booking[isSender ? 'published_by_receiver' : 'published_by_sender'] && <Badge variant="outline" className="text-blue-700 border-blue-300">
-                Motpart har publisert ✓
-              </Badge>}
-          </>}
+        {booking.status === 'approved_by_both' && (
+          <div className="flex gap-1.5 items-center">
+            {!booking[isSender ? 'published_by_sender' : 'published_by_receiver'] ? (
+              <Button 
+                onClick={showPublishingSummary} 
+                disabled={loading} 
+                size="sm"
+                className="h-7 px-2 text-xs bg-blue-600 hover:bg-blue-700"
+              >
+                <ArrowRight className="h-3 w-3 mr-1" />
+                Publiser
+              </Button>
+            ) : (
+              <Badge variant="secondary" className="text-xs text-blue-700 bg-blue-50 border-blue-200">
+                ✓ Publisert
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Show status for sent requests (sender view of pending) */}
-        {isSender && booking.status === 'pending' && <div className="flex items-center text-sm text-muted-foreground">
-            <Eye className="h-4 w-4 mr-1" />
-            Venter på mottakers svar
-          </div>}
+        {isSender && booking.status === 'pending' && (
+          <Badge variant="secondary" className="text-xs text-muted-foreground">
+            Venter...
+          </Badge>
+        )}
 
         {/* Single cancel/delete button with confirmation for ongoing bookings */}
-        {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') && <AlertDialog>
+        {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both' || booking.status === 'upcoming') && (
+          <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <X className="h-4 w-4 mr-1" />
-                Avlys booking
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                disabled={loading}
+                className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash className="h-3 w-3" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  Er du sikker på at du vil avlyse denne bookingen?
+                  {booking.status === 'upcoming' ? 'Slett publisert arrangement?' : 'Avlys booking?'}
                 </AlertDialogTitle>
-                <AlertDialogDescription>
-                  Dette vil permanent slette bookingen og all relatert data fra systemet. Handlingen kan ikke angres.
+                <AlertDialogDescription className="text-sm">
+                  {getDeleteWarningText()}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancelBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Slett permanent
+                <AlertDialogCancel className="text-xs">Avbryt</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={booking.status === 'upcoming' ? handleDeleteBooking : handleCancelBooking}
+                  className="bg-red-600 hover:bg-red-700 text-xs"
+                >
+                  {booking.status === 'upcoming' ? 'Slett permanent' : 'Avlys'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
-          </AlertDialog>}
+          </AlertDialog>
+        )}
 
         {/* Delete button for all bookings except pending (which use reject) */}
         {booking.status === 'upcoming' && <AlertDialog>

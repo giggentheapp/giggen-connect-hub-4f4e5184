@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, Banknote, Phone, Mail, Eye, Globe } from 'lucide-react';
+import { Calendar, MapPin, Banknote, MessageCircle, Eye, Users, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 
@@ -19,133 +19,102 @@ interface BookingCardStep3Props {
 export const BookingCardStep3 = ({ 
   booking, 
   currentUserId, 
-  onDetailsClick,
-  onEditClick, 
+  onDetailsClick, 
+  onEditClick,
   onConceptClick, 
   onAction,
   onConfirmationClick,
   onAgreementClick
 }: BookingCardStep3Props) => {
-  // Get contact info from sender_contact_info
-  const contactInfo = booking.sender_contact_info || {};
-
   return (
-    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-green-500">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg flex items-center gap-2">
-              {booking.title}
-              <Badge variant="secondary" className="text-xs">
-                Steg 3: Publisert arrangement
-              </Badge>
+    <Card className="hover:shadow-sm transition-all border-l-4 border-l-green-400">
+      <CardHeader className="pb-2 px-3 md:px-4 pt-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base md:text-lg leading-tight flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+              <Button 
+                variant="ghost" 
+                className="p-0 h-auto font-semibold hover:text-primary transition-colors text-left justify-start"
+                onClick={onConceptClick}
+                disabled={!booking.concept_ids || booking.concept_ids.length === 0}
+              >
+                {booking.title}
+              </Button>
             </CardTitle>
             {booking.description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-1">
                 {booking.description}
               </p>
             )}
           </div>
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-            <Globe className="h-3 w-3 mr-1" />
+          <Badge variant="secondary" className="text-xs whitespace-nowrap bg-green-50 text-green-700 border-green-200">
             Publisert
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        {/* Final event details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+      <CardContent className="px-3 md:px-4 pb-3 space-y-3">
+        {/* Essential booking details - compact grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm">
           {booking.event_date && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-green-600" />
-              <span>
-                <strong>Dato:</strong> {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                {booking.time && ` kl. ${booking.time}`}
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">
+                {format(new Date(booking.event_date), 'dd.MM.yyyy')}
+                {booking.time && ` ${booking.time}`}
               </span>
             </div>
           )}
           
           {booking.venue && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-green-600" />
-              <span><strong>Spillested:</strong> {booking.venue}</span>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{booking.venue}</span>
             </div>
           )}
           
           {booking.address && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-green-600" />
-              <span><strong>Adresse:</strong> {booking.address}</span>
+            <div className="flex items-center gap-1.5 col-span-full">
+              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground truncate">{booking.address}</span>
+            </div>
+          )}
+          
+          {booking.ticket_price && (
+            <div className="flex items-center gap-1.5">
+              <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">Billett: {booking.ticket_price} kr</span>
             </div>
           )}
           
           {booking.audience_estimate && (
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-green-600" />
-              <span><strong>Forventet publikum:</strong> {booking.audience_estimate} personer</span>
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{booking.audience_estimate} pers</span>
             </div>
           )}
-          
-          <div className="flex items-center gap-2">
-            <Banknote className="h-4 w-4 text-green-600" />
-            <span>
-              <strong>Avtalt honorar:</strong>{' '}
-              {booking.door_deal ? (
-                `${booking.door_percentage}% av dørinntekter`
-              ) : (
-                booking.artist_fee || booking.price_musician || 'Ikke spesifisert'
-              )}
-              {booking.ticket_price && ` • Billettpris: ${booking.ticket_price} Kr`}
-            </span>
-          </div>
         </div>
 
-        {/* Contact information - now visible */}
-        {(contactInfo.phone || contactInfo.email) && (
-          <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded border border-green-200 dark:border-green-800">
-            <h4 className="font-medium text-green-800 dark:text-green-200 mb-2">
-              Kontaktinformasjon (nå synlig)
-            </h4>
-            <div className="space-y-1 text-sm">
-              {contactInfo.phone && (
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                  <Phone className="h-3 w-3" />
-                  <span>{contactInfo.phone}</span>
-                </div>
-              )}
-              {contactInfo.email && (
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                  <Mail className="h-3 w-3" />
-                  <span>{contactInfo.email}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Portfolio information if available */}
-        {booking.portfolio_available && (
-          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded border border-blue-200 dark:border-blue-800">
-            <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
-              Portefølje tilgjengelig
-            </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Artistens arbeider, referanser og kreative innhold kan ses i fullt omfang for dette arrangementet.
-            </p>
+        {/* Personal message */}
+        {booking.personal_message && (
+          <div className="flex items-start gap-1.5 text-xs md:text-sm bg-muted/30 p-2 rounded">
+            <MessageCircle className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-muted-foreground line-clamp-2">{booking.personal_message}</p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-3 border-t">
-          <div className="flex gap-2">
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex gap-1.5">
             <Button 
               size="sm" 
               variant="outline"
               onClick={onDetailsClick}
+              className="h-7 px-2 text-xs"
             >
-              <Eye className="h-4 w-4 mr-1" />
-              Vis avtale
+              <Eye className="h-3 w-3 mr-1" />
+              Detaljer
             </Button>
             
             {booking.concept_ids && booking.concept_ids.length > 0 && (
@@ -153,30 +122,18 @@ export const BookingCardStep3 = ({
                 size="sm" 
                 variant="outline"
                 onClick={onConceptClick}
+                className="h-7 px-2 text-xs"
               >
-                Se tilbud{booking.concept_ids.length > 1 ? '' : ''}
+                Tilbud
               </Button>
             )}
           </div>
           
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Publisert {booking.published_at && format(new Date(booking.published_at), 'dd.MM.yyyy')}</span>
-            <BookingActions 
-              booking={booking}
-              currentUserId={currentUserId}
-              onAction={onAction}
-            />
-          </div>
-        </div>
-
-        {/* Public visibility info with portfolio note */}
-        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-          Arrangementet er synlig for andre brukere. Kun tittel, beskrivelse, dato og sted er offentlig.
-          {booking.portfolio_available && (
-            <div className="mt-1 text-blue-600 dark:text-blue-400">
-              Porteføljeinnhold er også tilgjengelig for dette arrangementet.
-            </div>
-          )}
+          <BookingActions 
+            booking={booking}
+            currentUserId={currentUserId}
+            onAction={onAction}
+          />
         </div>
       </CardContent>
     </Card>

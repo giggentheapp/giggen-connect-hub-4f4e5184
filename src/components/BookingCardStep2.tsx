@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, Banknote, MessageCircle, Eye } from 'lucide-react';
+import { Calendar, MapPin, Banknote, MessageCircle, Eye, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
@@ -31,177 +31,118 @@ export const BookingCardStep2 = ({
   const canEdit = canBeEditedByParties(booking.status as BookingStatus) || isApprovedByBoth;
 
   return (
-    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg flex items-center gap-2">
+    <Card className="hover:shadow-sm transition-all border-l-4 border-l-orange-400">
+      <CardHeader className="pb-2 px-3 md:px-4 pt-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base md:text-lg leading-tight">
               <Button 
                 variant="ghost" 
-                className="p-0 h-auto font-semibold text-lg hover:text-primary transition-colors"
+                className="p-0 h-auto font-semibold hover:text-primary transition-colors text-left justify-start"
                 onClick={onConceptClick}
                 disabled={!booking.concept_ids || booking.concept_ids.length === 0}
               >
                 {booking.title}
               </Button>
-              <Badge variant="secondary" className="text-xs">
-                {canEdit ? 'Steg 2: Under forhandling' : 'Steg 2: Venter på godkjenning'}
-              </Badge>
             </CardTitle>
             {booking.description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-1">
                 {booking.description}
               </p>
             )}
           </div>
-          <Badge className={canEdit 
-            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-          }>
-            {canEdit ? 'Under forhandling' : 'Venter på begge parter'}
+          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+            Forhandling
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        {/* Comprehensive booking details - all editable in negotiation phase */}
-        <div className="space-y-4">
-          {/* Event Information */}
-          <div className="p-4 bg-muted/20 rounded-lg">
-            <h4 className="font-medium mb-3 text-sm">📅 Arrangementsdetaljer</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              {booking.event_date && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>
-                    <strong>Dato:</strong> {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                    {booking.time && ` kl. ${booking.time}`}
-                  </span>
-                </div>
-              )}
-              
-              {booking.venue && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span><strong>Spillested:</strong> {booking.venue}</span>
-                </div>
-              )}
-              
-              {booking.address && (
-                <div className="flex items-center gap-2 col-span-full">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span><strong>Adresse:</strong> {booking.address}</span>
-                </div>
-              )}
-              
-              {booking.audience_estimate && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span><strong>Forventet publikum:</strong> {booking.audience_estimate} personer</span>
-                </div>
-              )}
+      <CardContent className="px-3 md:px-4 pb-3 space-y-3">
+        {/* Essential booking details - compact grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm">
+          {booking.event_date && (
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">
+                {format(new Date(booking.event_date), 'dd.MM.yyyy')}
+                {booking.time && ` ${booking.time}`}
+              </span>
             </div>
-          </div>
-
-          {/* Pricing Information */}
-          <div className="p-4 bg-muted/20 rounded-lg">
-            <h4 className="font-medium mb-3 text-sm">💰 Prising og økonomi</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Banknote className="h-4 w-4 text-muted-foreground" />
-                <span>
-                  <strong>Musiker honorar:</strong> 
-                  {booking.door_deal ? (
-                    ` ${booking.door_percentage || 50}% av dørinntekter`
-                  ) : booking.by_agreement ? (
-                    ' Avtales direkte mellom partene'
-                  ) : (
-                    ` ${booking.artist_fee || booking.price_musician || 'Ikke spesifisert'} Kr`
-                  )}
-                </span>
-              </div>
-              
-              {booking.ticket_price && (
-                <div className="flex items-center gap-2">
-                  <Banknote className="h-4 w-4 text-muted-foreground" />
-                  <span><strong>Billettpris:</strong> {booking.ticket_price} Kr</span>
-                </div>
-              )}
-
-              {(booking.door_deal || booking.by_agreement) && (
-                <div className="text-xs text-muted-foreground ml-6">
-                  {booking.door_deal && '💡 Døravtale - honorar basert på billettsalg'}
-                  {booking.by_agreement && '🤝 Fleksibel avtale - pris justeres etter behov'}
-                </div>
-              )}
+          )}
+          
+          {booking.venue && (
+            <div className="flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{booking.venue}</span>
             </div>
+          )}
+          
+          {booking.address && (
+            <div className="flex items-center gap-1.5 col-span-full">
+              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground truncate">{booking.address}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-1.5">
+            <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+            <span className="truncate">
+              {booking.door_deal ? (
+                `${booking.door_percentage || 50}% av dør`
+              ) : booking.by_agreement ? (
+                'Etter avtale'
+              ) : (
+                `${booking.artist_fee || booking.price_musician || '0'} kr`
+              )}
+            </span>
           </div>
-
-          {/* Technical and Hospitality */}
-          {(booking.tech_spec || booking.hospitality_rider) && (
-            <div className="p-4 bg-muted/20 rounded-lg">
-              <h4 className="font-medium mb-3 text-sm">🎛️ Teknisk og hospitality</h4>
-              <div className="space-y-2 text-sm">
-                {booking.tech_spec && (
-                  <div>
-                    <strong>Tekniske krav:</strong>
-                    <p className="text-muted-foreground mt-1">{booking.tech_spec}</p>
-                  </div>
-                )}
-                {booking.hospitality_rider && (
-                  <div>
-                    <strong>Hospitality rider:</strong>
-                    <p className="text-muted-foreground mt-1">{booking.hospitality_rider}</p>
-                  </div>
-                )}
-              </div>
+          
+          {booking.ticket_price && (
+            <div className="flex items-center gap-1.5">
+              <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">Billett: {booking.ticket_price} kr</span>
             </div>
           )}
         </div>
 
-        {/* Personal message if exists */}
+        {/* Personal message */}
         {booking.personal_message && (
-          <div className="flex items-start gap-2 text-sm bg-muted/50 p-3 rounded">
-            <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
-            <div>
-              <span className="font-medium">Personlig melding:</span>
-              <p className="text-muted-foreground mt-1">
-                {booking.personal_message}
-              </p>
-            </div>
+          <div className="flex items-start gap-1.5 text-xs md:text-sm bg-muted/30 p-2 rounded">
+            <MessageCircle className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-muted-foreground line-clamp-2">{booking.personal_message}</p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-3 border-t">
-          <div className="flex gap-2">
-            {canEdit ? (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onEditClick}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                Rediger detaljer
-              </Button>
-            ) : (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onDetailsClick}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                Se detaljer
-              </Button>
-            )}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex gap-1.5">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={canEdit ? onEditClick : onDetailsClick}
+              className="h-7 px-2 text-xs"
+            >
+              {canEdit ? (
+                <>
+                  <Edit3 className="h-3 w-3 mr-1" />
+                  Rediger
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3 w-3 mr-1" />
+                  Detaljer
+                </>
+              )}
+            </Button>
             
-            {booking.concept_ids && booking.concept_ids.length > 0 && booking.status !== 'pending' && (
+            {booking.concept_ids && booking.concept_ids.length > 0 && (
               <Button 
                 size="sm" 
                 variant="outline"
                 onClick={onConceptClick}
+                className="h-7 px-2 text-xs"
               >
-                Se tilbud{booking.concept_ids.length > 1 ? '' : ''}
+                Tilbud
               </Button>
             )}
           </div>
@@ -211,15 +152,6 @@ export const BookingCardStep2 = ({
             currentUserId={currentUserId}
             onAction={onAction}
           />
-        </div>
-
-        {/* Status info */}
-        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-          {canEdit ? (
-            <span>🔄 Begge parter kan redigere detaljer og se kontaktinfo</span>
-          ) : (
-            <span>⏳ Venter på at begge parter godkjenner før redigering er mulig</span>
-          )}
         </div>
       </CardContent>
     </Card>
