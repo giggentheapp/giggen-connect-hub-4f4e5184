@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Eye, MessageSquare, Search, Music } from 'lucide-react';
+import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
@@ -91,130 +91,35 @@ export const MakerExploreSection = ({
       name: receiverName
     });
   };
-  return <div className="fixed inset-0 bg-background md:ml-16">
-      {/* Coming Soon Map Message */}
-      <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4">
-        <Card className="max-w-2xl w-full mx-auto bg-card/95 backdrop-blur-sm border shadow-lg">
-          <CardContent className="p-4 md:p-8 text-center">
-            {/* Map Icon */}
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <MapPin className="w-10 h-10 text-primary" />
-            </div>
-
-            {/* Main Title */}
-            <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
-            
-            {/* Description */}
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              {t('Map Description')}
-            </p>
-
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Upcoming Events */}
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Search className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">{t('Upcoming Events')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('See upcoming events in your local area')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Musicians Nearby */}
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Music className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">{t('Musicians Nearby')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('Find musicians close to you, and cooperate')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Local Community */}
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">{t('Local Venues')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('Find hidden venues in your town')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Interim Message */}
-            <p className="text-muted-foreground mb-6">
-              {t('Interim Message')}
-            </p>
-
-            {/* Action Button */}
-            <Button 
-              onClick={() => setActiveTab('list')}
-              size="lg"
-              className="mb-4"
-            >
-              {t('Go To Explore Page')}
-            </Button>
-
-            {/* Status Badge */}
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-              <Badge variant="secondary" className="text-xs">
-                {t('Under Development')}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Floating Controls */}
-      <div className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-10">
-        <div className="w-full max-w-3xl mx-auto">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="flex bg-card/95 backdrop-blur-sm rounded-lg p-1 border shadow-lg flex-shrink-0">
-              <button
-                onClick={() => setActiveTab('map')}
-                className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'map'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">{t('map')}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('list')}
-                className={`flex items-center px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'list'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Users className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">{t('list')}</span>
-              </button>
-            </div>
+  return (
+    <div className="w-full h-full bg-background">
+      {/* Tab Navigation Header */}
+      <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+              <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
+                <TabsTrigger value="map" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('map')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="list" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('list')}</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
             
             {activeTab === 'list' && (
-              <div className="flex-1 min-w-0 max-w-xs md:max-w-md">
+              <div className="flex-1 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder={t('Search Placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 md:pl-10 bg-card/95 backdrop-blur-sm border shadow-lg text-xs md:text-sm h-8 md:h-10"
+                    className="pl-10"
                   />
                 </div>
               </div>
@@ -223,99 +128,210 @@ export const MakerExploreSection = ({
         </div>
       </div>
 
-      {/* Floating List Panel */}
-      {activeTab === 'list' && (
-        <div className="absolute top-16 md:top-20 left-3 right-3 md:left-4 md:right-4 bottom-20 md:bottom-4 z-10 animate-fade-in">
-          <div className="h-full max-w-4xl mx-auto">
-            <Card className="h-full bg-card/95 backdrop-blur-sm border shadow-lg">
-              <CardContent className="p-0 h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base md:text-lg font-semibold">{t('makersInNetwork')}</h2>
+      {/* Tab Content */}
+      <div className="flex-1 overflow-hidden">
+        <Tabs value={activeTab} className="h-full">
+          {/* Map Tab Content */}
+          <TabsContent value="map" className="h-full m-0 p-3 md:p-4">
+            <div className="max-w-4xl mx-auto h-full">
+              <Card className="h-full flex items-center justify-center">
+                <CardContent className="p-8 text-center max-w-2xl">
+                  {/* Map Icon */}
+                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <MapPin className="w-10 h-10 text-primary" />
+                  </div>
+
+                  {/* Main Title */}
+                  <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
+                  
+                  {/* Description */}
+                  <p className="text-muted-foreground mb-8 leading-relaxed">
+                    {t('mapComingSoonDescription')}
+                  </p>
+
+                  {/* Features Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* Upcoming Events */}
+                    <div className="text-center space-y-3">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                        <Calendar className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('seeUpcomingEventsInArea')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Musicians Nearby */}
+                    <div className="text-center space-y-3">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                        <Music className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-2">{t('musiciansNearby')}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('findMusiciansCooperate')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Local Community */}
+                    <div className="text-center space-y-3">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                        <Users className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-2">{t('localVenues')}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('findHiddenVenues')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interim Message */}
+                  <p className="text-muted-foreground mb-6">
+                    {t('inTheMeantime')}
+                  </p>
+
+                  {/* Action Button */}
+                  <Button 
+                    onClick={() => setActiveTab('list')}
+                    size="lg"
+                    className="mb-4"
+                  >
+                    {t('goToExplorePage')}
+                  </Button>
+
+                  {/* Status Badge */}
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                     <Badge variant="secondary" className="text-xs">
-                      {filteredMakers.length}
+                      {t('underDevelopment')}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* List Tab Content */}
+          <TabsContent value="list" className="h-full m-0">
+            <div className="flex-1 flex flex-col h-full">
+              {/* List Header */}
+              <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-base md:text-lg font-semibold text-foreground">{t('makersInNetwork')}</h2>
+                    <Badge variant="outline" className="text-xs bg-muted">
+                      {loading ? '...' : filteredMakers.length}
                     </Badge>
                   </div>
                 </div>
+              </div>
               
-              {/* List Content */}
-              <div className="flex-1 overflow-auto mobile-scroll">
-                {filteredMakers.length === 0 ? (
-                  <div className="text-center py-8 md:py-12 text-muted-foreground px-4">
-                    <Music className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm md:text-base">
-                      {loading 
-                        ? t('Loading Makers')
-                        : searchTerm 
-                          ? t('No Makers Found Filtered')
-                          : t('No Makers Found')
-                      }
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-3 md:p-4 space-y-2 md:space-y-3">
-                    {filteredMakers.map((maker) => (
-                      <Card key={maker.id} className="group border bg-background/90 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-3 md:p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-2 md:gap-3 flex-1 min-w-0">
-                              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Music className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold text-foreground truncate text-sm md:text-base">
-                                    {maker.display_name}
-                                  </h3>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {maker.role}
-                                  </Badge>
+              {/* Main Content Area */}
+              <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                <div className="max-w-4xl mx-auto">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center">
+                        <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                        <p>{t('Loading Makers')}</p>
+                      </div>
+                    </div>
+                  ) : filteredMakers.length === 0 ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center max-w-md space-y-2">
+                        <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="font-medium">
+                          {searchTerm 
+                            ? t('No Makers Found Filtered')
+                            : t('No Makers Found')
+                          }
+                        </p>
+                        {searchTerm && (
+                          <p className="text-sm">
+                            {t('Adjust Filters')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 animate-fade-in">
+                      {filteredMakers.map((maker) => (
+                        <Card key={maker.id} className="group border bg-background hover:border-primary/50 hover:shadow-md transition-all duration-200">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3 flex-1 min-w-0">
+                                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <Music className="w-5 h-5 text-primary" />
                                 </div>
                                 
-                                 <p className="text-xs md:text-sm text-muted-foreground mb-2 line-clamp-2">
-                                   {maker.bio || t('No Description')}
-                                 </p>
-                                
-                                {maker.address && maker.is_address_public && (
-                                  <div className="flex items-center text-xs text-muted-foreground">
-                                    <MapPin className="w-3 h-3 mr-1" />
-                                    <span className="truncate">{maker.address}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="font-semibold text-foreground truncate">
+                                      {maker.display_name}
+                                    </h3>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {maker.role}
+                                    </Badge>
                                   </div>
-                                )}
+                                  
+                                  <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                    {maker.bio || t('No Description')}
+                                  </p>
+                                  
+                                  {maker.address && maker.is_address_public && (
+                                    <div className="flex items-center text-xs text-muted-foreground">
+                                      <MapPin className="w-3 h-3 mr-1" />
+                                      <span className="truncate">{maker.address}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="ml-4">
+                                <Button 
+                                  onClick={() => handleViewProfile(maker.user_id)} 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="text-xs"
+                                >
+                                  <Eye className="w-3 h-3 mr-2" />
+                                  {t('seeProfile')}
+                                </Button>
                               </div>
                             </div>
-                            
-                            <div className="ml-2 md:ml-4">
-                              <Button 
-                                onClick={() => handleViewProfile(maker.user_id)} 
-                                variant="outline" 
-                                size="sm"
-                                className="text-xs min-h-[36px] px-2 md:px-3"
-                              >
-                                <Eye className="w-3 h-3 mr-1" />
-                                <span className="hidden sm:inline">{t('seeProfile')}</span>
-                                <span className="sm:hidden">{t('view')}</span>
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-          </div>
-        </div>
-      )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
       
       {/* Profile Modal */}
-      <ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} userId={selectedUserId} />
+      <ProfileModal 
+        isOpen={profileModalOpen} 
+        onClose={() => setProfileModalOpen(false)} 
+        userId={selectedUserId} 
+      />
       
       {/* Booking Request Modal */}
-      {bookingMaker && <BookingRequest receiverId={bookingMaker.id} receiverName={bookingMaker.name} onSuccess={() => setBookingMaker(null)} />}
-    </div>;
+      {bookingMaker && (
+        <BookingRequest 
+          receiverId={bookingMaker.id} 
+          receiverName={bookingMaker.name} 
+          onSuccess={() => setBookingMaker(null)} 
+        />
+      )}
+    </div>
+  );
 };
