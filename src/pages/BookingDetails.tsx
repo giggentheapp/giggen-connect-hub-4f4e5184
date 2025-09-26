@@ -46,8 +46,6 @@ const BookingDetails = () => {
         <div className="max-w-4xl mx-auto">
           <EnhancedBookingDetails
             bookingId={bookingId}
-            isOpen={true}
-            onClose={() => navigate('/dashboard')}
           />
         </div>
       </main>

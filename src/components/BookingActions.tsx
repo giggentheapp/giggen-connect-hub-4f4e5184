@@ -461,30 +461,6 @@ export const BookingActions = ({
           </AlertDialog>
         )}
 
-        {/* Delete button for upcoming bookings only */}
-        {booking.status === 'upcoming' && <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash className="h-3 w-3" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Slett booking permanent?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {getDeleteWarningText()}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Slett permanent
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>}
       </div>
 
       <PublishingSummaryDialog />

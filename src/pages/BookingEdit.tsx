@@ -107,8 +107,6 @@ const BookingEdit = () => {
         <div className="max-w-4xl mx-auto">
           <BookingEditModal
             booking={booking}
-            isOpen={true}
-            onClose={() => navigate('/dashboard')}
             currentUserId={currentUserId}
             onSaved={handleSaved}
           />
