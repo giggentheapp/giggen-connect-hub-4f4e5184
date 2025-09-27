@@ -64,9 +64,17 @@ export const useBookings = (userId?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Safari detection
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
   // Set up realtime subscription for booking updates
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isSafari) {
+      if (isSafari) {
+        console.log('Skipping realtime for Safari');
+      }
+      return;
+    }
 
     const channel = supabase
       .channel('booking-updates')
@@ -105,7 +113,7 @@ export const useBookings = (userId?: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, isSafari]);
 
   const fetchBookings = useCallback(async (includeHistorical: boolean = false) => {
     try {
