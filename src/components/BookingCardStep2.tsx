@@ -6,6 +6,18 @@ import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 
+const formatSafeDate = (dateString: string) => {
+  try {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Ugyldig dato';
+    return format(date, 'dd.MM.yyyy');
+  } catch (error) {
+    console.warn('Date formatting error:', error);
+    return 'Ugyldig dato';
+  }
+};
+
 interface BookingCardStep2Props {
   booking: any;
   currentUserId: string;
@@ -63,10 +75,10 @@ export const BookingCardStep2 = ({
           {booking.event_date && (
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">
-                {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                {booking.time && ` ${booking.time}`}
-              </span>
+               <span className="truncate">
+                 {formatSafeDate(booking.event_date)}
+                 {booking.time && ` ${booking.time}`}
+               </span>
             </div>
           )}
           
