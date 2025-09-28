@@ -734,16 +734,16 @@ export const appTranslations = {
     
     // Map page translations
     mapComingSoon: "Map Coming Soon!",
-    mapComingSoonDescription: "We're working on creating an interactive map that makes it easier to find events in your area.",
+    mapComingSoonDescription: "We're working on creating an interactive map that makes it easier to find musicians and events in your area.",
     upcomingEvents: "Upcoming Events",
-    seeAllEventsOnMap: "See all events on the map with date and time",
+    seeUpcomingEventsInArea: "See upcoming events in the area with date and time",
     musiciansNearby: "Musicians Nearby",
-    findTalentedMusicians: "Find talented musicians and artists in your area",
-    localCommunity: "Local Community",
-    exploreLocalMusic: "Explore the local music community around you",
+    findMusiciansCooperate: "Find musicians and collaborate with other artists",
+    localVenues: "Local Venues",
+    discoverLocalVenues: "Discover venues and arenas near you",
     inTheMeantime: "In the meantime, you can explore musicians and events in the list.",
-    goToExplore: "Go to explore page",
-    underDevelopment: "Under development",
+    goToExplorePage: "Go to Explore",
+    underDevelopment: "Under Development",
     
     // Filters
     filterLocation: "Location",
