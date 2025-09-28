@@ -27,12 +27,12 @@ export const ProfileGoerSection = ({
 }: ProfileGoerSectionProps) => {
   return <div className="space-y-6">
       <Card className="max-w-2xl mx-auto">
-        <CardHeader className="text-center">
-          <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full rounded-full object-cover" /> : <User className="h-12 w-12 text-muted-foreground" />}
+        <CardHeader className="text-center px-3 md:px-6 py-3 md:py-6">
+          <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-2 md:mb-4">
+            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full rounded-full object-cover" /> : <User className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />}
           </div>
-          <CardTitle className="text-2xl">{profile.display_name}</CardTitle>
-          <CardDescription className="text-lg capitalize">{profile.role}</CardDescription>
+          <CardTitle className="text-lg md:text-2xl">{profile.display_name}</CardTitle>
+          <CardDescription className="text-sm md:text-lg capitalize">{profile.role}</CardDescription>
         </CardHeader>
       </Card>
 

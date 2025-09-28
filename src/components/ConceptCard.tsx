@@ -175,17 +175,20 @@ const ConceptCard = ({
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <CardTitle className="text-xl">{concept.title}</CardTitle>
-              <Badge variant={concept.is_published ? "default" : "secondary"}>
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+              <CardTitle className="text-base md:text-xl">{concept.title}</CardTitle>
+              <Badge 
+                variant={concept.is_published ? "default" : "secondary"} 
+                className="text-xs"
+              >
                 {concept.is_published ? t('conceptCard.published') : t('conceptCard.draft')}
               </Badge>
             </div>
             {concept.description && (
-              <p className="text-muted-foreground">{concept.description}</p>
+              <p className="text-muted-foreground text-sm md:text-base">{concept.description}</p>
             )}
           </div>
           {(showActions || showConceptActions) && (
@@ -194,8 +197,8 @@ const ConceptCard = ({
               {showConceptActions && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" disabled={actionLoading}>
-                      <MoreVertical className="h-4 w-4" />
+                    <Button variant="outline" size="sm" disabled={actionLoading} className="h-7 px-2 md:h-9 md:px-3">
+                      <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -211,6 +214,7 @@ const ConceptCard = ({
                 <Button 
                   variant="destructive" 
                   size="sm" 
+                  className="h-7 px-2 text-xs md:h-9 md:px-3 md:text-sm"
                   onClick={() => {
                     if (window.confirm(t('conceptCard.deleteConfirm'))) {
                       onDelete();
@@ -225,9 +229,9 @@ const ConceptCard = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3 md:space-y-6 px-3 md:px-6 pb-3 md:pb-6">
         {/* Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 text-sm md:text-base">
           <div className="flex items-center gap-2">
             <span className="font-medium">{t('conceptCard.price')}</span>
             <span>
@@ -252,8 +256,8 @@ const ConceptCard = ({
         {/* Available Dates */}
         {(availableDates.length > 0 || isIndefinite) && (
           <div>
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
+            <h4 className="font-medium mb-1 md:mb-2 flex items-center gap-1.5 md:gap-2 text-sm md:text-base">
+              <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
               {t('conceptCard.availableDates')}
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -275,8 +279,8 @@ const ConceptCard = ({
         {/* Concept Portfolio Files - Interactive Media Display */}
         {conceptFiles.length > 0 && (
           <div>
-            <h4 className="font-medium mb-4">{t('conceptCard.offerPortfolio')}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <h4 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('conceptCard.offerPortfolio')}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
               {Array.isArray(conceptFiles) ? conceptFiles.filter(file => file && file.id).map((file) => (
                 <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
                   
@@ -357,14 +361,15 @@ const ConceptCard = ({
                      <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
                        <FileText className="h-12 w-12 text-primary mb-2" />
                        <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(file.file_url, '_blank')}
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                          {t('conceptCard.download')}
-                        </Button>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           className="h-6 px-2 text-xs md:h-9 md:px-3 md:text-sm"
+                           onClick={() => window.open(file.file_url, '_blank')}
+                         >
+                           <Download className="h-2 w-2 md:h-3 md:w-3 mr-1" />
+                           {t('conceptCard.download')}
+                         </Button>
                      </div>
                    )}
                   
@@ -402,9 +407,10 @@ const ConceptCard = ({
                 <Button
                   variant="outline" 
                   size="sm"
+                  className="h-6 px-2 text-xs md:h-9 md:px-3 md:text-sm"
                   onClick={() => window.open(techSpecFile.file_url, '_blank')}
                 >
-                  <Download className="h-3 w-3 mr-1" />
+                  <Download className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                   {t('conceptCard.download')}
                 </Button>
               </div>
@@ -431,9 +437,10 @@ const ConceptCard = ({
                 <Button
                   variant="outline"
                   size="sm" 
+                  className="h-6 px-2 text-xs md:h-9 md:px-3 md:text-sm"
                   onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}
                 >
-                  <Download className="h-3 w-3 mr-1" />
+                  <Download className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                   {t('conceptCard.download')}
                 </Button>
               </div>

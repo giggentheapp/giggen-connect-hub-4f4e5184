@@ -39,26 +39,26 @@ export const ProfileSection = ({
   return <div className="space-y-6">
       {/* Basic Profile Info */}
       <Card>
-        <CardHeader className="text-center">
-          <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full rounded-full object-cover" /> : <User className="h-12 w-12 text-muted-foreground" />}
+        <CardHeader className="text-center px-3 md:px-6 py-3 md:py-6">
+          <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-2 md:mb-4">
+            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full rounded-full object-cover" /> : <User className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />}
           </div>
-          <CardTitle className="text-2xl">{profile.display_name}</CardTitle>
-          <CardDescription className="text-lg capitalize">{profile.role}</CardDescription>
+          <CardTitle className="text-lg md:text-2xl">{profile.display_name}</CardTitle>
+          <CardDescription className="text-sm md:text-lg capitalize">{profile.role}</CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 md:space-y-4 px-3 md:px-6 pb-3 md:pb-6">
           {profile.bio && <div>
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Eye className="h-4 w-4" />
+              <h3 className="font-semibold mb-1 md:mb-2 flex items-center gap-1.5 md:gap-2 text-sm md:text-base">
+                <Eye className="h-3 w-3 md:h-4 md:w-4" />
                 Om meg
               </h3>
-              <p className="text-muted-foreground">{profile.bio}</p>
+              <p className="text-muted-foreground text-sm md:text-base">{profile.bio}</p>
             </div>}
 
-          <div className="space-y-2">
-            <h3 className="font-semibold">{t('profileInformation')}</h3>
-            <div className="text-sm text-muted-foreground space-y-1">
+          <div className="space-y-1 md:space-y-2">
+            <h3 className="font-semibold text-sm md:text-base">{t('profileInformation')}</h3>
+            <div className="text-xs md:text-sm text-muted-foreground space-y-0.5 md:space-y-1">
               <p>{t('role')}: {t(profile.role)}</p>
               {profile.address && profile.is_address_public && <p>Lokasjon: {profile.address}</p>}
             </div>
@@ -73,42 +73,42 @@ export const ProfileSection = ({
 
       {/* Portfolio Section */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Folder className="h-5 w-5" />
+        <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
+          <CardTitle className="flex items-center gap-1.5 md:gap-2 text-base md:text-xl">
+            <Folder className="h-4 w-4 md:h-5 md:w-5" />
             {t('myPortfolio')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             {t('howPortfolioAppears')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
           <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
         </CardContent>
       </Card>
 
       {/* Concepts Section */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
+        <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
+          <CardTitle className="flex items-center gap-1.5 md:gap-2 text-base md:text-xl">
+            <Lightbulb className="h-4 w-4 md:h-5 md:w-5" />
             {t('myPublishedOffers')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             {t('yourVisibleOffers')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
           {conceptsLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Laster tilbud...</p>
             </div>
           ) : concepts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p>{t('noPublishedOffers')}</p>
-              <p className="text-sm">{t('createPublishOffers')}</p>
+            <div className="text-center py-4 md:py-8 text-muted-foreground">
+              <Lightbulb className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground/50" />
+              <p className="text-sm md:text-base">{t('noPublishedOffers')}</p>
+              <p className="text-xs md:text-sm">{t('createPublishOffers')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -122,24 +122,24 @@ export const ProfileSection = ({
 
       {/* Upcoming Events Section */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+        <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
+          <CardTitle className="flex items-center gap-1.5 md:gap-2 text-base md:text-xl">
+            <Calendar className="h-4 w-4 md:h-5 md:w-5" />
             {t('myUpcomingEvents')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             {t('eventsYouAreInvolvedIn')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-            <p className="text-sm text-muted-foreground">
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+          <div className="mb-2 md:mb-4 p-2 md:p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs md:text-sm text-muted-foreground">
               {t('privacyNote')}
             </p>
           </div>
           
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
+          <div className="text-center py-4 md:py-8">
+            <p className="text-muted-foreground text-sm md:text-base">{t('noUpcomingEvents')}</p>
           </div>
         </CardContent>
       </Card>

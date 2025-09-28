@@ -331,12 +331,12 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {incomingRequests.length === 0 ? (
-                        <Card>
-                          <CardContent className="text-center py-12">
-                            <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
-                          </CardContent>
-                        </Card>
+                         <Card>
+                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
+                             <Inbox className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
+                             <p className="text-muted-foreground text-sm md:text-base">Ingen innkommende forespørsler</p>
+                           </CardContent>
+                         </Card>
                       ) : (
                         incomingRequests.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
@@ -361,12 +361,12 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {sentRequests.length === 0 ? (
-                        <Card>
-                          <CardContent className="text-center py-12">
-                            <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Ingen sendte forespørsler</p>
-                          </CardContent>
-                        </Card>
+                         <Card>
+                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
+                             <Send className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
+                             <p className="text-muted-foreground text-sm md:text-base">Ingen sendte forespørsler</p>
+                           </CardContent>
+                         </Card>
                       ) : (
                         sentRequests.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
@@ -391,12 +391,12 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {ongoingAgreements.length === 0 ? (
-                        <Card>
-                          <CardContent className="text-center py-12">
-                            <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Ingen pågående avtaler</p>
-                          </CardContent>
-                        </Card>
+                         <Card>
+                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
+                             <Clock className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
+                             <p className="text-muted-foreground text-sm md:text-base">Ingen pågående avtaler</p>
+                           </CardContent>
+                         </Card>
                       ) : (
                         ongoingAgreements.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />

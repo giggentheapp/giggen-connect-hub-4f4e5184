@@ -42,12 +42,12 @@ export const Settings = () => {
         </div>
         
         {/* Language Settings - Top Right */}
-        <div className="flex gap-2">
+        <div className="flex gap-1 md:gap-2">
           <Button 
             onClick={() => changeLanguage('no')}
             variant={language === 'no' ? 'default' : 'outline'}
             size="sm"
-            className={`transition-all ${language === 'no' ? 'shadow-glow' : ''}`}
+            className={`transition-all h-7 px-2 text-xs md:h-9 md:px-3 md:text-sm ${language === 'no' ? 'shadow-glow' : ''}`}
           >
             Norsk
           </Button>
@@ -55,7 +55,7 @@ export const Settings = () => {
             onClick={() => changeLanguage('en')}
             variant={language === 'en' ? 'default' : 'outline'}
             size="sm"
-            className={`transition-all ${language === 'en' ? 'shadow-glow' : ''}`}
+            className={`transition-all h-7 px-2 text-xs md:h-9 md:px-3 md:text-sm ${language === 'en' ? 'shadow-glow' : ''}`}
           >
             English
           </Button>
