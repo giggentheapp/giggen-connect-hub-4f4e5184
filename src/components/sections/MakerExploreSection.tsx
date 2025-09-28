@@ -143,8 +143,10 @@ export const MakerExploreSection = ({
 
                   {/* Main Title */}
                   <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
-                  
-        
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           {/* List Tab Content */}
           <TabsContent value="list" className="h-full m-0">
