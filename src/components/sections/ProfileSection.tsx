@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { User, Eye, Folder, Lightbulb, Calendar, Shield } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
-import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
+import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -138,9 +138,7 @@ export const ProfileSection = ({
             </p>
           </div>
           
-          <div className="text-center py-4 md:py-8">
-            <p className="text-muted-foreground text-sm md:text-base">{t('noUpcomingEvents')}</p>
-          </div>
+          <UpcomingEventsDisplay userId={profile.user_id} />
         </CardContent>
       </Card>
 
