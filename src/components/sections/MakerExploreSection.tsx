@@ -144,78 +144,7 @@ export const MakerExploreSection = ({
                   {/* Main Title */}
                   <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
                   
-                  {/* Description */}
-                  <p className="text-muted-foreground mb-8 leading-relaxed">
-                    {t('Map Coming Soon Description')}
-                  </p>
-
-                  {/* Features Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {/* Upcoming Events */}
-                    <div className="text-center space-y-3">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                        <Calendar className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">{t('upcomingEvents')}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {t('')}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Musicians Nearby */}
-                    <div className="text-center space-y-3">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                        <Music className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">{t('Musicians Nearby')}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {t('')}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Local Community */}
-                    <div className="text-center space-y-3">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                        <Users className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">{t('Lokale Spillesteder')}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {t('')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Interim Message */}
-                  <p className="text-muted-foreground mb-6">
-                    {t('In The Meantime')}
-                  </p>
-
-                  {/* Action Button */}
-                  <Button 
-                    onClick={() => setActiveTab('list')}
-                    size="lg"
-                    className="mb-4"
-                  >
-                    {t('Gå til liste')}
-                  </Button>
-
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                    <Badge variant="secondary" className="text-xs">
-                      {t('Under Utvikling')}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+        
 
           {/* List Tab Content */}
           <TabsContent value="list" className="h-full m-0">
