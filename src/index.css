@@ -8,145 +8,141 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light gray business-friendly palette */
-    --background: 220 9% 97%;
-    --foreground: 210 11% 15%;
+    /* Warm, community-focused palette - Giggen brand */
+    --background: 34 7% 98%; /* Off-white #FAFAFA */
+    --foreground: 0 0% 17%; /* Warm gray #2B2B2B */
 
     --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
+    --card-foreground: 0 0% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 11% 15%;
+    --popover-foreground: 0 0% 17%;
 
-    /* Purple accent colors for CTAs */
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --primary-light: 262 83% 70%;
-    --primary-dark: 262 83% 45%;
+    /* Orange to Pink gradient primary - Giggen brand */
+    --primary: 22 100% 52%; /* Orange #FF6B00 */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 22 100% 60%;
+    --primary-dark: 22 100% 45%;
 
-    /* Light gray secondary palette */
-    --secondary: 220 9% 92%;
-    --secondary-foreground: 210 11% 15%;
+    /* Warm secondary palette */
+    --secondary: 34 7% 94%;
+    --secondary-foreground: 0 0% 17%;
 
-    --muted: 220 9% 95%;
-    --muted-foreground: 210 9% 45%;
+    --muted: 34 7% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Subtle accent colors */
-    --accent: 220 9% 92%;
-    --accent-foreground: 210 11% 15%;
-    --accent-pink: 330 81% 75%;
-    --accent-blue: 217 91% 60%;
-    --accent-green: 142 76% 73%;
-    --accent-orange: 25 95% 70%;
+    /* Community accent colors */
+    --accent: 34 7% 94%;
+    --accent-foreground: 0 0% 17%;
+    --accent-pink: 345 100% 58%; /* Pink #FF2D55 */
+    --accent-yellow: 47 100% 71%; /* Accent Yellow #FFE66D */
+    --accent-orange: 22 100% 52%; /* Orange #FF6B00 */
+    --accent-warm: 30 100% 85%; /* Cream tones */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 9% 90%;
-    --input: 220 9% 90%;
-    --ring: 262 83% 58%;
+    --border: 34 7% 88%;
+    --input: 34 7% 90%;
+    --ring: 22 100% 52%;
 
-    --radius: 0.75rem;
+    --radius: 1rem; /* More rounded for friendlier feel */
 
-    /* Beautiful gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(330 81% 75%), hsl(262 83% 58%));
-    --gradient-accent: linear-gradient(135deg, hsl(32 98% 83%), hsl(25 95% 70%));
-    --gradient-cool: linear-gradient(135deg, hsl(217 91% 60%), hsl(142 76% 73%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 70%), hsl(330 81% 75%));
-    --gradient-rainbow: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%), hsl(142 76% 73%), hsl(32 98% 83%));
+    /* Sunset gradient system - Giggen brand */
+    --gradient-primary: linear-gradient(135deg, hsl(22 100% 52%), hsl(345 100% 58%)); /* Orange to Pink */
+    --gradient-secondary: linear-gradient(135deg, hsl(345 100% 58%), hsl(47 100% 71%)); /* Pink to Yellow */
+    --gradient-accent: linear-gradient(135deg, hsl(47 100% 71%), hsl(30 100% 85%)); /* Yellow to Cream */
+    --gradient-warm: linear-gradient(135deg, hsl(22 100% 52%), hsl(30 100% 85%)); /* Orange to Cream */
+    --gradient-sunset: linear-gradient(135deg, hsl(22 100% 52%), hsl(345 100% 58%), hsl(47 100% 71%)); /* Full sunset */
+    --gradient-community: linear-gradient(135deg, hsl(345 100% 58%), hsl(22 100% 52%), hsl(47 100% 71%)); /* Community vibes */
 
-    /* Enhanced shadows with color */
-    --shadow-primary: 0 10px 30px hsla(262 83% 58% / 0.3);
-    --shadow-secondary: 0 8px 25px hsla(217 91% 60% / 0.2);
-    --shadow-accent: 0 6px 20px hsla(330 81% 75% / 0.25);
-    --shadow-glow: 0 0 40px hsla(262 83% 58% / 0.4);
+    /* Warm, inviting shadows */
+    --shadow-primary: 0 10px 30px hsla(22 100% 52% / 0.25);
+    --shadow-secondary: 0 8px 25px hsla(345 100% 58% / 0.2);
+    --shadow-accent: 0 6px 20px hsla(47 100% 71% / 0.15);
+    --shadow-glow: 0 0 40px hsla(22 100% 52% / 0.3);
 
-    /* Map colors and gradients */
-    --map-primary-gradient: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%));
-    --map-marker-shadow: 0 8px 25px hsla(262 83% 58% / 0.3);
-    --map-marker-hover-shadow: 0 12px 35px hsla(262 83% 58% / 0.4);
+    /* Map colors and gradients - Giggen warm theme */
+    --map-primary-gradient: linear-gradient(135deg, hsl(22 100% 52%), hsl(345 100% 58%));
+    --map-marker-shadow: 0 8px 25px hsla(22 100% 52% / 0.3);
+    --map-marker-hover-shadow: 0 12px 35px hsla(22 100% 52% / 0.4);
 
-    /* Animation colors */
-    --animate-pulse-from: hsl(262 83% 58% / 0.1);
-    --animate-pulse-to: hsl(262 83% 58% / 0.3);
+    /* Animation colors - Warm community theme */
+    --animate-pulse-from: hsl(22 100% 52% / 0.1);
+    --animate-pulse-to: hsl(22 100% 52% / 0.3);
 
+    /* Sidebar - Warm community colors */
     --sidebar-background: 0 0% 100%;
-
-    --sidebar-foreground: 210 11% 15%;
-
-    --sidebar-primary: 262 83% 58%;
-
+    --sidebar-foreground: 0 0% 17%;
+    --sidebar-primary: 22 100% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-
-    --sidebar-accent: 220 9% 92%;
-
-    --sidebar-accent-foreground: 210 11% 15%;
-
-    --sidebar-border: 220 9% 90%;
-
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-accent: 34 7% 94%;
+    --sidebar-accent-foreground: 0 0% 17%;
+    --sidebar-border: 34 7% 88%;
+    --sidebar-ring: 22 100% 52%;
   }
 
   .dark {
-    /* Dark mode with vibrant accents */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with warm, community vibes */
+    --background: 0 0% 9%; /* Warm dark background */
+    --foreground: 34 7% 98%;
 
-    --card: 217.2 32.6% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 34 7% 98%;
 
-    --popover: 217.2 32.6% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 34 7% 98%;
 
-    /* Vibrant primary in dark mode */
-    --primary: 262 83% 65%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-light: 262 83% 75%;
-    --primary-dark: 262 83% 55%;
+    /* Vibrant warm primary in dark mode */
+    --primary: 22 100% 58%; /* Brighter orange for dark mode */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 22 100% 65%;
+    --primary-dark: 22 100% 50%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 262 83% 65%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 22 100% 58%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 34 7% 65%;
 
-    /* Dark mode accent colors */
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 262 83% 65%;
-    --accent-pink: 330 81% 65%;
-    --accent-blue: 217 91% 70%;
-    --accent-green: 142 76% 65%;
-    --accent-orange: 25 95% 65%;
+    /* Dark mode warm accent colors */
+    --accent: 0 0% 15%;
+    --accent-foreground: 22 100% 58%;
+    --accent-pink: 345 100% 65%; /* Brighter pink for dark */
+    --accent-yellow: 47 100% 75%; /* Brighter yellow for dark */
+    --accent-orange: 22 100% 58%;
+    --accent-warm: 30 100% 80%;
 
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 65%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 22 100% 58%;
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 65%), hsl(217 91% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(330 81% 65%), hsl(262 83% 65%));
-    --gradient-accent: linear-gradient(135deg, hsl(32 98% 73%), hsl(25 95% 65%));
-    --gradient-cool: linear-gradient(135deg, hsl(217 91% 70%), hsl(142 76% 65%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 65%), hsl(330 81% 65%));
-    --gradient-rainbow: linear-gradient(135deg, hsl(262 83% 65%), hsl(217 91% 70%), hsl(142 76% 65%), hsl(32 98% 73%));
+    /* Dark mode sunset gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(22 100% 58%), hsl(345 100% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(345 100% 65%), hsl(47 100% 75%));
+    --gradient-accent: linear-gradient(135deg, hsl(47 100% 75%), hsl(30 100% 80%));
+    --gradient-warm: linear-gradient(135deg, hsl(22 100% 58%), hsl(30 100% 80%));
+    --gradient-sunset: linear-gradient(135deg, hsl(22 100% 58%), hsl(345 100% 65%), hsl(47 100% 75%));
+    --gradient-community: linear-gradient(135deg, hsl(345 100% 65%), hsl(22 100% 58%), hsl(47 100% 75%));
 
-    /* Dark mode shadows */
-    --shadow-primary: 0 10px 30px hsla(262 83% 65% / 0.4);
-    --shadow-secondary: 0 8px 25px hsla(217 91% 70% / 0.3);
-    --shadow-accent: 0 6px 20px hsla(330 81% 65% / 0.35);
-    --shadow-glow: 0 0 40px hsla(262 83% 65% / 0.5);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Dark mode warm shadows */
+    --shadow-primary: 0 10px 30px hsla(22 100% 58% / 0.4);
+    --shadow-secondary: 0 8px 25px hsla(345 100% 65% / 0.3);
+    --shadow-accent: 0 6px 20px hsla(47 100% 75% / 0.2);
+    --shadow-glow: 0 0 40px hsla(22 100% 58% / 0.5);
+    
+    /* Dark mode sidebar */
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 34 7% 95%;
+    --sidebar-primary: 22 100% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 34 7% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 22 100% 58%;
   }
 }
 
@@ -157,10 +153,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, hsl(var(--background)), hsl(220 9% 94%));
+    background: linear-gradient(135deg, hsl(var(--background)), hsl(34 7% 96%));
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   }
 
-  /* Colorful utility classes */
+  /* Warm community utility classes */
   .gradient-primary {
     background: var(--gradient-primary);
   }
@@ -173,16 +170,16 @@ All colors MUST be HSL.
     background: var(--gradient-accent);
   }
 
-  .gradient-cool {
-    background: var(--gradient-cool);
-  }
-
   .gradient-warm {
     background: var(--gradient-warm);
   }
 
-  .gradient-rainbow {
-    background: var(--gradient-rainbow);
+  .gradient-sunset {
+    background: var(--gradient-sunset);
+  }
+
+  .gradient-community {
+    background: var(--gradient-community);
   }
 
   .shadow-primary {
@@ -214,24 +211,49 @@ All colors MUST be HSL.
                 var(--gradient-primary) border-box;
   }
 
-  /* Enhanced animations */
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
+/* Enhanced animations and warm interactions */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
 
-  .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
-  }
+.animate-glow {
+  animation: warm-glow 2s ease-in-out infinite alternate;
+}
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
 
-  @keyframes glow {
-    from { box-shadow: 0 0 20px hsla(var(--primary) / 0.5); }
-    to { box-shadow: 0 0 30px hsla(var(--primary) / 0.8); }
+@keyframes warm-glow {
+  from { box-shadow: 0 0 20px hsla(var(--primary) / 0.4); }
+  to { box-shadow: 0 0 35px hsla(var(--primary) / 0.7); }
+}
+
+/* Community-focused interactions */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.community-pulse {
+  animation: community-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes community-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
   }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
 
   /* Floating Feedback Button */
   .floating-feedback-btn {

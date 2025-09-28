@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Poppins', 'system-ui', 'sans-serif'],
+				poppins: ['Poppins', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -46,9 +50,9 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))',
 					pink: 'hsl(var(--accent-pink))',
-					blue: 'hsl(var(--accent-blue))',
-					green: 'hsl(var(--accent-green))',
-					orange: 'hsl(var(--accent-orange))'
+					yellow: 'hsl(var(--accent-yellow))',
+					orange: 'hsl(var(--accent-orange))',
+					warm: 'hsl(var(--accent-warm))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -78,9 +82,9 @@ export default {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-secondary': 'var(--gradient-secondary)',
 				'gradient-accent': 'var(--gradient-accent)',
-				'gradient-cool': 'var(--gradient-cool)',
 				'gradient-warm': 'var(--gradient-warm)',
-				'gradient-rainbow': 'var(--gradient-rainbow)'
+				'gradient-sunset': 'var(--gradient-sunset)',
+				'gradient-community': 'var(--gradient-community)'
 			},
 			boxShadow: {
 				'primary': 'var(--shadow-primary)',
