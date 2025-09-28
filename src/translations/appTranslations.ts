@@ -235,15 +235,15 @@ export const appTranslations = {
     
     // Map page translations
     mapComingSoon: "Kart kommer snart!",
-    mapComingSoonDescription: "Vi jobber med å lage et interaktivt kart som gjør det enklere å finne arrangementer i ditt område.",
+    mapComingSoonDescription: "Vi jobber med å lage et interaktivt kart som gjør det enklere å finne musikere og arrangementer i ditt område.",
     upcomingEvents: "Kommende arrangementer",
-    seeAllEventsOnMap: "Se alle arrangementer på kartet med dato og tid",
+    seeUpcomingEventsInArea: "Se kommende arrangementer i området med dato og tid",
     musiciansNearby: "Musikere i nærheten",
-    findTalentedMusicians: "Finn talentfulle musikere og artister i ditt område",
-    localCommunity: "Lokalsamfunn",
-    exploreLocalMusic: "Utforsk det lokale musikksamfunnet rundt deg",
+    findMusiciansCooperate: "Finn musikere og samarbeid med andre artister",
+    localVenues: "Lokale spillesteder",
+    discoverLocalVenues: "Oppdag spillesteder og arenaer i nærheten av deg",
     inTheMeantime: "I mellomtiden kan du utforske musikere og arrangementer i listen.",
-    goToExplore: "Gå til utforsk-siden",
+    goToExplorePage: "Gå til utforsk",
     underDevelopment: "Under utvikling",
     
     // Filters

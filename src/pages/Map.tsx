@@ -42,7 +42,7 @@ export default function Map() {
               </div>
               <CardTitle className="text-xl md:text-2xl">{t('mapComingSoon')}</CardTitle>
               <CardDescription className="text-base md:text-lg mt-2 px-2">
-                {t('Map Coming Soon Description')}
+                {t('mapComingSoonDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 md:space-y-6 px-4 md:px-6">
@@ -52,21 +52,21 @@ export default function Map() {
                   <Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
                   <h3 className="font-medium mb-1 text-sm md:text-base">{t('upcomingEvents')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('See Upcoming Events In Area')}
+                    {t('seeUpcomingEventsInArea')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
                   <Music className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
                   <h3 className="font-medium mb-1 text-sm md:text-base">{t('musiciansNearby')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('Find Musicians and Cooperate')}
+                    {t('findMusiciansCooperate')}
                   </p>
                 </div>
                 <div className="flex flex-col items-center p-3 md:p-4 bg-muted/30 rounded-lg">
                   <Users className="w-6 h-6 md:w-8 md:h-8 text-primary mb-2" />
                   <h3 className="font-medium mb-1 text-sm md:text-base">{t('localVenues')}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground text-center">
-                    {t('')}
+                    {t('discoverLocalVenues')}
                   </p>
                 </div>
               </div>
@@ -80,7 +80,7 @@ export default function Map() {
                   onClick={() => navigate('/')}
                   className="w-full md:w-auto min-h-[44px]"
                 >
-                  {t('Go To Explore Page')}
+                  {t('goToExplorePage')}
                 </Button>
               </div>
             </CardContent>
@@ -90,7 +90,7 @@ export default function Map() {
           <div className="mt-6 md:mt-8 text-center px-4">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-primary/10 text-primary rounded-full text-xs md:text-sm">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              {t('Under Development')}
+              {t('underDevelopment')}
             </div>
           </div>
         </div>
