@@ -47,7 +47,7 @@ export const UnifiedSidePanel = ({
   profile,
   className
 }: UnifiedSidePanelProps) => {
-  const [activeSection, setActiveSection] = useState('explore');
+  const [activeSection, setActiveSection] = useState('profile');  // Changed default to 'profile'
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();

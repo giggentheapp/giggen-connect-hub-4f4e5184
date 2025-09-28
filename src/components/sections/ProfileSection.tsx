@@ -100,15 +100,21 @@ export const ProfileSection = ({
         </CardHeader>
         <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
           {conceptsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Laster tilbud...</p>
+            <div className="text-center py-6 md:py-8">
+              <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-b-2 border-primary mx-auto mb-2 md:mb-4"></div>
+              <p className="text-sm md:text-base">Laster tilbud...</p>
             </div>
           ) : concepts.length === 0 ? (
-            <div className="text-center py-4 md:py-8 text-muted-foreground">
-              <Lightbulb className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground/50" />
-              <p className="text-sm md:text-base">{t('noPublishedOffers')}</p>
-              <p className="text-xs md:text-sm">{t('createPublishOffers')}</p>
+            <div className="bg-muted/30 border border-muted-foreground/20 rounded-xl p-6 md:p-8 text-center">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Lightbulb className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm md:text-base font-medium text-foreground mb-1">
+                {t('noPublishedOffers')}
+              </p>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                {t('createPublishOffers')}
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
