@@ -12,9 +12,9 @@ const BookingDetails = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Booking ikke funnet</p>
-          <Button onClick={() => navigate('/dashboard')} variant="outline">
+          <Button onClick={() => navigate('/bookings')} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake til dashboard
+            Tilbake til bookinger
           </Button>
         </div>
       </div>
@@ -29,7 +29,7 @@ const BookingDetails = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/bookings')}
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

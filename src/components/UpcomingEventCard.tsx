@@ -125,16 +125,6 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
               <Eye className="h-3 w-3 mr-1" />
               Detaljer
             </Button>
-            
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => window.open(`/booking/${event.id}/public`, '_blank')}
-              className="h-7 px-2 text-xs"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Vis offentlig
-            </Button>
           </div>
         </div>
       </CardContent>

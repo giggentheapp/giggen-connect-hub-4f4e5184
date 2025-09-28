@@ -131,6 +131,8 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: "Booking-detaljene har blitt lagret",
       });
 
+      // Navigate back to bookings page
+      window.history.replaceState(null, '', '/bookings');
       onSaved();
     } catch (error) {
       if (error instanceof z.ZodError) {

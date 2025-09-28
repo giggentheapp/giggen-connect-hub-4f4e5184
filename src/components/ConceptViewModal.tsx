@@ -164,6 +164,8 @@ export const ConceptViewModal = ({
     const result = await rejectConcept(concept.id, reason);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'rejected');
+      // Navigate back to bookings page
+      window.history.replaceState(null, '', '/bookings');
       onClose();
     }
   };
@@ -172,6 +174,8 @@ export const ConceptViewModal = ({
     const result = await deleteConcept(concept.id);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'deleted');
+      // Navigate back to bookings page
+      window.history.replaceState(null, '', '/bookings');
       onClose();
     }
   };

@@ -467,35 +467,36 @@ export const UserSettings = ({
     <div className="space-y-6">
       {/* Profile Information */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
+        <CardHeader className="pb-3 md:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <User className="h-4 w-4 md:h-5 md:w-5" />
             {t('profileInformationSettings')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             {t('updateProfileDetails')}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6 px-3 md:px-6 pb-3 md:pb-6">
           {/* Avatar Upload Section */}
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <Avatar className="h-16 w-16 md:h-20 md:w-20">
               <AvatarImage src={profileData.avatar_url || undefined} />
               <AvatarFallback>
                 {profileData.display_name?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('profilePicture')}</h3>
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-1 md:space-y-2">
+              <h3 className="text-xs md:text-sm font-medium">{t('profilePicture')}</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">
                 {t('selectProfilePicture')}
               </p>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => setShowAvatarCrop(true)}
+                className="h-7 md:h-8 px-2 md:px-3 text-xs md:text-sm"
               >
-                <Camera className="h-4 w-4 mr-2" />
+                <Camera className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                 {t('changePicture')}
               </Button>
             </div>
