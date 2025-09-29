@@ -14,15 +14,21 @@ export const VideoPlayer = ({ publicUrl, filename, mimeType }: VideoPlayerProps)
   return (
     <div className="w-full space-y-2">
       {!showPlayer ? (
-        // Show thumbnail with play button
+        // Show video thumbnail with play overlay
         <div 
           className="relative cursor-pointer group"
           onClick={() => setShowPlayer(true)}
         >
-          <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <Play className="h-16 w-16 mx-auto mb-2 text-primary group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-medium">{filename}</p>
+          <video
+            className="w-full h-48 rounded-lg object-cover"
+            preload="metadata"
+            muted
+          >
+            <source src={publicUrl + '#t=0.5'} type={mimeType || 'video/quicktime'} />
+          </video>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg group-hover:bg-black/40 transition-colors">
+            <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform">
+              <Play className="h-8 w-8 text-primary" />
             </div>
           </div>
         </div>
