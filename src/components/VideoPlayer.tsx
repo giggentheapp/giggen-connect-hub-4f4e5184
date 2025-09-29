@@ -27,15 +27,20 @@ export const VideoPlayer = ({ publicUrl, filename, mimeType }: VideoPlayerProps)
           </div>
         </div>
       ) : (
-        // When clicked, show iframe player
+        // When clicked, show video player
         <div className="w-full space-y-2">
-          <iframe
-            src={publicUrl}
-            className="w-full h-48 rounded-lg border-0"
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            title={filename}
-          />
+          <video
+            controls
+            autoPlay
+            playsInline
+            className="w-full h-48 rounded-lg object-cover bg-black"
+            onError={(e) => {
+              console.error('Video error:', e);
+            }}
+          >
+            <source src={publicUrl} type={mimeType || 'video/mp4'} />
+            Din nettleser støtter ikke videoavspilling.
+          </video>
           <Button
             onClick={() => setShowPlayer(false)}
             variant="ghost"
@@ -49,3 +54,4 @@ export const VideoPlayer = ({ publicUrl, filename, mimeType }: VideoPlayerProps)
     </div>
   );
 };
+
