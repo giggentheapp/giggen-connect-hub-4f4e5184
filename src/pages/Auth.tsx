@@ -29,49 +29,37 @@ const Auth = () => {
   const { t } = useAppTranslation();
 
   useEffect(() => {
-    // Clear any existing session first - CRITICAL FIX
-    const clearExistingSession = async () => {
-      console.log('🔍 Auth.tsx: Checking for existing session...');
-      
-      // Force clear any cached session
-      await supabase.auth.signOut();
-      
-      // Clear localStorage manually as backup
-      localStorage.removeItem('sb-hkcdyqghfqyrlwjcsrnx-auth-token');
-      sessionStorage.clear();
-      
-      console.log('🧹 Auth.tsx: Cleared all cached auth data');
-    };
-
-    clearExistingSession().then(() => {
-      // Set up auth state listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          console.log('🔄 Auth.tsx: Auth state changed:', event, session ? 'User logged in' : 'No user');
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-          
-          if (session?.user) {
-            navigate('/dashboard');
-          }
-        }
-      );
-
-      // Check for existing session
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log('📋 Auth.tsx: Existing session check:', session ? 'Found session' : 'No session');
+    console.log('🔍 Auth.tsx: Setting up auth listener...');
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('🔄 Auth.tsx: Auth state changed:', event, session ? 'User logged in' : 'No user');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
         if (session?.user) {
+          console.log('✅ Auth.tsx: User authenticated, navigating to dashboard');
           navigate('/dashboard');
         }
-      });
+      }
+    );
 
-      return () => subscription.unsubscribe();
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('📋 Auth.tsx: Existing session check:', session ? 'Found session' : 'No session');
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      if (session?.user) {
+        console.log('✅ Auth.tsx: Found existing session, navigating to dashboard');
+        navigate('/dashboard');
+      }
     });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
