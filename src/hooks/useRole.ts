@@ -10,29 +10,39 @@ export const useRoleData = () => {
 
   const fetchRole = async () => {
     try {
+      console.log('🔍 useRole: Starting role fetch...');
       setLoading(true);
       setError(null);
 
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 useRole: Got user:', user ? user.id : 'None');
+      
       if (!user) {
+        console.log('❌ useRole: No user found, setting role to null');
         setRole(null);
         return;
       }
 
+      console.log('📋 useRole: Fetching profile for user:', user.id);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('❌ useRole: Profile fetch error:', profileError);
+        throw profileError;
+      }
 
+      console.log('✅ useRole: Profile fetched:', profile);
       setRole(profile?.role as UserRole || 'goer');
     } catch (err: any) {
-      console.error('Error fetching user role:', err);
+      console.error('❌ useRole: Error fetching user role:', err);
       setError(err.message);
       setRole(null);
     } finally {
+      console.log('🏁 useRole: Fetch complete, setting loading to false');
       setLoading(false);
     }
   };

@@ -50,33 +50,51 @@ const Dashboard = () => {
 
     // Check for existing session and load profile
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('📋 Dashboard: Checking session:', session ? 'Found' : 'None');
       setSession(session);
       setUser(session?.user ?? null);
       
       if (!session?.user) {
+        console.log('❌ Dashboard: No user, redirecting to auth');
         navigate('/auth');
         return;
       }
 
-      // Load user profile
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single();
+      try {
+        console.log('👤 Dashboard: Loading profile for user:', session.user.id);
+        
+        // Load user profile
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
 
-      if (error) {
-        console.error('Dashboard: Error loading profile:', error);
+        if (error) {
+          console.error('❌ Dashboard: Error loading profile:', error);
+          toast({
+            title: t('profileLoadError'),
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          console.log('✅ Dashboard: Profile loaded successfully:', profileData);
+          setProfile(profileData);
+        }
+      } catch (err) {
+        console.error('❌ Dashboard: Unexpected error loading profile:', err);
         toast({
           title: t('profileLoadError'),
-          description: error.message,
+          description: 'Unexpected error occurred',
           variant: "destructive",
         });
-      } else {
-        setProfile(profileData);
       }
       
       setLoading(false);
+    }).catch(err => {
+      console.error('❌ Dashboard: Session check failed:', err);
+      setLoading(false);
+      navigate('/auth');
     });
 
     return () => subscription.unsubscribe();
@@ -132,6 +150,13 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  console.log('🎛️ Dashboard: Rendering with state:', {
+    loading,
+    hasUser: !!user,
+    hasProfile: !!profile,
+    userRole: profile?.role
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
