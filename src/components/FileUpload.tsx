@@ -83,29 +83,30 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
           break;
       }
 
-      // Create unique filename - encode to handle Norwegian characters
+      // Velger viktig - LAG din egen filePath
       const timestamp = Date.now();
       const sanitizedFileName = file.name
-        .replace(/[^a-zA-Z0-9._\-æøåÆØÅ]/g, '_') // Allow Norwegian characters
-        .replace(/_{2,}/g, '_'); // Replace multiple underscores with single
+        .replace(/[^a-zA-Z0-9._\-æøåÆØÅ]/g, '_')
+        .replace(/_{2,}/g, '_');
       const fileName = `${timestamp}-${sanitizedFileName}`;
-      const filePath = `${user.id}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`; // <-- DENNE brukes overalt
 
-      console.log(`Uploading to bucket: ${bucketName}, path: ${filePath}`);
+      console.log('🎯 Creating file at path:', filePath);
 
-      // Upload to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // Upload
+      const { error: uploadError } = await supabase.storage
         .from(bucketName)
-        .upload(filePath, file);
+        .upload(filePath, file); // <-- Bruk filePath
 
-      if (uploadError) {
-        throw new Error(`Upload feilet: ${uploadError.message}`);
-      }
+      if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get URL
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
-        .getPublicUrl(filePath);
+        .getPublicUrl(filePath); // <-- Bruk filePath
+
+      console.log('✅ File uploaded to:', filePath);
+      console.log('🔗 Public URL:', publicUrl);
 
       console.log('✅ File uploaded successfully:', {
         filename: file.name,
