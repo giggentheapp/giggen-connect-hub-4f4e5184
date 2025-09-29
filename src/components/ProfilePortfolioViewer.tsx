@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,40 @@ interface ProfilePortfolioViewerProps {
 export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
   const { files, loading, error } = useProfilePortfolio(userId);
   const { t } = useAppTranslation();
+
+  // Test function to verify Supabase connectivity
+  const testAudioConnectivity = async (filePath: string) => {
+    try {
+      console.log('🧪 Testing audio connectivity for:', filePath);
+      
+      // Test 1: Generate signed URL as fallback
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from('portfolio')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      
+      if (signedUrlError) {
+        console.error('🚫 Signed URL error:', signedUrlError);
+      } else {
+        console.log('✅ Signed URL generated:', signedUrlData.signedUrl);
+      }
+      
+      // Test 2: Check file existence
+      const { data: fileData, error: fileError } = await supabase.storage
+        .from('portfolio')
+        .list(filePath.split('/')[0], { search: filePath.split('/')[1] });
+      
+      if (fileError) {
+        console.error('🚫 File list error:', fileError);
+      } else {
+        console.log('📁 File exists:', fileData);
+      }
+      
+      return signedUrlData?.signedUrl;
+    } catch (err) {
+      console.error('🚫 Connectivity test failed:', err);
+      return null;
+    }
+  };
 
   if (loading) {
     return (
@@ -73,7 +108,12 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       .getPublicUrl(filePath);
     
     console.log('🔗 Generated public URL for:', filePath, '→', data.publicUrl);
-    return data.publicUrl;
+    
+    // Add timestamp to prevent caching issues
+    const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
+    console.log('🔗 Final URL with cache busting:', urlWithCache);
+    
+    return urlWithCache;
   };
 
   // Enhanced audio detection function for consistency
@@ -86,6 +126,13 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
   const renderMediaPlayer = (file: typeof files[0]) => {
     const publicUrl = getPublicUrl(file.file_path);
+    
+    // Test connectivity for audio files on mount
+    React.useEffect(() => {
+      if (isAudioFile(file)) {
+        testAudioConnectivity(file.file_path).catch(console.error);
+      }
+    }, [file.file_path]);
 
     if (file.file_type.includes('video')) {
       return (
@@ -116,24 +163,61 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             controls 
             className="w-full rounded-md"
             preload="metadata"
+            crossOrigin="anonymous"
+            controlsList="nodownload"
             onError={(e) => {
+              const audioElement = e.currentTarget;
               console.error('🚫 Audio playback error for:', file.filename);
-              console.error('URL:', publicUrl);
-              console.error('MIME type:', file.mime_type);
-              console.error('File type:', file.file_type);
+              console.error('Error details:', {
+                error: audioElement.error,
+                errorCode: audioElement.error?.code,
+                errorMessage: audioElement.error?.message,
+                url: publicUrl,
+                mimeType: file.mime_type,
+                fileType: file.file_type,
+                networkState: audioElement.networkState,
+                readyState: audioElement.readyState
+              });
+              
+              // Try to fetch the URL directly to check for network issues
+              fetch(publicUrl, { method: 'HEAD' })
+                .then(response => {
+                  console.log('🌐 Direct fetch test:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                  });
+                })
+                .catch(fetchError => {
+                  console.error('🚫 Direct fetch failed:', fetchError);
+                });
             }}
             onLoadStart={() => {
               console.log('▶️ Audio loading started for:', file.filename);
             }}
+            onLoadedMetadata={() => {
+              console.log('📊 Audio metadata loaded for:', file.filename);
+            }}
             onCanPlay={() => {
               console.log('✅ Audio ready to play:', file.filename);
             }}
+            onPlay={() => {
+              console.log('🎵 Audio playback started for:', file.filename);
+            }}
+            onPause={() => {
+              console.log('⏸️ Audio playback paused for:', file.filename);
+            }}
           >
             <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-            <source src={publicUrl} type="audio/mpeg" />
-            <source src={publicUrl} type="audio/wav" />
-            <source src={publicUrl} type="audio/mp4" />
-            Lyden kan ikke spilles i nettleseren din.
+            {file.mime_type !== 'audio/mpeg' && <source src={publicUrl} type="audio/mpeg" />}
+            {file.mime_type !== 'audio/wav' && <source src={publicUrl} type="audio/wav" />}
+            {file.mime_type !== 'audio/mp4' && <source src={publicUrl} type="audio/mp4" />}
+            <p className="text-sm text-muted-foreground mt-2">
+              Lyden kan ikke spilles i nettleseren din. <br />
+              <a href={publicUrl} download className="text-primary hover:underline">
+                Last ned filen direkte
+              </a>
+            </p>
           </audio>
         </div>
       );

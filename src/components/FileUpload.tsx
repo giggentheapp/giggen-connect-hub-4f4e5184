@@ -107,13 +107,21 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
         .from(bucketName)
         .getPublicUrl(filePath);
 
+      console.log('✅ File uploaded successfully:', {
+        filename: file.name,
+        filePath: filePath,
+        publicUrl: publicUrl,
+        bucketName: bucketName
+      });
+
       // Save metadata to database
       const dbFileType = getFileType(file.name, file.type);
       
       console.log('📁 File type detection:', {
         filename: file.name,
         mimeType: file.type,
-        detectedType: dbFileType
+        detectedType: dbFileType,
+        fileSize: file.size
       });
       
       // Determine which table to use based on fileType
