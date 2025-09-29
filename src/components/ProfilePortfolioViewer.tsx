@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Play, Volume2, Image as ImageIcon, File, Download } from 'lucide-react';
+import { Play, Volume2, Image as ImageIcon, File, Download, Pause } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
+import { toast } from 'sonner';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -17,6 +18,45 @@ interface ProfilePortfolioViewerProps {
 export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
   const { files, loading, error } = useProfilePortfolio(userId);
   const { t } = useAppTranslation();
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
+
+  const playAudio = (url: string, fileId: string, title: string) => {
+    // Stop any currently playing audio
+    if (audioInstance) {
+      audioInstance.pause();
+      audioInstance.currentTime = 0;
+    }
+
+    // If clicking the same file, just stop
+    if (playingAudio === fileId) {
+      setPlayingAudio(null);
+      setAudioInstance(null);
+      return;
+    }
+
+    // Create and play new audio
+    const audio = new Audio(url);
+    audio.play()
+      .then(() => {
+        console.log('✅ Audio playing:', title);
+        setPlayingAudio(fileId);
+        setAudioInstance(audio);
+        toast.success(`Spiller: ${title}`);
+      })
+      .catch(err => {
+        console.error('❌ Audio failed:', err);
+        toast.error('Kunne ikke spille lyd');
+        setPlayingAudio(null);
+        setAudioInstance(null);
+      });
+
+    // Handle when audio ends
+    audio.onended = () => {
+      setPlayingAudio(null);
+      setAudioInstance(null);
+    };
+  };
 
   // Test function to verify Supabase connectivity
   const testAudioConnectivity = async (filePath: string) => {
@@ -162,76 +202,32 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       }
 
       if (isAudioFile(file)) {
-        console.log('🎵 Rendering audio player for:', file.filename, {
-          file_type: file.file_type,
-          mime_type: file.mime_type,
-          publicUrl: publicUrl,
-          urlValid: !!publicUrl,
-          fileId: file.id
-        });
-        
-        // DEBUG: Check if audioUrl is being set in component state
-        console.log('🔍 Audio URL state check:', {
-          hasUrl: !!publicUrl,
-          urlLength: publicUrl?.length,
-          filePathExists: !!file.file_path
-        });
-
-        // DEBUG: Log just before rendering
-        console.log('🎬 Rendering audio with URL:', publicUrl);
+        const isPlaying = playingAudio === file.id;
         
         return (
-          <div className="w-full">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="w-full space-y-2">
+            <div className="flex items-center gap-2">
               <Volume2 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">{file.filename}</span>
+              <span className="text-sm font-medium truncate">{file.filename}</span>
             </div>
-            <audio 
-              key={file.id}
-              src={publicUrl}
-              controls 
-              className="w-full rounded-md"
-              preload="metadata"
-              onLoadStart={() => console.log('🎯 Audio load started:', publicUrl)}
-              onCanPlay={() => console.log('✅ Audio can play')}
-              onError={(e) => {
-                const target = e.target as HTMLAudioElement;
-                console.error('🔴 Audio error:', {
-                  src: target.src,
-                  currentSrc: target.currentSrc,
-                  error: target.error?.message,
-                  errorCode: target.error?.code,
-                  networkState: target.networkState,
-                  readyState: target.readyState,
-                  originalUrl: publicUrl,
-                  filename: file.filename
-                });
-              }}
-              onLoadedMetadata={() => console.log('📊 Audio metadata loaded')}
-              onLoadedData={() => console.log('📈 Audio data loaded')}
-              onCanPlayThrough={() => console.log('🚀 Audio can play through')}
-              onPlay={() => {
-                console.log('🎵 Audio playback started for:', file.filename);
-              }}
-              onPause={() => {
-                console.log('⏸️ Audio playback paused for:', file.filename);
-              }}
-              onDurationChange={(e) => {
-                const target = e.target as HTMLAudioElement;
-                console.log('⏱️ Audio duration:', target.duration, 'seconds');
-              }}
+            <Button
+              onClick={() => playAudio(publicUrl, file.id, file.title || file.filename)}
+              variant={isPlaying ? "default" : "outline"}
+              className="w-full"
+              size="sm"
             >
-              <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-              {file.mime_type !== 'audio/mpeg' && <source src={publicUrl} type="audio/mpeg" />}
-              {file.mime_type !== 'audio/wav' && <source src={publicUrl} type="audio/wav" />}
-              {file.mime_type !== 'audio/mp4' && <source src={publicUrl} type="audio/mp4" />}
-              <p className="text-sm text-muted-foreground mt-2">
-                Lyden kan ikke spilles i nettleseren din. <br />
-                <a href={publicUrl} download className="text-primary hover:underline">
-                  Last ned filen direkte
-                </a>
-              </p>
-            </audio>
+              {isPlaying ? (
+                <>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Stopp
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Spill av
+                </>
+              )}
+            </Button>
           </div>
         );
       }
