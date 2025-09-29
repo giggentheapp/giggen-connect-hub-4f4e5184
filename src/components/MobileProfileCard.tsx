@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   X, MapPin, Music, Eye, Calendar, Image as ImageIcon, 
-  ExternalLink, ChevronDown, ChevronUp, MessageSquare
+  ExternalLink, ChevronDown, ChevronUp, MessageSquare, Package
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
@@ -32,6 +32,22 @@ interface ProfileSettings {
   show_events?: boolean;
 }
 
+interface Concept {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  expected_audience: number;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  event_date: string;
+  venue: string;
+}
+
 interface MobileProfileCardProps {
   userId: string | null;
   onClose: () => void;
@@ -44,6 +60,8 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
@@ -55,6 +73,8 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     }
     
     fetchProfileData();
+    fetchConcepts();
+    fetchEvents();
   }, [userId]);
 
   const fetchProfileData = async () => {
@@ -88,10 +108,46 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     }
   };
 
+  const fetchConcepts = async () => {
+    if (!userId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('concepts')
+        .select('id, title, description, price, expected_audience')
+        .eq('maker_id', userId)
+        .eq('is_published', true);
+
+      if (error) throw error;
+      setConcepts(data || []);
+    } catch (err) {
+      console.error('Error fetching concepts:', err);
+    }
+  };
+
+  const fetchEvents = async () => {
+    if (!userId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, title, description, event_date, venue')
+        .eq('receiver_id', userId)
+        .eq('status', 'upcoming')
+        .eq('is_public_after_approval', true);
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+    }
+  };
+
   if (!userId || !profile) return null;
 
   const showPortfolio = settings?.show_portfolio;
   const showAbout = settings?.show_about;
+  const showEvents = settings?.show_events;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-in-bottom">
@@ -158,15 +214,25 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         {expanded && (
           <div className="max-h-[60vh] overflow-y-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full grid grid-cols-2 rounded-none">
+              <TabsList className="w-full grid grid-cols-4 rounded-none">
                 <TabsTrigger value="info" className="text-xs">
                   <Eye className="w-3 h-3 mr-1" />
                   {t('info')}
+                </TabsTrigger>
+                <TabsTrigger value="concepts" className="text-xs">
+                  <Package className="w-3 h-3 mr-1" />
+                  Tilbud
                 </TabsTrigger>
                 {showPortfolio && (
                   <TabsTrigger value="portfolio" className="text-xs">
                     <ImageIcon className="w-3 h-3 mr-1" />
                     {t('portfolio')}
+                  </TabsTrigger>
+                )}
+                {showEvents && (
+                  <TabsTrigger value="events" className="text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Event
                   </TabsTrigger>
                 )}
               </TabsList>
@@ -193,6 +259,37 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 )}
               </TabsContent>
 
+              <TabsContent value="concepts" className="p-4 space-y-3">
+                {concepts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Ingen tilbud tilgjengelig
+                  </p>
+                ) : (
+                  concepts.map((concept) => (
+                    <Card key={concept.id} className="overflow-hidden">
+                      <CardContent className="p-3">
+                        <h4 className="font-semibold text-sm mb-1">{concept.title}</h4>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {concept.description}
+                        </p>
+                        <div className="flex items-center justify-between text-xs">
+                          {concept.price && (
+                            <Badge variant="secondary">
+                              {concept.price.toLocaleString('no-NO')} kr
+                            </Badge>
+                          )}
+                          {concept.expected_audience && (
+                            <span className="text-muted-foreground">
+                              {concept.expected_audience} publikum
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </TabsContent>
+
               {showPortfolio && (
                 <TabsContent value="portfolio" className="p-4">
                   <ProfilePortfolioViewer 
@@ -200,6 +297,44 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                     showControls={false}
                     isOwnProfile={false}
                   />
+                </TabsContent>
+              )}
+
+              {showEvents && (
+                <TabsContent value="events" className="p-4 space-y-3">
+                  {events.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Ingen kommende arrangementer
+                    </p>
+                  ) : (
+                    events.map((event) => (
+                      <Card key={event.id} className="overflow-hidden">
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-sm">{event.title}</h4>
+                            <Badge variant="outline" className="text-xs">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {new Date(event.event_date).toLocaleDateString('no-NO', {
+                                day: 'numeric',
+                                month: 'short'
+                              })}
+                            </Badge>
+                          </div>
+                          {event.venue && (
+                            <div className="flex items-center text-xs text-muted-foreground mb-1">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {event.venue}
+                            </div>
+                          )}
+                          {event.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {event.description}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </TabsContent>
               )}
             </Tabs>
