@@ -104,32 +104,33 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   };
 
   const getPublicUrl = (filePath: string) => {
-    try {
-      if (!filePath) {
-        console.error('🔴 No file path provided');
-        return null;
-      }
-
-      const { data } = supabase.storage
-        .from('portfolio')
-        .getPublicUrl(filePath);
-      
-      if (!data?.publicUrl) {
-        console.error('🔴 No public URL generated for:', filePath);
-        return null;
-      }
-
-      console.log('🔗 Generated public URL for:', filePath, '→', data.publicUrl);
-      
-      // Add timestamp to prevent caching issues
-      const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
-      console.log('🔗 Final URL with cache busting:', urlWithCache);
-      
-      return urlWithCache;
-    } catch (error) {
-      console.error('🔴 Error generating public URL:', error);
-      return null;
+    console.log('📁 Original file_path from DB:', filePath);
+    
+    // Check if filePath already includes user ID or is malformed
+    if (!filePath) {
+      console.error('❌ Empty file_path!');
+      return '';
     }
+    
+    const { data } = supabase.storage
+      .from('portfolio')
+      .getPublicUrl(filePath);
+    
+    console.log('🔗 Generated public URL:', data.publicUrl);
+    
+    // Test if URL is actually accessible
+    fetch(data.publicUrl, { method: 'HEAD' })
+      .then(response => {
+        console.log('🌐 URL Response:', response.status, response.statusText);
+        if (response.status === 404) {
+          console.error('❌ File not found at URL!');
+          console.error('Expected path:', filePath);
+          console.error('Full URL:', data.publicUrl);
+        }
+      })
+      .catch(error => console.error('❌ Fetch failed:', error));
+    
+    return data.publicUrl;
   };
 
   // Enhanced audio detection function for consistency
