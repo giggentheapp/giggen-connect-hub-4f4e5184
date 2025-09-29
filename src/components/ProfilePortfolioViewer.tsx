@@ -104,33 +104,24 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   };
 
   const getPublicUrl = (filePath: string) => {
-    console.log('📁 Original file_path from DB:', filePath);
-    
-    // Check if filePath already includes user ID or is malformed
     if (!filePath) {
-      console.error('❌ Empty file_path!');
-      return '';
+      console.error('No file path provided');
+      return null;
     }
-    
+
     const { data } = supabase.storage
       .from('portfolio')
       .getPublicUrl(filePath);
     
-    console.log('🔗 Generated public URL:', data.publicUrl);
+    if (!data?.publicUrl) {
+      console.error('No public URL generated for:', filePath);
+      return null;
+    }
     
-    // Test if URL is actually accessible
-    fetch(data.publicUrl, { method: 'HEAD' })
-      .then(response => {
-        console.log('🌐 URL Response:', response.status, response.statusText);
-        if (response.status === 404) {
-          console.error('❌ File not found at URL!');
-          console.error('Expected path:', filePath);
-          console.error('Full URL:', data.publicUrl);
-        }
-      })
-      .catch(error => console.error('❌ Fetch failed:', error));
+    // Add timestamp to prevent caching issues
+    const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
     
-    return data.publicUrl;
+    return urlWithCache;
   };
 
   // Enhanced audio detection function for consistency
