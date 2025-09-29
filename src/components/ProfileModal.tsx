@@ -10,6 +10,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
+import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface ProfileData {
   id: string;
@@ -46,7 +47,6 @@ export const ProfileModal = ({
 }: ProfileModalProps) => {
   const { t } = useAppTranslation();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [portfolio, setPortfolio] = useState<any[]>([]);
   const [concepts, setConcepts] = useState<any[]>([]);
   const [portfolioVisible, setPortfolioVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,6 @@ export const ProfileModal = ({
   useEffect(() => {
     if (!userId || !isOpen) {
       setProfile(null);
-      setPortfolio([]);
       setConcepts([]);
       return;
     }
@@ -111,54 +110,30 @@ export const ProfileModal = ({
           console.warn('No profile data returned for user:', userId);
         }
 
-        // Fetch portfolio if visible to user
+        // Check portfolio visibility using profile_settings table
         const isOwnProfile = currentUserId === userId;
-        let portfolioData: any[] = [];
         
         if (isOwnProfile) {
-          // Own profile - show all portfolio
-          const {
-            data,
-            error
-          } = await supabase.from('profile_portfolio').select('*').eq('user_id', userId).order('created_at', {
-            ascending: false
-          });
-          portfolioData = data || [];
           setPortfolioVisible(true);
         } else {
-          // Other's profile - check privacy settings for portfolio visibility
-          const profilePrivacySettings = (profileData?.privacy_settings as any) || {};
-          const showPortfolio = profilePrivacySettings.show_portfolio_to_goers === true;
+          // Check if maker has enabled portfolio sharing in profile_settings
+          const { data: profileSettings } = await supabase
+            .from('profile_settings')
+            .select('show_portfolio')
+            .eq('maker_id', userId)
+            .single();
+          
+          const showPortfolio = profileSettings?.show_portfolio === true;
           
           console.log('📁 Portfolio visibility check:', {
             userId,
-            privacySettings: profilePrivacySettings,
+            profileSettings,
             showPortfolio,
             currentUserRole
           });
           
           setPortfolioVisible(showPortfolio);
-          
-          if (showPortfolio) {
-            const {
-              data,
-              error
-            } = await supabase.from('profile_portfolio').select('*').eq('user_id', userId).eq('is_public', true).order('created_at', {
-              ascending: false
-            });
-            
-            if (error) {
-              console.error('❌ Error fetching portfolio:', error);
-            } else {
-              console.log('✅ Portfolio data fetched:', data?.length || 0);
-            }
-            
-            portfolioData = data || [];
-          } else {
-            console.log('❌ Portfolio not visible due to privacy settings');
-          }
         }
-        setPortfolio(portfolioData);
 
         // Fetch concepts if user is maker and viewing another maker
         if (currentUserRole === 'maker') {
@@ -192,18 +167,6 @@ export const ProfileModal = ({
         </DialogContent>
       </Dialog>;
   }
-  const renderFilePreview = (file: any) => {
-    if (file.mime_type?.startsWith('image/')) {
-      return <img src={file.file_url} alt={file.title || file.filename} className="w-full h-48 object-cover rounded-lg" />;
-    } else if (file.mime_type?.startsWith('video/')) {
-      return <video src={file.file_url} controls className="w-full h-48 rounded-lg" />;
-    } else if (file.mime_type?.startsWith('audio/')) {
-      return <audio src={file.file_url} controls className="w-full" />;
-    }
-    return <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-        <span className="text-sm text-muted-foreground">{file.filename}</span>
-      </div>;
-  };
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-hidden p-0 gap-0 mobile-modal mobile-optimized">
         <div className="mobile-modal-content">
@@ -282,20 +245,11 @@ export const ProfileModal = ({
                         <p className="text-muted-foreground italic">
                           {t('Portfolio Not Public')}
                         </p>
-                      ) : portfolio.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {portfolio.map(file => (
-                            <div key={file.id} className="space-y-2">
-                              {renderFilePreview(file)}
-                              {file.title && <h4 className="font-medium">{file.title}</h4>}
-                              {file.description && <p className="text-sm text-muted-foreground">{file.description}</p>}
-                            </div>
-                          ))}
-                        </div>
                       ) : (
-                        <p className="text-muted-foreground italic">
-                          {t('No Portfolio Items')}
-                        </p>
+                        <ProfilePortfolioViewer 
+                          userId={userId} 
+                          isOwnProfile={currentUserId === userId}
+                        />
                       )}
                     </CardContent>
                  </Card>
