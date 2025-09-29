@@ -215,7 +215,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     <div className={`fixed inset-0 z-50 transition-transform duration-300 ${
       expanded ? 'translate-y-0' : 'translate-y-[calc(100%-180px)]'
     }`}>
-      <div className="h-full bg-background/98 backdrop-blur-sm shadow-2xl flex flex-col">
+      <div className="h-full bg-card border-l shadow-2xl flex flex-col">
         {/* Header - Always visible */}
         <div className="px-4 py-3 border-b">
           <div className="flex items-center justify-between gap-3">
@@ -276,9 +276,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
         {/* Expandable content - Full screen when expanded */}
         {expanded && availableTabs > 0 && (
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-hidden flex flex-col">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="w-full grid rounded-none flex-shrink-0" style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
+              <TabsList className="w-full grid rounded-none flex-shrink-0 bg-muted" style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
                 {showAbout && (
                   <TabsTrigger value="info" className="text-xs px-2">
                     <Eye className="w-3 h-3 mr-1" />
