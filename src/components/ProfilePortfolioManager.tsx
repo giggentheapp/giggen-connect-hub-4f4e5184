@@ -178,19 +178,40 @@ const ProfilePortfolioManager = ({
         return;
       }
 
-      const {
-        error
-      } = await supabase.from('profile_portfolio').delete().eq('id', itemId);
-      if (error) throw error;
+      // Find the item to get the file_path before deleting
+      const itemToDelete = items.find(item => item.id === itemId);
+      if (!itemToDelete) {
+        throw new Error('Fil ikke funnet');
+      }
+
+      // First, delete the file from Supabase Storage
+      const { error: storageError } = await supabase.storage
+        .from('portfolio')
+        .remove([itemToDelete.file_path]);
+
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+        // Continue with database deletion even if storage deletion fails
+      }
+
+      // Then delete from database
+      const { error: dbError } = await supabase
+        .from('profile_portfolio')
+        .delete()
+        .eq('id', itemId);
+
+      if (dbError) throw dbError;
+
       setItems(prev => prev.filter(item => item.id !== itemId));
       toast({
         title: t('fileDeleteSuccess'),
         description: t('portfolioElementDeleted')
       });
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: t('error'),
-        description: t('couldNotDeleteElement'),
+        description: error.message || t('couldNotDeleteElement'),
         variant: "destructive"
       });
     }

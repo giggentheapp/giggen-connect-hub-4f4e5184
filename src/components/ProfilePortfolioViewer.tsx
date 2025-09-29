@@ -192,7 +192,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
               controls 
               className="w-full rounded-md"
               preload="metadata"
-              controlsList="nodownload"
               onLoadStart={() => console.log('🎯 Audio load started:', publicUrl)}
               onCanPlay={() => console.log('✅ Audio can play')}
               onError={(e) => {
