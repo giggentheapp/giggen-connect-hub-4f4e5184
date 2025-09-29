@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { AppLanguageProvider } from "@/contexts/AppLanguageContext";
+import { RoleProvider } from "@/contexts/RoleProvider";
 import { MobileLayoutOptimizer } from "@/components/MobileLayoutOptimizer";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
@@ -34,8 +35,9 @@ const App = () => (
   <AppLanguageProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <MobileLayoutOptimizer>
-          <ErrorBoundary>
+        <RoleProvider>
+          <MobileLayoutOptimizer>
+            <ErrorBoundary>
             <Toaster />
             <Sonner />
             <Routes>
@@ -63,9 +65,10 @@ const App = () => (
             <FeedbackButton />
           </ErrorBoundary>
         </MobileLayoutOptimizer>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </AppLanguageProvider>
+      </RoleProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
+</AppLanguageProvider>
 );
 
 export default App;

@@ -185,13 +185,10 @@ export const SafeBookingsSection = ({ profile }: SafeBookingsSectionProps) => {
                 booking={booking}
                 currentUserId={profile.user_id}
                 onDetailsClick={() => {
-                  console.log('Details clicked for booking:', booking.id);
-                  // TODO: Implement details modal
+                  // Navigate to booking details page
+                  window.location.href = `/booking/${booking.id}/details`;
                 }}
-                onAction={() => {
-                  console.log('Action clicked for booking:', booking.id);
-                  // TODO: Implement action handling
-                }}
+                onAction={refetch}
               />
             ))
           )}
