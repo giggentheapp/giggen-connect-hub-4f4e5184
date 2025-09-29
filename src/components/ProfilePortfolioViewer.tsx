@@ -1,8 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, Volume2, Image as ImageIcon, File } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Play, Volume2, Image as ImageIcon, File, Download } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -65,8 +67,15 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     return 'Dokument';
   };
 
+  const getPublicUrl = (filePath: string) => {
+    const { data } = supabase.storage
+      .from('portfolio')
+      .getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
   const renderMediaPlayer = (file: typeof files[0]) => {
-    if (!file.file_url) return null;
+    const publicUrl = getPublicUrl(file.file_path);
 
     if (file.file_type.includes('video')) {
       return (
@@ -74,7 +83,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
           controls 
           className="w-full max-h-48 rounded-lg"
         >
-          <source src={file.file_url} type={file.mime_type || 'video/mp4'} />
+          <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
           Videoen kan ikke vises i nettleseren din.
         </video>
       );
@@ -89,7 +98,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       console.log('🎵 Rendering audio player for:', file.filename, {
         file_type: file.file_type,
         mime_type: file.mime_type,
-        file_url: file.file_url
+        publicUrl: publicUrl
       });
       
       return (
@@ -104,16 +113,16 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             preload="metadata"
             onError={(e) => {
               console.error('Audio playback error:', e);
-              console.error('Audio file URL:', file.file_url);
+              console.error('Audio file URL:', publicUrl);
               console.error('Audio mime type:', file.mime_type);
             }}
             onLoadStart={() => {
               console.log('Audio loading started for:', file.filename);
             }}
           >
-            <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
+            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
             {file.mime_type?.includes('wav') && (
-              <source src={file.file_url} type="audio/wav" />
+              <source src={publicUrl} type="audio/wav" />
             )}
             Lyden kan ikke spilles i nettleseren din.
           </audio>
@@ -124,7 +133,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     if (file.file_type.includes('image')) {
       return (
         <img 
-          src={file.file_url} 
+          src={publicUrl} 
           alt={file.title || file.filename}
           className="w-full max-h-48 object-cover rounded-lg"
         />
@@ -165,12 +174,22 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                 </p>
               )}
               
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                 <span>{new Date(file.created_at).toLocaleDateString('no-NO')}</span>
                 {file.file_size && (
                   <span>{(file.file_size / (1024 * 1024)).toFixed(1)} MB</span>
                 )}
               </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
+                className="w-full h-7 text-xs"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Last ned
+              </Button>
             </div>
           </CardContent>
         </Card>
