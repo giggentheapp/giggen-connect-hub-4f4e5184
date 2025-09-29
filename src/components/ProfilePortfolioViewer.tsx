@@ -148,12 +148,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
         return <div className="text-sm text-destructive">Kunne ikke laste fil-URL</div>;
       }
 
-      // Test connectivity for audio files on mount
-      React.useEffect(() => {
-        if (isAudioFile(file)) {
-          testAudioConnectivity(file.file_path).catch(console.error);
-        }
-      }, [file.file_path]);
 
       if (file.file_type?.includes('video')) {
         return (
