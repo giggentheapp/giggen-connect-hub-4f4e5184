@@ -33,6 +33,42 @@ export const ConceptPortfolioUpload = ({
 }: ConceptPortfolioUploadProps) => {
   const { toast } = useToast();
 
+  // Enhanced file upload handler with auth validation
+  const handleFileUpload = async (fileData: any) => {
+    try {
+      // Import supabase here since it's not already imported
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Validate authentication
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Ikke innlogget",
+          description: "Du må være innlogget for å laste opp filer",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Concept portfolio upload', { 
+        userId, 
+        isAuthenticated: !!user,
+        operation: 'upload',
+        filename: fileData.filename
+      });
+
+      // Pass through to parent handler
+      onFileUploaded(fileData);
+    } catch (error) {
+      console.error('Error in concept portfolio upload:', error);
+      toast({
+        title: "Feil ved opplasting",
+        description: "En feil oppstod under opplasting av filen",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('image')) return <Image className="h-4 w-4 text-blue-500" />;
     if (fileType.includes('video')) return <Video className="h-4 w-4 text-red-500" />;
@@ -57,7 +93,7 @@ export const ConceptPortfolioUpload = ({
         <FileUpload
           fileType="concepts"
           folderPath={`portfolio/${userId}`}
-          onFileUploaded={onFileUploaded}
+          onFileUploaded={handleFileUpload}
           acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx"
           targetTable={null}
         />
