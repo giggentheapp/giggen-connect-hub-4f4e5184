@@ -8,6 +8,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
 import { toast } from 'sonner';
+import { VideoPlayer } from './VideoPlayer';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -187,22 +188,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
 
       if (file.file_type?.includes('video')) {
-        return (
-          <div className="w-full">
-            <video 
-              controls 
-              className="w-full max-h-48 rounded-lg object-cover"
-              preload="metadata"
-              playsInline
-              onError={(e) => {
-                console.error('🔴 Video Error for:', file.filename, e);
-              }}
-            >
-              <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
-              Videoen kan ikke vises i nettleseren din.
-            </video>
-          </div>
-        );
+        return <VideoPlayer publicUrl={publicUrl} filename={file.filename} mimeType={file.mime_type} />;
       }
 
       if (isAudioFile(file)) {
