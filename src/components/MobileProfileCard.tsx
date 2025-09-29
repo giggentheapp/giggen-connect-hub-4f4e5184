@@ -64,7 +64,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
     if (!userId) {
@@ -145,17 +145,24 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
   if (!userId || !profile) return null;
 
-  const showPortfolio = settings?.show_portfolio;
-  const showAbout = settings?.show_about;
-  const showEvents = settings?.show_events;
+  const showPortfolio = settings?.show_portfolio ?? false;
+  const showAbout = settings?.show_about ?? false;
+  const showEvents = settings?.show_events ?? false;
 
-  // Count available tabs
-  const availableTabs = [
+  // Determine available tabs
+  const tabs = [
     showAbout && 'info',
     concepts.length > 0 && 'concepts',
     showPortfolio && 'portfolio',
     showEvents && 'events'
-  ].filter(Boolean).length;
+  ].filter(Boolean);
+  
+  const availableTabs = tabs.length;
+  
+  // Set active tab to first available tab if not set
+  if (activeTab === '' && tabs.length > 0) {
+    setActiveTab(tabs[0] as string);
+  }
 
   return (
     <div className={`fixed inset-0 z-50 transition-transform duration-300 ${
@@ -221,10 +228,10 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         </div>
 
         {/* Expandable content - Full screen when expanded */}
-        {expanded && (
+        {expanded && availableTabs > 0 && (
           <div className="flex-1 overflow-y-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className={`w-full grid rounded-none flex-shrink-0`} style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
+              <TabsList className="w-full grid rounded-none flex-shrink-0" style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
                 {showAbout && (
                   <TabsTrigger value="info" className="text-xs px-2">
                     <Eye className="w-3 h-3 mr-1" />
@@ -350,6 +357,15 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 </TabsContent>
               )}
             </Tabs>
+          </div>
+        )}
+        
+        {/* Show message if no tabs available */}
+        {expanded && availableTabs === 0 && (
+          <div className="flex-1 flex items-center justify-center p-8">
+            <p className="text-muted-foreground text-center">
+              Ingen offentlig informasjon tilgjengelig
+            </p>
           </div>
         )}
 
