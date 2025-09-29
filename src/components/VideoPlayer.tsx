@@ -31,11 +31,18 @@ export const VideoPlayer = ({ publicUrl, filename, mimeType }: VideoPlayerProps)
         <div className="w-full space-y-2">
           <video
             controls
-            autoPlay
             playsInline
+            preload="auto"
             className="w-full h-48 rounded-lg object-cover bg-black"
+            onLoadStart={() => console.log('Video loading started')}
+            onCanPlay={() => console.log('Video can play')}
             onError={(e) => {
-              console.error('Video error:', e);
+              const target = e.target as HTMLVideoElement;
+              console.error('Video error:', {
+                error: target.error?.message,
+                code: target.error?.code,
+                src: target.currentSrc
+              });
             }}
           >
             <source src={publicUrl} type={mimeType || 'video/mp4'} />
