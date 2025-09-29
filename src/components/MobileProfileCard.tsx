@@ -416,27 +416,29 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
           </div>
         )}
 
-        {/* Bottom action bar - Always visible */}
-        <div className="px-4 py-3 border-t bg-muted/30 flex-shrink-0">
-          <div className="flex gap-2">
+        {/* Bottom action bar - Always visible with proper z-index */}
+        <div className="px-4 py-3 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+          <div className="flex gap-2 w-full">
             {ismaker && (
               <Button
                 onClick={() => {
                   navigate(`/booking/create/${userId}`);
                   onClose();
                 }}
-                className="flex-1 min-h-[48px] touch-target"
+                className="flex-1 min-h-[48px] touch-target text-sm font-medium"
+                size="lg"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
-                {t('bookNow')}
+                <span>{t('bookNow')}</span>
               </Button>
             )}
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 min-h-[48px] touch-target"
+              className="flex-1 min-h-[48px] touch-target text-sm font-medium"
+              size="lg"
             >
-              {t('close')}
+              <span>{t('close')}</span>
             </Button>
           </div>
         </div>

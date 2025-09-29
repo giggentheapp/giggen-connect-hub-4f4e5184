@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Eye, Search, Music, Grid, List } from 'lucide-react';
+import { MapPin, Users, Eye, Search, Music, Grid, List, Calendar } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +43,9 @@ interface GoerExploreSectionProps {
 export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
   const [listViewMode, setListViewMode] = useState<'grid' | 'list'>('grid');
   const [makers, setMakers] = useState<any[]>([]);
+  const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,14 +57,64 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   });
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'makers' | 'events'>('events');
   const navigate = useNavigate();
   const { isGoer, ismaker } = useRole();
   const { t } = useAppTranslation();
 
-  // Auto-fetch makers when component mounts
+  // Auto-fetch data when component mounts
   useEffect(() => {
     fetchAllMakers();
+    fetchPublishedEvents();
   }, []);
+
+  const fetchPublishedEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log('🎯 Fetching published events from events_market...');
+      
+      // Fetch published events from events_market
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events_market')
+        .select(`
+          id,
+          title,
+          description,
+          venue,
+          date,
+          time,
+          ticket_price,
+          expected_audience,
+          created_by,
+          is_public
+        `)
+        .eq('is_public', true)
+        .order('date', { ascending: true });
+      
+      if (eventsError) {
+        console.error('❌ Failed to fetch events:', eventsError);
+        setError('Kunne ikke laste arrangementer');
+        setPublishedEvents([]);
+        setFilteredEvents([]);
+        return;
+      }
+      
+      console.log('✅ Successfully fetched published events:', eventsData?.length || 0);
+      
+      setPublishedEvents(eventsData || []);
+      setFilteredEvents(eventsData || []);
+      
+    } catch (err: any) {
+      console.error('❌ Error fetching events:', err);
+      setError(err.message || 'Noe gikk galt');
+      setPublishedEvents([]);
+      setFilteredEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchAllMakers = async () => {
     try {
@@ -203,29 +255,51 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
     <div className="w-full h-full bg-background">
       {/* List View */}
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Search and Filters */}
-        <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+        {/* Tabs for Events vs Makers */}
+        <div className="px-3 md:px-4 pt-3 bg-background shrink-0">
           <div className="max-w-4xl mx-auto">
-            <SearchFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              filters={filters}
-              onFiltersChange={setFilters}
-              resultCount={filteredMakers.length}
-              loading={loading}
-              onMapClick={() => navigate('/map')}
-            />
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'makers' | 'events')}>
+              <TabsList className="w-full grid grid-cols-2">
+                <TabsTrigger value="events" className="text-sm">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Kommende Arrangementer
+                </TabsTrigger>
+                <TabsTrigger value="makers" className="text-sm">
+                  <Users className="w-4 h-4 mr-2" />
+                  {t('makersInNetwork')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
+
+        {/* Search and Filters - Only show for makers tab */}
+        {activeTab === 'makers' && (
+          <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+            <div className="max-w-4xl mx-auto">
+              <SearchFilters
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                filters={filters}
+                onFiltersChange={setFilters}
+                resultCount={filteredMakers.length}
+                loading={loading}
+                onMapClick={() => navigate('/map')}
+              />
+            </div>
+          </div>
+        )}
 
         {/* List Header with View Toggle */}
         <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h2 className="text-base md:text-lg font-semibold text-foreground">{t('makersInNetwork')}</h2>
+                <h2 className="text-base md:text-lg font-semibold text-foreground">
+                  {activeTab === 'events' ? 'Publiserte Arrangementer' : t('makersInNetwork')}
+                </h2>
                 <Badge variant="outline" className="text-xs bg-muted">
-                  {loading ? '...' : filteredMakers.length}
+                  {loading ? '...' : activeTab === 'events' ? filteredEvents.length : filteredMakers.length}
                 </Badge>
               </div>
               
@@ -254,65 +328,154 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
           <div className="max-w-4xl mx-auto">
-          {loading ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <div className="text-center">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                <p>{t('Loading Makers')}</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center py-12 text-destructive">
-              <div className="text-center">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-2">{error}</p>
-                <Button 
-                  onClick={fetchAllMakers} 
-                  variant="outline" 
-                  size="sm"
-                  className="text-primary border-primary/20 hover:bg-primary hover:text-white"
-                >
-                  {t('tryAgain')}
-                </Button>
-              </div>
-            </div>
-          ) : filteredMakers.length === 0 ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <div className="text-center max-w-md space-y-2">
-                <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium">
-                  {searchTerm || Object.values(filters).some(Boolean)
-                    ? t('No Makers Found Filtered')
-                    : t('No Makers Found')
-                  }
-                </p>
-                {(searchTerm || Object.values(filters).some(Boolean)) && (
-                  <p className="text-sm">
-                    {t('Adjust Filters')}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className={`${
-              listViewMode === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
-                : 'space-y-3'
-            } animate-fade-in`}>
-              {filteredMakers.map((maker) => (
-                <div 
-                  key={maker.id} 
-                  className="animate-fade-in"
-                >
-                  <MakerCard
-                    maker={maker}
-                    onViewProfile={handleViewProfile}
-                    onBookMaker={ismaker ? handleBookMaker : undefined}
-                  />
+          {activeTab === 'events' ? (
+            // Published Events View
+            loading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p>Laster arrangementer...</p>
                 </div>
-              ))}
-            </div>
-            )}
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center py-12 text-destructive">
+                <div className="text-center">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="mb-2">{error}</p>
+                  <Button 
+                    onClick={fetchPublishedEvents} 
+                    variant="outline" 
+                    size="sm"
+                    className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                  >
+                    Prøv igjen
+                  </Button>
+                </div>
+              </div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center max-w-md space-y-2">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Ingen publiserte arrangementer</p>
+                  <p className="text-sm">Kommende arrangementer vil vises her</p>
+                </div>
+              </div>
+            ) : (
+              <div className={`${
+                listViewMode === 'grid' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
+                  : 'space-y-3'
+              } animate-fade-in`}>
+                {filteredEvents.map((event) => (
+                  <Card 
+                    key={event.id}
+                    className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                    onClick={() => navigate(`/event/${event.id}`)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-base line-clamp-2">{event.title}</h3>
+                          <Badge variant="secondary" className="shrink-0">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {event.date && new Date(event.date).toLocaleDateString('no-NO', { day: 'numeric', month: 'short' })}
+                          </Badge>
+                        </div>
+                        
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {event.description}
+                          </p>
+                        )}
+                        
+                        {event.venue && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <MapPin className="w-4 h-4 mr-1 shrink-0" />
+                            <span className="truncate">{event.venue}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-2 pt-2">
+                          {event.ticket_price && (
+                            <Badge variant="outline" className="text-xs">
+                              {event.ticket_price} kr
+                            </Badge>
+                          )}
+                          {event.expected_audience && (
+                            <Badge variant="outline" className="text-xs">
+                              <Users className="w-3 h-3 mr-1" />
+                              {event.expected_audience}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )
+          ) : (
+            // Makers View
+            loading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                  <p>{t('Loading Makers')}</p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center py-12 text-destructive">
+                <div className="text-center">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="mb-2">{error}</p>
+                  <Button 
+                    onClick={fetchAllMakers} 
+                    variant="outline" 
+                    size="sm"
+                    className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                  >
+                    {t('tryAgain')}
+                  </Button>
+                </div>
+              </div>
+            ) : filteredMakers.length === 0 ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center max-w-md space-y-2">
+                  <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">
+                    {searchTerm || Object.values(filters).some(Boolean)
+                      ? t('No Makers Found Filtered')
+                      : t('No Makers Found')
+                    }
+                  </p>
+                  {(searchTerm || Object.values(filters).some(Boolean)) && (
+                    <p className="text-sm">
+                      {t('Adjust Filters')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={`${
+                listViewMode === 'grid' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' 
+                  : 'space-y-3'
+              } animate-fade-in`}>
+                {filteredMakers.map((maker) => (
+                  <div 
+                    key={maker.id} 
+                    className="animate-fade-in"
+                  >
+                    <MakerCard
+                      maker={maker}
+                      onViewProfile={handleViewProfile}
+                      onBookMaker={ismaker ? handleBookMaker : undefined}
+                    />
+                  </div>
+                ))}
+              </div>
+            )
+          )}
           </div>
         </div>
       </div>
