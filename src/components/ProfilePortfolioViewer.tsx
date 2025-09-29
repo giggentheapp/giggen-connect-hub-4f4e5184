@@ -118,10 +118,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       return null;
     }
     
-    // Add timestamp to prevent caching issues
-    const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
-    
-    return urlWithCache;
+    return data.publicUrl;
   };
 
   // Enhanced audio detection function for consistency
@@ -190,7 +187,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
               <span className="text-sm font-medium">{file.filename}</span>
             </div>
             <audio 
-              key={`${file.id}-${publicUrl}`} // Force re-mount when URL changes
+              key={file.id}
               src={publicUrl}
               controls 
               className="w-full rounded-md"
