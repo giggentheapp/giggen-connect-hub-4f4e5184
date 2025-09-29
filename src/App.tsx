@@ -25,6 +25,7 @@ import BookingEdit from "./pages/BookingEdit";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import BookingAgreementPage from "./pages/BookingAgreementPage";
 import BookingRequestPage from "./pages/BookingRequestPage";
+import BookingAgreementSummary from "./pages/BookingAgreementSummary";
 import Bookings from "./pages/Bookings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
               <Route path="/booking/:bookingId/edit" element={<BookingEdit />} />
+              <Route path="/booking/:bookingId/summary" element={<BookingAgreementSummary />} />
               <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
               <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

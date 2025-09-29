@@ -12,7 +12,6 @@ import { BookingActions } from '@/components/BookingActions';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
-import { BookingAgreementSummaryModal } from '@/components/BookingAgreementSummaryModal';
 import { format } from 'date-fns';
 import { SafeBookingsSection } from '@/components/SafeBookingsSection';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -40,8 +39,6 @@ export const BookingsSection = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // Handle URL tab parameter
   useEffect(() => {
@@ -201,8 +198,7 @@ export const BookingsSection = ({
     booking: any;
   }) => {
     const handleDetailsClick = () => {
-      setSelectedBooking(booking);
-      setIsDetailsModalOpen(true);
+      navigate(`/booking/${booking.id}/summary`);
     };
 
     const handleEditClick = () => {
@@ -454,19 +450,6 @@ export const BookingsSection = ({
           </div>
 
         </div>
-
-        {/* Agreement Summary Modal */}
-        {selectedBooking && (
-          <BookingAgreementSummaryModal
-            isOpen={isDetailsModalOpen}
-            onClose={() => {
-              setIsDetailsModalOpen(false);
-              setSelectedBooking(null);
-            }}
-            booking={selectedBooking}
-            currentUserId={profile.user_id}
-          />
-        )}
       </BookingErrorBoundary>
     </SafariErrorBoundary>
   );

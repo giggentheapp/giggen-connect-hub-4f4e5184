@@ -1,0 +1,406 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music, MessageSquare, User } from 'lucide-react';
+import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
+
+const BookingAgreementSummary = () => {
+  const { bookingId } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [booking, setBooking] = useState<any>(null);
+  const [selectedConcept, setSelectedConcept] = useState<any>(null);
+  const [senderProfile, setSenderProfile] = useState<any>(null);
+  const [receiverProfile, setReceiverProfile] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/auth');
+          return;
+        }
+        setCurrentUserId(user.id);
+
+        // Get booking data
+        if (bookingId) {
+          const { data: bookingData, error: bookingError } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('id', bookingId)
+            .single();
+
+          if (bookingError) throw bookingError;
+          setBooking(bookingData);
+
+          // Load selected concept if available
+          if (bookingData.selected_concept_id) {
+            const { data: conceptData } = await supabase
+              .from('concepts')
+              .select('*')
+              .eq('id', bookingData.selected_concept_id)
+              .single();
+            
+            if (conceptData) setSelectedConcept(conceptData);
+          }
+
+          // Load profiles
+          const { data: senderData } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('user_id', bookingData.sender_id)
+            .single();
+          
+          const { data: receiverData } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('user_id', bookingData.receiver_id)
+            .single();
+
+          if (senderData) setSenderProfile(senderData);
+          if (receiverData) setReceiverProfile(receiverData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: 'Feil',
+          description: 'Kunne ikke laste avtaledetaljer',
+          variant: 'destructive'
+        });
+        navigate('/bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [bookingId, navigate, toast]);
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd.MM.yyyy');
+    } catch {
+      return dateString;
+    }
+  };
+
+  const handleBack = () => {
+    if (booking) {
+      const target = getBookingNavigationTargetWithUser(booking, currentUserId);
+      navigate(target);
+    } else {
+      navigate('/bookings');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Avtale ikke funnet</p>
+          <Button onClick={() => navigate('/bookings')} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tilbake til bookinger
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const isSender = currentUserId === booking.sender_id;
+  const isReceiver = currentUserId === booking.receiver_id;
+  const canSeeContactInfo = booking.status !== 'pending';
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={handleBack}
+              className="flex items-center"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake
+            </Button>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold">Avtaledetaljer</h1>
+              <p className="text-sm text-muted-foreground">{booking.title}</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="space-y-6">
+          {/* Header Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{booking.title}</CardTitle>
+              {booking.description && (
+                <p className="text-sm text-muted-foreground mt-2">{booking.description}</p>
+              )}
+            </CardHeader>
+          </Card>
+
+          {/* Parties Involved */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Parter
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {senderProfile?.avatar_url && (
+                    <img 
+                      src={senderProfile.avatar_url} 
+                      alt={senderProfile.display_name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium">{senderProfile?.display_name || 'Arrangør'}</p>
+                    <p className="text-xs text-muted-foreground">Arrangør</p>
+                  </div>
+                </div>
+                {isSender && <Badge variant="secondary">Deg</Badge>}
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {receiverProfile?.avatar_url && (
+                    <img 
+                      src={receiverProfile.avatar_url} 
+                      alt={receiverProfile.display_name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium">{receiverProfile?.display_name || 'Artist'}</p>
+                    <p className="text-xs text-muted-foreground">Artist</p>
+                  </div>
+                </div>
+                {isReceiver && <Badge variant="secondary">Deg</Badge>}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Event Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Arrangementsinformasjon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {booking.event_date && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>{formatDate(booking.event_date)} {booking.time && `kl. ${booking.time}`}</span>
+                </div>
+              )}
+              {booking.venue && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{booking.venue}</span>
+                </div>
+              )}
+              {booking.address && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{booking.address}</span>
+                </div>
+              )}
+              {booking.audience_estimate && (
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>Forventet publikum: {booking.audience_estimate} personer</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pricing Agreement */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Banknote className="h-5 w-5" />
+                Avtalt pris
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {booking.price_musician && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Artisthonorar</p>
+                  <p className="font-medium">{booking.price_musician}</p>
+                </div>
+              )}
+              {booking.artist_fee && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Garantert honorar</p>
+                  <p className="font-medium">{booking.artist_fee} kr</p>
+                </div>
+              )}
+              {booking.door_deal && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Døravtale</p>
+                  <p className="font-medium">{booking.door_percentage}% av dør</p>
+                </div>
+              )}
+              {booking.ticket_price && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Billettpris</p>
+                  <p className="font-medium">{booking.ticket_price} kr</p>
+                </div>
+              )}
+              {booking.by_agreement && (
+                <Badge variant="outline">Etter avtale</Badge>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Selected Concept */}
+          {selectedConcept && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Music className="h-5 w-5" />
+                  Valgt konsept
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="font-medium">{selectedConcept.title}</p>
+                {selectedConcept.description && (
+                  <p className="text-sm text-muted-foreground">{selectedConcept.description}</p>
+                )}
+                {selectedConcept.expected_audience && (
+                  <p className="text-sm">Forventet publikum: {selectedConcept.expected_audience} personer</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tech Specs & Hospitality */}
+          {(booking.tech_spec || booking.hospitality_rider) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Tekniske krav
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {booking.tech_spec && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Tech Spec</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{booking.tech_spec}</p>
+                  </div>
+                )}
+                {booking.hospitality_rider && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Hospitality Rider</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{booking.hospitality_rider}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Personal Message */}
+          {booking.personal_message && canSeeContactInfo && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Personlig melding
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{booking.personal_message}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Contact Information */}
+          {booking.sender_contact_info && canSeeContactInfo && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Kontaktinformasjon</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {booking.sender_contact_info.email && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">E-post</p>
+                    <p className="font-medium">{booking.sender_contact_info.email}</p>
+                  </div>
+                )}
+                {booking.sender_contact_info.phone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Telefon</p>
+                    <p className="font-medium">{booking.sender_contact_info.phone}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Agreement Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Avtalestatus</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Arrangør godkjent</span>
+                <Badge variant={booking.approved_by_sender ? "default" : "secondary"}>
+                  {booking.approved_by_sender ? "Godkjent" : "Venter"}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Artist godkjent</span>
+                <Badge variant={booking.approved_by_receiver ? "default" : "secondary"}>
+                  {booking.approved_by_receiver ? "Godkjent" : "Venter"}
+                </Badge>
+              </div>
+              {booking.sender_approved_at && (
+                <p className="text-xs text-muted-foreground">
+                  Arrangør godkjent: {formatDate(booking.sender_approved_at)}
+                </p>
+              )}
+              {booking.receiver_approved_at && (
+                <p className="text-xs text-muted-foreground">
+                  Artist godkjent: {formatDate(booking.receiver_approved_at)}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default BookingAgreementSummary;
