@@ -188,7 +188,7 @@ export const BookingsSection = ({
     booking: any;
   }) => {
     const handleDetailsClick = () => {
-      navigate(`/booking/${booking.id}/details`);
+      // Details are now shown in the booking card itself
     };
 
     const handleEditClick = () => {

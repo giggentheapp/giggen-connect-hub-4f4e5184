@@ -185,8 +185,7 @@ export const SafeBookingsSection = ({ profile }: SafeBookingsSectionProps) => {
                 booking={booking}
                 currentUserId={profile.user_id}
                 onDetailsClick={() => {
-                  // Navigate to booking details page
-                  window.location.href = `/booking/${booking.id}/details`;
+                  // Details are shown in the booking card itself
                 }}
                 onAction={refetch}
               />
