@@ -76,6 +76,14 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     return data.publicUrl;
   };
 
+  // Enhanced audio detection function for consistency
+  const isAudioFile = (file: typeof files[0]) => {
+    return file.file_type === 'audio' || 
+           file.file_type.includes('audio') || 
+           file.mime_type?.includes('audio') ||
+           /\.(mp3|wav|m4a|aac|ogg|flac|wma)$/i.test(file.filename);
+  };
+
   const renderMediaPlayer = (file: typeof files[0]) => {
     const publicUrl = getPublicUrl(file.file_path);
 
@@ -91,12 +99,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       );
     }
 
-    // Enhanced audio detection - check file type, mime type, and file extension
-    const isAudioFile = file.file_type.includes('audio') || 
-                        file.mime_type?.includes('audio') ||
-                        /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(file.filename);
-
-    if (isAudioFile) {
+    if (isAudioFile(file)) {
       console.log('🎵 Rendering audio player for:', file.filename, {
         file_type: file.file_type,
         mime_type: file.mime_type,
@@ -114,18 +117,22 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             className="w-full rounded-md"
             preload="metadata"
             onError={(e) => {
-              console.error('Audio playback error:', e);
-              console.error('Audio file URL:', publicUrl);
-              console.error('Audio mime type:', file.mime_type);
+              console.error('🚫 Audio playback error for:', file.filename);
+              console.error('URL:', publicUrl);
+              console.error('MIME type:', file.mime_type);
+              console.error('File type:', file.file_type);
             }}
             onLoadStart={() => {
-              console.log('Audio loading started for:', file.filename);
+              console.log('▶️ Audio loading started for:', file.filename);
+            }}
+            onCanPlay={() => {
+              console.log('✅ Audio ready to play:', file.filename);
             }}
           >
             <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-            {file.mime_type?.includes('wav') && (
-              <source src={publicUrl} type="audio/wav" />
-            )}
+            <source src={publicUrl} type="audio/mpeg" />
+            <source src={publicUrl} type="audio/wav" />
+            <source src={publicUrl} type="audio/mp4" />
             Lyden kan ikke spilles i nettleseren din.
           </audio>
         </div>
@@ -183,24 +190,18 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                 )}
               </div>
               
-              {/* Check if current file is audio */}
-              {(() => {
-                const isAudioFile = file.file_type.includes('audio') || 
-                                  file.mime_type?.includes('audio') ||
-                                  /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(file.filename);
-                
-                return !isAudioFile && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
-                    className="w-full h-7 text-xs"
-                  >
-                    <Download className="h-3 w-3 mr-1" />
-                    Last ned
-                  </Button>
-                );
-              })()}
+              {/* Show download button only for non-audio files */}
+              {!isAudioFile(file) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
+                  className="w-full h-7 text-xs"
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  Last ned
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

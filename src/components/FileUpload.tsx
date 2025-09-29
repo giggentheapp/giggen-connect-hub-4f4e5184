@@ -21,11 +21,22 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
   const { toast } = useToast();
   const { t } = useAppTranslation();
 
-  const getFileType = (mimeType: string): string => {
-    // Categorize MIME types for database constraints
+  const getFileType = (fileName: string, mimeType: string): string => {
+    // Enhanced categorization - check both MIME type and file extension
+    const audioExtensions = /\.(mp3|wav|m4a|aac|ogg|flac|wma)$/i;
+    const videoExtensions = /\.(mp4|mov|avi|mkv|webm|flv)$/i;
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|svg|webp)$/i;
+    
+    // Check MIME type first
     if (mimeType.startsWith('image/')) return 'image';
     if (mimeType.startsWith('video/')) return 'video';
     if (mimeType.startsWith('audio/')) return 'audio';
+    
+    // Fallback to file extension for cases where MIME type is generic or missing
+    if (audioExtensions.test(fileName)) return 'audio';
+    if (videoExtensions.test(fileName)) return 'video';
+    if (imageExtensions.test(fileName)) return 'image';
+    
     return 'document';
   };
 
@@ -97,7 +108,13 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
         .getPublicUrl(filePath);
 
       // Save metadata to database
-      const dbFileType = getFileType(file.type);
+      const dbFileType = getFileType(file.name, file.type);
+      
+      console.log('📁 File type detection:', {
+        filename: file.name,
+        mimeType: file.type,
+        detectedType: dbFileType
+      });
       
       // Determine which table to use based on fileType
       if (fileType === 'avatars') {
