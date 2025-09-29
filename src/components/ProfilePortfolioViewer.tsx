@@ -188,36 +188,19 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
       if (file.file_type?.includes('video')) {
         return (
-          <div className="w-full space-y-2">
-            {/* Video thumbnail with play overlay */}
-            <div className="relative cursor-pointer" onClick={() => window.open(publicUrl, '_blank')}>
-              <img 
-                src={publicUrl + '#t=0.5'}
-                alt={file.filename}
-                className="w-full max-h-48 object-cover rounded-lg"
-                onError={(e) => {
-                  // Fallback to a placeholder if thumbnail fails
-                  const target = e.currentTarget;
-                  target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23222" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20"%3EVideo%3C/text%3E%3C/svg%3E';
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg hover:bg-black/40 transition-colors">
-                <div className="bg-white/90 rounded-full p-3">
-                  <Play className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Play button */}
-            <Button
-              onClick={() => window.open(publicUrl, '_blank')}
-              variant="outline"
-              className="w-full"
-              size="sm"
+          <div className="w-full">
+            <video 
+              controls 
+              className="w-full max-h-48 rounded-lg object-cover"
+              preload="metadata"
+              playsInline
+              onError={(e) => {
+                console.error('🔴 Video Error for:', file.filename, e);
+              }}
             >
-              <Play className="h-4 w-4 mr-2" />
-              Spill av video
-            </Button>
+              <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
+              Videoen kan ikke vises i nettleseren din.
+            </video>
           </div>
         );
       }
