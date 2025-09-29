@@ -6,6 +6,7 @@ import { Play, Volume2, Image as ImageIcon, File, Download } from 'lucide-react'
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -103,194 +104,235 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   };
 
   const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage
-      .from('portfolio')
-      .getPublicUrl(filePath);
-    
-    console.log('🔗 Generated public URL for:', filePath, '→', data.publicUrl);
-    
-    // Add timestamp to prevent caching issues
-    const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
-    console.log('🔗 Final URL with cache busting:', urlWithCache);
-    
-    return urlWithCache;
+    try {
+      if (!filePath) {
+        console.error('🔴 No file path provided');
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('portfolio')
+        .getPublicUrl(filePath);
+      
+      if (!data?.publicUrl) {
+        console.error('🔴 No public URL generated for:', filePath);
+        return null;
+      }
+
+      console.log('🔗 Generated public URL for:', filePath, '→', data.publicUrl);
+      
+      // Add timestamp to prevent caching issues
+      const urlWithCache = `${data.publicUrl}?t=${Date.now()}`;
+      console.log('🔗 Final URL with cache busting:', urlWithCache);
+      
+      return urlWithCache;
+    } catch (error) {
+      console.error('🔴 Error generating public URL:', error);
+      return null;
+    }
   };
 
   // Enhanced audio detection function for consistency
   const isAudioFile = (file: typeof files[0]) => {
+    if (!file) return false;
+    
     return file.file_type === 'audio' || 
-           file.file_type.includes('audio') || 
+           file.file_type?.includes('audio') || 
            file.mime_type?.includes('audio') ||
-           /\.(mp3|wav|m4a|aac|ogg|flac|wma)$/i.test(file.filename);
+           /\.(mp3|wav|m4a|aac|ogg|flac|wma)$/i.test(file.filename || '');
   };
 
   const renderMediaPlayer = (file: typeof files[0]) => {
-    const publicUrl = getPublicUrl(file.file_path);
-    
-    // Test connectivity for audio files on mount
-    React.useEffect(() => {
-      if (isAudioFile(file)) {
-        testAudioConnectivity(file.file_path).catch(console.error);
+    try {
+      if (!file) {
+        console.error('🔴 No file provided to renderMediaPlayer');
+        return <div className="text-sm text-destructive">Ingen fil funnet</div>;
       }
-    }, [file.file_path]);
 
-    if (file.file_type.includes('video')) {
-      return (
-        <video 
-          controls 
-          className="w-full max-h-48 rounded-lg"
-        >
-          <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
-          Videoen kan ikke vises i nettleseren din.
-        </video>
-      );
-    }
-
-    if (isAudioFile(file)) {
-      console.log('🎵 Rendering audio player for:', file.filename, {
-        file_type: file.file_type,
-        mime_type: file.mime_type,
-        publicUrl: publicUrl
-      });
+      const publicUrl = getPublicUrl(file.file_path);
       
-      return (
-        <div className="w-full">
-          <div className="flex items-center gap-2 mb-2">
-            <Volume2 className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">{file.filename}</span>
-          </div>
-          <audio 
+      if (!publicUrl) {
+        console.error('🔴 No public URL generated for file:', file.filename);
+        return <div className="text-sm text-destructive">Kunne ikke laste fil-URL</div>;
+      }
+
+      // Test connectivity for audio files on mount
+      React.useEffect(() => {
+        if (isAudioFile(file)) {
+          testAudioConnectivity(file.file_path).catch(console.error);
+        }
+      }, [file.file_path]);
+
+      if (file.file_type?.includes('video')) {
+        return (
+          <video 
             controls 
-            className="w-full rounded-md"
-            preload="metadata"
-            crossOrigin="anonymous"
-            controlsList="nodownload"
+            className="w-full max-h-48 rounded-lg"
             onError={(e) => {
-              const audioElement = e.currentTarget;
-              console.error('🚫 Audio playback error for:', file.filename);
-              console.error('Error details:', {
-                error: audioElement.error,
-                errorCode: audioElement.error?.code,
-                errorMessage: audioElement.error?.message,
-                url: publicUrl,
-                mimeType: file.mime_type,
-                fileType: file.file_type,
-                networkState: audioElement.networkState,
-                readyState: audioElement.readyState
-              });
-              
-              // Try to fetch the URL directly to check for network issues
-              fetch(publicUrl, { method: 'HEAD' })
-                .then(response => {
-                  console.log('🌐 Direct fetch test:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers.entries())
-                  });
-                })
-                .catch(fetchError => {
-                  console.error('🚫 Direct fetch failed:', fetchError);
-                });
-            }}
-            onLoadStart={() => {
-              console.log('▶️ Audio loading started for:', file.filename);
-            }}
-            onLoadedMetadata={() => {
-              console.log('📊 Audio metadata loaded for:', file.filename);
-            }}
-            onCanPlay={() => {
-              console.log('✅ Audio ready to play:', file.filename);
-            }}
-            onPlay={() => {
-              console.log('🎵 Audio playback started for:', file.filename);
-            }}
-            onPause={() => {
-              console.log('⏸️ Audio playback paused for:', file.filename);
+              console.error('🔴 Video Error for:', file.filename, e);
             }}
           >
-            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-            {file.mime_type !== 'audio/mpeg' && <source src={publicUrl} type="audio/mpeg" />}
-            {file.mime_type !== 'audio/wav' && <source src={publicUrl} type="audio/wav" />}
-            {file.mime_type !== 'audio/mp4' && <source src={publicUrl} type="audio/mp4" />}
-            <p className="text-sm text-muted-foreground mt-2">
-              Lyden kan ikke spilles i nettleseren din. <br />
-              <a href={publicUrl} download className="text-primary hover:underline">
-                Last ned filen direkte
-              </a>
-            </p>
-          </audio>
-        </div>
-      );
-    }
+            <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
+            Videoen kan ikke vises i nettleseren din.
+          </video>
+        );
+      }
 
-    if (file.file_type.includes('image')) {
+      if (isAudioFile(file)) {
+        console.log('🎵 Rendering audio player for:', file.filename, {
+          file_type: file.file_type,
+          mime_type: file.mime_type,
+          publicUrl: publicUrl
+        });
+        
+        return (
+          <div className="w-full">
+            <div className="flex items-center gap-2 mb-2">
+              <Volume2 className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">{file.filename}</span>
+            </div>
+            <audio 
+              controls 
+              className="w-full rounded-md"
+              preload="metadata"
+              crossOrigin="anonymous"
+              controlsList="nodownload"
+              onError={(e) => {
+                const target = e.target as HTMLAudioElement;
+                console.error('🔴 Audio Error:', {
+                  error: target.error,
+                  code: target.error?.code,
+                  message: target.error?.message,
+                  src: publicUrl,
+                  filename: file.filename,
+                  networkState: target.networkState,
+                  readyState: target.readyState
+                });
+              }}
+              onLoadStart={() => {
+                console.log('▶️ Audio loading started for:', file.filename);
+              }}
+              onLoadedMetadata={() => {
+                console.log('📊 Audio metadata loaded for:', file.filename);
+              }}
+              onCanPlay={() => {
+                console.log('✅ Audio ready to play:', file.filename);
+              }}
+              onPlay={() => {
+                console.log('🎵 Audio playback started for:', file.filename);
+              }}
+              onPause={() => {
+                console.log('⏸️ Audio playback paused for:', file.filename);
+              }}
+            >
+              <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
+              {file.mime_type !== 'audio/mpeg' && <source src={publicUrl} type="audio/mpeg" />}
+              {file.mime_type !== 'audio/wav' && <source src={publicUrl} type="audio/wav" />}
+              {file.mime_type !== 'audio/mp4' && <source src={publicUrl} type="audio/mp4" />}
+              <p className="text-sm text-muted-foreground mt-2">
+                Lyden kan ikke spilles i nettleseren din. <br />
+                <a href={publicUrl} download className="text-primary hover:underline">
+                  Last ned filen direkte
+                </a>
+              </p>
+            </audio>
+          </div>
+        );
+      }
+
+      if (file.file_type?.includes('image')) {
+        return (
+          <img 
+            src={publicUrl} 
+            alt={file.title || file.filename}
+            className="w-full max-h-48 object-cover rounded-lg"
+            onError={(e) => {
+              console.error('🔴 Image Error for:', file.filename, e);
+            }}
+          />
+        );
+      }
+
       return (
-        <img 
-          src={publicUrl} 
-          alt={file.title || file.filename}
-          className="w-full max-h-48 object-cover rounded-lg"
-        />
-      );
-    }
-
-    return (
-      <div className="flex items-center justify-center p-4 border border-dashed rounded-lg">
-        <div className="text-center">
-          <File className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">{file.filename}</p>
+        <div className="flex items-center justify-center p-4 border border-dashed rounded-lg">
+          <div className="text-center">
+            <File className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">{file.filename}</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    } catch (error) {
+      console.error('🔴 Error rendering media player:', error);
+      return <div className="text-sm text-destructive">Kunne ikke vise fil</div>;
+    }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {files.map((file) => (
-        <Card key={file.id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-sm truncate">
-                  {file.title || file.filename}
-                </h4>
-                <Badge variant="outline" className="text-xs">
-                  {getFileIcon(file.file_type)}
-                  <span className="ml-1">{getFileTypeLabel(file.file_type)}</span>
-                </Badge>
-              </div>
-              
-              {renderMediaPlayer(file)}
-              
-              {file.description && (
-                <p className="text-xs text-muted-foreground">
-                  {file.description}
-                </p>
-              )}
-              
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                <span>{new Date(file.created_at).toLocaleDateString('no-NO')}</span>
-                {file.file_size && (
-                  <span>{(file.file_size / (1024 * 1024)).toFixed(1)} MB</span>
-                )}
-              </div>
-              
-              {/* Show download button only for non-audio files */}
-              {!isAudioFile(file) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
-                  className="w-full h-7 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Last ned
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <ErrorBoundary>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {files.map((file) => {
+          if (!file) {
+            console.warn('🔴 Skipping null/undefined file in portfolio');
+            return null;
+          }
+          
+          return (
+            <Card key={file.id} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm truncate">
+                      {file.title || file.filename}
+                    </h4>
+                    <Badge variant="outline" className="text-xs">
+                      {getFileIcon(file.file_type)}
+                      <span className="ml-1">{getFileTypeLabel(file.file_type)}</span>
+                    </Badge>
+                  </div>
+                  
+                  <ErrorBoundary>
+                    {renderMediaPlayer(file)}
+                  </ErrorBoundary>
+                  
+                  {file.description && (
+                    <p className="text-xs text-muted-foreground">
+                      {file.description}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                    <span>{new Date(file.created_at).toLocaleDateString('no-NO')}</span>
+                    {file.file_size && (
+                      <span>{(file.file_size / (1024 * 1024)).toFixed(1)} MB</span>
+                    )}
+                  </div>
+                  
+                  {/* Show download button only for non-audio files */}
+                  {!isAudioFile(file) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const url = getPublicUrl(file.file_path);
+                        if (url) {
+                          window.open(url, '_blank');
+                        } else {
+                          console.error('🔴 Cannot download - no URL available');
+                        }
+                      }}
+                      className="w-full h-7 text-xs"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      Last ned
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </ErrorBoundary>
   );
 };
 
