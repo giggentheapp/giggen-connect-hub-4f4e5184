@@ -12,9 +12,10 @@ import { BookingActions } from '@/components/BookingActions';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
+import { BookingAgreementSummaryModal } from '@/components/BookingAgreementSummaryModal';
 import { format } from 'date-fns';
 import { SafeBookingsSection } from '@/components/SafeBookingsSection';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -37,7 +38,19 @@ export const BookingsSection = ({
   console.log('🔄 BookingsSection rendering for user:', profile.user_id);
   
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // Handle URL tab parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming'].includes(tab)) {
+      setActiveTab(tab as any);
+    }
+  }, [location.search]);
   
   // Hooks with error handling
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
@@ -188,7 +201,8 @@ export const BookingsSection = ({
     booking: any;
   }) => {
     const handleDetailsClick = () => {
-      // Details are now shown in the booking card itself
+      setSelectedBooking(booking);
+      setIsDetailsModalOpen(true);
     };
 
     const handleEditClick = () => {
@@ -198,7 +212,7 @@ export const BookingsSection = ({
     const handleConceptClick = () => {
       if (booking.concept_ids?.length > 0) {
         const firstConceptId = booking.concept_ids[0];
-        navigate(`/concept/${firstConceptId}`);
+        navigate(`/concept/${firstConceptId}`, { state: { from: 'bookings' } });
       }
     };
 
@@ -440,6 +454,19 @@ export const BookingsSection = ({
           </div>
 
         </div>
+
+        {/* Agreement Summary Modal */}
+        {selectedBooking && (
+          <BookingAgreementSummaryModal
+            isOpen={isDetailsModalOpen}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setSelectedBooking(null);
+            }}
+            booking={selectedBooking}
+            currentUserId={profile.user_id}
+          />
+        )}
       </BookingErrorBoundary>
     </SafariErrorBoundary>
   );

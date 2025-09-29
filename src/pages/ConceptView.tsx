@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -32,10 +32,15 @@ interface Profile {
 
 const ConceptView = () => {
   const { conceptId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [concept, setConcept] = useState<Concept | null>(null);
   const [maker, setMaker] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Check if we came from bookings page
+  const fromBookings = location.state?.from === 'bookings';
 
   useEffect(() => {
     if (conceptId) {
@@ -122,11 +127,13 @@ const ConceptView = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/bookings">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tilbake
-              </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate(fromBookings ? '/bookings?tab=ongoing' : '/bookings')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake
             </Button>
             <div>
               <h1 className="text-2xl font-bold">Tilbudsvisning</h1>

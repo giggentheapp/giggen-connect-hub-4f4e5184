@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { BookingEditModal } from '@/components/BookingEditModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
 
 const BookingEdit = () => {
   const { bookingId } = useParams();
@@ -57,7 +58,9 @@ const BookingEdit = () => {
       title: 'Lagret',
       description: 'Endringene har blitt lagret',
     });
-    navigate('/bookings');
+    // Navigate to correct tab based on booking status
+    const target = getBookingNavigationTargetWithUser(booking, currentUserId);
+    navigate(target);
   };
 
   if (loading) {
@@ -90,7 +93,10 @@ const BookingEdit = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/bookings')}
+              onClick={() => {
+                const target = getBookingNavigationTargetWithUser(booking, currentUserId);
+                navigate(target);
+              }}
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
