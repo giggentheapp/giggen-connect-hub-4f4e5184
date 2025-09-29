@@ -29,7 +29,7 @@ const BookingDetails = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/bookings')}
+              onClick={() => navigate('/dashboard')}
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

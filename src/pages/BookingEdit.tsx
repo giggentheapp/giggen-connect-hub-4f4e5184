@@ -57,7 +57,7 @@ const BookingEdit = () => {
       title: 'Lagret',
       description: 'Endringene har blitt lagret',
     });
-    navigate('/dashboard');
+    navigate(`/booking/${bookingId}/details`);
   };
 
   if (loading) {
@@ -90,7 +90,7 @@ const BookingEdit = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(`/booking/${bookingId}/details`)}
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
