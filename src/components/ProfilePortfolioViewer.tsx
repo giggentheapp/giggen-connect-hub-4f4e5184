@@ -174,8 +174,20 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
         console.log('🎵 Rendering audio player for:', file.filename, {
           file_type: file.file_type,
           mime_type: file.mime_type,
-          publicUrl: publicUrl
+          publicUrl: publicUrl,
+          urlValid: !!publicUrl,
+          fileId: file.id
         });
+        
+        // DEBUG: Check if audioUrl is being set in component state
+        console.log('🔍 Audio URL state check:', {
+          hasUrl: !!publicUrl,
+          urlLength: publicUrl?.length,
+          filePathExists: !!file.file_path
+        });
+
+        // DEBUG: Log just before rendering
+        console.log('🎬 Rendering audio with URL:', publicUrl);
         
         return (
           <div className="w-full">
@@ -184,37 +196,40 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
               <span className="text-sm font-medium">{file.filename}</span>
             </div>
             <audio 
+              key={`${file.id}-${publicUrl}`} // Force re-mount when URL changes
+              src={publicUrl}
               controls 
               className="w-full rounded-md"
               preload="metadata"
               crossOrigin="anonymous"
               controlsList="nodownload"
+              onLoadStart={() => console.log('🎯 Audio load started:', publicUrl)}
+              onCanPlay={() => console.log('✅ Audio can play')}
               onError={(e) => {
                 const target = e.target as HTMLAudioElement;
-                console.error('🔴 Audio Error:', {
-                  error: target.error,
-                  code: target.error?.code,
-                  message: target.error?.message,
-                  src: publicUrl,
-                  filename: file.filename,
+                console.error('🔴 Audio error:', {
+                  src: target.src,
+                  currentSrc: target.currentSrc,
+                  error: target.error?.message,
+                  errorCode: target.error?.code,
                   networkState: target.networkState,
-                  readyState: target.readyState
+                  readyState: target.readyState,
+                  originalUrl: publicUrl,
+                  filename: file.filename
                 });
               }}
-              onLoadStart={() => {
-                console.log('▶️ Audio loading started for:', file.filename);
-              }}
-              onLoadedMetadata={() => {
-                console.log('📊 Audio metadata loaded for:', file.filename);
-              }}
-              onCanPlay={() => {
-                console.log('✅ Audio ready to play:', file.filename);
-              }}
+              onLoadedMetadata={() => console.log('📊 Audio metadata loaded')}
+              onLoadedData={() => console.log('📈 Audio data loaded')}
+              onCanPlayThrough={() => console.log('🚀 Audio can play through')}
               onPlay={() => {
                 console.log('🎵 Audio playback started for:', file.filename);
               }}
               onPause={() => {
                 console.log('⏸️ Audio playback paused for:', file.filename);
+              }}
+              onDurationChange={(e) => {
+                const target = e.target as HTMLAudioElement;
+                console.log('⏱️ Audio duration:', target.duration, 'seconds');
               }}
             >
               <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
@@ -228,6 +243,25 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                 </a>
               </p>
             </audio>
+            
+            {/* DEBUG: Additional URL testing */}
+            <div className="mt-2 text-xs text-muted-foreground">
+              <details>
+                <summary>Debug Info</summary>
+                <div className="mt-1 space-y-1">
+                  <div>URL: {publicUrl}</div>
+                  <div>File Path: {file.file_path}</div>
+                  <div>MIME Type: {file.mime_type}</div>
+                  <div>File Type: {file.file_type}</div>
+                  <button 
+                    onClick={() => window.open(publicUrl, '_blank')}
+                    className="text-primary hover:underline"
+                  >
+                    Test URL in new tab
+                  </button>
+                </div>
+              </details>
+            </div>
           </div>
         );
       }
