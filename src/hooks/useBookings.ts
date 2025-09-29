@@ -2,61 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-
-interface Booking {
-  id: string;
-  sender_id: string;
-  receiver_id: string;
-  concept_ids: string[];
-  selected_concept_id: string | null;
-  title: string;
-  description: string | null;
-  personal_message: string | null;
-  price_musician: string | null;
-  price_ticket: string | null;
-  event_date: string | null;
-  venue: string | null;
-  hospitality_rider: string | null;
-  tech_spec: string | null;
-  status: 'pending' | 'allowed' | 'approved_by_sender' | 'approved_by_receiver' | 'approved_by_both' | 'upcoming' | 'completed' | 'cancelled';
-  sender_confirmed: boolean;
-  receiver_confirmed: boolean;
-  sender_read_agreement: boolean;
-  receiver_read_agreement: boolean;
-  created_at: string;
-  updated_at: string;
-  sender_contact_info?: any;
-  // New fields
-  time?: string | null;
-  audience_estimate?: number | null;
-  ticket_price?: number | null;
-  artist_fee?: number | null;
-  // Door deal fields
-  door_deal?: boolean;
-  door_percentage?: number | null;
-// New fields for enhanced privacy and workflow
-  is_public_after_approval?: boolean;
-  public_visibility_settings?: any;
-  agreement_summary_text?: string;
-  deleted_at?: string;
-  deletion_reason?: string;
-  contact_info_shared_at?: string;
-  both_parties_approved?: boolean;
-  // New workflow fields
-  allowed_at?: string;
-  approved_at?: string;
-  published_at?: string;
-  rejected_at?: string;
-  cancelled_at?: string;
-  receiver_allowed_at?: string;
-  requires_approval?: boolean;
-  last_modified_by?: string;
-  last_modified_at?: string;
-  // New publishing fields
-  published_by_sender?: boolean;
-  published_by_receiver?: boolean;
-}
-
+import { Booking, CreateBookingRequest, UpdateBookingRequest } from '@/types/booking';
+import { getErrorMessage } from '@/types/common';
 
 export const useBookings = (userId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -133,10 +80,11 @@ export const useBookings = (userId?: string) => {
 
       if (error) throw error;
       setBookings((data || []) as Booking[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       toast({
         title: "Feil ved lasting av bookinger",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -148,63 +96,86 @@ export const useBookings = (userId?: string) => {
     fetchBookings();
   }, [fetchBookings]);
 
-  const createBooking = async (bookingData: Partial<Booking>) => {
+  const createBooking = async (bookingData: CreateBookingRequest): Promise<Booking> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ikke autentisert');
 
+      const insertData = {
+        receiver_id: bookingData.receiverId,
+        concept_ids: bookingData.conceptIds,
+        selected_concept_id: bookingData.selectedConceptId || null,
+        title: bookingData.title,
+        description: bookingData.description || null,
+        event_date: bookingData.eventDate || null,
+        time: bookingData.time || null,
+        venue: bookingData.venue || null,
+        address: bookingData.address || null,
+        latitude: bookingData.coordinates?.latitude || null,
+        longitude: bookingData.coordinates?.longitude || null,
+        personal_message: bookingData.personalMessage || null,
+        sender_contact_info: bookingData.contactInfo || null,
+        sender_id: user.id,
+        status: 'pending' as const,
+        approved_by_sender: false,
+        approved_by_receiver: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('bookings')
-        .insert({
-          ...bookingData,
-          sender_id: user.id,
-          status: 'pending', // Always start with pending status
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } as any)
+        .insert(insertData)
         .select()
         .single();
 
       if (error) throw error;
       
-      setBookings(prev => [data as Booking, ...prev]);
+      const newBooking = data as Booking;
+      setBookings(prev => [newBooking, ...prev]);
       toast({
         title: "Forespørsel sendt",
         description: "Forespørselen venter på mottakers svar",
       });
       
-      return data;
-    } catch (error: any) {
+      return newBooking;
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       toast({
         title: "Feil ved oppretting av booking",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;
     }
   };
 
-  const updateBooking = async (bookingId: string, updates: Partial<Booking>) => {
+  const updateBooking = async (bookingId: string, updates: UpdateBookingRequest): Promise<Booking> => {
     try {
       const { data, error } = await supabase
         .from('bookings')
-        .update(updates)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', bookingId)
         .select()
         .single();
 
       if (error) throw error;
       
+      const updatedBooking = data as Booking;
       setBookings(prev => prev.map(booking => 
-        booking.id === bookingId ? data as Booking : booking
+        booking.id === bookingId ? updatedBooking : booking
       ));
       
-      return data;
-    } catch (error: any) {
+      return updatedBooking;
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       console.error('❌ Error updating booking:', error);
       toast({
         title: "Feil ved oppdatering av booking",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -237,11 +208,12 @@ export const useBookings = (userId?: string) => {
         description: "Arrangementet er flyttet til historikk og sensitiv data er fjernet",
       });
       
-      return data;
-    } catch (error: any) {
+      return data as Booking;
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       toast({
         title: "Feil ved sletting av booking",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -273,17 +245,17 @@ export const useBookings = (userId?: string) => {
           queryClient.invalidateQueries({ queryKey: ['receivedBookings', userId] })
         ]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       console.error('Error rejecting booking:', error);
       toast({
         title: "Feil ved avvisning",
-        description: error.message,
+        description: message,
         variant: "destructive"
       });
       throw error;
     }
   };
-
 
   const permanentlyDeleteBooking = async (bookingId: string) => {
     try {
@@ -310,11 +282,12 @@ export const useBookings = (userId?: string) => {
           queryClient.invalidateQueries({ queryKey: ['receivedBookings', userId] })
         ]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       console.error('Error permanently deleting booking:', error);
       toast({
         title: "Feil ved sletting",
-        description: error.message,
+        description: message,
         variant: "destructive"
       });
       throw error;

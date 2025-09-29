@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CreateBookingRequest, ContactInfo } from '@/types/booking';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -105,26 +106,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
       }
 
-      const bookingData = {
-        receiver_id: receiverId,
-        concept_ids: [selectedConcept.id],
-        selected_concept_id: selectedConcept.id,
+      const bookingData: CreateBookingRequest = {
+        receiverId: receiverId,
+        conceptIds: [selectedConcept.id],
+        selectedConceptId: selectedConcept.id,
         title: selectedConcept.title,
         description: selectedConcept.description || '',
-        personal_message: personalMessage,
-        price_musician: selectedConcept.price?.toString() || null,
-        artist_fee: selectedConcept.door_deal ? null : (selectedConcept.price || null),
-        door_deal: selectedConcept.door_deal || false,
-        door_percentage: selectedConcept.door_percentage || null,
-        event_date: null,
-        time: "Ved avtale",
-        venue: "Ved avtale",
-        audience_estimate: selectedConcept.expected_audience || null,
-        ticket_price: null,
-        status: 'pending' as const,
-        sender_contact_info: contactInfoToShare,
-        tech_spec: techSpecUrl || "Ikke lagt ved dokument",
-        hospitality_rider: hospitalityRiderUrl || "Ikke lagt ved dokument"
+        personalMessage: personalMessage,
+        contactInfo: contactInfoToShare as ContactInfo,
       };
 
       await createBooking(bookingData);
