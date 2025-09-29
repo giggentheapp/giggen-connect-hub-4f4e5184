@@ -243,25 +243,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                 </a>
               </p>
             </audio>
-            
-            {/* DEBUG: Additional URL testing */}
-            <div className="mt-2 text-xs text-muted-foreground">
-              <details>
-                <summary>Debug Info</summary>
-                <div className="mt-1 space-y-1">
-                  <div>URL: {publicUrl}</div>
-                  <div>File Path: {file.file_path}</div>
-                  <div>MIME Type: {file.mime_type}</div>
-                  <div>File Type: {file.file_type}</div>
-                  <button 
-                    onClick={() => window.open(publicUrl, '_blank')}
-                    className="text-primary hover:underline"
-                  >
-                    Test URL in new tab
-                  </button>
-                </div>
-              </details>
-            </div>
           </div>
         );
       }
