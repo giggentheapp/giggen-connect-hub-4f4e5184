@@ -188,20 +188,19 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
       if (file.file_type?.includes('video')) {
         return (
-          <div className="w-full space-y-2">
-            <div className="flex items-center gap-2">
-              <Play className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium truncate">{file.filename}</span>
-            </div>
-            <Button
-              onClick={() => window.open(publicUrl, '_blank')}
-              variant="outline"
-              className="w-full"
-              size="sm"
+          <div className="w-full">
+            <video 
+              controls 
+              className="w-full max-h-48 rounded-lg object-cover"
+              poster={publicUrl + '#t=0.1'}
+              preload="metadata"
+              onError={(e) => {
+                console.error('🔴 Video Error for:', file.filename, e);
+              }}
             >
-              <Play className="h-4 w-4 mr-2" />
-              Spill av video
-            </Button>
+              <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
+              Videoen kan ikke vises i nettleseren din.
+            </video>
           </div>
         );
       }
@@ -303,26 +302,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                       <span>{(file.file_size / (1024 * 1024)).toFixed(1)} MB</span>
                     )}
                   </div>
-                  
-                  {/* Show download button only for non-audio files */}
-                  {!isAudioFile(file) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const url = getPublicUrl(file.file_path);
-                        if (url) {
-                          window.open(url, '_blank');
-                        } else {
-                          console.error('🔴 Cannot download - no URL available');
-                        }
-                      }}
-                      className="w-full h-7 text-xs"
-                    >
-                      <Download className="h-3 w-3 mr-1" />
-                      Last ned
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
