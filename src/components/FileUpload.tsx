@@ -72,9 +72,12 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
           break;
       }
 
-      // Create unique filename (no prefix needed since buckets are separate)
+      // Create unique filename - encode to handle Norwegian characters
       const timestamp = Date.now();
-      const fileName = `${timestamp}-${file.name}`;
+      const sanitizedFileName = file.name
+        .replace(/[^a-zA-Z0-9._\-æøåÆØÅ]/g, '_') // Allow Norwegian characters
+        .replace(/_{2,}/g, '_'); // Replace multiple underscores with single
+      const fileName = `${timestamp}-${sanitizedFileName}`;
       const filePath = `${user.id}/${fileName}`;
 
       console.log(`Uploading to bucket: ${bucketName}, path: ${filePath}`);

@@ -71,6 +71,8 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     const { data } = supabase.storage
       .from('portfolio')
       .getPublicUrl(filePath);
+    
+    console.log('🔗 Generated public URL for:', filePath, '→', data.publicUrl);
     return data.publicUrl;
   };
 
@@ -181,15 +183,24 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
                 )}
               </div>
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
-                className="w-full h-7 text-xs"
-              >
-                <Download className="h-3 w-3 mr-1" />
-                Last ned
-              </Button>
+              {/* Check if current file is audio */}
+              {(() => {
+                const isAudioFile = file.file_type.includes('audio') || 
+                                  file.mime_type?.includes('audio') ||
+                                  /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(file.filename);
+                
+                return !isAudioFile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
+                    className="w-full h-7 text-xs"
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Last ned
+                  </Button>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
