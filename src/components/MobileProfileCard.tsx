@@ -59,7 +59,12 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   const { ismaker } = useRole();
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [settings, setSettings] = useState<ProfileSettings | null>(null);
+  const [settings, setSettings] = useState<ProfileSettings>({
+    show_portfolio: false,
+    show_about: false,
+    show_contact: false,
+    show_events: false
+  });
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
@@ -69,13 +74,44 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   useEffect(() => {
     if (!userId) {
       setProfile(null);
+      setSettings({
+        show_portfolio: false,
+        show_about: false,
+        show_contact: false,
+        show_events: false
+      });
+      setConcepts([]);
+      setEvents([]);
       return;
     }
     
+    console.log('Fetching data for userId:', userId);
     fetchProfileData();
     fetchConcepts();
     fetchEvents();
   }, [userId]);
+
+  // Set active tab when data is loaded
+  useEffect(() => {
+    if (!profile) return;
+    
+    const tabs = [
+      settings.show_about && 'info',
+      concepts.length > 0 && 'concepts',
+      settings.show_portfolio && 'portfolio',
+      settings.show_events && 'events'
+    ].filter(Boolean) as string[];
+    
+    console.log('Available tabs:', tabs);
+    console.log('Settings:', settings);
+    console.log('Concepts count:', concepts.length);
+    console.log('Events count:', events.length);
+    
+    if (tabs.length > 0 && !activeTab) {
+      console.log('Setting active tab to:', tabs[0]);
+      setActiveTab(tabs[0]);
+    }
+  }, [profile, settings, concepts, events, activeTab]);
 
   const fetchProfileData = async () => {
     if (!userId) return;
@@ -92,15 +128,25 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
       if (profileError) throw profileError;
 
+      console.log('Profile data:', profileData);
+
       // Fetch settings
-      const { data: settingsData } = await supabase
+      const { data: settingsData, error: settingsError } = await supabase
         .from('profile_settings')
         .select('show_portfolio, show_about, show_contact, show_events')
         .eq('maker_id', userId)
-        .single();
+        .maybeSingle();
+
+      console.log('Settings data:', settingsData);
+      console.log('Settings error:', settingsError);
 
       setProfile(profileData);
-      setSettings(settingsData || {});
+      setSettings(settingsData || {
+        show_portfolio: false,
+        show_about: false,
+        show_contact: false,
+        show_events: false
+      });
     } catch (err) {
       console.error('Error fetching profile:', err);
     } finally {
@@ -117,6 +163,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         .select('id, title, description, price, expected_audience')
         .eq('maker_id', userId)
         .eq('is_published', true);
+
+      console.log('Concepts data:', data);
+      console.log('Concepts error:', error);
 
       if (error) throw error;
       setConcepts(data || []);
@@ -136,6 +185,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true);
 
+      console.log('Events data:', data);
+      console.log('Events error:', error);
+
       if (error) throw error;
       setEvents(data || []);
     } catch (err) {
@@ -145,9 +197,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
   if (!userId || !profile) return null;
 
-  const showPortfolio = settings?.show_portfolio ?? false;
-  const showAbout = settings?.show_about ?? false;
-  const showEvents = settings?.show_events ?? false;
+  const showPortfolio = settings.show_portfolio ?? false;
+  const showAbout = settings.show_about ?? false;
+  const showEvents = settings.show_events ?? false;
 
   // Determine available tabs
   const tabs = [
@@ -158,11 +210,6 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   ].filter(Boolean);
   
   const availableTabs = tabs.length;
-  
-  // Set active tab to first available tab if not set
-  if (activeTab === '' && tabs.length > 0) {
-    setActiveTab(tabs[0] as string);
-  }
 
   return (
     <div className={`fixed inset-0 z-50 transition-transform duration-300 ${
