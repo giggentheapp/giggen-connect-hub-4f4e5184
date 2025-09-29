@@ -188,16 +188,21 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
       if (file.file_type?.includes('video')) {
         return (
-          <video 
-            controls 
-            className="w-full max-h-48 rounded-lg"
-            onError={(e) => {
-              console.error('🔴 Video Error for:', file.filename, e);
-            }}
-          >
-            <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
-            Videoen kan ikke vises i nettleseren din.
-          </video>
+          <div className="w-full space-y-2">
+            <div className="flex items-center gap-2">
+              <Play className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium truncate">{file.filename}</span>
+            </div>
+            <Button
+              onClick={() => window.open(publicUrl, '_blank')}
+              variant="outline"
+              className="w-full"
+              size="sm"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Spill av video
+            </Button>
+          </div>
         );
       }
 
