@@ -224,7 +224,7 @@ export const BookingPublicPreview = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Publish button clicked');
+                
                 onPublish();
               }}
               className="bg-green-600 hover:bg-green-700"

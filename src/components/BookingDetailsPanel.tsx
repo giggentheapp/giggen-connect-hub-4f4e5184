@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 
@@ -81,7 +82,7 @@ export const BookingDetailsPanel = ({
         updates.address = newValue.address;
         updates.latitude = newValue.coordinates.lat;
         updates.longitude = newValue.coordinates.lng;
-        console.log('📍 Storing coordinates:', newValue.coordinates);
+        logger.debug('Storing address coordinates', newValue.coordinates);
       }
 
       // If either party has approved, reset their approval when changes are made

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export type UserRole = 'maker' | 'goer';
 
@@ -10,20 +11,16 @@ export const useRoleData = () => {
 
   const fetchRole = async () => {
     try {
-      console.log('🔍 useRole: Starting role fetch...');
       setLoading(true);
       setError(null);
 
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('👤 useRole: Got user:', user ? user.id : 'None');
       
       if (!user) {
-        console.log('❌ useRole: No user found, setting role to null');
         setRole(null);
         return;
       }
 
-      console.log('📋 useRole: Fetching profile for user:', user.id);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -31,18 +28,17 @@ export const useRoleData = () => {
         .single();
 
       if (profileError) {
-        console.error('❌ useRole: Profile fetch error:', profileError);
+        logger.error('Failed to fetch user profile', profileError);
         throw profileError;
       }
 
-      console.log('✅ useRole: Profile fetched:', profile);
       setRole(profile?.role as UserRole || 'goer');
-    } catch (err: any) {
-      console.error('❌ useRole: Error fetching user role:', err);
-      setError(err.message);
+      logger.debug('User role loaded', { userId: user.id, role: profile?.role });
+    } catch (err: unknown) {
+      logger.error('Error fetching user role', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
       setRole(null);
     } finally {
-      console.log('🏁 useRole: Fetch complete, setting loading to false');
       setLoading(false);
     }
   };

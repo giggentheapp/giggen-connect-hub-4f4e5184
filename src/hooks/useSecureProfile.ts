@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useRole } from '@/contexts/RoleProvider';
+import { logger } from '@/utils/logger';
 
 export interface SecureProfile {
   id: string;
@@ -57,9 +58,9 @@ export const useSecureProfile = (targetUserId: string | undefined, isOwnProfile 
             setProfile(null);
           }
         }
-      } catch (err: any) {
-        console.error('Error fetching profile:', err);
-        setError(err.message);
+      } catch (err: unknown) {
+        logger.error('Failed to fetch secure profile', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setProfile(null);
       } finally {
         setLoading(false);

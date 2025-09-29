@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface UserConcept {
   id: string;
@@ -48,9 +49,9 @@ export const useUserConcepts = (userId: string | undefined) => {
       if (fetchError) throw fetchError;
 
       setConcepts(data || []);
-    } catch (err: any) {
-      console.error('Error fetching concepts:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      logger.error('Failed to fetch user concepts', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }

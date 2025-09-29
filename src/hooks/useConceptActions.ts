@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface ConceptActionResult {
   success: boolean;
@@ -71,9 +72,9 @@ export const useConceptActions = () => {
       });
 
       return { success: true };
-    } catch (error: any) {
-      console.error('Error rejecting concept:', error);
-      const errorMessage = error.message || "Kunne ikke avvise tilbudet";
+    } catch (error: unknown) {
+      logger.error('Failed to reject concept', error);
+      const errorMessage = error instanceof Error ? error.message : "Kunne ikke avvise tilbudet";
       
       toast({
         title: "Feil ved avvisning",
@@ -151,9 +152,9 @@ export const useConceptActions = () => {
       });
 
       return { success: true };
-    } catch (error: any) {
-      console.error('Error deleting concept:', error);
-      const errorMessage = error.message || 'Kunne ikke slette konseptet';
+    } catch (error: unknown) {
+      logger.error('Failed to delete concept', error);
+      const errorMessage = error instanceof Error ? error.message : 'Kunne ikke slette konseptet';
       
       toast({
         title: "Feil ved sletting",

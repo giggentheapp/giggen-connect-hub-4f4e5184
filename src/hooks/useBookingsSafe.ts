@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface SafeBooking {
   id: string;
@@ -57,8 +58,6 @@ export const useBookingsSafe = (userId?: string) => {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Fetching bookings for user:', userId);
-      
       const { data, error: fetchError } = await supabase
         .from('bookings')
         .select('*')
@@ -66,7 +65,7 @@ export const useBookingsSafe = (userId?: string) => {
         .order('created_at', { ascending: false });
 
       if (fetchError) {
-        console.error('❌ Fetch error:', fetchError);
+        logger.error('Failed to fetch bookings', fetchError);
         throw fetchError;
       }
 
@@ -96,11 +95,12 @@ export const useBookingsSafe = (userId?: string) => {
       }));
 
       setBookings(safeBookings);
-      console.log('✅ Bookings loaded:', safeBookings.length);
+      logger.business('Bookings loaded', { count: safeBookings.length, userId });
       
-    } catch (error: any) {
-      console.error('❌ Error fetching bookings:', error);
-      setError(error.message || 'Failed to load bookings');
+    } catch (error: unknown) {
+      logger.error('Error fetching bookings', error);
+      const message = error instanceof Error ? error.message : 'Failed to load bookings';
+      setError(message);
       setBookings([]);
       toast({
         title: "Kunne ikke laste bookinger",
@@ -120,8 +120,6 @@ export const useBookingsSafe = (userId?: string) => {
   // Safe update function
   const updateBooking = async (bookingId: string, updates: Partial<SafeBooking>) => {
     try {
-      console.log('🔄 Updating booking:', bookingId, updates);
-      
       const { data, error } = await supabase
         .from('bookings')
         .update({
@@ -141,17 +139,19 @@ export const useBookingsSafe = (userId?: string) => {
           : booking
       ));
 
+      logger.business('Booking updated', { bookingId, updates });
       toast({
         title: "Booking oppdatert",
         description: "Endringene er lagret",
       });
 
       return data;
-    } catch (error: any) {
-      console.error('❌ Error updating booking:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to update booking', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Kunne ikke oppdatere booking",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -161,8 +161,6 @@ export const useBookingsSafe = (userId?: string) => {
   // Safe delete function
   const deleteBooking = async (bookingId: string) => {
     try {
-      console.log('🗑️ Deleting booking:', bookingId);
-      
       const { error } = await supabase.rpc('permanently_delete_any_booking', {
         booking_uuid: bookingId
       });
@@ -172,16 +170,18 @@ export const useBookingsSafe = (userId?: string) => {
       // Remove from local state
       setBookings(prev => prev.filter(booking => booking.id !== bookingId));
 
+      logger.business('Booking deleted', { bookingId });
       toast({
         title: "Booking slettet",
         description: "Bookingen er permanent fjernet",
       });
       
-    } catch (error: any) {
-      console.error('❌ Error deleting booking:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to delete booking', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Kunne ikke slette booking",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -191,8 +191,6 @@ export const useBookingsSafe = (userId?: string) => {
   // Safe reject function for pending bookings
   const rejectBooking = async (bookingId: string) => {
     try {
-      console.log('❌ Rejecting booking:', bookingId);
-      
       const { error } = await supabase.rpc('reject_booking_request', {
         booking_uuid: bookingId
       });
@@ -202,16 +200,18 @@ export const useBookingsSafe = (userId?: string) => {
       // Remove from local state
       setBookings(prev => prev.filter(booking => booking.id !== bookingId));
 
+      logger.business('Booking rejected', { bookingId });
       toast({
         title: "Forespørsel avvist",
         description: "Forespørselen er slettet",
       });
       
-    } catch (error: any) {
-      console.error('❌ Error rejecting booking:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to reject booking', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Kunne ikke avvise forespørsel",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
       throw error;

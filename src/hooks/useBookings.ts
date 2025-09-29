@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Booking, CreateBookingRequest, UpdateBookingRequest } from '@/types/booking';
 import { getErrorMessage } from '@/types/common';
+import { logger } from '@/utils/logger';
 
 export const useBookings = (userId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -18,7 +19,7 @@ export const useBookings = (userId?: string) => {
   useEffect(() => {
     if (!userId || isSafari) {
       if (isSafari) {
-        console.log('Skipping realtime for Safari');
+        logger.debug('Skipping realtime for Safari browser');
       }
       return;
     }
@@ -34,7 +35,7 @@ export const useBookings = (userId?: string) => {
           filter: `sender_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Booking updated (as sender):', payload);
+          logger.debug('Booking updated (as sender)', { bookingId: payload.new.id });
           setBookings(prev => prev.map(booking => 
             booking.id === payload.new.id ? payload.new as Booking : booking
           ));
@@ -49,7 +50,7 @@ export const useBookings = (userId?: string) => {
           filter: `receiver_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Booking updated (as receiver):', payload);
+          logger.debug('Booking updated (as receiver)', { bookingId: payload.new.id });
           setBookings(prev => prev.map(booking => 
             booking.id === payload.new.id ? payload.new as Booking : booking
           ));
@@ -133,6 +134,7 @@ export const useBookings = (userId?: string) => {
       
       const newBooking = data as Booking;
       setBookings(prev => [newBooking, ...prev]);
+      logger.business('Booking created', { bookingId: newBooking.id, receiverId: bookingData.receiverId });
       toast({
         title: "Forespørsel sendt",
         description: "Forespørselen venter på mottakers svar",
@@ -169,10 +171,11 @@ export const useBookings = (userId?: string) => {
         booking.id === bookingId ? updatedBooking : booking
       ));
       
+      logger.business('Booking updated', { bookingId, updates });
       return updatedBooking;
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      console.error('❌ Error updating booking:', error);
+      logger.error('Failed to update booking', error);
       toast({
         title: "Feil ved oppdatering av booking",
         description: message,
@@ -247,7 +250,7 @@ export const useBookings = (userId?: string) => {
       }
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      console.error('Error rejecting booking:', error);
+      logger.error('Failed to reject booking', error);
       toast({
         title: "Feil ved avvisning",
         description: message,
@@ -284,7 +287,7 @@ export const useBookings = (userId?: string) => {
       }
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      console.error('Error permanently deleting booking:', error);
+      logger.error('Failed to permanently delete booking', error);
       toast({
         title: "Feil ved sletting",
         description: message,

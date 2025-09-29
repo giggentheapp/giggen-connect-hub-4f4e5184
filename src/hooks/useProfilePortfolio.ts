@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface ProfilePortfolioFile {
   id: string;
@@ -33,8 +34,6 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       setLoading(true);
       setError(null);
 
-      console.log('🎨 Fetching portfolio for user:', userId);
-
       const { data, error: fetchError } = await supabase
         .from('profile_portfolio')
         .select('*')
@@ -42,15 +41,15 @@ export const useProfilePortfolio = (userId: string | undefined) => {
         .order('created_at', { ascending: false });
 
       if (fetchError) {
-        console.error('❌ Portfolio fetch error:', fetchError);
+        logger.error('Failed to fetch portfolio', fetchError);
         throw fetchError;
       }
 
-      console.log('✅ Portfolio fetched successfully:', data?.length || 0);
+      logger.debug('Portfolio fetched', { userId, count: data?.length || 0 });
       setFiles(data || []);
-    } catch (err: any) {
-      console.error('Error fetching portfolio:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      logger.error('Error fetching portfolio', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }

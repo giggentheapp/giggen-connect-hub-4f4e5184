@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface HospitalityRiderFile {
   id: string;
@@ -39,9 +40,9 @@ export const useHospitalityRiders = (userId: string | undefined) => {
       if (fetchError) throw fetchError;
 
       setFiles(data || []);
-    } catch (err: any) {
-      console.error('Error fetching hospitality riders:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      logger.error('Failed to fetch hospitality riders', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
