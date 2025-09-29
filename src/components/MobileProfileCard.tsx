@@ -149,9 +149,19 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   const showAbout = settings?.show_about;
   const showEvents = settings?.show_events;
 
+  // Count available tabs
+  const availableTabs = [
+    showAbout && 'info',
+    concepts.length > 0 && 'concepts',
+    showPortfolio && 'portfolio',
+    showEvents && 'events'
+  ].filter(Boolean).length;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-in-bottom">
-      <div className="bg-background/95 backdrop-blur-sm border-t shadow-2xl">
+    <div className={`fixed inset-0 z-50 transition-transform duration-300 ${
+      expanded ? 'translate-y-0' : 'translate-y-[calc(100%-180px)]'
+    }`}>
+      <div className="h-full bg-background/98 backdrop-blur-sm shadow-2xl flex flex-col">
         {/* Header - Always visible */}
         <div className="px-4 py-3 border-b">
           <div className="flex items-center justify-between gap-3">
@@ -210,62 +220,64 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
           )}
         </div>
 
-        {/* Expandable content */}
+        {/* Expandable content - Full screen when expanded */}
         {expanded && (
-          <div className="max-h-[60vh] overflow-y-auto">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full grid grid-cols-4 rounded-none">
-                <TabsTrigger value="info" className="text-xs">
-                  <Eye className="w-3 h-3 mr-1" />
-                  {t('info')}
-                </TabsTrigger>
-                <TabsTrigger value="concepts" className="text-xs">
-                  <Package className="w-3 h-3 mr-1" />
-                  Tilbud
-                </TabsTrigger>
+          <div className="flex-1 overflow-y-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+              <TabsList className={`w-full grid rounded-none flex-shrink-0`} style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
+                {showAbout && (
+                  <TabsTrigger value="info" className="text-xs px-2">
+                    <Eye className="w-3 h-3 mr-1" />
+                    Om
+                  </TabsTrigger>
+                )}
+                {concepts.length > 0 && (
+                  <TabsTrigger value="concepts" className="text-xs px-2">
+                    <Package className="w-3 h-3 mr-1" />
+                    Tilbud
+                  </TabsTrigger>
+                )}
                 {showPortfolio && (
-                  <TabsTrigger value="portfolio" className="text-xs">
+                  <TabsTrigger value="portfolio" className="text-xs px-2">
                     <ImageIcon className="w-3 h-3 mr-1" />
-                    {t('portfolio')}
+                    Media
                   </TabsTrigger>
                 )}
                 {showEvents && (
-                  <TabsTrigger value="events" className="text-xs">
+                  <TabsTrigger value="events" className="text-xs px-2">
                     <Calendar className="w-3 h-3 mr-1" />
                     Event
                   </TabsTrigger>
                 )}
               </TabsList>
 
-              <TabsContent value="info" className="p-4 space-y-4">
-                {/* Bio */}
-                {showAbout && profile.bio && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">{t('about')}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {profile.bio}
-                    </p>
-                  </div>
-                )}
+              {showAbout && (
+                <TabsContent value="info" className="p-4 space-y-4 flex-1 overflow-y-auto">
+                  {/* Bio */}
+                  {profile.bio && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Om meg</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {profile.bio}
+                      </p>
+                    </div>
+                  )}
 
-                {/* Social media */}
-                {profile.social_media_links && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">{t('socialMedia')}</h4>
-                    <SocialMediaLinks 
-                      socialLinks={profile.social_media_links}
-                    />
-                  </div>
-                )}
-              </TabsContent>
+                  {/* Social media */}
+                  {profile.social_media_links && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">{t('socialMedia')}</h4>
+                      <SocialMediaLinks 
+                        socialLinks={profile.social_media_links}
+                      />
+                    </div>
+                  )}
+                </TabsContent>
+              )}
 
-              <TabsContent value="concepts" className="p-4 space-y-3">
-                {concepts.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Ingen tilbud tilgjengelig
-                  </p>
-                ) : (
-                  concepts.map((concept) => (
+              {concepts.length > 0 && (
+                <TabsContent value="concepts" className="p-4 space-y-3 flex-1 overflow-y-auto">
+                  {concepts.map((concept) => (
                     <Card key={concept.id} className="overflow-hidden">
                       <CardContent className="p-3">
                         <h4 className="font-semibold text-sm mb-1">{concept.title}</h4>
@@ -286,12 +298,12 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                         </div>
                       </CardContent>
                     </Card>
-                  ))
-                )}
-              </TabsContent>
+                  ))}
+                </TabsContent>
+              )}
 
               {showPortfolio && (
-                <TabsContent value="portfolio" className="p-4">
+                <TabsContent value="portfolio" className="p-4 flex-1 overflow-y-auto">
                   <ProfilePortfolioViewer 
                     userId={userId}
                     showControls={false}
@@ -301,7 +313,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
               )}
 
               {showEvents && (
-                <TabsContent value="events" className="p-4 space-y-3">
+                <TabsContent value="events" className="p-4 space-y-3 flex-1 overflow-y-auto">
                   {events.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
                       Ingen kommende arrangementer
@@ -341,8 +353,8 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
           </div>
         )}
 
-        {/* Bottom action bar */}
-        <div className="px-4 py-3 border-t bg-muted/30">
+        {/* Bottom action bar - Always visible */}
+        <div className="px-4 py-3 border-t bg-muted/30 flex-shrink-0">
           <div className="flex gap-2">
             {ismaker && (
               <Button
