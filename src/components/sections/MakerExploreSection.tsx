@@ -8,7 +8,7 @@ import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar } from 'luci
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
-import { ProfileModal } from '@/components/ProfileModal';
+import { MobileProfileCard } from '@/components/MobileProfileCard';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface UserProfile {
   id: string;
@@ -34,8 +34,7 @@ export const MakerExploreSection = ({
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileCardUserId, setProfileCardUserId] = useState<string | null>(null);
   const [bookingMaker, setBookingMaker] = useState<{
     id: string;
     name: string;
@@ -82,8 +81,7 @@ export const MakerExploreSection = ({
     }
   }, [makers, searchTerm]);
   const handleViewProfile = (makerId: string) => {
-    setSelectedUserId(makerId);
-    setProfileModalOpen(true);
+    setProfileCardUserId(makerId);
   };
   const handleStartBooking = (receiverId: string, receiverName: string) => {
     setBookingMaker({
@@ -248,12 +246,13 @@ export const MakerExploreSection = ({
         </Tabs>
       </div>
       
-      {/* Profile Modal */}
-      <ProfileModal 
-        isOpen={profileModalOpen} 
-        onClose={() => setProfileModalOpen(false)} 
-        userId={selectedUserId} 
-      />
+      {/* Mobile Profile Card - Sticky bottom */}
+      {profileCardUserId && (
+        <MobileProfileCard 
+          userId={profileCardUserId}
+          onClose={() => setProfileCardUserId(null)}
+        />
+      )}
       
       {/* Booking Request Modal */}
       {bookingMaker && (
