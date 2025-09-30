@@ -9,6 +9,7 @@ import { useRole } from '@/contexts/RoleProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import giggenLogo from '@/assets/giggen-logo.png';
 
 // Import sections
 import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
@@ -189,7 +190,7 @@ export const UnifiedSidePanel = ({
             <div className="p-4 border-b border-border">
               <div className="flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+                  src={giggenLogo} 
                   alt="GIGGEN Logo" 
                   className="w-8 h-8 object-contain"
                 />

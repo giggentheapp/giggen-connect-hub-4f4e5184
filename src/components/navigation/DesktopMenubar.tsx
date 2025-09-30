@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import giggenLogo from '@/assets/giggen-logo.png';
 
 interface UserProfile {
   id: string;
@@ -116,7 +117,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
               <img 
-                src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+                src={giggenLogo} 
                 alt="GIGGEN Logo" 
                 className="w-full h-full object-contain"
               />
@@ -124,7 +125,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
             {isExpanded && (
               <div className="opacity-0 animate-fade-in">
                 <img 
-                  src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+                  src={giggenLogo} 
                   alt="GIGGEN Logo" 
                   className="h-8 object-contain"
                 />

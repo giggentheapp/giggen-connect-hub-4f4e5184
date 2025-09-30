@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { Compass, User, Settings } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate, useLocation } from 'react-router-dom';
+import giggenLogo from '@/assets/giggen-logo.png';
 
 interface DesktopSidebarProps {
   activeSection: string;
@@ -50,7 +51,7 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <img 
-            src="/lovable-uploads/d5d195a6-c8a7-4768-b1ac-c6c11fbff212.png" 
+            src={giggenLogo} 
             alt="GIGGEN Logo" 
             className="w-8 h-8 object-contain"
           />
