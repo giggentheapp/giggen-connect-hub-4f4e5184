@@ -20,6 +20,7 @@ export const AdminConceptsSection = ({
   const { t } = useAppTranslation();
   const [showWizard, setShowWizard] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [editConceptId, setEditConceptId] = useState<string | undefined>(undefined);
   const {
     concepts,
     loading,
@@ -52,6 +53,16 @@ export const AdminConceptsSection = ({
   const handleSuccess = () => {
     refetch();
     refetchDrafts();
+  };
+
+  const handleEdit = (conceptId: string) => {
+    setEditConceptId(conceptId);
+    setShowWizard(true);
+  };
+
+  const handleCloseWizard = () => {
+    setShowWizard(false);
+    setEditConceptId(undefined);
   };
   return <div className="space-y-6">
 
@@ -127,6 +138,7 @@ export const AdminConceptsSection = ({
                         showActions={true}
                         showConceptActions={true}
                         onDelete={() => handleDeleteConcept(draft.id)}
+                        onEdit={handleEdit}
                         onConceptAction={action => {
                           if (action === 'deleted' || action === 'rejected') {
                             refetch();
@@ -143,6 +155,12 @@ export const AdminConceptsSection = ({
         </Collapsible>
       )}
 
-      <ConceptWizard isOpen={showWizard} onClose={() => setShowWizard(false)} onSuccess={handleSuccess} userId={profile.user_id} />
+      <ConceptWizard 
+        isOpen={showWizard} 
+        onClose={handleCloseWizard} 
+        onSuccess={handleSuccess} 
+        userId={profile.user_id}
+        editConceptId={editConceptId}
+      />
     </div>;
 };

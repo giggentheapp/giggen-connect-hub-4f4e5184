@@ -43,6 +43,7 @@ interface ConceptWizardProps {
   onClose: () => void;
   onSuccess: () => void;
   userId: string;
+  editConceptId?: string;
 }
 
 const STEPS = [
@@ -54,12 +55,13 @@ const STEPS = [
   { id: 'preview', title: 'preview', description: 'preview' },
 ];
 
-export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWizardProps) => {
+export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptId }: ConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAsPublished, setSaveAsPublished] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(false);
   const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders, loading: hospitalityRidersLoading } = useHospitalityRiders(userId);
   const { toast } = useToast();
@@ -80,6 +82,109 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
     pricing_type: 'fixed',
     door_percentage: '',
   }));
+
+  // Load existing concept if editing
+  useEffect(() => {
+    if (isOpen && editConceptId) {
+      loadExistingConcept(editConceptId);
+    } else if (isOpen && !editConceptId) {
+      // Reset for new concept
+      setConceptData({
+        title: '',
+        description: '',
+        price: '',
+        expected_audience: '',
+        tech_spec: '',
+        available_dates: [],
+        portfolio_files: [],
+        selected_tech_spec_file: '',
+        selected_hospitality_rider_file: '',
+        is_indefinite: false,
+        pricing_type: 'fixed',
+        door_percentage: '',
+      });
+      setCurrentStep(0);
+    }
+  }, [isOpen, editConceptId]);
+
+  const loadExistingConcept = async (conceptId: string) => {
+    setLoadingExisting(true);
+    try {
+      // Load concept data
+      const { data: concept, error: conceptError } = await supabase
+        .from('concepts')
+        .select('*')
+        .eq('id', conceptId)
+        .single();
+
+      if (conceptError) throw conceptError;
+
+      // Load concept files
+      const { data: files, error: filesError } = await supabase
+        .from('concept_files')
+        .select('*')
+        .eq('concept_id', conceptId);
+
+      if (filesError) throw filesError;
+
+      // Parse available dates
+      let parsedDates: Date[] = [];
+      let isIndefinite = false;
+      if (concept.available_dates) {
+        try {
+          const dates = typeof concept.available_dates === 'string' 
+            ? JSON.parse(concept.available_dates) 
+            : concept.available_dates;
+          
+          if (dates && typeof dates === 'object' && dates.indefinite) {
+            isIndefinite = true;
+          } else if (Array.isArray(dates)) {
+            parsedDates = dates.map((d: string) => new Date(d));
+          }
+        } catch (e) {
+          console.error('Error parsing dates:', e);
+        }
+      }
+
+      // Determine pricing type
+      let pricingType: 'fixed' | 'door_deal' | 'by_agreement' = 'fixed';
+      if (concept.door_deal) {
+        pricingType = 'door_deal';
+      } else if (concept.price_by_agreement) {
+        pricingType = 'by_agreement';
+      }
+
+      // Set concept data
+      setConceptData({
+        title: concept.title || '',
+        description: concept.description || '',
+        price: concept.price ? concept.price.toString() : '',
+        expected_audience: concept.expected_audience ? concept.expected_audience.toString() : '',
+        tech_spec: concept.tech_spec || '',
+        available_dates: parsedDates,
+        portfolio_files: files || [],
+        selected_tech_spec_file: concept.tech_spec_reference || '',
+        selected_hospitality_rider_file: concept.hospitality_rider_reference || '',
+        is_indefinite: isIndefinite,
+        pricing_type: pricingType,
+        door_percentage: concept.door_percentage ? concept.door_percentage.toString() : '',
+      });
+
+      toast({
+        title: t('conceptWizard.messages.draftLoaded'),
+        description: t('conceptWizard.messages.draftLoadedDescription'),
+      });
+    } catch (error: any) {
+      console.error('Error loading concept:', error);
+      toast({
+        title: t('conceptWizard.messages.loadError'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingExisting(false);
+    }
+  };
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
     setConceptData(prev => ({ ...prev, [field]: value }));
@@ -165,14 +270,38 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         status: isPublished ? 'published' : 'draft'
       };
 
-      const { data, error: insertError } = await supabase
-        .from('concepts')
-        .insert(conceptPayload)
-        .select('id')
-        .single();
-      
-      if (insertError) throw insertError;
-      const conceptId = data?.id;
+      let conceptId: string;
+
+      if (editConceptId) {
+        // Update existing concept
+        const { error: updateError } = await supabase
+          .from('concepts')
+          .update(conceptPayload)
+          .eq('id', editConceptId);
+        
+        if (updateError) throw updateError;
+        conceptId = editConceptId;
+
+        // Delete old files if any
+        const { error: deleteFilesError } = await supabase
+          .from('concept_files')
+          .delete()
+          .eq('concept_id', editConceptId);
+        
+        if (deleteFilesError) {
+          console.error('Error deleting old files:', deleteFilesError);
+        }
+      } else {
+        // Create new concept
+        const { data, error: insertError } = await supabase
+          .from('concepts')
+          .insert(conceptPayload)
+          .select('id')
+          .single();
+        
+        if (insertError) throw insertError;
+        conceptId = data?.id;
+      }
 
       // Create concept_files records for uploaded files
       if (conceptData.portfolio_files.length > 0 && conceptId) {
@@ -183,13 +312,13 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         }
 
         const fileRecords = Array.isArray(conceptData.portfolio_files) 
-          ? conceptData.portfolio_files.filter(file => file && file.filename).map(file => ({
+          ? conceptData.portfolio_files.filter(file => file && file.filename && !file.id).map(file => ({
           creator_id: user.id,
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
           file_type: file.file_type,
-          file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
+          file_url: file.publicUrl || file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
           mime_type: file.mime_type,
           file_size: file.file_size,
           title: file.title || file.filename,
@@ -197,24 +326,30 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         }))
           : [];
 
-        const { error: filesError } = await supabase
-          .from('concept_files')
-          .insert(fileRecords);
-        
-        if (filesError) {
-          console.error('Error creating concept files:', filesError);
-          // Don't throw here - concept was created successfully, just log the file error
-          toast({
-            title: t('conceptWizard.messages.filesSaveWarning'),
-            description: t('conceptWizard.messages.filesSaveWarningDescription'),
-            variant: "destructive",
-          });
+        if (fileRecords.length > 0) {
+          const { error: filesError } = await supabase
+            .from('concept_files')
+            .insert(fileRecords);
+          
+          if (filesError) {
+            console.error('Error creating concept files:', filesError);
+            // Don't throw here - concept was created successfully, just log the file error
+            toast({
+              title: t('conceptWizard.messages.filesSaveWarning'),
+              description: t('conceptWizard.messages.filesSaveWarningDescription'),
+              variant: "destructive",
+            });
+          }
         }
       }
 
       toast({
-        title: isPublished ? t('conceptWizard.messages.published') : t('conceptWizard.messages.draftSaved'),
-        description: isPublished ? t('conceptWizard.messages.publishedDescription') : t('conceptWizard.messages.draftSavedDescription'),
+        title: editConceptId 
+          ? t('conceptWizard.messages.updated') 
+          : (isPublished ? t('conceptWizard.messages.published') : t('conceptWizard.messages.draftSaved')),
+        description: editConceptId
+          ? t('conceptWizard.messages.updatedDescription')
+          : (isPublished ? t('conceptWizard.messages.publishedDescription') : t('conceptWizard.messages.draftSavedDescription')),
       });
 
       onSuccess();
@@ -255,6 +390,21 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
   };
 
   if (!isOpen) return null;
+
+  if (loadingExisting) {
+    return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-lg font-medium">{t('conceptWizard.messages.draftLoading')}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
