@@ -39,7 +39,6 @@ interface ConceptCardProps {
   showConceptActions?: boolean;
   onDelete?: () => void;
   onConceptAction?: (action: 'rejected' | 'deleted') => void;
-  onEdit?: (conceptId: string) => void;
 }
 
 interface ConceptFile {
@@ -71,8 +70,7 @@ const ConceptCard = ({
   showActions = false, 
   showConceptActions = false, 
   onDelete,
-  onConceptAction,
-  onEdit
+  onConceptAction
 }: ConceptCardProps) => {
   console.log('ConceptCard rendering with concept:', concept.id);
   
@@ -195,18 +193,6 @@ const ConceptCard = ({
           </div>
           {(showActions || showConceptActions) && (
             <div className="flex gap-2">
-              {/* Edit button for drafts */}
-              {!concept.is_published && onEdit && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-7 px-2 text-xs md:h-9 md:px-3 md:text-sm"
-                  onClick={() => onEdit(concept.id)}
-                >
-                  {t('conceptCard.edit')}
-                </Button>
-              )}
-              
               {/* Concept Actions (Reject/Delete) */}
               {showConceptActions && (
                 <DropdownMenu>

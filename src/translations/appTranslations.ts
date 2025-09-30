@@ -272,8 +272,6 @@ export const appTranslations = {
     newOffer: "nytt tilbud",
     noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
     createFirstOffer: "Opprett ditt første tilbud",
-    drafts: "Utkast",
-    draftsDescription: "Uferdige tilbud som ikke er publisert ennå",
 
     // Concept Wizard
     conceptWizard: {
@@ -345,10 +343,7 @@ export const appTranslations = {
       },
       navigation: {
         previous: "Forrige",
-        next: "Neste",
-        saveDraft: "Lagre utkast",
-        saving: "Lagrer...",
-        publishing: "Publiserer..."
+        next: "Neste"
       },
       confirmDialog: {
         title: "Er du sikker?",
@@ -363,12 +358,6 @@ export const appTranslations = {
         unknownError: "En ukjent feil oppstod",
         draftSaved: "Tilbud lagret!",
         draftSavedDescription: "Tilbudet er lagret som utkast",
-        draftLoading: "Laster utkast...",
-        draftLoaded: "Utkast lastet!",
-        draftLoadedDescription: "Utkastet er klart til redigering",
-        updated: "Tilbud oppdatert!",
-        updatedDescription: "Endringene er lagret",
-        loadError: "Feil ved lasting",
         published: "Tilbud publisert!",
         publishedDescription: "Tilbudet er nå tilgjengelig for andre",
         filesSaveWarning: "Advarsel",
@@ -782,8 +771,6 @@ export const appTranslations = {
     newOffer: "new offer",
     noOffersCreated: "You haven't created any offers yet",
     createFirstOffer: "Create your first offer",
-    drafts: "Drafts",
-    draftsDescription: "Unfinished offers that have not been published yet",
 
     // Concept Wizard
     conceptWizard: {
@@ -855,10 +842,7 @@ export const appTranslations = {
       },
       navigation: {
         previous: "Previous",
-        next: "Next",
-        saveDraft: "Save Draft",
-        saving: "Saving...",
-        publishing: "Publishing..."
+        next: "Next"
       },
       confirmDialog: {
         title: "Are you sure?",
@@ -873,12 +857,6 @@ export const appTranslations = {
         unknownError: "An unknown error occurred",
         draftSaved: "Offer Saved!",
         draftSavedDescription: "The offer has been saved as a draft",
-        draftLoading: "Loading draft...",
-        draftLoaded: "Draft Loaded!",
-        draftLoadedDescription: "The draft is ready for editing",
-        updated: "Offer Updated!",
-        updatedDescription: "Changes have been saved",
-        loadError: "Error loading",
         published: "Offer Published!",
         publishedDescription: "The offer is now available to others",
         filesSaveWarning: "Warning",

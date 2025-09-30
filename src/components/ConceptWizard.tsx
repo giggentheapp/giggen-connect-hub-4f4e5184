@@ -43,7 +43,6 @@ interface ConceptWizardProps {
   onClose: () => void;
   onSuccess: () => void;
   userId: string;
-  editConceptId?: string;
 }
 
 const STEPS = [
@@ -55,13 +54,12 @@ const STEPS = [
   { id: 'preview', title: 'preview', description: 'preview' },
 ];
 
-export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptId }: ConceptWizardProps) => {
+export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAsPublished, setSaveAsPublished] = useState(false);
-  const [loadingExisting, setLoadingExisting] = useState(false);
   const { files: availableTechSpecs, loading: techSpecsLoading } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders, loading: hospitalityRidersLoading } = useHospitalityRiders(userId);
   const { toast } = useToast();
@@ -82,109 +80,6 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
     pricing_type: 'fixed',
     door_percentage: '',
   }));
-
-  // Load existing concept if editing
-  useEffect(() => {
-    if (isOpen && editConceptId) {
-      loadExistingConcept(editConceptId);
-    } else if (isOpen && !editConceptId) {
-      // Reset for new concept
-      setConceptData({
-        title: '',
-        description: '',
-        price: '',
-        expected_audience: '',
-        tech_spec: '',
-        available_dates: [],
-        portfolio_files: [],
-        selected_tech_spec_file: '',
-        selected_hospitality_rider_file: '',
-        is_indefinite: false,
-        pricing_type: 'fixed',
-        door_percentage: '',
-      });
-      setCurrentStep(0);
-    }
-  }, [isOpen, editConceptId]);
-
-  const loadExistingConcept = async (conceptId: string) => {
-    setLoadingExisting(true);
-    try {
-      // Load concept data
-      const { data: concept, error: conceptError } = await supabase
-        .from('concepts')
-        .select('*')
-        .eq('id', conceptId)
-        .single();
-
-      if (conceptError) throw conceptError;
-
-      // Load concept files
-      const { data: files, error: filesError } = await supabase
-        .from('concept_files')
-        .select('*')
-        .eq('concept_id', conceptId);
-
-      if (filesError) throw filesError;
-
-      // Parse available dates
-      let parsedDates: Date[] = [];
-      let isIndefinite = false;
-      if (concept.available_dates) {
-        try {
-          const dates = typeof concept.available_dates === 'string' 
-            ? JSON.parse(concept.available_dates) 
-            : concept.available_dates;
-          
-          if (dates && typeof dates === 'object' && dates.indefinite) {
-            isIndefinite = true;
-          } else if (Array.isArray(dates)) {
-            parsedDates = dates.map((d: string) => new Date(d));
-          }
-        } catch (e) {
-          console.error('Error parsing dates:', e);
-        }
-      }
-
-      // Determine pricing type
-      let pricingType: 'fixed' | 'door_deal' | 'by_agreement' = 'fixed';
-      if (concept.door_deal) {
-        pricingType = 'door_deal';
-      } else if (concept.price_by_agreement) {
-        pricingType = 'by_agreement';
-      }
-
-      // Set concept data
-      setConceptData({
-        title: concept.title || '',
-        description: concept.description || '',
-        price: concept.price ? concept.price.toString() : '',
-        expected_audience: concept.expected_audience ? concept.expected_audience.toString() : '',
-        tech_spec: concept.tech_spec || '',
-        available_dates: parsedDates,
-        portfolio_files: files || [],
-        selected_tech_spec_file: concept.tech_spec_reference || '',
-        selected_hospitality_rider_file: concept.hospitality_rider_reference || '',
-        is_indefinite: isIndefinite,
-        pricing_type: pricingType,
-        door_percentage: concept.door_percentage ? concept.door_percentage.toString() : '',
-      });
-
-      toast({
-        title: t('conceptWizard.messages.draftLoaded'),
-        description: t('conceptWizard.messages.draftLoadedDescription'),
-      });
-    } catch (error: any) {
-      console.error('Error loading concept:', error);
-      toast({
-        title: t('conceptWizard.messages.loadError'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingExisting(false);
-    }
-  };
 
   const updateConceptData = (field: keyof ConceptData, value: any) => {
     setConceptData(prev => ({ ...prev, [field]: value }));
@@ -270,38 +165,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
         status: isPublished ? 'published' : 'draft'
       };
 
-      let conceptId: string;
-
-      if (editConceptId) {
-        // Update existing concept
-        const { error: updateError } = await supabase
-          .from('concepts')
-          .update(conceptPayload)
-          .eq('id', editConceptId);
-        
-        if (updateError) throw updateError;
-        conceptId = editConceptId;
-
-        // Delete old files if any
-        const { error: deleteFilesError } = await supabase
-          .from('concept_files')
-          .delete()
-          .eq('concept_id', editConceptId);
-        
-        if (deleteFilesError) {
-          console.error('Error deleting old files:', deleteFilesError);
-        }
-      } else {
-        // Create new concept
-        const { data, error: insertError } = await supabase
-          .from('concepts')
-          .insert(conceptPayload)
-          .select('id')
-          .single();
-        
-        if (insertError) throw insertError;
-        conceptId = data?.id;
-      }
+      const { data, error: insertError } = await supabase
+        .from('concepts')
+        .insert(conceptPayload)
+        .select('id')
+        .single();
+      
+      if (insertError) throw insertError;
+      const conceptId = data?.id;
 
       // Create concept_files records for uploaded files
       if (conceptData.portfolio_files.length > 0 && conceptId) {
@@ -312,13 +183,13 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
         }
 
         const fileRecords = Array.isArray(conceptData.portfolio_files) 
-          ? conceptData.portfolio_files.filter(file => file && file.filename && !file.id).map(file => ({
+          ? conceptData.portfolio_files.filter(file => file && file.filename).map(file => ({
           creator_id: user.id,
           concept_id: conceptId,
           filename: file.filename,
           file_path: file.file_path,
           file_type: file.file_type,
-          file_url: file.publicUrl || file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
+          file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
           mime_type: file.mime_type,
           file_size: file.file_size,
           title: file.title || file.filename,
@@ -326,30 +197,24 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
         }))
           : [];
 
-        if (fileRecords.length > 0) {
-          const { error: filesError } = await supabase
-            .from('concept_files')
-            .insert(fileRecords);
-          
-          if (filesError) {
-            console.error('Error creating concept files:', filesError);
-            // Don't throw here - concept was created successfully, just log the file error
-            toast({
-              title: t('conceptWizard.messages.filesSaveWarning'),
-              description: t('conceptWizard.messages.filesSaveWarningDescription'),
-              variant: "destructive",
-            });
-          }
+        const { error: filesError } = await supabase
+          .from('concept_files')
+          .insert(fileRecords);
+        
+        if (filesError) {
+          console.error('Error creating concept files:', filesError);
+          // Don't throw here - concept was created successfully, just log the file error
+          toast({
+            title: t('conceptWizard.messages.filesSaveWarning'),
+            description: t('conceptWizard.messages.filesSaveWarningDescription'),
+            variant: "destructive",
+          });
         }
       }
 
       toast({
-        title: editConceptId 
-          ? t('conceptWizard.messages.updated') 
-          : (isPublished ? t('conceptWizard.messages.published') : t('conceptWizard.messages.draftSaved')),
-        description: editConceptId
-          ? t('conceptWizard.messages.updatedDescription')
-          : (isPublished ? t('conceptWizard.messages.publishedDescription') : t('conceptWizard.messages.draftSavedDescription')),
+        title: isPublished ? t('conceptWizard.messages.published') : t('conceptWizard.messages.draftSaved'),
+        description: isPublished ? t('conceptWizard.messages.publishedDescription') : t('conceptWizard.messages.draftSavedDescription'),
       });
 
       onSuccess();
@@ -371,14 +236,17 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
       case 0: 
         return conceptData.title.trim().length > 0;
       case 1: 
-        // For draft saving, we just need title - audience and pricing are optional for draft
-        return true;
+        const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
+        const pricingValid = conceptData.pricing_type === 'by_agreement' || 
+                            (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0 && parseFloat(conceptData.price) > 0) ||
+                            (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0 && parseFloat(conceptData.door_percentage) > 0);
+        return audienceValid && pricingValid;
       case 2: 
         return true; // Portfolio is optional
       case 3: 
         return true; // Tech spec is optional
       case 4: 
-        return true; // Dates are optional for draft
+        return conceptData.available_dates.length > 0 || conceptData.is_indefinite;
       case 5: 
         return true; // Preview step
       default: 
@@ -386,37 +254,11 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
     }
   };
 
-  const canPublish = () => {
-    // For publishing, require full validation
-    const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
-    const pricingValid = conceptData.pricing_type === 'by_agreement' || 
-                        (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0 && parseFloat(conceptData.price) > 0) ||
-                        (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0 && parseFloat(conceptData.door_percentage) > 0);
-    const datesValid = conceptData.available_dates.length > 0 || conceptData.is_indefinite;
-    
-    return conceptData.title.trim().length > 0 && audienceValid && pricingValid && datesValid;
-  };
-
   if (!isOpen) return null;
 
-  if (loadingExisting) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center p-4 bg-background">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-lg font-medium">{t('conceptWizard.messages.draftLoading')}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-h-screen bg-background p-4 md:p-8">
-      <Card className="w-full max-w-6xl mx-auto">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>
@@ -845,7 +687,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
                     setSaveAsPublished(false);
                     setShowConfirmDialog(true);
                   }}
-                  disabled={saving || !conceptData.title.trim()}
+                  disabled={saving}
                   variant="outline"
                   className="flex-1"
                 >
@@ -857,7 +699,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
                     setSaveAsPublished(true);
                     setShowConfirmDialog(true);
                   }}
-                  disabled={saving || !canPublish()}
+                  disabled={saving}
                   className="flex-1"
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -906,27 +748,13 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
               {t('conceptWizard.navigation.previous')}
             </Button>
             
-            <div className="flex gap-2">
-              {/* Save Draft button available on all steps except first */}
-              {currentStep > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSave(false)}
-                  disabled={saving || !conceptData.title.trim()}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {saving ? t('conceptWizard.navigation.saving') : t('conceptWizard.navigation.saveDraft')}
-                </Button>
-              )}
-              
-              <Button
-                onClick={nextStep}
-                disabled={!isStepValid()}
-              >
-                {t('conceptWizard.navigation.next')}
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
+            <Button
+              onClick={nextStep}
+              disabled={!isStepValid()}
+            >
+              {t('conceptWizard.navigation.next')}
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
         )}
       </Card>
