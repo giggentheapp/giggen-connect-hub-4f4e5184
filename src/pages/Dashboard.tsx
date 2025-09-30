@@ -48,12 +48,12 @@ const Dashboard = () => {
       try {
         console.log('👤 Dashboard: Loading profile for user:', session.user.id);
         
-        // Load user profile
+        // Load user profile with maybeSingle to handle missing profiles
         const { data: profileData, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('❌ Dashboard: Error loading profile:', error);
@@ -62,6 +62,31 @@ const Dashboard = () => {
             description: error.message,
             variant: "destructive",
           });
+        } else if (!profileData) {
+          // Profile doesn't exist - create one automatically
+          console.log('⚠️ Dashboard: Profile not found, creating new profile...');
+          
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: session.user.id,
+              display_name: session.user.email?.split('@')[0] || 'User',
+              role: 'audience' // Default role
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('❌ Dashboard: Error creating profile:', createError);
+            toast({
+              title: 'Kunne ikke opprette profil',
+              description: createError.message,
+              variant: "destructive",
+            });
+          } else {
+            console.log('✅ Dashboard: New profile created successfully:', newProfile);
+            setProfile(newProfile as UserProfile);
+          }
         } else {
           console.log('✅ Dashboard: Profile loaded successfully:', profileData);
           setProfile(profileData as UserProfile);
