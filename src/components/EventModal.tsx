@@ -45,7 +45,7 @@ export const EventModal = ({ isOpen, onClose, eventId }: EventModalProps) => {
           .from('events_market')
           .select('*')
           .eq('id', eventId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         setEvent(data);

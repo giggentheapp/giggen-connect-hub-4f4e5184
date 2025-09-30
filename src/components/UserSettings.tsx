@@ -88,7 +88,7 @@ export const UserSettings = ({
         .from('profiles')
         .select('*')
         .eq('user_id', profile.user_id)
-        .single();
+        .maybeSingle();
       
       if (profileError) throw profileError;
       
@@ -125,7 +125,7 @@ export const UserSettings = ({
           .from('profile_settings')
           .select('*')
           .eq('maker_id', profile.user_id)
-          .single();
+          .maybeSingle();
         
         if (settingsError && settingsError.code !== 'PGRST116') {
           throw settingsError;
@@ -151,7 +151,7 @@ export const UserSettings = ({
           .from('profiles')
           .select('privacy_settings')
           .eq('user_id', profile.user_id)
-          .single();
+          .maybeSingle();
 
         if (privacyError && privacyError.code !== 'PGRST116') {
           throw privacyError;

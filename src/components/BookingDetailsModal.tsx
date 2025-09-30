@@ -57,7 +57,7 @@ export const BookingDetailsModal = ({
         const {
           data,
           error
-        } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
+        } = await supabase.from('bookings').select('*').eq('id', bookingId).maybeSingle();
         if (error) throw error;
         setBooking(data);
       } catch (error) {

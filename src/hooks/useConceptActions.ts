@@ -24,7 +24,7 @@ export const useConceptActions = () => {
         .from('concepts')
         .select('*')
         .eq('id', conceptId)
-        .single();
+        .maybeSingle();
 
       if (fetchError || !concept) {
         throw new Error('Kunne ikke hente konseptdata');
@@ -97,7 +97,7 @@ export const useConceptActions = () => {
         .from('concepts')
         .select('*')
         .eq('id', conceptId)
-        .single();
+        .maybeSingle();
 
       if (fetchError || !concept) {
         throw new Error('Kunne ikke hente konseptdata');

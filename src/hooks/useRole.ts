@@ -25,7 +25,7 @@ export const useRoleData = () => {
         .from('profiles')
         .select('role')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         logger.error('Failed to fetch user profile', profileError);

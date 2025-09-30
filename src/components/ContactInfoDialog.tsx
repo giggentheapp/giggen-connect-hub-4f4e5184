@@ -31,7 +31,7 @@ export const ContactInfoDialog = ({ isOpen, onConfirm, onCancel }: ContactInfoDi
         .from('profiles')
         .select('display_name, contact_info, address, is_address_public')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       setContactInfo(profile);
     } catch (error) {
