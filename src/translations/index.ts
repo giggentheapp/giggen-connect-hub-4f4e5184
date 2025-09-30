@@ -4,7 +4,7 @@ export const translations = {
     explore: "Utforsk",
     favorites: "Favoritter", 
     settings: "Innstillinger",
-    My Offers: "Mine tilbud",
+    "My Offers": "Mine tilbud",
     bookings: "Bookinger",
     profile: "Profil",
     administration: "Administrasjon",
