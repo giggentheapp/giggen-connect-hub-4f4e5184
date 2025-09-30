@@ -337,47 +337,110 @@ export default function CreateOffer() {
 
     setSaving(true);
     try {
-      const conceptId = conceptData.id;
+      let conceptId = conceptData.id;
+
+      // If no conceptId exists, create the concept first
+      if (!conceptId) {
+        const payload = {
+          maker_id: userId,
+          title: conceptData.title,
+          description: conceptData.description || null,
+          price: conceptData.pricing_type === 'fixed' && conceptData.price ? parseFloat(conceptData.price) : null,
+          door_deal: conceptData.pricing_type === 'door_deal',
+          door_percentage: conceptData.pricing_type === 'door_deal' && conceptData.door_percentage ? parseFloat(conceptData.door_percentage) : null,
+          price_by_agreement: conceptData.pricing_type === 'by_agreement',
+          expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
+          tech_spec: conceptData.tech_spec || null,
+          tech_spec_reference: conceptData.selected_tech_spec_file || null,
+          hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
+          available_dates: conceptData.is_indefinite 
+            ? JSON.stringify({ indefinite: true })
+            : (conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null),
+          is_published: false,
+          status: 'draft',
+          updated_at: new Date().toISOString(),
+        };
+
+        const { data, error } = await supabase
+          .from('concepts')
+          .insert(payload)
+          .select('id')
+          .single();
+        
+        if (error) throw error;
+        conceptId = data.id;
+
+        // Save any portfolio files
+        if (conceptData.portfolio_files.length > 0) {
+          const fileRecords = conceptData.portfolio_files
+            .filter(file => file && file.filename && !file.id)
+            .map(file => ({
+              creator_id: userId,
+              concept_id: conceptId,
+              filename: file.filename,
+              file_path: file.file_path,
+              file_type: file.file_type,
+              file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concept-drafts/${file.file_path}`,
+              mime_type: file.mime_type,
+              file_size: file.file_size,
+              title: file.title || file.filename,
+              is_public: false
+            }));
+
+          if (fileRecords.length > 0) {
+            await supabase.from('concept_files').insert(fileRecords);
+          }
+        }
+      }
 
       // Move files from draft bucket to production bucket
-      if (conceptData.portfolio_files.length > 0 && conceptId) {
+      if (conceptData.portfolio_files.length > 0) {
         for (const file of conceptData.portfolio_files) {
           if (file.file_path?.startsWith(`${userId}/`)) {
-            // Download from draft bucket
-            const { data: fileData, error: downloadError } = await supabase.storage
-              .from('concept-drafts')
-              .download(file.file_path);
-
-            if (!downloadError && fileData) {
-              // Upload to production bucket
-              const newPath = file.file_path;
-              await supabase.storage
-                .from('concepts')
-                .upload(newPath, fileData, {
-                  contentType: file.mime_type,
-                  upsert: true
-                });
-
-              // Delete from draft bucket
-              await supabase.storage
+            try {
+              // Try to download from draft bucket
+              const { data: fileData, error: downloadError } = await supabase.storage
                 .from('concept-drafts')
-                .remove([file.file_path]);
+                .download(file.file_path);
 
-              // Update file URL
-              await supabase
-                .from('concept_files')
-                .update({
-                  file_url: `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${newPath}`,
-                  is_public: true
-                })
-                .eq('id', file.id);
+              if (!downloadError && fileData) {
+                // Upload to production bucket
+                const newPath = file.file_path;
+                const { error: uploadError } = await supabase.storage
+                  .from('concepts')
+                  .upload(newPath, fileData, {
+                    contentType: file.mime_type,
+                    upsert: true
+                  });
+
+                if (!uploadError) {
+                  // Delete from draft bucket
+                  await supabase.storage
+                    .from('concept-drafts')
+                    .remove([file.file_path]);
+
+                  // Update file URL if file has an id
+                  if (file.id) {
+                    await supabase
+                      .from('concept_files')
+                      .update({
+                        file_url: `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${newPath}`,
+                        is_public: true
+                      })
+                      .eq('id', file.id);
+                  }
+                }
+              }
+            } catch (fileError) {
+              console.warn('Could not move file from draft to production:', fileError);
+              // Continue with other files
             }
           }
         }
       }
 
       // Update concept to published
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('concepts')
         .update({
           is_published: true,
@@ -386,7 +449,7 @@ export default function CreateOffer() {
         })
         .eq('id', conceptId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast({
         title: '🎉 Tilbud publisert!',
