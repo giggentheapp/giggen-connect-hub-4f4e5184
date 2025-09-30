@@ -97,7 +97,7 @@ export const UnifiedSidePanel = ({
         icon: FileText
       }, {
         id: 'admin-concepts',
-        label: t('myOffers'),
+        label: t('My Offers'),
         icon: Lightbulb
       }, {
         id: 'bookings',

@@ -43,7 +43,7 @@ export const AdminConceptsSection = ({
       <Card className="bg-slate-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>{t('myOffers')}</span>
+            <span>{t('My Offers')}</span>
             <Button onClick={() => setShowWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
               {t('newOffer')}
