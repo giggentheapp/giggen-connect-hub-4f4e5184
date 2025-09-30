@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,6 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
-import { EventModal } from '@/components/EventModal';
 
 interface UserProfile {
   id: string;
@@ -51,6 +51,7 @@ interface UpcomingEventsSectionProps {
 }
 
 export const UpcomingEventsSection = ({ profile, isAdminView = false }: UpcomingEventsSectionProps) => {
+  const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
@@ -58,8 +59,6 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
   const [portfolioUserId, setPortfolioUserId] = useState<string | null>(null);
   const [techSpecFiles, setTechSpecFiles] = useState<any[]>([]);
   const [hospitalityFiles, setHospitalityFiles] = useState<any[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -203,17 +202,10 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       
       setDetailsOpen(true);
     } else {
-      // For public events from events_market, use EventModal
-      console.log('🚨 Public view: Opening EventModal');
-      setSelectedEventId(event.id);
-      setIsEventModalOpen(true);
+      // For public events, navigate to public event view
+      console.log('🚨 Public view: Navigating to public event page');
+      navigate(`/arrangement/${event.id}`);
     }
-  };
-
-  const handleEventModalClose = () => {
-    console.log('UpcomingEventsSection: Event modal closed');
-    setIsEventModalOpen(false);
-    setSelectedEventId(null);
   };
 
   const EventCard = ({ event }: { event: any }) => {
@@ -555,7 +547,7 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
                               {file.filename}
                             </a>
                           </div>
-                        ))}
+                         ))}
                       </div>
                     </div>
                   )}
@@ -564,15 +556,6 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
             </div>
           </DialogContent>
         </Dialog>
-      )}
-
-      {/* Event Modal for public events */}
-      {selectedEventId && (
-        <EventModal 
-          eventId={selectedEventId}
-          isOpen={isEventModalOpen}
-          onClose={handleEventModalClose}
-        />
       )}
     </div>
   );

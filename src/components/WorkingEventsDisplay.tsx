@@ -5,9 +5,7 @@ import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
-import { PublishedEventDetailsModal } from '@/components/PublishedEventDetailsModal';
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface UserProfile {
@@ -33,6 +31,7 @@ interface WorkingEventsDisplayProps {
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId, viewerRole }: WorkingEventsDisplayProps) => {
   const { t } = useAppTranslation();
+  const navigate = useNavigate();
   // Determine which data source to use based on viewer role and ownership
   const isOwnProfile = currentUserId === profile.user_id;
   const isGoerViewing = viewerRole === 'goer' && !isOwnProfile;
@@ -44,9 +43,6 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
   // Select the appropriate data source
   const loading = isGoerViewing ? publicLoading : bookingsLoading;
   const eventsData = isGoerViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
-  
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   console.log('🎭 WorkingEventsDisplay render:', {
     isOwnProfile,
@@ -57,20 +53,8 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
   });
 
   const handleEventClick = (bookingId: string) => {
-    console.log('Event clicked:', bookingId);
-    setSelectedBookingId(bookingId);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedBookingId(null);
-  };
-
-  // Determine if current user is owner of the booking (only for own profile events, not public events)
-  const isBookingOwner = (booking: any) => {
-    if (!currentUserId || isGoerViewing) return false; // Never owner when viewing as goer or for public events
-    return booking.sender_id === currentUserId || booking.receiver_id === currentUserId;
+    console.log('Event clicked - navigating to public view:', bookingId);
+    navigate(`/arrangement/${bookingId}`);
   };
 
   if (loading) {
@@ -155,15 +139,6 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
           </Card>
         ))}
       </div>
-
-      {/* Published Event Details Modal */}
-      <PublishedEventDetailsModal
-        bookingId={selectedBookingId || ''}
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        currentUserId={currentUserId || ''}
-        showSensitiveInfo={showSensitiveInfo}
-      />
     </>
   );
 };

@@ -41,8 +41,8 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
   const navigate = useNavigate();
 
   const handleDetailsClick = () => {
-    // Navigate to bookings list to see event details
-    navigate('/bookings');
+    // Navigate to public event view
+    navigate(`/arrangement/${event.id}`);
   };
 
   const userRole = event.is_sender ? 'Arrangør' : 'Artist';
