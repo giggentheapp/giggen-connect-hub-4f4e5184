@@ -94,12 +94,8 @@ const BookingAgreementSummary = () => {
   };
 
   const handleBack = () => {
-    if (booking) {
-      const target = getBookingNavigationTargetWithUser(booking, currentUserId);
-      navigate(target);
-    } else {
-      navigate('/bookings');
-    }
+    // Navigate back to events list in explore page
+    navigate('/', { state: { activeView: 'list' } });
   };
 
   if (loading) {

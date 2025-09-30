@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,7 @@ interface MakerExploreSectionProps {
 export const MakerExploreSection = ({
   profile
 }: MakerExploreSectionProps) => {
+  const location = useLocation();
   const [activeView, setActiveView] = useState<'map' | 'list' | 'makers'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
@@ -45,6 +47,13 @@ export const MakerExploreSection = ({
     role
   } = useRole();
   const { t } = useAppTranslation();
+
+  // Check if we should set active view from navigation state
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
 
   // Auto-fetch published events and makers when component mounts
   useEffect(() => {
@@ -463,47 +472,6 @@ export const MakerExploreSection = ({
                                 <Eye className="w-3 h-3 mr-2" />
                                 Se profil
                               </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Kommende Arrangementer under makers list */}
-              <div className="px-3 md:px-4 py-3 bg-background border-t border-border/10 shrink-0">
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-sm font-semibold text-foreground">Kommende Arrangementer</h3>
-                    <Badge variant="outline" className="text-xs bg-muted">
-                      {filteredEvents.length}
-                    </Badge>
-                  </div>
-                  
-                  {filteredEvents.length > 0 && (
-                    <div className="space-y-2">
-                      {filteredEvents.slice(0, 3).map((event) => (
-                        <Card 
-                          key={event.id}
-                          className="cursor-pointer hover:shadow-sm transition-shadow"
-                          onClick={() => handleViewEvent(event.id)}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium truncate">{event.title}</h4>
-                                {event.venue && (
-                                  <p className="text-xs text-muted-foreground truncate">{event.venue}</p>
-                                )}
-                              </div>
-                              <Badge variant="secondary" className="shrink-0 text-xs">
-                                {event.event_date && new Date(event.event_date).toLocaleDateString('no-NO', { 
-                                  day: 'numeric', 
-                                  month: 'short'
-                                })}
-                              </Badge>
                             </div>
                           </CardContent>
                         </Card>
