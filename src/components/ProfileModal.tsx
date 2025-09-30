@@ -207,7 +207,7 @@ export const ProfileModal = ({
               <TabsList className={`grid w-full ${currentUserRole === 'artist' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="about">{t('aboutMe')}</TabsTrigger>
                 <TabsTrigger value="portfolio">{t('filterPortfolio')}</TabsTrigger>
-                {currentUserRole === 'artist' && <TabsTrigger value="concepts">{t('My Offers')}</TabsTrigger>}
+                {currentUserRole === 'artist' && <TabsTrigger value="concepts">{t('Mine tilbud)}</TabsTrigger>}
                 <TabsTrigger value="events">{t('filterEvents')}</TabsTrigger>
               </TabsList>
             </div>
