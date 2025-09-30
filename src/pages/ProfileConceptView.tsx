@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ConceptCard from '@/components/ConceptCard';
 
 const ProfileConceptView = () => {
   const { userId, conceptId } = useParams();
@@ -17,13 +17,12 @@ const ProfileConceptView = () => {
   useEffect(() => {
     const loadConcept = async () => {
       try {
-        // Hent kun grunnleggende concept-data (publikumsvennlig)
         const { data: conceptData, error } = await supabase
           .from('concepts')
-          .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement, available_dates')
+          .select('*')
           .eq('id', conceptId)
           .eq('is_published', true)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         
@@ -84,16 +83,47 @@ const ProfileConceptView = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tilbake til profil
             </Button>
-            <div>
-              <h1 className="text-xl font-bold">Tilbudsdetaljer</h1>
-            </div>
           </div>
         </div>
       </header>
 
-      {/* Concept details */}
+      {/* Fullscreen concept details */}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <ConceptCard concept={concept} showActions={false} />
+        <Card>
+          <CardContent className="pt-6 space-y-6">
+            {/* Title */}
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{concept.title}</h1>
+              {concept.description && (
+                <p className="text-muted-foreground text-lg">{concept.description}</p>
+              )}
+            </div>
+
+            {/* Pricing info */}
+            <div className="flex flex-wrap gap-2">
+              {concept.price && !concept.door_deal && !concept.price_by_agreement && (
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  {concept.price} kr
+                </Badge>
+              )}
+              {concept.door_deal && concept.door_percentage && (
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  {concept.door_percentage}% av dørinntekter
+                </Badge>
+              )}
+              {concept.price_by_agreement && (
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  Pris ved avtale
+                </Badge>
+              )}
+              {concept.expected_audience && (
+                <Badge variant="secondary" className="text-lg px-4 py-2">
+                  {concept.expected_audience} publikum
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
