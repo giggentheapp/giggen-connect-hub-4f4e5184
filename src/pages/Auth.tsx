@@ -22,7 +22,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<'maker' | 'goer'>('goer');
+  const [role, setRole] = useState<'artist' | 'audience'>('audience');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -227,27 +227,27 @@ const Auth = () => {
                   <Label>{t('selectUserType')}</Label>
                   <RadioGroup
                     value={role}
-                    onValueChange={(value) => setRole(value as 'maker' | 'goer')}
+                    onValueChange={(value) => setRole(value as 'artist' | 'audience')}
                     disabled={isSubmitting}
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="maker" id="maker" />
-                      <Label htmlFor="maker" className="font-normal">
+                      <RadioGroupItem value="artist" id="artist" />
+                      <Label htmlFor="artist" className="font-normal">
                         <div>
-                          <div className="font-medium">{t('giggenMaker')}</div>
+                          <div className="font-medium">{t('artistOrganizer')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('makerDescription')}
+                            {t('artistDescription')}
                           </div>
                         </div>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="goer" id="goer" />
-                      <Label htmlFor="goer" className="font-normal">
+                      <RadioGroupItem value="audience" id="audience" />
+                      <Label htmlFor="audience" className="font-normal">
                         <div>
-                          <div className="font-medium">{t('giggenGoer')}</div>
+                          <div className="font-medium">{t('audience')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('goerDescription')}
+                            {t('audienceDescription')}
                           </div>
                         </div>
                       </Label>

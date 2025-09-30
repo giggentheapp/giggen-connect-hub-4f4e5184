@@ -53,10 +53,10 @@ export const appTranslations = {
     signupSuccess: "Registrering vellykket",
     checkEmailConfirm: "Sjekk e-posten din for å bekrefte kontoen.",
     createStrongPassword: "Opprett et sterkt passord...",
-    giggenMaker: "GiggenMaker",
-    giggenGoer: "GiggenGoer",
-    makerDescription: "Kan opprette tilbud, laste opp portefølje og administrere arrangementer",
-    goerDescription: "Kan se portefølje, arrangementer og profilene til Makers",
+    artistOrganizer: "Artist/Arrangør",
+    audience: "Publikum",
+    artistDescription: "Kan opprette tilbud, laste opp porteføljer og administrere arrangementer",
+    audienceDescription: "Kan utforske og finne konserter og arrangementer",
 
     // Settings page
     settingsDescription: "Administrer dine app-innstillinger og preferanser",
@@ -552,10 +552,10 @@ export const appTranslations = {
     signupSuccess: "Signup successful",
     checkEmailConfirm: "Check your email to confirm your account.",
     createStrongPassword: "Create a strong password...",
-    giggenMaker: "GiggenMaker",
-    giggenGoer: "GiggenGoer",
-    makerDescription: "Can create offers, upload portfolio and manage events",
-    goerDescription: "Can view portfolio, events and Maker profiles",
+    artistOrganizer: "Artist/Organizer",
+    audience: "Audience",
+    artistDescription: "Can create offers, upload portfolios and manage events",
+    audienceDescription: "Can explore and find concerts and events",
 
     // Settings page
     settingsDescription: "Manage your app settings and preferences",
