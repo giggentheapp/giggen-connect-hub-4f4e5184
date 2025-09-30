@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Banknote, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
-import { EventModal } from "@/components/EventModal";
 
 interface EventMarketItem {
   id: string;
@@ -18,10 +18,9 @@ interface EventMarketItem {
 }
 
 export const EventMarket = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<EventMarketItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   useEffect(() => {
     loadPublicEvents();
@@ -65,15 +64,8 @@ export const EventMarket = () => {
   };
 
   const handleEventClick = (eventId: string) => {
-    console.log('EventMarket: Event card clicked', { eventId });
-    setSelectedEventId(eventId);
-    setIsEventModalOpen(true);
-  };
-
-  const handleEventModalClose = () => {
-    console.log('EventMarket: Event modal closed');
-    setIsEventModalOpen(false);
-    setSelectedEventId(null);
+    console.log('EventMarket: Navigating to public event view', { eventId });
+    navigate(`/arrangement/${eventId}`);
   };
 
   if (loading) {
@@ -155,12 +147,6 @@ export const EventMarket = () => {
           ))}
         </div>
       )}
-
-      <EventModal 
-        isOpen={isEventModalOpen}
-        onClose={handleEventModalClose}
-        eventId={selectedEventId}
-      />
     </div>
   );
 };
