@@ -167,58 +167,12 @@ export const UnifiedSidePanel = ({
     }
   };
   const navItems = getNavigationItems();
-  return <div className={cn("relative min-h-screen", className)}>
-      {/* Desktop Sidebar - Sticky collapsed */}
-      {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
-          <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
-            {/* Logo */}
-            <div className="p-6 border-b border-border">
-              <div className="flex items-center justify-center">
-                <img 
-                  src={giggenLogo} 
-                  alt="GIGGEN Logo" 
-                  className="w-20 h-20 object-contain drop-shadow-lg"
-                />
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="p-3 space-y-2 flex-1">
-              {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            return <div key={item.id}>
-                    <button 
-                      onClick={() => handleNavigation(item.id)} 
-                      className={cn('w-full flex items-center justify-center p-3 rounded-lg transition-colors', isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
-                      title={item.label}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </button>
-                  </div>;
-          })}
-            </nav>
-          </div>
-        </div>}
-
-      {/* Main Content */}
-      <main className={cn("flex-1 overflow-hidden", !isMobile ? 'ml-16' : '', isMobile ? 'pb-16' : '')}>
+  return <div className={cn("relative min-h-screen w-full", className)}>
+      {/* Main Content - Navigation is now global in App.tsx */}
+      <main className="flex-1 overflow-hidden w-full">
         <div className="h-full w-full">
           {renderActiveSection()}
         </div>
       </main>
-
-      {/* Mobile Navigation */}
-      {isMobile && <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-          <div className="flex items-center justify-around h-16 px-2">
-            {navItems.map(item => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
-          return <button key={item.id} onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
-                  <Icon className="h-5 w-5" />
-                </button>;
-        })}
-          </div>
-        </nav>}
     </div>;
 };
