@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Save, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText } from 'lucide-react';
 import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
@@ -821,10 +821,49 @@ export default function CreateOffer() {
                   </div>
                 </div>
 
-                <div>
-                  <span className="text-sm text-muted-foreground">Portfolio filer:</span>
-                  <p className="font-medium">{conceptData.portfolio_files.length} fil(er)</p>
-                </div>
+                {/* Portfolio Files Preview */}
+                {conceptData.portfolio_files.length > 0 && (
+                  <div>
+                    <span className="text-sm text-muted-foreground block mb-2">Portfolio filer:</span>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {conceptData.portfolio_files.map((file, index) => (
+                        <div key={file.tempId || file.id || index} className="bg-muted/30 rounded-lg overflow-hidden">
+                          {file.file_type === 'image' && (
+                            <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
+                              <img 
+                                src={file.publicUrl || file.file_url} 
+                                alt={file.title || file.filename}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          {file.file_type === 'video' && (
+                            <div className="aspect-video bg-black">
+                              <video 
+                                controls 
+                                className="w-full h-full"
+                                src={file.publicUrl || file.file_url}
+                              />
+                            </div>
+                          )}
+                          {file.file_type === 'audio' && (
+                            <div className="p-3 flex items-center justify-center">
+                              <Music className="h-8 w-8 text-primary" />
+                            </div>
+                          )}
+                          {file.file_type === 'document' && (
+                            <div className="p-3 flex items-center justify-center">
+                              <FileText className="h-8 w-8 text-primary" />
+                            </div>
+                          )}
+                          <div className="p-2 border-t">
+                            <p className="text-xs font-medium truncate">{file.title || file.filename}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <span className="text-sm text-muted-foreground">Tilgjengelighet:</span>
