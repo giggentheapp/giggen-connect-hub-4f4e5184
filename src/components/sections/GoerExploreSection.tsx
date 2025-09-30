@@ -370,7 +370,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
                   <Card 
                     key={event.id}
                     className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-                    onClick={() => navigate(`/event/${event.id}`)}
+                    onClick={() => navigate(`/arrangement/${event.id}`)}
                   >
                     <CardContent className="p-4">
                       <div className="space-y-3">

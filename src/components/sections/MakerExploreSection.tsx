@@ -157,8 +157,8 @@ export const MakerExploreSection = ({
     }
   }, [publishedEvents, makers, searchTerm]);
   const handleViewEvent = (eventId: string) => {
-    // Navigate to event details page
-    window.location.href = `/booking/${eventId}/summary`;
+    // Navigate to public event view
+    window.location.href = `/arrangement/${eventId}`;
   };
   return (
     <div className="w-full h-full bg-background">
