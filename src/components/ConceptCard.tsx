@@ -266,11 +266,21 @@ const ConceptCard = ({
                   {t('conceptCard.indefiniteByAgreement')}
                 </Badge>
                ) : (
-                Array.isArray(availableDates) ? availableDates.filter(date => date).map((date: string, index: number) => (
-                   <Badge key={date || `date-${index}`} variant="outline">
-                     {format(new Date(date), 'dd.MM.yyyy')}
-                   </Badge>
-                 )) : <></>
+                Array.isArray(availableDates) ? availableDates.filter(date => date).map((date: string, index: number) => {
+                  try {
+                    const dateObj = new Date(date);
+                    if (isNaN(dateObj.getTime())) {
+                      return null;
+                    }
+                    return (
+                      <Badge key={date || `date-${index}`} variant="outline">
+                        {format(dateObj, 'dd.MM.yyyy')}
+                      </Badge>
+                    );
+                  } catch {
+                    return null;
+                  }
+                }).filter(Boolean) : <></>
                )}
             </div>
           </div>
@@ -379,7 +389,16 @@ const ConceptCard = ({
                       {file.title || file.filename}
                     </h5>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {file.file_type} • {format(new Date(file.created_at), 'dd.MM.yy')}
+                      {file.file_type}
+                      {file.created_at && (() => {
+                        try {
+                          const dateObj = new Date(file.created_at);
+                          if (!isNaN(dateObj.getTime())) {
+                            return ` • ${format(dateObj, 'dd.MM.yy')}`;
+                          }
+                        } catch {}
+                        return '';
+                      })()}
                     </p>
                   </div>
                 </div>
