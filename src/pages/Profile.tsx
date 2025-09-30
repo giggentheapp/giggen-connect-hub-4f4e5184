@@ -6,11 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Lightbulb, Music, File, Calendar, MapPin, Users } from 'lucide-react';
+import { User, Mail, Phone, Eye, EyeOff, Settings, ArrowLeft, Music, File, Calendar, MapPin, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ConceptCard from '@/components/ConceptCard';
 import { BookingRequest } from '@/components/BookingRequest';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { ProfileTechSpecsViewer } from '@/components/ProfileTechSpecsViewer';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
@@ -56,10 +54,6 @@ const Profile = () => {
   const {
     toast
   } = useToast();
-  const {
-    concepts,
-    loading: conceptsLoading
-  } = useUserConcepts(userId);
   const {
     files: portfolioFiles,
     loading: portfolioLoading
@@ -330,35 +324,6 @@ const Profile = () => {
             </CardContent>
           </Card>}
 
-        {/* Konsepter - Only visible when Artist views Artist profile */}
-        {profile.role === 'artist' && currentUser?.role === 'artist' && <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                Tilbud
-              </CardTitle>
-              <CardDescription>
-                {isOwnProfile ? "Dine publiserte tilbud" : "Publiserte tilbud"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {conceptsLoading ? <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-muted-foreground">Laster tilbud...</span>
-                </div> : Array.isArray(concepts) && concepts.length > 0 ? <div className="space-y-6">
-                  {concepts.filter(concept => concept && concept.id).map(concept => <ConceptCard key={concept.id} concept={concept} showActions={false} showConceptActions={!isOwnProfile} onConceptAction={action => {
-              if (action === 'deleted' || action === 'rejected') {
-                window.location.reload();
-              }
-            }} />)}
-                </div> : <div className="text-center py-12">
-                  <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    {isOwnProfile ? "Ingen publiserte tilbud ennå. Opprett ditt første tilbud i dashboardet." : "Ingen publiserte tilbud"}
-                  </p>
-                </div>}
-            </CardContent>
-          </Card>}
 
         {/* Kommende arrangementer - Show for both own profile and when viewing others */}
         <Card>
