@@ -17,6 +17,7 @@ interface ConceptViewModalProps {
   initialConceptIndex?: number;
   showConceptActions?: boolean;
   onConceptAction?: (conceptId: string, action: 'rejected' | 'deleted') => void;
+  viewMode?: 'public' | 'owner'; // NEW: default 'public'
 }
 interface Concept {
   id: string;
@@ -64,7 +65,8 @@ export const ConceptViewModal = ({
   conceptIds,
   initialConceptIndex = 0,
   showConceptActions = false,
-  onConceptAction
+  onConceptAction,
+  viewMode = 'public'
 }: ConceptViewModalProps) => {
   const [currentConceptIndex, setCurrentConceptIndex] = useState(initialConceptIndex);
   const [concept, setConcept] = useState<Concept | null>(null);
@@ -224,8 +226,8 @@ export const ConceptViewModal = ({
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>}
-              {/* Concept Actions */}
-              {showConceptActions && concept && <div className="flex gap-2">
+              {/* Concept Actions - Only in owner mode */}
+              {viewMode === 'owner' && showConceptActions && concept && <div className="flex gap-2">
                   
                   
                 </div>}
@@ -247,9 +249,10 @@ export const ConceptViewModal = ({
                     <CardTitle className="text-xl">{concept.title}</CardTitle>
                     {concept.description && <p className="text-muted-foreground mt-2">{concept.description}</p>}
                   </div>
-                  <Badge variant={concept.is_published ? "default" : "secondary"}>
+                  {/* Status badge - Only in owner mode */}
+                  {viewMode === 'owner' && <Badge variant={concept.is_published ? "default" : "secondary"}>
                     {concept.is_published ? 'Publisert' : 'Utkast'}
-                  </Badge>
+                  </Badge>}
                 </div>
               </CardHeader>
               
@@ -354,8 +357,8 @@ export const ConceptViewModal = ({
                 </CardContent>
               </Card>}
 
-            {/* Tech Spec and Hospitality Rider Files */}
-            {(techSpecFile || hospitalityRiderFile) && <Card>
+            {/* Tech Spec and Hospitality Rider Files - Only in owner mode */}
+            {viewMode === 'owner' && (techSpecFile || hospitalityRiderFile) && <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
@@ -397,16 +400,16 @@ export const ConceptViewModal = ({
                 </CardContent>
               </Card>}
 
-            {/* Created date */}
-            <div className="text-xs text-muted-foreground pt-2 border-t text-center">
+            {/* Created date - Only in owner mode */}
+            {viewMode === 'owner' && <div className="text-xs text-muted-foreground pt-2 border-t text-center">
               Tilbud opprettet: {format(new Date(concept.created_at), "dd.MM.yyyy HH:mm")}
-            </div>
+            </div>}
           </div> : <div className="text-center py-8 text-muted-foreground">
             Tilbud ikke funnet
           </div>}
       </DialogContent>
       
-      {/* Concept Actions Dialog */}
-      {showConceptActions && concept && <ConceptActionsDialog isOpen={showActionsDialog} onClose={() => setShowActionsDialog(false)} onReject={handleReject} onDelete={handleDelete} conceptTitle={concept.title} isLoading={actionLoading} />}
+      {/* Concept Actions Dialog - Only in owner mode */}
+      {viewMode === 'owner' && showConceptActions && concept && <ConceptActionsDialog isOpen={showActionsDialog} onClose={() => setShowActionsDialog(false)} onReject={handleReject} onDelete={handleDelete} conceptTitle={concept.title} isLoading={actionLoading} />}
     </Dialog>;
 };
