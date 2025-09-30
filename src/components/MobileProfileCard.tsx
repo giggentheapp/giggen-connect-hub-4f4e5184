@@ -429,7 +429,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 size="lg"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
-                <span>{t('bookNow')}</span>
+                <span>{t('Book nå')}</span>
               </Button>
             )}
             <Button
