@@ -183,9 +183,11 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         .select('id, title, description, event_date, venue')
         .eq('receiver_id', userId)
         .eq('status', 'upcoming')
-        .eq('is_public_after_approval', true);
+        .eq('is_public_after_approval', true)
+        .eq('approved_by_sender', true)
+        .eq('approved_by_receiver', true);
 
-      console.log('Events data:', data);
+      console.log('Events data for profile:', data);
       console.log('Events error:', error);
 
       if (error) throw error;
@@ -380,10 +382,12 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                             <h4 className="font-semibold text-sm">{event.title}</h4>
                             <Badge variant="outline" className="text-xs">
                               <Calendar className="w-3 h-3 mr-1" />
-                              {new Date(event.event_date).toLocaleDateString('no-NO', {
-                                day: 'numeric',
-                                month: 'short'
-                              })}
+                              {event.event_date 
+                                ? new Date(event.event_date).toLocaleDateString('no-NO', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                  })
+                                : 'Ved avtale'}
                             </Badge>
                           </div>
                           {event.venue && (
