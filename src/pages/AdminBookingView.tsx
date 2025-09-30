@@ -117,7 +117,7 @@ const AdminBookingView = () => {
   const isOwner = currentUserId === booking.sender_id || currentUserId === booking.receiver_id;
   const isSender = currentUserId === booking.sender_id;
   const otherParty = isSender ? receiverProfile : senderProfile;
-  const makerProfile = receiverProfile?.role === 'maker' ? receiverProfile : senderProfile;
+  const makerProfile = receiverProfile?.role === 'artist' ? receiverProfile : senderProfile;
 
   const getStatusColor = (status: string) => {
     switch (status) {

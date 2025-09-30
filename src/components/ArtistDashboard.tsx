@@ -1,13 +1,11 @@
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 import { UserProfile } from '@/types/auth';
 
-interface GoerViewProps {
+interface ArtistDashboardProps {
   profile: UserProfile;
 }
 
-export const GoerView = ({ profile }: GoerViewProps) => {
-  console.log('🎯 GoerView initialized with profile:', profile);
-
+export const ArtistDashboard = ({ profile }: ArtistDashboardProps) => {
   return (
     <UnifiedSidePanel 
       profile={profile}

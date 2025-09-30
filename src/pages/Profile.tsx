@@ -129,9 +129,9 @@ const Profile = () => {
         } as ProfileData;
         setProfile(typedProfileData);
 
-        // Fetch privacy settings only if user is a maker
-        if (profileData.role === 'maker') {
-          console.log('📄 Profile: Fetching settings for maker');
+        // Fetch privacy settings only if user is an artist
+        if (profileData.role === 'artist') {
+          console.log('📄 Profile: Fetching settings for artist');
           const {
             data: settingsData
           } = await supabase.from('profile_settings').select('*').eq('maker_id', userId).maybeSingle();

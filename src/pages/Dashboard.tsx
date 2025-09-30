@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
-import { MakerDashboard } from '@/components/MakerDashboard';
-import { GoerView } from '@/components/GoerView';
+import { ArtistDashboard } from '@/components/ArtistDashboard';
+import { AudienceView } from '@/components/AudienceView';
 import { Link } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
@@ -147,9 +147,9 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
       {/* Role-specific dashboard with integrated navigation */}
       {profile.role === 'artist' ? (
-        <MakerDashboard profile={profile} />
+        <ArtistDashboard profile={profile} />
       ) : (
-        <GoerView profile={profile} />
+        <AudienceView profile={profile} />
       )}
     </div>
   );

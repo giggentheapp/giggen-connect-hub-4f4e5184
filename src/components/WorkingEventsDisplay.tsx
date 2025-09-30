@@ -21,19 +21,19 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
   const navigate = useNavigate();
   // Determine which data source to use based on viewer role and ownership
   const isOwnProfile = currentUserId === profile.user_id;
-  const isGoerViewing = viewerRole === 'audience' && !isOwnProfile;
+  const isAudienceViewing = viewerRole === 'audience' && !isOwnProfile;
   
   // Use different data sources based on the viewing context
-  const { bookings, loading: bookingsLoading } = useBookings(isGoerViewing ? undefined : profile.user_id);
-  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isGoerViewing ? profile.user_id : '');
+  const { bookings, loading: bookingsLoading } = useBookings(isAudienceViewing ? undefined : profile.user_id);
+  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isAudienceViewing ? profile.user_id : '');
   
   // Select the appropriate data source
-  const loading = isGoerViewing ? publicLoading : bookingsLoading;
-  const eventsData = isGoerViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
+  const loading = isAudienceViewing ? publicLoading : bookingsLoading;
+  const eventsData = isAudienceViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
 
   console.log('🎭 WorkingEventsDisplay render:', {
     isOwnProfile,
-    isGoerViewing,
+    isAudienceViewing,
     viewerRole,
     eventsCount: eventsData.length,
     loading
@@ -58,7 +58,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
       <div className="text-center py-8">
         <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
         <p className="text-muted-foreground">
-          {isGoerViewing 
+          {isAudienceViewing 
             ? 'Ingen publiserte arrangementer for øyeblikket'
             : (isOwnProfile ? 'Du har ingen publiserte arrangementer' : 'Ingen publiserte arrangementer')
           }

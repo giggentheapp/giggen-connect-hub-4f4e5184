@@ -1,11 +1,13 @@
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 import { UserProfile } from '@/types/auth';
 
-interface MakerDashboardProps {
+interface AudienceViewProps {
   profile: UserProfile;
 }
 
-export const MakerDashboard = ({ profile }: MakerDashboardProps) => {
+export const AudienceView = ({ profile }: AudienceViewProps) => {
+  console.log('🎯 AudienceView initialized with profile:', profile);
+
   return (
     <UnifiedSidePanel 
       profile={profile}

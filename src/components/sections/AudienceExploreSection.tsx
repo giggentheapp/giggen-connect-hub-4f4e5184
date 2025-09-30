@@ -22,13 +22,13 @@ interface FilterOptions {
 
 import { UserProfile } from '@/types/auth';
 
-interface GoerExploreSectionProps {
+interface AudienceExploreSectionProps {
   profile: UserProfile;
   viewMode?: 'map' | 'list';
   exploreType?: 'makers' | 'events';
 }
 
-export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: GoerExploreSectionProps) => {
+export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType = 'makers' }: AudienceExploreSectionProps) => {
   const [listViewMode, setListViewMode] = useState<'grid' | 'list'>('grid');
   const [makers, setMakers] = useState<any[]>([]);
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);

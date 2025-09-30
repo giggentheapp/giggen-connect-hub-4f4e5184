@@ -13,8 +13,8 @@ import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
 // Import sections
-import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
-import { MakerExploreSection } from '@/components/sections/MakerExploreSection';
+import { AudienceExploreSection } from '@/components/sections/AudienceExploreSection';
+import { ArtistExploreSection } from '@/components/sections/ArtistExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
 import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
@@ -119,9 +119,9 @@ export const UnifiedSidePanel = ({
     switch (activeSection) {
       case 'explore':
         if (isAudience) {
-          return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
+          return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
         } else if (isArtist) {
-          return <MakerExploreSection profile={profile} />;
+          return <ArtistExploreSection profile={profile} />;
         }
         return null;
       // Loading state
@@ -159,9 +159,9 @@ export const UnifiedSidePanel = ({
         return <AdminSettingsSection profile={profile} />;
       default:
         if (isAudience) {
-          return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
+          return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
         } else if (isArtist) {
-          return <MakerExploreSection profile={profile} />;
+          return <ArtistExploreSection profile={profile} />;
         }
         return null;
     }

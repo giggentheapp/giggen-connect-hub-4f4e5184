@@ -12,12 +12,12 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { MobileProfileCard } from '@/components/MobileProfileCard';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
-interface MakerExploreSectionProps {
+interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
-export const MakerExploreSection = ({
+export const ArtistExploreSection = ({
   profile
-}: MakerExploreSectionProps) => {
+}: ArtistExploreSectionProps) => {
   const location = useLocation();
   const [activeView, setActiveView] = useState<'map' | 'list' | 'makers'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
