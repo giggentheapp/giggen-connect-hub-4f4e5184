@@ -31,7 +31,6 @@ import Bookings from "./pages/Bookings";
 import PublicEventView from "./pages/PublicEventView";
 import AdminBookingView from "./pages/AdminBookingView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { MobileNavigation } from "./components/navigation/MobileNavigation";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +41,6 @@ const App = () => (
         <RoleProvider>
           <MobileLayoutOptimizer>
             <ErrorBoundary>
-            <div className="pb-16 md:pb-0">
             <Toaster />
             <Sonner />
             <Routes>
@@ -71,8 +69,6 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <FeedbackButton />
-            <MobileNavigation />
-            </div>
           </ErrorBoundary>
         </MobileLayoutOptimizer>
       </RoleProvider>
