@@ -632,18 +632,18 @@ export const UserSettings = ({
       {/* Social Media Settings - Only for Artists */}
       {profileData.role === 'artist' && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
-                <Share2 className="h-5 w-5 text-primary" />
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="flex items-center gap-2 md:gap-3 text-base md:text-lg">
+              <div className="p-1.5 md:p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
+                <Share2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
               {t('socialMedia')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs md:text-sm">
               {t('addSocialMediaProfiles')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 md:space-y-4 px-3 md:px-6 pb-3 md:pb-6">
             {/* Instagram */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-primary">
@@ -756,8 +756,8 @@ export const UserSettings = ({
               />
             </div>
 
-            <Button onClick={handleProfileSubmit} disabled={loading} className="w-full">
-              <Save className="h-4 w-4 mr-2" />
+            <Button onClick={handleProfileSubmit} disabled={loading} className="w-full h-9 md:h-10 text-sm">
+              <Save className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5 md:mr-2" />
               {loading ? t('savingSocialMedia') : t('saveSocialMedia')}
             </Button>
           </CardContent>
@@ -767,22 +767,22 @@ export const UserSettings = ({
       {/* Consolidated Privacy Settings for Artists */}
       {profileData.role === 'artist' && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+              <Shield className="h-4 w-4 md:h-5 md:w-5" />
               {t('visibilityAndPrivacy')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs md:text-sm">
               {t('controlWhoSees')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 md:space-y-6 px-3 md:px-6 pb-3 md:pb-6">
             {/* Master Profile Toggle */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="space-y-1">
-                  <Label className="text-base font-medium">{t('publicProfile')}</Label>
-                  <p className="text-sm text-muted-foreground">
+            <div className="space-y-3 md:space-y-4">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div className="space-y-0.5 md:space-y-1">
+                  <Label className="text-sm md:text-base font-medium">{t('publicProfile')}</Label>
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     {t('makeProfileVisible')}
                   </p>
                 </div>
@@ -811,13 +811,13 @@ export const UserSettings = ({
               {/* Profile Content Settings - Only shown if public profile is enabled */}
               {privacySettings.show_profile_to_goers && (
                 <>
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">{t('profileContent')}</h4>
+                  <div className="space-y-3 md:space-y-4">
+                    <h4 className="text-xs md:text-sm font-medium text-foreground">{t('profileContent')}</h4>
                     
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('biographyDescription')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('biographyDescription')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('showBiographyToAll')}
                          </p>
                       </div>
@@ -829,9 +829,9 @@ export const UserSettings = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('portfolioWork')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('portfolioWork')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('showWorkExamples')}
                          </p>
                       </div>
@@ -846,9 +846,9 @@ export const UserSettings = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('eventsAndConcerts')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('eventsAndConcerts')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('showUpcomingEvents')}
                          </p>
                       </div>
@@ -863,9 +863,9 @@ export const UserSettings = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label>{t('technicalSpecifications')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                        <Label className="text-xs md:text-sm">{t('technicalSpecifications')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('shareTechRequirements')}
                          </p>
                       </div>
@@ -877,13 +877,13 @@ export const UserSettings = ({
                     </div>
                   </div>
 
-                  <div className="border-t pt-4 space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">{t('locationAndContact')}</h4>
+                  <div className="border-t pt-3 md:pt-4 space-y-3 md:space-y-4">
+                    <h4 className="text-xs md:text-sm font-medium text-foreground">{t('locationAndContact')}</h4>
                     
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('showOnMap')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('showOnMap')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('showLocationOnMap')}
                          </p>
                       </div>
@@ -900,9 +900,9 @@ export const UserSettings = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('publicAddress')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('publicAddress')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('makeAddressVisible')}
                          </p>
                       </div>
@@ -919,9 +919,9 @@ export const UserSettings = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('contactInfoTitle')}</Label>
-                         <p className="text-sm text-muted-foreground">
+                      <div className="space-y-0.5 md:space-y-1 flex-1 pr-2">
+                         <Label className="text-xs md:text-sm">{t('contactInfoTitle')}</Label>
+                         <p className="text-xs md:text-sm text-muted-foreground">
                            {t('shareContactInfo')}
                          </p>
                       </div>
@@ -933,11 +933,11 @@ export const UserSettings = ({
                     </div>
                   </div>
 
-                  <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-start gap-3">
-                      <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                      <div className="text-sm text-blue-800 dark:text-blue-200">
-                         <p className="font-medium mb-1">{t('securityFirst')}</p>
+                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 md:p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-2 md:gap-3">
+                      <Shield className="h-4 w-4 md:h-5 md:w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div className="text-xs md:text-sm text-blue-800 dark:text-blue-200">
+                         <p className="font-medium mb-0.5 md:mb-1">{t('securityFirst')}</p>
                          <p>{t('sensitiveInfoNote')}</p>
                       </div>
                     </div>
@@ -951,16 +951,16 @@ export const UserSettings = ({
 
       {/* Password Change */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
+        <CardHeader className="pb-3 md:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <Key className="h-4 w-4 md:h-5 md:w-5" />
             {t('changePassword')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             Oppdater ditt passord for økt sikkerhet
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 md:space-y-4 px-3 md:px-6 pb-3 md:pb-6">
           <div>
             <Label htmlFor="new-password">Nytt passord</Label>
             <Input
@@ -981,7 +981,7 @@ export const UserSettings = ({
               placeholder="Gjenta passordet"
             />
           </div>
-          <Button onClick={handlePasswordChange} disabled={loading || !newPassword}>
+          <Button onClick={handlePasswordChange} disabled={loading || !newPassword} className="h-9 md:h-10 text-sm">
             {loading ? t('updating') : t('changePassword')}
           </Button>
         </CardContent>
@@ -989,18 +989,18 @@ export const UserSettings = ({
 
       {/* Logout */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LogOut className="h-5 w-5" />
+        <CardHeader className="pb-3 md:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <LogOut className="h-4 w-4 md:h-5 md:w-5" />
             {t('logOut')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             {t('signOutOfAccount')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full">
-            <LogOut className="h-4 w-4 mr-2" />
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full h-9 md:h-10 text-sm">
+            <LogOut className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5 md:mr-2" />
             {loading ? t('loggingOut') : t('logOut')}
           </Button>
         </CardContent>
@@ -1008,20 +1008,20 @@ export const UserSettings = ({
 
       {/* Delete Account */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trash2 className="h-5 w-5" />
+        <CardHeader className="pb-3 md:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
             {t('deleteAccount')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             Permanent sletting av brukerdata. Denne handlingen kan ikke angres.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
+              <Button variant="outline" className="w-full h-9 md:h-10 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive">
+                <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5 md:mr-2" />
                 {t('deleteAccount')}
               </Button>
             </AlertDialogTrigger>
