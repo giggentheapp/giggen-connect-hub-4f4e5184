@@ -65,7 +65,6 @@ export const ProfileSection = ({
             {t('myPortfolio')}
           </CardTitle>
           <CardDescription className="text-xs md:text-sm">
-            {t('howPortfolioAppears')}
           </CardDescription>
         </CardHeader>
         <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
