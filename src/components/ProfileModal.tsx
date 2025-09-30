@@ -322,6 +322,6 @@ export const ProfileModal = ({
       </DialogContent>
 
       {/* Concept View Modal */}
-      {selectedConceptId && <ConceptViewModal isOpen={isConceptModalOpen} onClose={handleConceptModalClose} conceptIds={[selectedConceptId]} initialConceptIndex={0} showConceptActions={false} />}
+      {selectedConceptId && <ConceptViewModal isOpen={isConceptModalOpen} onClose={handleConceptModalClose} conceptIds={[selectedConceptId]} initialConceptIndex={0} showConceptActions={false} viewMode="public" />}
     </Dialog>;
 };
