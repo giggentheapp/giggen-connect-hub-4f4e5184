@@ -97,7 +97,8 @@ export const MakerExploreSection = ({
       }
 
       console.log('✅ Fetched published events:', data?.length || 0);
-      console.log('📋 Events data:', data);
+      console.log('📋 Events data:', JSON.stringify(data, null, 2));
+      console.log('🔍 First event:', data?.[0]);
       setPublishedEvents(data || []);
       setFilteredEvents(data || []);
     } catch (err) {

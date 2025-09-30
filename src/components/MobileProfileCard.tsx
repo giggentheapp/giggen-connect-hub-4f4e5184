@@ -178,17 +178,20 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     if (!userId) return;
     
     try {
+      console.log('🎪 Fetching events for profile userId:', userId);
+      
       const { data, error } = await supabase
         .from('bookings')
-        .select('id, title, description, event_date, venue')
+        .select('id, title, description, event_date, venue, time')
         .eq('receiver_id', userId)
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true)
         .eq('approved_by_sender', true)
         .eq('approved_by_receiver', true);
 
-      console.log('Events data for profile:', data);
-      console.log('Events error:', error);
+      console.log('📋 Events data for profile:', data);
+      console.log('❌ Events error:', error);
+      console.log('🔢 Number of events:', data?.length || 0);
 
       if (error) throw error;
       setEvents(data || []);
@@ -421,7 +424,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         )}
 
         {/* Bottom action bar - Always visible with proper z-index and padding */}
-        <div className="px-4 py-3 pb-28 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+        <div className="px-4 py-3 pb-32 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
           <div className="flex gap-2 w-full">
             {ismaker && (
               <Button
