@@ -250,7 +250,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                 </TabsTrigger>
                 <TabsTrigger value="makers" className="text-sm">
                   <Users className="w-4 h-4 mr-2" />
-                  {t('makersInNetwork')}
+                  {t('Artists and organizers')}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

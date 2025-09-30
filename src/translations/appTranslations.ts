@@ -207,6 +207,7 @@ export const appTranslations = {
 
     // Profile Page Cards
     myPortfolio: "Min portefølje",
+    howPortfolioAppears: "Slik vises porteføljen din til andre makere",
     noPortfolioUploaded: "Ingen porteføljefiler lastet opp. Gå til innstillinger for å laste opp.",
     myPublishedOffers: "Mine publiserte tilbud",
     yourVisibleOffers: "Tilbudene dine som er synlige for andre makere",
@@ -221,7 +222,7 @@ export const appTranslations = {
     searchPlaceholder: "Søk etter musikere og spillesteder",
     filter: "Filter",
     mapButton: "Kart",
-    makersInNetwork: "Makers i nettverket",
+    makersInNetwork: "Artister og arrangører",
     makersFound: "makers funnet",
     viewProfile: "Se profil",
     book: "Book",
