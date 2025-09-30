@@ -40,37 +40,52 @@ const Dashboard = () => {
       setUser(session?.user ?? null);
       
       if (!session?.user) {
-        console.log('❌ Dashboard: No user, redirecting to auth');
+        console.log('❌ Dashboard: No session, redirecting to auth');
         navigate('/auth');
+        setLoading(false);
         return;
       }
 
       try {
-        console.log('👤 Dashboard: Loading profile for user:', session.user.id);
+        // CRITICAL: Verify user exists in auth.users before attempting profile operations
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
         
-        // Load user profile with maybeSingle to handle missing profiles
-        const { data: profileData, error } = await supabase
+        if (authError || !authUser) {
+          console.error('❌ Dashboard: User not authenticated in auth.users:', authError);
+          navigate('/auth');
+          setLoading(false);
+          return;
+        }
+
+        console.log('✅ Dashboard: User verified in auth.users:', authUser.id);
+        
+        // Now safely load/create profile using verified user ID
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', session.user.id)
+          .eq('user_id', authUser.id)
           .maybeSingle();
 
-        if (error) {
-          console.error('❌ Dashboard: Error loading profile:', error);
+        if (profileError) {
+          console.error('❌ Dashboard: Error loading profile:', profileError);
           toast({
             title: t('profileLoadError'),
-            description: error.message,
+            description: profileError.message,
             variant: "destructive",
           });
-        } else if (!profileData) {
-          // Profile doesn't exist - create one automatically
-          console.log('⚠️ Dashboard: Profile not found, creating new profile...');
+          setLoading(false);
+          return;
+        }
+
+        if (!profileData) {
+          // Profile doesn't exist - create one for the verified user
+          console.log('⚠️ Dashboard: Profile not found, creating new profile for verified user...');
           
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert({
-              user_id: session.user.id,
-              display_name: session.user.email?.split('@')[0] || 'User',
+              user_id: authUser.id, // Use verified user ID
+              display_name: authUser.email?.split('@')[0] || 'User',
               role: 'audience' // Default role
             })
             .select()
@@ -92,7 +107,7 @@ const Dashboard = () => {
           setProfile(profileData as UserProfile);
         }
       } catch (err) {
-        console.error('❌ Dashboard: Unexpected error loading profile:', err);
+        console.error('❌ Dashboard: Unexpected error:', err);
         toast({
           title: t('profileLoadError'),
           description: 'Unexpected error occurred',
