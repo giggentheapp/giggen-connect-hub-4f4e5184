@@ -371,17 +371,14 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
       case 0: 
         return conceptData.title.trim().length > 0;
       case 1: 
-        const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
-        const pricingValid = conceptData.pricing_type === 'by_agreement' || 
-                            (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0 && parseFloat(conceptData.price) > 0) ||
-                            (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0 && parseFloat(conceptData.door_percentage) > 0);
-        return audienceValid && pricingValid;
+        // For draft saving, we just need title - audience and pricing are optional for draft
+        return true;
       case 2: 
         return true; // Portfolio is optional
       case 3: 
         return true; // Tech spec is optional
       case 4: 
-        return conceptData.available_dates.length > 0 || conceptData.is_indefinite;
+        return true; // Dates are optional for draft
       case 5: 
         return true; // Preview step
       default: 
@@ -389,11 +386,22 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
     }
   };
 
+  const canPublish = () => {
+    // For publishing, require full validation
+    const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
+    const pricingValid = conceptData.pricing_type === 'by_agreement' || 
+                        (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0 && parseFloat(conceptData.price) > 0) ||
+                        (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0 && parseFloat(conceptData.door_percentage) > 0);
+    const datesValid = conceptData.available_dates.length > 0 || conceptData.is_indefinite;
+    
+    return conceptData.title.trim().length > 0 && audienceValid && pricingValid && datesValid;
+  };
+
   if (!isOpen) return null;
 
   if (loadingExisting) {
     return (
-      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="w-full min-h-screen flex items-center justify-center p-4 bg-background">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -407,8 +415,8 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
   }
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="w-full min-h-screen bg-background p-4 md:p-8">
+      <Card className="w-full max-w-6xl mx-auto">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>
@@ -837,7 +845,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
                     setSaveAsPublished(false);
                     setShowConfirmDialog(true);
                   }}
-                  disabled={saving}
+                  disabled={saving || !conceptData.title.trim()}
                   variant="outline"
                   className="flex-1"
                 >
@@ -849,7 +857,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId, editConceptI
                     setSaveAsPublished(true);
                     setShowConfirmDialog(true);
                   }}
-                  disabled={saving}
+                  disabled={saving || !canPublish()}
                   className="flex-1"
                 >
                   <Eye className="h-4 w-4 mr-2" />

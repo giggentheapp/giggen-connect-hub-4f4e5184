@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Lightbulb, Plus, ChevronDown, FileText } from 'lucide-react';
-import { ConceptWizard } from '@/components/ConceptWizard';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
@@ -18,9 +18,8 @@ export const AdminConceptsSection = ({
   profile
 }: AdminConceptsSectionProps) => {
   const { t } = useAppTranslation();
-  const [showWizard, setShowWizard] = useState(false);
+  const navigate = useNavigate();
   const [showDrafts, setShowDrafts] = useState(false);
-  const [editConceptId, setEditConceptId] = useState<string | undefined>(undefined);
   const {
     concepts,
     loading,
@@ -56,13 +55,11 @@ export const AdminConceptsSection = ({
   };
 
   const handleEdit = (conceptId: string) => {
-    setEditConceptId(conceptId);
-    setShowWizard(true);
+    navigate(`/create-offer?edit=${conceptId}`);
   };
 
-  const handleCloseWizard = () => {
-    setShowWizard(false);
-    setEditConceptId(undefined);
+  const handleCreate = () => {
+    navigate('/create-offer');
   };
   return <div className="space-y-6">
 
@@ -70,7 +67,7 @@ export const AdminConceptsSection = ({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>{t('My Offers')}</span>
-            <Button onClick={() => setShowWizard(true)}>
+            <Button onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
               {t('newOffer')}
             </Button>
@@ -95,7 +92,7 @@ export const AdminConceptsSection = ({
                   <p className="text-muted-foreground mb-4">
                     {t('noOffersCreated')}
                   </p>
-                  <Button onClick={() => setShowWizard(true)}>
+                  <Button onClick={handleCreate}>
                     <Plus className="h-4 w-4 mr-2" />
                     {t('createFirstOffer')}
                   </Button>
@@ -154,13 +151,5 @@ export const AdminConceptsSection = ({
           </Card>
         </Collapsible>
       )}
-
-      <ConceptWizard 
-        isOpen={showWizard} 
-        onClose={handleCloseWizard} 
-        onSuccess={handleSuccess} 
-        userId={profile.user_id}
-        editConceptId={editConceptId}
-      />
     </div>;
 };
