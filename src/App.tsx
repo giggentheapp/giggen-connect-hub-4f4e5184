@@ -28,6 +28,7 @@ import BookingRequestPage from "./pages/BookingRequestPage";
 import BookingAgreementSummary from "./pages/BookingAgreementSummary";
 import Bookings from "./pages/Bookings";
 import PublicEventView from "./pages/PublicEventView";
+import AdminBookingView from "./pages/AdminBookingView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/events" element={<UpcomingEvents />} />
               <Route path="/arrangement/:id" element={<PublicEventView />} />
               <Route path="/bookings" element={<Bookings />} />
+              <Route path="/bookings/:id" element={<AdminBookingView />} />
               <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
               <Route path="/booking/:bookingId/edit" element={<BookingEdit />} />
               <Route path="/booking/:bookingId/summary" element={<BookingAgreementSummary />} />
