@@ -72,11 +72,12 @@ export const MakerExploreSection = ({
           sender_id,
           receiver_id,
           status,
-          is_public_after_approval
+          is_public_after_approval,
+          both_parties_approved
         `)
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true)
-        .gte('event_date', new Date().toISOString())
+        .eq('both_parties_approved', true)
         .order('event_date', { ascending: true });
 
       if (error) {
@@ -85,6 +86,7 @@ export const MakerExploreSection = ({
       }
 
       console.log('✅ Fetched published events:', data?.length || 0);
+      console.log('📋 Events data:', data);
       setPublishedEvents(data || []);
       setFilteredEvents(data || []);
     } catch (err) {
@@ -168,7 +170,7 @@ export const MakerExploreSection = ({
                 onClick={() => setActiveView('list')}
                 className="shrink-0"
               >
-                <Users className="w-4 h-4" />
+                <Calendar className="w-4 h-4" />
               </Button>
               <Button
                 variant={activeView === 'makers' ? 'default' : 'outline'}
@@ -176,7 +178,7 @@ export const MakerExploreSection = ({
                 onClick={() => setActiveView('makers')}
                 className="shrink-0"
               >
-                <User className="w-4 h-4" />
+                <Users className="w-4 h-4" />
               </Button>
             </div>
             
