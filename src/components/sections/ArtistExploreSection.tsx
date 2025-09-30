@@ -369,7 +369,7 @@ export const ArtistExploreSection = ({
               <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-base md:text-lg font-semibold text-foreground">Makers i nettverket</h2>
+                    <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>
                     <Badge variant="outline" className="text-xs bg-muted">
                       {loading ? '...' : filteredMakers.length}
                     </Badge>
