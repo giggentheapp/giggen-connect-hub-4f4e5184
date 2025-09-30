@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -26,15 +26,13 @@ export const ArtistExploreSection = ({
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [profileCardUserId, setProfileCardUserId] = useState<string | null>(null);
   const [bookingMaker, setBookingMaker] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const {
-    role
-  } = useRole();
+  const { role } = useRole();
   const { t } = useAppTranslation();
+  const navigate = useNavigate();
 
   // Check if we should set active view from navigation state
   useEffect(() => {
@@ -413,7 +411,7 @@ export const ArtistExploreSection = ({
                         <Card 
                           key={maker.id} 
                           className="group border bg-background hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer"
-                          onClick={() => setProfileCardUserId(maker.user_id)}
+                          onClick={() => navigate(`/profile/${maker.user_id}`)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-center gap-4">
@@ -452,7 +450,7 @@ export const ArtistExploreSection = ({
                               <Button 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setProfileCardUserId(maker.user_id);
+                                  navigate(`/profile/${maker.user_id}`);
                                 }}
                                 variant="outline" 
                                 size="sm"
@@ -473,14 +471,6 @@ export const ArtistExploreSection = ({
           </div>
         )}
       </div>
-      
-      {/* Mobile Profile Card - Sticky bottom */}
-      {profileCardUserId && (
-        <MobileProfileCard 
-          userId={profileCardUserId}
-          onClose={() => setProfileCardUserId(null)}
-        />
-      )}
       
       {/* Booking Request Modal */}
       {bookingMaker && (

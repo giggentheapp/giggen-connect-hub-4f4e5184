@@ -8,7 +8,6 @@ import { MapPin, Users, Eye, Search, Music, Grid, List, Calendar } from 'lucide-
 import { useRole } from '@/contexts/RoleProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ProfileModal } from '@/components/ProfileModal';
 import { MakerCard } from '@/components/MakerCard';
 import { SearchFilters } from '@/components/SearchFilters';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -43,8 +42,6 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
     hasEvents: false,
     isVerified: false,
   });
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'makers' | 'events'>('events');
   const navigate = useNavigate();
   const { isAudience, isArtist } = useRole();
@@ -229,9 +226,8 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
     setFilteredMakers(filteredAndSearchedMakers);
   }, [filteredAndSearchedMakers]);
 
-  const handleViewProfile = (makerId: string) => {
-    setSelectedUserId(makerId);
-    setProfileModalOpen(true);
+  const handleViewProfile = (userId: string) => {
+    navigate(`/profile/${userId}`);
   };
 
   const handleBookMaker = (makerId: string) => {
@@ -467,13 +463,6 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           </div>
         </div>
       </div>
-      
-      {/* Profile Modal */}
-      <ProfileModal 
-        isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-        userId={selectedUserId}
-      />
     </div>
   );
 };
