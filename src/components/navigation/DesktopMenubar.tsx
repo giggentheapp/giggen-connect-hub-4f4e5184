@@ -113,13 +113,13 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
         isExpanded ? "w-64" : "w-16"
       )}>
         {/* Logo */}
-        <div className="p-4 border-b border-border">
+        <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 flex items-center justify-center">
+            <div className="w-20 h-20 flex items-center justify-center">
               <img 
                 src={giggenLogo} 
                 alt="GIGGEN Logo" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain drop-shadow-lg"
               />
             </div>
             {isExpanded && (
@@ -127,7 +127,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN Logo" 
-                  className="h-16 object-contain"
+                  className="h-20 object-contain drop-shadow-lg"
                 />
               </div>
             )}

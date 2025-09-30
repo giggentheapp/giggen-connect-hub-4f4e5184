@@ -48,12 +48,12 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
 
   return (
     <aside className="hidden md:flex flex-col w-60 bg-sidebar-background border-r border-sidebar-border h-full">
-      <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
+      <div className="p-6 border-b border-sidebar-border">
+        <div className="flex items-center justify-center">
           <img 
             src={giggenLogo} 
             alt="GIGGEN Logo" 
-            className="w-16 h-16 object-contain"
+            className="w-20 h-20 object-contain drop-shadow-lg"
           />
         </div>
       </div>

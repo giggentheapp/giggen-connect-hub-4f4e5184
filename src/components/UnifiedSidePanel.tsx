@@ -187,12 +187,12 @@ export const UnifiedSidePanel = ({
       {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
           <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
             {/* Logo */}
-            <div className="p-4 border-b border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-center">
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN Logo" 
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain drop-shadow-lg"
                 />
               </div>
             </div>

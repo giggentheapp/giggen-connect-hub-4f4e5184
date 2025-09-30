@@ -147,11 +147,11 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md mobile-optimized">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-8">
             <img 
               src={giggenLogo} 
               alt="GIGGEN" 
-              className="h-24 w-auto md:h-20"
+              className="h-32 w-auto md:h-28 drop-shadow-2xl"
             />
           </div>
           <CardDescription className="text-base md:text-sm">

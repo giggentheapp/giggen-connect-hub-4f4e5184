@@ -29,7 +29,7 @@ const LandingPage = () => {
               <img 
                 src={giggenLogo} 
                 alt="GIGGEN" 
-                className="h-12 w-auto md:h-10"
+                className="h-16 w-auto md:h-14"
               />
             </div>
             
@@ -85,6 +85,15 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
+          {/* Large Logo */}
+          <div className="mb-12 flex justify-center">
+            <img 
+              src={giggenLogo} 
+              alt="GIGGEN" 
+              className="h-32 w-auto md:h-40 lg:h-48 drop-shadow-2xl animate-fade-in"
+            />
+          </div>
+          
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent-orange to-accent-pink bg-clip-text text-transparent leading-tight">
               {t('heroTitle')}
@@ -247,11 +256,11 @@ const LandingPage = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-6">
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN" 
-                  className="h-10 w-auto"
+                  className="h-14 w-auto"
                 />
               </div>
               <div className="space-y-2 text-muted-foreground">
