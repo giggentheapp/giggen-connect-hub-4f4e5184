@@ -12,7 +12,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
-import { ConceptViewModal } from '@/components/ConceptViewModal';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileData {
   id: string;
@@ -47,8 +47,7 @@ const Profile = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [concepts, setConcepts] = useState<any[]>([]);
-  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
-  const [isConceptModalOpen, setIsConceptModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
 
@@ -152,13 +151,7 @@ const Profile = () => {
   }, []);
 
   const handleConceptClick = (conceptId: string) => {
-    setSelectedConceptId(conceptId);
-    setIsConceptModalOpen(true);
-  };
-
-  const handleConceptModalClose = () => {
-    setIsConceptModalOpen(false);
-    setSelectedConceptId(null);
+    navigate(`/profile/${userId}/concept/${conceptId}`);
   };
 
   if (loading) {
@@ -347,18 +340,6 @@ const Profile = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Concept View Modal */}
-      {selectedConceptId && (
-        <ConceptViewModal
-          isOpen={isConceptModalOpen}
-          onClose={handleConceptModalClose}
-          conceptIds={[selectedConceptId]}
-          initialConceptIndex={0}
-          showConceptActions={false}
-          viewMode="public"
-        />
-      )}
     </div>
   );
 };

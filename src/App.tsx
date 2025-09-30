@@ -19,6 +19,7 @@ import Map from "./pages/Map";
 import FeedbackButton from "./components/FeedbackButton";
 
 import ConceptView from "./pages/ConceptView";
+import ProfileConceptView from "./pages/ProfileConceptView";
 import UpcomingEvents from "./pages/UpcomingEvents";
 import NotFound from "./pages/NotFound";
 import BookingEdit from "./pages/BookingEdit";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile/:userId" element={<Profile />} />
+              <Route path="/profile/:userId/concept/:conceptId" element={<ProfileConceptView />} />
               <Route path="/map" element={<Map />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/about" element={<About />} />
