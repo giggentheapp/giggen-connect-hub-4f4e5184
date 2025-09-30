@@ -272,6 +272,8 @@ export const appTranslations = {
     newOffer: "nytt tilbud",
     noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
     createFirstOffer: "Opprett ditt første tilbud",
+    drafts: "Utkast",
+    draftsDescription: "Uferdige tilbud som ikke er publisert ennå",
 
     // Concept Wizard
     conceptWizard: {
@@ -343,7 +345,10 @@ export const appTranslations = {
       },
       navigation: {
         previous: "Forrige",
-        next: "Neste"
+        next: "Neste",
+        saveDraft: "Lagre utkast",
+        saving: "Lagrer...",
+        publishing: "Publiserer..."
       },
       confirmDialog: {
         title: "Er du sikker?",
@@ -771,6 +776,8 @@ export const appTranslations = {
     newOffer: "new offer",
     noOffersCreated: "You haven't created any offers yet",
     createFirstOffer: "Create your first offer",
+    drafts: "Drafts",
+    draftsDescription: "Unfinished offers that have not been published yet",
 
     // Concept Wizard
     conceptWizard: {
@@ -842,7 +849,10 @@ export const appTranslations = {
       },
       navigation: {
         previous: "Previous",
-        next: "Next"
+        next: "Next",
+        saveDraft: "Save Draft",
+        saving: "Saving...",
+        publishing: "Publishing..."
       },
       confirmDialog: {
         title: "Are you sure?",

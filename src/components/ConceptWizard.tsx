@@ -748,13 +748,27 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
               {t('conceptWizard.navigation.previous')}
             </Button>
             
-            <Button
-              onClick={nextStep}
-              disabled={!isStepValid()}
-            >
-              {t('conceptWizard.navigation.next')}
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
+            <div className="flex gap-2">
+              {/* Save Draft button available on all steps except first */}
+              {currentStep > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSave(false)}
+                  disabled={saving || !conceptData.title.trim()}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {saving ? t('conceptWizard.navigation.saving') : t('conceptWizard.navigation.saveDraft')}
+                </Button>
+              )}
+              
+              <Button
+                onClick={nextStep}
+                disabled={!isStepValid()}
+              >
+                {t('conceptWizard.navigation.next')}
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </div>
         )}
       </Card>
