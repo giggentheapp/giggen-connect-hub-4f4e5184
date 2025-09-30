@@ -29,7 +29,7 @@ const LandingPage = () => {
               <img 
                 src={giggenLogo} 
                 alt="GIGGEN" 
-                className="h-8 w-auto"
+                className="h-12 w-auto md:h-10"
               />
             </div>
             
@@ -251,7 +251,7 @@ const LandingPage = () => {
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN" 
-                  className="h-6 w-auto"
+                  className="h-10 w-auto"
                 />
               </div>
               <div className="space-y-2 text-muted-foreground">

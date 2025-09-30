@@ -192,7 +192,7 @@ export const UnifiedSidePanel = ({
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN Logo" 
-                  className="w-8 h-8 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </div>
             </div>

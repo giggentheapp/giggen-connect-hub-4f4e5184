@@ -115,7 +115,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
         {/* Logo */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 flex items-center justify-center">
+            <div className="w-16 h-16 flex items-center justify-center">
               <img 
                 src={giggenLogo} 
                 alt="GIGGEN Logo" 
@@ -127,7 +127,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
                 <img 
                   src={giggenLogo} 
                   alt="GIGGEN Logo" 
-                  className="h-8 object-contain"
+                  className="h-16 object-contain"
                 />
               </div>
             )}
