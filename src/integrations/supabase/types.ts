@@ -1045,12 +1045,12 @@ export type Database = {
         Args: { target_user_id: string; viewer_user_id?: string }
         Returns: boolean
       }
-      is_booking_public: {
-        Args: { booking_uuid: string }
+      is_artist: {
+        Args: { user_uuid: string }
         Returns: boolean
       }
-      is_maker: {
-        Args: { user_uuid: string }
+      is_booking_public: {
+        Args: { booking_uuid: string }
         Returns: boolean
       }
       log_sensitive_access: {
@@ -1095,7 +1095,7 @@ export type Database = {
         | "approved_by_sender"
         | "approved_by_receiver"
         | "approved_by_both"
-      user_role: "maker" | "goer"
+      user_role: "artist" | "audience"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1234,7 +1234,7 @@ export const Constants = {
         "approved_by_receiver",
         "approved_by_both",
       ],
-      user_role: ["maker", "goer"],
+      user_role: ["artist", "audience"],
     },
   },
 } as const
