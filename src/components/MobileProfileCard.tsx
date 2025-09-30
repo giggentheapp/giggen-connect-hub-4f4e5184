@@ -417,7 +417,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         )}
 
         {/* Bottom action bar - Always visible with proper z-index and padding */}
-        <div className="px-4 py-3 pb-20 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+        <div className="px-4 py-3 pb-28 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
           <div className="flex gap-2 w-full">
             {ismaker && (
               <Button
