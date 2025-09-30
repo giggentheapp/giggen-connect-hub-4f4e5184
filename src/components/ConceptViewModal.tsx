@@ -87,7 +87,7 @@ export const ConceptViewModal = ({
     if (isOpen && conceptIds.length > 0) {
       loadConceptData(conceptIds[currentConceptIndex]);
     }
-  }, [isOpen, currentConceptIndex, conceptIds]);
+  }, [isOpen, currentConceptIndex, conceptIds, viewMode]);
   const loadConceptData = async (conceptId: string) => {
     if (!conceptId) return;
     setLoading(true);
@@ -111,8 +111,8 @@ export const ConceptViewModal = ({
         setConceptFiles(filesData || []);
       }
 
-      // Load tech spec file if reference exists
-      if (conceptData.tech_spec_reference) {
+      // Load tech spec file ONLY if viewMode is 'owner'
+      if (viewMode === 'owner' && conceptData.tech_spec_reference) {
         const {
           data: techSpecData,
           error: techSpecError
@@ -126,8 +126,8 @@ export const ConceptViewModal = ({
         setTechSpecFile(null);
       }
 
-      // Load hospitality rider file if reference exists  
-      if (conceptData.hospitality_rider_reference) {
+      // Load hospitality rider ONLY if viewMode is 'owner'
+      if (viewMode === 'owner' && conceptData.hospitality_rider_reference) {
         const {
           data: hospitalityRiderData,
           error: hospitalityRiderError
