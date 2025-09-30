@@ -73,12 +73,14 @@ export const MakerExploreSection = ({
           receiver_id,
           status,
           is_public_after_approval,
-          both_parties_approved
+          approved_by_sender,
+          approved_by_receiver
         `)
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true)
-        .eq('both_parties_approved', true)
-        .order('event_date', { ascending: true });
+        .eq('approved_by_sender', true)
+        .eq('approved_by_receiver', true)
+        .order('event_date', { ascending: true, nullsFirst: false });
 
       if (error) {
         console.error('❌ Error fetching events:', error);
@@ -282,14 +284,17 @@ export const MakerExploreSection = ({
                                     <h3 className="font-semibold text-foreground truncate">
                                       {event.title}
                                     </h3>
-                                    <Badge variant="secondary" className="shrink-0">
-                                      <Calendar className="w-3 h-3 mr-1" />
-                                      {event.event_date && new Date(event.event_date).toLocaleDateString('no-NO', { 
-                                        day: 'numeric', 
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })}
-                                    </Badge>
+                                     <Badge variant="secondary" className="shrink-0">
+                                       <Calendar className="w-3 h-3 mr-1" />
+                                       {event.event_date 
+                                         ? new Date(event.event_date).toLocaleDateString('no-NO', { 
+                                             day: 'numeric', 
+                                             month: 'short',
+                                             year: 'numeric'
+                                           })
+                                         : 'Ved avtale'
+                                       }
+                                     </Badge>
                                   </div>
                                   
                                   {event.time && (
