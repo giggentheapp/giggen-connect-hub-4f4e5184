@@ -12,6 +12,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
+import { ConceptViewModal } from '@/components/ConceptViewModal';
 
 interface ProfileData {
   id: string;
@@ -46,6 +47,8 @@ const Profile = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [concepts, setConcepts] = useState<any[]>([]);
+  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
+  const [isConceptModalOpen, setIsConceptModalOpen] = useState(false);
   const { toast } = useToast();
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
 
@@ -147,6 +150,16 @@ const Profile = () => {
       <File className="h-8 w-8 text-muted-foreground" />
     </div>;
   }, []);
+
+  const handleConceptClick = (conceptId: string) => {
+    setSelectedConceptId(conceptId);
+    setIsConceptModalOpen(true);
+  };
+
+  const handleConceptModalClose = () => {
+    setIsConceptModalOpen(false);
+    setSelectedConceptId(null);
+  };
 
   if (loading) {
     return <div className="flex justify-center p-8">Laster profil...</div>;
@@ -275,7 +288,11 @@ const Profile = () => {
             <CardContent>
               <div className="space-y-4">
                 {concepts.map((concept) => (
-                  <Card key={concept.id} className="bg-muted/30">
+                  <Card 
+                    key={concept.id} 
+                    className="bg-muted/30 cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleConceptClick(concept.id)}
+                  >
                     <CardContent className="pt-6">
                       <h3 className="font-semibold text-lg mb-2">{concept.title}</h3>
                       {concept.description && (
@@ -330,6 +347,18 @@ const Profile = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Concept View Modal */}
+      {selectedConceptId && (
+        <ConceptViewModal
+          isOpen={isConceptModalOpen}
+          onClose={handleConceptModalClose}
+          conceptIds={[selectedConceptId]}
+          initialConceptIndex={0}
+          showConceptActions={false}
+          viewMode="public"
+        />
+      )}
     </div>
   );
 };
