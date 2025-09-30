@@ -9,22 +9,7 @@ import { MakerDashboard } from '@/components/MakerDashboard';
 import { GoerView } from '@/components/GoerView';
 import { Link } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-  created_at: string;
-  updated_at: string;
-}
+import { UserProfile } from '@/types/auth';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -79,7 +64,7 @@ const Dashboard = () => {
           });
         } else {
           console.log('✅ Dashboard: Profile loaded successfully:', profileData);
-          setProfile(profileData);
+          setProfile(profileData as UserProfile);
         }
       } catch (err) {
         console.error('❌ Dashboard: Unexpected error loading profile:', err);
@@ -161,7 +146,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
       {/* Role-specific dashboard with integrated navigation */}
-      {profile.role === 'maker' ? (
+      {profile.role === 'artist' ? (
         <MakerDashboard profile={profile} />
       ) : (
         <GoerView profile={profile} />

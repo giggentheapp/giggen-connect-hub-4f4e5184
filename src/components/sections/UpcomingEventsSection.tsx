@@ -9,20 +9,7 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 
 interface UpcomingEvent {
   id: string;

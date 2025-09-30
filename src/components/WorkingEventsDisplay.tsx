@@ -7,26 +7,13 @@ import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
 import { useNavigate } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 
 interface WorkingEventsDisplayProps {
   profile: UserProfile;
   showSensitiveInfo: boolean; // true for own profile, false for others
   currentUserId?: string; // Add current user ID to determine ownership
-  viewerRole?: 'maker' | 'goer'; // Add viewer role to determine data source
+  viewerRole?: 'artist' | 'audience'; // Add viewer role to determine data source
 }
 
 export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId, viewerRole }: WorkingEventsDisplayProps) => {
@@ -34,7 +21,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
   const navigate = useNavigate();
   // Determine which data source to use based on viewer role and ownership
   const isOwnProfile = currentUserId === profile.user_id;
-  const isGoerViewing = viewerRole === 'goer' && !isOwnProfile;
+  const isGoerViewing = viewerRole === 'audience' && !isOwnProfile;
   
   // Use different data sources based on the viewing context
   const { bookings, loading: bookingsLoading } = useBookings(isGoerViewing ? undefined : profile.user_id);

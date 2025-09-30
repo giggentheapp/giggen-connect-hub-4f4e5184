@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import giggenLogo from '@/assets/giggen-logo.png';
+import { UserProfile } from '@/types/auth';
 
 // Import sections
 import { GoerExploreSection } from '@/components/sections/GoerExploreSection';
@@ -22,22 +23,6 @@ import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { UserSettings } from '@/components/UserSettings';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'artist' | 'audience';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-  created_at: string;
-  updated_at: string;
-}
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;

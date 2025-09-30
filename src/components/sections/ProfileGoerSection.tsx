@@ -2,19 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Eye, MapPin, Mail, Phone } from 'lucide-react';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'artist' | 'audience';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 interface ProfileGoerSectionProps {
   profile: UserProfile;
   currentUserId?: string;

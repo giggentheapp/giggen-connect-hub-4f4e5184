@@ -7,19 +7,7 @@ import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 interface AdminConceptsSectionProps {
   profile: UserProfile;
 }

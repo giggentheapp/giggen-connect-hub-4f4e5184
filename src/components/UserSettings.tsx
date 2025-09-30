@@ -16,21 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { AvatarCropModal } from '@/components/AvatarCropModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-  social_media_links?: any;
-}
+import { UserProfile } from '@/types/auth';
 
 interface ProfileSettings {
   show_about: boolean;
@@ -106,8 +92,8 @@ export const UserSettings = ({
       
       if (profileError) throw profileError;
       
-      if (currentProfile) {
-        setProfileData(currentProfile);
+        if (currentProfile) {
+          setProfileData(currentProfile as UserProfile);
 
         // Parse contact_info if it exists
         if (currentProfile.contact_info && typeof currentProfile.contact_info === 'object') {
@@ -133,8 +119,8 @@ export const UserSettings = ({
         }
       }
 
-      // Fetch profile settings for makers
-      if (profile.role === 'maker') {
+      // Fetch profile settings for artists
+      if (profile.role === 'artist') {
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
           .select('*')
@@ -148,7 +134,7 @@ export const UserSettings = ({
         if (settings) {
           setProfileSettings(settings);
         } else {
-          // Create default settings for maker if none exist
+          // Create default settings for artist if none exist
           const defaultSettings = {
             show_about: false,
             show_contact: false,
@@ -190,7 +176,7 @@ export const UserSettings = ({
       setLoading(true);
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(updates as any)
         .eq('user_id', profile.user_id);
       
       if (error) throw error;
@@ -216,7 +202,7 @@ export const UserSettings = ({
   };
 
   const updateProfileSettings = async (updates: Partial<ProfileSettings>) => {
-    if (profile.role !== 'maker' || !profileSettings) return;
+    if (profile.role !== 'artist' || !profileSettings) return;
     
     try {
       setLoading(true);
@@ -249,7 +235,7 @@ export const UserSettings = ({
   };
 
   const updatePrivacySettings = async (updates: Partial<PrivacySettings>) => {
-    if (profile.role !== 'maker') return;
+    if (profile.role !== 'artist') return;
     
     try {
       setLoading(true);
@@ -527,8 +513,8 @@ export const UserSettings = ({
               )}
             </div>
 
-            {/* Only show bio, address, and contact info for makers */}
-            {profileData.role === 'maker' && (
+            {/* Only show bio, address, and contact info for artists */}
+            {profileData.role === 'artist' && (
               <>
                 <div>
                   <Label htmlFor="bio">{t('biography')}</Label>
@@ -643,8 +629,8 @@ export const UserSettings = ({
         </CardContent>
       </Card>
 
-      {/* Social Media Settings - Only for Makers */}
-      {profileData.role === 'maker' && (
+      {/* Social Media Settings - Only for Artists */}
+      {profileData.role === 'artist' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
@@ -778,8 +764,8 @@ export const UserSettings = ({
         </Card>
       )}
 
-      {/* Consolidated Privacy Settings for Makers */}
-      {profileData.role === 'maker' && (
+      {/* Consolidated Privacy Settings for Artists */}
+      {profileData.role === 'artist' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

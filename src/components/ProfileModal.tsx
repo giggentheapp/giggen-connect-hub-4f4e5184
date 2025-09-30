@@ -289,7 +289,7 @@ export const ProfileModal = ({
                          return <p className="text-muted-foreground italic">{t('eventsNotPublic')}</p>;
                        }
                       
-                      return (
+                       return (
                         <WorkingEventsDisplay 
                           profile={{
                             id: profile.id,
@@ -302,7 +302,9 @@ export const ProfileModal = ({
                             latitude: profile.latitude || null,
                             longitude: profile.longitude || null,
                             is_address_public: profile.is_address_public,
-                            contact_info: profile.contact_info
+                            contact_info: profile.contact_info,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
                           }} 
                           showSensitiveInfo={isOwnProfile} 
                           currentUserId={currentUserId}

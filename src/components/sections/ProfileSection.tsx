@@ -7,21 +7,7 @@ import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-  social_media_links?: any;
-}
+import { UserProfile } from '@/types/auth';
 interface ProfileSectionProps {
   profile: UserProfile;
 }

@@ -4,20 +4,7 @@ import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSecti
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 
 const UpcomingEvents = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -36,7 +23,7 @@ const UpcomingEvents = () => {
           .eq('user_id', user.id)
           .single();
 
-        setProfile(profileData);
+        setProfile(profileData as UserProfile);
       } catch (error) {
         console.error('Error loading profile:', error);
       } finally {

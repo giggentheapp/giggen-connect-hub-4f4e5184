@@ -15,19 +15,7 @@ import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
 import { SafeBookingsSection } from '@/components/SafeBookingsSection';
 import { useNavigate, useLocation } from 'react-router-dom';
-interface UserProfile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  bio: string | null;
-  role: 'maker' | 'goer';
-  avatar_url: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  is_address_public: boolean;
-  contact_info: any;
-}
+import { UserProfile } from '@/types/auth';
 interface BookingsSectionProps {
   profile: UserProfile;
 }

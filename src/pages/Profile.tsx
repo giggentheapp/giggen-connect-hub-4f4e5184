@@ -24,12 +24,14 @@ interface ProfileData {
   bio: string | null;
   contact_info: any;
   avatar_url: string | null;
-  role: 'maker' | 'goer';
+  role: 'artist' | 'audience';
   address: string | null;
   latitude: number | null;
   longitude: number | null;
   is_address_public: boolean;
   social_media_links?: any;
+  created_at: string;
+  updated_at: string;
 }
 interface ProfileSettings {
   show_about: boolean;
@@ -122,7 +124,8 @@ const Profile = () => {
         // Cast the role to proper type since RPC returns string
         const typedProfileData = {
           ...profileData,
-          role: profileData.role as 'maker' | 'goer'
+          role: profileData.role as 'artist' | 'audience',
+          updated_at: profileData.created_at // Use created_at as fallback for updated_at
         } as ProfileData;
         setProfile(typedProfileData);
 
@@ -254,7 +257,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          {!isOwnProfile && profile.role === 'maker' && currentUser && currentUserProfile?.role === 'maker' && (
+          {!isOwnProfile && profile.role === 'artist' && currentUser && currentUserProfile?.role === 'artist' && (
             <BookingRequest 
               receiverId={profile.user_id} 
               receiverName={profile.display_name} 
@@ -327,8 +330,8 @@ const Profile = () => {
             </CardContent>
           </Card>}
 
-        {/* Konsepter - Only visible when Maker views Maker profile */}
-        {profile.role === 'maker' && currentUser?.role === 'maker' && <Card>
+        {/* Konsepter - Only visible when Artist views Artist profile */}
+        {profile.role === 'artist' && currentUser?.role === 'artist' && <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
@@ -380,8 +383,8 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Bookinger - Only visible when Maker views their own or another Maker's profile */}
-        {profile.role === 'maker' && currentUser?.role === 'maker' && <Card>
+        {/* Bookinger - Only visible when Artist views their own or another Artist's profile */}
+        {profile.role === 'artist' && currentUser?.role === 'artist' && <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
