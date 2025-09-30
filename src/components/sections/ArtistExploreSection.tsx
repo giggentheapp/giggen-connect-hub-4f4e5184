@@ -9,7 +9,6 @@ import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar, User } from
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
-import { MobileProfileCard } from '@/components/MobileProfileCard';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 interface ArtistExploreSectionProps {
