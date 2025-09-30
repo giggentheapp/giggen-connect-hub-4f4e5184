@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar } from 'lucide-react';
+import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar, User } from 'lucide-react';
 import { useRole } from '@/contexts/RoleProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
@@ -29,9 +29,11 @@ interface MakerExploreSectionProps {
 export const MakerExploreSection = ({
   profile
 }: MakerExploreSectionProps) => {
-  const [activeTab, setActiveTab] = useState('list');
+  const [activeView, setActiveView] = useState<'map' | 'list' | 'makers'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
+  const [makers, setMakers] = useState<any[]>([]);
+  const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [profileCardUserId, setProfileCardUserId] = useState<string | null>(null);
@@ -44,9 +46,10 @@ export const MakerExploreSection = ({
   } = useRole();
   const { t } = useAppTranslation();
 
-  // Auto-fetch published events when component mounts
+  // Auto-fetch published events and makers when component mounts
   useEffect(() => {
     fetchPublishedEvents();
+    fetchMakers();
   }, []);
   const fetchPublishedEvents = async () => {
     try {
@@ -91,50 +94,100 @@ export const MakerExploreSection = ({
     }
   };
 
-  // Filter events based on search term
+  const fetchMakers = async () => {
+    try {
+      setLoading(true);
+      console.log('👥 Fetching makers...');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'maker')
+        .order('display_name', { ascending: true });
+
+      if (error) {
+        console.error('❌ Error fetching makers:', error);
+        throw error;
+      }
+
+      console.log('✅ Fetched makers:', data?.length || 0);
+      setMakers(data || []);
+      setFilteredMakers(data || []);
+    } catch (err) {
+      console.error('Error fetching makers:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter events and makers based on search term
   useEffect(() => {
     if (!searchTerm) {
       setFilteredEvents(publishedEvents);
+      setFilteredMakers(makers);
     } else {
-      const filtered = publishedEvents.filter(event =>
+      const filteredEvts = publishedEvents.filter(event =>
         event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.venue?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.address?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredEvents(filtered);
+      setFilteredEvents(filteredEvts);
+
+      const filteredMkrs = makers.filter(maker =>
+        maker.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        maker.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMakers(filteredMkrs);
     }
-  }, [publishedEvents, searchTerm]);
+  }, [publishedEvents, makers, searchTerm]);
   const handleViewEvent = (eventId: string) => {
     // Navigate to event details page
     window.location.href = `/booking/${eventId}/summary`;
   };
   return (
     <div className="w-full h-full bg-background">
-      {/* Tab Navigation Header */}
+      {/* Top Navigation Header */}
       <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-              <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-                <TabsTrigger value="map" className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('map')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="list" className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('list')}</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Icon Navigation */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={activeView === 'map' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setActiveView('map')}
+                className="shrink-0"
+              >
+                <MapPin className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={activeView === 'list' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setActiveView('list')}
+                className="shrink-0"
+              >
+                <Users className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={activeView === 'makers' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setActiveView('makers')}
+                className="shrink-0"
+              >
+                <User className="w-4 h-4" />
+              </Button>
+            </div>
             
-            {activeTab === 'list' && (
+            {/* Search Field */}
+            {(activeView === 'list' || activeView === 'makers') && (
               <div className="flex-1 max-w-md">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder={t('Search Placeholder')}
+                    placeholder="Søk"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -146,11 +199,11 @@ export const MakerExploreSection = ({
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <Tabs value={activeTab} className="h-full">
-          {/* Map Tab Content */}
-          <TabsContent value="map" className="h-full m-0 p-3 md:p-4">
+        {/* Map View */}
+        {activeView === 'map' && (
+          <div className="h-full p-3 md:p-4">
             <div className="max-w-4xl mx-auto h-full">
               <Card className="h-full flex items-center justify-center">
                 <CardContent className="p-8 text-center max-w-2xl">
@@ -164,10 +217,12 @@ export const MakerExploreSection = ({
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* List Tab Content */}
-          <TabsContent value="list" className="h-full m-0">
+        {/* List View - Events */}
+        {activeView === 'list' && (
+          <div className="h-full">
             <div className="flex-1 flex flex-col h-full">
               {/* List Header */}
               <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
@@ -301,8 +356,158 @@ export const MakerExploreSection = ({
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
+
+        {/* Makers View */}
+        {activeView === 'makers' && (
+          <div className="h-full">
+            <div className="flex-1 flex flex-col h-full">
+              {/* List Header */}
+              <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-base md:text-lg font-semibold text-foreground">Makers i nettverket</h2>
+                    <Badge variant="outline" className="text-xs bg-muted">
+                      {loading ? '...' : filteredMakers.length}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Main Content Area */}
+              <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                <div className="max-w-4xl mx-auto">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center">
+                        <User className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                        <p>Laster makers...</p>
+                      </div>
+                    </div>
+                  ) : filteredMakers.length === 0 ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center max-w-md space-y-2">
+                        <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="font-medium">
+                          {searchTerm 
+                            ? 'Ingen makers funnet'
+                            : 'Ingen makers registrert'
+                          }
+                        </p>
+                        {searchTerm && (
+                          <p className="text-sm">
+                            Prøv et annet søk
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 animate-fade-in">
+                      {filteredMakers.map((maker) => (
+                        <Card 
+                          key={maker.id} 
+                          className="group border bg-background hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer"
+                          onClick={() => setProfileCardUserId(maker.user_id)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              {/* Avatar */}
+                              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                                {maker.avatar_url ? (
+                                  <img 
+                                    src={maker.avatar_url} 
+                                    alt={maker.display_name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <User className="w-6 h-6 text-muted-foreground" />
+                                )}
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-foreground truncate">
+                                  {maker.display_name}
+                                </h3>
+                                {maker.bio && (
+                                  <p className="text-sm text-muted-foreground line-clamp-1">
+                                    {maker.bio}
+                                  </p>
+                                )}
+                                {maker.address && maker.is_address_public && (
+                                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                    <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                                    <span className="truncate">{maker.address}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* View Button */}
+                              <Button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProfileCardUserId(maker.user_id);
+                                }}
+                                variant="outline" 
+                                size="sm"
+                                className="shrink-0"
+                              >
+                                <Eye className="w-3 h-3 mr-2" />
+                                Se profil
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Kommende Arrangementer under makers list */}
+              <div className="px-3 md:px-4 py-3 bg-background border-t border-border/10 shrink-0">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-sm font-semibold text-foreground">Kommende Arrangementer</h3>
+                    <Badge variant="outline" className="text-xs bg-muted">
+                      {filteredEvents.length}
+                    </Badge>
+                  </div>
+                  
+                  {filteredEvents.length > 0 && (
+                    <div className="space-y-2">
+                      {filteredEvents.slice(0, 3).map((event) => (
+                        <Card 
+                          key={event.id}
+                          className="cursor-pointer hover:shadow-sm transition-shadow"
+                          onClick={() => handleViewEvent(event.id)}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-medium truncate">{event.title}</h4>
+                                {event.venue && (
+                                  <p className="text-xs text-muted-foreground truncate">{event.venue}</p>
+                                )}
+                              </div>
+                              <Badge variant="secondary" className="shrink-0 text-xs">
+                                {event.event_date && new Date(event.event_date).toLocaleDateString('no-NO', { 
+                                  day: 'numeric', 
+                                  month: 'short'
+                                })}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Mobile Profile Card - Sticky bottom */}
