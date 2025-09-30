@@ -97,7 +97,9 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
-      const { error } = await supabase.auth.signUp({
+      console.log('🔐 Starting signup with:', { email, displayName, role });
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -110,18 +112,58 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error('❌ Signup error:', error);
         toast({
           title: t('signupError'),
           description: error.message,
           variant: "destructive",
         });
-      } else {
+        return;
+      }
+
+      if (data.user) {
+        console.log('✅ User created successfully:', data.user.id);
+        
+        // Give the database trigger time to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Verify profile was created
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error('⚠️ Profile check error:', profileError);
+        } else if (!profile) {
+          console.warn('⚠️ Profile not created by trigger, creating manually...');
+          
+          // Fallback: Create profile manually if trigger failed
+          const { error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: data.user.id,
+              display_name: displayName || email.split('@')[0],
+              role: role
+            });
+
+          if (createError) {
+            console.error('❌ Manual profile creation failed:', createError);
+          } else {
+            console.log('✅ Profile created manually');
+          }
+        } else {
+          console.log('✅ Profile created successfully by trigger');
+        }
+        
         toast({
           title: t('signupSuccess'),
           description: t('checkEmailConfirm'),
         });
       }
     } catch (error) {
+      console.error('❌ Unexpected signup error:', error);
       toast({
         title: t('signupError'),
         description: t('unexpectedError'),
