@@ -255,11 +255,6 @@ All colors MUST be HSL.
   }
 }
 
-/* Safe area for mobile devices */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
   /* Floating Feedback Button */
   .floating-feedback-btn {
     position: fixed;

@@ -1,50 +1,44 @@
 import { cn } from '@/lib/utils';
-import { Home, Calendar, Music, User, Settings } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Compass, User, Settings, Calendar } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
-export const MobileNavigation = () => {
+interface MobileNavigationProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
+export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationProps) => {
   const { t } = useAppTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   
   const navItems = [
-    { id: 'dashboard', label: t('dashboard') || 'Hjem', icon: Home, path: '/dashboard' },
-    { id: 'bookings', label: t('bookings') || 'Bookings', icon: Calendar, path: '/bookings' },
-    { id: 'events', label: t('events') || 'Events', icon: Music, path: '/events' },
-    { id: 'profile', label: t('profile') || 'Profil', icon: User, path: '/profile' },
-    { id: 'settings', label: t('settings') || 'Innstillinger', icon: Settings, path: '/settings' },
+    { id: 'explore', label: t('explore'), icon: Compass },
+    { id: 'profile', label: t('profile'), icon: User },
+    { id: 'bookings', label: t('bookings'), icon: Calendar },
+    { id: 'admin', label: t('administration'), icon: Settings },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border z-50 md:hidden safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden">
       <div className="flex items-center justify-around h-16 px-2">
-        {navItems.map((item) => {
+        {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
           const Icon = item.icon;
-          const active = isActive(item.path);
+          const isActive = activeSection === item.id;
           
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => onSectionChange(item.id)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-0 flex-1',
-                'active:scale-95',
-                active 
-                  ? 'text-primary bg-accent scale-105' 
+                'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1',
+                isActive 
+                  ? 'text-primary bg-accent' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               )}
             >
-              <Icon className={cn(
-                'h-5 w-5 transition-transform',
-                active && 'scale-110'
-              )} />
-              <span className="text-xs font-medium truncate">{item.label}</span>
+              <Icon className="h-5 w-5" />
             </button>
           );
-        })}
+        }) : []}
       </div>
     </nav>
   );
