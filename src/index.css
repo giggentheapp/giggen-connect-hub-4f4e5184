@@ -499,6 +499,11 @@ All colors MUST be HSL.
   }
 }
 
+/* Mobile navigation safe area padding for devices with notches */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Ensure it doesn't interfere with mobile navigation */
 @media (max-width: 767px) {
   .floating-feedback-btn-mobile {
