@@ -116,7 +116,7 @@ export const MakerExploreSection = ({
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'maker')
+        .eq('role', 'artist')
         .order('display_name', { ascending: true });
 
       if (error) {

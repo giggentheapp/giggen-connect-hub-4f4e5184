@@ -861,7 +861,7 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: undefined
       }
-      get_all_visible_makers: {
+      get_all_visible_artists: {
         Args: Record<PropertyKey, never>
         Returns: {
           address: string
@@ -919,6 +919,22 @@ export type Database = {
           show_techspec: boolean
         }[]
       }
+      get_public_artists_for_explore: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          id: string
+          is_address_public: boolean
+          latitude: number
+          longitude: number
+          role: string
+          user_id: string
+        }[]
+      }
       get_public_booking_data: {
         Args: { booking_uuid: string }
         Returns: {
@@ -948,22 +964,6 @@ export type Database = {
           ticket_price: number
           title: string
           venue: string
-        }[]
-      }
-      get_public_makers_for_explore: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          address: string
-          avatar_url: string
-          bio: string
-          created_at: string
-          display_name: string
-          id: string
-          is_address_public: boolean
-          latitude: number
-          longitude: number
-          role: string
-          user_id: string
         }[]
       }
       get_public_profile: {

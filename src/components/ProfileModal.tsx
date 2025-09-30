@@ -135,8 +135,8 @@ export const ProfileModal = ({
           setPortfolioVisible(showPortfolio);
         }
 
-        // Fetch concepts if user is maker and viewing another maker
-        if (currentUserRole === 'maker') {
+        // Fetch concepts if user is artist and viewing another artist
+        if (currentUserRole === 'artist') {
           const {
             data: conceptsData
           } = await supabase.from('concepts').select('*').eq('maker_id', userId).eq('is_published', true);
@@ -189,7 +189,7 @@ export const ProfileModal = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {profile.role === 'maker' && currentUserRole === 'maker' && (
+              {profile.role === 'artist' && currentUserRole === 'artist' && (
                 <BookingRequest 
                   receiverId={profile.user_id} 
                   receiverName={profile.display_name} 
@@ -204,10 +204,10 @@ export const ProfileModal = ({
           <Tabs defaultValue="about" className="flex flex-col h-full">
             {/* Fixed Navigation Bar - Always Visible */}
             <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b px-6 py-3 shadow-sm">
-              <TabsList className={`grid w-full ${currentUserRole === 'maker' ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <TabsList className={`grid w-full ${currentUserRole === 'artist' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="about">{t('aboutMe')}</TabsTrigger>
                 <TabsTrigger value="portfolio">{t('filterPortfolio')}</TabsTrigger>
-                {currentUserRole === 'maker' && <TabsTrigger value="concepts">{t('My Offers')}</TabsTrigger>}
+                {currentUserRole === 'artist' && <TabsTrigger value="concepts">{t('My Offers')}</TabsTrigger>}
                 <TabsTrigger value="events">{t('filterEvents')}</TabsTrigger>
               </TabsList>
             </div>
@@ -255,7 +255,7 @@ export const ProfileModal = ({
                  </Card>
               </TabsContent>
 
-              {currentUserRole === 'maker' && <TabsContent value="concepts" className="mt-0">
+              {currentUserRole === 'artist' && <TabsContent value="concepts" className="mt-0">
                   <Card>
                     <CardHeader>
                       <CardTitle>{t('My Offers')}</CardTitle>
@@ -296,7 +296,7 @@ export const ProfileModal = ({
                             user_id: profile.user_id,
                             display_name: profile.display_name,
                             bio: profile.bio || null,
-                            role: profile.role as 'maker' | 'goer',
+                            role: profile.role as 'artist' | 'audience',
                             avatar_url: profile.avatar_url || null,
                             address: profile.address || null,
                             latitude: profile.latitude || null,

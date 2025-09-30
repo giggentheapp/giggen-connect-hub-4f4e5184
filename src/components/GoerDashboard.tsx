@@ -10,7 +10,7 @@ interface UserProfile {
   user_id: string;
   display_name: string;
   bio: string | null;
-  role: 'maker' | 'goer';
+  role: 'artist' | 'audience';
   avatar_url: string | null;
   address: string | null;
   latitude: number | null;
@@ -36,22 +36,22 @@ export const GoerDashboard = ({ profile }: GoerDashboardProps) => {
 
   const loadVisibleMakers = async () => {
     try {
-      // Load makers with addresses that are visible on map
-      const { data: makersData, error: makersError } = await supabase
+      // Load artists with addresses that are visible on map
+      const { data: artistsData, error: artistsError } = await supabase
         .from('profiles')
         .select(`
           *,
           profile_settings!inner(show_on_map)
         `)
-        .eq('role', 'maker')
+        .eq('role', 'artist')
         .eq('profile_settings.show_on_map', true)
         .not('address', 'is', null)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .order('created_at', { ascending: false });
 
-      if (makersError) throw makersError;
-      setVisibleMakers(makersData || []);
+      if (artistsError) throw artistsError;
+      setVisibleMakers(artistsData || []);
 
     } catch (error: any) {
       toast({

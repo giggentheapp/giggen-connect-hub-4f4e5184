@@ -28,7 +28,7 @@ interface UserProfile {
   user_id: string;
   display_name: string;
   bio: string | null;
-  role: 'maker' | 'goer';
+  role: 'artist' | 'audience';
   avatar_url: string | null;
   address: string | null;
   latitude: number | null;
@@ -54,7 +54,7 @@ export const UnifiedSidePanel = ({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role: userRole, ismaker, isGoer, loading: roleLoading } = useRole();
+  const { role: userRole, isArtist, isAudience, loading: roleLoading } = useRole();
   const { t } = useAppTranslation();
 
   // Use role from context as single source of truth
@@ -79,7 +79,7 @@ export const UnifiedSidePanel = ({
 
   // Role-based navigation items
   const getNavigationItems = () => {
-    if (isGoer) {
+    if (isAudience) {
       return [
         {
           id: 'profile',
@@ -97,7 +97,7 @@ export const UnifiedSidePanel = ({
           icon: Settings
         }
       ];
-    } else if (ismaker) {
+    } else if (isArtist) {
       return [{
         id: 'profile',
         label: t('profile'),
@@ -133,49 +133,49 @@ export const UnifiedSidePanel = ({
     }
     switch (activeSection) {
       case 'explore':
-        if (isGoer) {
+        if (isAudience) {
           return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (ismaker) {
+        } else if (isArtist) {
           return <MakerExploreSection profile={profile} />;
         }
         return null;
       // Loading state
 
       case 'profile':
-        if (isGoer) {
+        if (isAudience) {
           return <ProfileGoerSection 
             profile={profile} 
             currentUserId={profile.user_id}
             viewerRole={profile.role}
           />;
-        } else if (ismaker) {
+        } else if (isArtist) {
           return <ProfileSection profile={profile} />;
         }
         return null;
       case 'bookings':
-        // Only available to makers
-        if (ismaker) {
+        // Only available to artists
+        if (isArtist) {
           return <BookingsSection profile={profile} />;
         }
         return null;
       case 'admin-files':
-        // Only available to makers
-        if (ismaker) {
+        // Only available to artists
+        if (isArtist) {
           return <AdminFilesSection profile={profile} />;
         }
         return null;
       case 'admin-concepts':
-        // Only available to makers
-        if (ismaker) {
+        // Only available to artists
+        if (isArtist) {
           return <AdminConceptsSection profile={profile} />;
         }
         return null;
       case 'settings':
         return <AdminSettingsSection profile={profile} />;
       default:
-        if (isGoer) {
+        if (isAudience) {
           return <GoerExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (ismaker) {
+        } else if (isArtist) {
           return <MakerExploreSection profile={profile} />;
         }
         return null;

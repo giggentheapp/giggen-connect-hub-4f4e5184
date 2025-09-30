@@ -23,7 +23,7 @@ interface MakerCardProps {
 }
 
 export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps) => {
-  const { ismaker } = useRole();
+  const { isArtist } = useRole();
   const { t } = useAppTranslation();
   const navigate = useNavigate();
   
@@ -134,8 +134,8 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             <span className="sm:hidden">{t('view')}</span>
           </Button>
           
-          {/* Only show Book button to Makers */}
-          {ismaker && (
+          {/* Only show Book button to Artists */}
+          {isArtist && (
             <Button
               onClick={() => navigate(`/booking/create/${maker.user_id}`)}
               size="sm"

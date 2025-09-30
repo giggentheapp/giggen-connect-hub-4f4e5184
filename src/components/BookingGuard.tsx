@@ -8,18 +8,18 @@ interface BookingGuardProps {
 }
 
 export const BookingGuard = ({ children }: BookingGuardProps) => {
-  const { ismaker, loading } = useRole();
+  const { isArtist, loading } = useRole();
 
   if (loading) {
     return <div className="flex items-center justify-center py-4">Laster...</div>;
   }
 
-  if (!ismaker) {
+  if (!isArtist) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Kun makere har tilgang til booking-funksjoner. Denne funksjonen er ikke tilgjengelig for goers.
+          Kun artister har tilgang til booking-funksjoner. Denne funksjonen er ikke tilgjengelig for audience.
         </AlertDescription>
       </Alert>
     );

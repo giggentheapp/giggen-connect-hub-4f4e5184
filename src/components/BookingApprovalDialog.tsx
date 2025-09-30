@@ -76,8 +76,8 @@ export const BookingApprovalDialog = ({ booking: initialBooking, isOpen, onClose
 
         setUserProfile(profile);
 
-        // Get privacy settings if user is a maker
-        if (profile?.role === 'maker') {
+        // Get privacy settings if user is an artist
+        if (profile?.role === 'artist') {
           const { data: settings } = await supabase
             .from('profile_settings')
             .select('*')

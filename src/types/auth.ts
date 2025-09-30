@@ -4,7 +4,7 @@
 
 import { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
 
-export type UserRole = 'maker' | 'goer';
+export type UserRole = 'artist' | 'audience';
 
 /**
  * Extended user interface with profile data
@@ -107,17 +107,17 @@ export interface AuthState {
   error: string | null;
 }
 
-/**
- * Role data hook return type
- */
-export interface RoleData {
-  role: UserRole | null;
-  loading: boolean;
-  error: string | null;
-  ismaker: boolean;
-  isGoer: boolean;
-  refresh: () => void;
-}
+  /**
+   * Role data hook return type
+   */
+  export interface RoleData {
+    role: UserRole | null;
+    loading: boolean;
+    error: string | null;
+    isArtist: boolean;
+    isAudience: boolean;
+    refresh: () => void;
+  }
 
 /**
  * Authentication hook return type

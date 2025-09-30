@@ -7,7 +7,7 @@ interface UserProfile {
   user_id: string;
   display_name: string;
   bio: string | null;
-  role: 'maker' | 'goer';
+  role: 'artist' | 'audience';
   avatar_url: string | null;
   address: string | null;
   latitude: number | null;
@@ -18,7 +18,7 @@ interface UserProfile {
 interface ProfileGoerSectionProps {
   profile: UserProfile;
   currentUserId?: string;
-  viewerRole?: 'maker' | 'goer';
+  viewerRole?: 'artist' | 'audience';
 }
 export const ProfileGoerSection = ({
   profile,

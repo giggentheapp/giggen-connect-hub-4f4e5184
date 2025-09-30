@@ -56,7 +56,7 @@ interface MobileProfileCardProps {
 export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) => {
   const { t } = useAppTranslation();
   const navigate = useNavigate();
-  const { ismaker } = useRole();
+  const { isArtist } = useRole();
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [settings, setSettings] = useState<ProfileSettings>({
@@ -426,7 +426,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
         {/* Bottom action bar - Always visible with proper z-index and padding */}
         <div className="px-4 py-3 pb-32 border-t bg-card flex-shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
           <div className="flex gap-2 w-full">
-            {ismaker && (
+            {isArtist && (
               <Button
                 onClick={() => {
                   navigate(`/booking/create/${userId}`);

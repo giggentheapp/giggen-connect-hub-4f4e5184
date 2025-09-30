@@ -2,11 +2,11 @@ import React, { ReactNode, createContext, useContext } from 'react';
 import { useRoleData } from '@/hooks/useRole';
 
 interface RoleContextType {
-  role: 'maker' | 'goer' | null;
+  role: 'artist' | 'audience' | null;
   loading: boolean;
   error: string | null;
-  ismaker: boolean;
-  isGoer: boolean;
+  isArtist: boolean;
+  isAudience: boolean;
   refresh: () => void;
 }
 
@@ -14,8 +14,8 @@ const RoleContext = createContext<RoleContextType>({
   role: null,
   loading: true,
   error: null,
-  ismaker: false,
-  isGoer: false,
+  isArtist: false,
+  isAudience: false,
   refresh: () => {},
 });
 

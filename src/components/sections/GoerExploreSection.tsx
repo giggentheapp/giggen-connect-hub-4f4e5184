@@ -59,7 +59,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'makers' | 'events'>('events');
   const navigate = useNavigate();
-  const { isGoer, ismaker } = useRole();
+  const { isAudience, isArtist } = useRole();
   const { t } = useAppTranslation();
 
   // Auto-fetch data when component mounts
@@ -147,7 +147,7 @@ export const GoerExploreSection = ({ profile, viewMode = 'list', exploreType = '
           privacy_settings,
           created_at
         `)
-        .eq('role', 'maker')
+        .eq('role', 'artist')
         .eq('privacy_settings->>show_profile_to_goers', 'true')
         .order('created_at', { ascending: false });
       
