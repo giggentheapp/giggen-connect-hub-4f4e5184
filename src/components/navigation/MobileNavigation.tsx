@@ -1,58 +1,36 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { User, MapPin, FileText, Lightbulb, Briefcase, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useRole } from '@/contexts/RoleProvider';
+import { Compass, User, Settings, Calendar } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
-export const MobileNavigation = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isArtist, isAudience, loading: roleLoading } = useRole();
+interface MobileNavigationProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
+export const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationProps) => {
   const { t } = useAppTranslation();
-
-  // Navigation items based on role
-  const getNavigationItems = () => {
-    if (isAudience) {
-      return [
-        { id: 'profile', label: t('profile'), icon: User, path: '/dashboard' },
-        { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard' },
-        { id: 'settings', label: t('settings'), icon: Settings, path: '/settings' }
-      ];
-    } else if (isArtist) {
-      return [
-        { id: 'profile', label: t('profile'), icon: User, path: '/dashboard' },
-        { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard' },
-        { id: 'admin-files', label: 'Filer', icon: FileText, path: '/dashboard' },
-        { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/dashboard' },
-        { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/bookings' },
-        { id: 'settings', label: t('settings'), icon: Settings, path: '/settings' }
-      ];
-    }
-    return [];
-  };
-
-  const navItems = getNavigationItems();
-
-  if (roleLoading || navItems.length === 0) {
-    return null;
-  }
-
-  const isActive = (path: string) => location.pathname === path;
+  
+  const navItems = [
+    { id: 'explore', label: t('explore'), icon: Compass },
+    { id: 'profile', label: t('profile'), icon: User },
+    { id: 'bookings', label: t('bookings'), icon: Calendar },
+    { id: 'admin', label: t('administration'), icon: Settings },
+  ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden">
       <div className="flex items-center justify-around h-16 px-2">
-        {navItems.map((item) => {
+        {Array.isArray(navItems) ? navItems.filter(item => item && item.id).map((item) => {
           const Icon = item.icon;
-          const active = isActive(item.path);
+          const isActive = activeSection === item.id;
           
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => onSectionChange(item.id)}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1',
-                active 
+                isActive 
                   ? 'text-primary bg-accent' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               )}
@@ -60,7 +38,7 @@ export const MobileNavigation = () => {
               <Icon className="h-5 w-5" />
             </button>
           );
-        })}
+        }) : []}
       </div>
     </nav>
   );
