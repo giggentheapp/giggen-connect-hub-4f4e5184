@@ -207,7 +207,7 @@ export const ProfileModal = ({
               <TabsList className={`grid w-full ${currentUserRole === 'artist' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="about">{t('aboutMe')}</TabsTrigger>
                 <TabsTrigger value="portfolio">{t('filterPortfolio')}</TabsTrigger>
-                {currentUserRole === 'artist' && <TabsTrigger value="concepts">{t('Mine tilbud)}</TabsTrigger>}
+                {currentUserRole === 'artist' && <TabsTrigger value="concepts">{t('My Offers')}</TabsTrigger>}
                 <TabsTrigger value="events">{t('filterEvents')}</TabsTrigger>
               </TabsList>
             </div>
@@ -258,7 +258,7 @@ export const ProfileModal = ({
               {currentUserRole === 'artist' && <TabsContent value="concepts" className="mt-0">
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('My Offers')}</CardTitle>
+                      <CardTitle>{t('Mine Tilbud')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {concepts.length > 0 ? <div className="space-y-4">
