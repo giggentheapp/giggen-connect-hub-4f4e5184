@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Lightbulb, Plus, ChevronDown, Edit, Trash2, Clock } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Lightbulb, Plus, ChevronDown, Edit, Trash2, Clock, Eye, EyeOff } from 'lucide-react';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
@@ -26,6 +28,36 @@ export const AdminConceptsSection = ({
   
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
+  
+  const toggleConceptVisibility = async (conceptId: string, currentState: boolean) => {
+    try {
+      const newPublishedState = !currentState;
+      
+      const { error } = await supabase
+        .from('concepts')
+        .update({ is_published: newPublishedState })
+        .eq('id', conceptId);
+
+      if (error) throw error;
+
+      toast({
+        title: newPublishedState ? 'Tilbud publisert' : 'Tilbud skjult',
+        description: newPublishedState 
+          ? 'Tilbudet er nå offentlig tilgjengelig' 
+          : 'Tilbudet er nå skjult fra offentlig visning',
+      });
+      
+      refetch();
+    } catch (error: any) {
+      console.error('Error toggling visibility:', error);
+      toast({
+        title: 'Kunne ikke endre synlighet',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleDeleteConcept = async (conceptId: string) => {
     try {
       const { error } = await supabase.from('concepts').delete().eq('id', conceptId);
@@ -125,18 +157,42 @@ export const AdminConceptsSection = ({
             <div className="space-y-4">
               {concepts.length > 0 ? (
                 concepts.map(concept => (
-                  <ConceptCard
-                    key={concept.id}
-                    concept={concept}
-                    showActions={true}
-                    showConceptActions={true}
-                    onDelete={() => handleDeleteConcept(concept.id)}
-                    onConceptAction={(action) => {
-                      if (action === 'deleted' || action === 'rejected') {
-                        refetch();
-                      }
-                    }}
-                  />
+                  <div key={concept.id} className="flex items-start gap-3">
+                    <div className="flex-1">
+                      <ConceptCard
+                        concept={concept}
+                        showActions={true}
+                        showConceptActions={true}
+                        onDelete={() => handleDeleteConcept(concept.id)}
+                        onConceptAction={(action) => {
+                          if (action === 'deleted' || action === 'rejected') {
+                            refetch();
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col items-center gap-2 bg-muted/30 rounded-lg p-3 border min-w-[100px]">
+                      <Label htmlFor={`concept-visibility-${concept.id}`} className="text-xs font-medium text-center">
+                        {concept.is_published ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <Eye className="h-4 w-4 text-green-600" />
+                            <span>Offentlig</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1">
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            <span>Skjult</span>
+                          </div>
+                        )}
+                      </Label>
+                      <Switch
+                        id={`concept-visibility-${concept.id}`}
+                        checked={concept.is_published}
+                        onCheckedChange={() => toggleConceptVisibility(concept.id, concept.is_published)}
+                        className="data-[state=checked]:bg-green-500"
+                      />
+                    </div>
+                  </div>
                 ))
               ) : (
                 <div className="text-center py-8">

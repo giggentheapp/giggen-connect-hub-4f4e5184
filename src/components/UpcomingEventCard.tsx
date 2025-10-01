@@ -1,14 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Calendar, MapPin, Banknote, Users, Eye, ExternalLink, EyeOff } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
 
 interface UpcomingEvent {
   id: string;
@@ -45,38 +40,10 @@ const formatSafeDate = (dateString: string) => {
 
 export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
   const navigate = useNavigate();
-  const [isPublic, setIsPublic] = useState(event.is_public_after_approval ?? false);
-
-  useEffect(() => {
-    setIsPublic(event.is_public_after_approval ?? false);
-  }, [event.is_public_after_approval]);
 
   const handleDetailsClick = () => {
     // Navigate to public event view
     navigate(`/arrangement/${event.id}`);
-  };
-
-  const toggleVisibility = async () => {
-    try {
-      const newPublicState = !isPublic;
-      
-      const { error } = await supabase
-        .from('bookings')
-        .update({ is_public_after_approval: newPublicState })
-        .eq('id', event.id);
-
-      if (error) throw error;
-
-      setIsPublic(newPublicState);
-      toast.success(
-        newPublicState 
-          ? 'Arrangementet er nå offentlig' 
-          : 'Arrangementet er nå skjult'
-      );
-    } catch (error) {
-      console.error('Error toggling visibility:', error);
-      toast.error('Kunne ikke endre synlighet');
-    }
   };
 
   const userRole = event.is_sender ? 'Arrangør' : 'Artist';
@@ -95,31 +62,13 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
               </p>
             )}
           </div>
-          <div className="flex items-start gap-2">
-            <div className="flex flex-col gap-1">
-              <Badge variant="secondary" className="text-xs whitespace-nowrap bg-green-50 text-green-700 border-green-200">
-                Publisert
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {userRole}
-              </Badge>
-            </div>
-            {/* Visibility Toggle */}
-            <div className="flex items-center gap-1.5 bg-muted/30 rounded-lg p-1.5 border">
-              <Label htmlFor={`event-visibility-${event.id}`} className="text-xs font-medium cursor-pointer flex items-center gap-1">
-                {isPublic ? (
-                  <Eye className="h-3 w-3 text-green-600" />
-                ) : (
-                  <EyeOff className="h-3 w-3 text-muted-foreground" />
-                )}
-              </Label>
-              <Switch
-                id={`event-visibility-${event.id}`}
-                checked={isPublic}
-                onCheckedChange={toggleVisibility}
-                className="scale-75 data-[state=checked]:bg-green-500"
-              />
-            </div>
+          <div className="flex flex-col gap-1">
+            <Badge variant="secondary" className="text-xs whitespace-nowrap bg-green-50 text-green-700 border-green-200">
+              Publisert
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {userRole}
+            </Badge>
           </div>
         </div>
       </CardHeader>

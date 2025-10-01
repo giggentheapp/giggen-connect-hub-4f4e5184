@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical, Eye, EyeOff } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
@@ -85,46 +83,16 @@ const ConceptCard = ({
   const [showActionsDialog, setShowActionsDialog] = useState(false);
   const [profileSettings, setProfileSettings] = useState<any>(null);
   const [isPublished, setIsPublished] = useState(concept.is_published);
-  const [isOwnConcept, setIsOwnConcept] = useState(false);
   
   const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
   useEffect(() => {
     loadConceptData();
-    checkOwnership();
   }, [concept.id]);
 
   useEffect(() => {
     setIsPublished(concept.is_published);
   }, [concept.is_published]);
-
-  const checkOwnership = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setIsOwnConcept(user?.id === concept.maker_id);
-  };
-
-  const toggleVisibility = async () => {
-    try {
-      const newPublishedState = !isPublished;
-      
-      const { error } = await supabase
-        .from('concepts')
-        .update({ is_published: newPublishedState })
-        .eq('id', concept.id);
-
-      if (error) throw error;
-
-      setIsPublished(newPublishedState);
-      toast.success(
-        newPublishedState 
-          ? 'Tilbudet er nå offentlig' 
-          : 'Tilbudet er nå skjult'
-      );
-    } catch (error) {
-      console.error('Error toggling visibility:', error);
-      toast.error('Kunne ikke endre synlighet');
-    }
-  };
 
   const loadConceptData = async () => {
     try {
@@ -231,31 +199,6 @@ const ConceptCard = ({
               <p className="text-muted-foreground text-sm md:text-base">{concept.description}</p>
             )}
           </div>
-          
-          {/* Visibility Toggle - only for own concepts */}
-          {isOwnConcept && (
-            <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-2 border">
-              <Label htmlFor={`visibility-${concept.id}`} className="text-xs font-medium cursor-pointer flex items-center gap-1">
-                {isPublished ? (
-                  <>
-                    <Eye className="h-3 w-3" />
-                    <span className="hidden sm:inline">Offentlig</span>
-                  </>
-                ) : (
-                  <>
-                    <EyeOff className="h-3 w-3" />
-                    <span className="hidden sm:inline">Skjult</span>
-                  </>
-                )}
-              </Label>
-              <Switch
-                id={`visibility-${concept.id}`}
-                checked={isPublished}
-                onCheckedChange={toggleVisibility}
-                className="data-[state=checked]:bg-green-500"
-              />
-            </div>
-          )}
 
           {(showActions || showConceptActions) && (
             <div className="flex gap-2">
