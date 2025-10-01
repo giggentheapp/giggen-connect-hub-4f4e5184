@@ -71,8 +71,12 @@ const ProfileConceptView = () => {
     navigate(`/profile/${userId}`);
   };
 
-  const getPublicUrl = (filePath: string) => {
-    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concept-portfolio/${filePath}`;
+  const getPublicUrl = (file: ConceptFile) => {
+    // Use file_url if available, otherwise construct URL from file_path
+    if (file.file_url) {
+      return file.file_url;
+    }
+    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
   };
 
   const getFileIcon = (fileType: string) => {
@@ -85,7 +89,7 @@ const ProfileConceptView = () => {
   };
 
   const renderMedia = (file: ConceptFile) => {
-    const publicUrl = getPublicUrl(file.file_path);
+    const publicUrl = getPublicUrl(file);
     
     if (file.file_type === 'image') {
       return (
@@ -232,7 +236,7 @@ const ProfileConceptView = () => {
                       <div className="bg-black/5">
                         {file.file_type === 'image' && (
                           <img 
-                            src={getPublicUrl(file.file_path)} 
+                            src={getPublicUrl(file)} 
                             alt={file.title || file.filename}
                             className="w-full max-h-[400px] object-contain"
                             loading="lazy"
@@ -241,11 +245,13 @@ const ProfileConceptView = () => {
                         
                         {file.file_type === 'video' && (
                           <video 
-                            src={getPublicUrl(file.file_path)}
+                            src={getPublicUrl(file)}
                             controls
                             className="w-full max-h-[400px]"
                             preload="metadata"
+                            crossOrigin="anonymous"
                           >
+                            <source src={getPublicUrl(file)} type={file.mime_type || 'video/mp4'} />
                             Din nettleser støtter ikke video.
                           </video>
                         )}
@@ -253,10 +259,11 @@ const ProfileConceptView = () => {
                         {file.file_type === 'audio' && (
                           <div className="p-4">
                             <audio 
-                              src={getPublicUrl(file.file_path)}
+                              src={getPublicUrl(file)}
                               controls
                               className="w-full"
                               preload="metadata"
+                              crossOrigin="anonymous"
                             >
                               Din nettleser støtter ikke lyd.
                             </audio>
