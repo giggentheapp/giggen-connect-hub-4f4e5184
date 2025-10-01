@@ -203,22 +203,69 @@ const ProfileConceptView = () => {
               <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <File className="h-4 w-4" />
-                  Portefølje
+                  Portefølje ({conceptFiles.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
+                <div className="space-y-3">
                   {conceptFiles.map(file => (
                     <div 
                       key={file.id}
-                      className="group aspect-[4/3] rounded-md overflow-hidden border bg-card hover:shadow-md transition-all duration-200 cursor-pointer"
-                      onClick={() => window.open(getPublicUrl(file.file_path), '_blank')}
+                      className="rounded-lg border bg-muted/30 overflow-hidden"
                     >
-                      <div className="relative w-full h-full">
-                        {renderMedia(file)}
-                        {file.title && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                            <p className="text-white text-xs font-medium truncate">{file.title}</p>
+                      {/* File header */}
+                      <div className="p-3 border-b bg-card">
+                        <div className="flex items-center gap-2">
+                          {getFileIcon(file.file_type)}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {file.title || file.filename}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {file.file_type.charAt(0).toUpperCase() + file.file_type.slice(1)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Media content */}
+                      <div className="bg-black/5">
+                        {file.file_type === 'image' && (
+                          <img 
+                            src={getPublicUrl(file.file_path)} 
+                            alt={file.title || file.filename}
+                            className="w-full max-h-[400px] object-contain"
+                            loading="lazy"
+                          />
+                        )}
+                        
+                        {file.file_type === 'video' && (
+                          <video 
+                            src={getPublicUrl(file.file_path)}
+                            controls
+                            className="w-full max-h-[400px]"
+                            preload="metadata"
+                          >
+                            Din nettleser støtter ikke video.
+                          </video>
+                        )}
+                        
+                        {file.file_type === 'audio' && (
+                          <div className="p-4">
+                            <audio 
+                              src={getPublicUrl(file.file_path)}
+                              controls
+                              className="w-full"
+                              preload="metadata"
+                            >
+                              Din nettleser støtter ikke lyd.
+                            </audio>
+                          </div>
+                        )}
+                        
+                        {!['image', 'video', 'audio'].includes(file.file_type) && (
+                          <div className="flex items-center justify-center p-8 text-muted-foreground">
+                            <File className="h-12 w-12" />
                           </div>
                         )}
                       </div>
