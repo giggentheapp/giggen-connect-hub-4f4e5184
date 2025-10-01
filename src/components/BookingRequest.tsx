@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useToast } from '@/hooks/use-toast';
@@ -158,123 +158,128 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           {t('Book nå')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto mobile-modal mobile-optimized">
-        <div className="mobile-modal-content">
-        <DialogHeader>
-          <DialogTitle className="text-lg md:text-base">{t('sendBookingRequest')}</DialogTitle>
+      <DialogContent className="sm:max-w-2xl w-full h-full sm:h-auto max-h-screen sm:max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
+          <DialogTitle className="text-lg sm:text-xl">{t('sendBookingRequest')}</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            {t('selectOfferAndSendMessage')}
+          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Concept Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">
-              {t('selectOffer')}
-            </Label>
-            {concepts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t('mustCreateOffersFirst')}
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
-                {concepts.filter(concept => concept && concept.id).map((concept) => (
-                  <Card 
-                    key={concept.id} 
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedConcept?.id === concept.id 
-                        ? "border-primary bg-primary/5" 
-                        : "hover:border-muted-foreground"
-                    )}
-                    onClick={() => selectConcept(concept)}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
-                        <div className={cn(
-                          "mt-1 h-4 w-4 rounded border-2",
-                          selectedConcept?.id === concept.id 
-                            ? "border-primary bg-primary" 
-                            : "border-muted-foreground"
-                        )} />
-                        <div className="flex-1">
-                          <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
-                          {concept.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {concept.description}
-                            </p>
-                          )}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-6">
+            {/* Concept Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">
+                {t('selectOffer')}
+              </Label>
+              {concepts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t('mustCreateOffersFirst')}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                  {concepts.filter(concept => concept && concept.id).map((concept) => (
+                    <Card 
+                      key={concept.id} 
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        selectedConcept?.id === concept.id 
+                          ? "border-primary bg-primary/5" 
+                          : "hover:border-muted-foreground"
+                      )}
+                      onClick={() => selectConcept(concept)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div className={cn(
+                            "mt-1 h-4 w-4 rounded border-2",
+                            selectedConcept?.id === concept.id 
+                              ? "border-primary bg-primary" 
+                              : "border-muted-foreground"
+                          )} />
+                          <div className="flex-1">
+                            <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
+                            {concept.description && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {concept.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedConcept && (
+              <>
+                {/* Selected Concept Info */}
+                <div className="space-y-2">
+                  <Label className="text-base font-medium">{t('selectedOffer')}</Label>
+                  <Card className="bg-muted/50">
+                    <CardContent className="p-3">
+                      <h4 className="font-medium">{selectedConcept.title}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {selectedConcept.description || t('noDescription')}
+                      </p>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
+                </div>
+
+                {/* Personal Message */}
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="message" className="text-base font-medium">
+                      {t('personalMessage')} *
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('personalMessageNote')}
+                    </p>
+                  </div>
+                  <Textarea
+                    id="message"
+                    placeholder={t('personalMessagePlaceholder')}
+                    value={personalMessage}
+                    onChange={(e) => setPersonalMessage(e.target.value)}
+                    className="min-h-[120px] text-base"
+                    required
+                  />
+                </div>
+
+                {/* Next Steps Information */}
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    {t('whatHappensNext')}
+                  </h4>
+                  <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                    <p>• {t('receiverGetsNotification')}</p>
+                    <p>• {t('canSeeOfferDetails')}</p>
+                    <p>• {t('canAllowRequest')}</p>
+                    <p>• {t('getContactAccess')}</p>
+                    <p>• {t('negotiationsCanStart')}</p>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
-          {selectedConcept && (
-            <>
-              {/* Selected Concept Info */}
-              <div className="space-y-2">
-                <Label className="text-base font-medium">{t('selectedOffer')}</Label>
-                <Card className="bg-muted/50">
-                  <CardContent className="p-3">
-                    <h4 className="font-medium">{selectedConcept.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {selectedConcept.description || t('noDescription')}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Personal Message */}
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="message" className="text-base font-medium">
-                    {t('personalMessage')} *
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {t('personalMessageNote')}
-                  </p>
-                </div>
-                <Textarea
-                  id="message"
-                  placeholder={t('personalMessagePlaceholder')}
-                  value={personalMessage}
-                  onChange={(e) => setPersonalMessage(e.target.value)}
-                  className="min-h-[120px] text-base md:text-sm"
-                  required
-                />
-              </div>
-
-              {/* Next Steps Information */}
-              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                  {t('whatHappensNext')}
-                </h4>
-                <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-                  <p>• {t('receiverGetsNotification')}</p>
-                  <p>• {t('canSeeOfferDetails')}</p>
-                  <p>• {t('canAllowRequest')}</p>
-                  <p>• {t('getContactAccess')}</p>
-                  <p>• {t('negotiationsCanStart')}</p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Submit Button */}
-          <div className="flex justify-end gap-3">
+          {/* Submit Button - Always visible at bottom */}
+          <div className="border-t px-4 sm:px-6 py-4 bg-background flex justify-end gap-3">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => setOpen(false)}
+              className="min-h-[44px]"
             >
               {t('cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={submitting || !selectedConcept || !personalMessage.trim()}
-              className="min-h-[48px] touch-target"
+              className="min-h-[44px]"
             >
               {submitting ? t('sending') : t('sendRequest')}
             </Button>
@@ -286,7 +291,6 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           onConfirm={handleContactDialogConfirm}
           onCancel={handleContactDialogCancel}
         />
-        </div>
       </DialogContent>
     </Dialog>
   );

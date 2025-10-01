@@ -365,6 +365,30 @@ export const appTranslations = {
       }
     },
 
+    // Booking Request
+    "Book nå": "Book nå",
+    sendBookingRequest: "Send booking-forespørsel",
+    selectOfferAndSendMessage: "Velg et tilbud og send en melding til artistenselect",
+    selectOffer: "Velg tilbud",
+    mustCreateOffersFirst: "Du må opprette tilbud før du kan sende booking-forespørsler",
+    selectedOffer: "Valgt tilbud",
+    noDescription: "Ingen beskrivelse",
+    personalMessage: "Personlig melding",
+    personalMessageNote: "Forklar hva du ønsker og detaljer om arrangementet",
+    personalMessagePlaceholder: "Skriv en melding til artisten...",
+    personalMessageAndOfferRequired: "Du må velge et tilbud og skrive en personlig melding",
+    missingInformation: "Manglende informasjon",
+    sending: "Sender...",
+    sendRequest: "Send forespørsel",
+    requestSent: "Forespørsel sendt!",
+    bookingRequestSent: "Booking-forespørselen er sendt",
+    whatHappensNext: "Hva skjer nå?",
+    receiverGetsNotification: "Mottakeren får varsel om forespørselen",
+    canSeeOfferDetails: "De kan se tilbudsdetaljene dine",
+    canAllowRequest: "De kan godta eller avslå forespørselen",
+    getContactAccess: "Ved godkjenning får dere tilgang til hverandres kontaktinfo",
+    negotiationsCanStart: "Dere kan starte forhandlinger og planlegge arrangementet",
+
     // Success/Error Messages
     profileUpdated: "Profil oppdatert",
     passwordChanged: "Passord endret",
@@ -863,6 +887,30 @@ export const appTranslations = {
         filesSaveWarningDescription: "Offer saved, but some files could not be saved. Try uploading them again."
       }
     },
+
+    // Booking Request
+    "Book nå": "Book Now",
+    sendBookingRequest: "Send Booking Request",
+    selectOfferAndSendMessage: "Select an offer and send a message to the artist",
+    selectOffer: "Select Offer",
+    mustCreateOffersFirst: "You must create offers before you can send booking requests",
+    selectedOffer: "Selected Offer",
+    noDescription: "No description",
+    personalMessage: "Personal Message",
+    personalMessageNote: "Explain what you want and details about the event",
+    personalMessagePlaceholder: "Write a message to the artist...",
+    personalMessageAndOfferRequired: "You must select an offer and write a personal message",
+    missingInformation: "Missing information",
+    sending: "Sending...",
+    sendRequest: "Send Request",
+    requestSent: "Request Sent!",
+    bookingRequestSent: "The booking request has been sent",
+    whatHappensNext: "What happens next?",
+    receiverGetsNotification: "The recipient will be notified of the request",
+    canSeeOfferDetails: "They can see your offer details",
+    canAllowRequest: "They can accept or decline the request",
+    getContactAccess: "Upon approval, you get access to each other's contact info",
+    negotiationsCanStart: "You can start negotiations and plan the event",
 
     // Success/Error Messages
     profileUpdated: "Profile updated",
