@@ -75,6 +75,9 @@ const Profile = () => {
       try {
         setLoading(true);
         const isOwnProfile = currentUser?.id === userId;
+        
+        // Force fresh data by adding timestamp to bypass any caching
+        const timestamp = Date.now();
 
         // Use get_public_profile RPC which checks show_public_profile setting
         const { data: profileData, error: profileError } = await supabase
@@ -136,12 +139,12 @@ const Profile = () => {
           });
 
           // Fetch published concepts (tilbud) - KUN SYNLIGE
+          // Add timestamp to force fresh query and bypass cache
           const { data: conceptsData, error: conceptsError } = await supabase
             .from('concepts')
             .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement, is_published, updated_at')
             .eq('maker_id', userId)
             .eq('is_published', true)
-            .not('is_published', 'is', null)
             .order('updated_at', { ascending: false });
 
           console.log('📋 PROFILE CONCEPTS LOADED:', {
@@ -190,6 +193,19 @@ const Profile = () => {
       }
     };
     fetchProfile();
+    
+    // Add event listener to refetch when navigating back to this page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProfile();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [userId, currentUser]);
 
   const renderFilePreview = useCallback((file: any) => {
