@@ -72,20 +72,53 @@ const Profile = () => {
       if (!userId) return;
 
       try {
+        setLoading(true);
+        const isOwnProfile = currentUser?.id === userId;
+
+        // Use get_public_profile RPC which checks show_public_profile setting
         const { data: profileData, error: profileError } = await supabase
-          .rpc('get_secure_profile_data', { target_user_id: userId })
+          .rpc('get_public_profile', { target_user_id: userId })
           .maybeSingle();
 
-        if (profileError) throw profileError;
-        if (!profileData) return;
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          throw profileError;
+        }
 
-        const typedProfileData = {
-          ...profileData,
-          role: profileData.role as 'artist' | 'audience',
-          updated_at: profileData.created_at
-        } as ProfileData;
+        // If display_name is NULL, profile is private (for artists without show_public_profile)
+        if (!profileData || (!profileData.display_name && !isOwnProfile)) {
+          console.log('Profile is private or not found');
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
 
-        setProfile(typedProfileData);
+        // If own profile, fetch full data directly
+        if (isOwnProfile) {
+          const { data: ownProfileData, error: ownError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+          if (ownError) throw ownError;
+
+          const typedOwnProfile = {
+            ...ownProfileData,
+            role: ownProfileData.role as 'artist' | 'audience'
+          } as ProfileData;
+
+          setProfile(typedOwnProfile);
+        } else {
+          // Use public profile data
+          const typedProfileData = {
+            ...profileData,
+            role: profileData.role as 'artist' | 'audience',
+            updated_at: profileData.created_at
+          } as ProfileData;
+
+          setProfile(typedProfileData);
+        }
 
         // Fetch settings
         if (profileData.role === 'artist') {
@@ -119,11 +152,7 @@ const Profile = () => {
         }
       } catch (error: any) {
         console.error('Error fetching profile:', error);
-        toast({
-          title: "Feil",
-          description: "Kunne ikke laste profil",
-          variant: "destructive"
-        });
+        setProfile(null);
       } finally {
         setLoading(false);
       }
