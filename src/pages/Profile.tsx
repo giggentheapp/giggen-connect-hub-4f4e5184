@@ -84,8 +84,6 @@ const Profile = () => {
           role: profileData.role as 'artist' | 'audience',
           updated_at: profileData.created_at
         } as ProfileData;
-        
-        setProfile(typedProfileData);
 
         // Fetch settings
         if (profileData.role === 'artist') {
@@ -95,13 +93,24 @@ const Profile = () => {
             .eq('maker_id', userId)
             .maybeSingle();
           
-          setSettings(settingsData || {
+          const profileSettings = settingsData || {
             show_public_profile: false,
             show_on_map: false,
             show_contact: false
-          });
+          };
+          
+          setSettings(profileSettings);
 
-          // Fetch published concepts (tilbud) - KUN GRUNNLEGGENDE FELTER
+          // Check if profile should be visible to non-owners
+          const isOwner = currentUser?.id === userId;
+          if (!isOwner && !profileSettings.show_public_profile) {
+            // Profile is private and viewer is not the owner
+            setProfile(null);
+            setLoading(false);
+            return;
+          }
+
+          // Fetch published concepts (tilbud) - KUN SYNLIGE
           const { data: conceptsData } = await supabase
             .from('concepts')
             .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement')
@@ -117,6 +126,8 @@ const Profile = () => {
             show_contact: false
           });
         }
+        
+        setProfile(typedProfileData);
       } catch (error: any) {
         console.error('Error fetching profile:', error);
         toast({
@@ -129,7 +140,7 @@ const Profile = () => {
       }
     };
     fetchProfile();
-  }, [userId]);
+  }, [userId, currentUser]);
 
   const renderFilePreview = useCallback((file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`;

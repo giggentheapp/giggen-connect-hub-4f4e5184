@@ -96,20 +96,18 @@ export const ArtistExploreSection = ({
   const fetchMakers = async () => {
     try {
       setLoading(true);
-      console.log('👥 Fetching makers...');
+      console.log('👥 Fetching public makers...');
 
+      // Use RPC function to get only artists with show_public_profile enabled
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'artist')
-        .order('display_name', { ascending: true });
+        .rpc('get_public_artists_for_explore');
 
       if (error) {
         console.error('❌ Error fetching makers:', error);
         throw error;
       }
 
-      console.log('✅ Fetched makers:', data?.length || 0);
+      console.log('✅ Fetched public makers:', data?.length || 0);
       setMakers(data || []);
       setFilteredMakers(data || []);
     } catch (err) {
