@@ -43,7 +43,6 @@ export const useUserConcepts = (userId: string | undefined) => {
         .from('concepts')
         .select('*')
         .eq('maker_id', userId)
-        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
