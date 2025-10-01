@@ -26,8 +26,11 @@ export const AdminConceptsSection = ({
   const { toast } = useToast();
   const [showDrafts, setShowDrafts] = useState(true);
   
-  const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
+  const { concepts: allConcepts, loading, refetch } = useUserConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
+  
+  // Filter only published concepts for "My Offers" section
+  const concepts = allConcepts.filter(c => c.is_published === true);
   
   const toggleConceptVisibility = async (conceptId: string, currentState: boolean) => {
     try {
