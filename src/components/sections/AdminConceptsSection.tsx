@@ -29,6 +29,16 @@ export const AdminConceptsSection = ({
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
   
+  console.log('🔧 ADMIN SECTION - All concepts (should show all):', {
+    totalConcepts: concepts.length,
+    concepts: concepts.map(c => ({
+      title: c.title,
+      id: c.id,
+      is_published: c.is_published,
+      status: c.status
+    }))
+  });
+  
   const toggleConceptVisibility = async (conceptId: string, currentState: boolean) => {
     try {
       const newPublishedState = !currentState;
