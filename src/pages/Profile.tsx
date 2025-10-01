@@ -76,8 +76,13 @@ const Profile = () => {
         setLoading(true);
         const isOwnProfile = currentUser?.id === userId;
         
+        // Clear existing concepts before fetching to prevent stale data
+        setConcepts([]);
+        setConceptFiles({});
+        
         // Force fresh data by adding timestamp to bypass any caching
         const timestamp = Date.now();
+        console.log('🔄 Fetching profile at:', timestamp);
 
         // Use get_public_profile RPC which checks show_public_profile setting
         const { data: profileData, error: profileError } = await supabase
@@ -152,6 +157,7 @@ const Profile = () => {
             isOwnProfile,
             conceptsError,
             totalFound: conceptsData?.length || 0,
+            timestamp: new Date().toISOString(),
             concepts: conceptsData?.map(c => ({
               title: c.title,
               is_published: c.is_published,
