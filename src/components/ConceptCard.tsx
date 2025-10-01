@@ -80,6 +80,8 @@ const ConceptCard = ({
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showActionsDialog, setShowActionsDialog] = useState(false);
+  const [profileSettings, setProfileSettings] = useState<any>(null);
+  const [isOwnConcept, setIsOwnConcept] = useState(false);
   
   const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
@@ -89,20 +91,42 @@ const ConceptCard = ({
 
   const loadConceptData = async () => {
     try {
-      // Load concept files (portfolio)
-      const { data: filesData, error: filesError } = await supabase
-        .from('concept_files')
-        .select('id, filename, file_type, file_url, title, created_at, mime_type')
-        .eq('concept_id', concept.id);
+      // Check if this is the user's own concept
+      const { data: { user } } = await supabase.auth.getUser();
+      const isOwn = user?.id === concept.maker_id;
+      setIsOwnConcept(isOwn);
 
-      if (filesError) {
-        console.error('Error loading concept files:', filesError);
+      // Load profile settings for the concept owner
+      const { data: settings, error: settingsError } = await supabase
+        .from('profile_settings')
+        .select('show_portfolio, show_techspec')
+        .eq('maker_id', concept.maker_id)
+        .maybeSingle();
+
+      if (settingsError) {
+        console.error('Error loading profile settings:', settingsError);
       } else {
-        setConceptFiles(filesData || []);
+        setProfileSettings(settings);
       }
 
-      // Load tech spec file if reference exists
-      if (concept.tech_spec_reference) {
+      // Load concept files (portfolio) - only if allowed
+      const shouldShowPortfolio = isOwn || settings?.show_portfolio === true;
+      if (shouldShowPortfolio) {
+        const { data: filesData, error: filesError } = await supabase
+          .from('concept_files')
+          .select('id, filename, file_type, file_url, title, created_at, mime_type')
+          .eq('concept_id', concept.id);
+
+        if (filesError) {
+          console.error('Error loading concept files:', filesError);
+        } else {
+          setConceptFiles(filesData || []);
+        }
+      }
+
+      // Load tech spec file if reference exists - only if allowed
+      const shouldShowTechSpec = isOwn || settings?.show_techspec === true;
+      if (shouldShowTechSpec && concept.tech_spec_reference) {
         const { data: techSpecData, error: techSpecError } = await supabase
           .from('profile_tech_specs')
           .select('id, filename, file_url, file_type')
@@ -116,7 +140,7 @@ const ConceptCard = ({
         }
       }
 
-      // Load hospitality rider file if reference exists  
+      // Load hospitality rider file if reference exists - always show if exists
       if (concept.hospitality_rider_reference) {
         const { data: hospitalityRiderData, error: hospitalityRiderError } = await supabase
           .from('hospitality_riders')
