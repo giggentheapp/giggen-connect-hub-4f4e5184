@@ -197,22 +197,22 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
+    <div className="container mx-auto p-3 md:p-6 max-w-4xl">
+      {/* Header - Compact Mobile */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-14 w-14 sm:h-16 sm:w-16">
             <AvatarImage src={profile.avatar_url} />
             <AvatarFallback>
-              <User className="h-8 w-8" />
+              <User className="h-6 w-6 sm:h-7 sm:w-7" />
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">{profile.display_name}</h1>
-            <Badge variant="outline">{profile.role}</Badge>
+            <h1 className="text-lg sm:text-xl font-bold">{profile.display_name}</h1>
+            <Badge variant="outline" className="text-xs">{profile.role}</Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="w-full sm:w-auto">
           {!isOwnProfile && profile.role === 'artist' && currentUser && currentUserProfile?.role === 'artist' && (
             <BookingRequest 
               receiverId={profile.user_id} 
@@ -222,23 +222,23 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-3 md:space-y-4">
         {/* Om meg */}
         {(settings?.show_public_profile || isOwnProfile) && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <User className="h-4 w-4" />
                 Om meg
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-foreground leading-relaxed">
+            <CardContent className="p-4 pt-0">
+              <p className="text-sm text-foreground leading-relaxed">
                 {profile.bio || (isOwnProfile ? "Ingen beskrivelse lagt til." : "Ingen beskrivelse tilgjengelig.")}
               </p>
               
               {profile.social_media_links && (
-                <div className="mt-4">
+                <div className="mt-3">
                   <SocialMediaLinks socialLinks={profile.social_media_links} />
                 </div>
               )}
@@ -249,30 +249,30 @@ const Profile = () => {
         {/* Portefølje */}
         {(settings?.show_public_profile || isOwnProfile) && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <File className="h-5 w-5" />
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <File className="h-4 w-4" />
                 Portefølje
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               {portfolioLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <div className="flex items-center justify-center py-6">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
                 </div>
               ) : Array.isArray(portfolioFiles) && portfolioFiles.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
                   {portfolioFiles.filter(file => file && file.id && file.file_path).map(file => (
                     <div 
                       key={file.id} 
-                      className="group aspect-[4/3] rounded-lg overflow-hidden border bg-card hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      className="group aspect-[4/3] rounded-md overflow-hidden border bg-card hover:shadow-md transition-all duration-200 cursor-pointer"
                       onClick={() => window.open(`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/portfolio/${file.file_path}`, '_blank')}
                     >
                       <div className="relative w-full h-full">
                         {renderFilePreview(file)}
                         {file.title && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                            <p className="text-white text-sm font-medium truncate">{file.title}</p>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                            <p className="text-white text-xs font-medium truncate">{file.title}</p>
                           </div>
                         )}
                       </div>
@@ -280,9 +280,9 @@ const Profile = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Ingen portefølje tilgjengelig</p>
+                <div className="text-center py-8">
+                  <File className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Ingen portefølje tilgjengelig</p>
                 </div>
               )}
             </CardContent>
@@ -292,48 +292,45 @@ const Profile = () => {
         {/* Mine publiserte tilbud - PUBLIKUMSVENNLIG */}
         {profile.role === 'artist' && concepts.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MapPin className="h-4 w-4" />
                 {isOwnProfile ? 'Mine publiserte tilbud' : 'Tilbud'}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 {isOwnProfile ? 'Dine tilbud som er synlige for andre' : 'Publiserte tilbud'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 pt-0">
+              <div className="space-y-3">
                 {concepts.map((concept) => (
                   <Card 
                     key={concept.id} 
                     className="bg-muted/30 cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => handleConceptClick(concept.id)}
                   >
-                    <CardContent className="pt-6">
-                      <h3 className="font-semibold text-lg mb-2">{concept.title}</h3>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-base mb-2">{concept.title}</h3>
                       {concept.description && (
-                        <p className="text-muted-foreground mb-4">{concept.description}</p>
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{concept.description}</p>
                       )}
                       
                       <div className="flex flex-wrap gap-2">
                         {concept.price && !concept.door_deal && !concept.price_by_agreement && (
-                          <Badge variant="outline">{concept.price} kr</Badge>
+                          <Badge variant="outline" className="text-xs">{concept.price} kr</Badge>
                         )}
                         {concept.door_deal && (
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="text-xs">
                             {concept.door_percentage}% av dørinntekter
                           </Badge>
                         )}
                         {concept.price_by_agreement && (
-                          <Badge variant="outline">Pris ved avtale</Badge>
+                          <Badge variant="outline" className="text-xs">Pris ved avtale</Badge>
                         )}
                         {concept.expected_audience && (
-                          <Badge variant="outline">{concept.expected_audience} publikum</Badge>
+                          <Badge variant="outline" className="text-xs">{concept.expected_audience} publikum</Badge>
                         )}
                       </div>
-
-                      {/* VIKTIG: Tech specs og hospitality vises IKKE lenger her */}
-                      {/* Disse skal kun være tilgjengelig etter booking-godkjenning */}
                     </CardContent>
                   </Card>
                 ))}
@@ -344,16 +341,16 @@ const Profile = () => {
 
         {/* Kommende arrangementer */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="p-4">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4" />
               {isOwnProfile ? 'Mine Kommende Arrangementer' : 'Kommende Arrangementer'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs">
               {isOwnProfile ? 'Dine kommende arrangementer og konserter' : 'Publiserte arrangementer'}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <WorkingEventsDisplay 
               profile={profile} 
               showSensitiveInfo={isOwnProfile}
