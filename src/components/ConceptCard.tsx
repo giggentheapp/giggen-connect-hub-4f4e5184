@@ -95,22 +95,26 @@ const ConceptCard = ({
       // Portfolio files are always loaded for published concepts
       const { data: filesData, error: filesError } = await supabase
         .from('concept_files')
-        .select('id, filename, file_type, file_url, title, created_at, mime_type')
+        .select('id, filename, file_type, file_url, file_path, title, created_at, mime_type')
         .eq('concept_id', concept.id);
+
+      console.log('🔍 CONCEPT FILES LOADED:', {
+        conceptId: concept.id,
+        conceptTitle: concept.title,
+        filesError,
+        fileCount: filesData?.length || 0,
+        files: filesData?.map(f => ({
+          id: f.id,
+          filename: f.filename,
+          file_url: f.file_url,
+          file_path: f.file_path,
+          has_url: !!f.file_url
+        }))
+      });
 
       if (filesError) {
         console.error('Error loading concept files:', filesError);
       } else {
-        console.log('🔍 Concept files loaded:', {
-          conceptId: concept.id,
-          fileCount: filesData?.length || 0,
-          files: filesData?.map(f => ({
-            id: f.id,
-            filename: f.filename,
-            file_url: f.file_url,
-            has_url: !!f.file_url
-          }))
-        });
         setConceptFiles(filesData || []);
       }
 

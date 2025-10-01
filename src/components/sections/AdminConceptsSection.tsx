@@ -33,34 +33,45 @@ export const AdminConceptsSection = ({
     try {
       const newPublishedState = !currentState;
       
-      console.log('🔄 Toggling concept visibility:', {
+      console.log('🔄 TOGGLE START:', {
         conceptId,
-        from: currentState,
-        to: newPublishedState
+        currentState,
+        newPublishedState,
+        timestamp: new Date().toISOString()
       });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('concepts')
         .update({ 
           is_published: newPublishedState,
           updated_at: new Date().toISOString()
         })
-        .eq('id', conceptId);
+        .eq('id', conceptId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ TOGGLE FAILED:', error);
+        throw error;
+      }
 
-      console.log('✅ Concept visibility updated in database');
+      console.log('✅ TOGGLE SUCCESS:', {
+        conceptId,
+        updatedData: data,
+        newState: newPublishedState
+      });
 
       toast({
-        title: newPublishedState ? 'Tilbud publisert' : 'Tilbud skjult',
+        title: newPublishedState ? '✅ Tilbud publisert' : '🔒 Tilbud skjult',
         description: newPublishedState 
-          ? 'Tilbudet er nå offentlig tilgjengelig' 
-          : 'Tilbudet er nå skjult fra offentlig visning',
+          ? 'Tilbudet er nå synlig på profilsiden' 
+          : 'Tilbudet er nå skjult fra profilsiden',
       });
       
-      refetch();
+      await refetch();
+      console.log('♻️ Refetch completed');
+      
     } catch (error: any) {
-      console.error('❌ Error toggling visibility:', error);
+      console.error('❌ TOGGLE ERROR:', error);
       toast({
         title: 'Kunne ikke endre synlighet',
         description: error.message,

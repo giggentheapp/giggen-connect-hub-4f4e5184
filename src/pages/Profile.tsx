@@ -136,22 +136,28 @@ const Profile = () => {
           });
 
           // Fetch published concepts (tilbud) - KUN SYNLIGE
-          const { data: conceptsData } = await supabase
+          const { data: conceptsData, error: conceptsError } = await supabase
             .from('concepts')
             .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement, is_published')
             .eq('maker_id', userId)
             .eq('is_published', true)
             .order('created_at', { ascending: false });
-          
-          console.log('📋 Concepts loaded on profile page:', {
+
+          console.log('📋 PROFILE CONCEPTS LOADED:', {
             userId,
             isOwnProfile,
-            totalConcepts: conceptsData?.length || 0,
+            conceptsError,
+            totalFound: conceptsData?.length || 0,
             concepts: conceptsData?.map(c => ({
               title: c.title,
-              is_published: c.is_published
+              is_published: c.is_published,
+              id: c.id
             }))
           });
+
+          if (conceptsError) {
+            console.error('❌ Error loading concepts:', conceptsError);
+          }
           
           setConcepts(conceptsData || []);
 
