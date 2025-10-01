@@ -50,17 +50,20 @@ export const ConceptPortfolioUpload = ({
         return;
       }
 
-      console.log('Concept portfolio upload', { 
-        userId, 
-        isAuthenticated: !!user,
-        operation: 'upload',
-        filename: fileData.filename
-      });
+      // ✅ Generate correct file URL
+      const correctUrl = fileData.file_url || fileData.publicUrl || 
+        `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${fileData.file_path}`;
 
-      // Pass through to parent handler
-      onFileUploaded(fileData);
+      const enrichedFileData = {
+        ...fileData,
+        file_url: correctUrl,
+        publicUrl: correctUrl
+      };
+
+      console.log('✅ File uploaded with URL:', enrichedFileData.file_url);
+      onFileUploaded(enrichedFileData);
     } catch (error) {
-      console.error('Error in concept portfolio upload:', error);
+      console.error('❌ Upload error:', error);
       toast({
         title: "Feil ved opplasting",
         description: "En feil oppstod under opplasting av filen",

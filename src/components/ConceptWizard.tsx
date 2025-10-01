@@ -183,18 +183,26 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
         }
 
         const fileRecords = Array.isArray(conceptData.portfolio_files) 
-          ? conceptData.portfolio_files.filter(file => file && file.filename).map(file => ({
-          creator_id: user.id,
-          concept_id: conceptId,
-          filename: file.filename,
-          file_path: file.file_path,
-          file_type: file.file_type,
-          file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`,
-          mime_type: file.mime_type,
-          file_size: file.file_size,
-          title: file.title || file.filename,
-          is_public: true
-        }))
+          ? conceptData.portfolio_files.filter(file => file && file.filename).map(file => {
+            // ✅ Generate correct URL
+            const fileUrl = file.file_url || file.publicUrl || 
+              `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
+            
+            console.log('✅ Saving file with URL:', { filename: file.filename, fileUrl });
+            
+            return {
+              creator_id: user.id,
+              concept_id: conceptId,
+              filename: file.filename,
+              file_path: file.file_path,
+              file_type: file.file_type,
+              file_url: fileUrl,
+              mime_type: file.mime_type,
+              file_size: file.file_size,
+              title: file.title || file.filename,
+              is_public: true
+            };
+          })
           : [];
 
         const { error: filesError } = await supabase

@@ -82,17 +82,12 @@ const ConceptCard = ({
   const [loading, setLoading] = useState(true);
   const [showActionsDialog, setShowActionsDialog] = useState(false);
   const [profileSettings, setProfileSettings] = useState<any>(null);
-  const [isPublished, setIsPublished] = useState(concept.is_published);
   
   const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
   useEffect(() => {
     loadConceptData();
   }, [concept.id]);
-
-  useEffect(() => {
-    setIsPublished(concept.is_published);
-  }, [concept.is_published]);
 
   const loadConceptData = async () => {
     try {
@@ -106,6 +101,16 @@ const ConceptCard = ({
       if (filesError) {
         console.error('Error loading concept files:', filesError);
       } else {
+        console.log('🔍 Concept files loaded:', {
+          conceptId: concept.id,
+          fileCount: filesData?.length || 0,
+          files: filesData?.map(f => ({
+            id: f.id,
+            filename: f.filename,
+            file_url: f.file_url,
+            has_url: !!f.file_url
+          }))
+        });
         setConceptFiles(filesData || []);
       }
 
@@ -189,10 +194,10 @@ const ConceptCard = ({
             <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
               <CardTitle className="text-base md:text-xl">{concept.title}</CardTitle>
               <Badge 
-                variant={isPublished ? "default" : "secondary"} 
+                variant={concept.is_published ? "default" : "secondary"} 
                 className="text-xs"
               >
-                {isPublished ? t('conceptCard.published') : t('conceptCard.draft')}
+                {concept.is_published ? t('conceptCard.published') : t('conceptCard.draft')}
               </Badge>
             </div>
             {concept.description && (
