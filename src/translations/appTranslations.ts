@@ -368,7 +368,7 @@ export const appTranslations = {
     // Booking Request
     "Book nå": "Book nå",
     sendBookingRequest: "Send booking-forespørsel",
-    selectOfferAndSendMessage: "Velg et tilbud og send en melding til artistenselect",
+    selectOfferAndSendMessage: "Velg et tilbud og send en melding til artisten",
     selectOffer: "Velg tilbud",
     mustCreateOffersFirst: "Du må opprette tilbud før du kan sende booking-forespørsler",
     selectedOffer: "Valgt tilbud",
