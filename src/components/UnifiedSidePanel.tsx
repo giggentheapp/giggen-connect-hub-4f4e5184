@@ -134,7 +134,7 @@ export const UnifiedSidePanel = ({
             viewerRole={profile.role}
           />;
         } else if (isArtist) {
-          return <ProfileSection profile={profile} />;
+          return <ProfileSection profile={profile} isOwnProfile={true} />;
         }
         return null;
       case 'bookings':

@@ -10,18 +10,31 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 interface ProfileSectionProps {
   profile: UserProfile;
+  isOwnProfile?: boolean;
 }
 export const ProfileSection = ({
-  profile
+  profile,
+  isOwnProfile = false
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
-  console.log('🚨 ProfileSection RENDERED for user:', profile.user_id);
-  console.log('🚨 ProfileSection will call UpcomingEventsSection with isAdminView=true');
+  console.log('🚨 ProfileSection RENDERED for user:', profile.user_id, 'isOwnProfile:', isOwnProfile);
   
   const {
-    concepts,
+    concepts: allConcepts,
     loading: conceptsLoading
   } = useUserConcepts(profile.user_id);
+  
+  // Filter concepts based on who is viewing
+  const concepts = isOwnProfile 
+    ? allConcepts 
+    : allConcepts.filter(c => c.is_published);
+  
+  console.log('📊 ProfileSection concepts:', {
+    total: allConcepts.length,
+    published: allConcepts.filter(c => c.is_published).length,
+    showing: concepts.length,
+    isOwnProfile
+  });
   return <div className="space-y-6">
       {/* Basic Profile Info */}
       <Card>
