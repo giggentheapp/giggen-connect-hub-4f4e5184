@@ -47,6 +47,19 @@ export const useUserConcepts = (userId: string | undefined) => {
 
       if (fetchError) throw fetchError;
 
+      console.log('🔍 useUserConcepts fetched:', {
+        userId,
+        total: data?.length || 0,
+        published: data?.filter(c => c.is_published).length || 0,
+        unpublished: data?.filter(c => !c.is_published).length || 0,
+        concepts: data?.map(c => ({
+          id: c.id,
+          title: c.title,
+          is_published: c.is_published,
+          status: c.status
+        }))
+      });
+
       setConcepts(data || []);
     } catch (err: unknown) {
       logger.error('Failed to fetch user concepts', err);
