@@ -701,36 +701,27 @@ export type Database = {
           created_at: string
           id: string
           maker_id: string
-          show_about: boolean
           show_contact: boolean
-          show_events: boolean
           show_on_map: boolean
-          show_portfolio: boolean
-          show_techspec: boolean
+          show_public_profile: boolean
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           maker_id: string
-          show_about?: boolean
           show_contact?: boolean
-          show_events?: boolean
           show_on_map?: boolean
-          show_portfolio?: boolean
-          show_techspec?: boolean
+          show_public_profile?: boolean
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           maker_id?: string
-          show_about?: boolean
           show_contact?: boolean
-          show_events?: boolean
           show_on_map?: boolean
-          show_portfolio?: boolean
-          show_techspec?: boolean
+          show_public_profile?: boolean
           updated_at?: string
         }
         Relationships: [

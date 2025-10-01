@@ -19,12 +19,9 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 
 interface ProfileSettings {
-  show_about: boolean;
-  show_contact: boolean;
-  show_portfolio: boolean;
-  show_techspec: boolean;
-  show_events: boolean;
+  show_public_profile: boolean;
   show_on_map: boolean;
+  show_contact: boolean;
 }
 
 interface PrivacySettings {
@@ -136,12 +133,9 @@ export const UserSettings = ({
         } else {
           // Create default settings for artist if none exist
           const defaultSettings = {
-            show_about: false,
-            show_contact: false,
-            show_portfolio: false,
-            show_techspec: false,
-            show_events: false,
-            show_on_map: false
+            show_public_profile: false,
+            show_on_map: false,
+            show_contact: false
           };
           setProfileSettings(defaultSettings);
         }
@@ -764,190 +758,81 @@ export const UserSettings = ({
         </Card>
       )}
 
-      {/* Consolidated Privacy Settings for Artists */}
+      {/* Simplified Privacy Settings for Artists */}
       {profileData.role === 'artist' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              {t('visibilityAndPrivacy')}
+              Synlighetsinnstillinger
             </CardTitle>
             <CardDescription>
-              {t('controlWhoSees')}
+              Styr hva som vises på din offentlige profil. Individuelle tilbud og arrangementer styres per element.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Master Profile Toggle */}
+            {/* Public Profile Toggle */}
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="space-y-1">
-                  <Label className="text-base font-medium">{t('publicProfile')}</Label>
+                  <Label className="text-base font-medium">Offentlig profil</Label>
                   <p className="text-sm text-muted-foreground">
-                    {t('makeProfileVisible')}
+                    Vis profilbilde, navn og om meg-tekst for alle
                   </p>
                 </div>
                 <Switch
-                  checked={privacySettings.show_profile_to_goers || false}
+                  checked={profileSettings?.show_public_profile || false}
+                  onCheckedChange={(checked) => updateProfileSettings({ show_public_profile: checked })}
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Location Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Lokasjon</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Vis på kart og offentlig gjør adresse synlig
+                  </p>
+                </div>
+                <Switch
+                  checked={(profileSettings?.show_on_map || false) && (profileData.is_address_public || false)}
                   onCheckedChange={(checked) => {
-                    updatePrivacySettings({ show_profile_to_goers: checked });
-                    if (!checked) {
-                      // If disabling public profile, also disable dependent settings
-                      updatePrivacySettings({ 
-                        show_portfolio_to_goers: false,
-                        show_events_to_goers: false 
-                      });
-                      updateProfileSettings({
-                        show_about: false,
-                        show_portfolio: false,
-                        show_events: false,
-                        show_on_map: false
-                      });
+                    updateProfileSettings({ show_on_map: checked });
+                    if (checked && !profileData.is_address_public) {
+                      setProfileData(prev => ({ ...prev, is_address_public: true }));
                     }
                   }}
                   disabled={loading}
                 />
               </div>
 
-              {/* Profile Content Settings - Only shown if public profile is enabled */}
-              {privacySettings.show_profile_to_goers && (
-                <>
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">{t('profileContent')}</h4>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('biographyDescription')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('showBiographyToAll')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={profileSettings?.show_about || false}
-                        onCheckedChange={(checked) => updateProfileSettings({ show_about: checked })}
-                        disabled={loading}
-                      />
-                    </div>
+              {/* Contact Info Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Kontaktinfo</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Tillat deling av kontaktinfo gjennom aktive bookinger
+                  </p>
+                </div>
+                <Switch
+                  checked={profileSettings?.show_contact || false}
+                  onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('portfolioWork')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('showWorkExamples')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={(profileSettings?.show_portfolio || false) && (privacySettings.show_portfolio_to_goers || false)}
-                        onCheckedChange={(checked) => {
-                          updateProfileSettings({ show_portfolio: checked });
-                          updatePrivacySettings({ show_portfolio_to_goers: checked });
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('eventsAndConcerts')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('showUpcomingEvents')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={(profileSettings?.show_events || false) && (privacySettings.show_events_to_goers || false)}
-                        onCheckedChange={(checked) => {
-                          updateProfileSettings({ show_events: checked });
-                          updatePrivacySettings({ show_events_to_goers: checked });
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label>{t('technicalSpecifications')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('shareTechRequirements')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={profileSettings?.show_techspec || false}
-                        onCheckedChange={(checked) => updateProfileSettings({ show_techspec: checked })}
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-4 space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">{t('locationAndContact')}</h4>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('showOnMap')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('showLocationOnMap')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={(profileSettings?.show_on_map || false) && (profileData.is_address_public || false)}
-                        onCheckedChange={(checked) => {
-                          updateProfileSettings({ show_on_map: checked });
-                          if (checked && !profileData.is_address_public) {
-                            setProfileData(prev => ({ ...prev, is_address_public: true }));
-                          }
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('publicAddress')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('makeAddressVisible')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={profileData.is_address_public || false}
-                        onCheckedChange={(checked) => {
-                          setProfileData(prev => ({ ...prev, is_address_public: checked }));
-                          if (!checked) {
-                            updateProfileSettings({ show_on_map: false });
-                          }
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                         <Label>{t('contactInfoTitle')}</Label>
-                         <p className="text-sm text-muted-foreground">
-                           {t('shareContactInfo')}
-                         </p>
-                      </div>
-                      <Switch
-                        checked={profileSettings?.show_contact || false}
-                        onCheckedChange={(checked) => updateProfileSettings({ show_contact: checked })}
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-start gap-3">
-                      <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                      <div className="text-sm text-blue-800 dark:text-blue-200">
-                         <p className="font-medium mb-1">{t('securityFirst')}</p>
-                         <p>{t('sensitiveInfoNote')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
+            {/* Information Box */}
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h4 className="text-sm font-medium mb-2">Individuelle innstillinger</h4>
+              <p className="text-sm text-muted-foreground">
+                Hvert publisert tilbud og arrangement har sin egen synlighets-toggle. Du styrer disse direkte i tilbuds- og arrangement-visningen.
+              </p>
             </div>
           </CardContent>
         </Card>
-      )}
+       )}
 
       {/* Password Change */}
       <Card>

@@ -32,11 +32,9 @@ interface ProfileData {
 }
 
 interface ProfileSettings {
-  show_about: boolean;
+  show_public_profile: boolean;
+  show_on_map: boolean;
   show_contact: boolean;
-  show_portfolio: boolean;
-  show_techspec: boolean;
-  show_events: boolean;
 }
 
 const Profile = () => {
@@ -98,11 +96,9 @@ const Profile = () => {
             .maybeSingle();
           
           setSettings(settingsData || {
-            show_about: false,
-            show_contact: false,
-            show_portfolio: false,
-            show_techspec: false,
-            show_events: false
+            show_public_profile: false,
+            show_on_map: false,
+            show_contact: false
           });
 
           // Fetch published concepts (tilbud) - KUN GRUNNLEGGENDE FELTER
@@ -116,11 +112,9 @@ const Profile = () => {
           setConcepts(conceptsData || []);
         } else {
           setSettings({
-            show_about: true,
-            show_contact: false,
-            show_portfolio: false,
-            show_techspec: false,
-            show_events: false
+            show_public_profile: true,
+            show_on_map: false,
+            show_contact: false
           });
         }
       } catch (error: any) {
@@ -201,7 +195,7 @@ const Profile = () => {
 
       <div className="space-y-8">
         {/* Om meg */}
-        {(settings?.show_about || isOwnProfile) && (
+        {(settings?.show_public_profile || isOwnProfile) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -224,7 +218,7 @@ const Profile = () => {
         )}
 
         {/* Portefølje */}
-        {(settings?.show_portfolio || isOwnProfile) && (
+        {(settings?.show_public_profile || isOwnProfile) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

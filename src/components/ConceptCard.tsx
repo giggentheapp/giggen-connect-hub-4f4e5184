@@ -90,35 +90,21 @@ const ConceptCard = ({
 
   const loadConceptData = async () => {
     try {
-      // Load profile settings for the concept owner
-      const { data: settings, error: settingsError } = await supabase
-        .from('profile_settings')
-        .select('show_portfolio, show_techspec')
-        .eq('maker_id', concept.maker_id)
-        .maybeSingle();
+      // Concepts now control their own visibility via is_published
+      // Portfolio files are always loaded for published concepts
+      const { data: filesData, error: filesError } = await supabase
+        .from('concept_files')
+        .select('id, filename, file_type, file_url, title, created_at, mime_type')
+        .eq('concept_id', concept.id);
 
-      if (settingsError) {
-        console.error('Error loading profile settings:', settingsError);
+      if (filesError) {
+        console.error('Error loading concept files:', filesError);
       } else {
-        setProfileSettings(settings);
+        setConceptFiles(filesData || []);
       }
 
-      // Load concept files (portfolio) - ONLY if show_portfolio toggle is ON
-      if (settings?.show_portfolio === true) {
-        const { data: filesData, error: filesError } = await supabase
-          .from('concept_files')
-          .select('id, filename, file_type, file_url, title, created_at, mime_type')
-          .eq('concept_id', concept.id);
-
-        if (filesError) {
-          console.error('Error loading concept files:', filesError);
-        } else {
-          setConceptFiles(filesData || []);
-        }
-      }
-
-      // Load tech spec file - ONLY if show_techspec toggle is ON
-      if (settings?.show_techspec === true && concept.tech_spec_reference) {
+      // Load tech spec file if reference exists
+      if (concept.tech_spec_reference) {
         const { data: techSpecData, error: techSpecError } = await supabase
           .from('profile_tech_specs')
           .select('id, filename, file_url, file_type')
@@ -134,7 +120,7 @@ const ConceptCard = ({
 
       // Load hospitality rider file if reference exists - always show if exists
       if (concept.hospitality_rider_reference) {
-        const { data: hospitalityRiderData, error: hospitalityRiderError } = await supabase
+        const { data: hospitalityRiderData, error: hospitalityRiderError} = await supabase
           .from('hospitality_riders')
           .select('id, filename, file_url, file_type')
           .eq('id', concept.hospitality_rider_reference)

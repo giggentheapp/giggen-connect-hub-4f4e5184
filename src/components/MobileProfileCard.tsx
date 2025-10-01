@@ -26,10 +26,9 @@ interface ProfileData {
 }
 
 interface ProfileSettings {
-  show_portfolio?: boolean;
-  show_about?: boolean;
+  show_public_profile?: boolean;
+  show_on_map?: boolean;
   show_contact?: boolean;
-  show_events?: boolean;
 }
 
 interface Concept {
@@ -60,10 +59,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [settings, setSettings] = useState<ProfileSettings>({
-    show_portfolio: false,
-    show_about: false,
-    show_contact: false,
-    show_events: false
+    show_public_profile: false,
+    show_on_map: false,
+    show_contact: false
   });
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -75,10 +73,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     if (!userId) {
       setProfile(null);
       setSettings({
-        show_portfolio: false,
-        show_about: false,
-        show_contact: false,
-        show_events: false
+        show_public_profile: false,
+        show_on_map: false,
+        show_contact: false
       });
       setConcepts([]);
       setEvents([]);
@@ -96,10 +93,10 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
     if (!profile) return;
     
     const tabs = [
-      settings.show_about && 'info',
+      settings.show_public_profile && 'info',
       concepts.length > 0 && 'concepts',
-      settings.show_portfolio && 'portfolio',
-      settings.show_events && 'events'
+      settings.show_public_profile && 'portfolio',
+      events.length > 0 && 'events'
     ].filter(Boolean) as string[];
     
     console.log('Available tabs:', tabs);
@@ -130,10 +127,10 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
       console.log('Profile data:', profileData);
 
-      // Fetch settings
+      // Fetch settings - simplified structure now
       const { data: settingsData, error: settingsError } = await supabase
         .from('profile_settings')
-        .select('show_portfolio, show_about, show_contact, show_events')
+        .select('show_public_profile, show_on_map, show_contact')
         .eq('maker_id', userId)
         .maybeSingle();
 
@@ -142,10 +139,9 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
       setProfile(profileData);
       setSettings(settingsData || {
-        show_portfolio: false,
-        show_about: false,
-        show_contact: false,
-        show_events: false
+        show_public_profile: false,
+        show_on_map: false,
+        show_contact: false
       });
     } catch (err) {
       console.error('Error fetching profile:', err);
@@ -202,16 +198,15 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
 
   if (!userId || !profile) return null;
 
-  const showPortfolio = settings.show_portfolio ?? false;
-  const showAbout = settings.show_about ?? false;
-  const showEvents = settings.show_events ?? false;
+  const showProfile = settings.show_public_profile ?? false;
+  const showLocation = settings.show_on_map ?? false;
 
-  // Determine available tabs
+  // Determine available tabs - simplified
   const tabs = [
-    showAbout && 'info',
+    showProfile && 'info',
     concepts.length > 0 && 'concepts',
-    showPortfolio && 'portfolio',
-    showEvents && 'events'
+    showProfile && 'portfolio',
+    events.length > 0 && 'events'
   ].filter(Boolean);
   
   const availableTabs = tabs.length;
@@ -284,7 +279,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
           <div className="flex-1 overflow-hidden flex flex-col">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <TabsList className="w-full grid rounded-none flex-shrink-0 bg-muted" style={{ gridTemplateColumns: `repeat(${availableTabs}, 1fr)` }}>
-                {showAbout && (
+                {showProfile && (
                   <TabsTrigger value="info" className="text-xs px-2">
                     <Eye className="w-3 h-3 mr-1" />
                     Om
@@ -296,13 +291,13 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                     Tilbud
                   </TabsTrigger>
                 )}
-                {showPortfolio && (
+                {showProfile && (
                   <TabsTrigger value="portfolio" className="text-xs px-2">
                     <ImageIcon className="w-3 h-3 mr-1" />
                     Media
                   </TabsTrigger>
                 )}
-                {showEvents && (
+                {events.length > 0 && (
                   <TabsTrigger value="events" className="text-xs px-2">
                     <Calendar className="w-3 h-3 mr-1" />
                     Event
@@ -310,7 +305,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 )}
               </TabsList>
 
-              {showAbout && (
+              {showProfile && (
                 <TabsContent value="info" className="p-4 space-y-4 flex-1 overflow-y-auto">
                   {/* Bio */}
                   {profile.bio && (
@@ -361,7 +356,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 </TabsContent>
               )}
 
-              {showPortfolio && (
+              {showProfile && (
                 <TabsContent value="portfolio" className="p-4 flex-1 overflow-y-auto">
                   <ProfilePortfolioViewer 
                     userId={userId}
@@ -371,7 +366,7 @@ export const MobileProfileCard = ({ userId, onClose }: MobileProfileCardProps) =
                 </TabsContent>
               )}
 
-              {showEvents && (
+              {events.length > 0 && (
                 <TabsContent value="events" className="p-4 space-y-3 flex-1 overflow-y-auto">
                   {events.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">

@@ -116,14 +116,16 @@ export const ProfileModal = ({
         if (isOwnProfile) {
           setPortfolioVisible(true);
         } else {
-          // Check if maker has enabled portfolio sharing in profile_settings
-          const { data: profileSettings } = await supabase
-            .from('profile_settings')
-            .select('show_portfolio')
-            .eq('maker_id', userId)
-            .single();
-          
-          const showPortfolio = profileSettings?.show_portfolio === true;
+        // Check if maker has enabled portfolio sharing in profile_settings
+        // Portfolio files visibility is now controlled per-concept via is_published
+        // So we just check if portfolio display is enabled in general
+        const { data: profileSettings } = await supabase
+          .from('profile_settings')
+          .select('show_public_profile')
+          .eq('maker_id', userId)
+          .single();
+        
+        const showPortfolio = profileSettings?.show_public_profile === true;
           
           console.log('📁 Portfolio visibility check:', {
             userId,
