@@ -81,7 +81,6 @@ const ConceptCard = ({
   const [loading, setLoading] = useState(true);
   const [showActionsDialog, setShowActionsDialog] = useState(false);
   const [profileSettings, setProfileSettings] = useState<any>(null);
-  const [isOwnConcept, setIsOwnConcept] = useState(false);
   
   const { rejectConcept, deleteConcept, loading: actionLoading } = useConceptActions();
 
@@ -91,11 +90,6 @@ const ConceptCard = ({
 
   const loadConceptData = async () => {
     try {
-      // Check if this is the user's own concept
-      const { data: { user } } = await supabase.auth.getUser();
-      const isOwn = user?.id === concept.maker_id;
-      setIsOwnConcept(isOwn);
-
       // Load profile settings for the concept owner
       const { data: settings, error: settingsError } = await supabase
         .from('profile_settings')
@@ -109,9 +103,8 @@ const ConceptCard = ({
         setProfileSettings(settings);
       }
 
-      // Load concept files (portfolio) - only if allowed
-      const shouldShowPortfolio = isOwn || settings?.show_portfolio === true;
-      if (shouldShowPortfolio) {
+      // Load concept files (portfolio) - ONLY if show_portfolio toggle is ON
+      if (settings?.show_portfolio === true) {
         const { data: filesData, error: filesError } = await supabase
           .from('concept_files')
           .select('id, filename, file_type, file_url, title, created_at, mime_type')
@@ -124,9 +117,8 @@ const ConceptCard = ({
         }
       }
 
-      // Load tech spec file if reference exists - only if allowed
-      const shouldShowTechSpec = isOwn || settings?.show_techspec === true;
-      if (shouldShowTechSpec && concept.tech_spec_reference) {
+      // Load tech spec file - ONLY if show_techspec toggle is ON
+      if (settings?.show_techspec === true && concept.tech_spec_reference) {
         const { data: techSpecData, error: techSpecError } = await supabase
           .from('profile_tech_specs')
           .select('id, filename, file_url, file_type')
