@@ -85,6 +85,8 @@ const Profile = () => {
           updated_at: profileData.created_at
         } as ProfileData;
 
+        setProfile(typedProfileData);
+
         // Fetch settings
         if (profileData.role === 'artist') {
           const { data: settingsData } = await supabase
@@ -93,22 +95,11 @@ const Profile = () => {
             .eq('maker_id', userId)
             .maybeSingle();
           
-          const profileSettings = settingsData || {
+          setSettings(settingsData || {
             show_public_profile: false,
             show_on_map: false,
             show_contact: false
-          };
-          
-          setSettings(profileSettings);
-
-          // Check if profile should be visible to non-owners
-          const isOwner = currentUser?.id === userId;
-          if (!isOwner && !profileSettings.show_public_profile) {
-            // Profile is private and viewer is not the owner
-            setProfile(null);
-            setLoading(false);
-            return;
-          }
+          });
 
           // Fetch published concepts (tilbud) - KUN SYNLIGE
           const { data: conceptsData } = await supabase
@@ -126,8 +117,6 @@ const Profile = () => {
             show_contact: false
           });
         }
-        
-        setProfile(typedProfileData);
       } catch (error: any) {
         console.error('Error fetching profile:', error);
         toast({
