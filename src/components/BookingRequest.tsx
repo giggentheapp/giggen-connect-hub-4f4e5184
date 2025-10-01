@@ -158,15 +158,15 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           {t('Book nå')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl w-full h-full sm:h-auto max-h-screen sm:max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
+      <DialogContent className="w-full h-full sm:max-w-2xl sm:h-auto sm:max-h-[90vh] flex flex-col p-0 m-0 sm:rounded-lg rounded-none max-w-none">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b shrink-0">
           <DialogTitle className="text-lg sm:text-xl">{t('sendBookingRequest')}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {t('selectOfferAndSendMessage')}
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
           <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-6">
             {/* Concept Selection */}
             <div className="space-y-3">
@@ -178,7 +178,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                   {t('mustCreateOffersFirst')}
                 </p>
               ) : (
-                <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-1 gap-3">
                   {concepts.filter(concept => concept && concept.id).map((concept) => (
                     <Card 
                       key={concept.id} 
@@ -193,15 +193,15 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                       <CardContent className="p-3">
                         <div className="flex items-start gap-3">
                           <div className={cn(
-                            "mt-1 h-4 w-4 rounded border-2",
+                            "mt-1 h-4 w-4 rounded border-2 shrink-0",
                             selectedConcept?.id === concept.id 
                               ? "border-primary bg-primary" 
                               : "border-muted-foreground"
                           )} />
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
                             {concept.description && (
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
                                 {concept.description}
                               </p>
                             )}
@@ -244,7 +244,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                     placeholder={t('personalMessagePlaceholder')}
                     value={personalMessage}
                     onChange={(e) => setPersonalMessage(e.target.value)}
-                    className="min-h-[120px] text-base"
+                    className="min-h-[120px] text-base resize-none"
                     required
                   />
                 </div>
@@ -254,7 +254,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                   <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
                     {t('whatHappensNext')}
                   </h4>
-                  <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                  <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                     <p>• {t('receiverGetsNotification')}</p>
                     <p>• {t('canSeeOfferDetails')}</p>
                     <p>• {t('canAllowRequest')}</p>
@@ -267,7 +267,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           </div>
 
           {/* Submit Button - Always visible at bottom */}
-          <div className="border-t px-4 sm:px-6 py-4 bg-background flex justify-end gap-3">
+          <div className="border-t px-4 sm:px-6 py-3 sm:py-4 bg-background shrink-0 flex justify-end gap-3">
             <Button 
               type="button" 
               variant="outline" 
