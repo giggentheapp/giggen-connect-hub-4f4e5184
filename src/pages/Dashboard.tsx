@@ -153,7 +153,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4 shadow-glow"></div>
-          <p className="text-lg font-medium bg-gradient-primary bg-clip-text text-transparent">{t('loadingDashboard')}</p>
+          <p className="text-lg font-medium bg-gradient-primary bg-clip-text text-transparent">{t('GIGGEN laster ...')}</p>
         </div>
       </div>
     );
