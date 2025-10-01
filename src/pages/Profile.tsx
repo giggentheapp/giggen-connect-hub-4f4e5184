@@ -138,10 +138,11 @@ const Profile = () => {
           // Fetch published concepts (tilbud) - KUN SYNLIGE
           const { data: conceptsData, error: conceptsError } = await supabase
             .from('concepts')
-            .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement, is_published')
+            .select('id, title, description, price, expected_audience, door_deal, door_percentage, price_by_agreement, is_published, updated_at')
             .eq('maker_id', userId)
             .eq('is_published', true)
-            .order('created_at', { ascending: false });
+            .not('is_published', 'is', null)
+            .order('updated_at', { ascending: false });
 
           console.log('📋 PROFILE CONCEPTS LOADED:', {
             userId,
