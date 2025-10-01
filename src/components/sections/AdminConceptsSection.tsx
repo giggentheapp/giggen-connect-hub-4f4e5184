@@ -33,12 +33,23 @@ export const AdminConceptsSection = ({
     try {
       const newPublishedState = !currentState;
       
+      console.log('🔄 Toggling concept visibility:', {
+        conceptId,
+        from: currentState,
+        to: newPublishedState
+      });
+      
       const { error } = await supabase
         .from('concepts')
-        .update({ is_published: newPublishedState })
+        .update({ 
+          is_published: newPublishedState,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', conceptId);
 
       if (error) throw error;
+
+      console.log('✅ Concept visibility updated in database');
 
       toast({
         title: newPublishedState ? 'Tilbud publisert' : 'Tilbud skjult',
@@ -49,7 +60,7 @@ export const AdminConceptsSection = ({
       
       refetch();
     } catch (error: any) {
-      console.error('Error toggling visibility:', error);
+      console.error('❌ Error toggling visibility:', error);
       toast({
         title: 'Kunne ikke endre synlighet',
         description: error.message,
