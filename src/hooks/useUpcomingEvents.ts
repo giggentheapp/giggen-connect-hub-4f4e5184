@@ -16,6 +16,7 @@ interface UpcomingEvent {
   // For identifying user role in the event
   is_sender: boolean;
   is_receiver: boolean;
+  is_public_after_approval?: boolean;
 }
 
 export const useUpcomingEvents = (userId: string) => {
@@ -61,7 +62,8 @@ export const useUpcomingEvents = (userId: string) => {
         status: booking.status,
         created_at: booking.created_at,
         is_sender: booking.sender_id === userId,
-        is_receiver: booking.receiver_id === userId
+        is_receiver: booking.receiver_id === userId,
+        is_public_after_approval: booking.is_public_after_approval
       }));
 
       setEvents(upcomingEvents);
