@@ -13,6 +13,7 @@ import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useNavigate } from 'react-router-dom';
+import { MobileNavigation } from '@/components/navigation/MobileNavigation';
 
 interface ProfileData {
   id: string;
@@ -250,9 +251,14 @@ const Profile = () => {
     );
   }
 
+  const handleNavigation = (section: string) => {
+    navigate(`/?section=${section}`);
+  };
+
   return (
-    <div className="container mx-auto p-3 md:p-6 max-w-4xl">
-      {/* Header - Compact Mobile */}
+    <>
+      <div className="container mx-auto p-3 md:p-6 max-w-4xl pb-20 md:pb-6">
+        {/* Header - Compact Mobile */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-14 w-14 sm:h-16 sm:w-16">
@@ -448,6 +454,12 @@ const Profile = () => {
         </Card>
       </div>
     </div>
+    
+    <MobileNavigation 
+      activeSection="profile"
+      onSectionChange={handleNavigation}
+    />
+  </>
   );
 };
 
