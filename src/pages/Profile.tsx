@@ -45,6 +45,7 @@ const Profile = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [concepts, setConcepts] = useState<any[]>([]);
+  const [conceptFiles, setConceptFiles] = useState<Record<string, any[]>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(userId);
@@ -143,6 +144,20 @@ const Profile = () => {
             .order('created_at', { ascending: false });
           
           setConcepts(conceptsData || []);
+
+          // Fetch portfolio files for each published concept
+          if (conceptsData && conceptsData.length > 0) {
+            const filesMap: Record<string, any[]> = {};
+            for (const concept of conceptsData) {
+              const { data: filesData } = await supabase
+                .from('concept_files')
+                .select('*')
+                .eq('concept_id', concept.id)
+                .order('created_at', { ascending: false });
+              filesMap[concept.id] = filesData || [];
+            }
+            setConceptFiles(filesMap);
+          }
         } else {
           setSettings({
             show_public_profile: true,
@@ -303,37 +318,70 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-3">
-                {concepts.map((concept) => (
-                  <Card 
-                    key={concept.id} 
-                    className="bg-muted/30 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleConceptClick(concept.id)}
-                  >
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-base mb-2">{concept.title}</h3>
-                      {concept.description && (
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{concept.description}</p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {concept.price && !concept.door_deal && !concept.price_by_agreement && (
-                          <Badge variant="outline" className="text-xs">{concept.price} kr</Badge>
+                 {concepts.map((concept) => {
+                  const files = conceptFiles[concept.id] || [];
+                  return (
+                    <Card 
+                      key={concept.id} 
+                      className="bg-muted/30 cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => handleConceptClick(concept.id)}
+                    >
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-base mb-2">{concept.title}</h3>
+                        {concept.description && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{concept.description}</p>
                         )}
-                        {concept.door_deal && (
-                          <Badge variant="outline" className="text-xs">
-                            {concept.door_percentage}% av dørinntekter
-                          </Badge>
+                        
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {concept.price && !concept.door_deal && !concept.price_by_agreement && (
+                            <Badge variant="outline" className="text-xs">{concept.price} kr</Badge>
+                          )}
+                          {concept.door_deal && (
+                            <Badge variant="outline" className="text-xs">
+                              {concept.door_percentage}% av dørinntekter
+                            </Badge>
+                          )}
+                          {concept.price_by_agreement && (
+                            <Badge variant="outline" className="text-xs">Pris ved avtale</Badge>
+                          )}
+                          {concept.expected_audience && (
+                            <Badge variant="outline" className="text-xs">{concept.expected_audience} publikum</Badge>
+                          )}
+                        </div>
+
+                        {/* Portfolio files preview */}
+                        {files.length > 0 && (
+                          <div className="border-t pt-3">
+                            <p className="text-xs text-muted-foreground mb-2">Portefølje ({files.length})</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              {files.slice(0, 3).map((file) => {
+                                const fileUrl = file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
+                                return (
+                                  <div key={file.id} className="aspect-square rounded overflow-hidden bg-muted">
+                                    {file.file_type === 'image' && (
+                                      <img src={fileUrl} alt={file.title || file.filename} className="w-full h-full object-cover" />
+                                    )}
+                                    {file.file_type === 'video' && (
+                                      <video src={fileUrl} className="w-full h-full object-cover" muted />
+                                    )}
+                                    {file.file_type === 'audio' && (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            {files.length > 3 && (
+                              <p className="text-xs text-muted-foreground mt-2">+{files.length - 3} til</p>
+                            )}
+                          </div>
                         )}
-                        {concept.price_by_agreement && (
-                          <Badge variant="outline" className="text-xs">Pris ved avtale</Badge>
-                        )}
-                        {concept.expected_audience && (
-                          <Badge variant="outline" className="text-xs">{concept.expected_audience} publikum</Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
