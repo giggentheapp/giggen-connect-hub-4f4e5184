@@ -24,15 +24,13 @@ export const ProfileSection = ({
     loading: conceptsLoading
   } = useUserConcepts(profile.user_id);
   
-  // Filter concepts based on who is viewing
-  const concepts = isOwnProfile 
-    ? allConcepts 
-    : allConcepts.filter(c => c.is_published);
+  // ProfileSection is the PUBLIC view - ALWAYS show only published concepts
+  // regardless of who is viewing (even if viewing own profile)
+  const concepts = allConcepts.filter(c => c.is_published);
   
-  console.log('📊 ProfileSection concepts:', {
+  console.log('📊 ProfileSection concepts (PUBLIC VIEW):', {
     total: allConcepts.length,
-    published: allConcepts.filter(c => c.is_published).length,
-    showing: concepts.length,
+    published: concepts.length,
     isOwnProfile
   });
   return <div className="space-y-6">
