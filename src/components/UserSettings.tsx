@@ -466,7 +466,6 @@ export const UserSettings = ({
             <div className="space-y-1 md:space-y-2">
               <h3 className="text-xs md:text-sm font-medium">{t('profilePicture')}</h3>
               <p className="text-xs md:text-sm text-muted-foreground">
-                {t('selectProfilePicture')}
               </p>
               <Button 
                 variant="outline" 
