@@ -127,16 +127,6 @@ export const BookingCardStep1 = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex gap-1.5">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onDetailsClick}
-              className="h-7 px-2 text-xs"
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              Detaljer
-            </Button>
-            
             {booking.concept_ids && booking.concept_ids.length > 0 && (
               <Button 
                 size="sm" 
