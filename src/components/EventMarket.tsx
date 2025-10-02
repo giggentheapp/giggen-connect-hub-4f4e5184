@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 
@@ -91,58 +91,48 @@ export const EventMarket = () => {
       </div>
 
       {events.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-8">
-            <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">Ingen offentlige arrangementer tilgjengelig</p>
-          </CardContent>
-        </Card>
+        <div className="text-center py-8">
+          <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <p className="text-muted-foreground">Ingen offentlige arrangementer tilgjengelig</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {events.map((event) => (
             <Card 
               key={event.id} 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+              className="hover:shadow-md transition-all cursor-pointer"
               onClick={() => handleEventClick(event.id)}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
-                  <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                    Offentlig
-                  </Badge>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
+              <div className="p-4 space-y-2">
+                <h3 className="text-lg font-semibold line-clamp-2">{event.title}</h3>
+                
                 {event.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-3">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
                     {event.description}
                   </p>
                 )}
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-wrap gap-4 text-sm pt-2">
+                  <div className="flex items-center gap-1.5">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>{formatEventDate(event.date)}</span>
-                    {event.time && (
-                      <>
-                        <Clock className="h-4 w-4 text-muted-foreground ml-2" />
-                        <span>{formatEventTime(event.time)}</span>
-                      </>
-                    )}
                   </div>
+                  
+                  {event.time && (
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span>{formatEventTime(event.time)}</span>
+                    </div>
+                  )}
 
                   {event.venue && (
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="line-clamp-1">{event.venue}</span>
                     </div>
                   )}
-
-                  {/* Security: Ticket prices removed from public display */}
                 </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>

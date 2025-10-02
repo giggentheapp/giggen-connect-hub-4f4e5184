@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -203,7 +203,7 @@ export const ArtistExploreSection = ({
           <div className="h-full p-3 md:p-4">
             <div className="max-w-4xl mx-auto h-full">
               <Card className="h-full flex items-center justify-center">
-                <CardContent className="p-8 text-center max-w-2xl">
+                <div className="p-8 text-center max-w-2xl">
                   {/* Map Icon */}
                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <MapPin className="w-10 h-10 text-primary" />
@@ -211,7 +211,7 @@ export const ArtistExploreSection = ({
 
                   {/* Main Title */}
                   <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
-                </CardContent>
+                </div>
               </Card>
             </div>
           </div>
@@ -265,90 +265,59 @@ export const ArtistExploreSection = ({
                       {filteredEvents.map((event) => (
                         <Card 
                           key={event.id} 
-                          className="group border bg-background hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer"
+                          className="hover:shadow-md transition-all cursor-pointer"
                           onClick={() => handleViewEvent(event.id)}
                         >
-                          <CardContent className="p-4">
-                            <div className="space-y-3">
-                              {/* Event Header */}
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-semibold text-foreground truncate">
-                                      {event.title}
-                                    </h3>
-                                     <Badge variant="secondary" className="shrink-0">
-                                       <Calendar className="w-3 h-3 mr-1" />
-                                       {event.event_date 
-                                         ? new Date(event.event_date).toLocaleDateString('no-NO', { 
-                                             day: 'numeric', 
-                                             month: 'short',
-                                             year: 'numeric'
-                                           })
-                                         : 'Ved avtale'
-                                       }
-                                     </Badge>
-                                  </div>
-                                  
-                                  {event.time && (
-                                    <p className="text-xs text-muted-foreground mb-2">
-                                      Kl. {event.time}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
+                          <div className="p-4 space-y-2">
+                            <h3 className="text-lg font-semibold">{event.title}</h3>
+                            
+                            {event.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {event.description}
+                              </p>
+                            )}
 
-                              {/* Event Description */}
-                              {event.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {event.description}
-                                </p>
-                              )}
-
-                              {/* Event Location */}
-                              {(event.venue || event.address) && (
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <MapPin className="w-4 h-4 mr-1 shrink-0" />
-                                  <span className="truncate">
-                                    {event.venue}
-                                    {event.venue && event.address && ', '}
-                                    {event.address}
+                            <div className="flex flex-wrap gap-4 text-sm pt-2">
+                              {event.event_date && (
+                                <div className="flex items-center gap-1.5">
+                                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                                  <span>
+                                    {new Date(event.event_date).toLocaleDateString('no-NO', { 
+                                      day: 'numeric', 
+                                      month: 'short',
+                                      year: 'numeric'
+                                    })}
                                   </span>
                                 </div>
                               )}
-
-                              {/* Event Details */}
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {event.ticket_price && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {event.ticket_price} kr
-                                  </Badge>
-                                )}
-                                {event.audience_estimate && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <Users className="w-3 h-3 mr-1" />
-                                    {event.audience_estimate} publikum
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* View Button */}
-                              <div className="pt-2">
-                                <Button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewEvent(event.id);
-                                  }}
-                                  variant="outline" 
-                                  size="sm"
-                                  className="w-full"
-                                >
-                                  <Eye className="w-3 h-3 mr-2" />
-                                  Se detaljer
-                                </Button>
-                              </div>
+                              
+                              {event.time && (
+                                <div className="flex items-center gap-1.5">
+                                  <span>Kl. {event.time}</span>
+                                </div>
+                              )}
+                              
+                              {event.venue && (
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                                  <span>{event.venue}</span>
+                                </div>
+                              )}
+                              
+                              {event.ticket_price && (
+                                <div className="flex items-center gap-1.5">
+                                  <span>{event.ticket_price} kr</span>
+                                </div>
+                              )}
+                              
+                              {event.audience_estimate && (
+                                <div className="flex items-center gap-1.5">
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span>{event.audience_estimate}</span>
+                                </div>
+                              )}
                             </div>
-                          </CardContent>
+                          </div>
                         </Card>
                       ))}
                     </div>
@@ -407,10 +376,10 @@ export const ArtistExploreSection = ({
                       {filteredMakers.map((maker) => (
                         <Card 
                           key={maker.id} 
-                          className="group border bg-background hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer"
+                          className="hover:shadow-md transition-all cursor-pointer"
                           onClick={() => navigate(`/profile/${maker.user_id}`)}
                         >
-                          <CardContent className="p-4">
+                          <div className="p-4 space-y-2">
                             <div className="flex items-center gap-4">
                               {/* Avatar */}
                               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
@@ -427,7 +396,7 @@ export const ArtistExploreSection = ({
 
                               {/* Info */}
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground truncate">
+                                <h3 className="font-semibold text-foreground">
                                   {maker.display_name}
                                 </h3>
                                 {maker.bio && (
@@ -442,22 +411,8 @@ export const ArtistExploreSection = ({
                                   </div>
                                 )}
                               </div>
-
-                              {/* View Button */}
-                              <Button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/profile/${maker.user_id}`);
-                                }}
-                                variant="outline" 
-                                size="sm"
-                                className="shrink-0"
-                              >
-                                <Eye className="w-3 h-3 mr-2" />
-                                Se profil
-                              </Button>
                             </div>
-                          </CardContent>
+                          </div>
                         </Card>
                       ))}
                     </div>

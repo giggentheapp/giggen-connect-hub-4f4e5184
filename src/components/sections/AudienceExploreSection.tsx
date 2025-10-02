@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -353,47 +353,47 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                 {filteredEvents.map((event) => (
                   <Card 
                     key={event.id}
-                    className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                    className="hover:shadow-md transition-all cursor-pointer"
                     onClick={() => navigate(`/arrangement/${event.id}`)}
                   >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-base line-clamp-2">{event.title}</h3>
-                          <Badge variant="secondary" className="shrink-0">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            {event.date && new Date(event.date).toLocaleDateString('no-NO', { day: 'numeric', month: 'short' })}
-                          </Badge>
-                        </div>
-                        
-                        {event.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {event.description}
-                          </p>
-                        )}
-                        
-                        {event.venue && (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="w-4 h-4 mr-1 shrink-0" />
-                            <span className="truncate">{event.venue}</span>
+                    <div className="p-4 space-y-2">
+                      <h3 className="text-lg font-semibold">{event.title}</h3>
+                      
+                      {event.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap gap-4 text-sm pt-2">
+                        {event.date && (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>{new Date(event.date).toLocaleDateString('no-NO', { day: 'numeric', month: 'short' })}</span>
                           </div>
                         )}
                         
-                        <div className="flex items-center gap-2 pt-2">
-                          {event.ticket_price && (
-                            <Badge variant="outline" className="text-xs">
-                              {event.ticket_price} kr
-                            </Badge>
-                          )}
-                          {event.expected_audience && (
-                            <Badge variant="outline" className="text-xs">
-                              <Users className="w-3 h-3 mr-1" />
-                              {event.expected_audience}
-                            </Badge>
-                          )}
-                        </div>
+                        {event.venue && (
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span>{event.venue}</span>
+                          </div>
+                        )}
+                        
+                        {event.ticket_price && (
+                          <div className="flex items-center gap-1.5">
+                            <span>{event.ticket_price} kr</span>
+                          </div>
+                        )}
+                        
+                        {event.expected_audience && (
+                          <div className="flex items-center gap-1.5">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>{event.expected_audience}</span>
+                          </div>
+                        )}
                       </div>
-                    </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
