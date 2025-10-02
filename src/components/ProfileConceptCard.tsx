@@ -66,7 +66,7 @@ export const ProfileConceptCard = ({ concept }: ProfileConceptCardProps) => {
   };
 
   const handleClick = () => {
-    navigate(`/profile/${concept.maker_id}/tilbud/${concept.id}`);
+    navigate(`/profile/${concept.maker_id}/concept/${concept.id}`);
   };
 
   return (
