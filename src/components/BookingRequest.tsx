@@ -173,13 +173,13 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
               <Label className="text-base font-medium">
                 {t('selectOffer')}
               </Label>
-              {concepts.length === 0 ? (
+              {concepts.filter(c => c.is_published).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   {t('mustCreateOffersFirst')}
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-3">
-                  {concepts.filter(concept => concept && concept.id).map((concept) => (
+                  {concepts.filter(concept => concept && concept.id && concept.is_published).map((concept) => (
                     <Card 
                       key={concept.id} 
                       className={cn(

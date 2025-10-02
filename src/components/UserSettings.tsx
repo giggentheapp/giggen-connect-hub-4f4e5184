@@ -948,11 +948,13 @@ export const UserSettings = ({
         isOpen={showAvatarCrop}
         onClose={() => setShowAvatarCrop(false)}
         onAvatarUpdate={(avatarUrl) => {
-          setProfileData(prev => ({ ...prev, avatar_url: avatarUrl }));
-          onProfileUpdate?.({ ...profileData, avatar_url: avatarUrl });
+          const updatedProfile = { ...profileData, avatar_url: avatarUrl };
+          setProfileData(updatedProfile);
+          onProfileUpdate?.(updatedProfile);
+          setShowAvatarCrop(false);
         }}
         currentAvatarUrl={profileData.avatar_url}
-        userId={profile.user_id}
+        userId={profileData.user_id}
       />
     </div>
   );
