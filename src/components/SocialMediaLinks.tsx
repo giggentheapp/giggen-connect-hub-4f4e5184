@@ -106,7 +106,6 @@ export const SocialMediaLinks = ({ socialLinks }: SocialMediaLinksProps) => {
 
   return (
     <div className="social-media-links space-y-3">
-      <h4 className="text-sm font-medium text-foreground">Følg meg på:</h4>
       <div className="flex flex-wrap gap-3">
         {activePlatforms.map(platform => (
           <button
