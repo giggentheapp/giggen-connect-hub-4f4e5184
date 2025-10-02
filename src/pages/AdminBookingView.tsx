@@ -5,9 +5,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, DollarSign, FileText, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Users, DollarSign, FileText, Phone, Mail, User, Settings, Briefcase, Lightbulb } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useRole } from '@/contexts/RoleProvider';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
+import giggenLogo from '@/assets/giggen-logo.png';
+import { cn } from '@/lib/utils';
 
 const AdminBookingView = () => {
   const { id } = useParams<{ id: string }>();

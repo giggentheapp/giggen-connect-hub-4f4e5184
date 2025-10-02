@@ -6,9 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Banknote, Music, ArrowLeft, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Music, ArrowLeft, Clock, User, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useRole } from '@/contexts/RoleProvider';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
+import giggenLogo from '@/assets/giggen-logo.png';
+import { cn } from '@/lib/utils';
 
 interface PublicEventData {
   id: string;
