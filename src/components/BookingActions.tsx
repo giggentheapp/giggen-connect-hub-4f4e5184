@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, X, Trash, ArrowRight, Eye, Settings, Calendar, MapPin, Users, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
+import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 interface BookingActionsProps {
   booking: any;
   currentUserId: string;
@@ -207,6 +208,14 @@ export const BookingActions = ({
                       <Banknote className="h-4 w-4 text-primary" />
                       <span className="font-medium">Billettpris: {booking.ticket_price} kr</span>
                     </div>
+                  </div>
+                )}
+
+                {/* Portfolio Gallery */}
+                {booking.selected_concept_id && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold mb-2">Portefølje</h4>
+                    <ConceptPortfolioGallery conceptId={booking.selected_concept_id} />
                   </div>
                 )}
               </div>

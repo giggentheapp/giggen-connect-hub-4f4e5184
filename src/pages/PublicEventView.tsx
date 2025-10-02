@@ -4,16 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
+import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Banknote, Music, ArrowLeft, Clock, User, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Music, ArrowLeft, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useRole } from '@/contexts/RoleProvider';
-import { useAppTranslation } from '@/hooks/useAppTranslation';
-import giggenLogo from '@/assets/giggen-logo.png';
-import { cn } from '@/lib/utils';
 
 interface PublicEventData {
   id: string;
@@ -27,6 +22,7 @@ interface PublicEventData {
   audience_estimate: number | null;
   sender_id: string;
   receiver_id: string;
+  selected_concept_id: string | null;
 }
 
 const PublicEventView = () => {
@@ -50,7 +46,7 @@ const PublicEventView = () => {
       // Fetch ONLY public event data using RLS-protected query
       const { data: eventData, error: eventError } = await supabase
         .from('bookings')
-        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id')
+        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id')
         .eq('id', id)
         .eq('status', 'upcoming')
         .eq('is_public_after_approval', true)
@@ -225,20 +221,17 @@ const PublicEventView = () => {
           </CardContent>
         </Card>
 
-        {/* Artist Portfolio */}
-        {makerProfile && (
+        {/* Portfolio */}
+        {event.selected_concept_id && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Music className="h-5 w-5 text-accent-orange" />
-                Portefølje - {makerProfile.display_name}
+                Portefølje
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ProfilePortfolioViewer 
-                userId={event.receiver_id} 
-                isOwnProfile={false}
-              />
+              <ConceptPortfolioGallery conceptId={event.selected_concept_id} />
             </CardContent>
           </Card>
         )}
