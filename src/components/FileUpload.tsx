@@ -1,8 +1,6 @@
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, File, Image, Video, Music } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -266,35 +264,26 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="h-4 w-4" />
-          {t('uploadFile')}
-        </CardTitle>
-        <CardDescription>
-          {t('supportedFormatsDetailed')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept={acceptedTypes}
-            onChange={handleFileUpload}
-            disabled={uploading}
-          />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            variant="outline"
-          >
-            {uploading ? t('uploadingFile') : t('selectFile')}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="relative">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={acceptedTypes}
+        onChange={handleFileUpload}
+        disabled={uploading}
+        className="hidden"
+        id={`file-upload-${fileType}`}
+      />
+      <label
+        htmlFor={`file-upload-${fileType}`}
+        className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-muted-foreground/20 rounded-lg hover:border-muted-foreground/40 transition-colors cursor-pointer bg-muted/20 hover:bg-muted/30"
+      >
+        <Upload className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">
+          {uploading ? t('uploadingFile') : t('selectFile')}
+        </span>
+      </label>
+    </div>
   );
 };
 

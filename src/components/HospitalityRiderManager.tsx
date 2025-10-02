@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { X, Edit2, Save } from 'lucide-react';
+import { X, Edit2, Save, FileText } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
@@ -153,7 +153,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
       ) : (
         <div className="space-y-2">
           {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
-            <div key={item.id} className="border rounded p-2 bg-background">
+            <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
                 <div className="space-y-2">
                   <div>
@@ -186,19 +186,23 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-pink/20 to-accent-orange/20 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-accent-pink" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-medium truncate">{item.filename}</h4>
-                    <p className="text-[10px] text-muted-foreground mt-1">
+                    <h4 className="text-sm font-medium truncate">{item.filename}</h4>
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-2">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-pink"></span>
                       {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                     </p>
                   </div>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => startEditing(item)}
-                      className="h-6 w-6 p-0"
+                      className="h-7 w-7 p-0"
                     >
                       <Edit2 className="h-3 w-3" />
                     </Button>
@@ -206,7 +210,7 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
                       size="sm"
                       variant="ghost"
                       onClick={() => handleDeleteItem(item.id)}
-                      className="h-6 w-6 p-0 hover:bg-muted"
+                      className="h-7 w-7 p-0 hover:bg-muted"
                     >
                       <X className="h-3 w-3" />
                     </Button>

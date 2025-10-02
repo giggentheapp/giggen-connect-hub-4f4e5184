@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { X, Edit2, Save } from 'lucide-react';
+import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface ProfilePortfolioItem {
@@ -244,7 +244,7 @@ const ProfilePortfolioManager = ({
       ) : (
         <div className="space-y-2">
           {Array.isArray(items) ? items.filter(item => item && item.id).map(item => (
-            <div key={item.id} className="border rounded p-2 bg-background">
+            <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
                 <div className="space-y-2">
                   <div>
@@ -277,23 +277,30 @@ const ProfilePortfolioManager = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-orange/20 to-accent-pink/20 flex items-center justify-center">
+                    {item.file_type === 'image' && <ImageIcon className="h-4 w-4 text-accent-orange" />}
+                    {item.file_type === 'video' && <VideoIcon className="h-4 w-4 text-accent-pink" />}
+                    {item.file_type === 'audio' && <MusicIcon className="h-4 w-4 text-accent-purple" />}
+                    {item.file_type === 'document' && <FileText className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-medium truncate">{item.title || item.filename}</h4>
+                    <h4 className="text-sm font-medium truncate">{item.title || item.filename}</h4>
                     {item.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                         {item.description}
                       </p>
                     )}
-                    <p className="text-[10px] text-muted-foreground mt-1">
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-2">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
                       {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                     </p>
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button size="sm" variant="ghost" onClick={() => startEditing(item)} className="h-6 w-6 p-0">
+                  <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="ghost" onClick={() => startEditing(item)} className="h-7 w-7 p-0">
                       <Edit2 className="h-3 w-3" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="h-6 w-6 p-0 hover:bg-muted">
+                    <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="h-7 w-7 p-0 hover:bg-muted">
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
