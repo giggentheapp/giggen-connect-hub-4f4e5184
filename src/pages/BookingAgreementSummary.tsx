@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 
 const BookingAgreementSummary = () => {
   const { bookingId } = useParams();
@@ -323,6 +324,15 @@ const BookingAgreementSummary = () => {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {/* Portfolio Attachments */}
+          {bookingId && currentUserId && (
+            <BookingPortfolioAttachments
+              bookingId={bookingId}
+              currentUserId={currentUserId}
+              canEdit={false}
+            />
           )}
 
           {/* Personal Message */}
