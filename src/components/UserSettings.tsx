@@ -819,7 +819,6 @@ export const UserSettings = ({
             <div className="bg-muted/50 p-4 rounded-lg">
               <h4 className="text-sm font-medium mb-2">Individuelle innstillinger</h4>
               <p className="text-sm text-muted-foreground">
-                Hvert publisert tilbud og arrangement har sin egen synlighets-toggle. Du styrer disse direkte i tilbuds- og arrangement-visningen.
               </p>
             </div>
           </div>
