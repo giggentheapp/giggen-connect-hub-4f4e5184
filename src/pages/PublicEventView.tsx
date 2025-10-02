@@ -124,9 +124,9 @@ const PublicEventView = () => {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Arrangement ikke funnet</p>
-            <Button onClick={() => navigate('/dashboard')}>
+            <Button onClick={() => navigate('/dashboard?section=bookings&tab=upcoming')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til utforsk
+              Tilbake
             </Button>
           </div>
         </div>
@@ -140,11 +140,11 @@ const PublicEventView = () => {
         {/* Back button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/dashboard?section=bookings&tab=upcoming')}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Tilbake til utforsk
+          Tilbake
         </Button>
 
         {/* Event Header */}

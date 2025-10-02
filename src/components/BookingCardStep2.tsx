@@ -44,29 +44,28 @@ export const BookingCardStep2 = ({
 
   return (
     <Card className="hover:shadow-md transition-all cursor-pointer">
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold">{booking.title}</h3>
-            {booking.description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                {booking.description}
-              </p>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold">{booking.title}</h3>
           {isApprovedByBoth ? (
-            <Badge variant="default" className="text-xs whitespace-nowrap bg-green-600 hover:bg-green-700">
-              Godkjent av begge
+            <Badge variant="default" className="text-xs whitespace-nowrap bg-green-600 hover:bg-green-700 shrink-0">
+              Godkjent
             </Badge>
           ) : (
-            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+            <Badge variant="secondary" className="text-xs whitespace-nowrap shrink-0">
               Forhandling
             </Badge>
           )}
         </div>
         
+        {booking.description && (
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-2">
+            {booking.description}
+          </p>
+        )}
+        
         {/* Essential booking details */}
-        <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm pt-2">
           {booking.event_date && (
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -96,32 +95,18 @@ export const BookingCardStep2 = ({
               )}
             </span>
           </div>
-          
-          {booking.ticket_price && (
-            <div className="flex items-center gap-1.5">
-              <Banknote className="h-4 w-4 text-muted-foreground" />
-              <span>Billett: {booking.ticket_price} kr</span>
-            </div>
-          )}
         </div>
-
-        {booking.address && (
-          <div className="flex items-center gap-1.5 text-sm">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">{booking.address}</span>
-          </div>
-        )}
 
         {/* Personal message */}
         {booking.personal_message && (
-          <div className="flex items-start gap-1.5 text-sm bg-muted/30 p-3 rounded">
+          <div className="flex items-start gap-1.5 text-sm bg-muted/30 p-2 rounded">
             <MessageCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-muted-foreground">{booking.personal_message}</p>
+            <p className="text-muted-foreground text-xs">{booking.personal_message}</p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t">
+        <div className="flex items-center justify-between pt-2">
           <div className="flex gap-2">
             {isApprovedByBoth ? (
               <Button 
@@ -149,16 +134,6 @@ export const BookingCardStep2 = ({
                     Detaljer
                   </>
                 )}
-              </Button>
-            )}
-            
-            {booking.concept_ids && booking.concept_ids.length > 0 && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onConceptClick}
-              >
-                Se tilbud
               </Button>
             )}
           </div>

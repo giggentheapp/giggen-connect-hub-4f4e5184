@@ -80,19 +80,12 @@ export const BookingCardStep3 = ({
 
   return (
     <Card className="hover:shadow-md transition-all cursor-pointer">
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold">{booking.title}</h3>
-            {booking.description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                {booking.description}
-              </p>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold">{booking.title}</h3>
           
           {/* Visibility toggle */}
-          <div className="flex flex-col items-center gap-1 bg-muted/30 rounded-lg p-2 border shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {isPublic ? (
               <Eye className="h-4 w-4 text-green-600" />
             ) : (
@@ -106,8 +99,14 @@ export const BookingCardStep3 = ({
           </div>
         </div>
         
+        {booking.description && (
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-2">
+            {booking.description}
+          </p>
+        )}
+        
         {/* Essential booking details */}
-        <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm pt-2">
           {booking.event_date && (
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -127,7 +126,7 @@ export const BookingCardStep3 = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t">
+        <div className="flex gap-2 pt-2">
           <Button 
             size="sm" 
             variant="outline"
