@@ -66,7 +66,6 @@ export const appTranslations = {
     profileInformationSettings: "Profilinformasjon",
     updateProfileDetails: "Oppdater dine grunnleggende profildetaljer som vises til andre brukere",
     profilePicture: "Profilbilde",
-    selectProfilePicture: "Velg et profilbilde som representerer deg",
     changePicture: "Endre bilde",
     biography: "Biografi",
     biographyPlaceholder: "Fortell litt om deg selv, din musikk og erfaring...",
