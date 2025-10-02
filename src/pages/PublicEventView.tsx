@@ -252,9 +252,6 @@ const PublicEventView = () => {
             </CardContent>
           </Card>
         )}
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
