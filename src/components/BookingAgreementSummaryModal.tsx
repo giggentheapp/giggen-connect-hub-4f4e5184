@@ -82,7 +82,7 @@ export const BookingAgreementSummaryModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl h-[90vh] md:h-auto md:max-h-[90vh] p-0 flex flex-col">
+      <DialogContent className="w-screen h-screen max-w-none m-0 rounded-none p-0 flex flex-col">
         {/* Sticky Header */}
         <DialogHeader className="sticky top-0 z-10 bg-background border-b px-4 py-4 md:px-6 shrink-0">
           <DialogTitle className="text-xl md:text-2xl">Avtaledetaljer</DialogTitle>
@@ -197,6 +197,33 @@ export const BookingAgreementSummaryModal = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 p-4 md:p-6 pt-0">
+                  {/* Revenue Calculation */}
+                  {booking.ticket_price && booking.audience_estimate && (
+                    <div className="bg-muted/50 p-3 rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs md:text-sm text-muted-foreground">Forventet brutto</p>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(booking.ticket_price * booking.audience_estimate).toLocaleString('no-NO')} kr
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {booking.ticket_price} kr × {booking.audience_estimate} publikum
+                      </p>
+                      
+                      {/* Door deal calculation */}
+                      {booking.door_deal && booking.door_percentage && (
+                        <div className="pt-2 border-t border-border/50">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs md:text-sm text-muted-foreground">Artist sin andel ({booking.door_percentage}%)</p>
+                            <p className="font-semibold text-sm md:text-base text-primary">
+                              {((booking.ticket_price * booking.audience_estimate * booking.door_percentage) / 100).toLocaleString('no-NO')} kr
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {booking.price_musician && (
                     <div>
                       <p className="text-xs md:text-sm text-muted-foreground">Artisthonorar</p>
@@ -206,7 +233,7 @@ export const BookingAgreementSummaryModal = ({
                   {booking.artist_fee && (
                     <div>
                       <p className="text-xs md:text-sm text-muted-foreground">Garantert honorar</p>
-                      <p className="font-medium text-sm md:text-base">{booking.artist_fee} kr</p>
+                      <p className="font-medium text-sm md:text-base">{booking.artist_fee.toLocaleString('no-NO')} kr</p>
                     </div>
                   )}
                   {booking.door_deal && (
@@ -218,7 +245,7 @@ export const BookingAgreementSummaryModal = ({
                   {booking.ticket_price && (
                     <div>
                       <p className="text-xs md:text-sm text-muted-foreground">Billettpris</p>
-                      <p className="font-medium text-sm md:text-base">{booking.ticket_price} kr</p>
+                      <p className="font-medium text-sm md:text-base">{booking.ticket_price.toLocaleString('no-NO')} kr</p>
                     </div>
                   )}
                   {booking.by_agreement && (

@@ -214,11 +214,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
       {/* Delt kontaktinfo - vises i forhandlingsfasen */}
       {showContactInfo && booking.sender_contact_info && (
-        <Card className="mb-6 border-primary/20 bg-primary/5">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <span>📞</span> Delt kontaktinformasjon
-            </CardTitle>
+            <CardTitle className="text-lg">Delt kontaktinformasjon</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {booking.sender_contact_info.email && (
