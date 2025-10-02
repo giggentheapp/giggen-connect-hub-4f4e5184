@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
-import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import { ArrowLeft, Calendar, MapPin, Banknote, Users, Music, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
 
 const BookingAgreementView = () => {
@@ -101,10 +100,10 @@ const BookingAgreementView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
-      <header className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 max-w-5xl">
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 max-w-4xl">
           <Button variant="ghost" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake
@@ -113,218 +112,172 @@ const BookingAgreementView = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <FileText className="h-8 w-8" />
-            Bookingavtale
-          </h1>
-          <p className="text-muted-foreground">Fullstendig oversikt over avtalen</p>
+      <main className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
+        {/* Title Section */}
+        <div>
+          <h1 className="text-4xl font-bold mb-2">{booking.title}</h1>
+          {booking.description && (
+            <p className="text-lg text-muted-foreground">{booking.description}</p>
+          )}
         </div>
 
-        <div className="space-y-6">
-          {/* Event Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5" />
-                Arrangementsdetaljer
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Event Details */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-accent-orange" />
+            Detaljer
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-8">
+            {booking.event_date && (
               <div>
-                <h3 className="font-semibold text-lg mb-2">{booking.title}</h3>
-                {booking.description && (
-                  <p className="text-muted-foreground mb-4">{booking.description}</p>
-                )}
+                <p className="text-sm text-muted-foreground">Dato og tid</p>
+                <p className="font-medium">{format(new Date(booking.event_date), 'EEEE d. MMMM yyyy', { locale: nb })} kl. {booking.time || format(new Date(booking.event_date), 'HH:mm')}</p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {booking.event_date && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span>{format(new Date(booking.event_date), 'dd.MM.yyyy HH:mm')}</span>
-                  </div>
-                )}
-                
-                {booking.venue && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>{booking.venue}</span>
-                  </div>
-                )}
-
-                {booking.address && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>{booking.address}</span>
-                  </div>
-                )}
-
-                {(selectedConcept?.expected_audience || booking.audience_estimate) && (
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span>Forventet publikum: {selectedConcept?.expected_audience || booking.audience_estimate}</span>
-                  </div>
-                )}
+            )}
+            
+            {booking.venue && (
+              <div>
+                <p className="text-sm text-muted-foreground">Spillested</p>
+                <p className="font-medium">{booking.venue}</p>
               </div>
+            )}
 
-              {(booking.price_musician || booking.price_ticket || booking.artist_fee || booking.door_deal) && (
-                <div className="border-t pt-4 mt-4">
-                  <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <Banknote className="h-4 w-4" />
-                    Prising
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(booking.price_musician || booking.artist_fee || booking.door_deal) && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Musiker honorar:</span>
-                        <p className="font-medium">
-                          {booking.door_deal ? (
-                            `${booking.door_percentage}% av dørinntekter`
-                          ) : (
-                            booking.artist_fee || booking.price_musician || 'Ikke spesifisert'
-                          )}
-                        </p>
-                      </div>
-                    )}
-                    {booking.price_ticket && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Billettpris:</span>
-                        <p className="font-medium">{booking.price_ticket}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            {booking.address && (
+              <div>
+                <p className="text-sm text-muted-foreground">Adresse</p>
+                <p className="font-medium">{booking.address}</p>
+              </div>
+            )}
 
-          {/* Selected Concept */}
-          {selectedConcept && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Valgt tilbud</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+            {(selectedConcept?.expected_audience || booking.audience_estimate) && (
+              <div>
+                <p className="text-sm text-muted-foreground">Forventet publikum</p>
+                <p className="font-medium">{selectedConcept?.expected_audience || booking.audience_estimate} personer</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pricing Section */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <Banknote className="h-6 w-6 text-accent-orange" />
+            Økonomi
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-8">
+            {booking.by_agreement ? (
+              <div>
+                <p className="text-sm text-muted-foreground">Musiker honorar</p>
+                <p className="font-medium">Etter avtale</p>
+              </div>
+            ) : booking.door_deal ? (
+              <div>
+                <p className="text-sm text-muted-foreground">Musiker honorar</p>
+                <p className="font-medium">{booking.door_percentage}% av dørinntekter</p>
+              </div>
+            ) : (
+              <>
+                {(booking.artist_fee || booking.price_musician) && (
                   <div>
-                    <h4 className="font-medium">{selectedConcept.title}</h4>
-                    {selectedConcept.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{selectedConcept.description}</p>
-                    )}
+                    <p className="text-sm text-muted-foreground">Musiker honorar</p>
+                    <p className="font-medium">{booking.artist_fee ? `${booking.artist_fee} kr` : booking.price_musician}</p>
                   </div>
-                  {selectedConcept.price && (
-                    <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4" />
-                      <span>Pris: {selectedConcept.price} kr</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                )}
+              </>
+            )}
 
-          {/* Portfolio */}
-          {makerId && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Portefølje</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePortfolioViewer userId={makerId} isOwnProfile={false} />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Tech Specs */}
-          {techSpecFiles.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Tekniske spesifikasjoner</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-2">
-                  {techSpecFiles.map((file) => (
-                    <div key={file.id} className="p-3 border rounded">
-                      <a 
-                        href={file.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {file.filename}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Hospitality Rider */}
-          {hospitalityFiles.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Hospitality Rider</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-2">
-                  {hospitalityFiles.map((file) => (
-                    <div key={file.id} className="p-3 border rounded">
-                      <a 
-                        href={file.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {file.filename}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Documents */}
-          <BookingDocumentViewer
-            techSpec={booking.tech_spec}
-            hospitalityRider={booking.hospitality_rider}
-            bookingStatus={booking.status}
-            isVisible={true}
-          />
-
-          {/* Legal Terms */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Juridiske vilkår</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 border rounded bg-muted/50">
-                <h4 className="font-medium mb-2">Avtalevilkår</h4>
-                <div className="space-y-2 text-sm">
-                  <p>• Begge parter er forpliktet til å overholde de avtalevilkår som er spesifisert i denne bookingen.</p>
-                  <p>• Eventuell kansellering må skje i rimelig tid og i samsvar med gjeldende lover og regler.</p>
-                  <p>• Alle priser er inkludert mva der det er aktuelt.</p>
-                  <p>• Tekniske spesifikasjoner og hospitality rider må overholdes av arrangør.</p>
-                  <p>• Ved publisering blir arrangementet synlig for allmennheten med offentlig informasjon.</p>
-                </div>
+            {booking.ticket_price && (
+              <div>
+                <p className="text-sm text-muted-foreground">Billettpris</p>
+                <p className="font-medium">{booking.ticket_price} kr</p>
               </div>
-              
-              <div className="p-4 border rounded bg-orange-50 dark:bg-orange-950/20">
-                <h4 className="font-medium mb-2 text-orange-800 dark:text-orange-200">Viktig informasjon</h4>
-                <div className="space-y-2 text-sm text-orange-700 dark:text-orange-300">
-                  <p>• Når arrangementet publiseres, vil følgende informasjon bli synlig for allmennheten:</p>
-                  <p className="ml-4">- Tittel og beskrivelse</p>
-                  <p className="ml-4">- Dato, klokkeslett og sted</p>
-                  <p className="ml-4">- Billettpris (hvis satt)</p>
-                  <p className="ml-4">- Portefølje og forventet publikum</p>
-                  <p>• Sensitiv informasjon som musiker honorar, tech spec og hospitality rider forblir privat.</p>
-                </div>
+            )}
+
+            {booking.price_ticket && (
+              <div>
+                <p className="text-sm text-muted-foreground">Inngang</p>
+                <p className="font-medium">{booking.price_ticket}</p>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Selected Concept */}
+        {selectedConcept && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+              <Music2 className="h-6 w-6 text-accent-orange" />
+              Valgt tilbud
+            </h2>
+            <div className="pl-8">
+              <h3 className="font-medium text-lg">{selectedConcept.title}</h3>
+              {selectedConcept.description && (
+                <p className="text-muted-foreground mt-1">{selectedConcept.description}</p>
+              )}
+              {selectedConcept.price && (
+                <p className="mt-2">Pris: {selectedConcept.price} kr</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Portfolio */}
+        {makerId && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Portefølje</h2>
+            <div className="pl-8">
+              <ProfilePortfolioViewer userId={makerId} isOwnProfile={false} />
+            </div>
+          </div>
+        )}
+
+        {/* Tech Specs */}
+        {techSpecFiles.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+              <FileText className="h-6 w-6 text-accent-orange" />
+              Tekniske spesifikasjoner
+            </h2>
+            <div className="pl-8 space-y-2">
+              {techSpecFiles.map((file) => (
+                <a 
+                  key={file.id}
+                  href={file.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-primary hover:underline"
+                >
+                  {file.filename}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Hospitality Rider */}
+        {hospitalityFiles.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Hospitality Rider</h2>
+            <div className="pl-8 space-y-2">
+              {hospitalityFiles.map((file) => (
+                <a 
+                  key={file.id}
+                  href={file.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-primary hover:underline"
+                >
+                  {file.filename}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Legal Notice */}
+        <div className="pt-8 border-t text-sm text-muted-foreground space-y-2">
+          <p>Begge parter er forpliktet til å overholde avtalens vilkår.</p>
+          <p>Ved publisering blir tittel, beskrivelse, dato, sted og billettpris synlig for allmennheten. Musiker honorar, tech spec og hospitality rider forblir privat.</p>
         </div>
       </main>
     </div>
