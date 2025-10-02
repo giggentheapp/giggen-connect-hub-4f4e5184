@@ -3,8 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { User } from 'lucide-react';
-import { BookingRequest } from '@/components/BookingRequest';
-import { ProfileSection } from '@/components/sections/ProfileSection';
+import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 import { UserProfile } from '@/types/auth';
 
 const Profile = () => {
@@ -105,22 +104,7 @@ const Profile = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen">
-      {/* Booking Request Button (sticky on mobile) */}
-      {!isOwnProfile && profile.role === 'artist' && currentUser && currentUserProfile?.role === 'artist' && (
-        <div className="fixed top-4 right-4 z-50">
-          <BookingRequest 
-            receiverId={profile.user_id} 
-            receiverName={profile.display_name} 
-          />
-        </div>
-      )}
-
-      {/* Profile Section */}
-      <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />
-    </div>
-  );
+  return <UnifiedSidePanel profile={profile} />;
 };
 
 export default Profile;

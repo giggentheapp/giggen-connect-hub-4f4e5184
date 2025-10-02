@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
+import { UpcomingEventCard } from '@/components/UpcomingEventCard';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
@@ -329,9 +330,21 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-3 md:space-y-4">
           {upcomingEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            isAdminView ? (
+              <EventCard key={event.id} event={event} />
+            ) : (
+              <UpcomingEventCard 
+                key={event.id} 
+                event={{
+                  ...event,
+                  is_sender: false,
+                  is_receiver: false,
+                  status: 'upcoming'
+                }} 
+              />
+            )
           ))}
         </div>
       )}
