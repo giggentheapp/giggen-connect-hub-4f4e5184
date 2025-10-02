@@ -252,12 +252,6 @@ const PublicEventView = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* Info box about privacy */}
-        <Card className="mt-6 border-accent-orange/20 bg-accent-orange/5">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground text-center">
-              Dette er en offentlig visning. Økonomiske detaljer, kontaktinformasjon og tekniske spesifikasjoner er kun tilgjengelig for partene involvert i arrangementet.
             </p>
           </CardContent>
         </Card>
