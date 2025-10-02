@@ -110,9 +110,12 @@ export const BookingPortfolioAttachments = ({
                     Legg ved
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-3xl bg-background">
                   <DialogHeader>
                     <DialogTitle>Velg fra din portefølje</DialogTitle>
+                    <CardDescription>
+                      Klikk på en fil for å legge den ved denne bookingen
+                    </CardDescription>
                   </DialogHeader>
                   {portfolioLoading ? (
                     <div className="py-8 flex items-center justify-center">
@@ -134,13 +137,14 @@ export const BookingPortfolioAttachments = ({
                       )}
                     </div>
                   ) : (
-                    <div className="max-h-[60vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-1">
+                    <div className="max-h-[60vh] overflow-y-auto py-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {availableFiles.map((file) => (
                           <Card
                             key={file.id}
-                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            className="cursor-pointer hover:shadow-md transition-shadow bg-card"
                             onClick={async () => {
+                              console.log('📎 Attaching file:', file.id);
                               await attachPortfolioFile(file.id);
                               setIsSelectDialogOpen(false);
                             }}
