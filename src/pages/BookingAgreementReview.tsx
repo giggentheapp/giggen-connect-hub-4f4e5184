@@ -353,27 +353,17 @@ const BookingAgreementReview = () => {
               ) : booking.by_agreement ? (
                 <>
                   <p className="text-lg">Honorar avtales direkte mellom partene</p>
-                  {hasRevenueData && (
-                    <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
-                      <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
-                    </div>
-                  )}
                 </>
               ) : (
                 <>
                   <p className="text-lg mb-2">
                     Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong>
                   </p>
-                  {hasRevenueData && (
-                    <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
-                      <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
-                    </div>
-                  )}
                 </>
               )}
             </div>
 
-            <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-sm">
                 Sørg for at du forstår og godtar alle priser og honorarordninger.
               </p>
