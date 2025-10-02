@@ -35,52 +35,59 @@ export const ProfileSection = ({
     <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-12">
       {/* Profile Header */}
       <div className="text-center space-y-4 md:space-y-6">
-        <div className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-accent-orange/20 to-accent-pink/20 flex items-center justify-center mx-auto ring-4 ring-background shadow-lg">
-          {profile.avatar_url ? (
-            <img 
-              src={profile.avatar_url} 
-              alt={profile.display_name} 
-              className="w-full h-full rounded-full object-cover" 
-            />
-          ) : (
-            <User className="h-10 w-10 md:h-16 md:w-16 text-muted-foreground" />
-          )}
+        <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-accent-orange/30 via-accent-pink/20 to-accent-purple/30 p-1 mx-auto shadow-2xl">
+          <div className="w-full h-full rounded-full bg-background/95 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+            {profile.avatar_url ? (
+              <img 
+                src={profile.avatar_url} 
+                alt={profile.display_name} 
+                className="w-full h-full object-cover" 
+              />
+            ) : (
+              <User className="h-12 w-12 md:h-20 md:w-20 text-muted-foreground" />
+            )}
+          </div>
         </div>
         
-        <div>
-          <h1 className="text-2xl md:text-4xl font-bold mb-2">{profile.display_name}</h1>
-          <p className="text-sm md:text-lg text-muted-foreground capitalize flex items-center justify-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-accent-orange"></span>
-            {profile.role}
-          </p>
-        </div>
-
-        {profile.bio && (
-          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            {profile.bio}
-          </p>
-        )}
-
-        {profile.address && profile.is_address_public && (
-          <p className="text-xs md:text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-            <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-            {profile.address}
-          </p>
-        )}
-
-        {/* Social Media Links */}
-        {profile.social_media_links && (
-          <div className="pt-2">
-            <SocialMediaLinks socialLinks={profile.social_media_links} />
+        <div className="space-y-3 md:space-y-4">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent">
+              {profile.display_name}
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground">
+              <span className="inline-block w-2 h-2 rounded-full bg-accent-orange animate-pulse"></span>
+              <span className="capitalize font-medium">{profile.role}</span>
+            </div>
           </div>
-        )}
+
+          {profile.bio && (
+            <div className="max-w-2xl mx-auto">
+              <p className="text-base md:text-lg text-foreground/90 leading-relaxed px-4">
+                {profile.bio}
+              </p>
+            </div>
+          )}
+
+          {profile.address && profile.is_address_public && (
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground bg-muted/30 px-4 py-2 rounded-full inline-flex mx-auto">
+              <MapPin className="h-4 w-4 md:h-5 md:w-5 text-accent-orange" />
+              <span>{profile.address}</span>
+            </div>
+          )}
+
+          {/* Social Media Links */}
+          {profile.social_media_links && (
+            <div className="pt-2">
+              <SocialMediaLinks socialLinks={profile.social_media_links} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Portfolio Section */}
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-center gap-3">
           <Folder className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-          <h2 className="text-xl md:text-2xl font-semibold">Portefølje</h2>
         </div>
         <div className="border-t pt-4 md:pt-6">
           <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
@@ -92,7 +99,6 @@ export const ProfileSection = ({
         <div className="space-y-4 md:space-y-6">
           <div className="flex items-center gap-3">
             <Lightbulb className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-            <h2 className="text-xl md:text-2xl font-semibold">Tilbud</h2>
           </div>
           <div className="border-t pt-4 md:pt-6 space-y-3 md:space-y-4">
             {concepts.map(concept => (
@@ -104,23 +110,12 @@ export const ProfileSection = ({
 
       {/* Upcoming Events Section */}
       <div className="space-y-4 md:space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-            <h2 className="text-xl md:text-2xl font-semibold">{t('myUpcomingEvents')}</h2>
-          </div>
-          <p className="text-xs md:text-sm text-muted-foreground pl-8 md:pl-9">
-            {t('eventsYouAreInvolvedIn')}
-          </p>
+        <div className="flex items-center gap-3">
+          <Calendar className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+          <h2 className="text-xl md:text-2xl font-semibold">{t('myUpcomingEvents')}</h2>
         </div>
         
         <div className="border-t pt-4 md:pt-6">
-          <div className="mb-4 md:mb-6 p-3 md:p-4 bg-muted/30 rounded-lg border border-muted">
-            <p className="text-xs md:text-sm text-muted-foreground">
-              {t('privacyNote')}
-            </p>
-          </div>
-          
           <UpcomingEventsDisplay userId={profile.user_id} />
         </div>
       </div>
