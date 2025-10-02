@@ -13,7 +13,7 @@ import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { WorkingEventsDisplay } from '@/components/WorkingEventsDisplay';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useNavigate } from 'react-router-dom';
-import { MobileNavigation } from '@/components/navigation/MobileNavigation';
+
 
 interface ProfileData {
   id: string;
@@ -252,8 +252,7 @@ const Profile = () => {
   }
 
   return (
-    <>
-      <div className="container mx-auto p-3 md:p-6 max-w-4xl pb-20 md:pb-6">
+    <div className="container mx-auto p-3 md:p-6 max-w-4xl">{/* ... keep existing code (profile content) ... */}
         {/* Header - Compact Mobile */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
           <div className="flex items-center gap-3">
@@ -449,10 +448,7 @@ const Profile = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-      
-      <MobileNavigation />
-    </>
+    </div>
   );
 };
 
