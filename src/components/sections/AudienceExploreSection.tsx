@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MakerCard } from '@/components/MakerCard';
 import { SearchFilters } from '@/components/SearchFilters';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { ProfileEventCard } from '@/components/ProfileEventCard';
 
 interface FilterOptions {
   location: string;
@@ -351,50 +352,18 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                   : 'space-y-3'
               } animate-fade-in`}>
                 {filteredEvents.map((event) => (
-                  <Card 
+                  <ProfileEventCard 
                     key={event.id}
-                    className="hover:shadow-md transition-all cursor-pointer"
-                    onClick={() => navigate(`/arrangement/${event.id}`)}
-                  >
-                    <div className="p-4 space-y-2">
-                      <h3 className="text-lg font-semibold">{event.title}</h3>
-                      
-                      {event.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {event.description}
-                        </p>
-                      )}
-
-                      <div className="flex flex-wrap gap-4 text-sm pt-2">
-                        {event.date && (
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>{new Date(event.date).toLocaleDateString('no-NO', { day: 'numeric', month: 'short' })}</span>
-                          </div>
-                        )}
-                        
-                        {event.venue && (
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span>{event.venue}</span>
-                          </div>
-                        )}
-                        
-                        {event.ticket_price && (
-                          <div className="flex items-center gap-1.5">
-                            <span>{event.ticket_price} kr</span>
-                          </div>
-                        )}
-                        
-                        {event.expected_audience && (
-                          <div className="flex items-center gap-1.5">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>{event.expected_audience}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
+                    event={{
+                      id: event.id,
+                      title: event.title,
+                      description: event.description,
+                      event_date: event.date,
+                      time: event.time,
+                      ticket_price: event.ticket_price,
+                      price_musician: undefined
+                    }}
+                  />
                 ))}
               </div>
             )

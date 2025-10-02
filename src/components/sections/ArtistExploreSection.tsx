@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
+import { ProfileEventCard } from '@/components/ProfileEventCard';
 interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
@@ -263,62 +264,18 @@ export const ArtistExploreSection = ({
                   ) : (
                     <div className="space-y-3 animate-fade-in">
                       {filteredEvents.map((event) => (
-                        <Card 
-                          key={event.id} 
-                          className="hover:shadow-md transition-all cursor-pointer"
-                          onClick={() => handleViewEvent(event.id)}
-                        >
-                          <div className="p-4 space-y-2">
-                            <h3 className="text-lg font-semibold">{event.title}</h3>
-                            
-                            {event.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {event.description}
-                              </p>
-                            )}
-
-                            <div className="flex flex-wrap gap-4 text-sm pt-2">
-                              {event.event_date && (
-                                <div className="flex items-center gap-1.5">
-                                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                                  <span>
-                                    {new Date(event.event_date).toLocaleDateString('no-NO', { 
-                                      day: 'numeric', 
-                                      month: 'short',
-                                      year: 'numeric'
-                                    })}
-                                  </span>
-                                </div>
-                              )}
-                              
-                              {event.time && (
-                                <div className="flex items-center gap-1.5">
-                                  <span>Kl. {event.time}</span>
-                                </div>
-                              )}
-                              
-                              {event.venue && (
-                                <div className="flex items-center gap-1.5">
-                                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                                  <span>{event.venue}</span>
-                                </div>
-                              )}
-                              
-                              {event.ticket_price && (
-                                <div className="flex items-center gap-1.5">
-                                  <span>{event.ticket_price} kr</span>
-                                </div>
-                              )}
-                              
-                              {event.audience_estimate && (
-                                <div className="flex items-center gap-1.5">
-                                  <Users className="h-4 w-4 text-muted-foreground" />
-                                  <span>{event.audience_estimate}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
+                        <ProfileEventCard 
+                          key={event.id}
+                          event={{
+                            id: event.id,
+                            title: event.title,
+                            description: event.description,
+                            event_date: event.event_date,
+                            time: event.time,
+                            ticket_price: event.ticket_price,
+                            price_musician: event.artist_fee?.toString()
+                          }}
+                        />
                       ))}
                     </div>
                   )}
