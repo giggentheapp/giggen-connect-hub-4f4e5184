@@ -37,7 +37,11 @@ export interface Booking {
   description?: string;
   status: BookingStatus;
   event_date?: string;
-  time?: string;
+  start_date?: string; // New: explicit start date for date ranges
+  end_date?: string;   // New: end date for multi-day events
+  time?: string;       // Legacy: kept for backwards compatibility
+  start_time?: string; // New: start time in HH:MM format
+  end_time?: string;   // New: end time in HH:MM format
   venue?: string;
   address?: string;
   latitude?: number;
@@ -90,7 +94,11 @@ export interface SafeBooking {
   description?: string;
   status: BookingStatus;
   event_date?: string;
+  start_date?: string;
+  end_date?: string;
   time?: string;
+  start_time?: string;
+  end_time?: string;
   venue?: string;
   audience_estimate?: number;
   is_public_after_approval?: boolean;
@@ -154,7 +162,11 @@ export interface UpdateBookingRequest {
   title?: string;
   description?: string;
   event_date?: string;
-  time?: string;
+  start_date?: string;  // New: explicit start date for date ranges
+  end_date?: string;    // New: end date for multi-day events
+  time?: string;        // Legacy: kept for backwards compatibility
+  start_time?: string;  // New: start time in HH:MM format
+  end_time?: string;    // New: end time in HH:MM format
   venue?: string;
   address?: string;
   latitude?: number;
