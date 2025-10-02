@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -226,82 +225,90 @@ const ProfilePortfolioManager = ({
     setEditTitle('');
     setEditDescription('');
   };
-  return <Card className="bg-slate-50">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <FileUpload fileType="portfolio" folderPath={`portfolio/${userId}`} onFileUploaded={handleFileUploaded} acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx" />
+  return (
+    <div className="space-y-3">
+      <div>
+        <h3 className="text-sm font-medium mb-1">{title}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{description}</p>
+      </div>
+      
+      <FileUpload 
+        fileType="portfolio" 
+        folderPath={`portfolio/${userId}`} 
+        onFileUploaded={handleFileUploaded} 
+        acceptedTypes=".jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav,.pdf,.doc,.docx" 
+      />
 
-        {loading ? (
-          <div className="text-center py-4">{t('loadingPortfolio')}</div>
-        ) : (
-          <div className="space-y-4">
-            {Array.isArray(items) ? items.filter(item => item && item.id).map(item => (
-              <div key={item.id} className="border rounded-lg p-4">
-                {editingItem === item.id ? (
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="title">{t('title')}</Label>
-                      <Input 
-                        id="title" 
-                        value={editTitle} 
-                        onChange={e => setEditTitle(e.target.value)} 
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">{t('description')}</Label>
-                      <Textarea 
-                        id="description" 
-                        value={editDescription} 
-                        onChange={e => setEditDescription(e.target.value)} 
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => handleUpdateItem(item.id)}>
-                        <Save className="h-4 w-4 mr-1" />
-                        {t('save')}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEditing}>
-                        <X className="h-4 w-4 mr-1" />
-                        {t('cancel')}
-                      </Button>
-                    </div>
+      {loading ? (
+        <div className="text-center py-3 text-xs text-muted-foreground">{t('loadingPortfolio')}</div>
+      ) : (
+        <div className="space-y-2">
+          {Array.isArray(items) ? items.filter(item => item && item.id).map(item => (
+            <div key={item.id} className="border rounded p-2 bg-background">
+              {editingItem === item.id ? (
+                <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="title" className="text-xs">{t('title')}</Label>
+                    <Input 
+                      id="title" 
+                      value={editTitle} 
+                      onChange={e => setEditTitle(e.target.value)}
+                      className="h-8 text-xs"
+                    />
                   </div>
-                ) : (
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{item.title || item.filename}</h4>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {item.description}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
+                  <div>
+                    <Label htmlFor="description" className="text-xs">{t('description')}</Label>
+                    <Textarea 
+                      id="description" 
+                      value={editDescription} 
+                      onChange={e => setEditDescription(e.target.value)}
+                      className="text-xs min-h-[60px]"
+                    />
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="sm" onClick={() => handleUpdateItem(item.id)} className="h-7 text-xs">
+                      <Save className="h-3 w-3 mr-1" />
+                      {t('save')}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={cancelEditing} className="h-7 text-xs">
+                      <X className="h-3 w-3 mr-1" />
+                      {t('cancel')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-medium truncate">{item.title || item.filename}</h4>
+                    {item.description && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        {item.description}
                       </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => startEditing(item)}>
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="hover:bg-muted">
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
+                    </p>
                   </div>
-                )}
-              </div>
-            )) : []}
-            {items.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                {t('noPortfolioFiles')}
-              </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>;
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="ghost" onClick={() => startEditing(item)} className="h-6 w-6 p-0">
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="h-6 w-6 p-0 hover:bg-muted">
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )) : []}
+          {items.length === 0 && (
+            <div className="text-center py-4 text-xs text-muted-foreground">
+              {t('noPortfolioFiles')}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 export default ProfilePortfolioManager;
