@@ -231,7 +231,7 @@ const ConceptView = () => {
                 <div>
                   <span>{maker.display_name}</span>
                   <p className="text-sm text-muted-foreground font-normal">
-                    GiggenMaker
+                    Artist
                   </p>
                 </div>
               </CardTitle>
