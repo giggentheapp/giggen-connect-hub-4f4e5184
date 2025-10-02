@@ -269,7 +269,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Fra dato</Label>
-                <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
+                <Popover open={startDateOpen} onOpenChange={setStartDateOpen} modal={false}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -287,8 +287,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     className="w-auto p-0 z-50" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={8}
+                    sideOffset={4}
                     avoidCollisions={false}
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
@@ -309,7 +310,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
               <div>
                 <Label>Til dato</Label>
-                <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+                <Popover open={endDateOpen} onOpenChange={setEndDateOpen} modal={false}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -327,8 +328,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     className="w-auto p-0 z-50" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={8}
+                    sideOffset={4}
                     avoidCollisions={false}
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
