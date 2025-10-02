@@ -421,8 +421,8 @@ All colors MUST be HSL.
 /* Mobile-optimized feedback button */
 .floating-feedback-btn-mobile {
   position: fixed;
-  bottom: 80px; /* Above mobile navigation */
-  left: 16px; /* Left side to avoid important buttons */
+  bottom: 90px; /* Above mobile navigation */
+  right: 16px;
   z-index: 999; /* Below important modals/dialogs */
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
@@ -453,7 +453,7 @@ All colors MUST be HSL.
 
 .feedback-bubble {
   position: absolute;
-  left: 60px; /* Switch to left side */
+  right: 60px;
   top: 50%;
   transform: translateY(-50%);
   background: hsl(var(--card));
@@ -473,11 +473,11 @@ All colors MUST be HSL.
 .feedback-bubble::after {
   content: '';
   position: absolute;
-  right: 100%; /* Arrow points to left */
+  left: 100%;
   top: 50%;
   transform: translateY(-50%);
   border: 6px solid transparent;
-  border-right-color: hsl(var(--card)); /* Arrow from right */
+  border-left-color: hsl(var(--card));
 }
 
 .floating-feedback-btn-mobile:hover .feedback-bubble {
@@ -489,13 +489,13 @@ All colors MUST be HSL.
 @media (min-width: 768px) {
   .floating-feedback-btn-mobile {
     bottom: 24px;
-    left: 24px; /* Left side on desktop too */
+    right: 24px;
     width: 56px;
     height: 56px;
   }
   
   .feedback-bubble {
-    left: 68px; /* Bubble to the right of button */
+    right: 68px;
     font-size: 16px;
   }
 }
