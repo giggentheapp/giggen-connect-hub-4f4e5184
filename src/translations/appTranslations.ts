@@ -588,7 +588,6 @@ export const appTranslations = {
     profileInformationSettings: "Profile Information",
     updateProfileDetails: "Update your basic profile details that are shown to other users",
     profilePicture: "Profile Picture",
-    selectProfilePicture: "Choose a profile picture that represents you",
     changePicture: "Change Picture",
     biography: "Biography",
     biographyPlaceholder: "Tell us about yourself, your music and experience...",
