@@ -284,12 +284,11 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-auto p-0" 
+                    className="w-auto p-0 z-50" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={4}
-                    avoidCollisions={true}
-                    collisionPadding={20}
+                    sideOffset={8}
+                    avoidCollisions={false}
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
@@ -325,12 +324,11 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-auto p-0" 
+                    className="w-auto p-0 z-50" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={4}
-                    avoidCollisions={true}
-                    collisionPadding={20}
+                    sideOffset={8}
+                    avoidCollisions={false}
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
