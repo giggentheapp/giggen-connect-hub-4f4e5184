@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
 import { BookingErrorBoundary } from '@/components/BookingErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +11,6 @@ import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
-import { SafeBookingsSection } from '@/components/SafeBookingsSection';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserProfile } from '@/types/auth';
 interface BookingsSectionProps {
@@ -267,9 +265,8 @@ export const BookingsSection = ({
 
   // Use the original booking flow
   return (
-    <SafariErrorBoundary>
-      <BookingErrorBoundary>
-        <div className="w-full h-full bg-background">
+    <BookingErrorBoundary>
+      <div className="w-full h-full bg-background">
           {/* Tab Navigation Header */}
           <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
             <div className="max-w-4xl mx-auto">
@@ -425,8 +422,7 @@ export const BookingsSection = ({
             </Tabs>
           </div>
 
-        </div>
-      </BookingErrorBoundary>
-    </SafariErrorBoundary>
+      </div>
+    </BookingErrorBoundary>
   );
 };
