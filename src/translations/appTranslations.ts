@@ -267,8 +267,9 @@ export const appTranslations = {
     loadingProfile: "Laster profil...",
     profileNotFound: "Profil ikke funnet",
     viewDetails: "Se detaljer",
+    myOffers: "Mine tilbud",
     createAndManageOffers: "Opprett og administrer dine kreative tilbud",
-    newOffer: "nytt tilbud",
+    newOffer: "Nytt tilbud",
     noOffersCreated: "Du har ikke opprettet noen tilbud ennå",
     createFirstOffer: "Opprett ditt første tilbud",
 
