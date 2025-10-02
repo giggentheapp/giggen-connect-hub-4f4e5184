@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, AlertTriangle, Check, X, Eye, Trash2 } from 'lucide-react';
+import { CalendarIcon, AlertTriangle, Check, X, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
 
@@ -520,8 +520,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4 mr-2" />
+                    <Button variant="ghost" size="sm" className="hover:bg-muted">
+                      <X className="h-4 w-4 mr-2" />
                       Slett
                     </Button>
                   </AlertDialogTrigger>

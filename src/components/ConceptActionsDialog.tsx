@@ -20,7 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Trash2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface ConceptActionsDialogProps {
   isOpen: boolean;
@@ -85,7 +85,7 @@ export const ConceptActionsDialog = ({
               onClick={() => setShowDeleteDialog(true)}
               disabled={isLoading}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4 mr-2" />
               Slett tilbud til historikk
             </Button>
           </div>

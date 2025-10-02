@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ProfilePortfolioManager from '@/components/ProfilePortfolioManager';
 import TechSpecManager from '@/components/TechSpecManager';
 import HospitalityRiderManager from '@/components/HospitalityRiderManager';
@@ -14,39 +13,32 @@ export const AdminFilesSection = ({
 }: AdminFilesSectionProps) => {
   const { t } = useAppTranslation();
 
-  return <div className="space-y-6">
-    <Card className="bg-slate-200">
-      <CardHeader>
-        <CardTitle>{t('fileManagement')}</CardTitle>
-        <CardDescription>
-          {t('managePortfolioFiles')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div>
-          <ProfilePortfolioManager 
-            userId={profile.user_id} 
-            title={t('profilePortfolio')} 
-            description={t('uploadPortfolioFiles')} 
-          />
-        </div>
+  return (
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('fileManagement')}</h1>
+        <p className="text-sm text-muted-foreground">{t('managePortfolioFiles')}</p>
+      </div>
+
+      <div className="space-y-8">
+        <ProfilePortfolioManager 
+          userId={profile.user_id} 
+          title={t('profilePortfolio')} 
+          description={t('uploadPortfolioFiles')} 
+        />
         
-        <div>
-          <TechSpecManager 
-            userId={profile.user_id} 
-            title={t('technicalSpecifications')} 
-            description={t('uploadTechSpecs')} 
-          />
-        </div>
+        <TechSpecManager 
+          userId={profile.user_id} 
+          title={t('technicalSpecifications')} 
+          description={t('uploadTechSpecs')} 
+        />
         
-        <div>
-          <HospitalityRiderManager 
-            userId={profile.user_id} 
-            title={t('hospitalityRiders')} 
-            description={t('uploadHospitalityRiders')} 
-          />
-        </div>
-      </CardContent>
-    </Card>
-  </div>;
+        <HospitalityRiderManager 
+          userId={profile.user_id} 
+          title={t('hospitalityRiders')} 
+          description={t('uploadHospitalityRiders')} 
+        />
+      </div>
+    </div>
+  );
 };

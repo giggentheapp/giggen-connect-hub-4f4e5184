@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Edit2, Save, X } from 'lucide-react';
+import { X, Edit2, Save } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
@@ -204,7 +204,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                         variant="destructive"
                         onClick={() => handleDeleteItem(item.id)}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <X className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>

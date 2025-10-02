@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, File, Image, Video, Music, Download, Eye } from 'lucide-react';
+import { X, File, Image, Video, Music, Download, Eye } from 'lucide-react';
 
 interface FileItem {
   id: string;
@@ -189,7 +189,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
                   onClick={() => handleDelete(file)}
                   disabled={deletingFiles.has(file.id)}
                 >
-                  <Trash2 className="h-3 w-3 mr-1" />
+                  <X className="h-3 w-3 mr-1" />
                   {deletingFiles.has(file.id) ? 'Sletter...' : 'Slett'}
                 </Button>
               )}

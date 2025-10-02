@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, Trash, ArrowRight, Eye, Settings } from 'lucide-react';
+import { Check, X, ArrowRight, Eye, Settings } from 'lucide-react';
 interface BookingActionsProps {
   booking: any;
   currentUserId: string;
@@ -264,9 +264,9 @@ export const BookingActions = ({
                 variant="ghost" 
                 size="sm" 
                 disabled={loading}
-                className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="h-7 px-2 text-xs hover:bg-muted"
               >
-                <Trash className="h-3 w-3" />
+                <X className="h-3 w-3" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Lightbulb, Plus, ChevronDown, Edit, Trash2, Clock, Eye, EyeOff } from 'lucide-react';
+import { Lightbulb, Plus, ChevronDown, Edit, X, Clock, Eye, EyeOff } from 'lucide-react';
 import ConceptCard from '@/components/ConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
@@ -311,7 +311,7 @@ export const AdminConceptsSection = ({
                                 variant="destructive"
                                 onClick={() => handleDeleteDraft(draft.id)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <X className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>

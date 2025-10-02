@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Trash2, Video, Music, FileText, Image } from 'lucide-react';
+import { X, Video, Music, FileText, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FileUpload from '@/components/FileUpload';
 
@@ -128,7 +128,7 @@ export const ConceptPortfolioUpload = ({
                     onClick={() => onFileRemoved(file)}
                     className="text-destructive hover:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}

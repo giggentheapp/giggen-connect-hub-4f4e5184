@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Edit2, Save, X } from 'lucide-react';
+import { X, Edit2, Save } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface ProfilePortfolioItem {
@@ -286,8 +286,8 @@ const ProfilePortfolioManager = ({
                       <Button size="sm" variant="outline" onClick={() => startEditing(item)}>
                         <Edit2 className="h-3 w-3" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDeleteItem(item.id)}>
-                        <Trash2 className="h-3 w-3" />
+                      <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="hover:bg-muted">
+                        <X className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
