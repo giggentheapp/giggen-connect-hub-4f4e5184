@@ -443,15 +443,15 @@ export const UserSettings = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-12">
       {/* Profile Information */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <User className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-          <h2 className="text-xl md:text-2xl font-semibold">{t('profileInformationSettings')}</h2>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">{t('profileInformationSettings')}</h2>
+          <p className="text-sm text-muted-foreground">Oppdater dine profildetaljer</p>
         </div>
         
-        <div className="rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 p-4 md:p-6 space-y-4">
+        <div className="space-y-4">
           {/* Avatar Upload Section */}
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 md:h-20 md:w-20 shrink-0">
@@ -611,13 +611,13 @@ export const UserSettings = ({
 
       {/* Social Media Settings - Only for Artists */}
       {profileData.role === 'artist' && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Share2 className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-            <h2 className="text-xl md:text-2xl font-semibold">{t('socialMedia')}</h2>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">{t('socialMedia')}</h2>
+            <p className="text-sm text-muted-foreground">Legg til dine sosiale medier</p>
           </div>
           
-          <div className="rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 p-4 md:p-6 space-y-3">
+          <div className="space-y-3">
             {/* Instagram */}
             <div>
               <Label className="flex items-center gap-2 text-sm">
@@ -708,13 +708,13 @@ export const UserSettings = ({
 
       {/* Simplified Privacy Settings for Artists */}
       {profileData.role === 'artist' && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-            <h2 className="text-xl md:text-2xl font-semibold">Synlighetsinnstillinger</h2>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">Synlighetsinnstillinger</h2>
+            <p className="text-sm text-muted-foreground">Kontroller hva som er synlig for andre</p>
           </div>
           
-          <div className="rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 p-4 md:p-6 space-y-3">
+          <div className="space-y-3">
             {/* Public Profile Toggle */}
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
               <div className="flex-1 pr-4">
@@ -767,13 +767,13 @@ export const UserSettings = ({
        )}
 
       {/* Password Change */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Key className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-          <h2 className="text-xl md:text-2xl font-semibold">{t('changePassword')}</h2>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">{t('changePassword')}</h2>
+          <p className="text-sm text-muted-foreground">Oppdater ditt passord</p>
         </div>
         
-        <div className="rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 p-4 md:p-6 space-y-3">
+        <div className="space-y-3">
           <div>
             <Label htmlFor="new-password" className="text-sm">Nytt passord</Label>
             <Input
@@ -802,31 +802,28 @@ export const UserSettings = ({
       </div>
 
       {/* Logout */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <LogOut className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-          <h2 className="text-xl md:text-2xl font-semibold">{t('logOut')}</h2>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">{t('logOut')}</h2>
+          <p className="text-sm text-muted-foreground">Logg ut av kontoen din</p>
         </div>
         
-        <div className="rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 p-4 md:p-6">
-          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full md:w-auto">
-            <LogOut className="h-4 w-4 mr-2" />
-            {loading ? t('loggingOut') : t('logOut')}
-          </Button>
-        </div>
+        <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full md:w-auto">
+          <LogOut className="h-4 w-4 mr-2" />
+          {loading ? t('loggingOut') : t('logOut')}
+        </Button>
       </div>
 
       {/* Delete Account */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Trash2 className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
-          <h2 className="text-xl md:text-2xl font-semibold">{t('deleteAccount')}</h2>
-        </div>
-        
-        <div className="rounded-lg border border-destructive/20 bg-gradient-to-br from-background to-destructive/5 p-4 md:p-6">
-          <p className="text-sm text-muted-foreground mb-4">
+      <div className="space-y-6 pt-6 border-t border-destructive/20">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold text-destructive mb-2">{t('deleteAccount')}</h2>
+          <p className="text-sm text-muted-foreground">
             Permanent sletting av brukerdata. Denne handlingen kan ikke angres.
           </p>
+        </div>
+        
+        <div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="w-full md:w-auto text-destructive border-destructive/30 hover:bg-destructive/10">
