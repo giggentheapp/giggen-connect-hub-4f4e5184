@@ -31,6 +31,21 @@ const AdminBookingView = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (booking && currentUserId) {
+      console.log('🎯 AdminBookingView - Booking loaded:', {
+        bookingId: booking.id,
+        status: booking.status,
+        isOwner: currentUserId === booking.sender_id || currentUserId === booking.receiver_id,
+        currentUserId,
+        shouldShowPortfolio: (currentUserId === booking.sender_id || currentUserId === booking.receiver_id) && 
+          (booking.status === 'allowed' || booking.status === 'approved_by_sender' || 
+           booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both' || 
+           booking.status === 'upcoming')
+      });
+    }
+  }, [booking, currentUserId]);
+
   const fetchBookingDetails = async () => {
     try {
       setLoading(true);

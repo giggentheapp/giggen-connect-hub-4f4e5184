@@ -27,6 +27,16 @@ export const BookingPortfolioAttachments = ({
   const { attachments, loading, attachPortfolioFile, removeAttachment } = useBookingPortfolio(bookingId);
   const { files: userPortfolioFiles, loading: portfolioLoading } = useProfilePortfolio(currentUserId);
 
+  console.log('📂 BookingPortfolioAttachments rendering:', {
+    bookingId,
+    currentUserId,
+    canEdit,
+    attachmentsCount: attachments.length,
+    userPortfolioFilesCount: userPortfolioFiles.length,
+    loading,
+    portfolioLoading
+  });
+
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
     if (fileType.startsWith('video/')) return <Video className="h-4 w-4" />;
