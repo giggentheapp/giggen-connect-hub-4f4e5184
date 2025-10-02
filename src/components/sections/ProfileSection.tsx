@@ -70,15 +70,7 @@ export const ProfileSection = ({
 
       {/* Portfolio Section */}
       <Card>
-        <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
-          <CardTitle className="flex items-center gap-1.5 md:gap-2 text-base md:text-xl">
-            <Folder className="h-4 w-4 md:h-5 md:w-5" />
-            {t('myPortfolio')}
-          </CardTitle>
-          <CardDescription className="text-xs md:text-sm">
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+        <CardContent className="px-3 md:px-6 py-3 md:py-6">
           <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
         </CardContent>
       </Card>
