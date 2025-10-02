@@ -238,7 +238,7 @@ export const ComprehensiveAgreementReview = ({
         const audienceEstimate = booking.audience_estimate || 0;
         const ticketPrice = booking.ticket_price || 0;
         const totalRevenue = audienceEstimate * ticketPrice;
-        const showCalculations = !booking.by_agreement && audienceEstimate > 0 && ticketPrice > 0;
+        const hasRevenueData = audienceEstimate > 0 && ticketPrice > 0;
         let artistEarnings = 0;
         if (booking.door_deal && booking.door_percentage) {
           artistEarnings = Math.round(totalRevenue * (booking.door_percentage / 100));
@@ -246,6 +246,27 @@ export const ComprehensiveAgreementReview = ({
           artistEarnings = booking.artist_fee;
         }
         return <div className="space-y-4">
+            {/* Revenue Calculation - Always show if we have data */}
+            {hasRevenueData && <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                <h4 className="font-semibold text-lg mb-3">Forventet inntekt</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Publikum:</span>
+                    <span className="font-semibold">{audienceEstimate} personer</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Billettpris:</span>
+                    <span className="font-semibold">{ticketPrice} kr</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Total brutto inntekt:</span>
+                      <span className="text-xl font-bold text-primary">{totalRevenue.toLocaleString('no-NO')} kr</span>
+                    </div>
+                  </div>
+                </div>
+              </div>}
+
             {booking.audience_estimate && <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />
                 <span>Forventet publikum: <strong>{booking.audience_estimate}</strong></span>
@@ -258,20 +279,27 @@ export const ComprehensiveAgreementReview = ({
 
             <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-lg border border-green-200 dark:border-green-800">
               <h4 className="font-semibold text-lg mb-3">Artist honorar</h4>
-              {booking.door_deal ? <p className="text-lg">Spiller for døra: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt</p> : booking.by_agreement ? <p className="text-lg">Honorar avtales direkte mellom partene</p> : <p className="text-lg">Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong></p>}
-              
-              {showCalculations && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
-                  {booking.door_deal ? <div className="space-y-2">
-                      <p className="text-base">
-                        Total inntekt: <strong>{totalRevenue.toLocaleString('nb-NO')} kr</strong>
-                      </p>
-                      <p className="text-base">
-                        Artist får: <strong>{artistEarnings.toLocaleString('nb-NO')} kr</strong> ({booking.door_percentage}%)
-                      </p>
-                    </div> : <p className="text-base">
-                      Estimert total inntekt: <strong>{totalRevenue.toLocaleString('nb-NO')} kr</strong>
-                    </p>}
-                </div>}
+              {booking.door_deal ? <>
+                  <p className="text-lg mb-2">Spiller for døra: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt</p>
+                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">Artist får ({booking.door_percentage}%):</span>
+                        <span className="text-xl font-bold text-green-700 dark:text-green-400">
+                          {artistEarnings.toLocaleString('no-NO')} kr
+                        </span>
+                      </div>
+                    </div>}
+                </> : booking.by_agreement ? <>
+                  <p className="text-lg">Honorar avtales direkte mellom partene</p>
+                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
+                      <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
+                    </div>}
+                </> : <>
+                  <p className="text-lg mb-2">Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong></p>
+                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
+                      <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
+                    </div>}
+                </>}
             </div>
 
             <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
@@ -285,8 +313,8 @@ export const ComprehensiveAgreementReview = ({
   if (!booking) return null;
   const Icon = currentSection.icon;
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="w-screen h-screen max-w-none m-0 rounded-none p-0 overflow-hidden flex flex-col">
+        <DialogHeader className="shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center justify-between">
             <span>Gjennomgå avtale før godkjenning</span>
             <div className="flex items-center gap-3 text-sm font-normal text-muted-foreground">
@@ -299,78 +327,82 @@ export const ComprehensiveAgreementReview = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Progress indicators */}
-        <div className="flex items-center gap-2 mb-6">
-          {SECTIONS.map((section, index) => <div key={section.id} className={cn("flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium", index < currentStep ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : index === currentStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-              {index < currentStep ? <Check className="h-3 w-3" /> : <section.icon className="h-3 w-3" />}
-              <span className="hidden sm:inline">{section.title}</span>
-            </div>)}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              
-              {currentSection.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-64 pr-4" ref={scrollRef}>
-              <div ref={contentRef}>
-                {renderSectionContent()}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        <div className="flex items-center justify-between mt-6">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={hasReadConfirmation} onChange={e => {
-              const checked = e.target.checked;
-              console.log('📋 Checkbox changed:', {
-                checked,
-                currentSection: currentSection.id,
-                step: currentStep + 1,
-                isLastStep
-              });
-              setHasReadConfirmation(checked);
-              setCanProceed(checked);
-
-              // If this is the last step and checkbox is checked, mark section as completed
-              if (isLastStep && checked) {
-                const newCompleted = new Set([...completedSections, currentSection.id]);
-                setCompletedSections(newCompleted);
-              }
-            }} className="rounded" />
-              <span>Jeg har lest og forstått denne delen</span>
-            </label>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Progress indicators */}
+          <div className="flex items-center gap-2 mb-6">
+            {SECTIONS.map((section, index) => <div key={section.id} className={cn("flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium", index < currentStep ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : index === currentStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                {index < currentStep ? <Check className="h-3 w-3" /> : <section.icon className="h-3 w-3" />}
+                <span className="hidden sm:inline">{section.title}</span>
+              </div>)}
           </div>
 
-          <div className="flex gap-2">
-            {currentStep > 0 && <Button variant="outline" onClick={() => {
-            setCurrentStep(prev => prev - 1);
-            setCanProceed(false);
-            setHasReadConfirmation(false);
-          }}>
-                Tilbake
-              </Button>}
-            
-            {!isLastStep ? <Button onClick={handleNext} disabled={!canProceed} className="min-w-20">
-                Neste
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button> : <Button onClick={() => {
-            console.log('🚀 Approval button clicked:', {
-              canProceed,
-              allSectionsCompleted,
-              loading,
-              completedSections: Array.from(completedSections),
-              sectionsLength: SECTIONS.length
-            });
-            handleApproval();
-          }} disabled={!canProceed || !allSectionsCompleted || loading} className="min-w-32">
-                {loading ? "Godkjenner..." : "Godkjenn avtale"}
-              </Button>}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                
+                {currentSection.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[calc(100vh-400px)] pr-4" ref={scrollRef}>
+                <div ref={contentRef}>
+                  {renderSectionContent()}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="shrink-0 border-t px-6 py-4 bg-background">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={hasReadConfirmation} onChange={e => {
+                const checked = e.target.checked;
+                console.log('📋 Checkbox changed:', {
+                  checked,
+                  currentSection: currentSection.id,
+                  step: currentStep + 1,
+                  isLastStep
+                });
+                setHasReadConfirmation(checked);
+                setCanProceed(checked);
+
+                // If this is the last step and checkbox is checked, mark section as completed
+                if (isLastStep && checked) {
+                  const newCompleted = new Set([...completedSections, currentSection.id]);
+                  setCompletedSections(newCompleted);
+                }
+              }} className="rounded" />
+                <span>Jeg har lest og forstått denne delen</span>
+              </label>
+            </div>
+
+            <div className="flex gap-2">
+              {currentStep > 0 && <Button variant="outline" onClick={() => {
+              setCurrentStep(prev => prev - 1);
+              setCanProceed(false);
+              setHasReadConfirmation(false);
+            }}>
+                  Tilbake
+                </Button>}
+              
+              {!isLastStep ? <Button onClick={handleNext} disabled={!canProceed} className="min-w-20">
+                  Neste
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button> : <Button onClick={() => {
+              console.log('🚀 Approval button clicked:', {
+                canProceed,
+                allSectionsCompleted,
+                loading,
+                completedSections: Array.from(completedSections),
+                sectionsLength: SECTIONS.length
+              });
+              handleApproval();
+            }} disabled={!canProceed || !allSectionsCompleted || loading} className="min-w-32">
+                  {loading ? "Godkjenner..." : "Godkjenn avtale"}
+                </Button>}
+            </div>
           </div>
         </div>
       </DialogContent>
