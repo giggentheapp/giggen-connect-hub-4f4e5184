@@ -6,7 +6,7 @@ import { ArrowLeft, Calendar, MapPin, Users, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
+import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 
 const BookingAgreementSummary = () => {
   const { bookingId } = useParams();
@@ -219,13 +219,10 @@ const BookingAgreementSummary = () => {
         </div>
 
         {/* Portfolio Section */}
-        {bookingId && currentUserId && (
+        {booking.selected_concept_id && (
           <div className="mb-12">
-            <BookingPortfolioAttachments
-              bookingId={bookingId}
-              currentUserId={currentUserId}
-              canEdit={false}
-            />
+            <h3 className="text-lg font-semibold mb-4">Portefølje</h3>
+            <ConceptPortfolioGallery conceptId={booking.selected_concept_id} />
           </div>
         )}
 
