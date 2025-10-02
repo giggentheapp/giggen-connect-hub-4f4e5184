@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, X, Image, Video, Music, File, Eye } from 'lucide-react';
 import { useBookingPortfolio } from '@/hooks/useBookingPortfolio';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
@@ -113,9 +113,9 @@ export const BookingPortfolioAttachments = ({
                 <DialogContent className="max-w-3xl bg-background">
                   <DialogHeader>
                     <DialogTitle>Velg fra din portefølje</DialogTitle>
-                    <CardDescription>
+                    <DialogDescription>
                       Klikk på en fil for å legge den ved denne bookingen
-                    </CardDescription>
+                    </DialogDescription>
                   </DialogHeader>
                   {portfolioLoading ? (
                     <div className="py-8 flex items-center justify-center">
