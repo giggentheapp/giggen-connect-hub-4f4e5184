@@ -3,14 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, Trash, ArrowRight, Eye, Settings, Calendar, MapPin, Users, Banknote } from 'lucide-react';
-import { format } from 'date-fns';
-import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
+import { Check, X, Trash, ArrowRight, Eye, Settings } from 'lucide-react';
 interface BookingActionsProps {
   booking: any;
   currentUserId: string;
@@ -144,147 +140,8 @@ export const BookingActions = ({
     return "Dette vil PERMANENT slette bookingen fra systemet. Handlingen kan ikke angres.";
   };
   const showPublishingSummary = () => {
-    setShowSummaryDialog(true);
+    navigate(`/booking/${booking.id}/publish-preview`);
   };
-  const PublishingSummaryDialog = () => (
-    <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <Eye className="h-5 w-5" />
-            Forhåndsvisning av publisert arrangement
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Public Event View - Same as actual public view */}
-          <div className="space-y-6 p-4 bg-muted/30 rounded-lg">
-            {/* Event Header */}
-            <div>
-              <div className="flex items-start justify-between mb-4">
-                <h1 className="text-2xl md:text-3xl font-bold">{booking.title}</h1>
-                <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white">
-                  Offentlig
-                </Badge>
-              </div>
-              
-              {booking.description && (
-                <p className="text-base text-muted-foreground mt-2">
-                  {booking.description}
-                </p>
-              )}
-            </div>
-
-            {/* Event Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Calendar className="h-5 w-5 text-accent-orange" />
-                  Arrangementsinformasjon
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {booking.event_date && (
-                    <div className="flex items-start gap-3">
-                      <Calendar className="h-5 w-5 text-accent-orange mt-0.5" />
-                      <div>
-                        <p className="font-medium text-sm">Dato</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                          {booking.time && ` kl. ${booking.time}`}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {booking.venue && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-accent-orange mt-0.5" />
-                      <div>
-                        <p className="font-medium text-sm">Spillested</p>
-                        <p className="text-sm text-muted-foreground">{booking.venue}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {booking.address && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-accent-orange mt-0.5" />
-                      <div>
-                        <p className="font-medium text-sm">Adresse</p>
-                        <p className="text-sm text-muted-foreground">{booking.address}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {booking.audience_estimate && (
-                    <div className="flex items-start gap-3">
-                      <Users className="h-5 w-5 text-accent-orange mt-0.5" />
-                      <div>
-                        <p className="font-medium text-sm">Forventet publikum</p>
-                        <p className="text-sm text-muted-foreground">{booking.audience_estimate} personer</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {booking.ticket_price && (
-                    <div className="flex items-start gap-3">
-                      <Banknote className="h-5 w-5 text-accent-orange mt-0.5" />
-                      <div>
-                        <p className="font-medium text-sm">Billettpris</p>
-                        <p className="text-sm text-muted-foreground">{booking.ticket_price} kr</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Portfolio */}
-            {booking.selected_concept_id && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Eye className="h-5 w-5 text-accent-orange" />
-                    Portefølje
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ConceptPortfolioGallery conceptId={booking.selected_concept_id} />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Info box */}
-          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-            <CardContent className="pt-4">
-              <p className="text-sm text-blue-900 dark:text-blue-100 text-center">
-                ℹ️ Slik vil arrangementet se ut for publikum når det publiseres. Økonomiske detaljer og kontaktinformasjon vil forbli privat.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <Button 
-              onClick={handlePublishBooking} 
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <ArrowRight className="h-4 w-4 mr-2" />
-              Publiser arrangement
-            </Button>
-            
-            <Button variant="outline" onClick={() => setShowSummaryDialog(false)}>
-              Avbryt
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
   return <>
       <div className="flex gap-1.5 items-center flex-wrap">
         {/* STEP 1: Allow booking (receiver only, pending status) */}
@@ -435,7 +292,5 @@ export const BookingActions = ({
         )}
 
       </div>
-
-      <PublishingSummaryDialog />
     </>;
 };
