@@ -163,94 +163,76 @@ const PublicEventView = () => {
           )}
         </div>
 
-        {/* Event Details Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-accent-orange" />
-              Arrangementsinformasjon
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {event.event_date && (
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Dato</p>
-                    <p className="text-muted-foreground">
-                      {format(new Date(event.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {event.time && (
-                <div className="flex items-start gap-3">
-                  <Clock className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Tid</p>
-                    <p className="text-muted-foreground">{event.time}</p>
-                  </div>
-                </div>
-              )}
-
-              {event.venue && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Spillested</p>
-                    <p className="text-muted-foreground">{event.venue}</p>
-                  </div>
-                </div>
-              )}
-
-              {event.address && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Adresse</p>
-                    <p className="text-muted-foreground">{event.address}</p>
-                  </div>
-                </div>
-              )}
-
-              {event.audience_estimate && (
-                <div className="flex items-start gap-3">
-                  <Users className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Forventet publikum</p>
-                    <p className="text-muted-foreground">{event.audience_estimate} personer</p>
-                  </div>
-                </div>
-              )}
-
-              {event.ticket_price && (
-                <div className="flex items-start gap-3">
-                  <Banknote className="h-5 w-5 text-accent-orange mt-1" />
-                  <div>
-                    <p className="font-medium">Billettpris</p>
-                    <p className="text-muted-foreground">{event.ticket_price} kr</p>
-                  </div>
-                </div>
-              )}
+        {/* Event Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {event.event_date && (
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Dato</p>
+                <p className="text-muted-foreground">
+                  {format(new Date(event.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
 
-        {/* Portfolio */}
+          {event.time && (
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Tid</p>
+                <p className="text-muted-foreground">{event.time}</p>
+              </div>
+            </div>
+          )}
+
+          {event.venue && (
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Spillested</p>
+                <p className="text-muted-foreground">{event.venue}</p>
+              </div>
+            </div>
+          )}
+
+          {event.address && (
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Adresse</p>
+                <p className="text-muted-foreground">{event.address}</p>
+              </div>
+            </div>
+          )}
+
+          {event.audience_estimate && (
+            <div className="flex items-start gap-3">
+              <Users className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Forventet publikum</p>
+                <p className="text-muted-foreground">{event.audience_estimate} personer</p>
+              </div>
+            </div>
+          )}
+
+          {event.ticket_price && (
+            <div className="flex items-start gap-3">
+              <Banknote className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Billettpris</p>
+                <p className="text-muted-foreground">{event.ticket_price} kr</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Portfolio Gallery */}
         {event.selected_concept_id && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5 text-accent-orange" />
-                Portefølje
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ConceptPortfolioGallery conceptId={event.selected_concept_id} />
-            </CardContent>
-          </Card>
+          <div className="mt-8">
+            <ConceptPortfolioGallery conceptId={event.selected_concept_id} />
+          </div>
         )}
       </div>
     </div>

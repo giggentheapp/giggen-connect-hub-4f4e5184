@@ -1,28 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, File, Image as ImageIcon, Video, Music } from 'lucide-react';
+import { ArrowLeft, Banknote, Calendar, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
+import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 
-interface ConceptFile {
-  id: string;
-  filename: string;
-  file_type: string;
-  file_path: string;
-  file_url?: string;
-  title?: string;
-  mime_type?: string;
-}
 
 const ProfileConceptView = () => {
   const { userId, conceptId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [concept, setConcept] = useState<any>(null);
-  const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,18 +30,6 @@ const ProfileConceptView = () => {
         if (error) throw error;
         
         setConcept(conceptData);
-
-        // Load concept files
-        const { data: filesData, error: filesError } = await supabase
-          .from('concept_files')
-          .select('*')
-          .eq('concept_id', conceptId);
-
-        if (filesError) {
-          console.error('Error loading concept files:', filesError);
-        } else {
-          setConceptFiles(filesData || []);
-        }
       } catch (error: any) {
         console.error('Error loading concept:', error);
         toast({
@@ -67,59 +47,17 @@ const ProfileConceptView = () => {
     }
   }, [conceptId, toast]);
 
-  const handleClose = () => {
-    navigate(`/profile/${userId}`);
-  };
-
-  const getPublicUrl = (file: ConceptFile) => {
-    // Use file_url if available, otherwise construct URL from file_path
-    if (file.file_url) {
-      return file.file_url;
+  const parseAvailableDates = (datesData: any) => {
+    if (!datesData) return { dates: [], isIndefinite: false };
+    try {
+      const dates = typeof datesData === 'string' ? JSON.parse(datesData) : datesData;
+      if (dates && typeof dates === 'object' && dates.indefinite) {
+        return { dates: [], isIndefinite: true };
+      }
+      return { dates: Array.isArray(dates) ? dates : [], isIndefinite: false };
+    } catch {
+      return { dates: [], isIndefinite: false };
     }
-    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
-  };
-
-  const getFileIcon = (fileType: string) => {
-    switch (fileType) {
-      case 'image': return <ImageIcon className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      case 'audio': return <Music className="h-4 w-4" />;
-      default: return <File className="h-4 w-4" />;
-    }
-  };
-
-  const renderMedia = (file: ConceptFile) => {
-    const publicUrl = getPublicUrl(file);
-    
-    if (file.file_type === 'image') {
-      return (
-        <img 
-          src={publicUrl} 
-          alt={file.title || file.filename} 
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      );
-    } else if (file.file_type === 'video') {
-      return (
-        <video 
-          src={publicUrl} 
-          className="w-full h-full object-cover" 
-          controls
-        />
-      );
-    } else if (file.file_type === 'audio') {
-      return (
-        <div className="flex items-center justify-center h-full bg-muted">
-          <audio src={publicUrl} controls className="w-full max-w-md" />
-        </div>
-      );
-    }
-    return (
-      <div className="flex items-center justify-center h-full bg-muted">
-        <File className="h-12 w-12 text-muted-foreground" />
-      </div>
-    );
   };
 
   if (loading) {
@@ -132,157 +70,107 @@ const ProfileConceptView = () => {
 
   if (!concept) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="text-center">
             <p className="text-muted-foreground mb-4">Tilbud ikke funnet</p>
-            <Button onClick={handleClose}>Tilbake til profil</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header with back button */}
-      <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleClose}
-            >
+            <Button onClick={() => navigate(`/profile/${userId}`)}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tilbake til profil
             </Button>
           </div>
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      {/* Fullscreen concept details */}
-      <div className="container mx-auto p-3 md:p-6 max-w-4xl">
-        <div className="space-y-3 md:space-y-4">
-          {/* Main concept info */}
-          <Card>
-            <CardContent className="p-4 space-y-3">
-              {/* Title */}
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold mb-1">{concept.title}</h1>
-                {concept.description && (
-                  <p className="text-muted-foreground text-sm">{concept.description}</p>
-                )}
-              </div>
+  const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
 
-              {/* Pricing info */}
-              <div className="flex flex-wrap gap-2">
-                {concept.price && !concept.door_deal && !concept.price_by_agreement && (
-                  <Badge variant="outline" className="text-xs">
-                    {concept.price} kr
-                  </Badge>
-                )}
-                {concept.door_deal && concept.door_percentage && (
-                  <Badge variant="outline" className="text-xs">
-                    {concept.door_percentage}% av dørinntekter
-                  </Badge>
-                )}
-                {concept.price_by_agreement && (
-                  <Badge variant="outline" className="text-xs">
-                    Pris ved avtale
-                  </Badge>
-                )}
-                {concept.expected_audience && (
-                  <Badge variant="secondary" className="text-xs">
-                    {concept.expected_audience} publikum
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Back button */}
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(`/profile/${userId}`)}
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Tilbake til profil
+        </Button>
 
-          {/* Portfolio files */}
-          {conceptFiles.length > 0 && (
-            <Card>
-              <CardHeader className="p-4">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <File className="h-4 w-4" />
-                  Portefølje ({conceptFiles.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="space-y-3">
-                  {conceptFiles.map(file => (
-                    <div 
-                      key={file.id}
-                      className="rounded-lg border bg-muted/30 overflow-hidden"
-                    >
-                      {/* File header */}
-                      <div className="p-3 border-b bg-card">
-                        <div className="flex items-center gap-2">
-                          {getFileIcon(file.file_type)}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">
-                              {file.title || file.filename}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {file.file_type.charAt(0).toUpperCase() + file.file_type.slice(1)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Media content */}
-                      <div className="bg-black/5">
-                        {file.file_type === 'image' && (
-                          <img 
-                            src={getPublicUrl(file)} 
-                            alt={file.title || file.filename}
-                            className="w-full max-h-[400px] object-contain"
-                            loading="lazy"
-                          />
-                        )}
-                        
-                        {file.file_type === 'video' && (
-                          <video 
-                            src={getPublicUrl(file)}
-                            controls
-                            className="w-full max-h-[400px]"
-                            preload="metadata"
-                            crossOrigin="anonymous"
-                          >
-                            <source src={getPublicUrl(file)} type={file.mime_type || 'video/mp4'} />
-                            Din nettleser støtter ikke video.
-                          </video>
-                        )}
-                        
-                        {file.file_type === 'audio' && (
-                          <div className="p-4">
-                            <audio 
-                              src={getPublicUrl(file)}
-                              controls
-                              className="w-full"
-                              preload="metadata"
-                              crossOrigin="anonymous"
-                            >
-                              Din nettleser støtter ikke lyd.
-                            </audio>
-                          </div>
-                        )}
-                        
-                        {!['image', 'video', 'audio'].includes(file.file_type) && (
-                          <div className="flex items-center justify-center p-8 text-muted-foreground">
-                            <File className="h-12 w-12" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between mb-4">
+            <h1 className="text-4xl font-bold">{concept.title}</h1>
+            <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white">
+              Tilbud
+            </Badge>
+          </div>
+          
+          {concept.description && (
+            <p className="text-lg text-muted-foreground mt-4 whitespace-pre-wrap">
+              {concept.description}
+            </p>
           )}
         </div>
+
+        {/* Details grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {(concept.price || concept.door_deal || concept.price_by_agreement) && (
+            <div className="flex items-start gap-3">
+              <Banknote className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Pris</p>
+                <p className="text-muted-foreground">
+                  {concept.door_deal && concept.door_percentage
+                    ? `${concept.door_percentage}% av dørsalg`
+                    : concept.price_by_agreement
+                    ? 'Etter avtale'
+                    : `${concept.price} kr`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {(availableDates.length > 0 || isIndefinite) && (
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Tilgjengelige datoer</p>
+                {isIndefinite ? (
+                  <p className="text-muted-foreground">Etter avtale</p>
+                ) : (
+                  <div className="text-muted-foreground">
+                    {availableDates.slice(0, 3).map((date: string, idx: number) => (
+                      <p key={idx}>{format(new Date(date), 'EEEE d. MMMM yyyy', { locale: nb })}</p>
+                    ))}
+                    {availableDates.length > 3 && (
+                      <p className="text-sm italic">+{availableDates.length - 3} flere datoer</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {concept.expected_audience && (
+            <div className="flex items-start gap-3">
+              <Users className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Forventet publikum</p>
+                <p className="text-muted-foreground">{concept.expected_audience} personer</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Portfolio Gallery */}
+        {conceptId && (
+          <div className="mt-8">
+            <ConceptPortfolioGallery conceptId={conceptId} />
+          </div>
+        )}
       </div>
     </div>
   );
