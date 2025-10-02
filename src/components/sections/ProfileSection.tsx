@@ -62,7 +62,7 @@ export const ProfileSection = ({
 
           {profile.bio && (
             <div className="max-w-2xl mx-auto">
-              <p className="text-base md:text-lg text-foreground/90 leading-relaxed px-4">
+              <p className="text-base md:text-lg text-foreground/90 leading-relaxed px-4 whitespace-pre-wrap">
                 {profile.bio}
               </p>
             </div>
