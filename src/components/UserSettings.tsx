@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -444,19 +443,18 @@ export const UserSettings = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
       {/* Profile Information */}
-      <Card>
-        <CardHeader className="pb-3 md:pb-4">
-          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-            <User className="h-4 w-4 md:h-5 md:w-5" />
-            {t('profileInformationSettings')}
-          </CardTitle>
-          <CardDescription className="text-xs md:text-sm">
-            {t('updateProfileDetails')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6 px-3 md:px-6 pb-3 md:pb-6">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-3">
+          <User className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+          <h2 className="text-xl md:text-2xl font-semibold">{t('profileInformationSettings')}</h2>
+        </div>
+        <p className="text-sm md:text-base text-muted-foreground">
+          {t('updateProfileDetails')}
+        </p>
+        
+        <div className="border-t pt-4 md:pt-6 space-y-4 md:space-y-6">
           {/* Avatar Upload Section */}
           <div className="flex items-center space-x-3 md:space-x-4">
             <Avatar className="h-16 w-16 md:h-20 md:w-20">
@@ -620,22 +618,21 @@ export const UserSettings = ({
             <Save className="h-4 w-4 mr-2" />
             {loading ? t('updating') : t('saveChanges')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Social Media Settings - Only for Artists */}
       {profileData.role === 'artist' && (
-        <Card>
-          <CardHeader className="pb-3 md:pb-4">
-            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-              <Share2 className="h-4 w-4 md:h-5 md:w-5" />
-              {t('socialMedia')}
-            </CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              {t('addSocialMediaProfiles')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 px-3 md:px-6 pb-3 md:pb-6">
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center gap-3">
+            <Share2 className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">{t('socialMedia')}</h2>
+          </div>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {t('addSocialMediaProfiles')}
+          </p>
+          
+          <div className="border-t pt-4 md:pt-6 space-y-4">
             {/* Instagram */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
@@ -748,27 +745,26 @@ export const UserSettings = ({
               />
             </div>
 
-            <Button onClick={handleProfileSubmit} disabled={loading} className="w-full">
+            <Button onClick={handleProfileSubmit} disabled={loading} className="w-full md:w-auto">
               <Save className="h-4 w-4 mr-2" />
               {loading ? t('savingSocialMedia') : t('saveSocialMedia')}
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Simplified Privacy Settings for Artists */}
       {profileData.role === 'artist' && (
-        <Card>
-          <CardHeader className="pb-3 md:pb-4">
-            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-              <Shield className="h-4 w-4 md:h-5 md:w-5" />
-              Synlighetsinnstillinger
-            </CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              Styr hva som vises på din offentlige profil. Individuelle tilbud og arrangementer styres per element.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 px-3 md:px-6 pb-3 md:pb-6">
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center gap-3">
+            <Shield className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">Synlighetsinnstillinger</h2>
+          </div>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Styr hva som vises på din offentlige profil. Individuelle tilbud og arrangementer styres per element.
+          </p>
+          
+          <div className="border-t pt-4 md:pt-6 space-y-6">
             {/* Public Profile Toggle */}
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
@@ -795,11 +791,10 @@ export const UserSettings = ({
                 </div>
                 <Switch
                   checked={(profileSettings?.show_on_map || false) && (profileData.is_address_public || false)}
-                  onCheckedChange={(checked) => {
-                    updateProfileSettings({ show_on_map: checked });
-                    if (checked && !profileData.is_address_public) {
-                      setProfileData(prev => ({ ...prev, is_address_public: true }));
-                    }
+                  onCheckedChange={async (checked) => {
+                    // Update both settings together
+                    await updateProfileSettings({ show_on_map: checked });
+                    await updateProfile({ is_address_public: checked });
                   }}
                   disabled={loading}
                 />
@@ -828,22 +823,21 @@ export const UserSettings = ({
                 Hvert publisert tilbud og arrangement har sin egen synlighets-toggle. Du styrer disse direkte i tilbuds- og arrangement-visningen.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
        )}
 
       {/* Password Change */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            {t('changePassword')}
-          </CardTitle>
-          <CardDescription>
-            Oppdater ditt passord for økt sikkerhet
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-3">
+          <Key className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+          <h2 className="text-xl md:text-2xl font-semibold">{t('changePassword')}</h2>
+        </div>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Oppdater ditt passord for økt sikkerhet
+        </p>
+        
+        <div className="border-t pt-4 md:pt-6 space-y-4">
           <div>
             <Label htmlFor="new-password">Nytt passord</Label>
             <Input
@@ -867,43 +861,41 @@ export const UserSettings = ({
           <Button onClick={handlePasswordChange} disabled={loading || !newPassword}>
             {loading ? t('updating') : t('changePassword')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Logout */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LogOut className="h-5 w-5" />
-            {t('logOut')}
-          </CardTitle>
-          <CardDescription>
-            {t('signOutOfAccount')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-3">
+          <LogOut className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+          <h2 className="text-xl md:text-2xl font-semibold">{t('logOut')}</h2>
+        </div>
+        <p className="text-sm md:text-base text-muted-foreground">
+          {t('signOutOfAccount')}
+        </p>
+        
+        <div className="border-t pt-4 md:pt-6">
+          <Button onClick={handleLogout} disabled={loading} variant="outline" className="w-full md:w-auto">
             <LogOut className="h-4 w-4 mr-2" />
             {loading ? t('loggingOut') : t('logOut')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Delete Account */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trash2 className="h-5 w-5" />
-            {t('deleteAccount')}
-          </CardTitle>
-          <CardDescription>
-            Permanent sletting av brukerdata. Denne handlingen kan ikke angres.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-3">
+          <Trash2 className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
+          <h2 className="text-xl md:text-2xl font-semibold">{t('deleteAccount')}</h2>
+        </div>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Permanent sletting av brukerdata. Denne handlingen kan ikke angres.
+        </p>
+        
+        <div className="border-t pt-4 md:pt-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive">
+              <Button variant="outline" className="w-full md:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t('deleteAccount')}
               </Button>
@@ -938,8 +930,8 @@ export const UserSettings = ({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Avatar Crop Modal */}
       <AvatarCropModal
