@@ -148,162 +148,126 @@ export const BookingActions = ({
   };
   const PublishingSummaryDialog = () => (
     <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             <Eye className="h-5 w-5" />
-            Slik vil arrangementet bli vist til publikum
+            Forhåndsvisning av publisert arrangement
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* What the public will see */}
-          <Card className="border-2 border-green-500/30">
-            <CardHeader>
-              <CardTitle className="text-lg text-green-700 dark:text-green-300 flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Dette vil andre brukere og publikum se
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                <h3 className="text-xl font-semibold text-primary mb-2">{booking.title}</h3>
-                {booking.description && (
-                  <p className="text-muted-foreground mb-4">{booking.description}</p>
-                )}
-                
+        <div className="space-y-4">
+          {/* Public Event View - Same as actual public view */}
+          <div className="space-y-6 p-4 bg-muted/30 rounded-lg">
+            {/* Event Header */}
+            <div>
+              <div className="flex items-start justify-between mb-4">
+                <h1 className="text-2xl md:text-3xl font-bold">{booking.title}</h1>
+                <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white">
+                  Offentlig
+                </Badge>
+              </div>
+              
+              {booking.description && (
+                <p className="text-base text-muted-foreground mt-2">
+                  {booking.description}
+                </p>
+              )}
+            </div>
+
+            {/* Event Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Calendar className="h-5 w-5 text-accent-orange" />
+                  Arrangementsinformasjon
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {booking.event_date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span>
-                        {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                        {booking.time && ` kl. ${booking.time}`}
-                      </span>
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 text-accent-orange mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Dato</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(booking.event_date), 'dd.MM.yyyy')}
+                          {booking.time && ` kl. ${booking.time}`}
+                        </p>
+                      </div>
                     </div>
                   )}
-                  
+
                   {booking.venue && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      <span>
-                        {booking.venue}
-                        {booking.address && ` - ${booking.address}`}
-                      </span>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-accent-orange mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Spillested</p>
+                        <p className="text-sm text-muted-foreground">{booking.venue}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {booking.address && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-accent-orange mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Adresse</p>
+                        <p className="text-sm text-muted-foreground">{booking.address}</p>
+                      </div>
                     </div>
                   )}
 
                   {booking.audience_estimate && (
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-primary" />
-                      <span>Forventet publikum: {booking.audience_estimate}</span>
+                    <div className="flex items-start gap-3">
+                      <Users className="h-5 w-5 text-accent-orange mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Forventet publikum</p>
+                        <p className="text-sm text-muted-foreground">{booking.audience_estimate} personer</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {booking.ticket_price && (
+                    <div className="flex items-start gap-3">
+                      <Banknote className="h-5 w-5 text-accent-orange mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Billettpris</p>
+                        <p className="text-sm text-muted-foreground">{booking.ticket_price} kr</p>
+                      </div>
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Public ticket price if available */}
-                {booking.ticket_price && (
-                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Billettpris: {booking.ticket_price} kr</span>
-                    </div>
-                  </div>
-                )}
+            {/* Portfolio */}
+            {booking.selected_concept_id && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Eye className="h-5 w-5 text-accent-orange" />
+                    Portefølje
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ConceptPortfolioGallery conceptId={booking.selected_concept_id} />
+                </CardContent>
+              </Card>
+            )}
+          </div>
 
-                {/* Portfolio Gallery */}
-                {booking.selected_concept_id && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Portefølje</h4>
-                    <ConceptPortfolioGallery conceptId={booking.selected_concept_id} />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* What only the owners will see - Enhanced with clear warnings */}
-          <Card className="border-2 border-red-500/50 bg-red-50/50 dark:bg-red-950/10">
-            <CardHeader>
-              <CardTitle className="text-lg text-red-700 dark:text-red-300 flex items-center gap-2">
-                🔒 PRIVAT INFORMASJON - Kun synlig for dere som parter
-              </CardTitle>
-              <p className="text-sm text-red-600 dark:text-red-400 font-medium">
-                ⚠️ Følgende informasjon vil ALDRI bli vist til publikum eller andre brukere
+          {/* Info box */}
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardContent className="pt-4">
+              <p className="text-sm text-blue-900 dark:text-blue-100 text-center">
+                ℹ️ Slik vil arrangementet se ut for publikum når det publiseres. Økonomiske detaljer og kontaktinformasjon vil forbli privat.
               </p>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-red-100 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="space-y-4">
-                  {/* Financial details - Enhanced */}
-                  <div className="bg-white dark:bg-gray-900 p-3 rounded border-l-4 border-red-500">
-                    <h4 className="font-bold text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
-                      💰 Økonomiske detaljer (KONFIDENSIELT)
-                    </h4>
-                    <div className="text-sm space-y-2 bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                      {booking.door_deal ? (
-                        <>
-                          <p className="font-medium">• Artist honorar: <span className="text-green-600 dark:text-green-400">{booking.door_percentage || 'X'}% av dørinntekter</span></p>
-                          {booking.audience_estimate && booking.ticket_price && (
-                            <p>• Estimert artist inntekt: <span className="font-bold text-green-600 dark:text-green-400">{Math.round((booking.audience_estimate * booking.ticket_price * (booking.door_percentage || 0)) / 100).toLocaleString('nb-NO')} kr</span></p>
-                          )}
-                        </>
-                      ) : booking.by_agreement ? (
-                        <p className="font-medium">• Artist honorar: <span className="text-blue-600 dark:text-blue-400">Avtales direkte mellom partene</span></p>
-                      ) : (
-                        <p className="font-medium">• Fast artist honorar: <span className="text-green-600 dark:text-green-400">{booking.artist_fee ? `${booking.artist_fee} kr` : 'Ikke spesifisert'}</span></p>
-                      )}
-                      
-                      {booking.audience_estimate && booking.ticket_price && (
-                        <p>• Total estimert billetinntekt: <span className="font-bold">{(booking.audience_estimate * booking.ticket_price).toLocaleString('nb-NO')} kr</span></p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Contact and private info - Enhanced */}
-                  <div className="bg-white dark:bg-gray-900 p-3 rounded border-l-4 border-amber-500">
-                    <h4 className="font-bold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
-                      📞 Sensitive personopplysninger (BESKYTTET)
-                    </h4>
-                    <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
-                      <ul className="text-sm space-y-1">
-                        <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          Kontaktinformasjon (telefonnummer, e-post, personlige adresser)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          Tekniske spesifikasjoner og hospitality rider
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          Private meldinger mellom partene
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          Komplett booking historikk og endringer
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          Fullstendige økonomiske avtaler og betalingsinformasjon
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Privacy guarantee */}
-                  <div className="bg-green-100 dark:bg-green-950/20 p-3 rounded border border-green-300 dark:border-green-700">
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
-                      ✅ PERSONVERNGARANTI: All sensitiv informasjon forblir privat mellom dere som parter i avtalen.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             <Button 
               onClick={handlePublishBooking} 
               disabled={loading}
@@ -314,7 +278,7 @@ export const BookingActions = ({
             </Button>
             
             <Button variant="outline" onClick={() => setShowSummaryDialog(false)}>
-              Tilbake til avtale
+              Avbryt
             </Button>
           </div>
         </div>
