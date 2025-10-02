@@ -102,10 +102,10 @@ const BookingPublishPreview = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate(`/bookings/${bookingId}`)}
+              onClick={() => navigate('/bookings?tab=ongoing')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til avtale
+              Tilbake
             </Button>
             <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white">
               Forhåndsvisning
@@ -232,7 +232,7 @@ const BookingPublishPreview = () => {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => navigate(`/bookings/${bookingId}`)}
+            onClick={() => navigate('/bookings?tab=ongoing')}
           >
             Avbryt
           </Button>

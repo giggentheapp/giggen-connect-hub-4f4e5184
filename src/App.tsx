@@ -28,6 +28,7 @@ import BookingRequestPage from "./pages/BookingRequestPage";
 import BookingAgreementSummary from "./pages/BookingAgreementSummary";
 import BookingAgreementReview from "./pages/BookingAgreementReview";
 import BookingPublishPreview from "./pages/BookingPublishPreview";
+import BookingAgreementView from "./pages/BookingAgreementView";
 import Bookings from "./pages/Bookings";
 import PublicEventView from "./pages/PublicEventView";
 
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/booking/:bookingId/publish-preview" element={<BookingPublishPreview />} />
               <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
               <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
+              <Route path="/booking/:bookingId/view" element={<BookingAgreementView />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
