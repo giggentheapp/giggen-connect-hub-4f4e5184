@@ -290,6 +290,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     sideOffset={4}
                     avoidCollisions={false}
                     onOpenAutoFocus={(e) => e.preventDefault()}
+                    sticky="always"
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
@@ -299,7 +300,6 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                           updateFormField('start_date', date);
                           setStartDateOpen(false);
                         }}
-                        initialFocus
                         className="pointer-events-auto"
                       />
                     </div>
@@ -331,6 +331,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     sideOffset={4}
                     avoidCollisions={false}
                     onOpenAutoFocus={(e) => e.preventDefault()}
+                    sticky="always"
                   >
                     <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
@@ -342,7 +343,6 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                         }}
                         disabled={(date) => formData.start_date ? date < formData.start_date : false}
                         defaultMonth={formData.start_date || undefined}
-                        initialFocus
                         className="pointer-events-auto"
                       />
                     </div>
