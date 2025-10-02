@@ -94,7 +94,7 @@ export const BookingPortfolioAttachments = ({
                 Legg ved filer fra din portefølje som vil vises når arrangementet publiseres
               </CardDescription>
             </div>
-            {canEdit && availableFiles.length > 0 && (
+            {canEdit && (
               <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline">
@@ -106,32 +106,53 @@ export const BookingPortfolioAttachments = ({
                   <DialogHeader>
                     <DialogTitle>Velg fra din portefølje</DialogTitle>
                   </DialogHeader>
-                  <ScrollArea className="h-[60vh] pr-4">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {availableFiles.map((file) => (
-                        <Card
-                          key={file.id}
-                          className="cursor-pointer hover:shadow-md transition-shadow"
-                          onClick={async () => {
-                            await attachPortfolioFile(file.id);
-                            setIsSelectDialogOpen(false);
-                          }}
-                        >
-                          <CardContent className="p-3 space-y-2">
-                            {renderFilePreview(file)}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium truncate">
-                                {file.title || file.filename}
-                              </p>
-                              <Badge variant="secondary" className="text-xs">
-                                {file.file_type}
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                  {portfolioLoading ? (
+                    <div className="h-[60vh] flex items-center justify-center">
+                      <p className="text-muted-foreground">Laster portefølje...</p>
                     </div>
-                  </ScrollArea>
+                  ) : availableFiles.length === 0 ? (
+                    <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+                      <p className="text-muted-foreground text-center">
+                        {userPortfolioFiles.length === 0 
+                          ? "Du har ingen porteføljeefiler ennå. Gå til Din Profil for å laste opp filer."
+                          : "Alle dine porteføljeefiler er allerede lagt ved denne bookingen."}
+                      </p>
+                      {userPortfolioFiles.length === 0 && (
+                        <Button variant="outline" onClick={() => {
+                          window.location.href = '/dashboard?section=files';
+                        }}>
+                          Gå til Din Profil
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[60vh] pr-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {availableFiles.map((file) => (
+                          <Card
+                            key={file.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={async () => {
+                              await attachPortfolioFile(file.id);
+                              setIsSelectDialogOpen(false);
+                            }}
+                          >
+                            <CardContent className="p-3 space-y-2">
+                              {renderFilePreview(file)}
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium truncate">
+                                  {file.title || file.filename}
+                                </p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {file.file_type}
+                                </Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
                 </DialogContent>
               </Dialog>
             )}
