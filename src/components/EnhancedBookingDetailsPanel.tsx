@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +7,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import { BookingDetailsPanel } from '@/components/BookingDetailsPanel';
 import { DocumentViewer } from '@/components/DocumentViewer';
-import { ComprehensiveAgreementReview } from '@/components/ComprehensiveAgreementReview';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +35,7 @@ export const EnhancedBookingDetailsPanel = ({
   currentUserId, 
   canEdit 
 }: EnhancedBookingDetailsPanelProps) => {
-  const [approvalOpen, setApprovalOpen] = useState(false);
+  const navigate = useNavigate();
   const [receiverProfile, setReceiverProfile] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -143,7 +143,7 @@ export const EnhancedBookingDetailsPanel = ({
           {/* Approval Button */}
           {booking.status === 'approved_by_both' && !booking[isSender ? 'approved_by_sender' : 'approved_by_receiver'] && (
             <div className="mt-4">
-              <Button onClick={() => setApprovalOpen(true)} className="w-full">
+              <Button onClick={() => navigate(`/booking/${booking.id}/review`)} className="w-full">
                 <Check className="h-4 w-4 mr-2" />
                 Godkjenn for publisering
               </Button>
@@ -241,14 +241,6 @@ export const EnhancedBookingDetailsPanel = ({
           </CardContent>
         </Card>
       )}
-
-      {/* Comprehensive Agreement Review */}
-      <ComprehensiveAgreementReview
-        booking={booking}
-        isOpen={approvalOpen}
-        onClose={() => setApprovalOpen(false)}
-        currentUserId={currentUserId}
-      />
     </div>
   );
 };

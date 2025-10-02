@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ComprehensiveAgreementReview } from '@/components/ComprehensiveAgreementReview';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,9 +20,9 @@ export const BookingActions = ({
   currentUserId,
   onAction
 }: BookingActionsProps) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
-  const [showAgreementReview, setShowAgreementReview] = useState(false);
   const {
     updateBooking,
     deleteBookingSecurely,
@@ -58,7 +58,7 @@ export const BookingActions = ({
 
   // Step 2: Open comprehensive agreement review before approval
   const openAgreementReview = () => {
-    setShowAgreementReview(true);
+    navigate(`/booking/${booking.id}/review`);
   };
 
   // Step 3: Individual publishing (each party can publish separately)
@@ -464,14 +464,5 @@ export const BookingActions = ({
       </div>
 
       <PublishingSummaryDialog />
-      
-      {/* Comprehensive Agreement Review */}
-      <ComprehensiveAgreementReview
-        booking={booking}
-        isOpen={showAgreementReview}
-        onClose={() => setShowAgreementReview(false)}
-        currentUserId={currentUserId}
-        onApprovalComplete={onAction}
-      />
     </>;
 };
