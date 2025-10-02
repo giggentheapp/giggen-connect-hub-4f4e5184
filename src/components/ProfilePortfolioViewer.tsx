@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Volume2, Image as ImageIcon, File } from 'lucide-react';
+import { Volume2, File, Expand, Play } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
-import { VideoPlayer } from './VideoPlayer';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface ProfilePortfolioViewerProps {
   userId: string;
@@ -72,7 +69,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     const publicUrl = getPublicUrl(file.file_path);
     if (!publicUrl) return null;
 
-    // Image - just show the image
+    // Image - just show the image with expand icon on hover
     if (file.file_type?.includes('image')) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
@@ -81,11 +78,16 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             alt=""
             className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
           />
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+              <Expand className="w-4 h-4 text-white" />
+            </div>
+          </div>
         </div>
       );
     }
 
-    // Video - show video with small play icon overlay
+    // Video - show video with expand icon on hover
     if (isVideoFile(file)) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
@@ -94,22 +96,34 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             className="w-full h-full object-cover"
             preload="metadata"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+              <Expand className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
             <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-              <div className="w-0 h-0 border-l-[16px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1" />
+              <Play className="w-6 h-6 text-black ml-1" fill="black" />
             </div>
           </div>
         </div>
       );
     }
 
-    // Audio - show audio icon overlay
+    // Audio - show audio player with filename
     if (isAudioFile(file)) {
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 group cursor-pointer">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Volume2 className="w-16 h-16 text-primary/60" />
-          </div>
+        <div className="relative w-full aspect-square overflow-hidden bg-white border border-border group cursor-pointer flex flex-col items-center justify-center p-3 gap-2">
+          <Volume2 className="w-12 h-12 text-primary" />
+          <p className="text-xs font-medium text-center truncate w-full px-2">{file.title || file.filename}</p>
+          <audio 
+            controls 
+            className="w-full mt-auto"
+            preload="metadata"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <source src={publicUrl} type={file.mime_type} />
+          </audio>
         </div>
       );
     }
@@ -124,18 +138,62 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     );
   };
 
+  const renderModalContent = (file: typeof files[0]) => {
+    const publicUrl = getPublicUrl(file.file_path);
+    if (!publicUrl) return null;
+
+    if (file.file_type?.includes('image')) {
+      return (
+        <img 
+          src={publicUrl} 
+          alt={file.title || file.filename}
+          className="w-full h-auto max-h-[80vh] object-contain"
+        />
+      );
+    }
+
+    if (isVideoFile(file)) {
+      return (
+        <video 
+          src={publicUrl}
+          controls
+          autoPlay
+          className="w-full h-auto max-h-[80vh]"
+        >
+          <source src={publicUrl} type={file.mime_type} />
+        </video>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <ErrorBoundary>
       <div className="grid grid-cols-3 gap-1">
         {files.map((file) => {
           if (!file) return null;
+          
+          // Don't open modal for audio files
+          const shouldOpenModal = !isAudioFile(file);
+          
           return (
-            <div key={file.id} onClick={() => setSelectedFile(file)}>
+            <div 
+              key={file.id} 
+              onClick={() => shouldOpenModal && setSelectedFile(file)}
+            >
               {renderGridItem(file)}
             </div>
           );
         })}
       </div>
+
+      {/* Modal for expanded view */}
+      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
+          {selectedFile && renderModalContent(selectedFile)}
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   );
 };
