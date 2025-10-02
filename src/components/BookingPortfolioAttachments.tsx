@@ -110,19 +110,19 @@ export const BookingPortfolioAttachments = ({
                     Legg ved
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl bg-background">
+                <DialogContent className="max-w-3xl bg-white dark:bg-slate-950 text-foreground">
                   <DialogHeader>
-                    <DialogTitle>Velg fra din portefølje</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-foreground">Velg fra din portefølje</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                       Klikk på en fil for å legge den ved denne bookingen
                     </DialogDescription>
                   </DialogHeader>
                   {portfolioLoading ? (
-                    <div className="py-8 flex items-center justify-center">
+                    <div className="py-8 flex items-center justify-center bg-background">
                       <p className="text-muted-foreground">Laster portefølje...</p>
                     </div>
                   ) : availableFiles.length === 0 ? (
-                    <div className="py-8 flex flex-col items-center justify-center gap-4">
+                    <div className="py-8 flex flex-col items-center justify-center gap-4 bg-background">
                       <p className="text-muted-foreground text-center">
                         {userPortfolioFiles.length === 0 
                           ? "Du har ingen porteføljeefiler ennå. Gå til Din Profil for å laste opp filer."
@@ -137,34 +137,37 @@ export const BookingPortfolioAttachments = ({
                       )}
                     </div>
                   ) : (
-                    <div className="max-h-[60vh] overflow-y-auto py-4">
+                    <div className="max-h-[60vh] overflow-y-auto py-4 bg-background">
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {availableFiles.map((file) => (
-                          <Card
-                            key={file.id}
-                            className="cursor-pointer hover:shadow-md transition-shadow bg-card"
-                            onClick={async () => {
-                              console.log('📎 Attaching file:', file.id);
-                              await attachPortfolioFile(file.id);
-                              setIsSelectDialogOpen(false);
-                            }}
-                          >
-                            <CardContent className="p-3 space-y-2">
-                              {renderFilePreview(file)}
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium truncate">
-                                  {file.title || file.filename}
-                                </p>
-                                <Badge variant="secondary" className="text-xs">
-                                  {file.file_type}
-                                </Badge>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                        {availableFiles.map((file) => {
+                          console.log('🎨 Rendering file card:', file.title || file.filename);
+                          return (
+                            <Card
+                              key={file.id}
+                              className="cursor-pointer hover:shadow-md transition-shadow border border-border bg-white dark:bg-slate-900"
+                              onClick={async () => {
+                                console.log('📎 Attaching file:', file.id);
+                                await attachPortfolioFile(file.id);
+                                setIsSelectDialogOpen(false);
+                              }}
+                            >
+                              <CardContent className="p-3 space-y-2">
+                                {renderFilePreview(file)}
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium truncate text-foreground">
+                                    {file.title || file.filename}
+                                  </p>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {file.file_type}
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
-                    </div>
-                  )}
+                     </div>
+                   )}
                 </DialogContent>
               </Dialog>
             )}
