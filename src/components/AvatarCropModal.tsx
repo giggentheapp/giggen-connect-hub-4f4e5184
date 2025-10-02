@@ -37,9 +37,20 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('AvatarCropModal state:', { isOpen, userId, hasImageSrc: !!imageSrc });
+  }, [isOpen, userId, imageSrc]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File select triggered');
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('File selected:', file.name, file.size, file.type);
 
     if (file.size > 5 * 1024 * 1024) { // 5MB limit
       toast.error('Bildet er for stort. Maksimal størrelse er 5MB.');
@@ -53,7 +64,12 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
     const reader = new FileReader();
     reader.onload = () => {
+      console.log('Image loaded successfully');
       setImageSrc(reader.result as string);
+    };
+    reader.onerror = (error) => {
+      console.error('FileReader error:', error);
+      toast.error('Kunne ikke lese bildet.');
     };
     reader.readAsDataURL(file);
   };
@@ -178,8 +194,11 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      console.log('Dialog onOpenChange:', open);
+      if (!open) onClose();
+    }}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
@@ -190,25 +209,36 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 pb-4">
           {!imageSrc ? (
-            <Card className="border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors">
+            <div className="border-2 border-dashed border-border rounded-lg bg-card">
               <div 
-                className="p-8 text-center cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
+                className="p-8 text-center cursor-pointer hover:bg-accent/5 transition-colors"
+                onClick={() => {
+                  console.log('Upload area clicked');
+                  fileInputRef.current?.click();
+                }}
               >
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Last opp et bilde</h3>
+                <h3 className="text-lg font-medium mb-2 text-foreground">Last opp et bilde</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Støttede formater: JPG, PNG, GIF<br />
                   Maksimal størrelse: 5MB
                 </p>
-                <Button variant="outline">
+                <Button 
+                  variant="outline" 
+                  type="button" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Button clicked');
+                    fileInputRef.current?.click();
+                  }}
+                >
                   <Upload className="h-4 w-4 mr-2" />
                   Velg fil
                 </Button>
               </div>
-            </Card>
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="relative bg-black/5 rounded-lg overflow-hidden">
