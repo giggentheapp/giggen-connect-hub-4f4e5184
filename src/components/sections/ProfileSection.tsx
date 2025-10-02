@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Eye, Folder, Lightbulb, Calendar, Shield } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
-import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
+import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
@@ -81,7 +81,7 @@ export const ProfileSection = ({
           <CardContent className="px-3 md:px-6 py-3 md:py-6">
             <div className="space-y-3 md:space-y-4">
               {concepts.map(concept => (
-                <ConceptPortfolioGallery key={concept.id} conceptId={concept.id} />
+                <ConceptCard key={concept.id} concept={concept} showActions={false} />
               ))}
             </div>
           </CardContent>

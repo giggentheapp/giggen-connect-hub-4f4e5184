@@ -6,6 +6,7 @@ import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical } f
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
+import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { useConceptActions } from '@/hooks/useConceptActions';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { toast } from 'sonner';
@@ -304,124 +305,10 @@ const ConceptCard = ({
           </div>
         )}
 
-        {/* Concept Portfolio Files - Interactive Media Display */}
+        {/* Concept Portfolio Files - Instagram-style Gallery */}
         {conceptFiles.length > 0 && (
           <div>
-            <h4 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('conceptCard.offerPortfolio')}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-              {Array.isArray(conceptFiles) ? conceptFiles.filter(file => file && file.id).map((file) => (
-                <div key={file.id} className="bg-muted/30 rounded-lg overflow-hidden">
-                  
-                  {/* Video Display */}
-                  {(file.file_type === 'video' || file.mime_type?.startsWith('video/') || 
-                   file.filename.match(/\.(mp4|webm|mov|avi)$/i)) && (
-                    <div className="aspect-video bg-black">
-                      <video 
-                        controls 
-                        className="w-full h-full"
-                        preload="metadata"
-                        crossOrigin="anonymous"
-                        onError={(e) => {
-                          // Video loading failed
-                        }}
-                        onLoadStart={() => {
-                          // Video started loading
-                        }}
-                      >
-                        <source src={file.file_url} type={file.mime_type || 'video/mp4'} />
-                        <source src={file.file_url} type="video/mp4" />
-                        {t('conceptCard.videoNotSupported')}
-                      </video>
-                    </div>
-                  )}
-                  
-                  {/* Image Display */}
-                  {(file.file_type === 'image' || file.mime_type?.startsWith('image/') || 
-                   file.filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) && (
-                     <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
-                       <img 
-                         src={file.file_url} 
-                         alt={file.title || file.filename}
-                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                         crossOrigin="anonymous"
-                         onClick={() => window.open(file.file_url, '_blank')}
-                          onError={(e) => {
-                            // Image loading failed
-                          }}
-                          onLoad={() => {
-                            // Image loaded successfully
-                          }}
-                       />
-                     </div>
-                   )}
-                  
-                  {/* Audio Display */}
-                  {(file.file_type === 'audio' || file.mime_type?.startsWith('audio/') || 
-                   file.filename.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) && (
-                      <div className="p-4">
-                       <div className="flex items-center gap-2 mb-3">
-                         <Music className="h-5 w-5 text-primary" />
-                         <span className="font-medium text-sm">{t('conceptCard.audioFile')}</span>
-                       </div>
-                      <audio 
-                        controls 
-                        className="w-full"
-                        preload="metadata"
-                        crossOrigin="anonymous"
-                        onError={(e) => {
-                          console.error('Failed to load audio:', file.file_url, e);
-                        }}
-                      >
-                         <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
-                         {t('conceptCard.audioNotSupported')}
-                      </audio>
-                    </div>
-                  )}
-                  
-                  {/* Document Display */}
-                  {(file.file_type === 'document' || 
-                   file.mime_type?.includes('pdf') || 
-                   file.mime_type?.includes('document') || 
-                   file.mime_type?.includes('text') || 
-                   file.mime_type?.includes('application/') || 
-                   file.filename.match(/\.(pdf|doc|docx|txt)$/i)) && 
-                   file.file_type !== 'image' && file.file_type !== 'video' && file.file_type !== 'audio' && (
-                     <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
-                       <FileText className="h-12 w-12 text-primary mb-2" />
-                       <span className="text-sm font-medium text-center mb-2">{file.filename}</span>
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           className="h-6 px-2 text-xs md:h-9 md:px-3 md:text-sm"
-                           onClick={() => window.open(file.file_url, '_blank')}
-                         >
-                           <Download className="h-2 w-2 md:h-3 md:w-3 mr-1" />
-                           {t('conceptCard.download')}
-                         </Button>
-                     </div>
-                   )}
-                  
-                  {/* File Info */}
-                  <div className="p-3 border-t">
-                    <h5 className="font-medium text-sm truncate">
-                      {file.title || file.filename}
-                    </h5>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {file.file_type}
-                      {file.created_at && (() => {
-                        try {
-                          const dateObj = new Date(file.created_at);
-                          if (!isNaN(dateObj.getTime())) {
-                            return ` • ${format(dateObj, 'dd.MM.yy')}`;
-                          }
-                        } catch {}
-                        return '';
-                      })()}
-                    </p>
-                  </div>
-                </div>
-              )) : <></>}
-            </div>
+            <ConceptPortfolioGallery conceptId={concept.id} />
           </div>
         )}
 
