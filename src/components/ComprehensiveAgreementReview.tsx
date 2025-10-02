@@ -231,13 +231,11 @@ export const ComprehensiveAgreementReview = ({
 
             {/* Portfolio Attachments */}
             {booking.id && currentUserId && (
-              <div className="-mx-4">
-                <BookingPortfolioAttachments
-                  bookingId={booking.id}
-                  currentUserId={currentUserId}
-                  canEdit={false}
-                />
-              </div>
+              <BookingPortfolioAttachments
+                bookingId={booking.id}
+                currentUserId={currentUserId}
+                canEdit={false}
+              />
             )}
 
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
