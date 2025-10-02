@@ -10,6 +10,7 @@ import { Check, Calendar, MapPin, Banknote, Users, Settings, FileText, Phone, Ey
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 interface ComprehensiveAgreementReviewProps {
   booking: any;
   isOpen: boolean;
@@ -227,6 +228,17 @@ export const ComprehensiveAgreementReview = ({
                     </div>}
                 </div>
               </div>}
+
+            {/* Portfolio Attachments */}
+            {booking.id && currentUserId && (
+              <div className="-mx-4">
+                <BookingPortfolioAttachments
+                  bookingId={booking.id}
+                  currentUserId={currentUserId}
+                  canEdit={false}
+                />
+              </div>
+            )}
 
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-sm">

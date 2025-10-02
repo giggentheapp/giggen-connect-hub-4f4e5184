@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 
 const SECTIONS = [
   {
@@ -265,6 +266,15 @@ const BookingAgreementReview = () => {
                   )}
                 </div>
               </div>
+            )}
+
+            {/* Portfolio Attachments */}
+            {booking.id && currentUserId && (
+              <BookingPortfolioAttachments
+                bookingId={booking.id}
+                currentUserId={currentUserId}
+                canEdit={false}
+              />
             )}
 
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
