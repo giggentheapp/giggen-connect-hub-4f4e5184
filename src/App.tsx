@@ -11,7 +11,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import { Settings } from "./pages/Settings";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -21,7 +20,6 @@ import FeedbackButton from "./components/FeedbackButton";
 import ConceptView from "./pages/ConceptView";
 import ProfileConceptView from "./pages/ProfileConceptView";
 import CreateOffer from "./pages/CreateOffer";
-import UpcomingEvents from "./pages/UpcomingEvents";
 import NotFound from "./pages/NotFound";
 import BookingEdit from "./pages/BookingEdit";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
@@ -52,13 +50,11 @@ const App = () => (
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/profile/:userId/concept/:conceptId" element={<ProfileConceptView />} />
               <Route path="/map" element={<Map />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/concept/:conceptId" element={<ConceptView />} />
               <Route path="/create-offer" element={<CreateOffer />} />
-              <Route path="/events" element={<UpcomingEvents />} />
               <Route path="/arrangement/:id" element={<PublicEventView />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/bookings/:id" element={<AdminBookingView />} />
