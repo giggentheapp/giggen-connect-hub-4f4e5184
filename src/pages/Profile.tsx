@@ -264,18 +264,18 @@ const Profile = () => {
   const getNavigationItems = () => {
     if (isAudience) {
       return [
-        { id: 'profile', label: t('profile'), icon: User, path: '/?section=profile' },
-        { id: 'explore', label: t('explore'), icon: MapPin, path: '/?section=explore' },
-        { id: 'settings', label: t('settings'), icon: Settings, path: '/?section=settings' }
+        { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
+        { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
+        { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
       ];
     } else if (isArtist) {
       return [
-        { id: 'profile', label: t('profile'), icon: User, path: '/?section=profile' },
-        { id: 'explore', label: t('explore'), icon: MapPin, path: '/?section=explore' },
-        { id: 'admin-files', label: 'Filer', icon: FileText, path: '/?section=admin-files' },
-        { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/?section=admin-concepts' },
-        { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/?section=bookings' },
-        { id: 'settings', label: t('settings'), icon: Settings, path: '/?section=settings' }
+        { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
+        { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
+        { id: 'admin-files', label: 'Filer', icon: FileText, path: '/dashboard?section=admin-files' },
+        { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/dashboard?section=admin-concepts' },
+        { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/dashboard?section=bookings' },
+        { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
       ];
     }
     return [];

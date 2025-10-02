@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Compass, User, Settings, Calendar, FolderOpen, LogOut, Search, MapPin, Users, Home, List, Lightbulb, Briefcase, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useRole } from '@/contexts/RoleProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -33,7 +33,9 @@ export const UnifiedSidePanel = ({
   profile,
   className
 }: UnifiedSidePanelProps) => {
-  const [activeSection, setActiveSection] = useState('profile');  // Changed default to 'profile'
+  const [searchParams] = useSearchParams();
+  const initialSection = searchParams.get('section') || 'profile';
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
@@ -41,6 +43,14 @@ export const UnifiedSidePanel = ({
   const { toast } = useToast();
   const { role: userRole, isArtist, isAudience, loading: roleLoading } = useRole();
   const { t } = useAppTranslation();
+
+  // Update activeSection when URL changes
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
 
   // Use role from context as single source of truth
   const currentRole = userRole || profile.role;
@@ -60,6 +70,7 @@ export const UnifiedSidePanel = ({
   };
   const handleNavigation = (section: string) => {
     setActiveSection(section);
+    navigate(`/dashboard?section=${section}`);
   };
 
   // Role-based navigation items
