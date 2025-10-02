@@ -1,8 +1,9 @@
 import { User, Lightbulb, Calendar, MapPin } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
-import ConceptCard from '@/components/ConceptCard';
-import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
+import { ProfileConceptCard } from '@/components/ProfileConceptCard';
+import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
@@ -21,6 +22,8 @@ export const ProfileSection = ({
     concepts: allConcepts,
     loading: conceptsLoading
   } = useUserConcepts(profile.user_id);
+  
+  const { events, loading: eventsLoading } = useUpcomingEvents(profile.user_id);
   
   // ProfileSection is the PUBLIC view - ALWAYS show only published concepts
   // regardless of who is viewing (even if viewing own profile)
@@ -86,9 +89,7 @@ export const ProfileSection = ({
 
       {/* Portfolio Section */}
       <div className="space-y-4 md:space-y-6">
-        <div className="border-t pt-4 md:pt-6">
-          <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
-        </div>
+        <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
       </div>
 
       {/* Concepts Section */}
@@ -98,25 +99,29 @@ export const ProfileSection = ({
             <Lightbulb className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
             <h2 className="text-xl md:text-2xl font-semibold">Mine tilbud</h2>
           </div>
-          <div className="border-t pt-4 md:pt-6 space-y-3 md:space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {concepts.map(concept => (
-              <ConceptCard key={concept.id} concept={concept} showActions={false} />
+              <ProfileConceptCard key={concept.id} concept={concept} />
             ))}
           </div>
         </div>
       )}
 
       {/* Upcoming Events Section */}
-      <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center gap-3">
-          <Calendar className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-          <h2 className="text-xl md:text-2xl font-semibold">{t('myUpcomingEvents')}</h2>
+      {events.length > 0 && (
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">{t('myUpcomingEvents')}</h2>
+          </div>
+          
+          <div className="space-y-3 md:space-y-4">
+            {events.map(event => (
+              <ProfileEventCard key={event.id} event={event} />
+            ))}
+          </div>
         </div>
-        
-        <div className="border-t pt-4 md:pt-6">
-          <UpcomingEventsDisplay userId={profile.user_id} />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
