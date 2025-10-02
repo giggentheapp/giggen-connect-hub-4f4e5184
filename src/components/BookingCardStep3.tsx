@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Calendar, MapPin, Banknote, MessageCircle, Eye, Users, CheckCircle, EyeOff } from 'lucide-react';
+import { Calendar, MapPin, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -79,22 +79,20 @@ export const BookingCardStep3 = ({
   };
 
   return (
-    <Card className="hover:shadow-sm transition-all border-l-4 border-l-green-400">
-      <CardHeader className="pb-2 px-3 md:px-4 pt-3">
+    <Card className="hover:shadow-md transition-all cursor-pointer">
+      <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-base md:text-lg leading-tight">
-              {booking.title}
-            </CardTitle>
+            <h3 className="text-lg font-semibold">{booking.title}</h3>
             {booking.description && (
-              <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-1">
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {booking.description}
               </p>
             )}
           </div>
           
-          {/* Visibility toggle in top right corner */}
-          <div className="flex flex-col items-center gap-1 bg-muted/30 rounded-lg p-2 border">
+          {/* Visibility toggle */}
+          <div className="flex flex-col items-center gap-1 bg-muted/30 rounded-lg p-2 border shrink-0">
             {isPublic ? (
               <Eye className="h-4 w-4 text-green-600" />
             ) : (
@@ -107,30 +105,28 @@ export const BookingCardStep3 = ({
             />
           </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="px-3 md:px-4 pb-3 space-y-3">
-        {/* Essential booking details - compact grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm">
+        
+        {/* Essential booking details */}
+        <div className="flex flex-wrap gap-4 text-sm">
           {booking.event_date && (
             <div className="flex items-center gap-1.5">
-              <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-               <span className="truncate">
-                 {formatSafeDate(booking.event_date)}
-                 {booking.time && ` ${booking.time}`}
-               </span>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>
+                {formatSafeDate(booking.event_date)}
+                {booking.time && ` ${booking.time}`}
+              </span>
             </div>
           )}
           
           {booking.venue && (
             <div className="flex items-center gap-1.5">
-              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{booking.venue}</span>
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span>{booking.venue}</span>
             </div>
           )}
         </div>
 
-        {/* Actions - Only two buttons */}
+        {/* Actions */}
         <div className="flex gap-2 pt-2 border-t">
           <Button 
             size="sm" 
@@ -150,7 +146,7 @@ export const BookingCardStep3 = ({
             Se arrangement
           </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
