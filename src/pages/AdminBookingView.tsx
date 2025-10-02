@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, DollarSign, FileText, Phone, Mail, User, Settings, Briefcase, Lightbulb } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRole } from '@/contexts/RoleProvider';
@@ -299,16 +300,13 @@ const AdminBookingView = () => {
           </Card>
         )}
 
-        {/* Portfolio */}
-        {makerProfile && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Portefølje</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProfilePortfolioViewer userId={makerProfile.user_id} isOwnProfile={false} />
-            </CardContent>
-          </Card>
+        {/* Booking Portfolio Attachments - For negotiation phase and later */}
+        {isOwner && currentUserId && (booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both' || booking.status === 'upcoming') && (
+          <BookingPortfolioAttachments
+            bookingId={booking.id}
+            currentUserId={currentUserId}
+            canEdit={booking.status !== 'upcoming'}
+          />
         )}
 
         {/* Technical Specs - Only for booking parties */}
