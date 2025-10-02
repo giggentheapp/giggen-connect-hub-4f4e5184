@@ -175,7 +175,10 @@ const BookingAgreementReview = () => {
           : "Du har godkjent avtalen"
       });
 
-      navigate(-1);
+      // Navigate back after a short delay to ensure toast is visible
+      setTimeout(() => {
+        navigate(-1);
+      }, 500);
     } catch (error: any) {
       toast({
         title: "Feil ved godkjenning",
