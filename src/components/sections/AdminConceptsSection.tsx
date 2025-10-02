@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Lightbulb, Plus, ChevronDown, Edit, X, Clock, Eye, EyeOff } from 'lucide-react';
-import ConceptCard from '@/components/ConceptCard';
+import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,174 +162,178 @@ export const AdminConceptsSection = ({
 
     return { completed, total };
   };
-  return <div className="space-y-6">
+  return (
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('My Offers')}</h1>
+          <p className="text-sm text-muted-foreground">{t('createAndManageOffers')}</p>
+        </div>
+        <Button onClick={() => navigate('/create-offer')}>
+          <Plus className="h-4 w-4 mr-2" />
+          {t('newOffer')}
+        </Button>
+      </div>
 
       {/* Published Offers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{t('My Offers')}</span>
-            <Button onClick={() => navigate('/create-offer')}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('newOffer')}
-            </Button>
-          </CardTitle>
-          <CardDescription>
-            {t('createAndManageOffers')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Laster tilbud...</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {concepts.length > 0 ? (
-                concepts.map(concept => (
-                  <div key={concept.id} className="flex items-start gap-3">
-                    <div className="flex-1">
-                      <ConceptCard
-                        concept={concept}
-                        showActions={true}
-                        showConceptActions={true}
-                        onDelete={() => handleDeleteConcept(concept.id)}
-                        onConceptAction={(action) => {
-                          if (action === 'deleted' || action === 'rejected') {
-                            refetch();
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center gap-2 bg-muted/30 rounded-lg p-3 border min-w-[100px]">
-                      <Label htmlFor={`concept-visibility-${concept.id}`} className="text-xs font-medium text-center">
-                        {concept.is_published ? (
-                          <div className="flex flex-col items-center gap-1">
-                            <Eye className="h-4 w-4 text-green-600" />
-                            <span>Offentlig</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-1">
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                            <span>Skjult</span>
-                          </div>
+      <div className="space-y-3">
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-sm text-muted-foreground">Laster tilbud...</p>
+          </div>
+        ) : (
+          <>
+            {concepts.length > 0 ? (
+              concepts.map(concept => (
+                <div key={concept.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 hover:border-border transition-all">
+                  <div className="flex items-start gap-3 p-3">
+                    <div className="flex-1 min-w-0">
+                      <div onClick={() => navigate(`/profile/${concept.maker_id}/concept/${concept.id}`)} className="cursor-pointer">
+                        <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
+                        {concept.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {concept.description}
+                          </p>
                         )}
-                      </Label>
+                        <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
+                            {concept.price ? `${concept.price} kr` : 'Etter avtale'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Visibility Toggle */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                      {concept.is_published ? (
+                        <>
+                          <Eye className="h-3 w-3 text-green-600" />
+                          <span className="text-xs font-medium">Offentlig</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs font-medium">Skjult</span>
+                        </>
+                      )}
                       <Switch
-                        id={`concept-visibility-${concept.id}`}
                         checked={concept.is_published}
                         onCheckedChange={() => toggleConceptVisibility(concept.id, concept.is_published)}
-                        className="data-[state=checked]:bg-green-500"
+                        className="data-[state=checked]:bg-green-500 scale-75"
                       />
                     </div>
+                    
+                    {/* Delete Button */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteConcept(concept.id)}
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-4">
-                    {t('noOffersCreated')}
-                  </p>
-                  <Button onClick={() => navigate('/create-offer')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t('createFirstOffer')}
-                  </Button>
                 </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              ))
+            ) : (
+              <div className="text-center py-12 border-2 border-dashed border-muted-foreground/20 rounded-lg">
+                <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('noOffersCreated')}
+                </p>
+                <Button onClick={() => navigate('/create-offer')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('createFirstOffer')}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Drafts Section */}
-      <Card>
-        <Collapsible open={showDrafts} onOpenChange={setShowDrafts}>
-          <CardHeader>
-            <CollapsibleTrigger className="w-full">
-              <CardTitle className="flex items-center justify-between cursor-pointer hover:text-primary transition-colors">
-                <span className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Mine utkast ({drafts.length})
-                </span>
-                <ChevronDown
-                  className={`h-5 w-5 transition-transform ${showDrafts ? 'rotate-180' : ''}`}
-                />
-              </CardTitle>
-            </CollapsibleTrigger>
-            <CardDescription>
-              Uferdige tilbud som du kan fortsette på
-            </CardDescription>
-          </CardHeader>
-
+      <Collapsible open={showDrafts} onOpenChange={setShowDrafts}>
+        <div className="space-y-3">
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold">Mine utkast ({drafts.length})</h2>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${showDrafts ? 'rotate-180' : ''}`}
+            />
+          </CollapsibleTrigger>
+          
           <CollapsibleContent>
-            <CardContent>
-              {draftsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p>Laster utkast...</p>
-                </div>
-              ) : drafts.length > 0 ? (
-                <div className="grid gap-4">
-                  {drafts.map((draft) => {
-                    const progress = calculateProgress(draft);
-                    return (
-                      <Card key={draft.id} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h4 className="font-semibold mb-1">
-                                {draft.title || 'Nytt tilbud'}
-                              </h4>
-                              <p className="text-sm text-muted-foreground mb-2">
-                                Sist endret: {format(new Date(draft.updated_at), 'PPp', { locale: nb })}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-primary transition-all"
-                                    style={{ width: `${(progress.completed / progress.total) * 100}%` }}
-                                  />
-                                </div>
-                                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                  {progress.completed}/{progress.total} steg
-                                </span>
-                              </div>
+            {draftsLoading ? (
+              <div className="text-center py-6">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-3"></div>
+                <p className="text-xs text-muted-foreground">Laster utkast...</p>
+              </div>
+            ) : drafts.length > 0 ? (
+              <div className="space-y-2">
+                {drafts.map((draft) => {
+                  const progress = calculateProgress(draft);
+                  return (
+                    <div key={draft.id} className="rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium truncate">
+                            {draft.title || 'Nytt tilbud'}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            Sist endret: {format(new Date(draft.updated_at), 'dd.MM.yyyy HH:mm')}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-accent-orange transition-all"
+                                style={{ width: `${(progress.completed / progress.total) * 100}%` }}
+                              />
                             </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => navigate(`/create-offer?edit=${draft.id}`)}
-                                className="gap-2"
-                              >
-                                <Edit className="h-4 w-4" />
-                                Fortsett
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDeleteDraft(draft.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                              {progress.completed}/{progress.total}
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    Ingen utkast for øyeblikket
-                  </p>
-                </div>
-              )}
-            </CardContent>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => navigate(`/create-offer?edit=${draft.id}`)}
+                            className="h-7 px-2 text-xs"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Fortsett
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteDraft(draft.id)}
+                            className="h-7 w-7 p-0 hover:bg-muted"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-6 border-2 border-dashed border-muted-foreground/20 rounded-lg">
+                <Clock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">
+                  Ingen utkast for øyeblikket
+                </p>
+              </div>
+            )}
           </CollapsibleContent>
-        </Collapsible>
-      </Card>
-    </div>;
+        </div>
+      </Collapsible>
+    </div>
+  );
 };
