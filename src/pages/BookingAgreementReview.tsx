@@ -175,10 +175,7 @@ const BookingAgreementReview = () => {
           : "Du har godkjent avtalen"
       });
 
-      // Navigate back after a short delay to ensure toast is visible
-      setTimeout(() => {
-        navigate(-1);
-      }, 500);
+      navigate('/bookings');
     } catch (error: any) {
       toast({
         title: "Feil ved godkjenning",
@@ -401,7 +398,7 @@ const BookingAgreementReview = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/bookings')}
               className="gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
