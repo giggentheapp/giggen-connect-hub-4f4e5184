@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Save, X } from 'lucide-react';
+import { CalendarIcon, Save, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { z } from 'zod';
+import { cn } from '@/lib/utils';
 
 // Validation schema
 const bookingEditSchema = z.object({
@@ -21,8 +23,10 @@ const bookingEditSchema = z.object({
   description: z.string().max(2000, "Beskrivelse må være under 2000 tegn").optional().nullable(),
   venue: z.string().max(200, "Spillested må være under 200 tegn").optional().nullable(),
   address: z.string().max(300, "Adresse må være under 300 tegn").optional().nullable(),
-  event_date: z.date().optional().nullable(),
-  time: z.string().max(10, "Tid må være i format HH:MM").optional().nullable(),
+  start_date: z.date().optional().nullable(),
+  end_date: z.date().optional().nullable(),
+  start_time: z.string().max(10, "Tid må være i format HH:MM").optional().nullable(),
+  end_time: z.string().max(10, "Tid må være i format HH:MM").optional().nullable(),
   ticket_price: z.number().min(0, "Billetpris må være positiv").optional().nullable(),
   artist_fee: z.number().min(0, "Honorar må være positivt").optional().nullable(),
   audience_estimate: z.number().min(1, "Publikumsestimat må være minst 1").optional().nullable(),
@@ -48,15 +52,19 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
     description: '',
     venue: '',
     address: '',
-    event_date: null as Date | null,
-    time: '',
+    start_date: null as Date | null,
+    end_date: null as Date | null,
+    start_time: '',
+    end_time: '',
     ticket_price: '',
     artist_fee: '',
     audience_estimate: '',
     door_deal: false,
     door_percentage: '',
     by_agreement: false,
-    personal_message: ''
+    personal_message: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   // Initialize form with booking data
@@ -67,15 +75,19 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: booking.description || '',
         venue: booking.venue || '',
         address: booking.address || '',
-        event_date: booking.event_date ? new Date(booking.event_date) : null,
-        time: booking.time || '',
+        start_date: booking.event_date ? new Date(booking.event_date) : null,
+        end_date: booking.end_date ? new Date(booking.end_date) : null,
+        start_time: booking.time || booking.start_time || '',
+        end_time: booking.end_time || '',
         ticket_price: booking.ticket_price?.toString() || '',
         artist_fee: booking.artist_fee?.toString() || '',
         audience_estimate: booking.audience_estimate?.toString() || '',
         door_deal: booking.door_deal || false,
         door_percentage: booking.door_percentage?.toString() || '',
         by_agreement: booking.by_agreement || false,
-        personal_message: booking.personal_message || ''
+        personal_message: booking.personal_message || '',
+        latitude: booking.latitude || null,
+        longitude: booking.longitude || null,
       });
       setErrors({});
     }
@@ -93,8 +105,10 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: formData.description || null,
         venue: formData.venue || null,
         address: formData.address || null,
-        event_date: formData.event_date,
-        time: formData.time || null,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        start_time: formData.start_time || null,
+        end_time: formData.end_time || null,
         ticket_price: formData.ticket_price ? parseFloat(formData.ticket_price) : null,
         artist_fee: formData.artist_fee ? parseFloat(formData.artist_fee) : null,
         audience_estimate: formData.audience_estimate ? parseInt(formData.audience_estimate) : null,
@@ -111,8 +125,12 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: validatedData.description,
         venue: validatedData.venue,
         address: validatedData.address,
-        event_date: validatedData.event_date?.toISOString(),
-        time: validatedData.time,
+        event_date: validatedData.start_date?.toISOString(),
+        start_date: validatedData.start_date?.toISOString(),
+        end_date: validatedData.end_date?.toISOString(),
+        time: validatedData.start_time,
+        start_time: validatedData.start_time,
+        end_time: validatedData.end_time,
         ticket_price: validatedData.ticket_price,
         artist_fee: validatedData.artist_fee,
         audience_estimate: validatedData.audience_estimate,
@@ -120,6 +138,8 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         door_percentage: validatedData.door_percentage,
         by_agreement: formData.by_agreement,
         personal_message: validatedData.personal_message,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         last_modified_by: currentUserId,
         last_modified_at: new Date().toISOString()
       };
@@ -243,43 +263,100 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             <CardTitle>Dato og sted</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Date Range */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Dato</Label>
+                <Label>Fra dato</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`w-full justify-start text-left font-normal ${!formData.event_date && "text-muted-foreground"}`}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.start_date && "text-muted-foreground"
+                      )}
                       disabled={!canEdit || loading}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.event_date ? format(formData.event_date, "PPP", { locale: nb }) : "Velg dato"}
+                      {formData.start_date ? format(formData.start_date, "PPP", { locale: nb }) : "Velg startdato"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={formData.event_date}
-                      onSelect={(date) => updateFormField('event_date', date)}
+                      selected={formData.start_date || undefined}
+                      onSelect={(date) => updateFormField('start_date', date)}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
-                {errors.event_date && <p className="text-sm text-red-500 mt-1">{errors.event_date}</p>}
+                {errors.start_date && <p className="text-sm text-destructive mt-1">{errors.start_date}</p>}
               </div>
 
               <div>
-                <Label htmlFor="time">Tid (HH:MM)</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={formData.time}
-                  onChange={(e) => updateFormField('time', e.target.value)}
-                  disabled={!canEdit || loading}
-                  className={errors.time ? "border-red-500" : ""}
-                />
-                {errors.time && <p className="text-sm text-red-500 mt-1">{errors.time}</p>}
+                <Label>Til dato</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.end_date && "text-muted-foreground"
+                      )}
+                      disabled={!canEdit || loading}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.end_date ? format(formData.end_date, "PPP", { locale: nb }) : "Velg sluttdato"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.end_date || undefined}
+                      onSelect={(date) => updateFormField('end_date', date)}
+                      disabled={(date) => formData.start_date ? date < formData.start_date : false}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.end_date && <p className="text-sm text-destructive mt-1">{errors.end_date}</p>}
+              </div>
+            </div>
+
+            {/* Time Range */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="start_time">Fra klokkeslett</Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="start_time"
+                    type="time"
+                    value={formData.start_time}
+                    onChange={(e) => updateFormField('start_time', e.target.value)}
+                    disabled={!canEdit || loading}
+                    className={cn("pl-10", errors.start_time && "border-destructive")}
+                  />
+                </div>
+                {errors.start_time && <p className="text-sm text-destructive mt-1">{errors.start_time}</p>}
+              </div>
+
+              <div>
+                <Label htmlFor="end_time">Til klokkeslett</Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="end_time"
+                    type="time"
+                    value={formData.end_time}
+                    onChange={(e) => updateFormField('end_time', e.target.value)}
+                    disabled={!canEdit || loading}
+                    className={cn("pl-10", errors.end_time && "border-destructive")}
+                  />
+                </div>
+                {errors.end_time && <p className="text-sm text-destructive mt-1">{errors.end_time}</p>}
               </div>
             </div>
 
@@ -298,15 +375,19 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
             <div>
               <Label htmlFor="address">Adresse</Label>
-              <Input
-                id="address"
+              <AddressAutocomplete
                 value={formData.address}
-                onChange={(e) => updateFormField('address', e.target.value)}
-                disabled={!canEdit || loading}
-                placeholder="F.eks. Sonja Henies plass 2, 1366 Lysaker"
-                className={errors.address ? "border-red-500" : ""}
+                onChange={(address, coordinates) => {
+                  updateFormField('address', address);
+                  if (coordinates) {
+                    updateFormField('latitude', coordinates.lat);
+                    updateFormField('longitude', coordinates.lng);
+                  }
+                }}
+                placeholder="Søk etter adresse..."
+                className={errors.address ? "border-destructive" : ""}
               />
-              {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
+              {errors.address && <p className="text-sm text-destructive mt-1">{errors.address}</p>}
             </div>
 
             <div>
