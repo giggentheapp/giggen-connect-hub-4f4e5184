@@ -37,6 +37,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
   const [selectedCoordinates, setSelectedCoordinates] = useState<{lat: number, lng: number} | null>(null);
+  const [userTyping, setUserTyping] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Geocode address using Supabase Edge Function
@@ -88,14 +89,16 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     }
   };
 
-  // Debounced geocoding
+  // Debounced geocoding - only trigger if user is typing
   useEffect(() => {
+    if (!userTyping) return;
     const timeoutId = setTimeout(() => geocodeAddress(value), 500);
     return () => clearTimeout(timeoutId);
-  }, [value]);
+  }, [value, userTyping]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    setUserTyping(true);
     onChange(newValue);
     if (!newValue.trim()) {
       setSelectedCoordinates(null);
@@ -111,6 +114,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     };
     
     setSelectedCoordinates(coordinates);
+    setUserTyping(false); // Stop triggering geocoding after selection
     onChange(suggestion.place_name, coordinates);
     setShowSuggestions(false);
     setSuggestions([]);

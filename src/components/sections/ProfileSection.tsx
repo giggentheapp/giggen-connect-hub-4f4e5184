@@ -1,4 +1,4 @@
-import { User, Folder, Lightbulb, Calendar, MapPin } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
@@ -86,9 +86,6 @@ export const ProfileSection = ({
 
       {/* Portfolio Section */}
       <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center gap-3">
-          <Folder className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-        </div>
         <div className="border-t pt-4 md:pt-6">
           <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
         </div>
@@ -99,6 +96,7 @@ export const ProfileSection = ({
         <div className="space-y-4 md:space-y-6">
           <div className="flex items-center gap-3">
             <Lightbulb className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">Mine tilbud</h2>
           </div>
           <div className="border-t pt-4 md:pt-6 space-y-3 md:space-y-4">
             {concepts.map(concept => (
