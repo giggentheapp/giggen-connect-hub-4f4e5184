@@ -186,7 +186,7 @@ export const BookingsSection = ({
     booking: any;
   }) => {
     const handleDetailsClick = () => {
-      navigate(`/bookings/${booking.id}`);
+      navigate(`/booking/${booking.id}/review`);
     };
 
     const handleEditClick = () => {
