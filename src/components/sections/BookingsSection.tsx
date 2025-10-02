@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SafariErrorBoundary } from '@/components/SafariErrorBoundary';
 import { BookingErrorBoundary } from '@/components/BookingErrorBoundary';
@@ -220,43 +219,40 @@ export const BookingsSection = ({
     }
 
     // Fallback for other statuses (cancelled, completed, etc.)
-    return <Card className="booking-card hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-lg">{booking.title}</CardTitle>
-              {booking.description && (
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {booking.description}
-                </p>
-              )}
-            </div>
-            <Badge className={getStatusColor(booking.status)}>
-              {getStatusText(booking.status)}
-            </Badge>
+    return <div className="group rounded-lg border border-border bg-gradient-to-br from-background to-muted/20 hover:border-primary/20 transition-all duration-300 p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold">{booking.title}</h3>
+            {booking.description && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                {booking.description}
+              </p>
+            )}
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between pt-3 border-t">
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={handleDetailsClick}>
-                <Eye className="h-4 w-4 mr-1" />
-                Se detaljer
+          <Badge className={getStatusColor(booking.status)}>
+            {getStatusText(booking.status)}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center justify-between pt-3 border-t border-border/50">
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleDetailsClick}>
+              <Eye className="h-4 w-4 mr-1" />
+              Se detaljer
+            </Button>
+            {booking.concept_ids && booking.concept_ids.length > 0 && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleConceptClick}
+              >
+                Se tilbud
               </Button>
-              {booking.concept_ids && booking.concept_ids.length > 0 && (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={handleConceptClick}
-                >
-                  Se tilbud
-                </Button>
-              )}
-            </div>
-            <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
+            )}
           </div>
-        </CardContent>
-      </Card>;
+          <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
+        </div>
+      </div>;
   };
   // Simple loading state
   if (loading) {
@@ -329,12 +325,10 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {incomingRequests.length === 0 ? (
-                         <Card>
-                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
-                             <Inbox className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
-                             <p className="text-muted-foreground text-sm md:text-base">Ingen innkommende forespørsler</p>
-                           </CardContent>
-                         </Card>
+                         <div className="text-center py-8">
+                           <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
+                         </div>
                       ) : (
                         incomingRequests.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
@@ -359,12 +353,10 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {sentRequests.length === 0 ? (
-                         <Card>
-                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
-                             <Send className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
-                             <p className="text-muted-foreground text-sm md:text-base">Ingen sendte forespørsler</p>
-                           </CardContent>
-                         </Card>
+                         <div className="text-center py-8">
+                           <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen sendte forespørsler</p>
+                         </div>
                       ) : (
                         sentRequests.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
@@ -389,12 +381,10 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {ongoingAgreements.length === 0 ? (
-                         <Card>
-                           <CardContent className="text-center py-6 md:py-12 px-3 md:px-6">
-                             <Clock className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-2 md:mb-4 text-muted-foreground" />
-                             <p className="text-muted-foreground text-sm md:text-base">Ingen pågående avtaler</p>
-                           </CardContent>
-                         </Card>
+                         <div className="text-center py-8">
+                           <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen pågående avtaler</p>
+                         </div>
                       ) : (
                         ongoingAgreements.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
@@ -419,12 +409,10 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {upcomingEvents.length === 0 ? (
-                        <Card>
-                          <CardContent className="text-center py-12">
-                            <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
-                          </CardContent>
-                        </Card>
+                         <div className="text-center py-8">
+                           <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
+                         </div>
                       ) : (
                         upcomingEvents.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
