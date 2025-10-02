@@ -196,98 +196,24 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
     }
   };
 
-  const EventCard = ({ event }: { event: any }) => {
-    // Handle different data structures for admin vs public view
-    const eventDate = event.event_date || event.event_datetime || event.date;
-    const eventTime = event.time;
-    const ticketPrice = event.price_ticket || event.ticket_price;
-    
-    // Format date display
-    const displayDate = eventDate ? (
-      eventTime && !eventDate.includes('T') ? 
-        `${format(new Date(eventDate), 'dd.MM.yyyy')} ${eventTime.slice(0, 5)}` :
-        format(new Date(eventDate), 'dd.MM.yyyy HH:mm')
-    ) : 'Dato ikke satt';
-
-    return (
-      <Card 
-        className="cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => openEventDetails(event)}
-      >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">{event.title}</CardTitle>
-              <CardDescription>
-                {event.description && (
-                  <span className="block text-sm">{event.description}</span>
-                )}
-              </CardDescription>
-            </div>
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              Kommende
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>{displayDate}</span>
-            </div>
-            
-            {event.venue && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{event.venue}</span>
-              </div>
-            )}
-            
-            {ticketPrice && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Banknote className="h-4 w-4" />
-                <span>Billett: {ticketPrice}</span>
-              </div>
-            )}
-
-            {event.expected_audience && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span>Forventet publikum: {event.expected_audience}</span>
-              </div>
-            )}
-
-            {isAdminView && (
-              <>
-                {event.price_musician && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Banknote className="h-4 w-4" />
-                    <span>Musiker: {event.price_musician}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  <span>
-                    {event.sender_id === profile.user_id ? 
-                      `Med: ${event.receiver_profile?.display_name || 'Ukjent bruker'}` : 
-                      `Med: ${event.sender_profile?.display_name || 'Ukjent bruker'}`
-                    }
-                  </span>
-                </div>
-              </>
-            )}
-
-            <div className="flex justify-end pt-2">
-              <Button size="sm" variant="ghost" onClick={() => openEventDetails(event)}>
-                <Eye className="h-4 w-4 mr-1" />
-                Se detaljer
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  // Transform event data for UpcomingEventCard
+  const transformEventForCard = (event: any) => {
+    return {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      event_date: event.event_date || event.event_datetime || event.date,
+      time: event.time,
+      venue: event.venue,
+      address: event.address,
+      ticket_price: event.price_ticket || event.ticket_price,
+      audience_estimate: event.expected_audience || event.audience_estimate,
+      status: 'upcoming' as const,
+      is_sender: event.sender_id === profile.user_id,
+      is_receiver: event.receiver_id === profile.user_id,
+      is_public_after_approval: event.is_public_after_approval,
+      created_at: event.created_at || new Date().toISOString()
+    };
   };
 
   if (loading) {
@@ -332,19 +258,9 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
       ) : (
         <div className="space-y-3 md:space-y-4">
           {upcomingEvents.map((event) => (
-            isAdminView ? (
-              <EventCard key={event.id} event={event} />
-            ) : (
-              <UpcomingEventCard 
-                key={event.id} 
-                event={{
-                  ...event,
-                  is_sender: false,
-                  is_receiver: false,
-                  status: 'upcoming'
-                }} 
-              />
-            )
+            <div key={event.id} onClick={() => isAdminView && openEventDetails(event)}>
+              <UpcomingEventCard event={transformEventForCard(event)} />
+            </div>
           ))}
         </div>
       )}
