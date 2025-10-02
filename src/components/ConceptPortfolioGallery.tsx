@@ -1,75 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Volume2, File, Expand, Play } from 'lucide-react';
-import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
-import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-interface ProfilePortfolioViewerProps {
-  userId: string;
-  showControls?: boolean;
-  isOwnProfile?: boolean;
+interface ConceptPortfolioGalleryProps {
+  conceptId: string;
 }
 
-export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
-  const { files, loading, error } = useProfilePortfolio(userId);
-  const { t } = useAppTranslation();
-  const [selectedFile, setSelectedFile] = useState<typeof files[0] | null>(null);
+interface ConceptFile {
+  id: string;
+  filename: string;
+  file_path: string;
+  file_url: string | null;
+  file_type: string;
+  mime_type: string | null;
+  title?: string;
+}
+
+export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryProps) => {
+  const [files, setFiles] = useState<ConceptFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('concept_files')
+          .select('*')
+          .eq('concept_id', conceptId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setFiles(data || []);
+      } catch (error) {
+        console.error('Error fetching concept files:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, [conceptId]);
 
   if (loading) {
     return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-destructive">Kunne ikke laste portefølje: {error}</p>
+      <div className="flex justify-center py-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!files.length) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-muted-foreground">
-          {showControls || isOwnProfile
-            ? t('noPortfolioUploaded')
-            : "Ingen offentlige porteføljefiler tilgjengelig"
-          }
-        </p>
-      </div>
-    );
+    return null;
   }
 
-  const getPublicUrl = (filePath: string) => {
-    if (!filePath) return null;
-    const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
-    return data?.publicUrl || null;
+  const getPublicUrl = (file: ConceptFile) => {
+    return file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
   };
 
-  const isAudioFile = (file: typeof files[0]) => {
-    if (!file) return false;
+  const isAudioFile = (file: ConceptFile) => {
     return file.file_type === 'audio' || 
            file.file_type?.includes('audio') || 
            file.mime_type?.includes('audio') ||
            /\.(mp3|wav|m4a|aac|ogg|flac|wma)$/i.test(file.filename || '');
   };
 
-  const isVideoFile = (file: typeof files[0]) => {
-    if (!file) return false;
+  const isVideoFile = (file: ConceptFile) => {
     return file.file_type?.includes('video') || file.mime_type?.includes('video');
   };
 
-  const renderGridItem = (file: typeof files[0]) => {
-    const publicUrl = getPublicUrl(file.file_path);
-    if (!publicUrl) return null;
+  const renderGridItem = (file: ConceptFile) => {
+    const publicUrl = getPublicUrl(file);
 
-    // Image - just show the image with expand icon on hover
+    // Image
     if (file.file_type?.includes('image')) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
@@ -87,7 +92,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       );
     }
 
-    // Video - show video with expand icon on hover
+    // Video
     if (isVideoFile(file)) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
@@ -110,7 +115,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       );
     }
 
-    // Audio - show audio player with filename
+    // Audio
     if (isAudioFile(file)) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-white border border-border group cursor-pointer flex flex-col items-center justify-center p-2 md:p-3 gap-1 md:gap-2">
@@ -122,25 +127,24 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             preload="metadata"
             onClick={(e) => e.stopPropagation()}
           >
-            <source src={publicUrl} type={file.mime_type} />
+            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
           </audio>
         </div>
       );
     }
 
-    // Other files - show file icon
+    // Other files
     return (
       <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
         <div className="absolute inset-0 flex items-center justify-center">
-          <File className="w-16 h-16 text-muted-foreground/60" />
+          <File className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/60" />
         </div>
       </div>
     );
   };
 
-  const renderModalContent = (file: typeof files[0]) => {
-    const publicUrl = getPublicUrl(file.file_path);
-    if (!publicUrl) return null;
+  const renderModalContent = (file: ConceptFile) => {
+    const publicUrl = getPublicUrl(file);
 
     if (file.file_type?.includes('image')) {
       return (
@@ -160,7 +164,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
           autoPlay
           className="w-full h-auto max-h-[80vh]"
         >
-          <source src={publicUrl} type={file.mime_type} />
+          <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
         </video>
       );
     }
@@ -172,9 +176,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
     <ErrorBoundary>
       <div className="grid grid-cols-3 gap-1">
         {files.map((file) => {
-          if (!file) return null;
-          
-          // Don't open modal for audio files
           const shouldOpenModal = !isAudioFile(file);
           
           return (
@@ -188,7 +189,6 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
         })}
       </div>
 
-      {/* Modal for expanded view */}
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
           {selectedFile && renderModalContent(selectedFile)}
@@ -198,4 +198,4 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   );
 };
 
-export default ProfilePortfolioViewer;
+export default ConceptPortfolioGallery;

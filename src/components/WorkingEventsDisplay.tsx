@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Banknote, Users, Eye, Music } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye, Music, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
@@ -145,28 +145,58 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
                   {/* Portfolio files preview */}
                   {files.length > 0 && (
                     <div className="border-t pt-3 mt-3">
-                      <p className="text-xs text-muted-foreground mb-2">Portefølje ({files.length})</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {files.slice(0, 3).map((file) => {
+                      <div className="grid grid-cols-3 gap-1">
+                        {files.map((file) => {
                           const fileUrl = file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
+                          const isAudio = file.file_type === 'audio' || file.mime_type?.includes('audio');
+                          const isVideo = file.file_type === 'video' || file.mime_type?.includes('video');
+                          
                           return (
-                            <div key={file.id} className="aspect-square rounded overflow-hidden bg-muted">
+                            <div key={file.id} className="aspect-square overflow-hidden bg-muted group cursor-pointer relative">
                               {file.file_type === 'image' && (
-                                <img src={fileUrl} alt={file.title || file.filename} className="w-full h-full object-cover" />
+                                <>
+                                  <img 
+                                    src={fileUrl} 
+                                    alt="" 
+                                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" 
+                                  />
+                                  <div className="absolute top-1 right-1 md:top-2 md:right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                                      <Eye className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                    </div>
+                                  </div>
+                                </>
                               )}
-                              {file.file_type === 'video' && (
-                                <video src={fileUrl} className="w-full h-full object-cover" muted />
+                              {isVideo && (
+                                <>
+                                  <video 
+                                    src={fileUrl} 
+                                    className="w-full h-full object-cover" 
+                                    preload="metadata"
+                                  />
+                                  <div className="absolute top-1 right-1 md:top-2 md:right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                                      <Eye className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                                    <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white/90 flex items-center justify-center">
+                                      <div className="w-0 h-0 border-l-[12px] md:border-l-[16px] border-l-black border-t-[8px] md:border-t-[10px] border-t-transparent border-b-[8px] md:border-b-[10px] border-b-transparent ml-1" />
+                                    </div>
+                                  </div>
+                                </>
                               )}
-                              {file.file_type === 'audio' && (
-                                <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3 bg-muted">
-                                  <Music className="h-8 w-8 text-primary" />
+                              {isAudio && (
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-1 md:gap-2 p-2 md:p-3 bg-white border border-border">
+                                  <Music className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                                  <p className="text-[10px] md:text-xs font-medium text-center truncate w-full px-1">{file.title || file.filename}</p>
                                   <audio
                                     controls
-                                    className="w-full"
+                                    className="w-full mt-auto scale-75 md:scale-100"
                                     preload="metadata"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
                                     <source src={fileUrl} type={file.mime_type || 'audio/mpeg'} />
-                                    Nettleseren din støtter ikke lydavspilling.
                                   </audio>
                                 </div>
                               )}
@@ -174,9 +204,6 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
                           );
                         })}
                       </div>
-                      {files.length > 3 && (
-                        <p className="text-xs text-muted-foreground mt-2">+{files.length - 3} til</p>
-                      )}
                     </div>
                   )}
                 </div>
