@@ -40,7 +40,7 @@ export const BookingCardStep2 = ({
   onAgreementClick
 }: BookingCardStep2Props) => {
   const isApprovedByBoth = booking.status === 'approved_by_both';
-  const canEdit = canBeEditedByParties(booking.status as BookingStatus) || isApprovedByBoth;
+  const canEdit = canBeEditedByParties(booking.status as BookingStatus) && !isApprovedByBoth;
 
   return (
     <Card className="hover:shadow-sm transition-all border-l-4 border-l-orange-400">
@@ -63,9 +63,15 @@ export const BookingCardStep2 = ({
               </p>
             )}
           </div>
-          <Badge variant="secondary" className="text-xs whitespace-nowrap">
-            Forhandling
-          </Badge>
+          {isApprovedByBoth ? (
+            <Badge variant="default" className="text-xs whitespace-nowrap bg-green-600 hover:bg-green-700">
+              Godkjent av begge
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+              Forhandling
+            </Badge>
+          )}
         </div>
       </CardHeader>
       
@@ -128,24 +134,36 @@ export const BookingCardStep2 = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex gap-1.5">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={canEdit ? onEditClick : onDetailsClick}
-              className="h-7 px-2 text-xs"
-            >
-              {canEdit ? (
-                <>
-                  <Edit3 className="h-3 w-3 mr-1" />
-                  Rediger
-                </>
-              ) : (
-                <>
-                  <Eye className="h-3 w-3 mr-1" />
-                  Detaljer
-                </>
-              )}
-            </Button>
+            {isApprovedByBoth ? (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={onDetailsClick}
+                className="h-7 px-2 text-xs"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Se avtale
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={canEdit ? onEditClick : onDetailsClick}
+                className="h-7 px-2 text-xs"
+              >
+                {canEdit ? (
+                  <>
+                    <Edit3 className="h-3 w-3 mr-1" />
+                    Rediger
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-3 w-3 mr-1" />
+                    Detaljer
+                  </>
+                )}
+              </Button>
+            )}
             
             {booking.concept_ids && booking.concept_ids.length > 0 && (
               <Button 
