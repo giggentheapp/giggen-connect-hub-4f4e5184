@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { logger } from '@/utils/logger';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 
 // Extend Window interface for TypeScript
 declare global {
@@ -694,6 +695,13 @@ export const BookingDetailsPanel = ({
 
       {/* Hospitality */}
       
+
+      {/* Portfolio Attachments */}
+      <BookingPortfolioAttachments 
+        bookingId={booking.id} 
+        currentUserId={currentUserId} 
+        canEdit={canEdit} 
+      />
 
       {/* Documents */}
       <BookingDocumentViewer techSpec={booking.tech_spec} hospitalityRider={booking.hospitality_rider} bookingStatus={booking.status} isVisible={canEdit || booking.status === 'upcoming' || booking.status === 'published'} />

@@ -115,6 +115,45 @@ export type Database = {
           },
         ]
       }
+      booking_portfolio_attachments: {
+        Row: {
+          attached_by: string
+          booking_id: string
+          created_at: string
+          id: string
+          portfolio_file_id: string
+        }
+        Insert: {
+          attached_by: string
+          booking_id: string
+          created_at?: string
+          id?: string
+          portfolio_file_id: string
+        }
+        Update: {
+          attached_by?: string
+          booking_id?: string
+          created_at?: string
+          id?: string
+          portfolio_file_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_portfolio_attachments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_portfolio_attachments_portfolio_file_id_fkey"
+            columns: ["portfolio_file_id"]
+            isOneToOne: false
+            referencedRelation: "profile_portfolio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           address: string | null
