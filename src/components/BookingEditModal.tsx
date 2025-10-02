@@ -194,6 +194,8 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
   const isSender = currentUserId === booking.sender_id;
   const canEdit = booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both';
+  const isInNegotiation = booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both';
+  const showContactInfo = isInNegotiation && booking.contact_info_shared_at;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -209,6 +211,59 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           {isSender && <Badge variant="outline">Du er avsender</Badge>}
         </div>
       </div>
+
+      {/* Delt kontaktinfo - vises i forhandlingsfasen */}
+      {showContactInfo && booking.sender_contact_info && (
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <span>📞</span> Delt kontaktinformasjon
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {booking.sender_contact_info.email && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium min-w-[80px]">E-post:</span>
+                <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
+                  {booking.sender_contact_info.email}
+                </a>
+              </div>
+            )}
+            {booking.sender_contact_info.phone && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium min-w-[80px]">Telefon:</span>
+                <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                  {booking.sender_contact_info.phone}
+                </a>
+              </div>
+            )}
+            {booking.sender_contact_info.website && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium min-w-[80px]">Nettside:</span>
+                <a href={booking.sender_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {booking.sender_contact_info.website}
+                </a>
+              </div>
+            )}
+            {booking.sender_contact_info.instagram && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium min-w-[80px]">Instagram:</span>
+                <a href={`https://instagram.com/${booking.sender_contact_info.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  @{booking.sender_contact_info.instagram.replace('@', '')}
+                </a>
+              </div>
+            )}
+            {booking.sender_contact_info.facebook && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium min-w-[80px]">Facebook:</span>
+                <a href={booking.sender_contact_info.facebook} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {booking.sender_contact_info.facebook}
+                </a>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Grunnleggende informasjon */}
