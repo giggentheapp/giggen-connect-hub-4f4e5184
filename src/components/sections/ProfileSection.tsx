@@ -1,6 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Eye, Folder, Lightbulb, Calendar, Shield } from 'lucide-react';
+import { User, Folder, Lightbulb, Calendar, MapPin } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import ConceptCard from '@/components/ConceptCard';
 import { UpcomingEventsDisplay } from '@/components/UpcomingEventsDisplay';
@@ -33,82 +31,99 @@ export const ProfileSection = ({
     published: concepts.length,
     isOwnProfile
   });
-  return <div className="space-y-6">
-      {/* Basic Profile Info */}
-      <Card>
-        <CardHeader className="text-center px-3 md:px-6 py-3 md:py-6">
-          <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-accent flex items-center justify-center mx-auto mb-2 md:mb-4">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full rounded-full object-cover" /> : <User className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />}
-          </div>
-          <CardTitle className="text-lg md:text-2xl">{profile.display_name}</CardTitle>
-          <CardDescription className="text-sm md:text-lg capitalize">{profile.role}</CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-3 md:space-y-4 px-3 md:px-6 pb-3 md:pb-6">
-          {profile.bio && <div>
-              <h3 className="font-semibold mb-1 md:mb-2 flex items-center gap-1.5 md:gap-2 text-sm md:text-base">
-                <Eye className="h-3 w-3 md:h-4 md:w-4" />
-                Om meg
-              </h3>
-              <p className="text-muted-foreground text-sm md:text-base">{profile.bio}</p>
-            </div>}
-
-          <div className="space-y-1 md:space-y-2">
-            <h3 className="font-semibold text-sm md:text-base">{t('profileInformation')}</h3>
-            <div className="text-xs md:text-sm text-muted-foreground space-y-0.5 md:space-y-1">
-              <p>{t('role')}: {t(profile.role)}</p>
-              {profile.address && profile.is_address_public && <p>Lokasjon: {profile.address}</p>}
-            </div>
-          </div>
-
-          {/* Social Media Links */}
-          {profile.social_media_links && (
-            <SocialMediaLinks socialLinks={profile.social_media_links} />
+  return (
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-12">
+      {/* Profile Header */}
+      <div className="text-center space-y-4 md:space-y-6">
+        <div className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-accent-orange/20 to-accent-pink/20 flex items-center justify-center mx-auto ring-4 ring-background shadow-lg">
+          {profile.avatar_url ? (
+            <img 
+              src={profile.avatar_url} 
+              alt={profile.display_name} 
+              className="w-full h-full rounded-full object-cover" 
+            />
+          ) : (
+            <User className="h-10 w-10 md:h-16 md:w-16 text-muted-foreground" />
           )}
-        </CardContent>
-      </Card>
+        </div>
+        
+        <div>
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">{profile.display_name}</h1>
+          <p className="text-sm md:text-lg text-muted-foreground capitalize flex items-center justify-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-accent-orange"></span>
+            {profile.role}
+          </p>
+        </div>
+
+        {profile.bio && (
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            {profile.bio}
+          </p>
+        )}
+
+        {profile.address && profile.is_address_public && (
+          <p className="text-xs md:text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+            <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+            {profile.address}
+          </p>
+        )}
+
+        {/* Social Media Links */}
+        {profile.social_media_links && (
+          <div className="pt-2">
+            <SocialMediaLinks socialLinks={profile.social_media_links} />
+          </div>
+        )}
+      </div>
 
       {/* Portfolio Section */}
-      <Card>
-        <CardContent className="px-3 md:px-6 py-3 md:py-6">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-3">
+          <Folder className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+          <h2 className="text-xl md:text-2xl font-semibold">Portefølje</h2>
+        </div>
+        <div className="border-t pt-4 md:pt-6">
           <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Concepts Section */}
       {concepts.length > 0 && (
-        <Card>
-          <CardContent className="px-3 md:px-6 py-3 md:py-6">
-            <div className="space-y-3 md:space-y-4">
-              {concepts.map(concept => (
-                <ConceptCard key={concept.id} concept={concept} showActions={false} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center gap-3">
+            <Lightbulb className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">Tilbud</h2>
+          </div>
+          <div className="border-t pt-4 md:pt-6 space-y-3 md:space-y-4">
+            {concepts.map(concept => (
+              <ConceptCard key={concept.id} concept={concept} showActions={false} />
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Upcoming Events Section */}
-      <Card>
-        <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
-          <CardTitle className="flex items-center gap-1.5 md:gap-2 text-base md:text-xl">
-            <Calendar className="h-4 w-4 md:h-5 md:w-5" />
-            {t('myUpcomingEvents')}
-          </CardTitle>
-          <CardDescription className="text-xs md:text-sm">
+      <div className="space-y-4 md:space-y-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">{t('myUpcomingEvents')}</h2>
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground pl-8 md:pl-9">
             {t('eventsYouAreInvolvedIn')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
-          <div className="mb-2 md:mb-4 p-2 md:p-3 bg-muted/50 rounded-lg">
+          </p>
+        </div>
+        
+        <div className="border-t pt-4 md:pt-6">
+          <div className="mb-4 md:mb-6 p-3 md:p-4 bg-muted/30 rounded-lg border border-muted">
             <p className="text-xs md:text-sm text-muted-foreground">
               {t('privacyNote')}
             </p>
           </div>
           
           <UpcomingEventsDisplay userId={profile.user_id} />
-        </CardContent>
-      </Card>
-
-    </div>;
+        </div>
+      </div>
+    </div>
+  );
 };
