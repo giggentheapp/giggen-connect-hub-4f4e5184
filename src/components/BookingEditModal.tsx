@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarIcon, Save, Clock } from 'lucide-react';
@@ -569,6 +570,15 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             </div>
           </CardContent>
         </Card>
+
+        {/* Portfolio Attachments */}
+        {isInNegotiation && (
+          <BookingPortfolioAttachments
+            bookingId={booking.id}
+            currentUserId={currentUserId}
+            canEdit={canEdit && !loading}
+          />
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t">
