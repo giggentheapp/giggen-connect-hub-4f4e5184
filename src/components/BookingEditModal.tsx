@@ -287,8 +287,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     side="bottom" 
                     sideOffset={8}
                     avoidCollisions={false}
+                    sticky="always"
                   >
-                    <div className="h-[340px] flex items-center justify-center">
+                    <div className="h-[380px] w-[320px] flex items-start justify-center pt-3">
                       <Calendar
                         mode="single"
                         selected={formData.start_date || undefined}
@@ -324,8 +325,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     side="bottom" 
                     sideOffset={8}
                     avoidCollisions={false}
+                    sticky="always"
                   >
-                    <div className="h-[340px] flex items-center justify-center">
+                    <div className="h-[380px] w-[320px] flex items-start justify-center pt-3">
                       <Calendar
                         mode="single"
                         selected={formData.end_date || undefined}
