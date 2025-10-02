@@ -1,8 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,8 +35,6 @@ const BookingAgreementReview = () => {
   const [booking, setBooking] = useState<any>(null);
   const [fetchingFreshData, setFetchingFreshData] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   
   const { updateBooking } = useBookings();
   const { toast } = useToast();
@@ -436,7 +432,7 @@ const BookingAgreementReview = () => {
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="max-w-5xl mx-auto">
           {/* Progress indicators */}
-          <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <div className="flex items-center gap-2 mb-8 flex-wrap">
             {SECTIONS.map((section, index) => (
               <div
                 key={section.id}
@@ -459,21 +455,18 @@ const BookingAgreementReview = () => {
             ))}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon className="h-5 w-5" />
-                {currentSection.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[calc(100vh-450px)] pr-4" ref={scrollRef}>
-                <div ref={contentRef}>
-                  {renderSectionContent()}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+          {/* Section Title */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold flex items-center gap-3">
+              <Icon className="h-8 w-8 text-primary" />
+              {currentSection.title}
+            </h2>
+          </div>
+
+          {/* Section Content - Full width, no card */}
+          <div className="pb-8">
+            {renderSectionContent()}
+          </div>
         </div>
       </div>
 
