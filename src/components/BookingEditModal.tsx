@@ -267,7 +267,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Fra dato</Label>
-                <Popover>
+                <Popover modal={true}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -281,7 +281,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                       {formData.start_date ? format(formData.start_date, "PPP", { locale: nb }) : "Velg startdato"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                     <Calendar
                       mode="single"
                       selected={formData.start_date || undefined}
@@ -296,7 +296,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
               <div>
                 <Label>Til dato</Label>
-                <Popover>
+                <Popover modal={true}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -310,12 +310,13 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                       {formData.end_date ? format(formData.end_date, "PPP", { locale: nb }) : "Velg sluttdato"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                     <Calendar
                       mode="single"
                       selected={formData.end_date || undefined}
                       onSelect={(date) => updateFormField('end_date', date)}
                       disabled={(date) => formData.start_date ? date < formData.start_date : false}
+                      defaultMonth={formData.start_date || undefined}
                       initialFocus
                       className="pointer-events-auto"
                     />
