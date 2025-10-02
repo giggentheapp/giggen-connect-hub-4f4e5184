@@ -241,7 +241,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
       {/* List View */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Tabs for Events vs Makers */}
-        <div className="px-3 md:px-4 pt-2 bg-background shrink-0">
+        <div className="px-3 md:px-4 pt-2 bg-background shrink-0 mobile-sticky-header">
           <div className="max-w-4xl mx-auto">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'makers' | 'events')}>
               <TabsList className="w-full grid grid-cols-2">
@@ -260,7 +260,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
 
         {/* Search and Filters - Only show for makers tab */}
         {activeTab === 'makers' && (
-          <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0">
+          <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '48px' }}>
             <div className="max-w-4xl mx-auto">
               <SearchFilters
                 searchTerm={searchTerm}
@@ -276,7 +276,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
         )}
 
         {/* List Header with View Toggle */}
-        <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+        <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '48px' }}>
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

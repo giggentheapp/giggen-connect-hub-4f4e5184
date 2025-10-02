@@ -421,9 +421,9 @@ All colors MUST be HSL.
 /* Mobile-optimized feedback button */
 .floating-feedback-btn-mobile {
   position: fixed;
-  bottom: 90px; /* Above mobile navigation */
+  bottom: 100px; /* Well above mobile navigation (64px) + spacing */
   right: 16px;
-  z-index: 999; /* Below important modals/dialogs */
+  z-index: 998; /* Below sticky headers but above content */
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   border: none;
@@ -492,18 +492,43 @@ All colors MUST be HSL.
     right: 24px;
     width: 56px;
     height: 56px;
+    z-index: 998; /* Consistent with mobile */
   }
   
   .feedback-bubble {
     right: 68px;
     font-size: 16px;
   }
+  
+  /* No sticky headers on desktop */
+  .mobile-sticky-header {
+    position: relative;
+  }
 }
 
 /* Ensure it doesn't interfere with mobile navigation */
 @media (max-width: 767px) {
   .floating-feedback-btn-mobile {
-    bottom: 90px; /* Well above the 64px high mobile nav */
+    bottom: 100px; /* Well above the 64px high mobile nav + spacing */
+  }
+  
+  /* Sticky section headers for mobile app feel */
+  .mobile-sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: hsl(var(--background));
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Safari-specific positioning to stay above URL bar */
+  @supports (-webkit-touch-callout: none) {
+    .mobile-sticky-header {
+      position: -webkit-sticky;
+      position: sticky;
+      top: env(safe-area-inset-top, 0);
+    }
   }
 }
 

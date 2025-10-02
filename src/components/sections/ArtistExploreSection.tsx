@@ -146,8 +146,8 @@ export const ArtistExploreSection = ({
   };
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-background">
-      {/* Top Navigation Header */}
-      <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0">
+      {/* Top Navigation Header - Sticky on mobile */}
+      <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             {/* Icon Navigation */}
@@ -223,7 +223,7 @@ export const ArtistExploreSection = ({
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 flex flex-col min-h-0">
               {/* List Header */}
-              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-3">
                     <h2 className="text-base md:text-lg font-semibold text-foreground">Kommende Arrangementer</h2>
@@ -290,7 +290,7 @@ export const ArtistExploreSection = ({
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 flex flex-col min-h-0">
               {/* List Header */}
-              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-3">
                     <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>
