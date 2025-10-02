@@ -43,6 +43,8 @@ interface BookingEditModalProps {
 export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEditModalProps) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
 
@@ -267,7 +269,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Fra dato</Label>
-                <Popover modal={false}>
+                <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -285,15 +287,18 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     className="w-auto p-0" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={8}
-                    avoidCollisions={false}
-                    sticky="always"
+                    sideOffset={4}
+                    avoidCollisions={true}
+                    collisionPadding={20}
                   >
-                    <div className="h-[380px] w-[320px] flex items-start justify-center pt-3">
+                    <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
                         mode="single"
                         selected={formData.start_date || undefined}
-                        onSelect={(date) => updateFormField('start_date', date)}
+                        onSelect={(date) => {
+                          updateFormField('start_date', date);
+                          setStartDateOpen(false);
+                        }}
                         initialFocus
                         className="pointer-events-auto"
                       />
@@ -305,7 +310,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
 
               <div>
                 <Label>Til dato</Label>
-                <Popover modal={false}>
+                <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -323,15 +328,18 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                     className="w-auto p-0" 
                     align="start" 
                     side="bottom" 
-                    sideOffset={8}
-                    avoidCollisions={false}
-                    sticky="always"
+                    sideOffset={4}
+                    avoidCollisions={true}
+                    collisionPadding={20}
                   >
-                    <div className="h-[380px] w-[320px] flex items-start justify-center pt-3">
+                    <div className="min-h-[350px] w-[280px] flex items-start justify-center">
                       <Calendar
                         mode="single"
                         selected={formData.end_date || undefined}
-                        onSelect={(date) => updateFormField('end_date', date)}
+                        onSelect={(date) => {
+                          updateFormField('end_date', date);
+                          setEndDateOpen(false);
+                        }}
                         disabled={(date) => formData.start_date ? date < formData.start_date : false}
                         defaultMonth={formData.start_date || undefined}
                         initialFocus
