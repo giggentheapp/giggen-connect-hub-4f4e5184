@@ -75,7 +75,7 @@ export const BookingCardStep3 = ({
   };
 
   const handleViewPublicEvent = () => {
-    navigate(`/booking/${booking.id}/preview`);
+    navigate(`/arrangement/${booking.id}`);
   };
 
   return (

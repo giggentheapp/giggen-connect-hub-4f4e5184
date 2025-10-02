@@ -23,6 +23,7 @@ interface PublicEventData {
   sender_id: string;
   receiver_id: string;
   selected_concept_id: string | null;
+  is_public_after_approval: boolean | null;
 }
 
 const PublicEventView = () => {
@@ -43,13 +44,15 @@ const PublicEventView = () => {
     try {
       setLoading(true);
 
-      // Fetch ONLY public event data using RLS-protected query
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Fetch event data - allow access if user is a party OR if event is public
       const { data: eventData, error: eventError } = await supabase
         .from('bookings')
-        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id')
+        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval')
         .eq('id', id)
         .eq('status', 'upcoming')
-        .eq('is_public_after_approval', true)
         .maybeSingle();
 
       if (eventError) throw eventError;
@@ -57,7 +60,21 @@ const PublicEventView = () => {
       if (!eventData) {
         toast({
           title: "Ikke funnet",
-          description: "Dette arrangementet er ikke tilgjengelig offentlig",
+          description: "Dette arrangementet eksisterer ikke",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      // Check if user has access (is a party OR event is public)
+      const isParty = user && (eventData.sender_id === user.id || eventData.receiver_id === user.id);
+      const isPublic = eventData.is_public_after_approval;
+
+      if (!isParty && !isPublic) {
+        toast({
+          title: "Ikke tilgang",
+          description: "Dette arrangementet er ikke offentlig tilgjengelig",
           variant: "destructive"
         });
         navigate('/dashboard');
