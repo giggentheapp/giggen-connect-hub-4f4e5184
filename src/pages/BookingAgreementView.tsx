@@ -232,47 +232,55 @@ const BookingAgreementView = () => {
         )}
 
         {/* Tech Specs */}
-        {techSpecFiles.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <FileText className="h-6 w-6 text-accent-orange" />
-              Tekniske spesifikasjoner
-            </h2>
-            <div className="pl-8 space-y-2">
-              {techSpecFiles.map((file) => (
-                <a 
-                  key={file.id}
-                  href={file.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-primary hover:underline"
-                >
-                  {file.filename}
-                </a>
-              ))}
-            </div>
+        <div>
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <FileText className="h-6 w-6 text-accent-orange" />
+            Tekniske spesifikasjoner
+          </h2>
+          <div className="pl-8">
+            {techSpecFiles.length > 0 ? (
+              <div className="space-y-2">
+                {techSpecFiles.map((file) => (
+                  <a 
+                    key={file.id}
+                    href={file.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline"
+                  >
+                    {file.filename}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Ikke lagt ved</p>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Hospitality Rider */}
-        {hospitalityFiles.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Hospitality Rider</h2>
-            <div className="pl-8 space-y-2">
-              {hospitalityFiles.map((file) => (
-                <a 
-                  key={file.id}
-                  href={file.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-primary hover:underline"
-                >
-                  {file.filename}
-                </a>
-              ))}
-            </div>
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Hospitality Rider</h2>
+          <div className="pl-8">
+            {hospitalityFiles.length > 0 ? (
+              <div className="space-y-2">
+                {hospitalityFiles.map((file) => (
+                  <a 
+                    key={file.id}
+                    href={file.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline"
+                  >
+                    {file.filename}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Ikke lagt ved</p>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Legal Notice */}
         <div className="pt-8 border-t text-sm text-muted-foreground space-y-2">

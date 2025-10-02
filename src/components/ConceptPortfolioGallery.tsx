@@ -118,17 +118,19 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
     // Audio
     if (isAudioFile(file)) {
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-white border border-border group cursor-pointer flex flex-col items-center justify-center p-2 md:p-3 gap-1 md:gap-2">
-          <Volume2 className="w-8 h-8 md:w-12 md:h-12 text-primary" />
-          <p className="text-[10px] md:text-xs font-medium text-center truncate w-full px-1 md:px-2">{file.title || file.filename}</p>
-          <audio 
-            controls 
-            className="w-full mt-auto scale-75 md:scale-100"
-            preload="metadata"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-          </audio>
+        <div className="relative w-full aspect-square overflow-hidden bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 border border-border group cursor-pointer flex flex-col items-center justify-center p-4">
+          <Volume2 className="w-12 h-12 text-accent-orange mb-2" />
+          <p className="text-xs font-medium text-center truncate w-full px-2">{file.title || file.filename}</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+              <Play className="w-6 h-6 text-black ml-1" fill="black" />
+            </div>
+          </div>
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+              <Expand className="w-4 h-4 text-white" />
+            </div>
+          </div>
         </div>
       );
     }
@@ -169,24 +171,37 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
       );
     }
 
+    if (isAudioFile(file)) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 gap-6 bg-gradient-to-br from-background to-muted min-h-[300px]">
+          <Volume2 className="w-16 h-16 text-accent-orange" />
+          <p className="text-lg font-medium text-center">{file.title || file.filename}</p>
+          <audio 
+            controls 
+            autoPlay
+            className="w-full max-w-md"
+            preload="metadata"
+          >
+            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
+          </audio>
+        </div>
+      );
+    }
+
     return null;
   };
 
   return (
     <ErrorBoundary>
       <div className="grid grid-cols-3 gap-1">
-        {files.map((file) => {
-          const shouldOpenModal = !isAudioFile(file);
-          
-          return (
-            <div 
-              key={file.id} 
-              onClick={() => shouldOpenModal && setSelectedFile(file)}
-            >
-              {renderGridItem(file)}
-            </div>
-          );
-        })}
+        {files.map((file) => (
+          <div 
+            key={file.id} 
+            onClick={() => setSelectedFile(file)}
+          >
+            {renderGridItem(file)}
+          </div>
+        ))}
       </div>
 
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
