@@ -96,8 +96,11 @@ export const ConceptViewModal = ({
       const {
         data: conceptData,
         error: conceptError
-      } = await supabase.from('concepts').select('*').eq('id', conceptId).single();
+      } = await supabase.from('concepts').select('*').eq('id', conceptId).maybeSingle();
       if (conceptError) throw conceptError;
+      if (!conceptData) {
+        throw new Error('Concept not found');
+      }
       setConcept(conceptData);
 
       // Load concept files (portfolio)

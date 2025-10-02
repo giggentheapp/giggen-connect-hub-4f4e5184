@@ -1,4 +1,18 @@
 /**
+ * Smart navigation helper that remembers where user came from
+ */
+export const navigateBack = (navigate: any, fallback: string = '/dashboard') => {
+  // Check if we have navigation state
+  const hasHistory = window.history.length > 2;
+  
+  if (hasHistory) {
+    navigate(-1);
+  } else {
+    navigate(fallback);
+  }
+};
+
+/**
  * Get the correct navigation target based on booking status
  */
 export const getBookingNavigationTarget = (booking: any): string => {

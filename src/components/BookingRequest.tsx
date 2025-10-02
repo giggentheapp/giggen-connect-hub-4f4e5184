@@ -75,7 +75,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         .from('profiles')
         .select('contact_info, display_name')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       const contactInfoToShare = profile?.contact_info || {
         name: profile?.display_name,
@@ -91,7 +91,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           .from('profile_tech_specs')
           .select('file_url')
           .eq('id', selectedConcept.tech_spec_reference)
-          .single();
+          .maybeSingle();
         
         techSpecUrl = techSpecData?.file_url || null;
       }
@@ -101,7 +101,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           .from('hospitality_riders')
           .select('file_url')
           .eq('id', selectedConcept.hospitality_rider_reference)
-          .single();
+          .maybeSingle();
         
         hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
       }

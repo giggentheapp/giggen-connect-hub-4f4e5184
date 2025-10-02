@@ -51,8 +51,10 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
               .from('profiles')
               .select('display_name, avatar_url, bio')
               .eq('user_id', booking.receiver_id)
-              .single();
-            setMakerProfile(data);
+              .maybeSingle();
+            if (data) {
+              setMakerProfile(data);
+            }
           } catch (error) {
             console.error('Error loading maker profile:', error);
           }

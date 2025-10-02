@@ -86,10 +86,19 @@ const ConceptView = () => {
         .select('*')
         .eq('id', conceptId)
         .eq('is_published', true) // Only show published concepts
-        .single();
+        .maybeSingle();
 
       if (conceptError) {
         console.error('Error loading concept:', conceptError);
+        toast({
+          title: "Konsept ikke funnet",
+          description: "Konseptet eksisterer ikke eller er ikke publisert",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!conceptData) {
         toast({
           title: "Konsept ikke funnet",
           description: "Konseptet eksisterer ikke eller er ikke publisert",
@@ -105,7 +114,7 @@ const ConceptView = () => {
         .from('profiles')
         .select('id, user_id, display_name, bio, avatar_url')
         .eq('user_id', conceptData.maker_id)
-        .single();
+        .maybeSingle();
 
       if (makerError) {
         console.error('Error loading maker profile:', makerError);

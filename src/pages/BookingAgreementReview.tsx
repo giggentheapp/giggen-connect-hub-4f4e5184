@@ -61,9 +61,19 @@ const BookingAgreementReview = () => {
           .from('bookings')
           .select('*')
           .eq('id', bookingId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        
+        if (!data) {
+          toast({
+            title: 'Ikke funnet',
+            description: 'Fant ikke bookingen',
+            variant: 'destructive'
+          });
+          navigate('/dashboard?section=bookings');
+          return;
+        }
 
         console.log('✅ Fresh booking data loaded:', {
           id: data.id,
@@ -80,7 +90,7 @@ const BookingAgreementReview = () => {
           description: "Kunne ikke laste bookingdata",
           variant: "destructive"
         });
-        navigate(-1);
+        navigate('/dashboard?section=bookings');
       } finally {
         setFetchingFreshData(false);
       }

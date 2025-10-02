@@ -32,9 +32,20 @@ const BookingEdit = () => {
             .from('bookings')
             .select('*')
             .eq('id', bookingId)
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
+          
+          if (!data) {
+            toast({
+              title: 'Ikke funnet',
+              description: 'Fant ikke bookingen',
+              variant: 'destructive'
+            });
+            navigate('/dashboard?section=bookings');
+            return;
+          }
+          
           setBooking(data);
         }
       } catch (error) {

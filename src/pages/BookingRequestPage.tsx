@@ -159,7 +159,7 @@ const BookingRequestPage = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/dashboard?section=explore')}
                 className="shrink-0"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -264,7 +264,7 @@ const BookingRequestPage = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate(-1)}
+                      onClick={() => navigate('/dashboard?section=explore')}
                       className="flex-1 sm:flex-none sm:min-w-[120px]"
                     >
                       Cancel

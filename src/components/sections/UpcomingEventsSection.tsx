@@ -124,13 +124,13 @@ export const UpcomingEventsSection = ({ profile, isAdminView = false }: Upcoming
             .from('profiles')
             .select('display_name, contact_info, bio, avatar_url')
             .eq('user_id', event.sender_id)
-            .single();
+            .maybeSingle();
             
           const { data: receiverProfile } = await supabase
             .from('profiles')
             .select('display_name, contact_info, bio, avatar_url')
             .eq('user_id', event.receiver_id)
-            .single();
+            .maybeSingle();
             
           // Enhance event with profile data
           const enhancedEvent = {

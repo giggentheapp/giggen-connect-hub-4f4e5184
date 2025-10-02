@@ -29,9 +29,20 @@ const BookingPublishPreview = () => {
         .from('bookings')
         .select('*')
         .eq('id', bookingId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      if (!data) {
+        toast({
+          title: 'Ikke funnet',
+          description: 'Fant ikke bookingen',
+          variant: 'destructive'
+        });
+        navigate('/dashboard?section=bookings');
+        return;
+      }
+      
       setBooking(data);
     } catch (error: any) {
       console.error('Error fetching booking:', error);
@@ -40,7 +51,7 @@ const BookingPublishPreview = () => {
         description: 'Kunne ikke laste booking',
         variant: 'destructive'
       });
-      navigate('/bookings');
+      navigate('/dashboard?section=bookings');
     } finally {
       setLoading(false);
     }

@@ -36,9 +36,20 @@ const BookingAgreementSummary = () => {
             .from('bookings')
             .select('*')
             .eq('id', bookingId)
-            .single();
+            .maybeSingle();
 
           if (bookingError) throw bookingError;
+          
+          if (!bookingData) {
+            toast({
+              title: 'Ikke funnet',
+              description: 'Fant ikke bookingen',
+              variant: 'destructive'
+            });
+            navigate('/dashboard?section=bookings');
+            return;
+          }
+          
           setBooking(bookingData);
 
           // Load selected concept if available
@@ -47,7 +58,7 @@ const BookingAgreementSummary = () => {
               .from('concepts')
               .select('*')
               .eq('id', bookingData.selected_concept_id)
-              .single();
+              .maybeSingle();
             
             if (conceptData) setSelectedConcept(conceptData);
           }
@@ -57,13 +68,13 @@ const BookingAgreementSummary = () => {
             .from('profiles')
             .select('display_name, avatar_url')
             .eq('user_id', bookingData.sender_id)
-            .single();
+            .maybeSingle();
           
           const { data: receiverData } = await supabase
             .from('profiles')
             .select('display_name, avatar_url')
             .eq('user_id', bookingData.receiver_id)
-            .single();
+            .maybeSingle();
 
           if (senderData) setSenderProfile(senderData);
           if (receiverData) setReceiverProfile(receiverData);
