@@ -1,9 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Banknote, MessageCircle, Eye, Users, CheckCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Calendar, MapPin, Banknote, MessageCircle, Eye, Users, CheckCircle, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
-import { BookingActions } from './BookingActions';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const formatSafeDate = (dateString: string) => {
   try {
@@ -38,21 +42,49 @@ export const BookingCardStep3 = ({
   onConfirmationClick,
   onAgreementClick
 }: BookingCardStep3Props) => {
+  const navigate = useNavigate();
+  const [isPublic, setIsPublic] = useState(booking.is_public_after_approval ?? false);
+
+  const toggleVisibility = async () => {
+    try {
+      const newPublicState = !isPublic;
+      
+      const { error } = await supabase
+        .from('bookings')
+        .update({ is_public_after_approval: newPublicState })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      setIsPublic(newPublicState);
+      toast.success(
+        newPublicState 
+          ? 'Arrangementet er nå offentlig' 
+          : 'Arrangementet er nå skjult'
+      );
+      
+      onAction();
+    } catch (error: any) {
+      console.error('Error toggling visibility:', error);
+      toast.error('Kunne ikke endre synlighet');
+    }
+  };
+
+  const handleViewAgreement = () => {
+    navigate(`/booking/${booking.id}/view`);
+  };
+
+  const handleViewPublicEvent = () => {
+    navigate(`/booking/${booking.id}/preview`);
+  };
+
   return (
     <Card className="hover:shadow-sm transition-all border-l-4 border-l-green-400">
       <CardHeader className="pb-2 px-3 md:px-4 pt-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-base md:text-lg leading-tight flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-              <Button 
-                variant="ghost" 
-                className="p-0 h-auto font-semibold hover:text-primary transition-colors text-left justify-start"
-                onClick={onConceptClick}
-                disabled={!booking.concept_ids || booking.concept_ids.length === 0}
-              >
-                {booking.title}
-              </Button>
+            <CardTitle className="text-base md:text-lg leading-tight">
+              {booking.title}
             </CardTitle>
             {booking.description && (
               <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-1">
@@ -60,9 +92,20 @@ export const BookingCardStep3 = ({
               </p>
             )}
           </div>
-          <Badge variant="secondary" className="text-xs whitespace-nowrap bg-green-50 text-green-700 border-green-200">
-            Publisert
-          </Badge>
+          
+          {/* Visibility toggle in top right corner */}
+          <div className="flex flex-col items-center gap-1 bg-muted/30 rounded-lg p-2 border">
+            {isPublic ? (
+              <Eye className="h-4 w-4 text-green-600" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
+            )}
+            <Switch
+              checked={isPublic}
+              onCheckedChange={toggleVisibility}
+              className="data-[state=checked]:bg-green-500"
+            />
+          </div>
         </div>
       </CardHeader>
       
@@ -85,67 +128,27 @@ export const BookingCardStep3 = ({
               <span className="truncate">{booking.venue}</span>
             </div>
           )}
-          
-          {booking.address && (
-            <div className="flex items-center gap-1.5 col-span-full">
-              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground truncate">{booking.address}</span>
-            </div>
-          )}
-          
-          {booking.ticket_price && (
-            <div className="flex items-center gap-1.5">
-              <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">Billett: {booking.ticket_price} kr</span>
-            </div>
-          )}
-          
-          {booking.audience_estimate && (
-            <div className="flex items-center gap-1.5">
-              <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{booking.audience_estimate} pers</span>
-            </div>
-          )}
         </div>
 
-        {/* Personal message */}
-        {booking.personal_message && (
-          <div className="flex items-start gap-1.5 text-xs md:text-sm bg-muted/30 p-2 rounded">
-            <MessageCircle className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-muted-foreground line-clamp-2">{booking.personal_message}</p>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex gap-1.5">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onDetailsClick}
-              className="h-7 px-2 text-xs"
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              Detaljer
-            </Button>
-            
-            {booking.concept_ids && booking.concept_ids.length > 0 && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onConceptClick}
-                className="h-7 px-2 text-xs"
-              >
-                Tilbud
-              </Button>
-            )}
-          </div>
+        {/* Actions - Only two buttons */}
+        <div className="flex gap-2 pt-2 border-t">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleViewAgreement}
+            className="flex-1"
+          >
+            Se avtale
+          </Button>
           
-          <BookingActions 
-            booking={booking}
-            currentUserId={currentUserId}
-            onAction={onAction}
-          />
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleViewPublicEvent}
+            className="flex-1"
+          >
+            Se arrangement
+          </Button>
         </div>
       </CardContent>
     </Card>
