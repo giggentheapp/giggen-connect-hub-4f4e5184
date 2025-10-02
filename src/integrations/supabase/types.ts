@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -136,6 +136,8 @@ export type Database = {
           description: string | null
           door_deal: boolean | null
           door_percentage: number | null
+          end_date: string | null
+          end_time: string | null
           event_date: string | null
           hospitality_rider: string | null
           hospitality_rider_status: string | null
@@ -165,6 +167,7 @@ export type Database = {
           sender_contact_info: Json | null
           sender_id: string
           sender_read_agreement: boolean | null
+          start_time: string | null
           status: Database["public"]["Enums"]["booking_status"]
           tech_spec: string | null
           ticket_price: number | null
@@ -193,6 +196,8 @@ export type Database = {
           description?: string | null
           door_deal?: boolean | null
           door_percentage?: number | null
+          end_date?: string | null
+          end_time?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
@@ -222,6 +227,7 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id: string
           sender_read_agreement?: boolean | null
+          start_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
           ticket_price?: number | null
@@ -250,6 +256,8 @@ export type Database = {
           description?: string | null
           door_deal?: boolean | null
           door_percentage?: number | null
+          end_date?: string | null
+          end_time?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
@@ -279,6 +287,7 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id?: string
           sender_read_agreement?: boolean | null
+          start_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
           ticket_price?: number | null
