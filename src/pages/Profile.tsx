@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { User, Eye, File, Calendar, MapPin, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
+import { User, Eye, File, Calendar, MapPin, Settings, Briefcase, FileText, Lightbulb, Music } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
@@ -480,8 +480,16 @@ const Profile = () => {
                                         <video src={fileUrl} className="w-full h-full object-cover" muted />
                                       )}
                                       {file.file_type === 'audio' && (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                          <Eye className="h-4 w-4 text-muted-foreground" />
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3 bg-muted">
+                                          <Music className="h-8 w-8 text-primary" />
+                                          <audio
+                                            controls
+                                            className="w-full"
+                                            preload="metadata"
+                                          >
+                                            <source src={fileUrl} type={file.mime_type || 'audio/mpeg'} />
+                                            Nettleseren din støtter ikke lydavspilling.
+                                          </audio>
                                         </div>
                                       )}
                                     </div>

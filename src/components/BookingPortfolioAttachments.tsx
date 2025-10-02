@@ -62,6 +62,22 @@ export const BookingPortfolioAttachments = ({
       );
     }
     
+    if (file.mime_type?.startsWith('audio/')) {
+      return (
+        <div className="w-full h-32 rounded bg-muted flex flex-col items-center justify-center gap-2 p-3">
+          <Music className="h-8 w-8 text-primary" />
+          <audio
+            controls
+            className="w-full"
+            preload="metadata"
+          >
+            <source src={publicUrl} type={file.mime_type} />
+            Nettleseren din støtter ikke lydavspilling.
+          </audio>
+        </div>
+      );
+    }
+    
     if (file.mime_type?.startsWith('image/')) {
       return (
         <img

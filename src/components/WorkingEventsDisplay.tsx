@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Banknote, Users, Eye } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Users, Eye, Music } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePublicEvents } from '@/hooks/usePublicEvents';
 import { useBookings } from '@/hooks/useBookings';
@@ -158,8 +158,16 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
                                 <video src={fileUrl} className="w-full h-full object-cover" muted />
                               )}
                               {file.file_type === 'audio' && (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3 bg-muted">
+                                  <Music className="h-8 w-8 text-primary" />
+                                  <audio
+                                    controls
+                                    className="w-full"
+                                    preload="metadata"
+                                  >
+                                    <source src={fileUrl} type={file.mime_type || 'audio/mpeg'} />
+                                    Nettleseren din støtter ikke lydavspilling.
+                                  </audio>
                                 </div>
                               )}
                             </div>

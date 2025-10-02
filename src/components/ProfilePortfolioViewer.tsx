@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Play, Volume2, Image as ImageIcon, File, Download, Pause } from 'lucide-react';
+import { Volume2, Image as ImageIcon, File } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
-import { toast } from 'sonner';
 import { VideoPlayer } from './VideoPlayer';
 
 interface ProfilePortfolioViewerProps {
@@ -19,79 +18,6 @@ interface ProfilePortfolioViewerProps {
 export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
   const { files, loading, error } = useProfilePortfolio(userId);
   const { t } = useAppTranslation();
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
-  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
-
-  const playAudio = (url: string, fileId: string, title: string) => {
-    // Stop any currently playing audio
-    if (audioInstance) {
-      audioInstance.pause();
-      audioInstance.currentTime = 0;
-    }
-
-    // If clicking the same file, just stop
-    if (playingAudio === fileId) {
-      setPlayingAudio(null);
-      setAudioInstance(null);
-      return;
-    }
-
-    // Create and play new audio
-    const audio = new Audio(url);
-    audio.play()
-      .then(() => {
-        console.log('✅ Audio playing:', title);
-        setPlayingAudio(fileId);
-        setAudioInstance(audio);
-        toast.success(`Spiller: ${title}`);
-      })
-      .catch(err => {
-        console.error('❌ Audio failed:', err);
-        toast.error('Kunne ikke spille lyd');
-        setPlayingAudio(null);
-        setAudioInstance(null);
-      });
-
-    // Handle when audio ends
-    audio.onended = () => {
-      setPlayingAudio(null);
-      setAudioInstance(null);
-    };
-  };
-
-  // Test function to verify Supabase connectivity
-  const testAudioConnectivity = async (filePath: string) => {
-    try {
-      console.log('🧪 Testing audio connectivity for:', filePath);
-      
-      // Test 1: Generate signed URL as fallback
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-        .from('portfolio')
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
-      
-      if (signedUrlError) {
-        console.error('🚫 Signed URL error:', signedUrlError);
-      } else {
-        console.log('✅ Signed URL generated:', signedUrlData.signedUrl);
-      }
-      
-      // Test 2: Check file existence
-      const { data: fileData, error: fileError } = await supabase.storage
-        .from('portfolio')
-        .list(filePath.split('/')[0], { search: filePath.split('/')[1] });
-      
-      if (fileError) {
-        console.error('🚫 File list error:', fileError);
-      } else {
-        console.log('📁 File exists:', fileData);
-      }
-      
-      return signedUrlData?.signedUrl;
-    } catch (err) {
-      console.error('🚫 Connectivity test failed:', err);
-      return null;
-    }
-  };
 
   if (loading) {
     return (
@@ -131,7 +57,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   }
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.includes('video')) return <Play className="h-4 w-4" />;
+    if (fileType.includes('video')) return <Volume2 className="h-4 w-4" />;
     if (fileType.includes('audio')) return <Volume2 className="h-4 w-4" />;
     if (fileType.includes('image')) return <ImageIcon className="h-4 w-4" />;
     return <File className="h-4 w-4" />;
@@ -192,32 +118,17 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       }
 
       if (isAudioFile(file)) {
-        const isPlaying = playingAudio === file.id;
-        
         return (
-          <div className="w-full space-y-2">
-            <div className="flex items-center gap-2">
-              <Volume2 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium truncate">{file.filename}</span>
-            </div>
-            <Button
-              onClick={() => playAudio(publicUrl, file.id, file.title || file.filename)}
-              variant={isPlaying ? "default" : "outline"}
+          <div className="w-full h-32 rounded bg-muted flex flex-col items-center justify-center gap-2 p-3">
+            <Volume2 className="h-8 w-8 text-primary" />
+            <audio
+              controls
               className="w-full"
-              size="sm"
+              preload="metadata"
             >
-              {isPlaying ? (
-                <>
-                  <Pause className="h-4 w-4 mr-2" />
-                  Stopp
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-2" />
-                  Spill av
-                </>
-              )}
-            </Button>
+              <source src={publicUrl} type={file.mime_type} />
+              Nettleseren din støtter ikke lydavspilling.
+            </audio>
           </div>
         );
       }

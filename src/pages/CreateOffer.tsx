@@ -847,8 +847,16 @@ export default function CreateOffer() {
                             </div>
                           )}
                           {file.file_type === 'audio' && (
-                            <div className="p-3 flex items-center justify-center">
+                            <div className="p-3 flex flex-col items-center justify-center gap-2">
                               <Music className="h-8 w-8 text-primary" />
+                              <audio
+                                controls
+                                className="w-full"
+                                preload="metadata"
+                              >
+                                <source src={file.publicUrl || file.file_url} type={file.mime_type || 'audio/mpeg'} />
+                                Nettleseren din støtter ikke lydavspilling.
+                              </audio>
                             </div>
                           )}
                           {file.file_type === 'document' && (
