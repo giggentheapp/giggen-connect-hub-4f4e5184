@@ -35,7 +35,8 @@ export const ProfileSection = ({
     isOwnProfile
   });
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-12">
+    <div className="h-full flex flex-col overflow-auto">
+      <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8">
       {/* Profile Header */}
       <div className="text-center space-y-4 md:space-y-6">
         <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-accent-orange/30 via-accent-pink/20 to-accent-purple/30 p-1 mx-auto shadow-2xl">
@@ -121,7 +122,8 @@ export const ProfileSection = ({
             ))}
           </div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

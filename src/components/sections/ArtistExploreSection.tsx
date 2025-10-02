@@ -145,9 +145,9 @@ export const ArtistExploreSection = ({
     window.location.href = `/arrangement/${eventId}`;
   };
   return (
-    <div className="w-full h-full bg-background">
+    <div className="w-full h-full flex flex-col overflow-hidden bg-background">
       {/* Top Navigation Header */}
-      <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+      <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             {/* Icon Navigation */}
@@ -198,7 +198,7 @@ export const ArtistExploreSection = ({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Map View */}
         {activeView === 'map' && (
           <div className="h-full p-3 md:p-4">
@@ -220,10 +220,10 @@ export const ArtistExploreSection = ({
 
         {/* List View - Events */}
         {activeView === 'list' && (
-          <div className="h-full">
-            <div className="flex-1 flex flex-col h-full">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0">
               {/* List Header */}
-              <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-3">
                     <h2 className="text-base md:text-lg font-semibold text-foreground">Kommende Arrangementer</h2>
@@ -287,10 +287,10 @@ export const ArtistExploreSection = ({
 
         {/* Makers View */}
         {activeView === 'makers' && (
-          <div className="h-full">
-            <div className="flex-1 flex flex-col h-full">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0">
               {/* List Header */}
-              <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-3">
                     <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>

@@ -14,7 +14,8 @@ export const AdminFilesSection = ({
   const { t } = useAppTranslation();
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8">
+    <div className="h-full flex flex-col overflow-auto">
+      <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('fileManagement')}</h1>
         <p className="text-sm text-muted-foreground">{t('managePortfolioFiles')}</p>
@@ -38,6 +39,7 @@ export const AdminFilesSection = ({
           title={t('hospitalityRiders')} 
           description={t('uploadHospitalityRiders')} 
         />
+        </div>
       </div>
     </div>
   );

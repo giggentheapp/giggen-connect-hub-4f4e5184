@@ -443,7 +443,7 @@ export const UserSettings = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-12">
+    <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-8">
       {/* Profile Information */}
       <div className="space-y-6">
         <div>

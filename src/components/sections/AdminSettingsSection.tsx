@@ -34,7 +34,8 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
   }, []);
   
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
+    <div className="h-full flex flex-col overflow-auto">
+      <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6">
       {/* Header with language controls */}
       <div className="flex justify-between items-start mb-8">
         <div>
@@ -70,6 +71,7 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
           onProfileUpdate={setUserProfile}
         />
       )}
+      </div>
     </div>
   );
 };

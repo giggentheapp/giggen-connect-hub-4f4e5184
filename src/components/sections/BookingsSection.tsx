@@ -266,9 +266,9 @@ export const BookingsSection = ({
   // Use the original booking flow
   return (
     <BookingErrorBoundary>
-      <div className="w-full h-full bg-background">
+      <div className="w-full h-full flex flex-col overflow-hidden bg-background">
           {/* Tab Navigation Header */}
-          <div className="p-3 md:p-4 bg-background border-b border-border/10 shrink-0">
+          <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0">
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 max-w-[600px]">
@@ -306,13 +306,13 @@ export const BookingsSection = ({
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <Tabs value={activeTab} className="h-full">
               {/* Incoming Tab Content */}
-              <TabsContent value="incoming" className="h-full m-0">
-                <div className="flex-1 flex flex-col h-full">
+              <TabsContent value="incoming" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Innkommende forespørsler</h2>
                     </div>
@@ -337,10 +337,10 @@ export const BookingsSection = ({
               </TabsContent>
 
               {/* Sent Tab Content */}
-              <TabsContent value="sent" className="h-full m-0">
-                <div className="flex-1 flex flex-col h-full">
+              <TabsContent value="sent" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Sendte forespørsler</h2>
                     </div>
@@ -365,10 +365,10 @@ export const BookingsSection = ({
               </TabsContent>
 
               {/* Ongoing Tab Content */}
-              <TabsContent value="ongoing" className="h-full m-0">
-                <div className="flex-1 flex flex-col h-full">
+              <TabsContent value="ongoing" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Pågående avtaler</h2>
                     </div>
@@ -393,10 +393,10 @@ export const BookingsSection = ({
               </TabsContent>
 
               {/* Published Tab Content */}
-              <TabsContent value="upcoming" className="h-full m-0">
-                <div className="flex-1 flex flex-col h-full">
+              <TabsContent value="upcoming" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-3 bg-background border-b border-border/10 shrink-0">
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Publiserte arrangementer</h2>
                     </div>
