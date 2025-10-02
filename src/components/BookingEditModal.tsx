@@ -128,7 +128,6 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         venue: validatedData.venue,
         address: validatedData.address,
         event_date: validatedData.start_date?.toISOString(),
-        start_date: validatedData.start_date?.toISOString(),
         end_date: validatedData.end_date?.toISOString(),
         time: validatedData.start_time,
         start_time: validatedData.start_time,
