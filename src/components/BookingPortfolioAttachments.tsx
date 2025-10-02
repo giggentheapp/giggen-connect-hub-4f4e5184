@@ -83,6 +83,14 @@ export const BookingPortfolioAttachments = ({
     (file) => file.is_public && !attachments.some((att) => att.portfolio_file_id === file.id)
   );
 
+  console.log('🎨 Render state:', {
+    isSelectDialogOpen,
+    portfolioLoading,
+    userPortfolioFilesCount: userPortfolioFiles.length,
+    availableFilesCount: availableFiles.length,
+    attachmentsCount: attachments.length
+  });
+
   return (
     <>
       <Card>
@@ -102,16 +110,16 @@ export const BookingPortfolioAttachments = ({
                     Legg ved
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl max-h-[80vh]">
+                <DialogContent className="max-w-3xl">
                   <DialogHeader>
                     <DialogTitle>Velg fra din portefølje</DialogTitle>
                   </DialogHeader>
                   {portfolioLoading ? (
-                    <div className="h-[60vh] flex items-center justify-center">
+                    <div className="py-8 flex items-center justify-center">
                       <p className="text-muted-foreground">Laster portefølje...</p>
                     </div>
                   ) : availableFiles.length === 0 ? (
-                    <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+                    <div className="py-8 flex flex-col items-center justify-center gap-4">
                       <p className="text-muted-foreground text-center">
                         {userPortfolioFiles.length === 0 
                           ? "Du har ingen porteføljeefiler ennå. Gå til Din Profil for å laste opp filer."
@@ -126,8 +134,8 @@ export const BookingPortfolioAttachments = ({
                       )}
                     </div>
                   ) : (
-                    <ScrollArea className="h-[60vh] pr-4">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="max-h-[60vh] overflow-y-auto">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-1">
                         {availableFiles.map((file) => (
                           <Card
                             key={file.id}
@@ -151,7 +159,7 @@ export const BookingPortfolioAttachments = ({
                           </Card>
                         ))}
                       </div>
-                    </ScrollArea>
+                    </div>
                   )}
                 </DialogContent>
               </Dialog>
