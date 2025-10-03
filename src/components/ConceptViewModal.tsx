@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
 import { useConceptActions } from '@/hooks/useConceptActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { BookingRequest } from '@/components/BookingRequest';
 interface ConceptViewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -75,6 +76,7 @@ export const ConceptViewModal = ({
   const [hospitalityRiderFile, setHospitalityRiderFile] = useState<HospitalityRiderFile | null>(null);
   const [loading, setLoading] = useState(false);
   const [showActionsDialog, setShowActionsDialog] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
   const {
     toast
   } = useToast();
@@ -102,6 +104,16 @@ export const ConceptViewModal = ({
         throw new Error('Concept not found');
       }
       setConcept(conceptData);
+
+      // Load profile data for the concept owner (for booking button)
+      if (viewMode === 'public') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .eq('user_id', conceptData.maker_id)
+          .maybeSingle();
+        setProfileData(profile);
+      }
 
       // Load concept files (portfolio)
       const {
@@ -247,15 +259,24 @@ export const ConceptViewModal = ({
             {/* Concept Header */}
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
                     <CardTitle className="text-xl">{concept.title}</CardTitle>
                     {concept.description && <p className="text-muted-foreground mt-2">{concept.description}</p>}
                   </div>
-                  {/* Status badge - Only in owner mode */}
-                  {viewMode === 'owner' && <Badge variant={concept.is_published ? "default" : "secondary"}>
-                    {concept.is_published ? 'Publisert' : 'Utkast'}
-                  </Badge>}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Status badge - Only in owner mode */}
+                    {viewMode === 'owner' && <Badge variant={concept.is_published ? "default" : "secondary"}>
+                      {concept.is_published ? 'Publisert' : 'Utkast'}
+                    </Badge>}
+                    {/* Book Now Button - Only in public view mode */}
+                    {viewMode === 'public' && profileData && (
+                      <BookingRequest 
+                        receiverId={profileData.user_id} 
+                        receiverName={profileData.display_name}
+                      />
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               

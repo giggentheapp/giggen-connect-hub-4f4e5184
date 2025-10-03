@@ -7,6 +7,7 @@ import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
+import { BookingRequest } from '@/components/BookingRequest';
 interface ProfileSectionProps {
   profile: UserProfile;
   isOwnProfile?: boolean;
@@ -37,6 +38,17 @@ export const ProfileSection = ({
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8">
+      
+      {/* Book Now Button - Top Right (Only for other profiles) */}
+      {!isOwnProfile && (
+        <div className="flex justify-end">
+          <BookingRequest 
+            receiverId={profile.user_id} 
+            receiverName={profile.display_name}
+          />
+        </div>
+      )}
+
       {/* Profile Header */}
       <div className="text-center space-y-4 md:space-y-6">
         <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-accent-orange/30 via-accent-pink/20 to-accent-purple/30 p-1 mx-auto shadow-2xl">
