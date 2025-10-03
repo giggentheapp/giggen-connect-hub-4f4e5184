@@ -12,13 +12,15 @@ export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: Contac
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Del kontaktinformasjon</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <p>
-              Ved å sende denne forespørselen godtar du at kontaktinformasjonen din blir delt med mottaker dersom forespørselen blir godtatt.
-            </p>
-            <p className="text-sm font-medium">
-              Dette inkluderer: Navn, e-post og eventuell telefon/adresse du har registrert.
-            </p>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2">
+              <div>
+                Ved å sende denne forespørselen godtar du at kontaktinformasjonen din blir delt med mottaker dersom forespørselen blir godtatt.
+              </div>
+              <div className="text-sm font-medium">
+                Dette inkluderer: Navn, e-post og eventuell telefon/adresse du har registrert.
+              </div>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
