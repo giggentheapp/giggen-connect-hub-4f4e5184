@@ -13,7 +13,7 @@ export const ProfileGoerSection = ({
   currentUserId,
   viewerRole
 }: ProfileGoerSectionProps) => {
-  return <div className="h-full flex flex-col overflow-auto">
+  return <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
     <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6">
       <Card className="mx-auto">
         <CardHeader className="text-center px-3 md:px-6 py-3 md:py-6">

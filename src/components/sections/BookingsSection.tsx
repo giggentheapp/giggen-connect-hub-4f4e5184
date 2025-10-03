@@ -319,7 +319,7 @@ export const BookingsSection = ({
                   </div>
                   
                   {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {incomingRequests.length === 0 ? (
                          <div className="text-center py-8">
@@ -347,7 +347,7 @@ export const BookingsSection = ({
                   </div>
                   
                   {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {sentRequests.length === 0 ? (
                          <div className="text-center py-8">
@@ -375,7 +375,7 @@ export const BookingsSection = ({
                   </div>
                   
                   {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {ongoingAgreements.length === 0 ? (
                          <div className="text-center py-8">
@@ -403,7 +403,7 @@ export const BookingsSection = ({
                   </div>
                   
                   {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {upcomingEvents.length === 0 ? (
                          <div className="text-center py-8">

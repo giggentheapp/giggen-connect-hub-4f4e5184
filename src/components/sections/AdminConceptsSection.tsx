@@ -163,7 +163,7 @@ export const AdminConceptsSection = ({
     return { completed, total };
   };
   return (
-    <div className="h-full flex flex-col overflow-auto">
+    <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">

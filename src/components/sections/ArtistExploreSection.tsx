@@ -235,7 +235,7 @@ export const ArtistExploreSection = ({
               </div>
               
               {/* Main Content Area */}
-              <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+              <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                 <div className="max-w-4xl mx-auto">
                   {loading ? (
                     <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -302,7 +302,7 @@ export const ArtistExploreSection = ({
               </div>
               
               {/* Main Content Area */}
-              <div className="flex-1 overflow-auto p-3 md:p-4 min-h-0">
+              <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                 <div className="max-w-4xl mx-auto">
                   {loading ? (
                     <div className="flex items-center justify-center py-12 text-muted-foreground">

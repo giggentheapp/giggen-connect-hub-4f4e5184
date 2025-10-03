@@ -35,7 +35,7 @@ export const ProfileSection = ({
     isOwnProfile
   });
   return (
-    <div className="h-full flex flex-col overflow-auto">
+    <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8">
       {/* Profile Header */}
       <div className="text-center space-y-4 md:space-y-6">

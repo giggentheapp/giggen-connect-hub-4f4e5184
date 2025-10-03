@@ -34,7 +34,7 @@ export const AdminSettingsSection = ({ profile }: AdminSettingsSectionProps) => 
   }, []);
   
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6">
       {/* Header with language controls */}
       <div className="flex justify-between items-start mb-8">
