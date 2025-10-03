@@ -47,7 +47,15 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 BookingRequest handleSubmit called', { 
+      hasMessage: !!personalMessage.trim(), 
+      hasConcept: !!selectedConcept,
+      receiverId,
+      receiverName 
+    });
+    
     if (!personalMessage.trim() || !selectedConcept) {
+      console.log('❌ Missing message or concept');
       toast({
         title: t('missingInformation'),
         description: t('personalMessageAndOfferRequired'),
@@ -58,10 +66,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
     // Show contact info dialog only first time
     if (!hasShownContactDialog) {
+      console.log('📋 Showing contact dialog');
       setShowContactDialog(true);
       return;
     }
 
+    console.log('✅ Proceeding to submitBooking');
     await submitBooking();
   };
 
@@ -69,13 +79,19 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     setSubmitting(true);
     
     try {
+      console.log('📤 submitBooking started', { receiverId, selectedConcept: selectedConcept?.id });
+      
       // Get current user's contact info to share
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Current user:', user?.id);
+      
       const { data: profile } = await supabase
         .from('profiles')
         .select('contact_info, display_name')
         .eq('user_id', user?.id)
         .maybeSingle();
+
+      console.log('📋 Profile fetched:', { hasProfile: !!profile });
 
       const contactInfoToShare = profile?.contact_info || {
         name: profile?.display_name,
@@ -116,7 +132,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         contactInfo: contactInfoToShare as ContactInfo,
       };
 
+      console.log('📦 Booking data prepared:', bookingData);
+      console.log('🔄 Calling createBooking...');
+      
       await createBooking(bookingData);
+
+      console.log('✅ Booking created successfully');
 
       // Reset form
       setSelectedConcept(null);
@@ -130,7 +151,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       
       onSuccess?.();
     } catch (error) {
-      // Error handled in hook
+      console.error('❌ Error in submitBooking:', error);
+      toast({
+        title: 'Feil',
+        description: error instanceof Error ? error.message : 'En ukjent feil oppstod',
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }
