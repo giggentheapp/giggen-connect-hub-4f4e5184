@@ -104,7 +104,7 @@ const Profile = () => {
     );
   }
 
-  return <UnifiedSidePanel profile={profile} />;
+  return <UnifiedSidePanel profile={profile} isOwnProfile={isOwnProfile} />;
 };
 
 export default Profile;

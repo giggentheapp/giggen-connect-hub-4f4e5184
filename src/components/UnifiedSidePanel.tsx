@@ -27,11 +27,13 @@ import { UserSettings } from '@/components/UserSettings';
 interface UnifiedSidePanelProps {
   profile: UserProfile;
   className?: string;
+  isOwnProfile?: boolean;
 }
 
 export const UnifiedSidePanel = ({
   profile,
-  className
+  className,
+  isOwnProfile = true
 }: UnifiedSidePanelProps) => {
   const [searchParams] = useSearchParams();
   const initialSection = searchParams.get('section') || 'profile';
@@ -145,7 +147,7 @@ export const UnifiedSidePanel = ({
             viewerRole={profile.role}
           />;
         } else if (isArtist) {
-          return <ProfileSection profile={profile} isOwnProfile={true} />;
+          return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
         }
         return null;
       case 'bookings':
