@@ -155,7 +155,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       <DialogTrigger asChild>
         <Button>
           <Send className="h-4 w-4 mr-2" />
-          {t('Book nå')}
+          {t('bookNow')}
         </Button>
       </DialogTrigger>
       <DialogContent className="fixed inset-0 translate-x-0 translate-y-0 w-screen h-screen max-w-none max-h-none m-0 rounded-none border-0 sm:relative sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg sm:border flex flex-col p-0 overflow-hidden">

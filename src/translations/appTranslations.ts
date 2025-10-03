@@ -366,7 +366,7 @@ export const appTranslations = {
     },
 
     // Booking Request
-    "Book nå": "Book nå",
+    bookNow: "Book nå",
     sendBookingRequest: "Send booking-forespørsel",
     selectOfferAndSendMessage: "Velg et tilbud og send en melding til artisten",
     selectOffer: "Velg tilbud",
@@ -888,7 +888,7 @@ export const appTranslations = {
     },
 
     // Booking Request
-    "Book nå": "Book Now",
+    bookNow: "Book Now",
     sendBookingRequest: "Send Booking Request",
     selectOfferAndSendMessage: "Select an offer and send a message to the artist",
     selectOffer: "Select Offer",
