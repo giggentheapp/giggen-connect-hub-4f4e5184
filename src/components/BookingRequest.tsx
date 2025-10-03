@@ -313,13 +313,13 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             </Button>
           </div>
         </form>
-
-        <ContactInfoSharingDialog
-          isOpen={showContactDialog}
-          onConfirm={handleContactDialogConfirm}
-          onCancel={handleContactDialogCancel}
-        />
       </DialogContent>
+
+      <ContactInfoSharingDialog
+        isOpen={showContactDialog}
+        onConfirm={handleContactDialogConfirm}
+        onCancel={handleContactDialogCancel}
+      />
     </Dialog>
   );
 };
