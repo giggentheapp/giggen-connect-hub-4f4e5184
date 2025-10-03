@@ -178,7 +178,7 @@ export const UnifiedSidePanel = ({
     }
   };
   const navItems = getNavigationItems();
-  return <div className={cn("flex flex-col", isMobile ? "h-screen" : "min-h-screen", className)}>
+  return <div className={cn("flex flex-col", isMobile ? "h-screen max-h-screen" : "min-h-screen", className)}>
       {/* Desktop Sidebar - Sticky collapsed */}
       {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
           <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
@@ -214,11 +214,11 @@ export const UnifiedSidePanel = ({
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 flex flex-col overflow-hidden", 
-        !isMobile ? 'ml-16' : '', 
+        "flex-1 flex flex-col", 
+        !isMobile ? 'ml-16 overflow-auto' : 'overflow-hidden', 
         isMobile ? 'pb-16' : ''
       )}>
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className={cn("flex-1 flex flex-col", isMobile ? "min-h-0 overflow-hidden" : "")}>
           {renderActiveSection()}
         </div>
       </main>

@@ -312,7 +312,7 @@ export const BookingsSection = ({
               <TabsContent value="incoming" className="flex-1 flex flex-col m-0 min-h-0">
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Innkommende forespørsler</h2>
                     </div>
@@ -340,7 +340,7 @@ export const BookingsSection = ({
               <TabsContent value="sent" className="flex-1 flex flex-col m-0 min-h-0">
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Sendte forespørsler</h2>
                     </div>
@@ -368,7 +368,7 @@ export const BookingsSection = ({
               <TabsContent value="ongoing" className="flex-1 flex flex-col m-0 min-h-0">
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Pågående avtaler</h2>
                     </div>
@@ -396,7 +396,7 @@ export const BookingsSection = ({
               <TabsContent value="upcoming" className="flex-1 flex flex-col m-0 min-h-0">
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Publiserte arrangementer</h2>
                     </div>
