@@ -163,12 +163,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   };
 
   const handleContactDialogConfirm = () => {
+    console.log('✅ Contact dialog confirmed - starting booking submission');
     setHasShownContactDialog(true);
     setShowContactDialog(false);
     submitBooking();
   };
 
   const handleContactDialogCancel = () => {
+    console.log('❌ Contact dialog cancelled');
     setShowContactDialog(false);
   };
 

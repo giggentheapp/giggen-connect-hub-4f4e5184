@@ -7,8 +7,20 @@ interface ContactInfoSharingDialogProps {
 }
 
 export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: ContactInfoSharingDialogProps) => {
+  console.log('🔔 ContactInfoSharingDialog render', { isOpen });
+  
+  const handleConfirm = () => {
+    console.log('🟢 ContactInfoSharingDialog - Confirm button clicked');
+    onConfirm();
+  };
+  
+  const handleCancel = () => {
+    console.log('🔴 ContactInfoSharingDialog - Cancel button clicked');
+    onCancel();
+  };
+  
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Del kontaktinformasjon</AlertDialogTitle>
@@ -24,8 +36,8 @@ export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: Contac
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>Avbryt</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
+          <AlertDialogCancel onClick={handleCancel}>Avbryt</AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm}>
             Godta og send forespørsel
           </AlertDialogAction>
         </AlertDialogFooter>
