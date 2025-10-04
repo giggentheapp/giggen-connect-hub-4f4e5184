@@ -323,7 +323,7 @@ export const ComprehensiveAgreementReview = ({
   if (!booking) return null;
   const Icon = currentSection.icon;
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-screen h-screen max-w-none m-0 rounded-none p-0 overflow-hidden flex flex-col">
+      <DialogContent className="w-screen h-screen max-w-none m-0 rounded-none p-0 overflow-y-auto flex flex-col">
         <DialogHeader className="shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center justify-between">
             <span>Gjennomgå avtale før godkjenning</span>
