@@ -197,90 +197,56 @@ export const ArtistExploreSection = ({
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {/* Map View */}
-        {activeView === 'map' && (
-          <div className="h-full p-3 md:p-4">
-            <div className="max-w-4xl mx-auto h-full">
-              <Card className="h-full flex items-center justify-center">
-                <div className="p-8 text-center max-w-2xl">
-                  {/* Map Icon */}
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                    <MapPin className="w-10 h-10 text-primary" />
-                  </div>
-
-                  {/* Main Title */}
-                  <h2 className="text-2xl font-bold text-foreground mb-4">{t('mapComingSoon')}</h2>
+{/* Main Content Area */}
+              <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+                <div className="max-w-4xl mx-auto">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center">
+                        <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                        <p>Laster arrangementer...</p>
+                      </div>
+                    </div>
+                  ) : filteredEvents.length === 0 ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center max-w-md space-y-2">
+                        <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="font-medium">
+                          {searchTerm 
+                            ? 'Ingen arrangementer funnet'
+                            : 'Ingen kommende arrangementer'
+                          }
+                        </p>
+                        {searchTerm && (
+                          <p className="text-sm">
+                            Prøv et annet søk
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 animate-fade-in">
+                      {filteredEvents.map((event) => (
+                        <ProfileEventCard 
+                          key={event.id}
+                          event={{
+                            id: event.id,
+                            title: event.title,
+                            description: event.description,
+                            event_date: event.event_date,
+                            time: event.time,
+                            ticket_price: event.ticket_price,
+                            price_musician: event.artist_fee?.toString()
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </Card>
+              </div>
             </div>
           </div>
         )}
-
-        {/* List View - Events */}
-        {activeView === 'list' && (
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* List Header */}
-              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-base md:text-lg font-semibold text-foreground">Kommende Arrangementer</h2>
-                    <Badge variant="outline" className="text-xs bg-muted">
-                      {loading ? '...' : filteredEvents.length}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              
-{/* Main Content Area */}
-<div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
-  <div className="max-w-4xl mx-auto">
-    {loading ? (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <div className="text-center">
-          <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-          <p>Laster arrangementer...</p>
-        </div>
-      </div>
-    ) : filteredEvents.length === 0 ? (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <div className="text-center max-w-md space-y-2">
-          <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p className="font-medium">
-            {searchTerm 
-              ? 'Ingen arrangementer funnet'
-              : 'Ingen kommende arrangementer'
-            }
-          </p>
-          {searchTerm && (
-            <p className="text-sm">
-              Prøv et annet søk
-            </p>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div className="mt-6 space-y-3 animate-fade-in">
-        {filteredEvents.map((event) => (
-          <ProfileEventCard 
-            key={event.id}
-            event={{
-              id: event.id,
-              title: event.title,
-              description: event.description,
-              event_date: event.event_date,
-              time: event.time,
-              ticket_price: event.ticket_price,
-              price_musician: event.artist_fee?.toString()
-            }}
-          />
-        ))}
-      </div>
-    )}
-  </div>
-</div>
               
         {/* Makers View */}
         {activeView === 'makers' && (
