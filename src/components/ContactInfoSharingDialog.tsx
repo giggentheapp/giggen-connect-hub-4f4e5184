@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { logger } from '@/utils/logger';
 
 interface ContactInfoSharingDialogProps {
   isOpen: boolean;
@@ -7,20 +9,52 @@ interface ContactInfoSharingDialogProps {
 }
 
 export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: ContactInfoSharingDialogProps) => {
-  console.log('🔔 ContactInfoSharingDialog render', { isOpen });
+  const renderCountRef = useRef(0);
+  const isProcessingRef = useRef(false);
+  
+  useEffect(() => {
+    renderCountRef.current += 1;
+    logger.debug(`ContactInfoSharingDialog render #${renderCountRef.current}`, { isOpen });
+    
+    if (renderCountRef.current > 5) {
+      logger.warn('⚠️ Too many renders detected in ContactInfoSharingDialog');
+    }
+  }, [isOpen]);
   
   const handleConfirm = () => {
-    console.log('🟢 ContactInfoSharingDialog - Confirm button clicked');
+    if (isProcessingRef.current) {
+      logger.warn('Already processing confirm');
+      return;
+    }
+    
+    isProcessingRef.current = true;
+    logger.info('Contact dialog confirmed');
     onConfirm();
+    
+    // Reset after a delay
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 1000);
   };
   
   const handleCancel = () => {
-    console.log('🔴 ContactInfoSharingDialog - Cancel button clicked');
+    if (isProcessingRef.current) {
+      logger.warn('Already processing cancel');
+      return;
+    }
+    
+    isProcessingRef.current = true;
+    logger.info('Contact dialog cancelled');
     onCancel();
+    
+    // Reset after a delay
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 1000);
   };
   
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+    <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Del kontaktinformasjon</AlertDialogTitle>

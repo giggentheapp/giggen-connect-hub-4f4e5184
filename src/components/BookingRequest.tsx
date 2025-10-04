@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CreateBookingRequest, ContactInfo } from '@/types/booking';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { ContactInfoSharingDialog } from '@/components/ContactInfoSharingDialog'
 import { Send } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 interface BookingRequestProps {
   receiverId: string;
@@ -31,10 +32,24 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const { createBooking } = useBookings();
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  
+  // Safeguards
+  const isSubmittingRef = useRef(false);
+  const submissionTimeoutRef = useRef<NodeJS.Timeout>();
+  const renderCountRef = useRef(0);
 
   // Get current user's concepts
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { concepts } = useUserConcepts(currentUserId);
+  
+  useEffect(() => {
+    renderCountRef.current += 1;
+    logger.debug(`BookingRequest render #${renderCountRef.current}`, { open, showContactDialog, submitting });
+    
+    if (renderCountRef.current > 10) {
+      logger.warn('⚠️ Too many renders in BookingRequest');
+    }
+  }, [open, showContactDialog, submitting]);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -47,7 +62,13 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🚀 BookingRequest handleSubmit called', { 
+    // Prevent double submissions
+    if (isSubmittingRef.current) {
+      logger.warn('Submission already in progress, ignoring duplicate request');
+      return;
+    }
+    
+    logger.info('BookingRequest handleSubmit called', { 
       hasMessage: !!personalMessage.trim(), 
       hasConcept: !!selectedConcept,
       receiverId,
@@ -55,7 +76,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     });
     
     if (!personalMessage.trim() || !selectedConcept) {
-      console.log('❌ Missing message or concept');
+      logger.warn('Missing message or concept');
       toast({
         title: t('missingInformation'),
         description: t('personalMessageAndOfferRequired'),
@@ -66,24 +87,45 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
     // Show contact info dialog only first time
     if (!hasShownContactDialog) {
-      console.log('📋 Showing contact dialog');
+      logger.info('Showing contact dialog');
       setShowContactDialog(true);
       return;
     }
 
-    console.log('✅ Proceeding to submitBooking');
+    logger.info('Proceeding to submitBooking');
     await submitBooking();
   };
 
   const submitBooking = async () => {
+    // Double-check safeguard
+    if (isSubmittingRef.current) {
+      logger.warn('submitBooking called but already in progress');
+      return;
+    }
+    
+    isSubmittingRef.current = true;
     setSubmitting(true);
     
+    // Set timeout protection (30 seconds)
+    submissionTimeoutRef.current = setTimeout(() => {
+      if (isSubmittingRef.current) {
+        logger.error('Submission timeout reached');
+        isSubmittingRef.current = false;
+        setSubmitting(false);
+        toast({
+          title: 'Timeout',
+          description: 'Forespørselen tok for lang tid. Vennligst prøv igjen.',
+          variant: 'destructive',
+        });
+      }
+    }, 30000);
+    
     try {
-      console.log('📤 submitBooking started', { receiverId, selectedConcept: selectedConcept?.id });
+      logger.info('submitBooking started', { receiverId, selectedConcept: selectedConcept?.id });
       
       // Get current user's contact info to share
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('👤 Current user:', user?.id);
+      logger.debug('Current user fetched', { userId: user?.id });
       
       const { data: profile } = await supabase
         .from('profiles')
@@ -91,7 +133,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         .eq('user_id', user?.id)
         .maybeSingle();
 
-      console.log('📋 Profile fetched:', { hasProfile: !!profile });
+      logger.debug('Profile fetched', { hasProfile: !!profile });
 
       const contactInfoToShare = profile?.contact_info || {
         name: profile?.display_name,
@@ -132,16 +174,22 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         contactInfo: contactInfoToShare as ContactInfo,
       };
 
-      console.log('📦 Booking data prepared:', bookingData);
-      console.log('🔄 Calling createBooking...');
+      logger.debug('Booking data prepared', { bookingDataKeys: Object.keys(bookingData) });
+      logger.info('Calling createBooking...');
       
       await createBooking(bookingData);
 
-      console.log('✅ Booking created successfully');
+      logger.info('✅ Booking created successfully');
+
+      // Clear timeout
+      if (submissionTimeoutRef.current) {
+        clearTimeout(submissionTimeoutRef.current);
+      }
 
       // Reset form
       setSelectedConcept(null);
       setPersonalMessage('');
+      setHasShownContactDialog(false);
       setOpen(false);
       
       toast({
@@ -151,26 +199,37 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       
       onSuccess?.();
     } catch (error) {
-      console.error('❌ Error in submitBooking:', error);
+      logger.error('Error in submitBooking', error);
+      
+      // Clear timeout
+      if (submissionTimeoutRef.current) {
+        clearTimeout(submissionTimeoutRef.current);
+      }
+      
       toast({
         title: 'Feil',
         description: error instanceof Error ? error.message : 'En ukjent feil oppstod',
         variant: 'destructive',
       });
     } finally {
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };
 
   const handleContactDialogConfirm = () => {
-    console.log('✅ Contact dialog confirmed - starting booking submission');
+    logger.info('Contact dialog confirmed - starting booking submission');
     setHasShownContactDialog(true);
     setShowContactDialog(false);
-    submitBooking();
+    
+    // Use setTimeout to ensure dialog closes before submission starts
+    setTimeout(() => {
+      submitBooking();
+    }, 100);
   };
 
   const handleContactDialogCancel = () => {
-    console.log('❌ Contact dialog cancelled');
+    logger.info('Contact dialog cancelled');
     setShowContactDialog(false);
   };
 
