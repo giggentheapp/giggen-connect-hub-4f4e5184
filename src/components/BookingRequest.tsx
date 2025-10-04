@@ -27,7 +27,6 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const [personalMessage, setPersonalMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
-  const [hasShownContactDialog, setHasShownContactDialog] = useState(false);
 
   const { createBooking } = useBookings();
   const { toast } = useToast();
@@ -75,24 +74,28 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       receiverName 
     });
     
-    if (!personalMessage.trim() || !selectedConcept) {
-      logger.warn('Missing message or concept');
+    // Validate inputs
+    if (!personalMessage.trim()) {
+      logger.warn('Missing personal message');
       toast({
         title: t('missingInformation'),
-        description: t('personalMessageAndOfferRequired'),
+        description: 'Vennligst skriv en personlig melding',
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!selectedConcept) {
+      logger.warn('No concept selected');
+      toast({
+        title: t('missingInformation'),
+        description: 'Vennligst velg et tilbud',
         variant: "destructive",
       });
       return;
     }
 
-    // Show contact info dialog only first time
-    if (!hasShownContactDialog) {
-      logger.info('Showing contact dialog');
-      setShowContactDialog(true);
-      return;
-    }
-
-    logger.info('Proceeding to submitBooking');
+    logger.info('✅ Validation passed - proceeding to submitBooking');
     await submitBooking();
   };
 
@@ -189,13 +192,17 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       // Reset form
       setSelectedConcept(null);
       setPersonalMessage('');
-      setHasShownContactDialog(false);
       setOpen(false);
       
+      // Show success toast
       toast({
         title: t('requestSent'),
         description: t('bookingRequestSent'),
       });
+      
+      // Show contact info dialog as confirmation
+      logger.info('Showing contact dialog after successful booking');
+      setShowContactDialog(true);
       
       onSuccess?.();
     } catch (error) {
@@ -217,19 +224,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     }
   };
 
-  const handleContactDialogConfirm = () => {
-    logger.info('Contact dialog confirmed - starting booking submission');
-    setHasShownContactDialog(true);
-    setShowContactDialog(false);
-    
-    // Use setTimeout to ensure dialog closes before submission starts
-    setTimeout(() => {
-      submitBooking();
-    }, 100);
-  };
-
-  const handleContactDialogCancel = () => {
-    logger.info('Contact dialog cancelled');
+  const handleContactDialogClose = () => {
+    logger.info('Contact dialog closed');
     setShowContactDialog(false);
   };
 
@@ -376,8 +372,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
 
       <ContactInfoSharingDialog
         isOpen={showContactDialog}
-        onConfirm={handleContactDialogConfirm}
-        onCancel={handleContactDialogCancel}
+        onConfirm={handleContactDialogClose}
+        onCancel={handleContactDialogClose}
       />
     </Dialog>
   );

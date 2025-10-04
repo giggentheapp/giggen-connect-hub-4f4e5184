@@ -57,11 +57,11 @@ export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: Contac
     <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Del kontaktinformasjon</AlertDialogTitle>
+          <AlertDialogTitle>Forespørsel sendt!</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-2">
               <div>
-                Ved å sende denne forespørselen godtar du at kontaktinformasjonen din blir delt med mottaker dersom forespørselen blir godtatt.
+                Din forespørsel er sendt til mottakeren. Kontaktinformasjonen din vil bli delt hvis forespørselen blir godtatt.
               </div>
               <div className="text-sm font-medium">
                 Dette inkluderer: Navn, e-post og eventuell telefon/adresse du har registrert.
@@ -70,9 +70,8 @@ export const ContactInfoSharingDialog = ({ isOpen, onConfirm, onCancel }: Contac
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>Avbryt</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm}>
-            Godta og send forespørsel
+            OK
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
