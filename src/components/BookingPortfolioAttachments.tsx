@@ -157,15 +157,21 @@ export const BookingPortfolioAttachments = ({
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {availableFiles.map((file) => {
                           console.log('🎨 Rendering file card:', file.title || file.filename);
+                          
+                          const handleFileSelect = async (e: React.MouseEvent | React.TouchEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('📎 Attaching file:', file.id);
+                            await attachPortfolioFile(file.id);
+                            setIsSelectDialogOpen(false);
+                          };
+                          
                           return (
                             <Card
                               key={file.id}
                               className="cursor-pointer hover:shadow-md transition-shadow border border-border bg-white dark:bg-slate-900"
-                              onClick={async () => {
-                                console.log('📎 Attaching file:', file.id);
-                                await attachPortfolioFile(file.id);
-                                setIsSelectDialogOpen(false);
-                              }}
+                              onClick={handleFileSelect}
+                              onTouchEnd={handleFileSelect}
                             >
                               <CardContent className="p-3 space-y-2">
                                 {renderFilePreview(file)}
