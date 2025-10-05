@@ -241,7 +241,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
           {t('bookNow')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="fixed inset-0 translate-x-0 translate-y-0 w-screen h-screen max-w-none max-h-none m-0 rounded-none border-0 sm:relative sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg sm:border flex flex-col p-0 overflow-y-auto">
+      <DialogContent className="fixed z-[9999] inset-0 translate-x-0 translate-y-0 w-screen h-screen max-w-none max-h-none m-0 rounded-none border-0 sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg sm:border flex flex-col p-0 overflow-y-auto">
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b shrink-0">
           <DialogTitle className="text-lg sm:text-xl">{t('sendBookingRequest')}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
