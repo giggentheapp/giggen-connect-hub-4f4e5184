@@ -197,152 +197,167 @@ export const ArtistExploreSection = ({
         </div>
       </div>
 
-{/* Main Content Area */}
-              <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
-                <div className="max-w-4xl mx-auto">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <div className="text-center">
-                        <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                        <p>Laster arrangementer...</p>
-                      </div>
-                    </div>
-                  ) : filteredEvents.length === 0 ? (
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <div className="text-center max-w-md space-y-2">
-                        <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p className="font-medium">
-                          {searchTerm 
-                            ? 'Ingen arrangementer funnet'
-                            : 'Ingen kommende arrangementer'
-                          }
-                        </p>
-                        {searchTerm && (
-                          <p className="text-sm">
-                            Prøv et annet søk
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 animate-fade-in">
-                      {filteredEvents.map((event) => (
-                        <ProfileEventCard 
-                          key={event.id}
-                          event={{
-                            id: event.id,
-                            title: event.title,
-                            description: event.description,
-                            event_date: event.event_date,
-                            time: event.time,
-                            ticket_price: event.ticket_price,
-                            price_musician: event.artist_fee?.toString()
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+      {/* Events List View */}
+      {activeView === 'list' && (
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* List Header */}
+            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base md:text-lg font-semibold text-foreground">Kommende arrangementer</h2>
+                  <Badge variant="outline" className="text-xs bg-muted">
+                    {loading ? '...' : filteredEvents.length}
+                  </Badge>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-              
-        {/* Makers View */}
-        {activeView === 'makers' && (
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* List Header */}
-              <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>
-                    <Badge variant="outline" className="text-xs bg-muted">
-                      {loading ? '...' : filteredMakers.length}
-                    </Badge>
+
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+              <div className="max-w-4xl mx-auto">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <p>Laster arrangementer...</p>
+                    </div>
                   </div>
+                ) : filteredEvents.length === 0 ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center max-w-md space-y-2">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">
+                        {searchTerm 
+                          ? 'Ingen arrangementer funnet'
+                          : 'Ingen kommende arrangementer'
+                        }
+                      </p>
+                      {searchTerm && (
+                        <p className="text-sm">
+                          Prøv et annet søk
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 space-y-3 animate-fade-in">
+                    {filteredEvents.map((event) => (
+                      <ProfileEventCard 
+                        key={event.id}
+                        event={{
+                          id: event.id,
+                          title: event.title,
+                          description: event.description,
+                          event_date: event.event_date,
+                          time: event.time,
+                          ticket_price: event.ticket_price,
+                          price_musician: event.artist_fee?.toString()
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+              
+      {/* Makers View */}
+      {activeView === 'makers' && (
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* List Header */}
+            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>
+                  <Badge variant="outline" className="text-xs bg-muted">
+                    {loading ? '...' : filteredMakers.length}
+                  </Badge>
                 </div>
               </div>
-              
-              {/* Main Content Area */}
-              <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
-                <div className="max-w-4xl mx-auto">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <div className="text-center">
-                        <User className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                        <p>Laster makers...</p>
-                      </div>
+            </div>
+            
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+              <div className="max-w-4xl mx-auto">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center">
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <p>Laster makers...</p>
                     </div>
-                  ) : filteredMakers.length === 0 ? (
-                    <div className="flex items-center justify-center py-12 text-muted-foreground">
-                      <div className="text-center max-w-md space-y-2">
-                        <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p className="font-medium">
-                          {searchTerm 
-                            ? 'Ingen makers funnet'
-                            : 'Ingen makers registrert'
-                          }
+                  </div>
+                ) : filteredMakers.length === 0 ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center max-w-md space-y-2">
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">
+                        {searchTerm 
+                          ? 'Ingen makers funnet'
+                          : 'Ingen makers registrert'
+                        }
+                      </p>
+                      {searchTerm && (
+                        <p className="text-sm">
+                          Prøv et annet søk
                         </p>
-                        {searchTerm && (
-                          <p className="text-sm">
-                            Prøv et annet søk
-                          </p>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="space-y-3 animate-fade-in">
-                      {filteredMakers.map((maker) => (
-                        <Card 
-                          key={maker.id} 
-                          className="hover:shadow-md transition-all cursor-pointer"
-                          onClick={() => navigate(`/profile/${maker.user_id}`)}
-                        >
-                          <div className="p-4 space-y-2">
-                            <div className="flex items-center gap-4">
-                              {/* Avatar */}
-                              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                                {maker.avatar_url ? (
-                                  <img 
-                                    src={maker.avatar_url} 
-                                    alt={maker.display_name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <User className="w-6 h-6 text-muted-foreground" />
-                                )}
-                              </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 space-y-3 animate-fade-in">
+                    {filteredMakers.map((maker) => (
+                      <Card 
+                        key={maker.id} 
+                        className="hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => navigate(`/profile/${maker.user_id}`)}
+                      >
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-center gap-4">
+                            {/* Avatar */}
+                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                              {maker.avatar_url ? (
+                                <img 
+                                  src={maker.avatar_url} 
+                                  alt={maker.display_name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <User className="w-6 h-6 text-muted-foreground" />
+                              )}
+                            </div>
 
-                              {/* Info */}
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground">
-                                  {maker.display_name}
-                                </h3>
-                                {maker.bio && (
-                                  <p className="text-sm text-muted-foreground line-clamp-1">
-                                    {maker.bio}
-                                  </p>
-                                )}
-                                {maker.address && maker.is_address_public && (
-                                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                                    <MapPin className="w-3 h-3 mr-1 shrink-0" />
-                                    <span className="truncate">{maker.address}</span>
-                                  </div>
-                                )}
-                              </div>
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground">
+                                {maker.display_name}
+                              </h3>
+                              {maker.bio && (
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {maker.bio}
+                                </p>
+                              )}
+                              {maker.address && maker.is_address_public && (
+                                <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                  <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                                  <span className="truncate">{maker.address}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       
       {/* Booking Request Modal */}
       {bookingMaker && (
