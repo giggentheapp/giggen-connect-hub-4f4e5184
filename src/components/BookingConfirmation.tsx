@@ -166,6 +166,9 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   const handleShowPublicPreview = async () => {
     try {
+      // Close first to reset state
+      setShowPublicPreview(false);
+      
       // Fetch fresh booking data from database to ensure we show the latest revised details
       const { data: freshBooking, error } = await supabase
         .from('bookings')
@@ -179,7 +182,10 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         setRealtimeBooking(freshBooking);
       }
       
-      setShowPublicPreview(true);
+      // Small delay to ensure state is reset before opening again
+      setTimeout(() => {
+        setShowPublicPreview(true);
+      }, 50);
     } catch (error) {
       console.error('Error fetching fresh booking data:', error);
       toast({
@@ -424,6 +430,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
       {/* Public Preview Dialog */}
       <BookingPublicPreview
+        key={`preview-${currentBooking.id}-${currentBooking.updated_at || Date.now()}`}
         booking={currentBooking}
         makerProfile={makerProfile}
         isOpen={showPublicPreview}
