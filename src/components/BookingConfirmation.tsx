@@ -19,7 +19,7 @@ interface BookingConfirmationProps {
 }
 
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import { BookingPublicPreview } from '@/components/BookingPublicPreview';
+import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
 
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
   const [hasReadAgreement, setHasReadAgreement] = useState(false);
@@ -164,36 +164,8 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     }
   };
 
-  const handleShowPublicPreview = async () => {
-    try {
-      // Close first to reset state
-      setShowPublicPreview(false);
-      
-      // Fetch fresh booking data from database to ensure we show the latest revised details
-      const { data: freshBooking, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('id', currentBooking.id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (freshBooking) {
-        setRealtimeBooking(freshBooking);
-      }
-      
-      // Small delay to ensure state is reset before opening again
-      setTimeout(() => {
-        setShowPublicPreview(true);
-      }, 50);
-    } catch (error) {
-      console.error('Error fetching fresh booking data:', error);
-      toast({
-        title: "Kunne ikke laste booking",
-        description: "Prøv igjen",
-        variant: "destructive",
-      });
-    }
+  const handleShowPublicPreview = () => {
+    setShowPublicPreview(true);
   };
 
   const handlePublishEvent = async () => {
@@ -428,11 +400,9 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         </div>
       </DialogContent>
 
-      {/* Public Preview Dialog */}
-      <BookingPublicPreview
-        key={`preview-${currentBooking.id}-${currentBooking.updated_at || Date.now()}`}
-        booking={currentBooking}
-        makerProfile={makerProfile}
+      {/* Publish Preview Dialog */}
+      <BookingPublishPreviewModal
+        bookingId={currentBooking.id}
         isOpen={showPublicPreview}
         onClose={() => setShowPublicPreview(false)}
         onPublish={handlePublishEvent}
