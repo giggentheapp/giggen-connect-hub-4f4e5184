@@ -24,11 +24,14 @@ export const ProfileSection = ({
     loading: conceptsLoading
   } = useUserConcepts(profile.user_id);
   
-  const { events, loading: eventsLoading } = useUpcomingEvents(profile.user_id);
+  const { events: allEvents, loading: eventsLoading } = useUpcomingEvents(profile.user_id);
   
   // ProfileSection is the PUBLIC view - ALWAYS show only published concepts
   // regardless of who is viewing (even if viewing own profile)
   const concepts = allConcepts.filter(c => c.is_published);
+  
+  // Filter events to only show public ones (is_public_after_approval = true)
+  const events = allEvents.filter(e => e.is_public_after_approval === true);
   
   console.log('📊 ProfileSection concepts (PUBLIC VIEW):', {
     total: allConcepts.length,
