@@ -155,12 +155,38 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         description: "Du har godkjent bookingavtalen",
       });
 
-      // If both have now confirmed, show preview
+      // If both have now confirmed, show preview with fresh data
       if (currentBooking[otherUserConfirmedField]) {
-        setShowPublicPreview(true);
+        await handleShowPublicPreview();
       }
     } catch (error) {
       // Error handled in hook
+    }
+  };
+
+  const handleShowPublicPreview = async () => {
+    try {
+      // Fetch fresh booking data from database to ensure we show the latest revised details
+      const { data: freshBooking, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', currentBooking.id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (freshBooking) {
+        setRealtimeBooking(freshBooking);
+      }
+      
+      setShowPublicPreview(true);
+    } catch (error) {
+      console.error('Error fetching fresh booking data:', error);
+      toast({
+        title: "Kunne ikke laste booking",
+        description: "Prøv igjen",
+        variant: "destructive",
+      });
     }
   };
 
@@ -381,7 +407,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
             {canShowPreview && !showPublicPreview && (
               <Button 
-                onClick={() => setShowPublicPreview(true)}
+                onClick={handleShowPublicPreview}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Eye className="h-4 w-4 mr-2" />
