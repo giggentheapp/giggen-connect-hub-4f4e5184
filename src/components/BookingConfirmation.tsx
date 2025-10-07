@@ -168,55 +168,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     setShowPublicPreview(true);
   };
 
-  const handlePublishEvent = async () => {
-    try {
-      // Update booking status to published
-      await updateBooking(currentBooking.id, { status: 'upcoming' });
-
-      // Create event in events_market
-      const eventDate = currentBooking.event_date ? new Date(currentBooking.event_date) : new Date();
-      const eventData = {
-        title: currentBooking.title,
-        description: currentBooking.description,
-        portfolio_id: currentBooking.selected_concept_id,
-        ticket_price: currentBooking.ticket_price || null,
-        venue: currentBooking.venue,
-        date: eventDate.toISOString().split('T')[0],
-        time: currentBooking.time || eventDate.toTimeString().split(' ')[0],
-        event_datetime: eventDate.toISOString(),
-        expected_audience: currentBooking.audience_estimate || null,
-        created_by: currentUserId,
-        is_public: true
-      };
-
-      const { error: eventError } = await supabase
-        .from("events_market")
-        .insert([eventData]);
-
-      if (eventError) {
-        console.error('Error creating event in market:', eventError);
-        toast({
-          title: "Arrangement publisert",
-          description: "Arrangementet er publisert, men kunne ikke legges til i markedet automatisk",
-        });
-      } else {
-        toast({
-          title: "Arrangement publisert! 🎉",
-          description: "Arrangementet er nå synlig for alle i Goer-appen",
-        });
-      }
-
-      setShowPublicPreview(false);
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Feil ved publisering",
-        description: "Kunne ikke publisere arrangementet",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!currentBooking) return null;
 
   const bothConfirmed = currentBooking.approved_by_sender && currentBooking.approved_by_receiver;
@@ -405,7 +356,7 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         bookingId={currentBooking.id}
         isOpen={showPublicPreview}
         onClose={() => setShowPublicPreview(false)}
-        onPublish={handlePublishEvent}
+        currentUserId={currentUserId}
       />
     </Dialog>
   );

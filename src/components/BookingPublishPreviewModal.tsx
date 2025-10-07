@@ -7,24 +7,29 @@ import { Calendar, MapPin, Users, Eye, Check, Info, Image, Video, Music, File } 
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { VideoPlayer } from '@/components/VideoPlayer';
+import { useToast } from '@/hooks/use-toast';
+import { useBookings } from '@/hooks/useBookings';
 
 interface BookingPublishPreviewModalProps {
   bookingId: string;
   isOpen: boolean;
   onClose: () => void;
-  onPublish: () => void;
+  currentUserId: string;
 }
 
 export const BookingPublishPreviewModal = ({ 
   bookingId,
   isOpen, 
-  onClose, 
-  onPublish 
+  onClose,
+  currentUserId
 }: BookingPublishPreviewModalProps) => {
   const [booking, setBooking] = useState<any>(null);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const { toast } = useToast();
+  const { updateBooking } = useBookings();
 
   useEffect(() => {
     if (isOpen && bookingId) {
@@ -104,6 +109,61 @@ export const BookingPublishPreviewModal = ({
   const getPublicUrl = (filePath: string) => {
     const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
     return data.publicUrl;
+  };
+
+  const handlePublishEvent = async () => {
+    if (!booking) return;
+    
+    try {
+      setIsPublishing(true);
+
+      // Update booking status to published
+      await updateBooking(booking.id, { status: 'upcoming' });
+
+      // Create event in events_market with fresh booking data
+      const eventDate = booking.event_date ? new Date(booking.event_date) : new Date();
+      const eventData = {
+        title: booking.title,
+        description: booking.description,
+        portfolio_id: booking.selected_concept_id,
+        ticket_price: booking.ticket_price || null,
+        venue: booking.venue,
+        date: eventDate.toISOString().split('T')[0],
+        time: booking.time || eventDate.toTimeString().split(' ')[0],
+        event_datetime: eventDate.toISOString(),
+        expected_audience: booking.audience_estimate || null,
+        created_by: currentUserId,
+        is_public: true
+      };
+
+      const { error: eventError } = await supabase
+        .from("events_market")
+        .insert([eventData]);
+
+      if (eventError) {
+        console.error('Error creating event in market:', eventError);
+        toast({
+          title: "Arrangement publisert",
+          description: "Arrangementet er publisert, men kunne ikke legges til i markedet automatisk",
+        });
+      } else {
+        toast({
+          title: "Arrangement publisert! 🎉",
+          description: "Arrangementet er nå synlig for alle i Goer-appen",
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Publish error:', error);
+      toast({
+        title: "Feil ved publisering",
+        description: "Kunne ikke publisere arrangementet",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const renderFilePreview = (file: any) => {
@@ -292,18 +352,15 @@ export const BookingPublishPreviewModal = ({
           {/* Actions */}
           <div className="flex gap-3 pt-6 border-t border-border">
             <Button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onPublish();
-              }}
+              onClick={handlePublishEvent}
+              disabled={isPublishing}
               className="bg-green-600 hover:bg-green-700"
             >
               <Check className="h-4 w-4 mr-2" />
-              Publiser arrangement
+              {isPublishing ? 'Publiserer...' : 'Publiser arrangement'}
             </Button>
             
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isPublishing}>
               Avbryt
             </Button>
           </div>
