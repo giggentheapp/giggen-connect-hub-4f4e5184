@@ -113,9 +113,10 @@ export const BookingPortfolioAttachments = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Portefølje</CardTitle>
+              <CardTitle>Portefølje for publisert arrangement</CardTitle>
               <CardDescription>
-                Legg ved filer fra din portefølje som vil vises når arrangementet publiseres
+                Kun filer lagt ved her vil vises når arrangementet publiseres. 
+                {attachments.length > 0 && ` (${attachments.length} ${attachments.length === 1 ? 'fil' : 'filer'} valgt)`}
               </CardDescription>
             </div>
             {canEdit && (

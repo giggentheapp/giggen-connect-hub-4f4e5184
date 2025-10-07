@@ -40,6 +40,8 @@ export const BookingPublishPreviewModal = ({
   const fetchFreshData = async () => {
     try {
       setLoading(true);
+      
+      console.log('🔄 Fetching fresh data for booking:', bookingId);
 
       // Fetch fresh booking data
       const { data: bookingData, error: bookingError } = await supabase
@@ -49,6 +51,14 @@ export const BookingPublishPreviewModal = ({
         .single();
 
       if (bookingError) throw bookingError;
+      
+      console.log('📋 Booking data:', {
+        id: bookingData.id,
+        title: bookingData.title,
+        status: bookingData.status,
+        updated_at: bookingData.updated_at
+      });
+      
       setBooking(bookingData);
 
       // Fetch maker profile
@@ -64,7 +74,8 @@ export const BookingPublishPreviewModal = ({
         }
       }
 
-      // Fetch portfolio attachments
+      // Fetch ONLY portfolio attachments from booking_portfolio_attachments table
+      // This ensures we only show files explicitly attached during negotiations
       const { data: attachmentsData, error: attachmentsError } = await supabase
         .from('booking_portfolio_attachments')
         .select(`
@@ -88,12 +99,18 @@ export const BookingPublishPreviewModal = ({
         .eq('booking_id', bookingId)
         .order('created_at', { ascending: false });
 
-      if (!attachmentsError && attachmentsData) {
-        setPortfolioAttachments(attachmentsData);
+      if (attachmentsError) {
+        console.error('❌ Error fetching attachments:', attachmentsError);
+      } else {
+        console.log('📎 Portfolio attachments:', {
+          count: attachmentsData?.length || 0,
+          files: attachmentsData?.map(a => a.portfolio_file?.title || a.portfolio_file?.filename)
+        });
+        setPortfolioAttachments(attachmentsData || []);
       }
 
     } catch (error) {
-      console.error('Error fetching preview data:', error);
+      console.error('❌ Error fetching preview data:', error);
     } finally {
       setLoading(false);
     }
@@ -313,9 +330,15 @@ export const BookingPublishPreviewModal = ({
             </div>
 
             {/* Portfolio Attachments */}
-            {portfolioAttachments.length > 0 && (
+            {portfolioAttachments.length > 0 ? (
               <div className="space-y-4 pt-4 border-t border-border">
-                <h3 className="text-lg font-semibold">Portefølje</h3>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Portefølje</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Kun filer som er lagt ved under forhandlingene vises her. 
+                    {portfolioAttachments.length} {portfolioAttachments.length === 1 ? 'fil' : 'filer'} vil vises til publikum.
+                  </p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {portfolioAttachments.map((attachment) => (
                     <Card key={attachment.id}>
@@ -335,6 +358,16 @@ export const BookingPublishPreviewModal = ({
                     </Card>
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div className="pt-4 border-t border-border">
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Ingen porteføljefiler er lagt ved denne bookingen ennå. 
+                    Gå til "Se avtale" for å legge ved filer som skal vises i det publiserte arrangementet.
+                  </AlertDescription>
+                </Alert>
               </div>
             )}
 
