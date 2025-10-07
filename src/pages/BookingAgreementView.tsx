@@ -6,8 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
-import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
-import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2 } from 'lucide-react';
+import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
+import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
+import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
@@ -19,6 +20,7 @@ const BookingAgreementView = () => {
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [showPublishPreview, setShowPublishPreview] = useState(false);
 
   // Get maker's data for portfolio, tech specs, and hospitality riders
   const makerId = booking?.receiver_id;
@@ -28,6 +30,9 @@ const BookingAgreementView = () => {
 
   // Get selected concept details
   const selectedConcept = concepts.find(c => c.id === booking?.selected_concept_id);
+  
+  // Check if booking is approved by both parties
+  const isBothApproved = booking?.status === 'approved_by_both' || booking?.status === 'upcoming';
 
   useEffect(() => {
     fetchCurrentUser();
@@ -114,11 +119,21 @@ const BookingAgreementView = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="container mx-auto px-4 py-4 max-w-4xl flex items-center justify-between">
           <Button variant="ghost" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake
           </Button>
+          
+          {isBothApproved && booking?.status === 'approved_by_both' && (
+            <Button 
+              onClick={() => setShowPublishPreview(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Forhåndsvis og publiser
+            </Button>
+          )}
         </div>
       </header>
 
@@ -232,12 +247,16 @@ const BookingAgreementView = () => {
           </div>
         )}
 
-        {/* Portfolio */}
-        {makerId && (
+        {/* Portfolio - Show only booking attachments */}
+        {bookingId && currentUserId && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Portefølje</h2>
             <div className="pl-8">
-              <ProfilePortfolioViewer userId={makerId} isOwnProfile={false} />
+              <BookingPortfolioAttachments
+                bookingId={bookingId}
+                currentUserId={currentUserId}
+                canEdit={booking?.status === 'allowed' || booking?.status === 'approved_by_sender' || booking?.status === 'approved_by_receiver'}
+              />
             </div>
           </div>
         )}
@@ -299,6 +318,16 @@ const BookingAgreementView = () => {
           <p>Ved publisering blir tittel, beskrivelse, dato, sted og billettpris synlig for allmennheten. Musiker honorar, tech spec og hospitality rider forblir privat.</p>
         </div>
       </main>
+      
+      {/* Publish Preview Modal */}
+      {bookingId && currentUserId && isBothApproved && (
+        <BookingPublishPreviewModal
+          bookingId={bookingId}
+          isOpen={showPublishPreview}
+          onClose={() => setShowPublishPreview(false)}
+          currentUserId={currentUserId}
+        />
+      )}
     </div>
   );
 };
