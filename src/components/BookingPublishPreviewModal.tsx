@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, MapPin, Users, Eye, Check, Info, Image, Video, Music, File } from 'lucide-react';
+import { Calendar, MapPin, Users, Check, Info, Image, Video, Music, File, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +24,7 @@ export const BookingPublishPreviewModal = ({
   onClose,
   currentUserId
 }: BookingPublishPreviewModalProps) => {
+  const navigate = useNavigate();
   const [booking, setBooking] = useState<any>(null);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
@@ -170,7 +172,7 @@ export const BookingPublishPreviewModal = ({
         });
       }
 
-      onClose();
+      navigate('/dashboard?section=bookings&tab=upcoming');
     } catch (error) {
       console.error('Publish error:', error);
       toast({
@@ -225,180 +227,176 @@ export const BookingPublishPreviewModal = ({
     );
   };
 
+  if (!isOpen) return null;
+  
   if (loading) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl">
-          <div className="py-12 flex items-center justify-center">
-            <p className="text-muted-foreground">Laster forhåndsvisning...</p>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Laster forhåndsvisning...</p>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     );
   }
 
   if (!booking) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Forhåndsvisning av arrangement
-          </DialogTitle>
-        </DialogHeader>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* Header */}
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 max-w-4xl flex items-center justify-between">
+          <Button variant="ghost" onClick={onClose}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tilbake
+          </Button>
+          
+          <Button 
+            onClick={handlePublishEvent}
+            disabled={isPublishing}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Check className="h-4 w-4 mr-2" />
+            {isPublishing ? 'Publiserer...' : 'Publiser arrangement'}
+          </Button>
+        </div>
+      </header>
 
-        <div className="space-y-6">
-          {/* Info Alert */}
-          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <AlertDescription className="text-blue-900 dark:text-blue-100">
-              Slik vises arrangementet til publikum når det publiseres
-            </AlertDescription>
-          </Alert>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
+        {/* Info Alert */}
+        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+          <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <AlertDescription className="text-blue-900 dark:text-blue-100">
+            Slik vises arrangementet til publikum når det publiseres
+          </AlertDescription>
+        </Alert>
 
-          {/* Public View */}
-          <div className="space-y-8">
-            {/* Hero Section */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                {makerProfile?.avatar_url && (
-                  <img 
-                    src={makerProfile.avatar_url} 
-                    alt={makerProfile.display_name}
-                    className="w-20 h-20 rounded-full object-cover border-4 border-primary/20"
-                  />
-                )}
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold mb-2">{booking.title}</h2>
-                  <p className="text-lg text-muted-foreground mb-2">
-                    med {makerProfile?.display_name || 'Artist'}
-                  </p>
-                  {booking.description && (
-                    <p className="text-base leading-relaxed">{booking.description}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Event Information Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {booking.event_date && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                    <Calendar className="h-5 w-5" />
-                    <span className="font-semibold">Dato og tid</span>
-                  </div>
-                  <p className="text-lg">
-                    {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                    {booking.time && ` kl. ${booking.time}`}
-                  </p>
-                </div>
-              )}
-
-              {(booking.venue || booking.address) && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                    <MapPin className="h-5 w-5" />
-                    <span className="font-semibold">Sted</span>
-                  </div>
-                  {booking.venue && <p className="text-lg">{booking.venue}</p>}
-                  {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
-                </div>
-              )}
-
-              {booking.ticket_price && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                    <Users className="h-5 w-5" />
-                    <span className="font-semibold">Billettpris</span>
-                  </div>
-                  <p className="text-lg font-medium">{booking.ticket_price} kr</p>
-                </div>
-              )}
-
-              {booking.audience_estimate && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                    <Users className="h-5 w-5" />
-                    <span className="font-semibold">Kapasitet</span>
-                  </div>
-                  <p className="text-lg">{booking.audience_estimate} personer</p>
-                </div>
+        {/* Hero Section */}
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            {makerProfile?.avatar_url && (
+              <img 
+                src={makerProfile.avatar_url} 
+                alt={makerProfile.display_name}
+                className="w-20 h-20 rounded-full object-cover border-4 border-primary/20"
+              />
+            )}
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold mb-2">{booking.title}</h1>
+              <p className="text-xl text-muted-foreground mb-2">
+                med {makerProfile?.display_name || 'Artist'}
+              </p>
+              {booking.description && (
+                <p className="text-lg leading-relaxed mt-4">{booking.description}</p>
               )}
             </div>
-
-            {/* Portfolio Attachments */}
-            {portfolioAttachments.length > 0 ? (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Portefølje</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Kun filer som er lagt ved under forhandlingene vises her. 
-                    {portfolioAttachments.length} {portfolioAttachments.length === 1 ? 'fil' : 'filer'} vil vises til publikum.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {portfolioAttachments.map((attachment) => (
-                    <Card key={attachment.id}>
-                      <CardContent className="p-4 space-y-3">
-                        {renderFilePreview(attachment.portfolio_file)}
-                        <div className="space-y-1">
-                          <p className="font-medium">
-                            {attachment.portfolio_file.title || attachment.portfolio_file.filename}
-                          </p>
-                          {attachment.portfolio_file.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {attachment.portfolio_file.description}
-                            </p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="pt-4 border-t border-border">
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Ingen porteføljefiler er lagt ved denne bookingen ennå. 
-                    Gå til "Se avtale" for å legge ved filer som skal vises i det publiserte arrangementet.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-
-            {/* Artist Bio */}
-            {makerProfile?.bio && (
-              <div className="pt-8 border-t border-border">
-                <h3 className="text-lg font-semibold mb-3">Om artisten</h3>
-                <p className="text-base leading-relaxed text-muted-foreground">
-                  {makerProfile.bio}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-6 border-t border-border">
-            <Button 
-              onClick={handlePublishEvent}
-              disabled={isPublishing}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              {isPublishing ? 'Publiserer...' : 'Publiser arrangement'}
-            </Button>
-            
-            <Button variant="outline" onClick={onClose} disabled={isPublishing}>
-              Avbryt
-            </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Event Information Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {booking.event_date && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <Calendar className="h-5 w-5" />
+                <span className="font-semibold">Dato og tid</span>
+              </div>
+              <p className="text-lg">
+                {format(new Date(booking.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
+                {booking.time && ` kl. ${booking.time}`}
+              </p>
+            </div>
+          )}
+
+          {(booking.venue || booking.address) && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <MapPin className="h-5 w-5" />
+                <span className="font-semibold">Sted</span>
+              </div>
+              {booking.venue && <p className="text-lg">{booking.venue}</p>}
+              {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
+            </div>
+          )}
+
+          {booking.ticket_price && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <Users className="h-5 w-5" />
+                <span className="font-semibold">Billettpris</span>
+              </div>
+              <p className="text-lg font-medium">{booking.ticket_price} kr</p>
+            </div>
+          )}
+
+          {booking.audience_estimate && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <Users className="h-5 w-5" />
+                <span className="font-semibold">Kapasitet</span>
+              </div>
+              <p className="text-lg">{booking.audience_estimate} personer</p>
+            </div>
+          )}
+        </div>
+
+        {/* Portfolio Attachments */}
+        {portfolioAttachments.length > 0 ? (
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold">Portefølje</h2>
+              <p className="text-sm text-muted-foreground">
+                {portfolioAttachments.length} {portfolioAttachments.length === 1 ? 'fil' : 'filer'} lagt ved under forhandlingene
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {portfolioAttachments.map((attachment) => (
+                <Card key={attachment.id}>
+                  <CardContent className="p-4 space-y-3">
+                    {renderFilePreview(attachment.portfolio_file)}
+                    <div className="space-y-1">
+                      <p className="font-medium">
+                        {attachment.portfolio_file.title || attachment.portfolio_file.filename}
+                      </p>
+                      {attachment.portfolio_file.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {attachment.portfolio_file.description}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="pt-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Ingen porteføljefiler er lagt ved denne bookingen ennå. 
+                Gå til "Se avtale" for å legge ved filer som skal vises i det publiserte arrangementet.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
+        {/* Artist Bio */}
+        {makerProfile?.bio && (
+          <div className="pt-8 border-t border-border">
+            <h2 className="text-2xl font-semibold mb-4">Om artisten</h2>
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              {makerProfile.bio}
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
   );
 };
