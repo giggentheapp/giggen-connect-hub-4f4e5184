@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, MapPin, Users, Check, Info, Image, Video, Music, File, ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, Users, Check, Info, Image, Video, Music, File, ArrowLeft, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -278,70 +279,70 @@ export const BookingPublishPreviewModal = ({
         </Alert>
 
         {/* Hero Section */}
-        <div className="space-y-4">
-          <div className="flex items-start gap-4">
-            {makerProfile?.avatar_url && (
-              <img 
-                src={makerProfile.avatar_url} 
-                alt={makerProfile.display_name}
-                className="w-20 h-20 rounded-full object-cover border-4 border-primary/20"
-              />
-            )}
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">{booking.title}</h1>
-              <p className="text-xl text-muted-foreground mb-2">
-                med {makerProfile?.display_name || 'Artist'}
-              </p>
-              {booking.description && (
-                <p className="text-lg leading-relaxed mt-4">{booking.description}</p>
-              )}
-            </div>
+        <div className="space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-4xl md:text-5xl font-bold flex-1">{booking.title}</h1>
+            <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white whitespace-nowrap">
+              Arrangement
+            </Badge>
           </div>
+
+          {makerProfile?.display_name && (
+            <p className="text-xl text-muted-foreground">
+              med {makerProfile.display_name}
+            </p>
+          )}
+
+          {booking.description && (
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {booking.description}
+            </p>
+          )}
         </div>
 
-        {/* Event Information Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {booking.event_date && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Calendar className="h-5 w-5" />
-                <span className="font-semibold">Dato og tid</span>
+        {/* Event Information List */}
+        <div className="space-y-4">
+          {booking.ticket_price && (
+            <div className="flex items-start gap-3">
+              <Banknote className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Pris</p>
+                <p className="text-muted-foreground">{booking.ticket_price} kr</p>
               </div>
-              <p className="text-lg">
-                {format(new Date(booking.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
-                {booking.time && ` kl. ${booking.time}`}
-              </p>
+            </div>
+          )}
+
+          {booking.event_date && (
+            <div className="flex items-start gap-3">
+              <Calendar className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Dato og tid</p>
+                <p className="text-muted-foreground">
+                  {format(new Date(booking.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
+                  {booking.time && ` kl. ${booking.time}`}
+                </p>
+              </div>
             </div>
           )}
 
           {(booking.venue || booking.address) && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <MapPin className="h-5 w-5" />
-                <span className="font-semibold">Sted</span>
+            <div className="flex items-start gap-3">
+              <MapPin className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Sted</p>
+                {booking.venue && <p className="text-muted-foreground">{booking.venue}</p>}
+                {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
               </div>
-              {booking.venue && <p className="text-lg">{booking.venue}</p>}
-              {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
-            </div>
-          )}
-
-          {booking.ticket_price && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Users className="h-5 w-5" />
-                <span className="font-semibold">Billettpris</span>
-              </div>
-              <p className="text-lg font-medium">{booking.ticket_price} kr</p>
             </div>
           )}
 
           {booking.audience_estimate && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Users className="h-5 w-5" />
-                <span className="font-semibold">Kapasitet</span>
+            <div className="flex items-start gap-3">
+              <Users className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Forventet publikum</p>
+                <p className="text-muted-foreground">{booking.audience_estimate} personer</p>
               </div>
-              <p className="text-lg">{booking.audience_estimate} personer</p>
             </div>
           )}
         </div>

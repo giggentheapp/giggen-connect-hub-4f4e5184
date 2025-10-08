@@ -170,81 +170,69 @@ const PublicEventView = () => {
         </Button>
 
         {/* Event Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <h1 className="text-4xl font-bold">{event.title}</h1>
-            <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white">
-              Offentlig arrangement
+        <div className="space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-4xl md:text-5xl font-bold flex-1">{event.title}</h1>
+            <Badge className="bg-gradient-to-r from-accent-orange to-accent-pink text-white whitespace-nowrap">
+              Arrangement
             </Badge>
           </div>
+
+          {makerProfile?.display_name && (
+            <p className="text-xl text-muted-foreground">
+              med {makerProfile.display_name}
+            </p>
+          )}
           
           {event.description && (
-            <p className="text-lg text-muted-foreground mt-4">
+            <p className="text-lg text-muted-foreground leading-relaxed">
               {event.description}
             </p>
           )}
         </div>
 
         {/* Event Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="space-y-4 py-6">
+          {event.ticket_price && (
+            <div className="flex items-start gap-3">
+              <Banknote className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Pris</p>
+                <p className="text-muted-foreground">{event.ticket_price} kr</p>
+              </div>
+            </div>
+          )}
+
           {event.event_date && (
             <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Dato</p>
+              <Calendar className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Dato{event.time && ' og tid'}</p>
                 <p className="text-muted-foreground">
                   {format(new Date(event.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
+                  {event.time && ` kl. ${event.time}`}
                 </p>
               </div>
             </div>
           )}
 
-          {event.time && (
+          {(event.venue || event.address) && (
             <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Tid</p>
-                <p className="text-muted-foreground">{event.time}</p>
-              </div>
-            </div>
-          )}
-
-          {event.venue && (
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Spillested</p>
-                <p className="text-muted-foreground">{event.venue}</p>
-              </div>
-            </div>
-          )}
-
-          {event.address && (
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Adresse</p>
-                <p className="text-muted-foreground">{event.address}</p>
+              <MapPin className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Sted</p>
+                {event.venue && <p className="text-muted-foreground">{event.venue}</p>}
+                {event.address && <p className="text-sm text-muted-foreground">{event.address}</p>}
               </div>
             </div>
           )}
 
           {event.audience_estimate && (
             <div className="flex items-start gap-3">
-              <Users className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Forventet publikum</p>
+              <Users className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-base mb-0.5">Forventet publikum</p>
                 <p className="text-muted-foreground">{event.audience_estimate} personer</p>
-              </div>
-            </div>
-          )}
-
-          {event.ticket_price && (
-            <div className="flex items-start gap-3">
-              <Banknote className="h-5 w-5 text-accent-orange mt-1" />
-              <div>
-                <p className="font-medium">Billettpris</p>
-                <p className="text-muted-foreground">{event.ticket_price} kr</p>
               </div>
             </div>
           )}
