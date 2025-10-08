@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { VideoPlayer } from '@/components/VideoPlayer';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Banknote, ArrowLeft, Clock, Image, Video, Music, File } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
+import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 
 interface PublicEventData {
   id: string;
@@ -241,68 +240,7 @@ const PublicEventView = () => {
         {/* Portfolio Gallery */}
         {portfolioAttachments.length > 0 && (
           <div className="mt-8 space-y-4">
-            <h2 className="text-2xl font-semibold">Portefølje</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {portfolioAttachments.map((attachment) => {
-                const file = attachment.portfolio_file;
-                if (!file) return null;
-                
-                const publicUrl = file.file_url || supabase.storage.from('portfolio').getPublicUrl(file.file_path).data.publicUrl;
-                
-                return (
-                  <Card key={attachment.id}>
-                    <CardContent className="p-4 space-y-3">
-                      {/* File Preview */}
-                      {file.mime_type?.startsWith('video/') && (
-                        <VideoPlayer
-                          publicUrl={publicUrl}
-                          filename={file.title || file.filename}
-                          mimeType={file.mime_type}
-                        />
-                      )}
-                      
-                      {file.mime_type?.startsWith('audio/') && (
-                        <div className="w-full rounded bg-muted flex flex-col items-center justify-center gap-2 p-4">
-                          <Music className="h-8 w-8 text-primary" />
-                          <audio controls className="w-full" preload="metadata">
-                            <source src={publicUrl} type={file.mime_type} />
-                            Nettleseren din støtter ikke lydavspilling.
-                          </audio>
-                        </div>
-                      )}
-                      
-                      {file.mime_type?.startsWith('image/') && (
-                        <img
-                          src={publicUrl}
-                          alt={file.title || file.filename}
-                          className="w-full rounded object-cover max-h-96"
-                        />
-                      )}
-                      
-                      {!file.mime_type?.startsWith('video/') && 
-                       !file.mime_type?.startsWith('audio/') && 
-                       !file.mime_type?.startsWith('image/') && (
-                        <div className="w-full h-32 rounded bg-muted flex items-center justify-center">
-                          <File className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      {/* File Info */}
-                      <div className="space-y-1">
-                        <p className="font-medium">
-                          {file.title || file.filename}
-                        </p>
-                        {file.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {file.description}
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            <BookingPortfolioGallery portfolioAttachments={portfolioAttachments} />
           </div>
         )}
       </div>

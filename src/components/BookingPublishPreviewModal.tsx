@@ -2,15 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Check, Info, Image, Video, Music, File, ArrowLeft, Banknote } from 'lucide-react';
+import { Calendar, MapPin, Users, Check, Info, ArrowLeft, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
-import { VideoPlayer } from '@/components/VideoPlayer';
 import { useToast } from '@/hooks/use-toast';
 import { useBookings } from '@/hooks/useBookings';
+import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 
 interface BookingPublishPreviewModalProps {
   bookingId: string;
@@ -119,17 +118,6 @@ export const BookingPublishPreviewModal = ({
     }
   };
 
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType?.startsWith('image/')) return <Image className="h-4 w-4" />;
-    if (mimeType?.startsWith('video/')) return <Video className="h-4 w-4" />;
-    if (mimeType?.startsWith('audio/')) return <Music className="h-4 w-4" />;
-    return <File className="h-4 w-4" />;
-  };
-
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
-    return data.publicUrl;
-  };
 
   const handlePublishEvent = async () => {
     if (!booking) return;
@@ -186,47 +174,6 @@ export const BookingPublishPreviewModal = ({
     }
   };
 
-  const renderFilePreview = (file: any) => {
-    const publicUrl = file.file_url || getPublicUrl(file.file_path);
-    
-    if (file.mime_type?.startsWith('video/')) {
-      return (
-        <VideoPlayer
-          publicUrl={publicUrl}
-          filename={file.title || file.filename}
-          mimeType={file.mime_type}
-        />
-      );
-    }
-    
-    if (file.mime_type?.startsWith('audio/')) {
-      return (
-        <div className="w-full rounded bg-muted flex flex-col items-center justify-center gap-2 p-4">
-          <Music className="h-8 w-8 text-primary" />
-          <audio controls className="w-full" preload="metadata">
-            <source src={publicUrl} type={file.mime_type} />
-            Nettleseren din støtter ikke lydavspilling.
-          </audio>
-        </div>
-      );
-    }
-    
-    if (file.mime_type?.startsWith('image/')) {
-      return (
-        <img
-          src={publicUrl}
-          alt={file.title || file.filename}
-          className="w-full rounded object-cover max-h-96"
-        />
-      );
-    }
-    
-    return (
-      <div className="w-full h-32 rounded bg-muted flex items-center justify-center">
-        {getFileIcon(file.mime_type || '')}
-      </div>
-    );
-  };
 
   if (!isOpen) return null;
   
@@ -348,43 +295,9 @@ export const BookingPublishPreviewModal = ({
         </div>
 
         {/* Portfolio Attachments */}
-        {portfolioAttachments.length > 0 ? (
+        {portfolioAttachments.length > 0 && (
           <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold">Portefølje</h2>
-              <p className="text-sm text-muted-foreground">
-                {portfolioAttachments.length} {portfolioAttachments.length === 1 ? 'fil' : 'filer'} lagt ved under forhandlingene
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {portfolioAttachments.map((attachment) => (
-                <Card key={attachment.id}>
-                  <CardContent className="p-4 space-y-3">
-                    {renderFilePreview(attachment.portfolio_file)}
-                    <div className="space-y-1">
-                      <p className="font-medium">
-                        {attachment.portfolio_file.title || attachment.portfolio_file.filename}
-                      </p>
-                      {attachment.portfolio_file.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {attachment.portfolio_file.description}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="pt-4">
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Ingen porteføljefiler er lagt ved denne bookingen ennå. 
-                Gå til "Se avtale" for å legge ved filer som skal vises i det publiserte arrangementet.
-              </AlertDescription>
-            </Alert>
+            <BookingPortfolioGallery portfolioAttachments={portfolioAttachments} />
           </div>
         )}
 
