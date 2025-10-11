@@ -89,7 +89,7 @@ export const UserSettings = ({
       if (profileError) throw profileError;
       
         if (currentProfile) {
-          setProfileData(currentProfile as UserProfile);
+          setProfileData(currentProfile as unknown as UserProfile);
 
         // Parse contact_info if it exists
         if (currentProfile.contact_info && typeof currentProfile.contact_info === 'object') {
@@ -115,8 +115,8 @@ export const UserSettings = ({
         }
       }
 
-      // Fetch profile settings for artists
-      if (profile.role === 'artist') {
+      // Fetch profile settings for organizers
+      if (profile.role === 'organizer') {
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
           .select('*')
@@ -195,7 +195,7 @@ export const UserSettings = ({
   };
 
   const updateProfileSettings = async (updates: Partial<ProfileSettings>) => {
-    if (profile.role !== 'artist' || !profileSettings) return;
+    if (profile.role !== 'organizer' || !profileSettings) return;
     
     try {
       setLoading(true);
@@ -228,7 +228,7 @@ export const UserSettings = ({
   };
 
   const updatePrivacySettings = async (updates: Partial<PrivacySettings>) => {
-    if (profile.role !== 'artist') return;
+    if (profile.role !== 'organizer') return;
     
     try {
       setLoading(true);
@@ -498,8 +498,8 @@ export const UserSettings = ({
               )}
             </div>
 
-            {/* Only show bio, address, and contact info for artists */}
-            {profileData.role === 'artist' && (
+            {/* Only show bio, address, and contact info for organizers */}
+            {profileData.role === 'organizer' && (
               <>
                 <div>
                   <Label htmlFor="bio">{t('biography')}</Label>
@@ -609,8 +609,8 @@ export const UserSettings = ({
         </div>
       </div>
 
-      {/* Social Media Settings - Only for Artists */}
-      {profileData.role === 'artist' && (
+      {/* Social Media Settings - Only for Organizers */}
+      {profileData.role === 'organizer' && (
         <div className="space-y-6">
           <div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">{t('socialMedia')}</h2>
@@ -706,8 +706,8 @@ export const UserSettings = ({
         </div>
       )}
 
-      {/* Simplified Privacy Settings for Artists */}
-      {profileData.role === 'artist' && (
+      {/* Simplified Privacy Settings for Organizers */}
+      {profileData.role === 'organizer' && (
         <div className="space-y-6">
           <div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">Synlighetsinnstillinger</h2>

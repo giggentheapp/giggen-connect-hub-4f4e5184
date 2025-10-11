@@ -45,7 +45,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
   });
   const [activeTab, setActiveTab] = useState<'makers' | 'events'>('events');
   const navigate = useNavigate();
-  const { isAudience, isArtist } = useRole();
+  const { isMusician, isOrganizer } = useRole();
   const { t } = useAppTranslation();
 
   // Auto-fetch data when component mounts
@@ -133,7 +133,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           privacy_settings,
           created_at
         `)
-        .eq('role', 'artist')
+        .eq('role', 'organizer' as any)
         .eq('privacy_settings->>show_profile_to_goers', 'true')
         .order('created_at', { ascending: false });
       
@@ -422,7 +422,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                     <MakerCard
                       maker={maker}
                       onViewProfile={handleViewProfile}
-                      onBookMaker={isArtist ? handleBookMaker : undefined}
+                      onBookMaker={isOrganizer ? handleBookMaker : undefined}
                     />
                   </div>
                 ))}

@@ -7,29 +7,29 @@ import { ProfileEventCard } from '@/components/ProfileEventCard';
 
 interface WorkingEventsDisplayProps {
   profile: UserProfile;
-  showSensitiveInfo: boolean; // true for own profile, false for others
-  currentUserId?: string; // Add current user ID to determine ownership
-  viewerRole?: 'artist' | 'audience'; // Add viewer role to determine data source
+  currentUserId?: string;
+  viewerRole?: 'organizer' | 'musician'; // Add viewer role to determine data source
+  isOwnProfile?: boolean;
 }
 
-export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId, viewerRole }: WorkingEventsDisplayProps) => {
+export const WorkingEventsDisplay = ({ profile, currentUserId, viewerRole, isOwnProfile: isOwnProfileProp }: WorkingEventsDisplayProps) => {
   const { t } = useAppTranslation();
   
   // Determine which data source to use based on viewer role and ownership
-  const isOwnProfile = currentUserId === profile.user_id;
-  const isAudienceViewing = viewerRole === 'audience' && !isOwnProfile;
+  const isOwnProfile = isOwnProfileProp !== undefined ? isOwnProfileProp : (currentUserId === profile.user_id);
+  const isMusicianViewing = viewerRole === 'musician' && !isOwnProfile;
   
   // Use different data sources based on the viewing context
-  const { bookings, loading: bookingsLoading } = useBookings(isAudienceViewing ? undefined : profile.user_id);
-  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isAudienceViewing ? profile.user_id : '');
+  const { bookings, loading: bookingsLoading } = useBookings(isMusicianViewing ? undefined : profile.user_id);
+  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isMusicianViewing ? profile.user_id : '');
   
   // Select the appropriate data source
-  const loading = isAudienceViewing ? publicLoading : bookingsLoading;
-  const eventsData = isAudienceViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
+  const loading = isMusicianViewing ? publicLoading : bookingsLoading;
+  const eventsData = isMusicianViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
 
   console.log('🎭 WorkingEventsDisplay render:', {
     isOwnProfile,
-    isAudienceViewing,
+    isMusicianViewing,
     viewerRole,
     eventsCount: eventsData.length,
     loading
@@ -49,7 +49,7 @@ export const WorkingEventsDisplay = ({ profile, showSensitiveInfo, currentUserId
       <div className="text-center py-8">
         <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
         <p className="text-muted-foreground">
-          {isAudienceViewing 
+          {isMusicianViewing 
             ? 'Ingen publiserte arrangementer for øyeblikket'
             : (isOwnProfile ? 'Du har ingen publiserte arrangementer' : 'Ingen publiserte arrangementer')
           }

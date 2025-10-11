@@ -44,20 +44,20 @@ const ConceptView = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { isArtist, isAudience } = useRole();
+  const { isOrganizer, isMusician } = useRole();
   const { t } = useAppTranslation();
 
   // Check if we came from bookings page
   const fromBookings = location.state?.from === 'bookings';
 
   const getNavigationItems = () => {
-    if (isAudience) {
+    if (isMusician) {
       return [
         { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
         { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
         { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
       ];
-    } else if (isArtist) {
+    } else if (isOrganizer) {
       return [
         { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
         { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },

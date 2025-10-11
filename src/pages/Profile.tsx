@@ -66,10 +66,10 @@ const Profile = () => {
             .single();
 
           if (ownError) throw ownError;
-          setProfile(ownProfileData as UserProfile);
+          setProfile(ownProfileData as unknown as UserProfile);
         } else {
           // Use public profile data
-          setProfile(profileData as UserProfile);
+          setProfile(profileData as unknown as UserProfile);
         }
       } catch (error: any) {
         console.error('Error fetching profile:', error);

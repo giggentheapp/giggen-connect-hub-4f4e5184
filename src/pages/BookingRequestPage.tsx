@@ -22,7 +22,7 @@ const BookingRequestPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  const { isArtist, isAudience } = useRole();
+  const { isOrganizer, isMusician } = useRole();
   const { t } = useAppTranslation();
   
   const [formData, setFormData] = useState({
@@ -35,13 +35,13 @@ const BookingRequestPage = () => {
   });
 
   const getNavigationItems = () => {
-    if (isAudience) {
+    if (isMusician) {
       return [
         { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
         { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
         { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
       ];
-    } else if (isArtist) {
+    } else if (isOrganizer) {
       return [
         { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
         { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },

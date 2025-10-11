@@ -83,11 +83,11 @@ const Dashboard = () => {
           
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
-            .insert({
+            .insert([{
               user_id: authUser.id, // Use verified user ID
               display_name: authUser.email?.split('@')[0] || 'User',
-              role: 'audience' // Default role
-            })
+              role: 'musician' as any // Default role
+            }])
             .select()
             .single();
 
@@ -100,11 +100,11 @@ const Dashboard = () => {
             });
           } else {
             console.log('✅ Dashboard: New profile created successfully:', newProfile);
-            setProfile(newProfile as UserProfile);
+            setProfile(newProfile as unknown as UserProfile);
           }
         } else {
           console.log('✅ Dashboard: Profile loaded successfully:', profileData);
-          setProfile(profileData as UserProfile);
+          setProfile(profileData as unknown as UserProfile);
         }
       } catch (err) {
         console.error('❌ Dashboard: Unexpected error:', err);
@@ -186,7 +186,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
       {/* Role-specific dashboard with integrated navigation */}
-      {profile.role === 'artist' ? (
+      {profile.role === 'organizer' ? (
         <ArtistDashboard profile={profile} />
       ) : (
         <AudienceView profile={profile} />

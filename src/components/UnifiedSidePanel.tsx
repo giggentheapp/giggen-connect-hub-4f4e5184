@@ -43,7 +43,7 @@ export const UnifiedSidePanel = ({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role: userRole, isArtist, isAudience, loading: roleLoading } = useRole();
+  const { role: userRole, isOrganizer, isMusician, loading: roleLoading } = useRole();
   const { t } = useAppTranslation();
 
   // Update activeSection when URL changes
@@ -77,7 +77,7 @@ export const UnifiedSidePanel = ({
 
   // Role-based navigation items
   const getNavigationItems = () => {
-    if (isAudience) {
+    if (isMusician) {
       return [
         {
           id: 'profile',
@@ -95,7 +95,7 @@ export const UnifiedSidePanel = ({
           icon: Settings
         }
       ];
-    } else if (isArtist) {
+    } else if (isOrganizer) {
       return [{
         id: 'profile',
         label: t('profile'),
@@ -131,49 +131,49 @@ export const UnifiedSidePanel = ({
     }
     switch (activeSection) {
       case 'explore':
-        if (isAudience) {
+        if (isMusician) {
           return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (isArtist) {
+        } else if (isOrganizer) {
           return <ArtistExploreSection profile={profile} />;
         }
         return null;
       // Loading state
 
       case 'profile':
-        if (isAudience) {
+        if (isMusician) {
           return <ProfileGoerSection 
             profile={profile} 
             currentUserId={profile.user_id}
-            viewerRole={profile.role}
+            viewerRole={profile.role as 'organizer' | 'musician'}
           />;
-        } else if (isArtist) {
+        } else if (isOrganizer) {
           return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
         }
         return null;
       case 'bookings':
-        // Only available to artists
-        if (isArtist) {
+        // Only available to organizers
+        if (isOrganizer) {
           return <BookingsSection profile={profile} />;
         }
         return null;
       case 'admin-files':
-        // Only available to artists
-        if (isArtist) {
+        // Only available to organizers
+        if (isOrganizer) {
           return <AdminFilesSection profile={profile} />;
         }
         return null;
       case 'admin-concepts':
-        // Only available to artists
-        if (isArtist) {
+        // Only available to organizers
+        if (isOrganizer) {
           return <AdminConceptsSection profile={profile} />;
         }
         return null;
       case 'settings':
         return <AdminSettingsSection profile={profile} />;
       default:
-        if (isAudience) {
+        if (isMusician) {
           return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (isArtist) {
+        } else if (isOrganizer) {
           return <ArtistExploreSection profile={profile} />;
         }
         return null;

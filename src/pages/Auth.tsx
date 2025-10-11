@@ -22,7 +22,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<'artist' | 'audience'>('audience');
+  const [role, setRole] = useState<'organizer' | 'musician'>('musician');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -142,11 +142,11 @@ const Auth = () => {
           // Fallback: Create profile manually if trigger failed
           const { error: createError } = await supabase
             .from('profiles')
-            .insert({
+            .insert([{
               user_id: data.user.id,
               display_name: displayName || email.split('@')[0],
-              role: role
-            });
+              role: role as any
+            }]);
 
           if (createError) {
             console.error('❌ Manual profile creation failed:', createError);
@@ -269,12 +269,12 @@ const Auth = () => {
                   <Label>{t('selectUserType')}</Label>
                   <RadioGroup
                     value={role}
-                    onValueChange={(value) => setRole(value as 'artist' | 'audience')}
+                    onValueChange={(value) => setRole(value as 'organizer' | 'musician')}
                     disabled={isSubmitting}
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="artist" id="artist" />
-                      <Label htmlFor="artist" className="font-normal">
+                      <RadioGroupItem value="organizer" id="organizer" />
+                      <Label htmlFor="organizer" className="font-normal">
                         <div>
                           <div className="font-medium">{t('artistOrganizer')}</div>
                           <div className="text-sm text-muted-foreground">
@@ -284,8 +284,8 @@ const Auth = () => {
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="audience" id="audience" />
-                      <Label htmlFor="audience" className="font-normal">
+                      <RadioGroupItem value="musician" id="musician" />
+                      <Label htmlFor="musician" className="font-normal">
                         <div>
                           <div className="font-medium">{t('audience')}</div>
                           <div className="text-sm text-muted-foreground">

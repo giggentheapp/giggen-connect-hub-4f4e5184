@@ -6,7 +6,7 @@ import { UserProfile } from '@/types/auth';
 interface ProfileGoerSectionProps {
   profile: UserProfile;
   currentUserId?: string;
-  viewerRole?: 'artist' | 'audience';
+  viewerRole?: 'organizer' | 'musician';
 }
 export const ProfileGoerSection = ({
   profile,

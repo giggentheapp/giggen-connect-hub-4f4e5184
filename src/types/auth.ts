@@ -4,7 +4,7 @@
 
 import { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
 
-export type UserRole = 'artist' | 'audience';
+export type UserRole = 'organizer' | 'musician';
 
 /**
  * Extended user interface with profile data
@@ -114,8 +114,8 @@ export interface AuthState {
     role: UserRole | null;
     loading: boolean;
     error: string | null;
-    isArtist: boolean;
-    isAudience: boolean;
+    isOrganizer: boolean;
+    isMusician: boolean;
     refresh: () => void;
   }
 
