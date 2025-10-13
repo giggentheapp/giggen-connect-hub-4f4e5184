@@ -273,23 +273,23 @@ const Auth = () => {
                     disabled={isSubmitting}
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="organizer" id="organizer" />
-                      <Label htmlFor="organizer" className="font-normal">
+                      <RadioGroupItem value="musician" id="musician" />
+                      <Label htmlFor="musician" className="font-normal">
                         <div>
-                          <div className="font-medium">{t('artistOrganizer')}</div>
+                          <div className="font-medium">{t('musicianArtistBand')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('artistDescription')}
+                            {t('musicianDescription')}
                           </div>
                         </div>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="musician" id="musician" />
-                      <Label htmlFor="musician" className="font-normal">
+                      <RadioGroupItem value="organizer" id="organizer" />
+                      <Label htmlFor="organizer" className="font-normal">
                         <div>
-                          <div className="font-medium">{t('audience')}</div>
+                          <div className="font-medium">{t('organizerVenue')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('audienceDescription')}
+                            {t('organizerDescription')}
                           </div>
                         </div>
                       </Label>

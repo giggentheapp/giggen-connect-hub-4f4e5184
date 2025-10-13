@@ -53,10 +53,10 @@ export const appTranslations = {
     signupSuccess: "Registrering vellykket",
     checkEmailConfirm: "Sjekk e-posten din for å bekrefte kontoen.",
     createStrongPassword: "Opprett et sterkt passord...",
-    artistOrganizer: "Artist/Arrangør",
-    audience: "Publikum",
-    artistDescription: "Kan opprette tilbud, laste opp porteføljer og administrere arrangementer",
-    audienceDescription: "Kan utforske og finne konserter og arrangementer",
+    musicianArtistBand: "Musiker/Artist/Band",
+    musicianDescription: "Jeg lager musikk og vil bygge profil",
+    organizerVenue: "Arrangør/Venue",
+    organizerDescription: "Jeg booker artister og arrangerer konserter",
 
     // Settings page
     settingsDescription: "Administrer dine app-innstillinger og preferanser",
@@ -77,8 +77,8 @@ export const appTranslations = {
     phoneNumberPlaceholder: "+47 123 45 678",
     saveChanges: "Lagre endringer",
     role: "Rolle",
-    maker: "maker",
-    goer: "goer",
+    musician: "Musiker/Artist/Band",
+    organizer: "Arrangør",
 
     // Social Media
     socialMedia: "Sosiale medier",
@@ -576,10 +576,10 @@ export const appTranslations = {
     signupSuccess: "Signup successful",
     checkEmailConfirm: "Check your email to confirm your account.",
     createStrongPassword: "Create a strong password...",
-    artistOrganizer: "Artist/Organizer",
-    audience: "Audience",
-    artistDescription: "Can create offers, upload portfolios and manage events",
-    audienceDescription: "Can explore and find concerts and events",
+    musicianArtistBand: "Musician/Artist/Band",
+    musicianDescription: "I make music and want to build a profile",
+    organizerVenue: "Organizer/Venue",
+    organizerDescription: "I book artists and organize concerts",
 
     // Settings page
     settingsDescription: "Manage your app settings and preferences",
@@ -600,8 +600,8 @@ export const appTranslations = {
     phoneNumberPlaceholder: "+47 123 45 678",
     saveChanges: "Save Changes",
     role: "Role",
-    maker: "maker",
-    goer: "goer",
+    musician: "Musician/Artist/Band",
+    organizer: "Organizer",
 
     // Social Media
     socialMedia: "Social Media",
