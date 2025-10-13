@@ -21,6 +21,26 @@ export const translations = {
     privacy: "Personvern",
     terms: "Vilkår",
     
+    // Authentication
+    musicianArtistBand: "Musiker/Artist/Band",
+    musicianDescription: "Jeg lager musikk og vil bygge profil",
+    organizerVenue: "Arrangør/Venue",
+    organizerDescription: "Jeg booker artister og arrangerer konserter",
+    selectUserType: "Velg brukertype",
+    createNewAccount: "Opprett ny konto",
+    loginToAccount: "Logg inn på kontoen din",
+    displayName: "Visningsnavn",
+    yourName: "Ditt navn",
+    createStrongPassword: "Lag et sterkt passord",
+    working: "Arbeider...",
+    dontHaveAccount: "Har du ikke konto? Registrer deg",
+    alreadyHaveAccount: "Har du allerede konto? Logg inn",
+    checkEmailConfirm: "Sjekk e-posten din for bekreftelseslenke",
+    loginError: "Innloggingsfeil",
+    signupError: "Registreringsfeil",
+    signupSuccess: "Registrering vellykket",
+    unexpectedError: "En uventet feil oppstod",
+    
     // Features Section
     keyFeatures: "Hovedfunksjoner",
     listTitle: "Liste",
@@ -291,6 +311,26 @@ export const translations = {
     about: "About",
     privacy: "Privacy",
     terms: "Terms",
+    
+    // Authentication
+    musicianArtistBand: "Musician/Artist/Band",
+    musicianDescription: "I create music and want to build my profile",
+    organizerVenue: "Organizer/Venue",
+    organizerDescription: "I book artists and organize concerts",
+    selectUserType: "Select user type",
+    createNewAccount: "Create new account",
+    loginToAccount: "Log in to your account",
+    displayName: "Display name",
+    yourName: "Your name",
+    createStrongPassword: "Create a strong password",
+    working: "Working...",
+    dontHaveAccount: "Don't have an account? Sign up",
+    alreadyHaveAccount: "Already have an account? Sign in",
+    checkEmailConfirm: "Check your email for confirmation link",
+    loginError: "Login error",
+    signupError: "Signup error",
+    signupSuccess: "Signup successful",
+    unexpectedError: "An unexpected error occurred",
     
     // Features Section
     keyFeatures: "Key Features",
