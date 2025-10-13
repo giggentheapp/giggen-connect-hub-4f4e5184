@@ -31,22 +31,22 @@ export const translations = {
     profilesDescription: "Detaljerte profiler med portefølje, tilbud, priser og tekniske krav. Alt du trenger for å ta informerte beslutninger.",
     
     // For Users Section
-    forMusicians: "For Musikere",
+    forMusicians: "For Musikere/Artister/Band",
     musicianFeature1: "Vis dine tilbud og konserter",
     musicianFeature2: "Motta booking-forespørsler",
     musicianFeature3: "Bygg ditt profesjonelle nettverk",
     musicianFeature4: "Kontroller din synlighet",
     
-    forOrganizers: "For Arrangører",
+    forOrganizers: "For Arrangører/Venues",
     organizerFeature1: "Søk og filtrer musikere",
-    organizerFeature2: "Se tilgjengelige artister på kart",
+    organizerFeature2: "Se tilgjengelige musikere på kart",
     organizerFeature3: "Trygg booking med godkjenning",
     organizerFeature4: "Oppdag nye talenter lokalt",
     
     forAudience: "For Publikum",
     audienceFeature1: "Oppdag nye arrangementer",
     audienceFeature2: "Finn konserter i ditt område",
-    audienceFeature3: "Se informasjon om artister",
+    audienceFeature3: "Se informasjon om musikere",
     audienceFeature4: "Hold deg oppdatert på lokale event",
     
     // Footer
@@ -195,7 +195,7 @@ export const translations = {
     agreementSummary: "Avtale-oppsummering",
     completeAgreementOverview: "Komplett avtaleoversikt",
     audienceLabel: "Publikum",
-    artistFee: "Artist honorar",
+    musicianFee: "Musiker honorar",
     notSpecified: "Ikke spesifisert",
     technicalRequirements: "Tekniske krav",
     hospitality: "Hospitality",
@@ -302,22 +302,22 @@ export const translations = {
     profilesDescription: "Detailed profiles with portfolio, offers, prices and technical requirements. Everything you need to make informed decisions.",
     
     // For Users Section
-    forMusicians: "For Musicians",
+    forMusicians: "For Musicians/Artists/Bands",
     musicianFeature1: "Show your offers and concerts",
     musicianFeature2: "Receive booking requests",
     musicianFeature3: "Build your professional network",
     musicianFeature4: "Control your visibility",
     
-    forOrganizers: "For Organizers",
+    forOrganizers: "For Organizers/Venues",
     organizerFeature1: "Search and filter musicians",
-    organizerFeature2: "See available artists on map",
+    organizerFeature2: "See available musicians on map",
     organizerFeature3: "Secure booking with approval",
     organizerFeature4: "Discover new local talents",
     
     forAudience: "For Audience",
     audienceFeature1: "Discover new events",
     audienceFeature2: "Find concerts in your area",
-    audienceFeature3: "See information about artists",
+    audienceFeature3: "See information about musicians",
     audienceFeature4: "Stay updated on local events",
     
     // Footer
@@ -466,7 +466,7 @@ export const translations = {
     agreementSummary: "Agreement Summary",
     completeAgreementOverview: "Complete Agreement Overview",
     audienceLabel: "Audience",
-    artistFee: "Artist Fee",
+    musicianFee: "Musician Fee",
     notSpecified: "Not Specified",
     technicalRequirements: "Technical Requirements",
     hospitality: "Hospitality",
