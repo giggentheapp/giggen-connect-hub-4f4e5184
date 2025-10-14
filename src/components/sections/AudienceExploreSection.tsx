@@ -116,7 +116,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
         return;
       }
 
-      // Fetch makers with privacy settings - only those who allow Goer visibility
+      // Fetch all profiles - no privacy filtering, show everyone
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select(`
@@ -133,8 +133,6 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           privacy_settings,
           created_at
         `)
-        .eq('role', 'organizer' as any)
-        .eq('privacy_settings->>show_profile_to_goers', 'true')
         .order('created_at', { ascending: false });
       
       if (profileError) {
@@ -147,24 +145,20 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
       
       console.log('✅ Successfully fetched makers:', profileData?.length || 0);
       
-      // Filter out sensitive data based on privacy settings
+      // Show all data without privacy filtering
       const safeProfileData = (profileData || []).map(maker => {
-        const privacySettings = (maker.privacy_settings as any) || {};
-        
         return {
           id: maker.id,
           user_id: maker.user_id,
           display_name: maker.display_name,
-          // Only show bio if allowed in privacy settings
-          bio: privacySettings.show_profile_to_goers ? maker.bio : null,
+          bio: maker.bio,
           role: maker.role,
           avatar_url: maker.avatar_url,
-          // Only include location if explicitly public AND privacy allows it
-          address: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.address : null,
-          latitude: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.latitude : null,
-          longitude: (maker.is_address_public && privacySettings.show_profile_to_goers) ? maker.longitude : null,
+          address: maker.is_address_public ? maker.address : null,
+          latitude: maker.is_address_public ? maker.latitude : null,
+          longitude: maker.is_address_public ? maker.longitude : null,
           is_address_public: maker.is_address_public,
-          privacy_settings: privacySettings,
+          privacy_settings: maker.privacy_settings,
           created_at: maker.created_at
         };
       });
@@ -202,16 +196,15 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
       );
     }
 
+    // Privacy filters removed - show all profiles
     if (filters.hasPortfolio) {
-      result = result.filter(maker => 
-        maker.privacy_settings?.show_portfolio_to_goers === true
-      );
+      // This filter could be enhanced to check if portfolio exists
+      result = result;
     }
 
     if (filters.hasEvents) {
-      result = result.filter(maker => 
-        maker.privacy_settings?.show_events_to_goers === true
-      );
+      // This filter could be enhanced to check if events exist
+      result = result;
     }
 
     if (filters.isVerified) {
@@ -422,7 +415,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                     <MakerCard
                       maker={maker}
                       onViewProfile={handleViewProfile}
-                      onBookMaker={isOrganizer ? handleBookMaker : undefined}
+                      onBookMaker={handleBookMaker}
                     />
                   </div>
                 ))}

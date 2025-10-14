@@ -2,7 +2,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Music, Eye, Calendar, Image, Star } from 'lucide-react';
-import { useRole } from '@/contexts/RoleProvider';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +22,6 @@ interface MakerCardProps {
 }
 
 export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps) => {
-  const { isOrganizer } = useRole();
   const { t } = useAppTranslation();
   const navigate = useNavigate();
   
@@ -110,17 +108,15 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             <Eye className="w-4 w-4 mr-1.5" />
             {t('viewProfile')}
           </Button>
-          
-          {isOrganizer && (
-            <Button
-              onClick={() => navigate(`/booking/create/${maker.user_id}`)}
-              size="sm"
-              className="flex-1"
-            >
-              <Music className="w-4 h-4 mr-1.5" />
-              {t('book')}
-            </Button>
-          )}
+          {/* Book button - available to all users */}
+          <Button
+            onClick={() => navigate(`/booking/create/${maker.user_id}`)}
+            size="sm"
+            className="flex-1"
+          >
+            <Music className="w-4 h-4 mr-1.5" />
+            {t('book')}
+          </Button>
         </div>
       </div>
     </Card>

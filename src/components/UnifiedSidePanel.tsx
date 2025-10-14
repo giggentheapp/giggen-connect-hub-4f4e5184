@@ -75,108 +75,62 @@ export const UnifiedSidePanel = ({
     navigate(`/dashboard?section=${section}`);
   };
 
-  // Role-based navigation items
+  // Unified navigation items - same for all roles
   const getNavigationItems = () => {
-    if (isMusician) {
-      return [
-        {
-          id: 'profile',
-          label: t('profile'),
-          icon: User
-        },
-        {
-          id: 'explore',
-          label: t('explore'),
-          icon: MapPin
-        },
-        {
-          id: 'settings',
-          label: t('settings'),
-          icon: Settings
-        }
-      ];
-    } else if (isOrganizer) {
-      return [{
-        id: 'profile',
-        label: t('profile'),
-        icon: User
-      }, {
-        id: 'explore',
-        label: t('explore'),
-        icon: MapPin
-      }, {
-        id: 'admin-files',
-        label: 'Filer', // Keep as is for now
-        icon: FileText
-      }, {
-        id: 'admin-concepts',
-        label: t('My Offers'),
-        icon: Lightbulb
-      }, {
-        id: 'bookings',
-        label: t('bookings'),
-        icon: Briefcase
-      }, {
-        id: 'settings',
-        label: t('settings'),
-        icon: Settings
-      }];
-    }
-    return []; // Loading state
+    return [{
+      id: 'profile',
+      label: t('profile'),
+      icon: User
+    }, {
+      id: 'explore',
+      label: t('explore'),
+      icon: MapPin
+    }, {
+      id: 'admin-files',
+      label: 'Filer',
+      icon: FileText
+    }, {
+      id: 'admin-concepts',
+      label: t('My Offers'),
+      icon: Lightbulb
+    }, {
+      id: 'bookings',
+      label: t('bookings'),
+      icon: Briefcase
+    }, {
+      id: 'settings',
+      label: t('settings'),
+      icon: Settings
+    }];
   };
   const renderActiveSection = () => {
     // Block content rendering if role loading
     if (roleLoading) {
       return <div className="flex items-center justify-center py-8">{t('loading')}</div>;
     }
+    
+    // All sections available to all users
     switch (activeSection) {
       case 'explore':
-        if (isMusician) {
-          return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (isOrganizer) {
-          return <ArtistExploreSection profile={profile} />;
-        }
-        return null;
-      // Loading state
-
+        return <ArtistExploreSection profile={profile} />;
+      
       case 'profile':
-        if (isMusician) {
-          return <ProfileGoerSection 
-            profile={profile} 
-            currentUserId={profile.user_id}
-            viewerRole={profile.role as 'organizer' | 'musician'}
-          />;
-        } else if (isOrganizer) {
-          return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
-        }
-        return null;
+        return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
+      
       case 'bookings':
-        // Only available to organizers
-        if (isOrganizer) {
-          return <BookingsSection profile={profile} />;
-        }
-        return null;
+        return <BookingsSection profile={profile} />;
+      
       case 'admin-files':
-        // Only available to organizers
-        if (isOrganizer) {
-          return <AdminFilesSection profile={profile} />;
-        }
-        return null;
+        return <AdminFilesSection profile={profile} />;
+      
       case 'admin-concepts':
-        // Only available to organizers
-        if (isOrganizer) {
-          return <AdminConceptsSection profile={profile} />;
-        }
-        return null;
+        return <AdminConceptsSection profile={profile} />;
+      
       case 'settings':
         return <AdminSettingsSection profile={profile} />;
+      
       default:
-        if (isMusician) {
-          return <AudienceExploreSection profile={profile} viewMode={viewMode} exploreType={exploreType} />;
-        } else if (isOrganizer) {
-          return <ArtistExploreSection profile={profile} />;
-        }
-        return null;
+        return <ArtistExploreSection profile={profile} />;
     }
   };
   const navItems = getNavigationItems();
