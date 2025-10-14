@@ -45,7 +45,6 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
   });
   const [activeTab, setActiveTab] = useState<'makers' | 'events'>('events');
   const navigate = useNavigate();
-  const { isMusician, isOrganizer } = useRole();
   const { t } = useAppTranslation();
 
   // Auto-fetch data when component mounts

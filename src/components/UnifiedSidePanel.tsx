@@ -1,28 +1,21 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, Calendar, FolderOpen, LogOut, Search, MapPin, Users, Home, List, Lightbulb, Briefcase, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { User, Settings, MapPin, Lightbulb, Briefcase, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useRole } from '@/contexts/RoleProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
 // Import sections
-import { AudienceExploreSection } from '@/components/sections/AudienceExploreSection';
 import { ArtistExploreSection } from '@/components/sections/ArtistExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
-import { ProfileGoerSection } from '@/components/sections/ProfileGoerSection';
-import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
-import { UserSettings } from '@/components/UserSettings';
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
@@ -43,7 +36,6 @@ export const UnifiedSidePanel = ({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role: userRole, isOrganizer, isMusician, loading: roleLoading } = useRole();
   const { t } = useAppTranslation();
 
   // Update activeSection when URL changes
@@ -54,8 +46,6 @@ export const UnifiedSidePanel = ({
     }
   }, [searchParams]);
 
-  // Use role from context as single source of truth
-  const currentRole = userRole || profile.role;
   const handleSignOut = async () => {
     const {
       error
@@ -104,11 +94,6 @@ export const UnifiedSidePanel = ({
     }];
   };
   const renderActiveSection = () => {
-    // Block content rendering if role loading
-    if (roleLoading) {
-      return <div className="flex items-center justify-center py-8">{t('loading')}</div>;
-    }
-    
     // All sections available to all users
     switch (activeSection) {
       case 'explore':

@@ -1,6 +1,5 @@
 import { Calendar } from 'lucide-react';
 import { usePublicEvents } from '@/hooks/usePublicEvents';
-import { useBookings } from '@/hooks/useBookings';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -8,30 +7,22 @@ import { ProfileEventCard } from '@/components/ProfileEventCard';
 interface WorkingEventsDisplayProps {
   profile: UserProfile;
   currentUserId?: string;
-  viewerRole?: 'organizer' | 'musician'; // Add viewer role to determine data source
   isOwnProfile?: boolean;
 }
 
-export const WorkingEventsDisplay = ({ profile, currentUserId, viewerRole, isOwnProfile: isOwnProfileProp }: WorkingEventsDisplayProps) => {
+export const WorkingEventsDisplay = ({ profile, currentUserId, isOwnProfile: isOwnProfileProp }: WorkingEventsDisplayProps) => {
   const { t } = useAppTranslation();
   
-  // Determine which data source to use based on viewer role and ownership
+  // Determine ownership - all users see the same view
   const isOwnProfile = isOwnProfileProp !== undefined ? isOwnProfileProp : (currentUserId === profile.user_id);
-  const isMusicianViewing = viewerRole === 'musician' && !isOwnProfile;
   
-  // Use different data sources based on the viewing context
-  const { bookings, loading: bookingsLoading } = useBookings(isMusicianViewing ? undefined : profile.user_id);
-  const { events: publicEvents, loading: publicLoading } = usePublicEvents(isMusicianViewing ? profile.user_id : '');
-  
-  // Select the appropriate data source
-  const loading = isMusicianViewing ? publicLoading : bookingsLoading;
-  const eventsData = isMusicianViewing ? publicEvents : bookings.filter(b => b.status === 'upcoming');
+  // Always show public events for this profile
+  const { events: publicEvents, loading } = usePublicEvents(profile.user_id);
 
   console.log('🎭 WorkingEventsDisplay render:', {
     isOwnProfile,
-    isMusicianViewing,
-    viewerRole,
-    eventsCount: eventsData.length,
+    profileId: profile.user_id,
+    eventsCount: publicEvents.length,
     loading
   });
 
@@ -44,15 +35,12 @@ export const WorkingEventsDisplay = ({ profile, currentUserId, viewerRole, isOwn
     );
   }
 
-  if (eventsData.length === 0) {
+  if (publicEvents.length === 0) {
     return (
       <div className="text-center py-8">
         <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
         <p className="text-muted-foreground">
-          {isMusicianViewing 
-            ? 'Ingen publiserte arrangementer for øyeblikket'
-            : (isOwnProfile ? 'Du har ingen publiserte arrangementer' : 'Ingen publiserte arrangementer')
-          }
+          {isOwnProfile ? 'Du har ingen publiserte arrangementer' : 'Ingen publiserte arrangementer'}
         </p>
       </div>
     );
@@ -60,7 +48,7 @@ export const WorkingEventsDisplay = ({ profile, currentUserId, viewerRole, isOwn
 
   return (
     <div className="space-y-3 md:space-y-4">
-      {eventsData.map((event) => (
+      {publicEvents.map((event) => (
         <ProfileEventCard key={event.id} event={event} />
       ))}
     </div>

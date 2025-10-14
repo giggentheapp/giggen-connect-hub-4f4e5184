@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { useRole } from '@/contexts/RoleProvider';
 
 interface RoleGuardProps {
   allowedRoles: ('organizer' | 'musician')[];
@@ -7,16 +6,7 @@ interface RoleGuardProps {
   fallback?: ReactNode;
 }
 
-export const RoleGuard = ({ allowedRoles, children, fallback = null }: RoleGuardProps) => {
-  const { role, loading } = useRole();
-
-  if (loading) {
-    return <div className="flex items-center justify-center py-4">Laster...</div>;
-  }
-
-  if (!role || !allowedRoles.includes(role)) {
-    return fallback;
-  }
-
+// RoleGuard is now a passthrough - all users have access to all features
+export const RoleGuard = ({ children }: RoleGuardProps) => {
   return <>{children}</>;
 };

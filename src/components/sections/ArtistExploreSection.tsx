@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Eye, MessageSquare, Search, Music, Calendar, User } from 'lucide-react';
-import { useRole } from '@/contexts/RoleProvider';
+import { MapPin, Users, Search, Calendar, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -30,7 +28,6 @@ export const ArtistExploreSection = ({
     id: string;
     name: string;
   } | null>(null);
-  const { role } = useRole();
   const { t } = useAppTranslation();
   const navigate = useNavigate();
 
