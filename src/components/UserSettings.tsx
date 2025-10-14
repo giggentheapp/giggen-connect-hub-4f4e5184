@@ -202,7 +202,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   };
 
   const updateProfileSettings = async (updates: Partial<ProfileSettings>) => {
-    if (profile.role !== "organizer" || !profileSettings) return;
+    if (!["musician", "organizer"].includes(profile.role) || !profileSettings) return;
 
     try {
       setLoading(true);
