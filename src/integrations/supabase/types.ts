@@ -1134,7 +1134,7 @@ export type Database = {
         | "approved_by_sender"
         | "approved_by_receiver"
         | "approved_by_both"
-      user_role: "artist" | "audience"
+      user_role: "artist" | "audience" | "musician" | "organizer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1273,7 +1273,7 @@ export const Constants = {
         "approved_by_receiver",
         "approved_by_both",
       ],
-      user_role: ["artist", "audience"],
+      user_role: ["artist", "audience", "musician", "organizer"],
     },
   },
 } as const
