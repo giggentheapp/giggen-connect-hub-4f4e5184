@@ -233,7 +233,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   };
 
   const updatePrivacySettings = async (updates: Partial<PrivacySettings>) => {
-    if (profile.role !== "organizer") return;
+    if (!["musician", "organizer"].includes(profile.role)) return;
 
     try {
       setLoading(true);
