@@ -238,7 +238,7 @@ export const ArtistExploreSection = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-3 animate-fade-in">
+                  <div className="mt-8 space-y-3 animate-fade-in">
                     {filteredEvents.map((event) => (
                       <ProfileEventCard 
                         key={event.id}
@@ -305,7 +305,7 @@ export const ArtistExploreSection = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-3 animate-fade-in">
+                  <div className="mt-8 space-y-3 animate-fade-in">
                     {filteredMakers.map((maker) => (
                       <Card 
                         key={maker.id} 
