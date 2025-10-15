@@ -122,8 +122,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         }
       }
 
-      // Fetch profile settings for organizers
-      if (profile.role === "organizer") {
+      // Fetch profile settings for all users
+      if (["musician", "organizer"].includes(profile.role)) {
         const { data: settings, error: settingsError } = await supabase
           .from("profile_settings")
           .select("*")
