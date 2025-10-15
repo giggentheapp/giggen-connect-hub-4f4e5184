@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useNotifications } from '@/hooks/useNotifications';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
@@ -37,6 +38,7 @@ export const UnifiedSidePanel = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  const { unreadCount } = useNotifications();
 
   // Update activeSection when URL changes
   useEffect(() => {
@@ -86,7 +88,8 @@ export const UnifiedSidePanel = ({
     }, {
       id: 'bookings',
       label: t('bookings'),
-      icon: Briefcase
+      icon: Briefcase,
+      badge: unreadCount > 0 ? unreadCount : undefined
     }, {
       id: 'settings',
       label: t('settings'),
@@ -139,7 +142,7 @@ export const UnifiedSidePanel = ({
               {navItems.map(item => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
-            return <div key={item.id}>
+            return <div key={item.id} className="relative">
                     <button 
                       onClick={() => handleNavigation(item.id)} 
                       className={cn('w-full flex items-center justify-center p-3 rounded-lg transition-colors', isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
@@ -147,6 +150,11 @@ export const UnifiedSidePanel = ({
                     >
                       <Icon className="h-5 w-5" />
                     </button>
+                    {item.badge && (
+                      <div className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1 text-xs bg-destructive text-destructive-foreground rounded-full">
+                        {item.badge}
+                      </div>
+                    )}
                   </div>;
           })}
             </nav>
@@ -170,9 +178,16 @@ export const UnifiedSidePanel = ({
             {navItems.map(item => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
-          return <button key={item.id} onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
+          return <div key={item.id} className="relative flex-1">
+                <button onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 w-full', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
                   <Icon className="h-5 w-5" />
-                </button>;
+                </button>
+                {item.badge && (
+                  <div className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1 text-xs bg-destructive text-destructive-foreground rounded-full">
+                    {item.badge}
+                  </div>
+                )}
+              </div>;
         })}
           </div>
         </nav>}

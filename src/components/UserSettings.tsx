@@ -31,6 +31,7 @@ interface ProfileSettings {
   show_public_profile: boolean;
   show_on_map: boolean;
   show_contact: boolean;
+  notifications_booking_requests?: boolean;
 }
 
 interface PrivacySettings {
@@ -770,7 +771,28 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         </div>
       </div>
 
-      {/* Password Change */}
+      {/* Notification Settings */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">Varslingsinnstillinger</h2>
+          <p className="text-sm text-muted-foreground">Styr hvilke varsler du vil motta</p>
+        </div>
+
+        <div className="space-y-3">
+          {/* Booking Request Notifications Toggle */}
+          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+            <div className="flex-1 pr-4">
+              <Label className="text-sm font-medium cursor-pointer">Booking-forespørsler</Label>
+              <p className="text-xs text-muted-foreground mt-1">Få varsel når noen sender deg en bookingforespørsel</p>
+            </div>
+            <Switch
+              checked={profileSettings?.notifications_booking_requests !== false}
+              onCheckedChange={(checked) => updateProfileSettings({ notifications_booking_requests: checked })}
+              disabled={loading}
+            />
+          </div>
+        </div>
+      </div>
       <div className="space-y-6">
         <div>
           <h2 className="text-xl md:text-2xl font-bold mb-2">{t("changePassword")}</h2>

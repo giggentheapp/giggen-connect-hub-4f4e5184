@@ -696,6 +696,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_portfolio: {
         Row: {
           created_at: string
@@ -749,27 +785,42 @@ export type Database = {
           created_at: string
           id: string
           maker_id: string
+          notifications_booking_requests: boolean
+          show_about: boolean | null
           show_contact: boolean
+          show_events: boolean | null
           show_on_map: boolean
+          show_portfolio: boolean | null
           show_public_profile: boolean
+          show_techspec: boolean | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           maker_id: string
+          notifications_booking_requests?: boolean
+          show_about?: boolean | null
           show_contact?: boolean
+          show_events?: boolean | null
           show_on_map?: boolean
+          show_portfolio?: boolean | null
           show_public_profile?: boolean
+          show_techspec?: boolean | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           maker_id?: string
+          notifications_booking_requests?: boolean
+          show_about?: boolean | null
           show_contact?: boolean
+          show_events?: boolean | null
           show_on_map?: boolean
+          show_portfolio?: boolean | null
           show_public_profile?: boolean
+          show_techspec?: boolean | null
           updated_at?: string
         }
         Relationships: [

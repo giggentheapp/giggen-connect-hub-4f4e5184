@@ -102,6 +102,13 @@ export const useBookings = (userId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ikke autentisert');
 
+      // Get sender profile for notification
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', user.id)
+        .single();
+
       const insertData = {
         receiver_id: bookingData.receiverId,
         concept_ids: bookingData.conceptIds,
@@ -134,6 +141,19 @@ export const useBookings = (userId?: string) => {
       
       const newBooking = data as Booking;
       setBookings(prev => [newBooking, ...prev]);
+      
+      // Create notification for receiver
+      const senderName = senderProfile?.display_name || 'En bruker';
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: bookingData.receiverId,
+          type: 'booking_request',
+          title: 'Ny bookingforespørsel',
+          message: `${senderName} vil booke deg`,
+          link: '/dashboard?section=bookings',
+        });
+      
       logger.business('Booking created', { bookingId: newBooking.id, receiverId: bookingData.receiverId });
       toast({
         title: "Forespørsel sendt",
