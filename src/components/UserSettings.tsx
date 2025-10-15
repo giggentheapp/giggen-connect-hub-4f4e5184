@@ -122,8 +122,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         }
       }
 
-      // Fetch profile settings for all users
-      if (["musician", "organizer"].includes(profile.role)) {
+      // Fetch profile settings for organizers
+      if (profile.role === "organizer") {
         const { data: settings, error: settingsError } = await supabase
           .from("profile_settings")
           .select("*")
@@ -495,8 +495,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
               )}
             </div>
 
-            {/* Only show bio, address, and contact info for organizers */}
-            {profileData.role === "organizer" && (
+            {/* Bio, address, and contact info for all users */}
+            <>
               <>
                 <div>
                   <Label htmlFor="bio">{t("biography")}</Label>
@@ -594,7 +594,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
                   </div>
                 </div>
               </>
-            )}
+            </>
           </div>
 
           <Button onClick={handleProfileSubmit} disabled={loading} className="w-full md:w-auto">
@@ -604,8 +604,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         </div>
       </div>
 
-      {/* Social Media Settings - Only for Organizers */}
-      {profileData.role === "organizer" && (
+      {/* Social Media Settings - For All Users */}
+      <>
         <div className="space-y-6">
           <div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">{t("socialMedia")}</h2>
@@ -714,7 +714,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             </Button>
           </div>
         </div>
-      )}
+      </>
 
       {/* Simplified Privacy Settings for ALL USERS */}
       <div className="space-y-6">
