@@ -39,10 +39,10 @@ export function MyTicketsView() {
 
   const now = new Date();
   const upcomingTickets = tickets.filter(
-    (t) => t.events && new Date(t.events.date) > now && t.status === "valid"
+    (t) => t.events_market && new Date(t.events_market.date) > now && t.status === "valid"
   );
   const pastTickets = tickets.filter(
-    (t) => t.events && (new Date(t.events.date) <= now || t.status !== "valid")
+    (t) => t.events_market && (new Date(t.events_market.date) <= now || t.status !== "valid")
   );
 
   return (
@@ -91,7 +91,7 @@ export function MyTicketsView() {
 }
 
 function TicketCard({ ticket }: { ticket: any }) {
-  const event = ticket.events;
+  const event = ticket.events_market;
   if (!event) return null;
 
   const eventDate = new Date(event.date);
@@ -112,7 +112,7 @@ function TicketCard({ ticket }: { ticket: any }) {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle>{event.name}</CardTitle>
+            <CardTitle>{event.title}</CardTitle>
             <CardDescription className="flex items-center gap-2 mt-2">
               <MapPin className="h-4 w-4" />
               {event.venue}

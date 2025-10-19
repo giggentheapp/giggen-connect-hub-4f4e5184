@@ -46,32 +46,13 @@ export function EventsTicketMarket() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => {
-          const ticketsLeft = event.capacity - event.tickets_sold;
-          const isSoldOut = ticketsLeft <= 0;
           const eventDate = new Date(event.date);
           const isPastEvent = eventDate < new Date();
 
           return (
             <Card key={event.id} className="overflow-hidden">
-              {event.image_url && (
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={event.image_url}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              
               <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="line-clamp-2">{event.name}</CardTitle>
-                  {isSoldOut ? (
-                    <Badge variant="destructive">Utsolgt</Badge>
-                  ) : ticketsLeft < 10 ? (
-                    <Badge variant="secondary">Få igjen</Badge>
-                  ) : null}
-                </div>
+                <CardTitle className="line-clamp-2">{event.title}</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   {event.venue}
@@ -100,10 +81,10 @@ export function EventsTicketMarket() {
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
-                    <span>{ticketsLeft} / {event.capacity} billetter igjen</span>
+                    <span>Maks {event.expected_audience} deltakere</span>
                   </div>
                   <div className="text-2xl font-bold">
-                    {event.price_nok} kr
+                    {event.ticket_price} kr
                   </div>
                 </div>
               </CardContent>
@@ -111,14 +92,10 @@ export function EventsTicketMarket() {
               <CardFooter>
                 <Button
                   className="w-full"
-                  disabled={isSoldOut || isPastEvent || isPending}
+                  disabled={isPastEvent || isPending}
                   onClick={() => purchaseTicket(event.id)}
                 >
-                  {isPastEvent
-                    ? "Arrangementet er passert"
-                    : isSoldOut
-                    ? "Utsolgt"
-                    : "Kjøp billett"}
+                  {isPastEvent ? "Arrangementet er passert" : "Kjøp billett"}
                 </Button>
               </CardFooter>
             </Card>

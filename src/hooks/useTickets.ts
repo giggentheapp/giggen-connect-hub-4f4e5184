@@ -5,17 +5,14 @@ import { toast } from "sonner";
 // Custom types for ticket system (independent of Supabase auto-generated types)
 export interface TicketEvent {
   id: string;
-  name: string;
+  title: string;
   venue: string;
   date: string;
   description: string | null;
-  price_nok: number;
-  capacity: number;
-  tickets_sold: number;
-  image_url: string | null;
-  is_active: boolean;
+  ticket_price: number;
+  expected_audience: number;
+  is_public: boolean;
   created_at: string;
-  updated_at: string;
   created_by: string | null;
 }
 
@@ -31,7 +28,7 @@ export interface Ticket {
   checked_in_by: string | null;
   created_at: string;
   updated_at: string;
-  events?: TicketEvent;
+  events_market?: TicketEvent;
   profiles?: {
     display_name: string;
     avatar_url: string | null;
@@ -43,9 +40,9 @@ export const useEvents = () => {
     queryKey: ["ticket-events"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("events" as any)
+        .from("events_market" as any)
         .select("*")
-        .eq("is_active", true)
+        .eq("is_public", true)
         .order("date", { ascending: true });
 
       if (error) throw error;
@@ -65,7 +62,7 @@ export const useMyTickets = () => {
         .from("tickets" as any)
         .select(`
           *,
-          events (*),
+          events_market:event_id (*),
           profiles:user_id (display_name, avatar_url)
         `)
         .eq("user_id", user.id)

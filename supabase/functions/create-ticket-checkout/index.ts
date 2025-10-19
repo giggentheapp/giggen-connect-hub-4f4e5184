@@ -35,18 +35,13 @@ serve(async (req) => {
 
     // Fetch event details
     const { data: event, error: eventError } = await supabaseClient
-      .from("events")
+      .from("events_market")
       .select("*")
       .eq("id", eventId)
       .single();
 
     if (eventError || !event) {
       throw new Error("Event not found");
-    }
-
-    // Check if tickets are still available
-    if (event.tickets_sold >= event.capacity) {
-      throw new Error("Event is sold out");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -69,11 +64,10 @@ serve(async (req) => {
           price_data: {
             currency: "nok",
             product_data: {
-              name: event.name,
+              name: event.title,
               description: `${event.venue} - ${new Date(event.date).toLocaleDateString("no-NO")}`,
-              images: event.image_url ? [event.image_url] : [],
             },
-            unit_amount: Math.round(event.price_nok * 100), // Convert to øre
+            unit_amount: Math.round(event.ticket_price * 100), // Convert to øre
           },
           quantity: 1,
         },
