@@ -34,14 +34,17 @@ import PublicEventView from "./pages/PublicEventView";
 import Events from "./pages/Events";
 import CheckIn from "./pages/CheckIn";
 import TicketSuccess from "./pages/TicketSuccess";
-import AdminSetup from "./pages/AdminSetup";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { useInitializeAdmin } from "./hooks/useInitializeAdmin";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <AppLanguageProvider>
+const App = () => {
+  useInitializeAdmin();
+  
+  return (
+    <AppLanguageProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <RoleProvider>
@@ -78,7 +81,6 @@ const App = () => (
               <Route path="/events" element={<Events />} />
               <Route path="/check-in" element={<CheckIn />} />
               <Route path="/ticket-success" element={<TicketSuccess />} />
-              <Route path="/admin-setup" element={<AdminSetup />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
@@ -90,6 +92,7 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 </AppLanguageProvider>
-);
+  );
+};
 
 export default App;
