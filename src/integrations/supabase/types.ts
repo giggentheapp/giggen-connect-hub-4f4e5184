@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_whitelist: {
+        Row: {
+          added_by: string | null
+          created_at: string | null
+          email: string
+          id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -547,53 +568,6 @@ export type Database = {
         }
         Relationships: []
       }
-      events: {
-        Row: {
-          created_at: string
-          description: string | null
-          event_date: string | null
-          id: string
-          is_public: boolean | null
-          location: string | null
-          maker_id: string
-          max_participants: number | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          event_date?: string | null
-          id?: string
-          is_public?: boolean | null
-          location?: string | null
-          maker_id: string
-          max_participants?: number | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          event_date?: string | null
-          id?: string
-          is_public?: boolean | null
-          location?: string | null
-          maker_id?: string
-          max_participants?: number | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_maker_id_fkey"
-            columns: ["maker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       events_market: {
         Row: {
           created_at: string | null
@@ -602,6 +576,7 @@ export type Database = {
           description: string | null
           event_datetime: string | null
           expected_audience: number | null
+          has_paid_tickets: boolean | null
           id: string
           is_public: boolean | null
           portfolio_id: string | null
@@ -617,6 +592,7 @@ export type Database = {
           description?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
+          has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
           portfolio_id?: string | null
@@ -632,6 +608,7 @@ export type Database = {
           description?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
+          has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
           portfolio_id?: string | null
@@ -930,6 +907,107 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           social_media_links?: Json | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          checked_in_by: string | null
+          created_at: string | null
+          event_id: string | null
+          id: string
+          purchased_at: string | null
+          qr_code_data: string
+          status: string | null
+          ticket_code: string
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          checked_in_by?: string | null
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          purchased_at?: string | null
+          qr_code_data: string
+          status?: string | null
+          ticket_code: string
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          checked_in_by?: string | null
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          purchased_at?: string | null
+          qr_code_data?: string
+          status?: string | null
+          ticket_code?: string
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount_nok: number
+          created_at: string | null
+          event_id: string | null
+          id: string
+          status: string | null
+          stripe_payment_id: string
+          ticket_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_nok: number
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status?: string | null
+          stripe_payment_id: string
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_nok?: number
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status?: string | null
+          stripe_payment_id?: string
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
           user_id?: string
         }
         Relationships: []

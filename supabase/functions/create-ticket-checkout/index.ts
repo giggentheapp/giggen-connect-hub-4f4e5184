@@ -41,7 +41,14 @@ serve(async (req) => {
       .single();
 
     if (eventError || !event) {
+      console.error("Event not found:", eventError);
       throw new Error("Event not found");
+    }
+
+    // Check if paid tickets are enabled for this event
+    if (!event.has_paid_tickets) {
+      console.error("Paid tickets not enabled for event:", eventId);
+      throw new Error("Paid tickets are not enabled for this event");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {

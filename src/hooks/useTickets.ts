@@ -14,6 +14,7 @@ export interface TicketEvent {
   is_public: boolean;
   created_at: string;
   created_by: string | null;
+  has_paid_tickets: boolean;
 }
 
 export interface Ticket {
@@ -41,7 +42,7 @@ export const useEvents = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events_market" as any)
-        .select("id, title, venue, date, description, ticket_price, expected_audience, is_public, created_at, created_by")
+        .select("id, title, venue, date, description, ticket_price, expected_audience, is_public, created_at, created_by, has_paid_tickets")
         .eq("is_public", true)
         .order("date", { ascending: true });
 

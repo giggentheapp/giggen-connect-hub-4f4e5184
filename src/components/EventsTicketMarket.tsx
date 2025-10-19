@@ -90,6 +90,7 @@ export function EventsTicketMarket() {
               </CardContent>
 
               <CardFooter>
+              {event.has_paid_tickets ? (
                 <Button
                   className="w-full"
                   disabled={isPastEvent || isPending}
@@ -97,6 +98,11 @@ export function EventsTicketMarket() {
                 >
                   {isPastEvent ? "Arrangementet er passert" : "Kjøp billett"}
                 </Button>
+              ) : (
+                <Button className="w-full" disabled variant="secondary">
+                  Billettsalg ikke tilgjengelig i appen
+                </Button>
+              )}
               </CardFooter>
             </Card>
           );
