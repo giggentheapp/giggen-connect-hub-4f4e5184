@@ -41,7 +41,7 @@ export const useEvents = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events_market" as any)
-        .select("*")
+        .select("id, title, venue, date, description, ticket_price, expected_audience, is_public, created_at, created_by")
         .eq("is_public", true)
         .order("date", { ascending: true });
 
