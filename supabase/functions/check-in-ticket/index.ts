@@ -32,14 +32,18 @@ serve(async (req) => {
     }
 
     // Check if user is musician or organizer
-    const { data: profile } = await supabaseClient
-      .from("profiles")
+    const { data: userRoles } = await supabaseClient
+      .from("user_roles")
       .select("role")
-      .eq("user_id", admin.id)
-      .single();
+      .eq("user_id", admin.id);
 
-    if (!profile || !["musician", "organizer"].includes(profile.role)) {
-      throw new Error("Unauthorized: Only musicians and organizers can check in tickets");
+    if (!userRoles || userRoles.length === 0) {
+      throw new Error("Unauthorized: Only admins and organizers can check in tickets");
+    }
+
+    const hasAccess = userRoles.some(r => r.role === 'admin' || r.role === 'organizer');
+    if (!hasAccess) {
+      throw new Error("Unauthorized: Only admins and organizers can check in tickets");
     }
 
     const { ticketCode } = await req.json();

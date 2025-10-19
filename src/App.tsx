@@ -31,6 +31,10 @@ import BookingPublishPreview from "./pages/BookingPublishPreview";
 import BookingAgreementView from "./pages/BookingAgreementView";
 import Bookings from "./pages/Bookings";
 import PublicEventView from "./pages/PublicEventView";
+import Events from "./pages/Events";
+import CheckIn from "./pages/CheckIn";
+import TicketSuccess from "./pages/TicketSuccess";
+import AdminSetup from "./pages/AdminSetup";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -69,6 +73,13 @@ const App = () => (
               <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
               <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
               <Route path="/booking/:bookingId/view" element={<BookingAgreementView />} />
+              
+              {/* Ticket System Routes */}
+              <Route path="/events" element={<Events />} />
+              <Route path="/check-in" element={<CheckIn />} />
+              <Route path="/ticket-success" element={<TicketSuccess />} />
+              <Route path="/admin-setup" element={<AdminSetup />} />
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Inbox, Clock, Eye, Check } from 'lucide-react';
+import { Send, Inbox, Clock, Eye, Check, Ticket } from 'lucide-react';
+import { MyTicketsView } from '@/components/MyTicketsView';
 import { BookingActions } from '@/components/BookingActions';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
@@ -23,13 +24,13 @@ export const BookingsSection = ({
   
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'tickets'>('incoming');
 
   // Handle URL tab parameter
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
-    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming'].includes(tab)) {
+    const tab = params.get('tab') || params.get('section');
+    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming', 'tickets'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -271,34 +272,38 @@ export const BookingsSection = ({
           <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header">
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 max-w-[600px]">
-                  <TabsTrigger value="incoming" className="flex items-center gap-2">
+                <TabsList className="grid w-full grid-cols-5 max-w-[700px]">
+                  <TabsTrigger value="incoming" className="flex items-center gap-1 md:gap-2">
                     <Inbox className="w-4 h-4" />
                     <span className="hidden sm:inline">Innkommende</span>
                     <Badge variant="secondary" className="text-xs">
                       {incomingRequests.length}
                     </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="sent" className="flex items-center gap-2">
+                  <TabsTrigger value="sent" className="flex items-center gap-1 md:gap-2">
                     <Send className="w-4 h-4" />
                     <span className="hidden sm:inline">Sendt</span>
                     <Badge variant="secondary" className="text-xs">
                       {sentRequests.length}
                     </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="ongoing" className="flex items-center gap-2">
+                  <TabsTrigger value="ongoing" className="flex items-center gap-1 md:gap-2">
                     <Clock className="w-4 h-4" />
                     <span className="hidden sm:inline">Pågående</span>
                     <Badge variant="secondary" className="text-xs">
                       {ongoingAgreements.length}
                     </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="upcoming" className="flex items-center gap-2">
+                  <TabsTrigger value="upcoming" className="flex items-center gap-1 md:gap-2">
                     <Check className="w-4 h-4" />
                     <span className="hidden sm:inline">Publisert</span>
                     <Badge variant="secondary" className="text-xs">
                       {upcomingEvents.length}
                     </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="tickets" className="flex items-center gap-1 md:gap-2">
+                    <Ticket className="w-4 h-4" />
+                    <span className="hidden sm:inline">Billetter</span>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -415,6 +420,25 @@ export const BookingsSection = ({
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
                         ))
                       )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tickets Tab Content */}
+              <TabsContent value="tickets" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Mine billetter</h2>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+                    <div className="max-w-4xl mx-auto">
+                      <MyTicketsView />
                     </div>
                   </div>
                 </div>

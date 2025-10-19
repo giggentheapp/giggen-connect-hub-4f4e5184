@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Camera, CameraOff, CheckCircle, XCircle, Ticket } from "lucide-react";
+import { Camera, CameraOff, CheckCircle, XCircle, Ticket, Shield } from "lucide-react";
 import { useCheckInTicket } from "@/hooks/useTickets";
+import { useIsAdmin, useIsOrganizer } from "@/hooks/useUserRole";
 
 export function AdminCheckIn() {
+  const isAdmin = useIsAdmin();
+  const isOrganizer = useIsOrganizer();
+  const hasAccess = isAdmin || isOrganizer;
+
   const [manualCode, setManualCode] = useState("");
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [lastScanResult, setLastScanResult] = useState<{
@@ -21,6 +26,33 @@ export function AdminCheckIn() {
   const scanIntervalRef = useRef<number>();
   
   const { mutate: checkInTicket, isPending } = useCheckInTicket();
+
+  // Show access denied if user doesn't have proper role
+  if (!hasAccess) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Alert variant="destructive">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-3">
+              <p className="font-semibold">Ingen tilgang</p>
+              <p>
+                Du har ikke tilgang til innsjekk-funksjonen. Kun administratorer og arrangører kan sjekke inn billetter.
+              </p>
+              <Button
+                onClick={() => window.location.href = '/admin-setup'}
+                variant="outline"
+                size="sm"
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Gå til Admin Setup
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   const handleCheckIn = useCallback((ticketCode: string) => {
     if (!ticketCode) return;
