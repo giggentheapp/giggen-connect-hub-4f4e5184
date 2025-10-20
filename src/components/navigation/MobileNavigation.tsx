@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, Calendar } from 'lucide-react';
+import { Compass, User, Menu, Ticket } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
@@ -18,13 +18,6 @@ export const MobileNavigation = () => {
   
   const navItems: NavigationRoute[] = [
     { 
-      id: 'explore', 
-      label: t('explore'), 
-      icon: Compass,
-      path: '/',
-      section: 'explore'
-    },
-    { 
       id: 'profile', 
       label: t('profile'), 
       icon: User,
@@ -32,18 +25,25 @@ export const MobileNavigation = () => {
       section: 'profile'
     },
     { 
-      id: 'bookings', 
-      label: t('bookings'), 
-      icon: Calendar,
+      id: 'explore', 
+      label: t('explore'), 
+      icon: Compass,
       path: '/',
-      section: 'bookings'
+      section: 'explore'
     },
     { 
-      id: 'admin', 
-      label: t('administration'), 
-      icon: Settings,
+      id: 'tickets', 
+      label: 'Billetter', 
+      icon: Ticket,
       path: '/',
-      section: 'admin'
+      section: 'tickets'
+    },
+    { 
+      id: 'menu', 
+      label: 'Meny', 
+      icon: Menu,
+      path: '/',
+      section: 'menu'
     },
   ];
 

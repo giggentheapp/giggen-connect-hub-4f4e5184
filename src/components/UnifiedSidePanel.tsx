@@ -17,6 +17,7 @@ import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
+import { TicketsSection } from '@/components/sections/TicketsSection';
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
@@ -105,9 +106,13 @@ export const UnifiedSidePanel = ({
       case 'profile':
         return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
       
+      case 'tickets':
+        return <TicketsSection profile={profile} />;
+      
       case 'bookings':
         return <BookingsSection profile={profile} />;
       
+      case 'menu':
       case 'admin-files':
         return <AdminFilesSection profile={profile} />;
       
@@ -118,7 +123,7 @@ export const UnifiedSidePanel = ({
         return <AdminSettingsSection profile={profile} />;
       
       default:
-        return <ArtistExploreSection profile={profile} />;
+        return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
     }
   };
   const navItems = getNavigationItems();
