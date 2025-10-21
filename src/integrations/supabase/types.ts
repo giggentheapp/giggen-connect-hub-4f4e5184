@@ -948,7 +948,15 @@ export type Database = {
           used_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_market"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
