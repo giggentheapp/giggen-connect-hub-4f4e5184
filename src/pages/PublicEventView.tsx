@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { usePurchaseTicket } from '@/hooks/useTickets';
+import QRCode from 'react-qr-code';
 
 interface PublicEventData {
   id: string;
@@ -37,6 +38,8 @@ const PublicEventView = () => {
   const [loading, setLoading] = useState(true);
   const [hasPaidTickets, setHasPaidTickets] = useState(false);
   const [marketEventId, setMarketEventId] = useState<string | null>(null);
+  const [userTicket, setUserTicket] = useState<any>(null);
+  const [showQR, setShowQR] = useState(false);
   const purchaseTicket = usePurchaseTicket();
 
   useEffect(() => {
@@ -44,6 +47,34 @@ const PublicEventView = () => {
       fetchPublicEventData();
     }
   }, [id]);
+
+  useEffect(() => {
+    // Check for user ticket after we know the marketEventId
+    if (marketEventId || id) {
+      checkUserTicket();
+    }
+  }, [marketEventId, id]);
+
+  const checkUserTicket = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Check if user has a ticket for this event (using marketEventId if available)
+      const eventIdToCheck = marketEventId || id;
+      
+      const { data: ticket } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('event_id', eventIdToCheck)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setUserTicket(ticket);
+    } catch (error) {
+      console.error('Error checking user ticket:', error);
+    }
+  };
 
   const fetchPublicEventData = async () => {
     try {
@@ -303,9 +334,67 @@ const PublicEventView = () => {
           </div>
         )}
 
-        {/* Ticket Purchase Section */}
+        {/* Ticket Purchase/Display Section */}
         <div className="mt-8 pt-8 border-t">
-          {hasPaidTickets && marketEventId ? (
+          {userTicket ? (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Din billett</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="font-medium">
+                    {userTicket.status === 'valid' ? 'Gyldig' : 
+                     userTicket.status === 'used' ? 'Brukt' : userTicket.status}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Kjøpt</p>
+                  <p className="text-sm">
+                    {new Date(userTicket.purchased_at || userTicket.created_at).toLocaleDateString('nb-NO', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+              
+              {showQR ? (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center py-6 bg-background rounded-lg border">
+                    <p className="text-sm font-medium mb-4">Skann QR-koden ved inngang</p>
+                    <div className="bg-white p-4 rounded-lg">
+                      <QRCode 
+                        value={userTicket.qr_code_data} 
+                        size={256}
+                        level="H"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-4 font-mono">
+                      {userTicket.ticket_code}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => setShowQR(false)}
+                  >
+                    Skjul QR-kode
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="lg"
+                  className="w-full md:w-auto"
+                  onClick={() => setShowQR(true)}
+                >
+                  <Ticket className="h-5 w-5 mr-2" />
+                  Vis billett
+                </Button>
+              )}
+            </div>
+          ) : hasPaidTickets && marketEventId ? (
             <div className="space-y-4">
               <h2 className="text-2xl font-bold">Kjøp billett</h2>
               <p className="text-muted-foreground">
