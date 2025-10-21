@@ -58,11 +58,6 @@ serve(async (req) => {
 
     // Generate unique ticket code
     const ticketCode = crypto.randomUUID();
-    const qrCodeData = JSON.stringify({
-      ticketCode,
-      eventId,
-      userId,
-    });
 
     // Create ticket record
     const { data: ticket, error: ticketError } = await supabaseClient
@@ -71,7 +66,7 @@ serve(async (req) => {
         event_id: eventId,
         user_id: userId,
         ticket_code: ticketCode,
-        qr_code_data: qrCodeData,
+        qr_code_data: ticketCode, // Use ticket code as QR data initially
         status: "valid",
       })
       .select()
@@ -80,6 +75,18 @@ serve(async (req) => {
     if (ticketError) {
       console.error("Error creating ticket:", ticketError);
       throw new Error("Failed to create ticket");
+    }
+
+    // Update qr_code_data to use the actual ticket ID for scanning
+    const { error: updateError } = await supabaseClient
+      .from("tickets")
+      .update({
+        qr_code_data: ticket.id, // Set to ticket ID for QR scanner
+      })
+      .eq("id", ticket.id);
+
+    if (updateError) {
+      console.error("Error updating QR code data:", updateError);
     }
 
     // Create transaction record
