@@ -22,7 +22,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<'musiker' | 'arrangør'>('musiker');
+  const [role, setRole] = useState<'MUSIKER' | 'ARRANGØR'>('MUSIKER');
   const [username, setUsername] = useState('');
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameError, setUsernameError] = useState('');
@@ -348,19 +348,19 @@ const Auth = () => {
                   <Label>{t('selectUserType')}</Label>
                   <RadioGroup
                     value={role}
-                    onValueChange={(value) => setRole(value as 'musiker' | 'arrangør')}
+                    onValueChange={(value) => setRole(value as 'MUSIKER' | 'ARRANGØR')}
                     disabled={isSubmitting}
                     className="space-y-2"
                   >
                     <div 
                       className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                        role === 'musiker' 
+                        role === 'MUSIKER' 
                           ? 'border-primary bg-primary/10' 
                           : 'border-border hover:border-primary/50'
                       }`}
-                      onClick={() => setRole('musiker')}
+                      onClick={() => setRole('MUSIKER')}
                     >
-                      <RadioGroupItem value="musiker" id="musiker" className="mt-1" />
+                      <RadioGroupItem value="MUSIKER" id="musiker" className="mt-1" />
                       <Label htmlFor="musiker" className="font-normal cursor-pointer flex-1">
                         <div>
                           <div className="font-bold mb-1">🎵 {t('musiker')}</div>
@@ -372,13 +372,13 @@ const Auth = () => {
                     </div>
                     <div 
                       className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                        role === 'arrangør' 
+                        role === 'ARRANGØR' 
                           ? 'border-primary bg-primary/10' 
                           : 'border-border hover:border-primary/50'
                       }`}
-                      onClick={() => setRole('arrangør')}
+                      onClick={() => setRole('ARRANGØR')}
                     >
-                      <RadioGroupItem value="arrangør" id="arrangør" className="mt-1" />
+                      <RadioGroupItem value="ARRANGØR" id="arrangør" className="mt-1" />
                       <Label htmlFor="arrangør" className="font-normal cursor-pointer flex-1">
                         <div>
                           <div className="font-bold mb-1">📅 {t('arrangør')}</div>

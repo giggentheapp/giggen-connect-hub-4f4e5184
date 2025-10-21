@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 interface RoleGuardProps {
-  allowedRoles: ('musiker' | 'arrangør')[];
+  allowedRoles: ('MUSIKER' | 'ARRANGØR')[];
   children: ReactNode;
   fallback?: ReactNode;
 }

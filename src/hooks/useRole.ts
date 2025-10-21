@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
-export type UserRole = 'musiker' | 'arrangør';
+export type UserRole = 'MUSIKER' | 'ARRANGØR';
 
 export const useRoleData = () => {
   const [role, setRole] = useState<UserRole | null>(null);
@@ -32,7 +32,7 @@ export const useRoleData = () => {
         throw profileError;
       }
 
-      setRole(profile?.role as UserRole || 'musiker');
+      setRole(profile?.role as UserRole || 'MUSIKER');
       logger.debug('User role loaded', { userId: user.id, role: profile?.role });
     } catch (err: unknown) {
       logger.error('Error fetching user role', err);
@@ -60,8 +60,8 @@ export const useRoleData = () => {
     role, 
     loading, 
     error, 
-    isOrganizer: role === 'arrangør',
-    isMusician: role === 'musiker',
+    isOrganizer: role === 'ARRANGØR',
+    isMusician: role === 'MUSIKER',
     refresh: fetchRole 
   };
 };
