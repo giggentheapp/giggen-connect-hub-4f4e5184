@@ -2,9 +2,18 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Ticket } from 'lucide-react';
 import { UserProfile } from "@/types/auth";
+import QRCode from 'react-qr-code';
 
 interface TicketsSectionProps {
   profile: UserProfile;
+}
+
+interface EventData {
+  id: string;
+  title: string;
+  venue: string | null;
+  date: string;
+  ticket_price: number | null;
 }
 
 interface TicketData {
@@ -20,6 +29,7 @@ interface TicketData {
   purchased_at: string;
   used_at: string | null;
   checked_in_by: string | null;
+  events_market?: EventData;
 }
 
 export const TicketsSection = ({ profile }: TicketsSectionProps) => {
@@ -42,7 +52,16 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
 
       const { data, error } = await supabase
         .from('tickets')
-        .select('*')
+        .select(`
+          *,
+          events_market:event_id (
+            id,
+            title,
+            venue,
+            date,
+            ticket_price
+          )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -50,7 +69,7 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
         console.error('Error fetching tickets:', error);
         setTickets([]);
       } else {
-        setTickets((data as TicketData[]) || []);
+        setTickets(data as any || []);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
@@ -84,45 +103,73 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
             <p className="text-muted-foreground">Du har ikke kjøpt noen billetter ennå</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {tickets.map((ticket) => (
-              <div key={ticket.id} className="border rounded-lg p-6 bg-card">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Billettkode</p>
-                    <p className="font-mono text-lg font-bold">{ticket.ticket_code}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="font-medium capitalize">{ticket.status === 'valid' ? 'Gyldig' : ticket.status}</p>
-                  </div>
-                </div>
-                
-                {ticket.qr_code_data && (
-                  <div className="flex justify-center py-4">
-                    <div className="border-2 border-dashed rounded p-4 bg-background">
-                      <p className="text-xs text-center text-muted-foreground mb-2">QR-kode</p>
-                      <p className="font-mono text-sm text-center break-all max-w-xs">{ticket.qr_code_data}</p>
+          <div className="space-y-6">
+            {tickets.map((ticket) => {
+              const eventName = ticket.events_market?.title || 'Ukjent arrangement';
+              const eventVenue = ticket.events_market?.venue || 'Ikke spesifisert';
+              const eventDate = ticket.events_market?.date 
+                ? new Date(ticket.events_market.date).toLocaleDateString('nb-NO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+                : 'Ikke spesifisert';
+              const ticketPrice = ticket.events_market?.ticket_price 
+                ? `${ticket.events_market.ticket_price} kr`
+                : 'Gratis';
+
+              return (
+                <div key={ticket.id} className="border rounded-lg p-6 bg-card shadow-sm">
+                  {/* Event Info Header */}
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold mb-2">{eventName}</h2>
+                    <div className="space-y-1 text-muted-foreground">
+                      <p className="text-sm">📍 {eventVenue}</p>
+                      <p className="text-sm">📅 {eventDate}</p>
+                      <p className="text-sm font-semibold text-foreground">💳 {ticketPrice}</p>
                     </div>
                   </div>
-                )}
-                
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    Kjøpt: {new Date(ticket.purchased_at || ticket.created_at).toLocaleDateString('nb-NO', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Billett-ID: {ticket.id}
-                  </p>
+
+                  {/* QR Code */}
+                  {ticket.qr_code_data && (
+                    <div className="flex flex-col items-center py-6 mb-6 bg-background rounded-lg border-2">
+                      <p className="text-sm font-medium mb-4">Skann QR-koden ved inngang</p>
+                      <div className="bg-white p-4 rounded-lg">
+                        <QRCode 
+                          value={ticket.qr_code_data} 
+                          size={200}
+                          level="H"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-4 font-mono">
+                        {ticket.ticket_code}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Status Badge */}
+                  <div className="flex justify-between items-center pt-4 border-t">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="font-medium">
+                        {ticket.status === 'valid' ? '✅ Gyldig' : 
+                         ticket.status === 'used' ? '✓ Brukt' : ticket.status}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Kjøpt</p>
+                      <p className="text-sm">
+                        {new Date(ticket.purchased_at || ticket.created_at).toLocaleDateString('nb-NO', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
