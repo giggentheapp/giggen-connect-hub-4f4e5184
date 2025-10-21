@@ -10,6 +10,7 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { EventsTicketMarket } from '@/components/EventsTicketMarket';
+import { BandExploreTab } from '@/components/BandExploreTab';
 interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
@@ -17,7 +18,7 @@ export const ArtistExploreSection = ({
   profile
 }: ArtistExploreSectionProps) => {
   const location = useLocation();
-  const [activeView, setActiveView] = useState<'map' | 'list' | 'makers'>('list');
+  const [activeView, setActiveView] = useState<'map' | 'list' | 'makers' | 'bands'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [makers, setMakers] = useState<any[]>([]);
@@ -173,10 +174,19 @@ export const ArtistExploreSection = ({
               >
                 <Users className="w-4 h-4" />
               </Button>
+              <Button
+                variant={activeView === 'bands' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setActiveView('bands')}
+                className="shrink-0"
+                title="Band"
+              >
+                <User className="w-4 h-4" />
+              </Button>
             </div>
             
             {/* Search Field */}
-            {(activeView === 'list' || activeView === 'makers') && (
+            {(activeView === 'list' || activeView === 'makers' || activeView === 'bands') && (
               <div className="flex-1 max-w-md">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -311,6 +321,15 @@ export const ArtistExploreSection = ({
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bands View */}
+      {activeView === 'bands' && (
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-4">
+            <BandExploreTab />
           </div>
         </div>
       )}

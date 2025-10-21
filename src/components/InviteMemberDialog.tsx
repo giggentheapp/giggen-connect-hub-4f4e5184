@@ -51,7 +51,7 @@ export const InviteMemberDialog = ({
         const { data, error } = await supabase
           .from('profiles')
           .select('user_id, display_name, avatar_url')
-          .eq('role', 'musician')
+          .eq('role', 'musiker' as any)
           .not('user_id', 'in', `(${memberIds.join(',')})`)
           .ilike('display_name', `%${search}%`)
           .limit(20);
