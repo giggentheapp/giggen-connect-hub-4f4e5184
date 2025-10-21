@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, Copy } from 'lucide-react';
 
 interface InviteMemberDialogProps {
   open: boolean;
@@ -17,6 +17,7 @@ interface InviteMemberDialogProps {
 interface Musician {
   user_id: string;
   display_name: string;
+  username: string;
   avatar_url: string | null;
 }
 
@@ -50,10 +51,10 @@ export const InviteMemberDialog = ({
         // Get all musicians except current members
         const { data, error } = await supabase
           .from('profiles')
-          .select('user_id, display_name, avatar_url')
+          .select('user_id, display_name, username, avatar_url')
           .eq('role', 'musiker' as any)
           .not('user_id', 'in', `(${memberIds.join(',')})`)
-          .ilike('display_name', `%${search}%`)
+          .or(`display_name.ilike.%${search}%,username.ilike.%${search}%`)
           .limit(20);
 
         if (error) throw error;
@@ -156,6 +157,16 @@ export const InviteMemberDialog = ({
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">{musician.display_name}</h4>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`@${musician.username}`);
+                        toast({ title: 'Kopiert!', description: `@${musician.username} kopiert til utklippstavlen` });
+                      }}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <span>@{musician.username}</span>
+                      <Copy className="h-3 w-3" />
+                    </button>
                   </div>
                   <Button
                     size="sm"

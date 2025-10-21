@@ -53,7 +53,7 @@ const BandProfile = () => {
         const memberIds = membersData?.map(m => m.user_id) || [];
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('user_id, display_name, avatar_url, role')
+          .select('user_id, display_name, username, avatar_url, role')
           .in('user_id', memberIds);
 
         const profiles = profilesData || [];

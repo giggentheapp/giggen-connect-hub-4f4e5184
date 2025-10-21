@@ -35,7 +35,7 @@ export const useBands = () => {
         if (memberIds.length > 0) {
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id, display_name, avatar_url, role')
+            .select('user_id, display_name, username, avatar_url, role')
             .in('user_id', memberIds);
           
           profiles = profilesData || [];

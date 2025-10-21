@@ -69,6 +69,9 @@ export const ProfileSection = ({
             <h1 className="text-3xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent">
               {profile.display_name}
             </h1>
+            <div className="text-lg md:text-xl text-muted-foreground mb-2">
+              @{(profile as any).username}
+            </div>
             <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground">
               <span className="inline-block w-2 h-2 rounded-full bg-accent-orange animate-pulse"></span>
               <span className="capitalize font-medium">{profile.role}</span>

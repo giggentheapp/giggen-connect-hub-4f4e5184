@@ -38,7 +38,7 @@ export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) =>
             <Users className="h-5 w-5" />
             {isOwnProfile ? "Mine Band" : "Band"}
           </CardTitle>
-          {isOwnProfile && <CreateBandModal userId={userId} />}
+          {isOwnProfile && <CreateBandModal open={false} onOpenChange={() => {}} />}
         </div>
       </CardHeader>
       <CardContent>

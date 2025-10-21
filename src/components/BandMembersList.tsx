@@ -131,8 +131,8 @@ export const BandMembersList = ({
             <h4 className="font-semibold truncate">
               {member.profile?.display_name || 'Ukjent'}
             </h4>
-            <p className="text-sm text-muted-foreground">
-              Ble med {new Date(member.joined_at).toLocaleDateString('no-NO')}
+            <p className="text-xs text-muted-foreground">
+              @{member.profile?.username}
             </p>
           </div>
           {getRoleBadge(member.role)}
