@@ -16,6 +16,7 @@ interface EventData {
   venue: string | null;
   date: string;
   ticket_price: number | null;
+  description: string | null;
 }
 
 interface TicketData {
@@ -92,7 +93,8 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
             title,
             venue,
             date,
-            ticket_price
+            ticket_price,
+            description
           )
         `)
         .eq('user_id', user.id)
@@ -287,7 +289,7 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
             }}
             event={{
               title: selectedTicket.events_market?.title || 'Ukjent arrangement',
-              description: null,
+              description: selectedTicket.events_market?.description || null,
               event_date: selectedTicket.events_market?.date || null,
               time: null,
               venue: selectedTicket.events_market?.venue || null,
