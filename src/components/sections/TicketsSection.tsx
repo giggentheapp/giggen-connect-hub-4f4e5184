@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Ticket, Camera } from 'lucide-react';
 import { UserProfile } from "@/types/auth";
 import QRCode from 'react-qr-code';
 import { QRScannerPanel } from './QRScannerPanel';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface TicketsSectionProps {
   profile: UserProfile;
@@ -38,10 +39,19 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
   const [loading, setLoading] = useState(true);
   const [canScan, setCanScan] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const subscriptionRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     fetchTickets();
     checkAdminAccess();
+    setupRealtimeSubscription();
+
+    return () => {
+      // Cleanup subscription on unmount
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current);
+      }
+    };
   }, []);
 
   const checkAdminAccess = async () => {
@@ -97,6 +107,59 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
       setTickets([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setupRealtimeSubscription = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Subscribe to changes in tickets table for this user
+      const channel = supabase
+        .channel('tickets-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to ALL events (INSERT, UPDATE, DELETE)
+            schema: 'public',
+            table: 'tickets',
+            filter: `user_id=eq.${user.id}` // Only this user's tickets
+          },
+          (payload) => {
+            console.log('Real-time update received:', payload);
+
+            if (payload.eventType === 'UPDATE') {
+              // Ticket was updated - update in local state
+              setTickets(prevTickets =>
+                prevTickets.map(ticket =>
+                  ticket.id === payload.new.id 
+                    ? { ...ticket, ...payload.new }
+                    : ticket
+                )
+              );
+            } else if (payload.eventType === 'INSERT') {
+              // New ticket added - refetch to get full event data
+              fetchTickets();
+            } else if (payload.eventType === 'DELETE') {
+              // Ticket deleted - remove from list
+              setTickets(prevTickets =>
+                prevTickets.filter(ticket => ticket.id !== payload.old.id)
+              );
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Real-time subscription active for tickets');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('Channel error - real-time updates unavailable');
+          }
+        });
+
+      subscriptionRef.current = channel;
+    } catch (error) {
+      console.error('Error setting up realtime subscription:', error);
     }
   };
 
