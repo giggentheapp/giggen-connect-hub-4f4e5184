@@ -2,6 +2,8 @@ import { User, Lightbulb, Calendar, MapPin } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
+import { BandsInProfile } from '@/components/BandsInProfile';
+import { BandInvites } from '@/components/BandInvites';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
@@ -123,6 +125,16 @@ export const ProfileSection = ({
         </div>
       )}
 
+      {/* Band Invites (only for own profile) */}
+      {isOwnProfile && (profile.role === 'musician' || profile.role === 'organizer') && (
+        <BandInvites userId={profile.user_id} />
+      )}
+
+      {/* Bands Section */}
+      {(profile.role === 'musician' || profile.role === 'organizer') && (
+        <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
+      )}
+
       {/* Upcoming Events Section */}
       {events.length > 0 && (
         <div className="space-y-4 md:space-y-6">
@@ -137,7 +149,7 @@ export const ProfileSection = ({
             ))}
           </div>
         </div>
-        )}
+      )}
       </div>
     </div>
   );

@@ -1,0 +1,188 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Upload } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+interface CreateBandModalProps {
+  userId: string;
+  onSuccess?: () => void;
+}
+
+export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('band-images')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('band-images')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (error: any) {
+      toast({
+        title: 'Feil ved opplasting av bilde',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast({
+        title: 'Mangler bandnavn',
+        description: 'Vennligst fyll inn et bandnavn',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      let imageUrl = null;
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+
+      const { data, error } = await supabase
+        .from('bands')
+        .insert({
+          name: name.trim(),
+          description: description.trim() || null,
+          image_url: imageUrl,
+          created_by: userId,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: 'Band opprettet!',
+        description: `${name} er nå opprettet`,
+      });
+
+      setOpen(false);
+      setName('');
+      setDescription('');
+      setImageFile(null);
+      setImagePreview(null);
+      onSuccess?.();
+    } catch (error: any) {
+      toast({
+        title: 'Feil ved oppretting av band',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default" className="gap-2">
+          <Plus className="h-4 w-4" />
+          Opprett band
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Opprett nytt band</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={imagePreview || undefined} />
+              <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
+                {name ? name.substring(0, 2).toUpperCase() : 'B'}
+              </AvatarFallback>
+            </Avatar>
+            <Label htmlFor="image-upload" className="cursor-pointer">
+              <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
+                <Upload className="h-4 w-4" />
+                Last opp bilde
+              </div>
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </Label>
+          </div>
+
+          <div>
+            <Label htmlFor="name">Bandnavn *</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Skriv inn bandnavn"
+              maxLength={100}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Beskrivelse</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Fortell om bandet..."
+              rows={4}
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Avbryt
+            </Button>
+            <Button type="submit" disabled={loading || !name.trim()}>
+              {loading ? 'Oppretter...' : 'Opprett band'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -35,6 +35,7 @@ import Events from "./pages/Events";
 import CheckIn from "./pages/CheckIn";
 import TicketSuccess from "./pages/TicketSuccess";
 import TicketView from "./pages/TicketView";
+import BandProfile from "./pages/BandProfile";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useInitializeAdmin } from "./hooks/useInitializeAdmin";
@@ -83,6 +84,9 @@ const App = () => {
               <Route path="/check-in" element={<CheckIn />} />
               <Route path="/ticket-success" element={<TicketSuccess />} />
               <Route path="/billett/:ticketId" element={<TicketView />} />
+              
+              {/* Band Routes */}
+              <Route path="/band/:bandId" element={<BandProfile />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

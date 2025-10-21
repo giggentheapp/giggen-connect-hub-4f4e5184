@@ -77,6 +77,114 @@ export type Database = {
         }
         Relationships: []
       }
+      band_invites: {
+        Row: {
+          band_id: string
+          created_at: string | null
+          id: string
+          invited_by: string
+          invited_user_id: string
+          responded_at: string | null
+          status: string | null
+        }
+        Insert: {
+          band_id: string
+          created_at?: string | null
+          id?: string
+          invited_by: string
+          invited_user_id: string
+          responded_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          band_id?: string
+          created_at?: string | null
+          id?: string
+          invited_by?: string
+          invited_user_id?: string
+          responded_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_invites_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      band_members: {
+        Row: {
+          band_id: string
+          id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          band_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          band_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_members_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bands: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bands_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       booking_changes: {
         Row: {
           approved_at: string | null
@@ -1043,6 +1151,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_band_invite: {
+        Args: { invite_id: string }
+        Returns: undefined
+      }
       can_access_contact_info: {
         Args: { target_user_id: string }
         Returns: boolean
