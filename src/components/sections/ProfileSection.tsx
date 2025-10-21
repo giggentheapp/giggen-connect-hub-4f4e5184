@@ -1,4 +1,4 @@
-import { User, Lightbulb, Calendar, MapPin } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -10,6 +10,7 @@ import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { BookingRequest } from '@/components/BookingRequest';
+import { useToast } from '@/hooks/use-toast';
 interface ProfileSectionProps {
   profile: UserProfile;
   isOwnProfile?: boolean;
@@ -19,6 +20,16 @@ export const ProfileSection = ({
   isOwnProfile = false
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
+  const { toast } = useToast();
+  
+  const handleCopyUsername = () => {
+    const username = `@${(profile as any).username}`;
+    navigator.clipboard.writeText(username);
+    toast({
+      title: 'Kopiert!',
+      description: `${username} kopiert til utklippstavlen`,
+    });
+  };
   
   const {
     concepts: allConcepts,
@@ -69,9 +80,13 @@ export const ProfileSection = ({
             <h1 className="text-3xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent">
               {profile.display_name}
             </h1>
-            <div className="text-lg md:text-xl text-muted-foreground mb-2">
-              @{(profile as any).username}
-            </div>
+            <button
+              onClick={handleCopyUsername}
+              className="inline-flex items-center gap-2 text-lg md:text-xl text-muted-foreground hover:text-foreground transition-colors mb-2 group"
+            >
+              <span>@{(profile as any).username}</span>
+              <Copy className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
             <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground">
               <span className="inline-block w-2 h-2 rounded-full bg-accent-orange animate-pulse"></span>
               <span className="capitalize font-medium">{profile.role}</span>
