@@ -114,6 +114,18 @@ const TicketView = () => {
         return;
       }
 
+      // First delete related transactions
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('ticket_id', ticketId);
+
+      if (transactionError) {
+        console.error('Transaction delete error:', transactionError);
+        throw transactionError;
+      }
+
+      // Then delete the ticket
       const { error } = await supabase
         .from('tickets')
         .delete()
