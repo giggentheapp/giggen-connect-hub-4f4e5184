@@ -73,7 +73,7 @@ export const ProfileEventCard = ({ event }: ProfileEventCardProps) => {
 
         {event.has_paid_tickets ? (
           <Button className="w-full" variant="default" onClick={handleClick}>
-            Se arrangement
+            Kjøp billett
           </Button>
         ) : (
           <Button className="w-full" disabled variant="secondary">

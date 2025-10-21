@@ -66,7 +66,7 @@ export const UnifiedSidePanel = ({
   };
   const handleNavigation = (section: string) => {
     setActiveSection(section);
-    navigate(`/dashboard?section=${section}`);
+    navigate(`/?section=${section}`);
   };
 
   // Unified navigation items - same for all roles

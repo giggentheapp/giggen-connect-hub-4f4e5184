@@ -54,7 +54,7 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
         .from('tickets')
         .select(`
           *,
-          events_market:event_id (
+          events_market!tickets_event_id_fkey (
             id,
             title,
             venue,
