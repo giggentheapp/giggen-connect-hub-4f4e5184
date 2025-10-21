@@ -36,50 +36,38 @@ export const ProfileEventCard = ({ event }: ProfileEventCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-md transition-all">
-      <div className="p-4 space-y-3">
-        <div onClick={handleClick} className="cursor-pointer space-y-2">
-          <h3 className="text-lg font-semibold">{event.title}</h3>
-          
-          {event.description && (
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {event.description}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-4 text-sm pt-2">
-            {event.ticket_price && (
-              <div className="flex items-center gap-1.5">
-                <Banknote className="h-4 w-4 text-muted-foreground" />
-                <span>{event.ticket_price} kr</span>
-              </div>
-            )}
-            
-            {event.event_date && (
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{formatSafeDate(event.event_date)}</span>
-              </div>
-            )}
-            
-            {event.time && (
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>{event.time}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {event.has_paid_tickets ? (
-          <Button className="w-full" variant="default" onClick={handleClick}>
-            Kjøp billett
-          </Button>
-        ) : (
-          <Button className="w-full" disabled variant="secondary">
-            Ikke tilgjengelig for kjøp i appen
-          </Button>
+    <Card className="hover:shadow-md transition-all cursor-pointer" onClick={handleClick}>
+      <div className="p-4 space-y-2">
+        <h3 className="text-lg font-semibold">{event.title}</h3>
+        
+        {event.description && (
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            {event.description}
+          </p>
         )}
+
+        <div className="flex flex-wrap gap-4 text-sm pt-2">
+          {event.ticket_price && (
+            <div className="flex items-center gap-1.5">
+              <Banknote className="h-4 w-4 text-muted-foreground" />
+              <span>{event.ticket_price} kr</span>
+            </div>
+          )}
+          
+          {event.event_date && (
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{formatSafeDate(event.event_date)}</span>
+            </div>
+          )}
+          
+          {event.time && (
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{event.time}</span>
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );

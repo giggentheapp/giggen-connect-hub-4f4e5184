@@ -117,37 +117,16 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex gap-1.5">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleDetailsClick}
-              className="h-7 px-2 text-xs"
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              Detaljer
-            </Button>
-          </div>
-          {event.has_paid_tickets ? (
-            <Button 
-              size="sm" 
-              variant="default"
-              className="h-7 px-2 text-xs"
-              onClick={handleDetailsClick}
-            >
-              Se billettsalg
-            </Button>
-          ) : (
-            <Button 
-              size="sm" 
-              disabled 
-              variant="secondary"
-              className="h-7 px-2 text-xs"
-            >
-              Ikke tilgjengelig
-            </Button>
-          )}
+        <div className="pt-2 border-t">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleDetailsClick}
+            className="h-7 px-2 text-xs w-full"
+          >
+            <Eye className="h-3 w-3 mr-1" />
+            Se detaljer
+          </Button>
         </div>
       </CardContent>
     </Card>

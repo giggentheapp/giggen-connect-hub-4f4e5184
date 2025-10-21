@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Banknote, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, ArrowLeft, Ticket } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
+import { usePurchaseTicket } from '@/hooks/useTickets';
 
 interface PublicEventData {
   id: string;
@@ -23,6 +24,7 @@ interface PublicEventData {
   receiver_id: string;
   selected_concept_id: string | null;
   is_public_after_approval: boolean | null;
+  has_paid_tickets?: boolean;
 }
 
 const PublicEventView = () => {
@@ -33,6 +35,8 @@ const PublicEventView = () => {
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasPaidTickets, setHasPaidTickets] = useState(false);
+  const purchaseTicket = usePurchaseTicket();
 
   useEffect(() => {
     if (id) {
@@ -82,6 +86,15 @@ const PublicEventView = () => {
       }
 
       setEvent(eventData);
+
+      // Check if event has paid tickets in events_market
+      const { data: marketEvent } = await supabase
+        .from('events_market')
+        .select('has_paid_tickets')
+        .eq('title', eventData.title)
+        .maybeSingle();
+      
+      setHasPaidTickets(marketEvent?.has_paid_tickets || false);
 
       // Fetch maker profile (receiver is usually the artist/maker)
       const { data: profileData } = await supabase
@@ -243,6 +256,34 @@ const PublicEventView = () => {
             <BookingPortfolioGallery portfolioAttachments={portfolioAttachments} />
           </div>
         )}
+
+        {/* Ticket Purchase Section */}
+        <div className="mt-8 pt-8 border-t">
+          {hasPaidTickets ? (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Kjøp billett</h2>
+              <p className="text-muted-foreground">
+                Sikre din plass på arrangementet ved å kjøpe billett nå.
+              </p>
+              <Button
+                size="lg"
+                className="w-full md:w-auto"
+                onClick={() => purchaseTicket.mutate(event.id)}
+                disabled={purchaseTicket.isPending}
+              >
+                <Ticket className="h-5 w-5 mr-2" />
+                {purchaseTicket.isPending ? 'Åpner betalingsvindu...' : `Kjøp billett - ${event.ticket_price} kr`}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Billettsalg</h2>
+              <p className="text-muted-foreground">
+                Billetter til dette arrangementet er ikke tilgjengelig for kjøp i appen.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
