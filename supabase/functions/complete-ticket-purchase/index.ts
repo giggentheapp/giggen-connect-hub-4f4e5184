@@ -89,21 +89,30 @@ serve(async (req) => {
       console.error("Error updating QR code data:", updateError);
     }
 
-    // Create transaction record
-    const { error: transactionError } = await supabaseClient
+    // Check if transaction already exists for this payment intent
+    const { data: existingTransaction } = await supabaseClient
       .from("transactions")
-      .insert({
-        user_id: userId,
-        ticket_id: ticket.id,
-        event_id: eventId,
-        stripe_payment_id: session.payment_intent as string,
-        amount_nok: session.amount_total! / 100, // Convert from øre
-        status: "completed",
-      });
+      .select()
+      .eq("stripe_payment_id", session.payment_intent as string)
+      .maybeSingle();
 
-    if (transactionError) {
-      console.error("Error creating transaction:", transactionError);
-      throw new Error("Failed to create transaction record");
+    if (!existingTransaction) {
+      // Create transaction record only if it doesn't exist
+      const { error: transactionError } = await supabaseClient
+        .from("transactions")
+        .insert({
+          user_id: userId,
+          ticket_id: ticket.id,
+          event_id: eventId,
+          stripe_payment_id: session.payment_intent as string,
+          amount_nok: session.amount_total! / 100, // Convert from øre
+          status: "completed",
+        });
+
+      if (transactionError) {
+        console.error("Error creating transaction:", transactionError);
+        throw new Error("Failed to create transaction record");
+      }
     }
 
     return new Response(
