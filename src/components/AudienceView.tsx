@@ -6,8 +6,6 @@ interface AudienceViewProps {
 }
 
 export const AudienceView = ({ profile }: AudienceViewProps) => {
-  console.log('🎯 AudienceView initialized with profile:', profile);
-
   return (
     <UnifiedSidePanel 
       profile={profile}

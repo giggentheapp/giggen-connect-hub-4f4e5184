@@ -423,21 +423,16 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     setCheckingUsername(true);
     try {
-      console.log('Checking username:', value);
       const response = await supabase.functions.invoke('validate-username', {
         body: { username: value }
       });
 
-      console.log('Username check response:', response);
-
       if (response.error) throw response.error;
 
       const data = response.data;
-      console.log('Username available:', data.available);
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
     } catch (error: any) {
-      console.error('Username check error:', error);
       setUsernameError("Kunne ikke sjekke tilgjengelighet");
       setUsernameAvailable(false);
     } finally {
@@ -457,7 +452,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     setChangingUsername(true);
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({
           username: newUsername.toLowerCase(),
@@ -468,8 +463,6 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
       if (error) throw error;
 
-      console.log('Username update response:', data);
-
       const updatedProfile = { ...profileData, username: newUsername.toLowerCase(), username_changed: true };
       setProfileData(updatedProfile);
       onProfileUpdate?.(updatedProfile);
@@ -479,7 +472,6 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         description: `Ditt brukernavn er nå @${newUsername.toLowerCase()}`,
       });
     } catch (error: any) {
-      console.error("Change username error:", error);
       toast({
         title: "Feil ved endring av brukernavn",
         description: error.message,

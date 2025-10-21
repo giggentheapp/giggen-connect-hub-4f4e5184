@@ -37,12 +37,10 @@ const Dashboard = () => {
     supabase.auth
       .getSession()
       .then(async ({ data: { session } }) => {
-        console.log("📋 Dashboard: Checking session:", session ? "Found" : "None");
         setSession(session);
         setUser(session?.user ?? null);
 
         if (!session?.user) {
-          console.log("❌ Dashboard: No session, redirecting to auth");
           navigate("/auth");
           setLoading(false);
           return;
@@ -56,13 +54,10 @@ const Dashboard = () => {
           } = await supabase.auth.getUser();
 
           if (authError || !authUser) {
-            console.error("❌ Dashboard: User not authenticated in auth.users:", authError);
             navigate("/auth");
             setLoading(false);
             return;
           }
-
-          console.log("✅ Dashboard: User verified in auth.users:", authUser.id);
 
           // Now safely load/create profile using verified user ID
           const { data: profileData, error: profileError } = await supabase
@@ -72,7 +67,6 @@ const Dashboard = () => {
             .maybeSingle();
 
           if (profileError) {
-            console.error("❌ Dashboard: Error loading profile:", profileError);
             toast({
               title: t("profileLoadError"),
               description: profileError.message,
@@ -84,7 +78,6 @@ const Dashboard = () => {
 
           if (!profileData) {
             // Profile should have been created by database trigger
-            console.error("❌ Dashboard: Profile not found - this should not happen");
             toast({
               title: "Profil ikke funnet",
               description: "Vennligst logg ut og inn igjen",
@@ -94,12 +87,10 @@ const Dashboard = () => {
             navigate('/auth');
             setLoading(false);
             return;
-          } else {
-            console.log("✅ Dashboard: Profile loaded successfully:", profileData);
-            setProfile(profileData as unknown as UserProfile);
           }
+          
+          setProfile(profileData as unknown as UserProfile);
         } catch (err) {
-          console.error("❌ Dashboard: Unexpected error:", err);
           toast({
             title: t("profileLoadError"),
             description: "Unexpected error occurred",
@@ -110,7 +101,6 @@ const Dashboard = () => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("❌ Dashboard: Session check failed:", err);
         setLoading(false);
         navigate("/auth");
       });
@@ -119,8 +109,6 @@ const Dashboard = () => {
   }, [navigate, toast]);
 
   const handleSignOut = async () => {
-    console.log("🚪 Dashboard.tsx: Signing out...");
-
     // Clear session and local storage
     const { error } = await supabase.auth.signOut();
 
@@ -129,14 +117,12 @@ const Dashboard = () => {
     sessionStorage.clear();
 
     if (error) {
-      console.error("❌ Dashboard.tsx: Sign out error:", error);
       toast({
         title: t("signOutError"),
         description: error.message,
         variant: "destructive",
       });
     } else {
-      console.log("✅ Dashboard.tsx: Signed out successfully, navigating to /auth");
       navigate("/auth");
     }
   };
@@ -168,13 +154,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  console.log("🎛️ Dashboard: Rendering with state:", {
-    loading,
-    hasUser: !!user,
-    hasProfile: !!profile,
-    userRole: profile?.role,
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
