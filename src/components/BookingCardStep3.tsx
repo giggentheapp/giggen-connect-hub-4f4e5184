@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { BookingActions } from '@/components/BookingActions';
 
 const formatSafeDate = (dateString: string) => {
   try {
@@ -126,24 +127,33 @@ export const BookingCardStep3 = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={handleViewAgreement}
-            className="flex-1"
-          >
-            Se avtale
-          </Button>
+        <div className="flex gap-2 pt-2 items-center justify-between">
+          <div className="flex gap-2 flex-1">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleViewAgreement}
+              className="flex-1"
+            >
+              Se avtale
+            </Button>
+            
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleViewPublicEvent}
+              className="flex-1"
+            >
+              Se arrangement
+            </Button>
+          </div>
           
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={handleViewPublicEvent}
-            className="flex-1"
-          >
-            Se arrangement
-          </Button>
+          {/* Booking actions (archive, etc.) */}
+          <BookingActions 
+            booking={booking} 
+            currentUserId={currentUserId} 
+            onAction={onAction} 
+          />
         </div>
       </div>
     </Card>
