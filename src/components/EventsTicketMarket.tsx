@@ -1,13 +1,13 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Ticket, Users } from "lucide-react";
-import { useEvents, usePurchaseTicket } from "@/hooks/useTickets";
+import { useEvents } from "@/hooks/useTickets";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 export function EventsTicketMarket() {
   const { data: events, isLoading } = useEvents();
-  const { mutate: purchaseTicket, isPending } = usePurchaseTicket();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -50,7 +50,11 @@ export function EventsTicketMarket() {
           const isPastEvent = eventDate < new Date();
 
           return (
-            <Card key={event.id} className="overflow-hidden">
+            <Card 
+              key={event.id} 
+              className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
+              onClick={() => navigate(`/arrangement/${event.id}`)}
+            >
               <CardHeader>
                 <CardTitle className="line-clamp-2">{event.title}</CardTitle>
                 <CardDescription className="flex items-center gap-2">
@@ -88,23 +92,6 @@ export function EventsTicketMarket() {
                   </div>
                 </div>
               </CardContent>
-
-              <CardFooter>
-                {event.has_paid_tickets ? (
-                  <Button
-                    className="w-full"
-                    disabled={isPastEvent || isPending}
-                    onClick={() => purchaseTicket(event.id)}
-                    variant="default"
-                  >
-                    {isPastEvent ? "Arrangementet er passert" : "Kjøp billett"}
-                  </Button>
-                ) : (
-                  <Button className="w-full" disabled variant="secondary">
-                    Ikke tilgjengelig for kjøp i appen
-                  </Button>
-                )}
-              </CardFooter>
             </Card>
           );
         })}

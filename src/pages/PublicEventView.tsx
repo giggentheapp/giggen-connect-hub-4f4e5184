@@ -36,6 +36,7 @@ const PublicEventView = () => {
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasPaidTickets, setHasPaidTickets] = useState(false);
+  const [marketEventId, setMarketEventId] = useState<string | null>(null);
   const purchaseTicket = usePurchaseTicket();
 
   useEffect(() => {
@@ -51,7 +52,49 @@ const PublicEventView = () => {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Fetch event data - allow access if user is a party OR if event is public
+      // First, try to fetch from events_market (for public ticket events)
+      const { data: marketEventData, error: marketError } = await supabase
+        .from('events_market')
+        .select('*')
+        .eq('id', id)
+        .eq('is_public', true)
+        .maybeSingle();
+
+      if (marketEventData) {
+        // Convert events_market format to booking format for display
+        setEvent({
+          id: marketEventData.id,
+          title: marketEventData.title,
+          description: marketEventData.description,
+          event_date: marketEventData.event_datetime || marketEventData.date,
+          time: marketEventData.time ? marketEventData.time.toString() : null,
+          venue: marketEventData.venue,
+          address: null,
+          ticket_price: marketEventData.ticket_price,
+          audience_estimate: marketEventData.expected_audience,
+          sender_id: marketEventData.created_by || '',
+          receiver_id: marketEventData.created_by || '',
+          selected_concept_id: null,
+          is_public_after_approval: true,
+        });
+
+        setHasPaidTickets(marketEventData.has_paid_tickets || false);
+        setMarketEventId(marketEventData.id); // Use this ID for ticket purchase
+
+        // Fetch maker profile
+        if (marketEventData.created_by) {
+          const { data: profileData } = await supabase
+            .rpc('get_public_profile', { target_user_id: marketEventData.created_by })
+            .maybeSingle();
+          
+          setMakerProfile(profileData);
+        }
+
+        setLoading(false);
+        return;
+      }
+      
+      // If not in events_market, try bookings
       const { data: eventData, error: eventError } = await supabase
         .from('bookings')
         .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval')
@@ -90,11 +133,14 @@ const PublicEventView = () => {
       // Check if event has paid tickets in events_market
       const { data: marketEvent } = await supabase
         .from('events_market')
-        .select('has_paid_tickets')
+        .select('id, has_paid_tickets')
         .eq('title', eventData.title)
         .maybeSingle();
       
       setHasPaidTickets(marketEvent?.has_paid_tickets || false);
+      if (marketEvent) {
+        setMarketEventId(marketEvent.id); // Store market event ID for ticket purchase
+      }
 
       // Fetch maker profile (receiver is usually the artist/maker)
       const { data: profileData } = await supabase
@@ -259,7 +305,7 @@ const PublicEventView = () => {
 
         {/* Ticket Purchase Section */}
         <div className="mt-8 pt-8 border-t">
-          {hasPaidTickets ? (
+          {hasPaidTickets && marketEventId ? (
             <div className="space-y-4">
               <h2 className="text-2xl font-bold">Kjøp billett</h2>
               <p className="text-muted-foreground">
@@ -268,7 +314,7 @@ const PublicEventView = () => {
               <Button
                 size="lg"
                 className="w-full md:w-auto"
-                onClick={() => purchaseTicket.mutate(event.id)}
+                onClick={() => purchaseTicket.mutate(marketEventId)}
                 disabled={purchaseTicket.isPending}
               >
                 <Ticket className="h-5 w-5 mr-2" />
