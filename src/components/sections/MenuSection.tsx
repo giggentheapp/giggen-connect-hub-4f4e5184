@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Briefcase, Lightbulb, FileText } from "lucide-react";
+import { Settings, Briefcase, Lightbulb, FileText, Ticket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserProfile } from "@/types/auth";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -44,6 +44,13 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
       description: 'Administrer dine filer',
       icon: FileText,
       section: 'admin-files'
+    },
+    {
+      id: 'tickets',
+      label: 'Mine billetter',
+      description: 'Se dine kjøpte billetter',
+      icon: Ticket,
+      section: 'tickets'
     }
   ];
 
