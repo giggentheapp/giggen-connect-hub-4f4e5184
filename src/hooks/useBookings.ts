@@ -174,6 +174,7 @@ export const useBookings = (userId?: string) => {
 
   const updateBooking = async (bookingId: string, updates: UpdateBookingRequest): Promise<Booking> => {
     try {
+      console.log('🔄 Updating booking:', bookingId, 'with updates:', updates);
       const { data, error } = await supabase
         .from('bookings')
         .update({
@@ -184,8 +185,12 @@ export const useBookings = (userId?: string) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
       
+      console.log('✅ Booking updated successfully:', data);
       const updatedBooking = data as Booking;
       setBookings(prev => prev.map(booking => 
         booking.id === bookingId ? updatedBooking : booking
@@ -195,6 +200,7 @@ export const useBookings = (userId?: string) => {
       return updatedBooking;
     } catch (error: unknown) {
       const message = getErrorMessage(error);
+      console.error('❌ Failed to update booking:', error);
       logger.error('Failed to update booking', error);
       toast({
         title: "Feil ved oppdatering av booking",
