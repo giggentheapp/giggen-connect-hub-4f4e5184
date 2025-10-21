@@ -415,19 +415,16 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     try {
       setLoading(true);
 
-      // Delete user profile and related data
-      const { error: profileError } = await supabase.from("profiles").delete().eq("user_id", profile.user_id);
+      // Call the database function to delete all user data including storage files
+      const { error: deleteError } = await supabase.rpc('delete_user_data', {
+        user_uuid: profile.user_id
+      });
 
-      if (profileError) throw profileError;
-
-      // Delete auth user (this will cascade delete other related data)
-      const { error: authError } = await supabase.auth.admin.deleteUser(profile.user_id);
-
-      if (authError) throw authError;
+      if (deleteError) throw deleteError;
 
       toast({
         title: "Bruker slettet",
-        description: "Din konto har blitt permanent slettet",
+        description: "Din konto og alle tilknyttede data har blitt permanent slettet",
       });
 
       // Sign out and redirect
@@ -437,7 +434,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       console.error("Delete user error:", error);
       toast({
         title: "Feil ved sletting",
-        description: error.message,
+        description: error.message || "Kunne ikke slette brukeren",
         variant: "destructive",
       });
     } finally {

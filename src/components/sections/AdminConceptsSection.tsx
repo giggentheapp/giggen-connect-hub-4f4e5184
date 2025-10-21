@@ -91,12 +91,26 @@ export const AdminConceptsSection = ({
 
   const handleDeleteConcept = async (conceptId: string) => {
     try {
+      // First, get all concept files to delete using the database function
+      const { data: files } = await supabase
+        .from('concept_files')
+        .select('id')
+        .eq('concept_id', conceptId);
+
+      // Delete all concept files using the database function
+      if (files && files.length > 0) {
+        for (const file of files) {
+          await supabase.rpc('delete_concept_file', { file_id: file.id });
+        }
+      }
+
+      // Then delete the concept itself
       const { error } = await supabase.from('concepts').delete().eq('id', conceptId);
       if (error) throw error;
       
       toast({
         title: 'Tilbud slettet',
-        description: 'Tilbudet er permanent fjernet',
+        description: 'Tilbudet og alle tilknyttede filer er permanent fjernet',
       });
       
       refetch();
@@ -112,19 +126,18 @@ export const AdminConceptsSection = ({
 
   const handleDeleteDraft = async (draftId: string) => {
     try {
-      // Delete associated files first
+      // Get all concept files to delete using the database function
       const { data: files } = await supabase
         .from('concept_files')
-        .select('file_path')
+        .select('id')
         .eq('concept_id', draftId);
 
+      // Delete all concept files using the database function
       if (files && files.length > 0) {
-        const filePaths = files.map(f => f.file_path);
-        await supabase.storage.from('concept-drafts').remove(filePaths);
+        for (const file of files) {
+          await supabase.rpc('delete_concept_file', { file_id: file.id });
+        }
       }
-
-      // Delete concept_files records
-      await supabase.from('concept_files').delete().eq('concept_id', draftId);
 
       // Delete the draft
       const { error } = await supabase.from('concepts').delete().eq('id', draftId);
@@ -132,7 +145,7 @@ export const AdminConceptsSection = ({
 
       toast({
         title: 'Utkast slettet',
-        description: 'Utkastet er permanent fjernet',
+        description: 'Utkastet og alle filer er permanent fjernet',
       });
 
       refetchDrafts();

@@ -1045,6 +1045,26 @@ export type Database = {
         Args: { booking_uuid: string }
         Returns: undefined
       }
+      delete_cancelled_booking: {
+        Args: { booking_uuid: string }
+        Returns: undefined
+      }
+      delete_concept_file: {
+        Args: { file_id: string }
+        Returns: undefined
+      }
+      delete_hospitality_rider: {
+        Args: { file_id: string }
+        Returns: undefined
+      }
+      delete_portfolio_file: {
+        Args: { file_id: string }
+        Returns: undefined
+      }
+      delete_tech_spec_file: {
+        Args: { file_id: string }
+        Returns: undefined
+      }
       delete_user_data: {
         Args: { user_uuid: string }
         Returns: undefined

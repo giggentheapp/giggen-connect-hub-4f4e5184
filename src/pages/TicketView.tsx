@@ -2,11 +2,22 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import QRCode from 'react-qr-code';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TicketData {
   id: string;
@@ -30,6 +41,7 @@ const TicketView = () => {
   const { toast } = useToast();
   const [ticket, setTicket] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (ticketId) {
@@ -84,6 +96,36 @@ const TicketView = () => {
       navigate('/dashboard?section=tickets');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    if (!ticketId) return;
+    
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticketId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Billett slettet",
+        description: "Billetten har blitt permanent slettet"
+      });
+
+      navigate('/dashboard?section=tickets');
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke slette billetten",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -200,6 +242,39 @@ const TicketView = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Delete Ticket Button */}
+          <div className="pt-6 border-t mt-8">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="text-destructive border-destructive/30 hover:bg-destructive/10 w-full"
+                  disabled={deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Slett billett
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Denne handlingen kan ikke angres. Billetten vil bli permanent slettet.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteTicket}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? 'Sletter...' : 'Slett permanent'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
