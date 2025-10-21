@@ -17,21 +17,27 @@ export type Database = {
       admin_whitelist: {
         Row: {
           added_by: string | null
+          can_scan_tickets: boolean | null
           created_at: string | null
           email: string
           id: string
+          user_id: string | null
         }
         Insert: {
           added_by?: string | null
+          can_scan_tickets?: boolean | null
           created_at?: string | null
           email: string
           id?: string
+          user_id?: string | null
         }
         Update: {
           added_by?: string | null
+          can_scan_tickets?: boolean | null
           created_at?: string | null
           email?: string
           id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -919,6 +925,8 @@ export type Database = {
           id: string
           purchased_at: string | null
           qr_code_data: string
+          scanned_at: string | null
+          scanned_by: string | null
           status: string | null
           ticket_code: string
           used_at: string | null
@@ -931,6 +939,8 @@ export type Database = {
           id?: string
           purchased_at?: string | null
           qr_code_data: string
+          scanned_at?: string | null
+          scanned_by?: string | null
           status?: string | null
           ticket_code: string
           used_at?: string | null
@@ -943,6 +953,8 @@ export type Database = {
           id?: string
           purchased_at?: string | null
           qr_code_data?: string
+          scanned_at?: string | null
+          scanned_by?: string | null
           status?: string | null
           ticket_code?: string
           used_at?: string | null

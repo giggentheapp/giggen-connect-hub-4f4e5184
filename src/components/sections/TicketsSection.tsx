@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Ticket } from 'lucide-react';
+import { Ticket, Camera } from 'lucide-react';
 import { UserProfile } from "@/types/auth";
 import QRCode from 'react-qr-code';
+import { QRScannerPanel } from './QRScannerPanel';
 
 interface TicketsSectionProps {
   profile: UserProfile;
@@ -35,10 +36,30 @@ interface TicketData {
 export const TicketsSection = ({ profile }: TicketsSectionProps) => {
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canScan, setCanScan] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     fetchTickets();
+    checkAdminAccess();
   }, []);
+
+  const checkAdminAccess = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('admin_whitelist')
+        .select('can_scan_tickets')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setCanScan(data?.can_scan_tickets || false);
+    } catch (error) {
+      console.error('Error checking admin access:', error);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
@@ -92,10 +113,30 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
   return (
     <div className="flex-1 overflow-auto">
       <div className="container mx-auto px-4 py-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Mine billetter</h1>
-          <p className="text-muted-foreground">Administrer dine kjøpte billetter</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Mine billetter</h1>
+            <p className="text-muted-foreground">Administrer dine kjøpte billetter</p>
+          </div>
+          
+          {/* Kamera-ikon for admins */}
+          {canScan && (
+            <button
+              onClick={() => setShowScanner(!showScanner)}
+              className="p-3 rounded-lg hover:bg-accent transition-colors border"
+              title="Skann billetter"
+            >
+              <Camera className="h-6 w-6" />
+            </button>
+          )}
         </div>
+
+        {/* Scanner Modal */}
+        {showScanner && canScan && (
+          <QRScannerPanel 
+            onClose={() => setShowScanner(false)}
+          />
+        )}
 
         {tickets.length === 0 ? (
           <div className="text-center py-12">
