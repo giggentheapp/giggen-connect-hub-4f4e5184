@@ -13,6 +13,7 @@ interface ProfileEventCardProps {
     time?: string;
     ticket_price?: number;
     price_musician?: string;
+    has_paid_tickets?: boolean;
   };
 }
 
@@ -70,9 +71,15 @@ export const ProfileEventCard = ({ event }: ProfileEventCardProps) => {
           </div>
         </div>
 
-        <Button className="w-full" disabled variant="secondary">
-          Ikke tilgjengelig for kjøp i appen
-        </Button>
+        {event.has_paid_tickets ? (
+          <Button className="w-full" variant="default" onClick={handleClick}>
+            Se arrangement
+          </Button>
+        ) : (
+          <Button className="w-full" disabled variant="secondary">
+            Ikke tilgjengelig for kjøp i appen
+          </Button>
+        )}
       </div>
     </Card>
   );

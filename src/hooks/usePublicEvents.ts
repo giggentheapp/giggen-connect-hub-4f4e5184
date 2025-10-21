@@ -15,6 +15,7 @@ interface PublicEvent {
   status: string;
   created_at: string;
   published_at: string | null;
+  has_paid_tickets?: boolean;
 }
 
 export const usePublicEvents = (makerId: string) => {
@@ -48,8 +49,25 @@ export const usePublicEvents = (makerId: string) => {
         throw fetchError;
       }
 
-      console.log('✅ Fetched public events:', data?.length || 0);
-      setEvents(data || []);
+      // For each booking, check if corresponding event in events_market has has_paid_tickets = true
+      const eventsWithTicketStatus = await Promise.all(
+        (data || []).map(async (booking) => {
+          const { data: marketEvent } = await supabase
+            .from('events_market')
+            .select('has_paid_tickets')
+            .eq('title', booking.title)
+            .eq('date', booking.event_date?.split('T')[0])
+            .maybeSingle();
+          
+          return {
+            ...booking,
+            has_paid_tickets: marketEvent?.has_paid_tickets || false
+          };
+        })
+      );
+
+      console.log('✅ Fetched public events:', eventsWithTicketStatus?.length || 0);
+      setEvents(eventsWithTicketStatus || []);
 
     } catch (err: any) {
       console.error('❌ Error in fetchPublicEvents:', err);

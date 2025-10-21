@@ -20,6 +20,7 @@ interface UpcomingEvent {
   is_sender: boolean;
   is_receiver: boolean;
   is_public_after_approval?: boolean;
+  has_paid_tickets?: boolean;
 }
 
 interface UpcomingEventCardProps {
@@ -128,14 +129,25 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
               Detaljer
             </Button>
           </div>
-          <Button 
-            size="sm" 
-            disabled 
-            variant="secondary"
-            className="h-7 px-2 text-xs"
-          >
-            Ikke tilgjengelig
-          </Button>
+          {event.has_paid_tickets ? (
+            <Button 
+              size="sm" 
+              variant="default"
+              className="h-7 px-2 text-xs"
+              onClick={handleDetailsClick}
+            >
+              Se billettsalg
+            </Button>
+          ) : (
+            <Button 
+              size="sm" 
+              disabled 
+              variant="secondary"
+              className="h-7 px-2 text-xs"
+            >
+              Ikke tilgjengelig
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -17,6 +17,7 @@ interface UpcomingEvent {
   is_sender: boolean;
   is_receiver: boolean;
   is_public_after_approval?: boolean;
+  has_paid_tickets?: boolean;
 }
 
 export const useUpcomingEvents = (userId: string) => {
@@ -48,24 +49,36 @@ export const useUpcomingEvents = (userId: string) => {
         return;
       }
 
-      // Transform bookings to upcoming events format
-      const upcomingEvents: UpcomingEvent[] = (bookings || []).map(booking => ({
-        id: booking.id,
-        title: booking.title,
-        description: booking.description,
-        event_date: booking.event_date,
-        time: booking.time,
-        venue: booking.venue,
-        address: booking.address,
-        ticket_price: booking.ticket_price,
-        audience_estimate: booking.audience_estimate,
-        status: booking.status,
-        created_at: booking.created_at,
-        is_sender: booking.sender_id === userId,
-        is_receiver: booking.receiver_id === userId,
-        is_public_after_approval: booking.is_public_after_approval
-      }));
+      // Transform bookings to upcoming events format and fetch has_paid_tickets status
+      const upcomingEventsPromises = (bookings || []).map(async (booking) => {
+        // Check if event exists in events_market and get has_paid_tickets status
+        const { data: marketEvent } = await supabase
+          .from('events_market')
+          .select('has_paid_tickets')
+          .eq('title', booking.title)
+          .eq('date', booking.event_date?.split('T')[0])
+          .maybeSingle();
 
+        return {
+          id: booking.id,
+          title: booking.title,
+          description: booking.description,
+          event_date: booking.event_date,
+          time: booking.time,
+          venue: booking.venue,
+          address: booking.address,
+          ticket_price: booking.ticket_price,
+          audience_estimate: booking.audience_estimate,
+          status: booking.status,
+          created_at: booking.created_at,
+          is_sender: booking.sender_id === userId,
+          is_receiver: booking.receiver_id === userId,
+          is_public_after_approval: booking.is_public_after_approval,
+          has_paid_tickets: marketEvent?.has_paid_tickets || false
+        };
+      });
+
+      const upcomingEvents = await Promise.all(upcomingEventsPromises);
       setEvents(upcomingEvents);
     } catch (err) {
       console.error('Error in fetchUpcomingEvents:', err);
