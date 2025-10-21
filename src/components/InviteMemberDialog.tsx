@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -118,13 +118,13 @@ export const InviteMemberDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Inviter musikere til {bandName}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="relative">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-full p-0 flex flex-col">
+        <SheetHeader className="p-6 pb-4 border-b">
+          <SheetTitle>Inviter musikere til {bandName}</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 flex flex-col min-h-0 p-6">
+          <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={search}
@@ -134,7 +134,7 @@ export const InviteMemberDialog = ({
             />
           </div>
 
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -182,7 +182,7 @@ export const InviteMemberDialog = ({
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };

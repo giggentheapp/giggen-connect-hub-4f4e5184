@@ -301,6 +301,11 @@ export const ArtistExploreSection = ({
                               <h3 className="font-semibold text-foreground">
                                 {maker.display_name}
                               </h3>
+                              {maker.username && (
+                                <p className="text-sm text-muted-foreground">
+                                  @{maker.username}
+                                </p>
+                              )}
                               {maker.bio && (
                                 <p className="text-sm text-muted-foreground line-clamp-1">
                                   {maker.bio}
