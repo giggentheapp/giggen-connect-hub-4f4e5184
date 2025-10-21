@@ -280,8 +280,8 @@ export const BookingActions = ({
           </Badge>
         )}
 
-        {/* Move to history button for upcoming bookings */}
-        {booking.status === 'upcoming' && (
+        {/* Move to history button for upcoming/approved bookings */}
+        {(booking.status === 'upcoming' || booking.status === 'approved_by_both' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'allowed') && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
