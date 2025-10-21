@@ -99,20 +99,20 @@ export function EventsTicketMarket() {
               </CardContent>
 
               <CardFooter>
-              {currentUserId === event.created_by ? (
-                <Button
-                  className="w-full"
-                  disabled={isPastEvent || isPending}
-                  onClick={() => purchaseTicket(event.id)}
-                  variant="default"
-                >
-                  {isPastEvent ? "Arrangementet er passert" : "Kjøp billett"}
-                </Button>
-              ) : (
-                <Button className="w-full" disabled variant="secondary">
-                  Ikke tilgjengelig for kjøp i appen
-                </Button>
-              )}
+                {currentUserId === event.created_by ? (
+                  <Button
+                    className="w-full"
+                    disabled={isPastEvent || isPending}
+                    onClick={() => purchaseTicket(event.id)}
+                    variant="default"
+                  >
+                    {isPastEvent ? "Arrangementet er passert" : "Kjøp billett"}
+                  </Button>
+                ) : (
+                  <Button className="w-full" disabled variant="secondary">
+                    Ikke tilgjengelig for kjøp i appen
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           );

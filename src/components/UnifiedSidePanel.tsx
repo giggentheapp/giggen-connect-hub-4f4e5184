@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Settings, MapPin, Lightbulb, Briefcase, FileText } from 'lucide-react';
+import { User, Settings, MapPin, Lightbulb, Briefcase, FileText, Ticket } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -78,6 +78,10 @@ export const UnifiedSidePanel = ({
       id: 'explore',
       label: t('explore'),
       icon: MapPin
+    }, {
+      id: 'tickets',
+      label: 'Billetter',
+      icon: Ticket
     }, {
       id: 'admin-files',
       label: 'Filer',
