@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { usePurchaseTicket } from '@/hooks/useTickets';
-import QRCode from 'react-qr-code';
+import { TicketQRModal } from '@/components/TicketQRModal';
 
 interface PublicEventData {
   id: string;
@@ -359,40 +359,21 @@ const PublicEventView = () => {
                 </div>
               </div>
               
-              {showQR ? (
-                <div className="space-y-4">
-                  <div className="flex flex-col items-center py-6 bg-background rounded-lg border">
-                    <p className="text-sm font-medium mb-4">Skann QR-koden ved inngang</p>
-                    <div className="bg-white p-4 rounded-lg">
-                      <QRCode 
-                        value={userTicket.qr_code_data} 
-                        size={256}
-                        level="H"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-4 font-mono">
-                      {userTicket.ticket_code}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full"
-                    onClick={() => setShowQR(false)}
-                  >
-                    Skjul QR-kode
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="lg"
-                  className="w-full md:w-auto"
-                  onClick={() => setShowQR(true)}
-                >
-                  <Ticket className="h-5 w-5 mr-2" />
-                  Vis billett
-                </Button>
-              )}
+              <Button
+                size="lg"
+                className="w-full md:w-auto"
+                onClick={() => setShowQR(true)}
+              >
+                <Ticket className="h-5 w-5 mr-2" />
+                Vis billett
+              </Button>
+
+              <TicketQRModal
+                open={showQR}
+                onOpenChange={setShowQR}
+                ticket={userTicket}
+                event={event}
+              />
             </div>
           ) : hasPaidTickets && marketEventId ? (
             <div className="space-y-4">
