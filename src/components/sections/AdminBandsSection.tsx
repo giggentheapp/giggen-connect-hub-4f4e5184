@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
-import { BandCard } from '@/components/BandCard';
-import { CreateBandModal } from '@/components/CreateBandModal';
-import { BandInvites } from '@/components/BandInvites';
-import { useUserBands } from '@/hooks/useBands';
-import { UserProfile } from '@/types/auth';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Users } from "lucide-react";
+import { BandCard } from "@/components/BandCard";
+import { CreateBandModal } from "@/components/CreateBandModal";
+import { BandInvites } from "@/components/BandInvites";
+import { useUserBands } from "@/hooks/useBands";
+import { UserProfile } from "@/types/auth";
 
 interface AdminBandsSectionProps {
   profile: UserProfile;
@@ -21,7 +21,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Mine band</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Mine Band</h1>
             <p className="text-sm text-muted-foreground">Administrer dine band og medlemskap</p>
           </div>
           <Button onClick={() => setShowCreateModal(true)}>
@@ -37,7 +37,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-accent-orange" />
-            <h2 className="text-xl font-semibold">Mine band ({bands.length})</h2>
+            <h2 className="text-xl font-semibold">Mine Band ({bands.length})</h2>
           </div>
 
           {loading ? (
@@ -47,16 +47,14 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
             </div>
           ) : bands.length > 0 ? (
             <div className="grid gap-4">
-              {bands.map(band => (
+              {bands.map((band) => (
                 <BandCard key={band.id} band={band} />
               ))}
             </div>
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-muted-foreground/20 rounded-lg">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-4">
-                Du er ikke medlem av noen band ennå
-              </p>
+              <p className="text-sm text-muted-foreground mb-4">Du er ikke medlem av noen band ennå</p>
               <Button onClick={() => setShowCreateModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Opprett ditt første band
@@ -67,10 +65,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
       </div>
 
       {/* Create Band Modal */}
-      <CreateBandModal 
-        open={showCreateModal} 
-        onOpenChange={setShowCreateModal}
-      />
+      <CreateBandModal open={showCreateModal} onOpenChange={setShowCreateModal} />
     </div>
   );
 };

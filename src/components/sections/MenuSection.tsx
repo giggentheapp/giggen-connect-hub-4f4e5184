@@ -17,41 +17,41 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
 
   const menuItems = [
     {
-      id: 'settings',
-      label: 'Innstillinger',
-      description: 'Administrer konto og preferanser',
+      id: "settings",
+      label: "Innstillinger",
+      description: "Administrer konto og preferanser",
       icon: Settings,
-      section: 'settings'
+      section: "settings",
     },
     {
-      id: 'bookings',
-      label: 'Booking',
-      description: 'Se dine bookinger og avtaler',
+      id: "bookings",
+      label: "Booking",
+      description: "Se dine bookinger og avtaler",
       icon: Briefcase,
-      section: 'bookings',
-      badge: unreadCount > 0 ? unreadCount : undefined
+      section: "bookings",
+      badge: unreadCount > 0 ? unreadCount : undefined,
     },
     {
-      id: 'admin-concepts',
-      label: 'Mine Tilbud',
-      description: 'Administrer dine tilbud',
+      id: "admin-concepts",
+      label: "Mine Tilbud",
+      description: "Administrer dine tilbud",
       icon: Lightbulb,
-      section: 'admin-concepts'
+      section: "admin-concepts",
     },
     {
-      id: 'admin-bands',
-      label: 'Mine band',
-      description: 'Administrer dine band og medlemskap',
+      id: "admin-bands",
+      label: "Mine Band",
+      description: "Administrer dine band og medlemskap",
       icon: Users,
-      section: 'admin-bands'
+      section: "admin-bands",
     },
     {
-      id: 'admin-files',
-      label: 'Filadministrasjon',
-      description: 'Administrer dine filer',
+      id: "admin-files",
+      label: "Filadministrasjon",
+      description: "Administrer dine filer",
       icon: FileText,
-      section: 'admin-files'
-    }
+      section: "admin-files",
+    },
   ];
 
   const handleItemClick = (section: string) => {
@@ -69,7 +69,7 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
-            <Card 
+            <Card
               key={item.id}
               className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md"
               onClick={() => handleItemClick(item.section)}
@@ -88,9 +88,7 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
                     </Badge>
                   )}
                 </div>
-                <CardDescription className="mt-2">
-                  {item.description}
-                </CardDescription>
+                <CardDescription className="mt-2">{item.description}</CardDescription>
               </CardHeader>
             </Card>
           );
