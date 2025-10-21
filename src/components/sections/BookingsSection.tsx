@@ -171,7 +171,9 @@ export const BookingsSection = ({
   };
   const handleBookingAction = async () => {
     try {
+      console.log('🔄 handleBookingAction called - refetching bookings');
       await refetch();
+      console.log('✅ Bookings refetched, new count:', bookings?.length);
     } catch (error) {
       console.error('❌ Failed to refresh bookings:', error);
       toast({

@@ -66,6 +66,7 @@ export const useBookings = (userId?: string) => {
   const fetchBookings = useCallback(async (includeHistorical: boolean = false) => {
     try {
       setLoading(true);
+      console.log('📥 Fetching bookings for userId:', userId);
       
       let query = supabase
         .from('bookings')
@@ -80,9 +81,11 @@ export const useBookings = (userId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
+      console.log('📊 Fetched', data?.length || 0, 'bookings');
       setBookings((data || []) as Booking[]);
     } catch (error: unknown) {
       const message = getErrorMessage(error);
+      console.error('❌ Error fetching bookings:', error);
       toast({
         title: "Feil ved lasting av bookinger",
         description: message,
@@ -192,9 +195,15 @@ export const useBookings = (userId?: string) => {
       
       console.log('✅ Booking updated successfully:', data);
       const updatedBooking = data as Booking;
-      setBookings(prev => prev.map(booking => 
-        booking.id === bookingId ? updatedBooking : booking
-      ));
+      
+      // Update local state
+      setBookings(prev => {
+        const updated = prev.map(booking => 
+          booking.id === bookingId ? updatedBooking : booking
+        );
+        console.log('📊 Updated bookings state:', updated.length, 'bookings');
+        return updated;
+      });
       
       logger.business('Booking updated', { bookingId, updates });
       return updatedBooking;
