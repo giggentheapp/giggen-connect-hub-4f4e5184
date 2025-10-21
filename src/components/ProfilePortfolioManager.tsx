@@ -177,7 +177,22 @@ const ProfilePortfolioManager = ({
         return;
       }
 
-      // Use the database function that handles both storage and database deletion
+      // Find the item to get the file_path
+      const itemToDelete = items.find(item => item.id === itemId);
+      if (!itemToDelete) {
+        throw new Error('Fil ikke funnet');
+      }
+
+      // First delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('portfolio')
+        .remove([itemToDelete.file_path]);
+
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+      }
+
+      // Then use the database function to delete from database
       const { error } = await supabase.rpc('delete_portfolio_file', {
         file_id: itemId
       });

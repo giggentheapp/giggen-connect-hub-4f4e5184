@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Lightbulb, Plus, ChevronDown, Edit, X, Clock, Eye, EyeOff } from 'lucide-react';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
+import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,8 @@ export const AdminConceptsSection = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDrafts, setShowDrafts] = useState(true);
+  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
+  const [showConceptModal, setShowConceptModal] = useState(false);
   
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
@@ -91,15 +94,30 @@ export const AdminConceptsSection = ({
 
   const handleDeleteConcept = async (conceptId: string) => {
     try {
+      // Get concept title for confirmation
+      const concept = concepts.find(c => c.id === conceptId);
+      if (!concept) return;
+
+      // Show confirmation dialog
+      if (!window.confirm(`Er du sikker på at du vil slette "${concept.title}"? Denne handlingen kan ikke angres.`)) {
+        return;
+      }
+
       // First, get all concept files to delete using the database function
       const { data: files } = await supabase
         .from('concept_files')
-        .select('id')
+        .select('id, file_path')
         .eq('concept_id', conceptId);
 
-      // Delete all concept files using the database function
+      // Delete all concept files
       if (files && files.length > 0) {
         for (const file of files) {
+          // Delete from storage
+          await supabase.storage
+            .from('concepts')
+            .remove([file.file_path]);
+          
+          // Delete from database
           await supabase.rpc('delete_concept_file', { file_id: file.id });
         }
       }
@@ -117,7 +135,7 @@ export const AdminConceptsSection = ({
     } catch (error: any) {
       console.error('Failed to delete concept:', error);
       toast({
-        title: 'Kunne ikke slette',
+        title: 'Feil ved sletting',
         description: error.message,
         variant: 'destructive',
       });
@@ -204,7 +222,13 @@ export const AdminConceptsSection = ({
                 <div key={concept.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 hover:border-border transition-all">
                   <div className="flex items-start gap-3 p-3">
                     <div className="flex-1 min-w-0">
-                      <div onClick={() => navigate(`/profile/${concept.maker_id}/concept/${concept.id}`)} className="cursor-pointer">
+                      <div 
+                        onClick={() => {
+                          setSelectedConceptId(concept.id);
+                          setShowConceptModal(true);
+                        }} 
+                        className="cursor-pointer"
+                      >
                         <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
                         {concept.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -349,6 +373,19 @@ export const AdminConceptsSection = ({
         </div>
       </Collapsible>
       </div>
+      
+      {/* Concept View Modal */}
+      {selectedConceptId && (
+        <ConceptViewModal
+          conceptIds={[selectedConceptId]}
+          isOpen={showConceptModal}
+          onClose={() => {
+            setShowConceptModal(false);
+            setSelectedConceptId(null);
+          }}
+          viewMode="owner"
+        />
+      )}
     </div>
   );
 };

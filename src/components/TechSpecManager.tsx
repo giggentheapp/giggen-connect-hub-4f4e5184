@@ -13,6 +13,7 @@ interface TechSpecItem {
   profile_id: string;
   filename: string;
   file_url: string;
+  file_path: string;
   file_type: string;
   created_at: string;
 }
@@ -101,10 +102,25 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from('profile_tech_specs')
-        .delete()
-        .eq('id', itemId);
+      // Find the item to get file_path
+      const itemToDelete = items.find(item => item.id === itemId);
+      if (!itemToDelete) {
+        throw new Error('Fil ikke funnet');
+      }
+
+      // Delete from storage first
+      const { error: storageError } = await supabase.storage
+        .from('tech-specs')
+        .remove([itemToDelete.file_path]);
+
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+      }
+
+      // Then use database function
+      const { error } = await supabase.rpc('delete_tech_spec_file', {
+        file_id: itemId
+      });
 
       if (error) throw error;
 

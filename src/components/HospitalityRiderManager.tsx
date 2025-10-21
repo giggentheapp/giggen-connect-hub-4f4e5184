@@ -13,6 +13,7 @@ interface HospitalityRiderItem {
   user_id: string;
   filename: string;
   file_url: string;
+  file_path: string;
   file_type: string;
   created_at: string;
 }
@@ -101,10 +102,25 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from('hospitality_riders')
-        .delete()
-        .eq('id', itemId);
+      // Find the item to get file_path
+      const itemToDelete = items.find(item => item.id === itemId);
+      if (!itemToDelete) {
+        throw new Error('Fil ikke funnet');
+      }
+
+      // Delete from storage first
+      const { error: storageError } = await supabase.storage
+        .from('hospitality')
+        .remove([itemToDelete.file_path]);
+
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+      }
+
+      // Then use database function
+      const { error } = await supabase.rpc('delete_hospitality_rider', {
+        file_id: itemId
+      });
 
       if (error) throw error;
 
