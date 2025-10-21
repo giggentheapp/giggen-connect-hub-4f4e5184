@@ -128,6 +128,14 @@ export const UpcomingEventCard = ({ event }: UpcomingEventCardProps) => {
               Detaljer
             </Button>
           </div>
+          <Button 
+            size="sm" 
+            disabled 
+            variant="secondary"
+            className="h-7 px-2 text-xs"
+          >
+            Ikke tilgjengelig
+          </Button>
         </div>
       </CardContent>
     </Card>

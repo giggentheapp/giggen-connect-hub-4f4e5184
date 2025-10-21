@@ -4,19 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Ticket, Users } from "lucide-react";
 import { useEvents, usePurchaseTicket } from "@/hooks/useTickets";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
 
 export function EventsTicketMarket() {
   const { data: events, isLoading } = useEvents();
   const { mutate: purchaseTicket, isPending } = usePurchaseTicket();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setCurrentUserId(data.user?.id || null);
-    });
-  }, []);
 
   if (isLoading) {
     return (
@@ -99,7 +90,7 @@ export function EventsTicketMarket() {
               </CardContent>
 
               <CardFooter>
-                {currentUserId === event.created_by ? (
+                {event.has_paid_tickets ? (
                   <Button
                     className="w-full"
                     disabled={isPastEvent || isPending}

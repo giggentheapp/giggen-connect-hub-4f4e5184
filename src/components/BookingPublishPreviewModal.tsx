@@ -125,6 +125,22 @@ export const BookingPublishPreviewModal = ({
     try {
       setIsPublishing(true);
 
+      // Get current user's email to check whitelist
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email;
+
+      // Check if user is in admin whitelist
+      let hasPaidTickets = false;
+      if (userEmail) {
+        const { data: whitelistData } = await supabase
+          .from('admin_whitelist')
+          .select('email')
+          .eq('email', userEmail)
+          .single();
+        
+        hasPaidTickets = !!whitelistData;
+      }
+
       // Update booking status to published
       await updateBooking(booking.id, { status: 'upcoming' });
 
@@ -141,7 +157,8 @@ export const BookingPublishPreviewModal = ({
         event_datetime: eventDate.toISOString(),
         expected_audience: booking.audience_estimate || null,
         created_by: currentUserId,
-        is_public: true
+        is_public: true,
+        has_paid_tickets: hasPaidTickets
       };
 
       const { error: eventError } = await supabase
