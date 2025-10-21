@@ -4,7 +4,7 @@ import { Ticket, Camera, MapPin, Calendar } from 'lucide-react';
 import { UserProfile } from "@/types/auth";
 import { QRScannerPanel } from './QRScannerPanel';
 import { RealtimeChannel } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
+import { TicketQRModal } from '@/components/TicketQRModal';
 
 interface TicketsSectionProps {
   profile: UserProfile;
@@ -39,8 +39,9 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
   const [loading, setLoading] = useState(true);
   const [canScan, setCanScan] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
   const subscriptionRef = useRef<RealtimeChannel | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTickets();
@@ -224,7 +225,14 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
                 : 'Gratis';
 
               return (
-              <div key={ticket.id} className="border rounded-lg p-6 bg-card shadow-sm cursor-pointer hover:shadow-md transition-all" onClick={() => navigate(`/arrangement/${ticket.events_market?.id}`)}>
+              <div 
+                key={ticket.id} 
+                className="border rounded-lg p-6 bg-card shadow-sm cursor-pointer hover:shadow-md transition-all" 
+                onClick={() => {
+                  setSelectedTicket(ticket);
+                  setShowQRModal(true);
+                }}
+              >
                 {/* Event Info Header */}
                 <div className="mb-4">
                   <h2 className="text-2xl font-bold mb-2">{eventName}</h2>
@@ -265,6 +273,27 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
               );
             })}
           </div>
+        )}
+
+        {/* QR Modal */}
+        {selectedTicket && (
+          <TicketQRModal
+            open={showQRModal}
+            onOpenChange={setShowQRModal}
+            ticket={{
+              qr_code_data: selectedTicket.qr_code_data,
+              ticket_code: selectedTicket.ticket_code,
+              status: selectedTicket.status
+            }}
+            event={{
+              title: selectedTicket.events_market?.title || 'Ukjent arrangement',
+              description: null,
+              event_date: selectedTicket.events_market?.date || null,
+              time: null,
+              venue: selectedTicket.events_market?.venue || null,
+              address: null
+            }}
+          />
         )}
       </div>
     </div>
