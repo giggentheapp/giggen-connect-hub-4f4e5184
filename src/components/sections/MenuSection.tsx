@@ -18,14 +18,14 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
   const menuItems = [
     {
       id: 'settings',
-      label: t('settings'),
+      label: 'Innstillinger',
       description: 'Administrer konto og preferanser',
       icon: Settings,
       section: 'settings'
     },
     {
       id: 'bookings',
-      label: t('bookings'),
+      label: 'Booking',
       description: 'Se dine bookinger og avtaler',
       icon: Briefcase,
       section: 'bookings',
@@ -33,14 +33,14 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
     },
     {
       id: 'admin-concepts',
-      label: t('My Offers'),
+      label: 'Mine Tilbud',
       description: 'Administrer dine tilbud',
       icon: Lightbulb,
       section: 'admin-concepts'
     },
     {
       id: 'admin-files',
-      label: 'Filer',
+      label: 'Filadministrasjon',
       description: 'Administrer dine filer',
       icon: FileText,
       section: 'admin-files'
