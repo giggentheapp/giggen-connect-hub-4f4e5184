@@ -25,7 +25,7 @@ export const BookingActions = ({
     deleteBookingSecurely,
     rejectBooking,
     permanentlyDeleteBooking
-  } = useBookings();
+  } = useBookings(currentUserId);
   const {
     toast
   } = useToast();
