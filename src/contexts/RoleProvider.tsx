@@ -2,7 +2,7 @@ import React, { ReactNode, createContext, useContext } from 'react';
 import { useRoleData } from '@/hooks/useRole';
 
 interface RoleContextType {
-  role: 'organizer' | 'musician' | null;
+  role: 'musiker' | 'arrangør' | null;
   loading: boolean;
   error: string | null;
   isOrganizer: boolean;

@@ -22,7 +22,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<'organizer' | 'musician'>('musician');
+  const [role, setRole] = useState<'musiker' | 'arrangør'>('musiker');
   const [username, setUsername] = useState('');
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameError, setUsernameError] = useState('');
@@ -348,27 +348,42 @@ const Auth = () => {
                   <Label>{t('selectUserType')}</Label>
                   <RadioGroup
                     value={role}
-                    onValueChange={(value) => setRole(value as 'organizer' | 'musician')}
+                    onValueChange={(value) => setRole(value as 'musiker' | 'arrangør')}
                     disabled={isSubmitting}
+                    className="space-y-2"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="musician" id="musician" />
-                      <Label htmlFor="musician" className="font-normal">
+                    <div 
+                      className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                        role === 'musiker' 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => setRole('musiker')}
+                    >
+                      <RadioGroupItem value="musiker" id="musiker" className="mt-1" />
+                      <Label htmlFor="musiker" className="font-normal cursor-pointer flex-1">
                         <div>
-                          <div className="font-medium">{t('musicianArtistBand')}</div>
+                          <div className="font-bold mb-1">🎵 {t('musiker')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('musicianDescription')}
+                            {t('musikerDescription')}
                           </div>
                         </div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="organizer" id="organizer" />
-                      <Label htmlFor="organizer" className="font-normal">
+                    <div 
+                      className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                        role === 'arrangør' 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => setRole('arrangør')}
+                    >
+                      <RadioGroupItem value="arrangør" id="arrangør" className="mt-1" />
+                      <Label htmlFor="arrangør" className="font-normal cursor-pointer flex-1">
                         <div>
-                          <div className="font-medium">{t('organizerVenue')}</div>
+                          <div className="font-bold mb-1">📅 {t('arrangør')}</div>
                           <div className="text-sm text-muted-foreground">
-                            {t('organizerDescription')}
+                            {t('arrangørDescription')}
                           </div>
                         </div>
                       </Label>
