@@ -76,6 +76,11 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameError, setUsernameError] = useState("");
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [changingUsername, setChangingUsername] = useState(false);
   const [showAvatarCrop, setShowAvatarCrop] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -98,6 +103,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
       if (currentProfile) {
         setProfileData(currentProfile as unknown as UserProfile);
+        setNewUsername(currentProfile.username || '');
 
         // Parse contact_info if it exists
         if (currentProfile.contact_info && typeof currentProfile.contact_info === "object") {
@@ -402,6 +408,80 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     }
   };
 
+  const checkUsername = async (value: string) => {
+    if (value.length < 3) {
+      setUsernameError("Minimum 3 tegn");
+      setUsernameAvailable(null);
+      return;
+    }
+
+    if (value === profileData.username) {
+      setUsernameAvailable(true);
+      setUsernameError("");
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const response = await supabase.functions.invoke('validate-username', {
+        body: { username: value }
+      });
+
+      if (response.error) throw response.error;
+
+      const data = response.data;
+      setUsernameAvailable(data.available);
+      setUsernameError(data.error || "");
+    } catch (error: any) {
+      console.error('Username check error:', error);
+      setUsernameError("Kunne ikke sjekke tilgjengelighet");
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleChangeUsername = async () => {
+    if (!usernameAvailable) {
+      toast({
+        title: "Ugyldig brukernavn",
+        description: usernameError || "Brukernavnet er ikke tilgjengelig",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setChangingUsername(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username: newUsername.toLowerCase(),
+          username_changed: true
+        })
+        .eq("user_id", profile.user_id);
+
+      if (error) throw error;
+
+      const updatedProfile = { ...profileData, username: newUsername.toLowerCase(), username_changed: true };
+      setProfileData(updatedProfile);
+      onProfileUpdate?.(updatedProfile);
+
+      toast({
+        title: "Brukernavn oppdatert",
+        description: `Ditt brukernavn er nå @${newUsername.toLowerCase()}`,
+      });
+    } catch (error: any) {
+      console.error("Change username error:", error);
+      toast({
+        title: "Feil ved endring av brukernavn",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setChangingUsername(false);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (deleteConfirmation !== "SLETT") {
       toast({
@@ -491,6 +571,58 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
               {validationErrors.display_name && (
                 <p className="text-sm text-destructive mt-1">{validationErrors.display_name}</p>
               )}
+            </div>
+
+            {/* Username Section */}
+            <div className="space-y-3">
+              <Label htmlFor="username">Brukernavn</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id="username"
+                    type="text"
+                    value={newUsername}
+                    onChange={(e) => {
+                      const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                      setNewUsername(value);
+                      if (value.length >= 3 && value !== profileData.username) {
+                        checkUsername(value);
+                      } else {
+                        setUsernameAvailable(value === profileData.username ? true : null);
+                        setUsernameError(value.length > 0 && value.length < 3 ? "Minimum 3 tegn" : "");
+                      }
+                    }}
+                    placeholder="@brukernavn"
+                    className="pr-10"
+                  />
+                  {checkingUsername && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    </div>
+                  )}
+                </div>
+                <Button
+                  onClick={handleChangeUsername}
+                  disabled={changingUsername || !usernameAvailable || newUsername === profileData.username}
+                  size="sm"
+                >
+                  {changingUsername ? "Lagrer..." : "Lagre"}
+                </Button>
+              </div>
+              {usernameError && (
+                <p className="text-sm text-destructive">{usernameError}</p>
+              )}
+              {usernameAvailable === true && !checkingUsername && newUsername !== profileData.username && (
+                <p className="text-sm text-green-600">✓ Tilgjengelig</p>
+              )}
+              {usernameAvailable === false && !usernameError && !checkingUsername && (
+                <p className="text-sm text-destructive">✗ Opptatt</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {(profileData as any).username_changed 
+                  ? "Du har endret brukernavnet ditt" 
+                  : "Originalt brukernavn (autogenerert)"}
+              </p>
             </div>
 
             {/* Bio, address, and contact info for all users */}

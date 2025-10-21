@@ -57,6 +57,12 @@ export const appTranslations = {
     musicianDescription: "Jeg lager musikk og vil bygge profil",
     organizerVenue: "Arrangør/Venue",
     organizerDescription: "Jeg booker artister og arrangerer konserter",
+    chooseUsername: "Velg @brukernavn",
+    usernameMinLength: "Minimum 3 tegn",
+    usernameCheckFailed: "Kunne ikke sjekke tilgjengelighet",
+    usernameNotAvailable: "Brukernavn er ikke tilgjengelig",
+    usernameAvailable: "Tilgjengelig",
+    usernameTaken: "Opptatt",
 
     // Settings page
     settingsDescription: "Administrer dine app-innstillinger og preferanser",

@@ -880,6 +880,8 @@ export type Database = {
           social_media_links: Json | null
           updated_at: string
           user_id: string
+          username: string
+          username_changed: boolean | null
         }
         Insert: {
           address?: string | null
@@ -897,6 +899,8 @@ export type Database = {
           social_media_links?: Json | null
           updated_at?: string
           user_id: string
+          username: string
+          username_changed?: boolean | null
         }
         Update: {
           address?: string | null
@@ -914,6 +918,8 @@ export type Database = {
           social_media_links?: Json | null
           updated_at?: string
           user_id?: string
+          username?: string
+          username_changed?: boolean | null
         }
         Relationships: []
       }

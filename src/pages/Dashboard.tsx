@@ -93,6 +93,8 @@ const Dashboard = () => {
                   user_id: authUser.id, // Use verified user ID
                   display_name: authUser.email?.split("@")[0] || "User",
                   role: "musician" as any, // Default role
+                  username: `user_${authUser.id.substring(0, 8)}`, // Generate a unique username
+                  username_changed: false
                 },
               ])
               .select()

@@ -23,6 +23,8 @@ export interface UserProfile {
   contact_info?: ContactInfo;
   privacy_settings?: PrivacySettings;
   social_media_links?: SocialMediaLinks;
+  username: string;
+  username_changed?: boolean;
   created_at: string;
   updated_at: string;
 }

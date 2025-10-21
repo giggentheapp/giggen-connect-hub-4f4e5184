@@ -23,6 +23,10 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<'organizer' | 'musician'>('musician');
+  const [username, setUsername] = useState('');
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameError, setUsernameError] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -90,14 +94,47 @@ const Auth = () => {
     }
   };
 
+  const checkUsername = async (value: string) => {
+    if (value.length < 3) {
+      setUsernameError(t('usernameMinLength') || "Minimum 3 characters");
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const response = await supabase.functions.invoke('validate-username', {
+        body: { username: value }
+      });
+
+      if (response.error) throw response.error;
+
+      const data = response.data;
+      setUsernameAvailable(data.available);
+      setUsernameError(data.error || "");
+    } catch (error: any) {
+      console.error('Username check error:', error);
+      setUsernameError(t('usernameCheckFailed') || "Could not check availability");
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate username before submission
+    if (!usernameAvailable) {
+      setUsernameError(t('usernameNotAvailable') || "Username not available");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
-      console.log('🔐 Starting signup with:', { email, displayName, role });
+      console.log('🔐 Starting signup with:', { email, displayName, role, username });
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -106,7 +143,8 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             display_name: displayName,
-            role: role
+            role: role,
+            username: username.toLowerCase()
           }
         }
       });
@@ -145,7 +183,9 @@ const Auth = () => {
             .insert([{
               user_id: data.user.id,
               display_name: displayName || email.split('@')[0],
-              role: role as any
+              role: role as any,
+              username: username.toLowerCase(),
+              username_changed: false
             }]);
 
           if (createError) {
@@ -263,6 +303,45 @@ const Auth = () => {
                     disabled={isSubmitting}
                     placeholder={t('yourName')}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="username">{t('chooseUsername') || 'Choose @username'}</Label>
+                  <div className="relative">
+                    <Input
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) => {
+                        const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                        setUsername(value);
+                        if (value.length >= 3) {
+                          checkUsername(value);
+                        } else {
+                          setUsernameAvailable(null);
+                          setUsernameError(value.length > 0 ? (t('usernameMinLength') || "Minimum 3 characters") : "");
+                        }
+                      }}
+                      placeholder="@brukernavn"
+                      required
+                      disabled={isSubmitting}
+                      className="pr-10"
+                    />
+                    {checkingUsername && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      </div>
+                    )}
+                  </div>
+                  {usernameError && (
+                    <p className="text-sm text-destructive">{usernameError}</p>
+                  )}
+                  {usernameAvailable === true && !checkingUsername && (
+                    <p className="text-sm text-green-600">✓ {t('usernameAvailable') || 'Available'}</p>
+                  )}
+                  {usernameAvailable === false && !usernameError && !checkingUsername && (
+                    <p className="text-sm text-destructive">✗ {t('usernameTaken') || 'Taken'}</p>
+                  )}
                 </div>
 
                 <div className="space-y-3">
