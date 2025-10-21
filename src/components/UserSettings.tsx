@@ -452,15 +452,18 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     setChangingUsername(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .update({
           username: newUsername.toLowerCase(),
           username_changed: true
         })
-        .eq("user_id", profile.user_id);
+        .eq("user_id", profile.user_id)
+        .select();
 
       if (error) throw error;
+
+      console.log('Username update response:', data);
 
       const updatedProfile = { ...profileData, username: newUsername.toLowerCase(), username_changed: true };
       setProfileData(updatedProfile);
