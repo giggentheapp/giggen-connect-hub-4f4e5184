@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
-import { ProfileEventCard } from '@/components/ProfileEventCard';
+import { EventsTicketMarket } from '@/components/EventsTicketMarket';
 interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
@@ -213,48 +213,7 @@ export const ArtistExploreSection = ({
             {/* Main Content Area */}
             <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
               <div className="max-w-4xl mx-auto">
-                {loading ? (
-                  <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    <div className="text-center">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                      <p>Laster arrangementer...</p>
-                    </div>
-                  </div>
-                ) : filteredEvents.length === 0 ? (
-                  <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    <div className="text-center max-w-md space-y-2">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p className="font-medium">
-                        {searchTerm 
-                          ? 'Ingen arrangementer funnet'
-                          : 'Ingen kommende arrangementer'
-                        }
-                      </p>
-                      {searchTerm && (
-                        <p className="text-sm">
-                          Prøv et annet søk
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-8 space-y-3 animate-fade-in">
-                    {filteredEvents.map((event) => (
-                      <ProfileEventCard 
-                        key={event.id}
-                        event={{
-                          id: event.id,
-                          title: event.title,
-                          description: event.description,
-                          event_date: event.event_date,
-                          time: event.time,
-                          ticket_price: event.ticket_price,
-                          price_musician: event.artist_fee?.toString()
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
+                <EventsTicketMarket />
               </div>
             </div>
           </div>

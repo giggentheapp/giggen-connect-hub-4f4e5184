@@ -125,20 +125,21 @@ export const BookingPublishPreviewModal = ({
     try {
       setIsPublishing(true);
 
-      // Get current user's email to check whitelist
+      // Get current user's email
       const { data: { user } } = await supabase.auth.getUser();
       const userEmail = user?.email;
 
-      // Check if user is in admin whitelist
+      // Check if current user is in admin whitelist
+      // Note: Ideally both parties should be checked, but we need user emails which require admin access
       let hasPaidTickets = false;
       if (userEmail) {
-        const { data: whitelistData } = await supabase
+        const { data: currentUserWhitelist } = await supabase
           .from('admin_whitelist')
           .select('email')
           .eq('email', userEmail)
-          .single();
+          .maybeSingle();
         
-        hasPaidTickets = !!whitelistData;
+        hasPaidTickets = !!currentUserWhitelist;
       }
 
       // Update booking status to published
