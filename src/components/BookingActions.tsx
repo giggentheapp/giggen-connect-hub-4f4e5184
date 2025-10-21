@@ -120,19 +120,15 @@ export const BookingActions = ({
     if (loading) return;
     setLoading(true);
     try {
-      console.log('Moving to history, booking:', booking.id, 'current status:', booking.status);
-      const result = await updateBooking(booking.id, {
+      await updateBooking(booking.id, {
         status: 'completed'
       });
-      console.log('Updated booking result:', result);
       toast({
         title: "Flyttet til historikk",
         description: "Arrangementet er nå arkivert i historikken"
       });
       onAction?.();
     } catch (error) {
-      console.error('Error moving to history:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
       toast({
         title: "Feil",
         description: error instanceof Error ? error.message : "Kunne ikke flytte til historikk",

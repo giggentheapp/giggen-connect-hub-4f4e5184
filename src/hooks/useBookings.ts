@@ -66,7 +66,6 @@ export const useBookings = (userId?: string) => {
   const fetchBookings = useCallback(async (includeHistorical: boolean = false) => {
     try {
       setLoading(true);
-      console.log('📥 Fetching bookings for userId:', userId);
       
       let query = supabase
         .from('bookings')
@@ -81,11 +80,9 @@ export const useBookings = (userId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      console.log('📊 Fetched', data?.length || 0, 'bookings');
       setBookings((data || []) as Booking[]);
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      console.error('❌ Error fetching bookings:', error);
       toast({
         title: "Feil ved lasting av bookinger",
         description: message,
@@ -177,7 +174,6 @@ export const useBookings = (userId?: string) => {
 
   const updateBooking = async (bookingId: string, updates: UpdateBookingRequest): Promise<Booking> => {
     try {
-      console.log('🔄 Updating booking:', bookingId, 'with updates:', updates);
       const { data, error } = await supabase
         .from('bookings')
         .update({
@@ -188,28 +184,18 @@ export const useBookings = (userId?: string) => {
         .select()
         .single();
 
-      if (error) {
-        console.error('❌ Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('✅ Booking updated successfully:', data);
       const updatedBooking = data as Booking;
       
-      // Update local state
-      setBookings(prev => {
-        const updated = prev.map(booking => 
-          booking.id === bookingId ? updatedBooking : booking
-        );
-        console.log('📊 Updated bookings state:', updated.length, 'bookings');
-        return updated;
-      });
+      setBookings(prev => prev.map(booking => 
+        booking.id === bookingId ? updatedBooking : booking
+      ));
       
       logger.business('Booking updated', { bookingId, updates });
       return updatedBooking;
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      console.error('❌ Failed to update booking:', error);
       logger.error('Failed to update booking', error);
       toast({
         title: "Feil ved oppdatering av booking",
