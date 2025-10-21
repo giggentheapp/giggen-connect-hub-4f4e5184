@@ -48,7 +48,7 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
   ];
 
   const handleItemClick = (section: string) => {
-    navigate(`/?section=${section}`);
+    navigate(`/dashboard?section=${section}`);
   };
 
   return (
