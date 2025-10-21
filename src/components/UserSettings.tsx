@@ -423,18 +423,23 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     setCheckingUsername(true);
     try {
+      console.log('Checking username:', value);
       const response = await supabase.functions.invoke('validate-username', {
         body: { username: value }
       });
 
+      console.log('Username check response:', response);
+
       if (response.error) throw response.error;
 
       const data = response.data;
+      console.log('Username available:', data.available);
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
     } catch (error: any) {
       console.error('Username check error:', error);
       setUsernameError("Kunne ikke sjekke tilgjengelighet");
+      setUsernameAvailable(false);
     } finally {
       setCheckingUsername(false);
     }
