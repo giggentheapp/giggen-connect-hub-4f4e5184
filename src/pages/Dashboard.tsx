@@ -83,34 +83,17 @@ const Dashboard = () => {
           }
 
           if (!profileData) {
-            // Profile doesn't exist - create one for the verified user
-            console.log("⚠️ Dashboard: Profile not found, creating new profile for verified user...");
-
-            const { data: newProfile, error: createError } = await supabase
-              .from("profiles")
-              .insert([
-                {
-                  user_id: authUser.id, // Use verified user ID
-                  display_name: authUser.email?.split("@")[0] || "User",
-                  role: "musician" as any, // Default role
-                  username: `user_${authUser.id.substring(0, 8)}`, // Generate a unique username
-                  username_changed: false
-                },
-              ])
-              .select()
-              .single();
-
-            if (createError) {
-              console.error("❌ Dashboard: Error creating profile:", createError);
-              toast({
-                title: "Kunne ikke opprette profil",
-                description: createError.message,
-                variant: "destructive",
-              });
-            } else {
-              console.log("✅ Dashboard: New profile created successfully:", newProfile);
-              setProfile(newProfile as unknown as UserProfile);
-            }
+            // Profile should have been created by database trigger
+            console.error("❌ Dashboard: Profile not found - this should not happen");
+            toast({
+              title: "Profil ikke funnet",
+              description: "Vennligst logg ut og inn igjen",
+              variant: "destructive",
+            });
+            await supabase.auth.signOut();
+            navigate('/auth');
+            setLoading(false);
+            return;
           } else {
             console.log("✅ Dashboard: Profile loaded successfully:", profileData);
             setProfile(profileData as unknown as UserProfile);
