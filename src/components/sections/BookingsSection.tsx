@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Inbox, Clock, Eye, Check } from 'lucide-react';
+import { Send, Inbox, Clock, Eye, Check, Archive } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
@@ -23,13 +23,13 @@ export const BookingsSection = ({
   
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming'>('incoming');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
 
   // Handle URL tab parameter
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab') || params.get('section');
-    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming'].includes(tab)) {
+    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming', 'history'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -59,6 +59,7 @@ export const BookingsSection = ({
   let sentRequests: any[] = [];
   let ongoingAgreements: any[] = [];
   let upcomingEvents: any[] = [];
+  let historicalBookings: any[] = [];
   
   try {
     if (Array.isArray(bookings)) {
@@ -81,12 +82,15 @@ export const BookingsSection = ({
         (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
         b?.status === 'upcoming'
       );
+
+      historicalBookings = bookings.filter(b => 
+        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
+        (b?.status === 'completed' || b?.status === 'cancelled')
+      );
     }
   } catch (error) {
     console.error('Error filtering bookings:', error);
   }
-  
-  // Remove historical bookings - we now permanently delete all bookings
 
   // Helper functions for booking status display with new workflow
   const getStatusColor = (status: string) => {
@@ -271,34 +275,21 @@ export const BookingsSection = ({
           <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header">
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 max-w-[600px]">
-                  <TabsTrigger value="incoming" className="flex items-center gap-1 md:gap-2">
+                <TabsList className="grid w-full grid-cols-5 max-w-[600px]">
+                  <TabsTrigger value="incoming" className="flex items-center justify-center">
                     <Inbox className="w-4 h-4" />
-                    <span className="hidden sm:inline">Innkommende</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {incomingRequests.length}
-                    </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="sent" className="flex items-center gap-1 md:gap-2">
+                  <TabsTrigger value="sent" className="flex items-center justify-center">
                     <Send className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sendt</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {sentRequests.length}
-                    </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="ongoing" className="flex items-center gap-1 md:gap-2">
+                  <TabsTrigger value="ongoing" className="flex items-center justify-center">
                     <Clock className="w-4 h-4" />
-                    <span className="hidden sm:inline">Pågående</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {ongoingAgreements.length}
-                    </Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="upcoming" className="flex items-center gap-1 md:gap-2">
+                  <TabsTrigger value="upcoming" className="flex items-center justify-center">
                     <Check className="w-4 h-4" />
-                    <span className="hidden sm:inline">Publisert</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {upcomingEvents.length}
-                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="flex items-center justify-center">
+                    <Archive className="w-4 h-4" />
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -313,8 +304,11 @@ export const BookingsSection = ({
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Innkommende forespørsler</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {incomingRequests.length}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -341,8 +335,11 @@ export const BookingsSection = ({
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Sendte forespørsler</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {sentRequests.length}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -369,8 +366,11 @@ export const BookingsSection = ({
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Pågående avtaler</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {ongoingAgreements.length}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -397,8 +397,11 @@ export const BookingsSection = ({
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
                       <h2 className="text-base md:text-lg font-semibold text-foreground">Publiserte arrangementer</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {upcomingEvents.length}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -412,6 +415,37 @@ export const BookingsSection = ({
                          </div>
                       ) : (
                         upcomingEvents.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                     </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* History Tab Content */}
+              <TabsContent value="history" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Historikk</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {historicalBookings.length}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {historicalBookings.length === 0 ? (
+                         <div className="text-center py-8">
+                           <Archive className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen historiske arrangementer</p>
+                         </div>
+                      ) : (
+                        historicalBookings.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
                         ))
                       )}

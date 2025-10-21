@@ -104,12 +104,26 @@ const TicketView = () => {
     
     setDeleting(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Feil",
+          description: "Du må være innlogget for å slette billetter",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('tickets')
         .delete()
-        .eq('id', ticketId);
+        .eq('id', ticketId)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
 
       toast({
         title: "Billett slettet",
@@ -117,11 +131,11 @@ const TicketView = () => {
       });
 
       navigate('/dashboard?section=tickets');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting ticket:', error);
       toast({
         title: "Feil",
-        description: "Kunne ikke slette billetten",
+        description: error.message || "Kunne ikke slette billetten",
         variant: "destructive"
       });
     } finally {
