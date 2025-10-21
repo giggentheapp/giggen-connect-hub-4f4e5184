@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,18 +10,27 @@ import { Plus, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface CreateBandModalProps {
-  userId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
-export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => {
-  const [open, setOpen] = useState(false);
+export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandModalProps) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Get current user ID
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id || null);
+    });
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,6 +45,8 @@ export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => 
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
+    if (!userId) return null;
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
@@ -62,6 +73,15 @@ export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!userId) {
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke hente brukerinformasjon',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (!name.trim()) {
       toast({
@@ -98,7 +118,7 @@ export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => 
         description: `${name} er nå opprettet`,
       });
 
-      setOpen(false);
+      onOpenChange(false);
       setName('');
       setDescription('');
       setImageFile(null);
@@ -116,13 +136,7 @@ export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => 
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Opprett band
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Opprett nytt band</DialogTitle>
@@ -174,7 +188,7 @@ export const CreateBandModal = ({ userId, onSuccess }: CreateBandModalProps) => 
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Avbryt
             </Button>
             <Button type="submit" disabled={loading || !name.trim()}>

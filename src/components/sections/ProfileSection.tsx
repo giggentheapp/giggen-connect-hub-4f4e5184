@@ -19,7 +19,6 @@ export const ProfileSection = ({
   isOwnProfile = false
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
-  console.log('🚨 ProfileSection RENDERED for user:', profile.user_id, 'isOwnProfile:', isOwnProfile);
   
   const {
     concepts: allConcepts,
@@ -35,11 +34,6 @@ export const ProfileSection = ({
   // Filter events to only show public ones (is_public_after_approval = true)
   const events = allEvents.filter(e => e.is_public_after_approval === true);
   
-  console.log('📊 ProfileSection concepts (PUBLIC VIEW):', {
-    total: allConcepts.length,
-    published: concepts.length,
-    isOwnProfile
-  });
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8">

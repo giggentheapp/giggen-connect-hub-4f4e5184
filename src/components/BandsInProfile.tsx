@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserBands } from '@/hooks/useBands';
 import { BandCard } from './BandCard';
+import { Users, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { CreateBandModal } from './CreateBandModal';
-import { Users } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface BandsInProfileProps {
   userId: string;
@@ -11,6 +13,7 @@ interface BandsInProfileProps {
 
 export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) => {
   const { bands, loading } = useUserBands(userId);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   if (loading) {
     return (
@@ -38,7 +41,12 @@ export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) =>
             <Users className="h-5 w-5" />
             {isOwnProfile ? 'Mine band' : 'Band'}
           </CardTitle>
-          {isOwnProfile && <CreateBandModal userId={userId} />}
+          {isOwnProfile && (
+            <Button onClick={() => setShowCreateModal(true)} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Nytt band
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -61,6 +69,13 @@ export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) =>
           </div>
         )}
       </CardContent>
+      
+      {isOwnProfile && (
+        <CreateBandModal 
+          open={showCreateModal} 
+          onOpenChange={setShowCreateModal}
+        />
+      )}
     </Card>
   );
 };

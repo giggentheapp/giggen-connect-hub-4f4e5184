@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Briefcase, Lightbulb, FileText } from "lucide-react";
+import { Settings, Briefcase, Lightbulb, FileText, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserProfile } from "@/types/auth";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -37,6 +37,13 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
       description: 'Administrer dine tilbud',
       icon: Lightbulb,
       section: 'admin-concepts'
+    },
+    {
+      id: 'admin-bands',
+      label: 'Mine band',
+      description: 'Administrer dine band og medlemskap',
+      icon: Users,
+      section: 'admin-bands'
     },
     {
       id: 'admin-files',
