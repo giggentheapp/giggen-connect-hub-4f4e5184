@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils';
-import { Compass, User, Menu, Ticket } from 'lucide-react';
+import { Search, User, Menu, Ticket } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 type NavigationRoute = {
   id: string;
   label: string;
-  icon: typeof Compass;
+  icon: typeof Search;
   path: string;
   section?: string;
 };
@@ -27,7 +27,7 @@ export const MobileNavigation = () => {
     { 
       id: 'explore', 
       label: t('explore'), 
-      icon: Compass,
+      icon: Search,
       path: '/',
       section: 'explore'
     },

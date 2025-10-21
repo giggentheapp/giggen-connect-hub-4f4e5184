@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, ArrowRight, Eye, Settings } from 'lucide-react';
+import { Check, X, ArrowRight, Eye, Settings, Archive, Trash2 } from 'lucide-react';
 interface BookingActionsProps {
   booking: any;
   currentUserId: string;
@@ -116,6 +116,30 @@ export const BookingActions = ({
       setLoading(false);
     }
   };
+  const handleMoveToHistory = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      await updateBooking(booking.id, {
+        status: 'completed'
+      });
+      toast({
+        title: "Flyttet til historikk",
+        description: "Arrangementet er nå arkivert i historikken"
+      });
+      onAction?.();
+    } catch (error) {
+      console.error('Error moving to history:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke flytte til historikk",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteBooking = async () => {
     if (loading) return;
     setLoading(true);
@@ -256,8 +280,74 @@ export const BookingActions = ({
           </Badge>
         )}
 
+        {/* Move to history button for upcoming bookings */}
+        {booking.status === 'upcoming' && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                disabled={loading}
+                className="h-7 px-2 text-xs hover:bg-muted"
+              >
+                <Archive className="h-3 w-3" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Flytt til historikk?</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm">
+                  Dette vil markere arrangementet som fullført og flytte det til historikk-seksjonen.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-xs">Avbryt</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleMoveToHistory}
+                  className="text-xs"
+                >
+                  Flytt til historikk
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {/* Permanent delete button for historical bookings */}
+        {(booking.status === 'completed' || booking.status === 'cancelled') && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                disabled={loading}
+                className="h-7 px-2 text-xs hover:bg-destructive/10 text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm">
+                  Dette vil PERMANENT slette bookingen fra systemet. Handlingen kan ikke angres.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-xs">Avbryt</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteBooking}
+                  className="bg-red-600 hover:bg-red-700 text-xs"
+                >
+                  Slett permanent
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
         {/* Single cancel/delete button with confirmation for ongoing bookings */}
-        {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both' || booking.status === 'upcoming') && (
+        {(booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both') && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
@@ -271,9 +361,7 @@ export const BookingActions = ({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {booking.status === 'upcoming' ? 'Slett publisert arrangement?' : 'Avlys booking?'}
-                </AlertDialogTitle>
+                <AlertDialogTitle>Avlys booking?</AlertDialogTitle>
                 <AlertDialogDescription className="text-sm">
                   {getDeleteWarningText()}
                 </AlertDialogDescription>
@@ -281,10 +369,10 @@ export const BookingActions = ({
               <AlertDialogFooter>
                 <AlertDialogCancel className="text-xs">Avbryt</AlertDialogCancel>
                 <AlertDialogAction 
-                  onClick={booking.status === 'upcoming' ? handleDeleteBooking : handleCancelBooking}
+                  onClick={handleCancelBooking}
                   className="bg-red-600 hover:bg-red-700 text-xs"
                 >
-                  {booking.status === 'upcoming' ? 'Slett permanent' : 'Avlys'}
+                  Avlys
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

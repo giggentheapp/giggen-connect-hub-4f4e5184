@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings } from 'lucide-react';
+import { Search, User, Settings } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate, useLocation } from 'react-router-dom';
 import giggenLogo from '@/assets/giggen-logo.png';
@@ -15,7 +15,7 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
   const location = useLocation();
   
   const navItems = [
-    { id: 'explore', label: t('explore'), icon: Compass, type: 'section' },
+    { id: 'explore', label: t('explore'), icon: Search, type: 'section' },
     { id: 'profile', label: t('profile'), icon: User, type: 'section' },
     { id: 'admin', label: t('administration'), icon: Settings, type: 'section' },
   ];

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Compass, User, Settings, ChevronDown, Calendar, LogOut } from 'lucide-react';
+import { Search, User, Settings, ChevronDown, Calendar, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +59,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
     { 
       id: 'explore', 
       label: 'Utforsk', 
-      icon: Compass,
+      icon: Search,
       subItems: []
     },
     { 
