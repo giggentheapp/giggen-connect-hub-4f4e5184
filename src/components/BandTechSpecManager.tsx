@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { X, Edit2, Save, FileText, Cloud } from 'lucide-react';
+import { X, Edit2, Save, FileText, FolderOpen } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from '@/components/FileSelectionModal';
@@ -189,18 +189,12 @@ const BandTechSpecManager = ({ userId, bandId, title, description }: BandTechSpe
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-medium mb-1">{title}</h3>
-        <p className="text-xs text-muted-foreground mb-3">{description}</p>
-      </div>
-      
       <Button 
         onClick={() => setShowFileModal(true)}
         variant="outline"
-        className="w-full h-9 text-xs"
       >
-        <Cloud className="h-4 w-4 mr-2" />
-        {t('selectFromFileBank')}
+        <FolderOpen className="h-4 w-4 mr-2" />
+        Velg fra Filbank
       </Button>
 
       <FileSelectionModal

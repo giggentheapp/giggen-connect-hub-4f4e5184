@@ -484,8 +484,8 @@ export const EditBandDialog = ({
                   <BandTechSpecManager
                     userId={userId}
                     bandId={band.id}
-                    title="Tekniske spesifikasjoner"
-                    description="Last opp tekniske spesifikasjoner for bandet fra filbanken"
+                    title=""
+                    description=""
                   />
                 )}
               </TabsContent>
@@ -495,8 +495,8 @@ export const EditBandDialog = ({
                   <BandHospitalityManager
                     userId={userId}
                     bandId={band.id}
-                    title="Hospitality Rider"
-                    description="Last opp hospitality rider for bandet fra filbanken"
+                    title=""
+                    description=""
                   />
                 )}
               </TabsContent>
