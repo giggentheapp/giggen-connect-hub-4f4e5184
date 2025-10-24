@@ -195,24 +195,45 @@ export const EditBandDialog = ({
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="fixed top-4 right-4 z-10"
+          className="fixed top-2 right-2 md:top-4 md:right-4 z-10"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
 
-        <div className="max-w-4xl mx-auto p-6 md:p-8">
-          <h1 className="text-3xl font-bold mb-6">Rediger {band.name}</h1>
+        <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 pr-10">Rediger {band.name}</h1>
           
           <form onSubmit={handleSubmit}>
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-7 mb-6">
-                <TabsTrigger value="basic">Grunnleggende</TabsTrigger>
-                <TabsTrigger value="visual">Visuelt</TabsTrigger>
-                <TabsTrigger value="music">Musikk</TabsTrigger>
-                <TabsTrigger value="social">Sosiale medier</TabsTrigger>
-                <TabsTrigger value="contact">Kontakt</TabsTrigger>
-                <TabsTrigger value="techspecs">Tech Specs</TabsTrigger>
-                <TabsTrigger value="hospitality">Hospitality</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-7 mb-6 h-auto">
+                <TabsTrigger value="basic" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">📝</span>
+                  <span className="hidden md:inline text-xs">Grunnleggende</span>
+                </TabsTrigger>
+                <TabsTrigger value="visual" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">🎨</span>
+                  <span className="hidden md:inline text-xs">Visuelt</span>
+                </TabsTrigger>
+                <TabsTrigger value="music" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">🎵</span>
+                  <span className="hidden md:inline text-xs">Musikk</span>
+                </TabsTrigger>
+                <TabsTrigger value="social" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">📱</span>
+                  <span className="hidden md:inline text-xs">Sosiale medier</span>
+                </TabsTrigger>
+                <TabsTrigger value="contact" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">✉️</span>
+                  <span className="hidden md:inline text-xs">Kontakt</span>
+                </TabsTrigger>
+                <TabsTrigger value="techspecs" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">⚙️</span>
+                  <span className="hidden md:inline text-xs">Tech Specs</span>
+                </TabsTrigger>
+                <TabsTrigger value="hospitality" className="flex-col gap-1 py-2">
+                  <span className="text-xs md:text-sm">🍽️</span>
+                  <span className="hidden md:inline text-xs">Hospitality</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4 mt-4">

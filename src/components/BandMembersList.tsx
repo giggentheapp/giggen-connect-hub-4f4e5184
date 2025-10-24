@@ -93,34 +93,39 @@ export const BandMembersList = ({
         return (
           <Badge variant="default" className="gap-1">
             <Crown className="h-3 w-3" />
-            Grunnlegger
+            <span className="hidden md:inline">Grunnlegger</span>
           </Badge>
         );
       case 'admin':
         return (
           <Badge variant="secondary" className="gap-1">
             <Shield className="h-3 w-3" />
-            Admin
+            <span className="hidden md:inline">Admin</span>
           </Badge>
         );
       default:
-        return <Badge variant="outline">Medlem</Badge>;
+        return (
+          <Badge variant="outline">
+            <span className="hidden md:inline">Medlem</span>
+            <span className="md:hidden text-xs">M</span>
+          </Badge>
+        );
     }
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center gap-4 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
+          className="flex items-center gap-2 md:gap-4 p-2 md:p-3 rounded-lg border hover:bg-accent/50 transition-colors"
         >
           <Avatar
-            className="h-12 w-12 cursor-pointer"
+            className="h-10 w-10 md:h-12 md:w-12 cursor-pointer flex-shrink-0"
             onClick={() => navigate(`/profile/${member.user_id}`)}
           >
             <AvatarImage src={member.profile?.avatar_url || undefined} />
-            <AvatarFallback>
+            <AvatarFallback className="text-xs md:text-sm">
               {member.profile?.display_name?.substring(0, 2).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -128,10 +133,10 @@ export const BandMembersList = ({
             className="flex-1 min-w-0 cursor-pointer"
             onClick={() => navigate(`/profile/${member.user_id}`)}
           >
-            <h4 className="font-semibold truncate">
+            <h4 className="font-semibold truncate text-sm md:text-base">
               {member.profile?.display_name || 'Ukjent'}
             </h4>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               @{member.profile?.username}
             </p>
           </div>
@@ -139,7 +144,7 @@ export const BandMembersList = ({
           {isAdmin && member.role !== 'founder' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" disabled={loading}>
+                <Button variant="ghost" size="icon" disabled={loading} className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
