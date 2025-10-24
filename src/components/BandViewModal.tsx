@@ -3,7 +3,7 @@ import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink } from 'lucide-react';
+import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Utensils } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,13 +71,13 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="fixed top-4 right-4 z-10"
+          className="fixed top-2 right-2 md:top-4 md:right-4 z-10"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
         {/* Banner */}
         {band.banner_url && (
-          <div className="w-full h-64 md:h-96 overflow-hidden">
+          <div className="w-full h-48 md:h-64 lg:h-96 overflow-hidden">
             <img 
               src={band.banner_url} 
               alt={`${band.name} banner`}
@@ -86,48 +86,81 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
           </div>
         )}
 
-        <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-6">
+        <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex items-start gap-4">
-            <Avatar className="h-24 w-24">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Avatar className="h-20 w-20 md:h-24 md:w-24 mx-auto sm:mx-0">
               <AvatarImage src={band.image_url || undefined} />
-              <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
+              <AvatarFallback className="text-xl md:text-2xl bg-gradient-primary text-primary-foreground">
                 {band.name.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold">{band.name}</h2>
-              <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-2xl md:text-3xl font-bold">{band.name}</h2>
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
                 {band.genre && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="text-xs md:text-sm">
                     <Music className="h-3 w-3 mr-1" />
                     {band.genre}
                   </Badge>
                 )}
                 {band.founded_year && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs md:text-sm">
                     <Calendar className="h-3 w-3 mr-1" />
                     Dannet {band.founded_year}
                   </Badge>
                 )}
               </div>
               {band.description && (
-                <p className="mt-3 text-muted-foreground">{band.description}</p>
+                <p className="mt-3 text-sm md:text-base text-muted-foreground">{band.description}</p>
               )}
             </div>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasTechSpecs, hasHospitality, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
-              <TabsTrigger value="about">Om bandet</TabsTrigger>
-              {hasMusicLinks && <TabsTrigger value="music">Musikk</TabsTrigger>}
-              {hasDiscography && <TabsTrigger value="discography">Diskografi</TabsTrigger>}
-              {hasSocialLinks && <TabsTrigger value="social">Sosiale medier</TabsTrigger>}
-              {hasTechSpecs && <TabsTrigger value="techspecs">Tech Specs</TabsTrigger>}
-              {hasHospitality && <TabsTrigger value="hospitality">Hospitality</TabsTrigger>}
-              {hasContactInfo && <TabsTrigger value="contact">Kontakt</TabsTrigger>}
+            <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasTechSpecs, hasHospitality, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
+              <TabsTrigger value="about" className="flex-col gap-1 py-2" title="Om bandet">
+                <Info className="h-5 w-5" />
+                <span className="text-xs hidden md:inline">Om</span>
+              </TabsTrigger>
+              {hasMusicLinks && (
+                <TabsTrigger value="music" className="flex-col gap-1 py-2" title="Musikk">
+                  <Music className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Musikk</span>
+                </TabsTrigger>
+              )}
+              {hasDiscography && (
+                <TabsTrigger value="discography" className="flex-col gap-1 py-2" title="Diskografi">
+                  <Disc className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Diskografi</span>
+                </TabsTrigger>
+              )}
+              {hasSocialLinks && (
+                <TabsTrigger value="social" className="flex-col gap-1 py-2" title="Sosiale medier">
+                  <Share2 className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Sosiale</span>
+                </TabsTrigger>
+              )}
+              {hasTechSpecs && (
+                <TabsTrigger value="techspecs" className="flex-col gap-1 py-2" title="Tech Specs">
+                  <Settings className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Tech</span>
+                </TabsTrigger>
+              )}
+              {hasHospitality && (
+                <TabsTrigger value="hospitality" className="flex-col gap-1 py-2" title="Hospitality">
+                  <Utensils className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Hospitality</span>
+                </TabsTrigger>
+              )}
+              {hasContactInfo && (
+                <TabsTrigger value="contact" className="flex-col gap-1 py-2" title="Kontakt">
+                  <Mail className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Kontakt</span>
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="about" className="space-y-4 mt-4">
