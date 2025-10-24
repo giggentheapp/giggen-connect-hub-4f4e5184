@@ -15,7 +15,15 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
   const { t } = useAppTranslation();
   const { unreadCount } = useNotifications();
 
-  const menuItems = [
+  const menuItems: Array<{
+    id: string;
+    label: string;
+    description: string;
+    icon: any;
+    section?: string;
+    path?: string;
+    badge?: number;
+  }> = [
     {
       id: "settings",
       label: "Innstillinger",
@@ -47,15 +55,19 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
     },
     {
       id: "admin-files",
-      label: "Filadministrasjon",
+      label: "Filbank",
       description: "Administrer dine filer",
       icon: FileText,
-      section: "admin-files",
+      path: "/filbank",
     },
   ];
 
-  const handleItemClick = (section: string) => {
-    navigate(`/dashboard?section=${section}`);
+  const handleItemClick = (section?: string, path?: string) => {
+    if (path) {
+      navigate(path);
+    } else if (section) {
+      navigate(`/dashboard?section=${section}`);
+    }
   };
 
   return (
@@ -72,7 +84,7 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
             <Card
               key={item.id}
               className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md"
-              onClick={() => handleItemClick(item.section)}
+              onClick={() => handleItemClick(item.section, item.path)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">

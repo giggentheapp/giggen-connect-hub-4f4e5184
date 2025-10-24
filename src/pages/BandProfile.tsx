@@ -145,7 +145,7 @@ const BandProfile = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard?section=admin-bands')}
             className="h-8 w-8 md:h-10 md:w-10"
           >
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
