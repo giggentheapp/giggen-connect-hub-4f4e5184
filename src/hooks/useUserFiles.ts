@@ -84,11 +84,54 @@ export const useUserFiles = (userId: string | undefined) => {
 
   const deleteFile = async (fileId: string, filePath: string) => {
     try {
+      console.log('Deleting file:', fileId, filePath);
+      
       // Get the public URL before deleting
       const bucket = filePath.split('/')[0];
       const path = filePath.substring(filePath.indexOf('/') + 1);
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
       const fileUrl = urlData.publicUrl;
+      console.log('File URL to remove:', fileUrl);
+
+      // First, remove all references to this file in bands table (logo and banner)
+      // We need to check both exact match and partial match (in case of different URL formats)
+      const { data: allBands, error: bandsError } = await supabase
+        .from('bands')
+        .select('id, image_url, banner_url');
+
+      if (bandsError) {
+        console.error('Error fetching bands:', bandsError);
+      } else if (allBands) {
+        console.log('Checking', allBands.length, 'bands for file usage');
+        for (const band of allBands) {
+          const updates: any = {};
+          
+          // Check if image_url contains the file path
+          if (band.image_url && (band.image_url === fileUrl || band.image_url.includes(path))) {
+            updates.image_url = null;
+            console.log('Removing logo from band:', band.id);
+          }
+          
+          // Check if banner_url contains the file path
+          if (band.banner_url && (band.banner_url === fileUrl || band.banner_url.includes(path))) {
+            updates.banner_url = null;
+            console.log('Removing banner from band:', band.id);
+          }
+          
+          if (Object.keys(updates).length > 0) {
+            const { error: updateError } = await supabase
+              .from('bands')
+              .update(updates)
+              .eq('id', band.id);
+              
+            if (updateError) {
+              console.error('Error updating band:', updateError);
+            } else {
+              console.log('Successfully updated band:', band.id);
+            }
+          }
+        }
+      }
 
       // Get all usages of this file from file_usage table
       const { data: usages } = await supabase
@@ -96,9 +139,13 @@ export const useUserFiles = (userId: string | undefined) => {
         .select('*')
         .eq('file_id', fileId);
 
+      console.log('File usages found:', usages?.length || 0);
+
       // Remove file references from all places it's used
       if (usages && usages.length > 0) {
         for (const usage of usages) {
+          console.log('Removing usage:', usage.usage_type, usage.reference_id);
+          
           if (usage.usage_type === 'band_tech_spec') {
             await supabase.from('band_tech_specs').delete().eq('file_path', filePath);
           } else if (usage.usage_type === 'band_hospitality') {
@@ -116,58 +163,45 @@ export const useUserFiles = (userId: string | undefined) => {
             await supabase
               .from('bands')
               .update({ image_url: null })
-              .eq('id', usage.reference_id)
-              .eq('image_url', fileUrl);
+              .eq('id', usage.reference_id);
           } else if (usage.usage_type === 'band_banner' && usage.reference_id) {
             // Remove band banner
             await supabase
               .from('bands')
               .update({ banner_url: null })
-              .eq('id', usage.reference_id)
-              .eq('banner_url', fileUrl);
-          }
-        }
-      }
-
-      // Also check bands table for any logo/banner usage not in file_usage (legacy data)
-      const { data: bandsWithImage } = await supabase
-        .from('bands')
-        .select('id, image_url, banner_url')
-        .or(`image_url.eq.${fileUrl},banner_url.eq.${fileUrl}`);
-
-      if (bandsWithImage && bandsWithImage.length > 0) {
-        for (const band of bandsWithImage) {
-          const updates: any = {};
-          if (band.image_url === fileUrl) updates.image_url = null;
-          if (band.banner_url === fileUrl) updates.banner_url = null;
-          
-          if (Object.keys(updates).length > 0) {
-            await supabase
-              .from('bands')
-              .update(updates)
-              .eq('id', band.id);
+              .eq('id', usage.reference_id);
           }
         }
       }
 
       // Delete from storage
+      console.log('Deleting from storage...');
       const { error: storageError } = await supabase.storage
         .from(bucket)
         .remove([path]);
 
-      if (storageError) throw storageError;
+      if (storageError) {
+        console.error('Storage delete error:', storageError);
+        throw storageError;
+      }
 
       // Delete from database (cascade will handle file_usage)
+      console.log('Deleting from user_files table...');
       const { error: dbError } = await supabase
         .from('user_files')
         .delete()
         .eq('id', fileId);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database delete error:', dbError);
+        throw dbError;
+      }
 
+      console.log('File deleted successfully');
       await fetchFiles();
     } catch (err: unknown) {
       logger.error('Failed to delete file', err);
+      console.error('Delete file error:', err);
       throw err;
     }
   };
