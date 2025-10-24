@@ -73,6 +73,15 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
         return;
       }
 
+      // Generate public URL if file_url is missing
+      let fileUrl = file.file_url;
+      if (!fileUrl) {
+        const bucket = file.file_path.split('/')[0];
+        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        fileUrl = data.publicUrl;
+      }
+
       // Add to file_usage
       const { error: usageError } = await supabase
         .from('file_usage')
@@ -89,7 +98,7 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
         band_id: bandId,
         filename: file.filename,
         file_path: file.file_path,
-        file_url: file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/hospitality/${file.file_path}`,
+        file_url: fileUrl,
         file_type: file.file_type,
         file_size: file.file_size,
         mime_type: file.mime_type

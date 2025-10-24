@@ -1,10 +1,12 @@
+import { useState, useEffect } from 'react';
 import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Music, Calendar, Mail, Phone, X } from 'lucide-react';
+import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BandViewModalProps {
   open: boolean;
@@ -14,12 +16,50 @@ interface BandViewModalProps {
 }
 
 export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: BandViewModalProps) => {
+  const [techSpecs, setTechSpecs] = useState<any[]>([]);
+  const [hospitalityRiders, setHospitalityRiders] = useState<any[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(true);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      if (!band.id) return;
+      
+      try {
+        const [techSpecsRes, hospitalityRes] = await Promise.all([
+          supabase
+            .from('band_tech_specs')
+            .select('*')
+            .eq('band_id', band.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('band_hospitality')
+            .select('*')
+            .eq('band_id', band.id)
+            .order('created_at', { ascending: false })
+        ]);
+
+        if (techSpecsRes.data) setTechSpecs(techSpecsRes.data);
+        if (hospitalityRes.data) setHospitalityRiders(hospitalityRes.data);
+      } catch (error) {
+        console.error('Error fetching band files:', error);
+      } finally {
+        setLoadingFiles(false);
+      }
+    };
+
+    if (open) {
+      fetchFiles();
+    }
+  }, [band.id, open]);
+
   // When showContactInfo is true (admin), show all tabs even if empty
   // When false (public), only show tabs with data
   const hasMusicLinks = showContactInfo || (band.music_links && Object.values(band.music_links).some(link => link));
   const hasSocialLinks = showContactInfo || (band.social_media_links && Object.values(band.social_media_links).some(link => link));
   const hasDiscography = showContactInfo || (band.discography && band.discography.length > 0);
   const hasContactInfo = showContactInfo;
+  const hasTechSpecs = showContactInfo || techSpecs.length > 0;
+  const hasHospitality = showContactInfo || hospitalityRiders.length > 0;
 
   if (!open) return null;
 
@@ -80,11 +120,13 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
 
           {/* Tabs */}
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasTechSpecs, hasHospitality, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
               <TabsTrigger value="about">Om bandet</TabsTrigger>
               {hasMusicLinks && <TabsTrigger value="music">Musikk</TabsTrigger>}
               {hasDiscography && <TabsTrigger value="discography">Diskografi</TabsTrigger>}
               {hasSocialLinks && <TabsTrigger value="social">Sosiale medier</TabsTrigger>}
+              {hasTechSpecs && <TabsTrigger value="techspecs">Tech Specs</TabsTrigger>}
+              {hasHospitality && <TabsTrigger value="hospitality">Hospitality</TabsTrigger>}
               {hasContactInfo && <TabsTrigger value="contact">Kontakt</TabsTrigger>}
             </TabsList>
 
@@ -234,6 +276,80 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                 ) : (
                   <p className="text-muted-foreground text-center py-8">
                     {showContactInfo ? 'Ingen sosiale medier lagt til ennå' : 'Ingen sosiale medier tilgjengelig'}
+                  </p>
+                )}
+              </TabsContent>
+            )}
+
+            {hasTechSpecs && (
+              <TabsContent value="techspecs" className="space-y-3 mt-4">
+                {loadingFiles ? (
+                  <p className="text-center text-muted-foreground py-4">Laster...</p>
+                ) : techSpecs.length > 0 ? (
+                  <div className="space-y-2">
+                    {techSpecs.map((spec) => (
+                      <a
+                        key={spec.id}
+                        href={spec.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-3 border rounded-lg hover:border-primary transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-purple/20 to-accent-pink/20 flex items-center justify-center">
+                            <FileText className="h-4 w-4 text-accent-purple" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium truncate">{spec.filename}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {spec.file_type} • {new Date(spec.created_at).toLocaleDateString('no-NO')}
+                            </p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    {showContactInfo ? 'Ingen tech spec-filer lagt til ennå' : 'Ingen tech specs tilgjengelig'}
+                  </p>
+                )}
+              </TabsContent>
+            )}
+
+            {hasHospitality && (
+              <TabsContent value="hospitality" className="space-y-3 mt-4">
+                {loadingFiles ? (
+                  <p className="text-center text-muted-foreground py-4">Laster...</p>
+                ) : hospitalityRiders.length > 0 ? (
+                  <div className="space-y-2">
+                    {hospitalityRiders.map((rider) => (
+                      <a
+                        key={rider.id}
+                        href={rider.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-3 border rounded-lg hover:border-primary transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-pink/20 to-accent-orange/20 flex items-center justify-center">
+                            <FileText className="h-4 w-4 text-accent-pink" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium truncate">{rider.filename}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {rider.file_type} • {new Date(rider.created_at).toLocaleDateString('no-NO')}
+                            </p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    {showContactInfo ? 'Ingen hospitality-filer lagt til ennå' : 'Ingen hospitality riders tilgjengelig'}
                   </p>
                 )}
               </TabsContent>
