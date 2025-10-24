@@ -158,8 +158,8 @@ export const EditBandDialog = ({
         description: 'Endringene har blitt lagret',
       });
 
-      onClose();
       onSuccess();
+      onClose();
     } catch (error: any) {
       toast({
         title: 'Feil ved oppdatering',
