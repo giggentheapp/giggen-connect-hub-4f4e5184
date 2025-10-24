@@ -94,7 +94,7 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
 
     <BandViewModal 
       open={showModal} 
-      onOpenChange={setShowModal} 
+      onClose={() => setShowModal(false)} 
       band={band}
       showContactInfo={false}
     />

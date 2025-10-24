@@ -100,7 +100,7 @@ const BandProfile = () => {
 
   // If user is a member but not admin, show public view
   if (!loading && band && isMember && !isAdmin) {
-    return <BandViewModal open={true} onOpenChange={(open) => !open && navigate(-1)} band={band} showContactInfo={false} />;
+    return <BandViewModal open={true} onClose={() => navigate('/dashboard')} band={band} showContactInfo={false} />;
   }
 
   if (loading) {
@@ -255,7 +255,7 @@ const BandProfile = () => {
           />
           <BandViewModal
             open={showPublicView}
-            onOpenChange={setShowPublicView}
+            onClose={() => setShowPublicView(false)}
             band={band}
             showContactInfo={false}
           />
