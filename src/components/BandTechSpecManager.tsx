@@ -211,7 +211,7 @@ const BandTechSpecManager = ({ userId, bandId, title, description }: BandTechSpe
         open={showFileModal}
         onOpenChange={setShowFileModal}
         files={userFiles}
-        allowedTypes={['document', 'pdf']}
+        allowedTypes={['document', 'pdf', 'application/pdf', 'application/vnd', 'text/']}
         onFileSelected={handleFileSelected}
         title={t('selectFromFileBank')}
       />
