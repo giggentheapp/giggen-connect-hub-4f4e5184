@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Search, User, Settings } from 'lucide-react';
+import { Search, User, Settings, Database } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate, useLocation } from 'react-router-dom';
 import giggenLogo from '@/assets/giggen-logo.png';
@@ -20,16 +20,25 @@ export const DesktopSidebar = ({ activeSection, onSectionChange }: DesktopSideba
     { id: 'admin', label: t('administration'), icon: Settings, type: 'section' },
   ];
 
-  // Add Settings link for direct route navigation
-  const settingsItem = { 
-    id: 'settings', 
-    label: t('settings'), 
-    icon: Settings, 
-    type: 'route',
-    path: '/settings' 
-  };
+  // Add direct route navigation items
+  const routeItems = [
+    { 
+      id: 'filbank', 
+      label: t('fileBank'), 
+      icon: Database, 
+      type: 'route',
+      path: '/filbank' 
+    },
+    { 
+      id: 'settings', 
+      label: t('settings'), 
+      icon: Settings, 
+      type: 'route',
+      path: '/settings' 
+    }
+  ];
 
-  const allItems = [...navItems, settingsItem];
+  const allItems = [...navItems, ...routeItems];
 
   const handleItemClick = (item: any) => {
     if (item.type === 'route') {

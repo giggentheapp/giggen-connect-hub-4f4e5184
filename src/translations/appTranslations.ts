@@ -155,6 +155,9 @@ export const appTranslations = {
     // File Management
     fileManagement: "Filhåndtering",
     managePortfolioFiles: "Administrer portefølje, tekniske spesifikasjoner og hospitality riders",
+    fileBank: "Filbank",
+    fileBankDescription: "Administrer alle dine filer på ett sted",
+    openFileBank: "Åpne Filbank",
     profilePortfolio: "Profilportefølje",
     uploadPortfolioFiles: "Last opp bilder, videoer og andre filer som viser frem ditt arbeid",
     hospitalityRiders: "Hospitality Rider",
