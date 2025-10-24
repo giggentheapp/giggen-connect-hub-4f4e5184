@@ -40,11 +40,21 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
   // Check if user is admin or founder
   const isAdmin = userRole === 'admin' || userRole === 'founder';
 
+  const handleCardClick = () => {
+    // If admin/founder, navigate to band profile page (has edit button)
+    // Otherwise, show modal
+    if (isAdmin) {
+      navigate(`/band/${band.id}`);
+    } else {
+      setShowModal(true);
+    }
+  };
+
   return (
     <>
       <Card
         className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
-        onClick={() => setShowModal(true)}
+        onClick={handleCardClick}
       >
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
