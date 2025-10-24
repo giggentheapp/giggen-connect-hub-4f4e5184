@@ -42,7 +42,17 @@ export const FileSelectionModal = ({
 
   const filteredFiles = files.filter(file => {
     const matchesSearch = file.filename.toLowerCase().includes(search.toLowerCase());
-    const matchesType = !allowedTypes || allowedTypes.some(type => file.file_type.includes(type));
+    const matchesType = !allowedTypes || allowedTypes.some(type => {
+      // Check file_type, mime_type, and category
+      const fileTypeLower = file.file_type.toLowerCase();
+      const mimeTypeLower = (file.mime_type || '').toLowerCase();
+      const categoryLower = ((file as any).category || '').toLowerCase();
+      const typeLower = type.toLowerCase();
+      
+      return fileTypeLower.includes(typeLower) || 
+             mimeTypeLower.includes(typeLower) || 
+             categoryLower.includes(typeLower);
+    });
     return matchesSearch && matchesType;
   });
 
