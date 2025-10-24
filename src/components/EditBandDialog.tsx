@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { X, FolderOpen } from 'lucide-react';
+import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
@@ -207,31 +207,31 @@ export const EditBandDialog = ({
             <Tabs defaultValue="basic" className="w-full">
               <TabsList className="grid w-full grid-cols-7 mb-6 h-auto">
                 <TabsTrigger value="basic" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">📝</span>
+                  <Info className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Grunnleggende</span>
                 </TabsTrigger>
                 <TabsTrigger value="visual" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">🎨</span>
-                  <span className="hidden md:inline text-xs">Visuelt</span>
+                  <FolderOpen className="h-4 w-4" />
+                  <span className="hidden md:inline text-xs">Portfolio</span>
                 </TabsTrigger>
                 <TabsTrigger value="music" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">🎵</span>
+                  <Disc className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Musikk</span>
                 </TabsTrigger>
                 <TabsTrigger value="social" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">📱</span>
+                  <Share2 className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Sosiale medier</span>
                 </TabsTrigger>
                 <TabsTrigger value="contact" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">✉️</span>
+                  <Mail className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Kontakt</span>
                 </TabsTrigger>
                 <TabsTrigger value="techspecs" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">⚙️</span>
+                  <Settings className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Tech Specs</span>
                 </TabsTrigger>
                 <TabsTrigger value="hospitality" className="flex-col gap-1 py-2">
-                  <span className="text-xs md:text-sm">🍽️</span>
+                  <Beer className="h-4 w-4" />
                   <span className="hidden md:inline text-xs">Hospitality</span>
                 </TabsTrigger>
               </TabsList>

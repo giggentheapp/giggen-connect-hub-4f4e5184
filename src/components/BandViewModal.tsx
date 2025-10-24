@@ -3,7 +3,7 @@ import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Utensils } from 'lucide-react';
+import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Beer } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,7 +151,7 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
               )}
               {hasHospitality && (
                 <TabsTrigger value="hospitality" className="flex-col gap-1 py-2" title="Hospitality">
-                  <Utensils className="h-5 w-5" />
+                  <Beer className="h-5 w-5" />
                   <span className="text-xs hidden md:inline">Hospitality</span>
                 </TabsTrigger>
               )}
