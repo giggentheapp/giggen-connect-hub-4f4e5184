@@ -11,6 +11,7 @@ export interface UserFile {
   file_type: string;
   file_size: number | null;
   mime_type: string | null;
+  category: string;
   created_at: string;
   updated_at: string;
 }
