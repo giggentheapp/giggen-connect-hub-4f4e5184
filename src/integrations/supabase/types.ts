@@ -748,6 +748,38 @@ export type Database = {
           },
         ]
       }
+      file_usage: {
+        Row: {
+          created_at: string | null
+          file_id: string
+          id: string
+          reference_id: string | null
+          usage_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_id: string
+          id?: string
+          reference_id?: string | null
+          usage_type: string
+        }
+        Update: {
+          created_at?: string | null
+          file_id?: string
+          id?: string
+          reference_id?: string | null
+          usage_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_usage_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "user_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitality_riders: {
         Row: {
           created_at: string
@@ -1125,6 +1157,45 @@ export type Database = {
           },
         ]
       }
+      user_files: {
+        Row: {
+          created_at: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string | null
+          filename: string
+          id: string
+          mime_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          file_url?: string | null
+          filename: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string | null
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1219,6 +1290,14 @@ export type Database = {
       get_current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_file_usage_summary: {
+        Args: { p_file_id: string }
+        Returns: {
+          count: number
+          reference_id: string
+          usage_type: string
+        }[]
       }
       get_profile_visibility: {
         Args: { maker_uuid: string }

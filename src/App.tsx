@@ -36,6 +36,7 @@ import CheckIn from "./pages/CheckIn";
 import TicketSuccess from "./pages/TicketSuccess";
 import TicketView from "./pages/TicketView";
 import BandProfile from "./pages/BandProfile";
+import FileBank from "./pages/FileBank";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useInitializeAdmin } from "./hooks/useInitializeAdmin";
@@ -87,6 +88,9 @@ const App = () => {
               
               {/* Band Routes */}
               <Route path="/band/:bandId" element={<BandProfile />} />
+              
+              {/* File Bank Route */}
+              <Route path="/filbank" element={<FileBank />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
