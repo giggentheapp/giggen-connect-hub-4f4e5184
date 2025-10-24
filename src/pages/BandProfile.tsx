@@ -38,7 +38,15 @@ const BandProfile = () => {
           .single();
 
         if (bandError) throw bandError;
-        setBand(bandData);
+        
+        // Type-cast jsonb fields from Supabase
+        setBand({
+          ...bandData,
+          music_links: bandData.music_links as Band['music_links'],
+          social_media_links: bandData.social_media_links as Band['social_media_links'],
+          contact_info: bandData.contact_info as Band['contact_info'],
+          discography: bandData.discography as string[] | null,
+        });
 
         // Fetch members
         const { data: membersData, error: membersError } = await supabase

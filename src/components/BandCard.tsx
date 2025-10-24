@@ -67,13 +67,25 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
         </div>
       </CardHeader>
 
-      {band.description && (
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground line-clamp-3">
+      <CardContent className="space-y-3">
+        {band.genre && (
+          <Badge variant="secondary" className="text-xs">
+            {band.genre}
+          </Badge>
+        )}
+        
+        {band.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {band.description}
           </p>
-        </CardContent>
-      )}
+        )}
+        
+        {band.founded_year && (
+          <p className="text-xs text-muted-foreground">
+            Dannet: {band.founded_year}
+          </p>
+        )}
+      </CardContent>
     </Card>
   );
 };

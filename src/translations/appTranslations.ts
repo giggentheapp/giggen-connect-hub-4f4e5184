@@ -164,6 +164,28 @@ export const appTranslations = {
     uploadHospitalityRiders: "Last opp hospitality rider-dokumenter for arrangementer",
     uploadTechSpecs: "Last opp tekniske spesifikasjoner og rider-dokumenter",
     
+    // Band Management
+    bandInfo: "Bandinformasjon",
+    bandBasicInfo: "Grunnleggende info",
+    bandVisual: "Visuelt",
+    bandMusicAndWork: "Musikk og arbeid",
+    bandSocialMedia: "Sosiale medier",
+    bandContactInfo: "Kontaktinformasjon",
+    bandName: "Bandnavn",
+    bandGenre: "Sjanger/Musikkstil",
+    bandFoundedYear: "Dannet år",
+    bandShortDescription: "Kort beskrivelse",
+    bandExtendedBio: "Utvidet bio",
+    bandLogo: "Bandlogo",
+    bandBannerImage: "Bannerbilde",
+    bandChangeLogo: "Endre logo",
+    bandUploadBanner: "Last opp banner",
+    bandChangeBanner: "Endre banner",
+    bandDiscography: "Diskografi (låter/album)",
+    bandAddSong: "Legg til låt",
+    bandAddSongOrAlbum: "Legg til låt eller album",
+    bandBookingEmail: "Booking e-post",
+    
     // Feedback
     feedback: "Tilbakemelding",
     

@@ -299,30 +299,54 @@ export type Database = {
       }
       bands: {
         Row: {
+          banner_url: string | null
+          bio: string | null
+          contact_info: Json | null
           created_at: string | null
           created_by: string
           description: string | null
+          discography: string[] | null
+          founded_year: number | null
+          genre: string | null
           id: string
           image_url: string | null
+          music_links: Json | null
           name: string
+          social_media_links: Json | null
           updated_at: string | null
         }
         Insert: {
+          banner_url?: string | null
+          bio?: string | null
+          contact_info?: Json | null
           created_at?: string | null
           created_by: string
           description?: string | null
+          discography?: string[] | null
+          founded_year?: number | null
+          genre?: string | null
           id?: string
           image_url?: string | null
+          music_links?: Json | null
           name: string
+          social_media_links?: Json | null
           updated_at?: string | null
         }
         Update: {
+          banner_url?: string | null
+          bio?: string | null
+          contact_info?: Json | null
           created_at?: string | null
           created_by?: string
           description?: string | null
+          discography?: string[] | null
+          founded_year?: number | null
+          genre?: string | null
           id?: string
           image_url?: string | null
+          music_links?: Json | null
           name?: string
+          social_media_links?: Json | null
           updated_at?: string | null
         }
         Relationships: [
