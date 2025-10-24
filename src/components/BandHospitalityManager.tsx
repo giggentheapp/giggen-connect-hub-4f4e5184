@@ -199,6 +199,7 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
   return (
     <div className="space-y-3">
       <Button 
+        type="button"
         onClick={() => setShowFileModal(true)}
         variant="outline"
       >

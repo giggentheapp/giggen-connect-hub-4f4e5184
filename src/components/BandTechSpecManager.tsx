@@ -199,6 +199,7 @@ const BandTechSpecManager = ({ userId, bandId, title, description }: BandTechSpe
   return (
     <div className="space-y-3">
       <Button 
+        type="button"
         onClick={() => setShowFileModal(true)}
         variant="outline"
       >
