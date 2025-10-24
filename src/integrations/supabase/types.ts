@@ -77,6 +77,53 @@ export type Database = {
         }
         Relationships: []
       }
+      band_hospitality: {
+        Row: {
+          band_id: string
+          created_at: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          filename: string
+          id: string
+          mime_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          band_id: string
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string
+          file_url: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          band_id?: string
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_hospitality_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       band_invites: {
         Row: {
           band_id: string
@@ -140,6 +187,109 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "band_members_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      band_portfolio: {
+        Row: {
+          band_id: string
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string | null
+          filename: string
+          id: string
+          is_public: boolean
+          mime_type: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          band_id: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          file_url?: string | null
+          filename: string
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          band_id?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string | null
+          filename?: string
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_portfolio_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      band_tech_specs: {
+        Row: {
+          band_id: string
+          created_at: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          filename: string
+          id: string
+          mime_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          band_id: string
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string
+          file_url: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          band_id?: string
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_tech_specs_band_id_fkey"
             columns: ["band_id"]
             isOneToOne: false
             referencedRelation: "bands"

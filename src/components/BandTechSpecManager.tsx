@@ -9,9 +9,9 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from '@/components/FileSelectionModal';
 
-interface TechSpecItem {
+interface BandTechSpecItem {
   id: string;
-  profile_id: string;
+  band_id: string;
   filename: string;
   file_url: string;
   file_path: string;
@@ -19,14 +19,15 @@ interface TechSpecItem {
   created_at: string;
 }
 
-interface TechSpecManagerProps {
+interface BandTechSpecManagerProps {
   userId: string;
+  bandId: string;
   title: string;
   description: string;
 }
 
-const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) => {
-  const [items, setItems] = useState<TechSpecItem[]>([]);
+const BandTechSpecManager = ({ userId, bandId, title, description }: BandTechSpecManagerProps) => {
+  const [items, setItems] = useState<BandTechSpecItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -37,23 +38,23 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   useEffect(() => {
     fetchItems();
-  }, [userId]);
+  }, [bandId]);
 
   const fetchItems = async () => {
     try {
       const { data, error } = await supabase
-        .from('profile_tech_specs')
+        .from('band_tech_specs')
         .select('*')
-        .eq('profile_id', userId)
+        .eq('band_id', bandId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setItems(data || []);
     } catch (error: any) {
-      console.error('Error fetching tech specs:', error);
+      console.error('Error fetching band tech specs:', error);
       toast({
         title: t('error'),
-        description: t('couldNotLoadTechSpecs'),
+        description: 'Kunne ikke laste tekniske spesifikasjoner',
         variant: "destructive",
       });
     } finally {
@@ -77,15 +78,15 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
         .from('file_usage')
         .insert({
           file_id: file.id,
-          usage_type: 'tech_spec',
-          reference_id: null
+          usage_type: 'band_tech_spec',
+          reference_id: bandId
         });
 
       if (usageError) throw usageError;
 
-      // Create tech spec entry
+      // Create band tech spec entry
       const techSpecData = {
-        profile_id: userId,
+        band_id: bandId,
         filename: file.filename,
         file_path: file.file_path,
         file_url: file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/tech-specs/${file.file_path}`,
@@ -95,7 +96,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       };
 
       const { data, error } = await supabase
-        .from('profile_tech_specs')
+        .from('band_tech_specs')
         .insert(techSpecData)
         .select()
         .single();
@@ -104,8 +105,8 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       setItems(prev => [data, ...prev]);
       toast({
-        title: t('techSpecUploaded'),
-        description: t('techSpecReady'),
+        title: 'Tech spec lagt til',
+        description: 'Teknisk spesifikasjon er klar',
       });
     } catch (error: any) {
       toast({
@@ -119,7 +120,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
   const handleUpdateItem = async (itemId: string) => {
     try {
       const { error } = await supabase
-        .from('profile_tech_specs')
+        .from('band_tech_specs')
         .update({
           filename: editName
         })
@@ -138,12 +139,12 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       toast({
         title: t('fileUpdateSuccess'),
-        description: t('techSpecNameUpdated'),
+        description: 'Tech spec-navn oppdatert',
       });
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('couldNotUpdateTechSpec'),
+        description: 'Kunne ikke oppdatere tech spec',
         variant: "destructive",
       });
     }
@@ -151,25 +152,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      // Find the item to get file_path
       const itemToDelete = items.find(item => item.id === itemId);
-      if (!itemToDelete) {
-        throw new Error('Fil ikke funnet');
-      }
+      if (!itemToDelete) throw new Error('Fil ikke funnet');
 
-      // Delete from storage first
-      const { error: storageError } = await supabase.storage
-        .from('tech-specs')
-        .remove([itemToDelete.file_path]);
-
-      if (storageError) {
-        console.error('Storage deletion error:', storageError);
-      }
-
-      // Then use database function
-      const { error } = await supabase.rpc('delete_tech_spec_file', {
-        file_id: itemId
-      });
+      const { error } = await supabase
+        .from('band_tech_specs')
+        .delete()
+        .eq('id', itemId);
 
       if (error) throw error;
 
@@ -177,18 +166,18 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       toast({
         title: t('fileDeleteSuccess'),
-        description: t('techSpecDeleted'),
+        description: 'Tech spec slettet',
       });
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('couldNotDeleteTechSpec'),
+        description: 'Kunne ikke slette tech spec',
         variant: "destructive",
       });
     }
   };
 
-  const startEditing = (item: TechSpecItem) => {
+  const startEditing = (item: BandTechSpecItem) => {
     setEditingItem(item.id);
     setEditName(item.filename);
   };
@@ -224,10 +213,10 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       />
 
       {loading ? (
-        <div className="text-center py-3 text-xs text-muted-foreground">{t('loadingTechSpecs')}</div>
+        <div className="text-center py-3 text-xs text-muted-foreground">Laster tech specs...</div>
       ) : (
         <div className="space-y-2">
-          {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
+          {items.map((item) => (
             <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
                 <div className="space-y-2">
@@ -293,10 +282,10 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                 </div>
               )}
             </div>
-          )) : []}
+          ))}
           {items.length === 0 && (
             <div className="text-center py-4 text-xs text-muted-foreground">
-              {t('noTechSpecFiles')}
+              Ingen tech spec-filer ennå
             </div>
           )}
         </div>
@@ -305,4 +294,4 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
   );
 };
 
-export default TechSpecManager;
+export default BandTechSpecManager;

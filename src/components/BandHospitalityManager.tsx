@@ -9,9 +9,9 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from '@/components/FileSelectionModal';
 
-interface TechSpecItem {
+interface BandHospitalityItem {
   id: string;
-  profile_id: string;
+  band_id: string;
   filename: string;
   file_url: string;
   file_path: string;
@@ -19,14 +19,15 @@ interface TechSpecItem {
   created_at: string;
 }
 
-interface TechSpecManagerProps {
+interface BandHospitalityManagerProps {
   userId: string;
+  bandId: string;
   title: string;
   description: string;
 }
 
-const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) => {
-  const [items, setItems] = useState<TechSpecItem[]>([]);
+const BandHospitalityManager = ({ userId, bandId, title, description }: BandHospitalityManagerProps) => {
+  const [items, setItems] = useState<BandHospitalityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -37,23 +38,23 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   useEffect(() => {
     fetchItems();
-  }, [userId]);
+  }, [bandId]);
 
   const fetchItems = async () => {
     try {
       const { data, error } = await supabase
-        .from('profile_tech_specs')
+        .from('band_hospitality')
         .select('*')
-        .eq('profile_id', userId)
+        .eq('band_id', bandId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setItems(data || []);
     } catch (error: any) {
-      console.error('Error fetching tech specs:', error);
+      console.error('Error fetching band hospitality riders:', error);
       toast({
         title: t('error'),
-        description: t('couldNotLoadTechSpecs'),
+        description: 'Kunne ikke laste hospitality riders',
         variant: "destructive",
       });
     } finally {
@@ -77,26 +78,26 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
         .from('file_usage')
         .insert({
           file_id: file.id,
-          usage_type: 'tech_spec',
-          reference_id: null
+          usage_type: 'band_hospitality',
+          reference_id: bandId
         });
 
       if (usageError) throw usageError;
 
-      // Create tech spec entry
-      const techSpecData = {
-        profile_id: userId,
+      // Create band hospitality rider entry
+      const riderData = {
+        band_id: bandId,
         filename: file.filename,
         file_path: file.file_path,
-        file_url: file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/tech-specs/${file.file_path}`,
+        file_url: file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/hospitality/${file.file_path}`,
         file_type: file.file_type,
         file_size: file.file_size,
         mime_type: file.mime_type
       };
 
       const { data, error } = await supabase
-        .from('profile_tech_specs')
-        .insert(techSpecData)
+        .from('band_hospitality')
+        .insert(riderData)
         .select()
         .single();
 
@@ -104,8 +105,8 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       setItems(prev => [data, ...prev]);
       toast({
-        title: t('techSpecUploaded'),
-        description: t('techSpecReady'),
+        title: 'Hospitality rider lagt til',
+        description: 'Hospitality rider er klar',
       });
     } catch (error: any) {
       toast({
@@ -119,7 +120,7 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
   const handleUpdateItem = async (itemId: string) => {
     try {
       const { error } = await supabase
-        .from('profile_tech_specs')
+        .from('band_hospitality')
         .update({
           filename: editName
         })
@@ -138,12 +139,12 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       toast({
         title: t('fileUpdateSuccess'),
-        description: t('techSpecNameUpdated'),
+        description: 'Hospitality rider-navn oppdatert',
       });
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('couldNotUpdateTechSpec'),
+        description: 'Kunne ikke oppdatere hospitality rider',
         variant: "destructive",
       });
     }
@@ -151,25 +152,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      // Find the item to get file_path
       const itemToDelete = items.find(item => item.id === itemId);
-      if (!itemToDelete) {
-        throw new Error('Fil ikke funnet');
-      }
+      if (!itemToDelete) throw new Error('Fil ikke funnet');
 
-      // Delete from storage first
-      const { error: storageError } = await supabase.storage
-        .from('tech-specs')
-        .remove([itemToDelete.file_path]);
-
-      if (storageError) {
-        console.error('Storage deletion error:', storageError);
-      }
-
-      // Then use database function
-      const { error } = await supabase.rpc('delete_tech_spec_file', {
-        file_id: itemId
-      });
+      const { error } = await supabase
+        .from('band_hospitality')
+        .delete()
+        .eq('id', itemId);
 
       if (error) throw error;
 
@@ -177,18 +166,18 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
 
       toast({
         title: t('fileDeleteSuccess'),
-        description: t('techSpecDeleted'),
+        description: 'Hospitality rider slettet',
       });
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('couldNotDeleteTechSpec'),
+        description: 'Kunne ikke slette hospitality rider',
         variant: "destructive",
       });
     }
   };
 
-  const startEditing = (item: TechSpecItem) => {
+  const startEditing = (item: BandHospitalityItem) => {
     setEditingItem(item.id);
     setEditName(item.filename);
   };
@@ -224,10 +213,10 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
       />
 
       {loading ? (
-        <div className="text-center py-3 text-xs text-muted-foreground">{t('loadingTechSpecs')}</div>
+        <div className="text-center py-3 text-xs text-muted-foreground">Laster hospitality riders...</div>
       ) : (
         <div className="space-y-2">
-          {Array.isArray(items) ? items.filter(item => item && item.id).map((item) => (
+          {items.map((item) => (
             <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
                 <div className="space-y-2">
@@ -262,13 +251,13 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                 </div>
               ) : (
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-purple/20 to-accent-pink/20 flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-accent-purple" />
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-pink/20 to-accent-orange/20 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-accent-pink" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium truncate">{item.filename}</h4>
                     <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-2">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-purple"></span>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-pink"></span>
                       {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
                     </p>
                   </div>
@@ -293,10 +282,10 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
                 </div>
               )}
             </div>
-          )) : []}
+          ))}
           {items.length === 0 && (
             <div className="text-center py-4 text-xs text-muted-foreground">
-              {t('noTechSpecFiles')}
+              Ingen hospitality-filer ennå
             </div>
           )}
         </div>
@@ -305,4 +294,4 @@ const TechSpecManager = ({ userId, title, description }: TechSpecManagerProps) =
   );
 };
 
-export default TechSpecManager;
+export default BandHospitalityManager;

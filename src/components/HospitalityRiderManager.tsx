@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { X, Edit2, Save, FileText } from 'lucide-react';
-import FileUpload from '@/components/FileUpload';
+import { X, Edit2, Save, FileText, Cloud } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useUserFiles } from '@/hooks/useUserFiles';
+import { FileSelectionModal } from '@/components/FileSelectionModal';
 
 interface HospitalityRiderItem {
   id: string;
@@ -29,8 +30,10 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [showFileModal, setShowFileModal] = useState(false);
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  const { files: userFiles } = useUserFiles(userId);
 
   useEffect(() => {
     fetchItems();
@@ -58,13 +61,59 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
     }
   };
 
-  const handleFileUploaded = (fileData: any) => {
-    // FileUpload component now handles database insertion directly for hospitality riders
-    setItems(prev => [fileData, ...prev]);
-    toast({
-      title: t('hospitalityRiderUploaded'),
-      description: t('hospitalityRiderReady'),
-    });
+  const handleFileSelected = async (file: any) => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Ikke innlogget",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Add to file_usage
+      const { error: usageError } = await supabase
+        .from('file_usage')
+        .insert({
+          file_id: file.id,
+          usage_type: 'hospitality_rider',
+          reference_id: null
+        });
+
+      if (usageError) throw usageError;
+
+      // Create hospitality rider entry
+      const riderData = {
+        user_id: userId,
+        filename: file.filename,
+        file_path: file.file_path,
+        file_url: file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/hospitality/${file.file_path}`,
+        file_type: file.file_type,
+        file_size: file.file_size,
+        mime_type: file.mime_type
+      };
+
+      const { data, error } = await supabase
+        .from('hospitality_riders')
+        .insert(riderData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setItems(prev => [data, ...prev]);
+      toast({
+        title: t('hospitalityRiderUploaded'),
+        description: t('hospitalityRiderReady'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleUpdateItem = async (itemId: string) => {
@@ -156,12 +205,22 @@ const HospitalityRiderManager = ({ userId, title, description }: HospitalityRide
         <p className="text-xs text-muted-foreground mb-3">{description}</p>
       </div>
       
-      <FileUpload
-        fileType="hospitality"
-        folderPath={userId}
-        onFileUploaded={handleFileUploaded}
-        acceptedTypes=".pdf,.doc,.docx,.txt,.md"
-        targetTable="hospitality_riders"
+      <Button 
+        onClick={() => setShowFileModal(true)}
+        variant="outline"
+        className="w-full h-9 text-xs"
+      >
+        <Cloud className="h-4 w-4 mr-2" />
+        {t('selectFromFileBank')}
+      </Button>
+
+      <FileSelectionModal
+        open={showFileModal}
+        onOpenChange={setShowFileModal}
+        files={userFiles}
+        allowedTypes={['document', 'pdf']}
+        onFileSelected={handleFileSelected}
+        title={t('selectFromFileBank')}
       />
 
       {loading ? (

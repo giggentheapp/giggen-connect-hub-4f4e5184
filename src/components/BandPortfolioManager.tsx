@@ -9,9 +9,10 @@ import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from '@/components/FileSelectionModal';
-interface ProfilePortfolioItem {
+
+interface BandPortfolioItem {
   id: string;
-  user_id: string;
+  band_id: string;
   file_type: string;
   filename: string;
   file_path: string;
@@ -23,17 +24,21 @@ interface ProfilePortfolioItem {
   created_at: string;
   updated_at: string;
 }
-interface ProfilePortfolioManagerProps {
+
+interface BandPortfolioManagerProps {
   userId: string;
+  bandId: string;
   title: string;
   description: string;
 }
-const ProfilePortfolioManager = ({
+
+const BandPortfolioManager = ({
   userId,
+  bandId,
   title,
   description
-}: ProfilePortfolioManagerProps) => {
-  const [items, setItems] = useState<ProfilePortfolioItem[]>([]);
+}: BandPortfolioManagerProps) => {
+  const [items, setItems] = useState<BandPortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -42,39 +47,33 @@ const ProfilePortfolioManager = ({
   const { toast } = useToast();
   const { t } = useAppTranslation();
   const { files: userFiles } = useUserFiles(userId);
+
   useEffect(() => {
     fetchItems();
-  }, [userId]);
+  }, [bandId]);
   
   const fetchItems = async () => {
     try {
-      // Validate authentication before fetching
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.log('User not authenticated, skipping portfolio fetch');
-        setLoading(false);
-        return;
-      }
+      const { data, error } = await supabase
+        .from('band_portfolio')
+        .select('*')
+        .eq('band_id', bandId)
+        .order('created_at', { ascending: false });
 
-      const {
-        data,
-        error
-      } = await supabase.from('profile_portfolio').select('*').eq('user_id', userId).order('created_at', {
-        ascending: false
-      });
       if (error) throw error;
       setItems(data || []);
     } catch (error: any) {
-      console.error('Error fetching portfolio items:', error);
+      console.error('Error fetching band portfolio:', error);
       toast({
         title: t('error'),
-        description: t('couldNotLoadPortfolio'),
+        description: 'Kunne ikke laste bandportefølje',
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
+
   const handleFileSelected = async (file: any) => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -92,15 +91,15 @@ const ProfilePortfolioManager = ({
         .from('file_usage')
         .insert({
           file_id: file.id,
-          usage_type: 'profile_portfolio',
-          reference_id: null
+          usage_type: 'band_portfolio',
+          reference_id: bandId
         });
 
       if (usageError) throw usageError;
 
-      // Create portfolio entry
+      // Create band portfolio entry
       const portfolioData = {
-        user_id: userId,
+        band_id: bandId,
         file_type: file.file_type,
         filename: file.filename,
         file_path: file.file_path,
@@ -113,7 +112,7 @@ const ProfilePortfolioManager = ({
       };
 
       const { data, error } = await supabase
-        .from('profile_portfolio')
+        .from('band_portfolio')
         .insert(portfolioData)
         .select()
         .single();
@@ -122,118 +121,94 @@ const ProfilePortfolioManager = ({
 
       setItems(prev => [data, ...prev]);
       toast({
-        title: t('fileUploadSuccess'),
-        description: t('fileAddedToPortfolio')
+        title: 'Fil lagt til',
+        description: 'Filen er lagt til i bandporteføljen'
       });
     } catch (error: any) {
       toast({
-        title: t('fileUploadError'),
+        title: 'Feil',
         description: error.message,
         variant: "destructive"
       });
     }
   };
+
   const handleUpdateItem = async (itemId: string) => {
     try {
-      // Validate authentication
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        toast({
-          title: "Ikke innlogget",
-          description: "Du må være innlogget for å oppdatere filer",
-          variant: "destructive"
-        });
-        return;
-      }
+      const { error } = await supabase
+        .from('band_portfolio')
+        .update({
+          filename: editTitle || undefined,
+          title: editTitle || undefined,
+          description: editDescription || undefined
+        })
+        .eq('id', itemId);
 
-      const {
-        error
-      } = await supabase.from('profile_portfolio').update({
-        filename: editTitle || undefined,
-        title: editTitle || undefined,
-        description: editDescription || undefined
-      }).eq('id', itemId);
       if (error) throw error;
+
       setItems(prev => prev.map(item => item.id === itemId ? {
         ...item,
         filename: editTitle || item.filename,
         title: editTitle || item.title,
         description: editDescription
       } : item));
+
       setEditingItem(null);
       setEditTitle('');
       setEditDescription('');
+
       toast({
         title: t('fileUpdateSuccess'),
-        description: t('portfolioElementUpdated')
+        description: 'Porteføljeelement oppdatert'
       });
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('couldNotUpdateElement'),
+        description: 'Kunne ikke oppdatere element',
         variant: "destructive"
       });
     }
   };
+
   const handleDeleteItem = async (itemId: string) => {
     try {
-      // Validate authentication
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        toast({
-          title: "Ikke innlogget",
-          description: "Du må være innlogget for å slette filer",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Find the item to get the file_path
       const itemToDelete = items.find(item => item.id === itemId);
-      if (!itemToDelete) {
-        throw new Error('Fil ikke funnet');
-      }
+      if (!itemToDelete) throw new Error('Fil ikke funnet');
 
-      // First delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('portfolio')
-        .remove([itemToDelete.file_path]);
-
-      if (storageError) {
-        console.error('Storage deletion error:', storageError);
-      }
-
-      // Then use the database function to delete from database
-      const { error } = await supabase.rpc('delete_portfolio_file', {
-        file_id: itemId
-      });
+      // Delete from database
+      const { error } = await supabase
+        .from('band_portfolio')
+        .delete()
+        .eq('id', itemId);
 
       if (error) throw error;
 
       setItems(prev => prev.filter(item => item.id !== itemId));
       toast({
         title: t('fileDeleteSuccess'),
-        description: t('portfolioElementDeleted')
+        description: 'Porteføljeelement slettet'
       });
     } catch (error: any) {
-      console.error('Delete error:', error);
       toast({
         title: t('error'),
-        description: error.message || t('couldNotDeleteElement'),
+        description: 'Kunne ikke slette element',
         variant: "destructive"
       });
     }
   };
-  const startEditing = (item: ProfilePortfolioItem) => {
+
+  const startEditing = (item: BandPortfolioItem) => {
     setEditingItem(item.id);
     setEditTitle(item.title || item.filename);
     setEditDescription(item.description || '');
   };
+
   const cancelEditing = () => {
     setEditingItem(null);
     setEditTitle('');
     setEditDescription('');
   };
+
   return (
     <div className="space-y-3">
       <div>
@@ -260,10 +235,10 @@ const ProfilePortfolioManager = ({
       />
 
       {loading ? (
-        <div className="text-center py-3 text-xs text-muted-foreground">{t('loadingPortfolio')}</div>
+        <div className="text-center py-3 text-xs text-muted-foreground">Laster portefølje...</div>
       ) : (
         <div className="space-y-2">
-          {Array.isArray(items) ? items.filter(item => item && item.id).map(item => (
+          {items.map(item => (
             <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
                 <div className="space-y-2">
@@ -327,10 +302,10 @@ const ProfilePortfolioManager = ({
                 </div>
               )}
             </div>
-          )) : []}
+          ))}
           {items.length === 0 && (
             <div className="text-center py-4 text-xs text-muted-foreground">
-              {t('noPortfolioFiles')}
+              Ingen porteføljefiler ennå
             </div>
           )}
         </div>
@@ -338,4 +313,5 @@ const ProfilePortfolioManager = ({
     </div>
   );
 };
-export default ProfilePortfolioManager;
+
+export default BandPortfolioManager;
