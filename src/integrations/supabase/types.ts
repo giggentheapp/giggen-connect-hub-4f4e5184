@@ -1309,6 +1309,7 @@ export type Database = {
       }
       user_files: {
         Row: {
+          category: string
           created_at: string | null
           file_path: string
           file_size: number | null
@@ -1321,6 +1322,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string | null
           file_path: string
           file_size?: number | null
@@ -1333,6 +1335,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string | null
           file_path?: string
           file_size?: number | null
