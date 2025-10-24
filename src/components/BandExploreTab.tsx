@@ -33,7 +33,7 @@ export const BandExploreTab = () => {
           {search ? 'Ingen band funnet' : 'Ingen band ennå'}
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBands.map((band) => (
             <BandCard key={band.id} band={band} />
           ))}

@@ -1,8 +1,7 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BandWithMembers } from '@/types/band';
-import { Users } from 'lucide-react';
+import { Users, Music } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface BandCardProps {
@@ -37,34 +36,40 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
 
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all"
+      className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
       onClick={() => navigate(`/band/${band.id}`)}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={band.image_url || undefined} />
-            <AvatarFallback className="text-lg bg-gradient-primary text-primary-foreground">
-              {band.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+      <CardHeader>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+            {band.image_url ? (
+              <img 
+                src={band.image_url} 
+                alt={band.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Music className="w-6 h-6 text-primary" />
+            )}
+          </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-lg truncate">{band.name}</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>{band.member_count || 0} medlemmer</span>
-            </div>
+            <CardTitle className="line-clamp-1 text-base">{band.name}</CardTitle>
+            <CardDescription className="flex items-center gap-1 text-xs">
+              <Users className="h-3 w-3" />
+              {band.member_count || 0} medlemmer
+            </CardDescription>
           </div>
           {userRole && (
-            <Badge variant={getRoleBadgeVariant(userRole)}>
+            <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs shrink-0">
               {getRoleLabel(userRole)}
             </Badge>
           )}
         </div>
       </CardHeader>
+
       {band.description && (
-        <CardContent>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground line-clamp-3">
             {band.description}
           </p>
         </CardContent>

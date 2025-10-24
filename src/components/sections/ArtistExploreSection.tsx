@@ -11,6 +11,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { EventsTicketMarket } from '@/components/EventsTicketMarket';
 import { BandExploreTab } from '@/components/BandExploreTab';
+import { MakerCard } from '@/components/MakerCard';
 interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
@@ -274,53 +275,13 @@ export const ArtistExploreSection = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-8 space-y-3 animate-fade-in">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredMakers.map((maker) => (
-                      <Card 
-                        key={maker.id} 
-                        className="hover:shadow-md transition-all cursor-pointer"
-                        onClick={() => navigate(`/profile/${maker.user_id}`)}
-                      >
-                        <div className="p-4 space-y-2">
-                          <div className="flex items-center gap-4">
-                            {/* Avatar */}
-                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                              {maker.avatar_url ? (
-                                <img 
-                                  src={maker.avatar_url} 
-                                  alt={maker.display_name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <User className="w-6 h-6 text-muted-foreground" />
-                              )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-foreground">
-                                {maker.display_name}
-                              </h3>
-                              {maker.username && (
-                                <p className="text-sm text-muted-foreground">
-                                  @{maker.username}
-                                </p>
-                              )}
-                              {maker.bio && (
-                                <p className="text-sm text-muted-foreground line-clamp-1">
-                                  {maker.bio}
-                                </p>
-                              )}
-                              {maker.address && maker.is_address_public && (
-                                <div className="flex items-center text-xs text-muted-foreground mt-1">
-                                  <MapPin className="w-3 h-3 mr-1 shrink-0" />
-                                  <span className="truncate">{maker.address}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
+                      <MakerCard
+                        key={maker.id}
+                        maker={maker}
+                        onViewProfile={(userId) => navigate(`/profile/${userId}`)}
+                      />
                     ))}
                   </div>
                 )}
@@ -333,8 +294,22 @@ export const ArtistExploreSection = ({
       {/* Bands View */}
       {activeView === 'bands' && (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-4">
-            <BandExploreTab />
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* List Header */}
+            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base md:text-lg font-semibold text-foreground">Band</h2>
+                </div>
+              </div>
+            </div>
+            
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+              <div className="max-w-4xl mx-auto">
+                <BandExploreTab />
+              </div>
+            </div>
           </div>
         </div>
       )}
