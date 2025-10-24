@@ -48,7 +48,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
           ) : bands.length > 0 ? (
             <div className="grid gap-4">
               {bands.map((band) => (
-                <BandCard key={band.id} band={band} />
+                <BandCard key={band.id} band={band} userRole={(band as any).user_role} />
               ))}
             </div>
           ) : (

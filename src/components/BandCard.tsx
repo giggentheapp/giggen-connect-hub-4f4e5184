@@ -37,6 +37,9 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
     }
   };
 
+  // Check if user is admin or founder
+  const isAdmin = userRole === 'admin' || userRole === 'founder';
+
   return (
     <>
       <Card
@@ -96,7 +99,7 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
       open={showModal} 
       onClose={() => setShowModal(false)} 
       band={band}
-      showContactInfo={false}
+      showContactInfo={isAdmin}
     />
     </>
   );
