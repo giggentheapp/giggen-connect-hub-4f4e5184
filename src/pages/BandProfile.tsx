@@ -11,6 +11,7 @@ import { ArrowLeft, Users, Settings, UserPlus, Crown, Shield } from 'lucide-reac
 import { BandMembersList } from '@/components/BandMembersList';
 import { InviteMemberDialog } from '@/components/InviteMemberDialog';
 import { EditBandDialog } from '@/components/EditBandDialog';
+import { BandViewModal } from '@/components/BandViewModal';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
@@ -22,6 +23,7 @@ const BandProfile = () => {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showPublicView, setShowPublicView] = useState(false);
 
   useEffect(() => {
     if (!bandId) return;
@@ -94,6 +96,12 @@ const BandProfile = () => {
   }, [bandId, toast]);
 
   const isAdmin = currentUserRole === 'admin' || currentUserRole === 'founder';
+  const isMember = !!currentUserRole;
+
+  // If user is a member but not admin, show public view
+  if (!loading && band && isMember && !isAdmin) {
+    return <BandViewModal open={true} onOpenChange={(open) => !open && navigate(-1)} band={band} showContactInfo={false} />;
+  }
 
   if (loading) {
     return (
@@ -195,6 +203,15 @@ const BandProfile = () => {
                       <Settings className="h-4 w-4" />
                       Rediger band
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowPublicView(true)}
+                      className="gap-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      Publikumsvisning
+                    </Button>
                   </div>
                 )}
               </div>
@@ -235,6 +252,12 @@ const BandProfile = () => {
             onOpenChange={setShowEditDialog}
             band={band}
             onSuccess={() => window.location.reload()}
+          />
+          <BandViewModal
+            open={showPublicView}
+            onOpenChange={setShowPublicView}
+            band={band}
+            showContactInfo={false}
           />
         </>
       )}

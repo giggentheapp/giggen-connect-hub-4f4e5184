@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Music, Users, Calendar } from 'lucide-react';
+import { Music, Users, Calendar, Mail, Phone } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
 
@@ -10,12 +10,16 @@ interface BandViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   band: Band;
+  showContactInfo?: boolean;
 }
 
-export const BandViewModal = ({ open, onOpenChange, band }: BandViewModalProps) => {
+export const BandViewModal = ({ open, onOpenChange, band, showContactInfo = false }: BandViewModalProps) => {
   const hasMusicLinks = band.music_links && Object.values(band.music_links).some(link => link);
   const hasSocialLinks = band.social_media_links && Object.values(band.social_media_links).some(link => link);
   const hasDiscography = band.discography && band.discography.length > 0;
+  const hasContactInfo = showContactInfo && band.contact_info && (
+    band.contact_info.email || band.contact_info.phone || band.contact_info.booking_email
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,11 +69,12 @@ export const BandViewModal = ({ open, onOpenChange, band }: BandViewModalProps) 
 
           {/* Tabs */}
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks].filter(Boolean).length}, 1fr)` }}>
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
               <TabsTrigger value="about">Om bandet</TabsTrigger>
               {hasMusicLinks && <TabsTrigger value="music">Musikk</TabsTrigger>}
               {hasDiscography && <TabsTrigger value="discography">Diskografi</TabsTrigger>}
               {hasSocialLinks && <TabsTrigger value="social">Sosiale medier</TabsTrigger>}
+              {hasContactInfo && <TabsTrigger value="contact">Kontakt</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="about" className="space-y-4 mt-4">
@@ -168,6 +173,44 @@ export const BandViewModal = ({ open, onOpenChange, band }: BandViewModalProps) 
             {hasSocialLinks && (
               <TabsContent value="social" className="mt-4">
                 <SocialMediaLinks socialLinks={band.social_media_links || {}} />
+              </TabsContent>
+            )}
+
+            {hasContactInfo && (
+              <TabsContent value="contact" className="space-y-3 mt-4">
+                {band.contact_info?.email && (
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">E-post</span>
+                    </div>
+                    <a href={`mailto:${band.contact_info.email}`} className="text-primary hover:underline">
+                      {band.contact_info.email}
+                    </a>
+                  </div>
+                )}
+                {band.contact_info?.phone && (
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Telefon</span>
+                    </div>
+                    <a href={`tel:${band.contact_info.phone}`} className="text-primary hover:underline">
+                      {band.contact_info.phone}
+                    </a>
+                  </div>
+                )}
+                {band.contact_info?.booking_email && (
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Booking e-post</span>
+                    </div>
+                    <a href={`mailto:${band.contact_info.booking_email}`} className="text-primary hover:underline">
+                      {band.contact_info.booking_email}
+                    </a>
+                  </div>
+                )}
               </TabsContent>
             )}
           </Tabs>
