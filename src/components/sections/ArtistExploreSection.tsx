@@ -133,6 +133,7 @@ export const ArtistExploreSection = ({
 
       const filteredMkrs = makers.filter(maker =>
         maker.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        maker.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         maker.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
       );

@@ -1151,10 +1151,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_band_invite: {
-        Args: { invite_id: string }
-        Returns: undefined
-      }
+      accept_band_invite: { Args: { invite_id: string }; Returns: undefined }
       can_access_contact_info: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -1167,28 +1164,16 @@ export type Database = {
         Args: { booking_uuid: string }
         Returns: undefined
       }
-      delete_concept_file: {
-        Args: { file_id: string }
-        Returns: undefined
-      }
+      delete_concept_file: { Args: { file_id: string }; Returns: undefined }
       delete_hospitality_rider: {
         Args: { file_id: string }
         Returns: undefined
       }
-      delete_portfolio_file: {
-        Args: { file_id: string }
-        Returns: undefined
-      }
-      delete_tech_spec_file: {
-        Args: { file_id: string }
-        Returns: undefined
-      }
-      delete_user_data: {
-        Args: { user_uuid: string }
-        Returns: undefined
-      }
+      delete_portfolio_file: { Args: { file_id: string }; Returns: undefined }
+      delete_tech_spec_file: { Args: { file_id: string }; Returns: undefined }
+      delete_user_data: { Args: { user_uuid: string }; Returns: undefined }
       get_all_visible_artists: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address: string
           avatar_url: string
@@ -1232,7 +1217,7 @@ export type Database = {
         Returns: Json
       }
       get_current_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
       get_profile_visibility: {
@@ -1246,7 +1231,7 @@ export type Database = {
         }[]
       }
       get_public_artists_for_explore: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address: string
           avatar_url: string
@@ -1257,8 +1242,10 @@ export type Database = {
           is_address_public: boolean
           latitude: number
           longitude: number
+          privacy_settings: Json
           role: string
           user_id: string
+          username: string
         }[]
       }
       get_public_booking_data: {
@@ -1371,14 +1358,8 @@ export type Database = {
         Args: { target_user_id: string; viewer_user_id?: string }
         Returns: boolean
       }
-      is_artist: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
-      is_booking_public: {
-        Args: { booking_uuid: string }
-        Returns: boolean
-      }
+      is_artist: { Args: { user_uuid: string }; Returns: boolean }
+      is_booking_public: { Args: { booking_uuid: string }; Returns: boolean }
       log_sensitive_access: {
         Args: {
           p_action: string
@@ -1401,10 +1382,7 @@ export type Database = {
         Args: { booking_uuid: string }
         Returns: undefined
       }
-      process_scheduled_deletions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      process_scheduled_deletions: { Args: never; Returns: undefined }
       reject_booking_request: {
         Args: { booking_uuid: string }
         Returns: undefined
