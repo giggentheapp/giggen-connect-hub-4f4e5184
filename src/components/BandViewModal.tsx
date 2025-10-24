@@ -14,12 +14,12 @@ interface BandViewModalProps {
 }
 
 export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: BandViewModalProps) => {
-  const hasMusicLinks = band.music_links && Object.values(band.music_links).some(link => link);
-  const hasSocialLinks = band.social_media_links && Object.values(band.social_media_links).some(link => link);
-  const hasDiscography = band.discography && band.discography.length > 0;
-  const hasContactInfo = showContactInfo && band.contact_info && (
-    band.contact_info.email || band.contact_info.phone || band.contact_info.booking_email
-  );
+  // When showContactInfo is true (admin), show all tabs even if empty
+  // When false (public), only show tabs with data
+  const hasMusicLinks = showContactInfo || (band.music_links && Object.values(band.music_links).some(link => link));
+  const hasSocialLinks = showContactInfo || (band.social_media_links && Object.values(band.social_media_links).some(link => link));
+  const hasDiscography = showContactInfo || (band.discography && band.discography.length > 0);
+  const hasContactInfo = showContactInfo;
 
   if (!open) return null;
 
@@ -101,7 +101,7 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
 
             {hasMusicLinks && (
               <TabsContent value="music" className="space-y-3 mt-4">
-                {band.music_links?.spotify && (
+                {band.music_links?.spotify ? (
                   <a 
                     href={band.music_links.spotify} 
                     target="_blank" 
@@ -113,8 +113,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       <span className="font-medium">Spotify</span>
                     </div>
                   </a>
+                ) : showContactInfo && (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      <span className="font-medium">Spotify - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.music_links?.youtube && (
+                {band.music_links?.youtube ? (
                   <a 
                     href={band.music_links.youtube} 
                     target="_blank" 
@@ -126,8 +133,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       <span className="font-medium">YouTube</span>
                     </div>
                   </a>
+                ) : showContactInfo && (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      <span className="font-medium">YouTube - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.music_links?.soundcloud && (
+                {band.music_links?.soundcloud ? (
                   <a 
                     href={band.music_links.soundcloud} 
                     target="_blank" 
@@ -139,8 +153,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       <span className="font-medium">SoundCloud</span>
                     </div>
                   </a>
+                ) : showContactInfo && (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      <span className="font-medium">SoundCloud - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.music_links?.appleMusic && (
+                {band.music_links?.appleMusic ? (
                   <a 
                     href={band.music_links.appleMusic} 
                     target="_blank" 
@@ -152,8 +173,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       <span className="font-medium">Apple Music</span>
                     </div>
                   </a>
+                ) : showContactInfo && (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      <span className="font-medium">Apple Music - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.music_links?.bandcamp && (
+                {band.music_links?.bandcamp ? (
                   <a 
                     href={band.music_links.bandcamp} 
                     target="_blank" 
@@ -165,31 +193,55 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       <span className="font-medium">Bandcamp</span>
                     </div>
                   </a>
+                ) : showContactInfo && (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      <span className="font-medium">Bandcamp - ikke lagt til</span>
+                    </div>
+                  </div>
+                )}
+                {!band.music_links?.spotify && !band.music_links?.youtube && 
+                 !band.music_links?.soundcloud && !band.music_links?.appleMusic && 
+                 !band.music_links?.bandcamp && !showContactInfo && (
+                  <p className="text-muted-foreground text-center py-8">Ingen musikklenker tilgjengelig</p>
                 )}
               </TabsContent>
             )}
 
             {hasDiscography && (
               <TabsContent value="discography" className="mt-4">
-                <div className="flex flex-wrap gap-2">
-                  {band.discography?.map((item, index) => (
-                    <Badge key={index} variant="secondary" className="text-sm">
-                      {item}
-                    </Badge>
-                  ))}
-                </div>
+                {band.discography && band.discography.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {band.discography.map((item, index) => (
+                      <Badge key={index} variant="secondary" className="text-sm">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    {showContactInfo ? 'Ingen diskografi lagt til ennå' : 'Ingen diskografi tilgjengelig'}
+                  </p>
+                )}
               </TabsContent>
             )}
 
             {hasSocialLinks && (
               <TabsContent value="social" className="mt-4">
-                <SocialMediaLinks socialLinks={band.social_media_links || {}} />
+                {band.social_media_links && Object.values(band.social_media_links).some(link => link) ? (
+                  <SocialMediaLinks socialLinks={band.social_media_links} />
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    {showContactInfo ? 'Ingen sosiale medier lagt til ennå' : 'Ingen sosiale medier tilgjengelig'}
+                  </p>
+                )}
               </TabsContent>
             )}
 
             {hasContactInfo && (
               <TabsContent value="contact" className="space-y-3 mt-4">
-                {band.contact_info?.email && (
+                {band.contact_info?.email ? (
                   <div className="p-3 border rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
                       <Mail className="h-4 w-4 text-muted-foreground" />
@@ -199,8 +251,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       {band.contact_info.email}
                     </a>
                   </div>
+                ) : (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">E-post - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.contact_info?.phone && (
+                {band.contact_info?.phone ? (
                   <div className="p-3 border rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
                       <Phone className="h-4 w-4 text-muted-foreground" />
@@ -210,8 +269,15 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                       {band.contact_info.phone}
                     </a>
                   </div>
+                ) : (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Telefon - ikke lagt til</span>
+                    </div>
+                  </div>
                 )}
-                {band.contact_info?.booking_email && (
+                {band.contact_info?.booking_email ? (
                   <div className="p-3 border rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
                       <Mail className="h-4 w-4 text-muted-foreground" />
@@ -220,6 +286,13 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                     <a href={`mailto:${band.contact_info.booking_email}`} className="text-primary hover:underline">
                       {band.contact_info.booking_email}
                     </a>
+                  </div>
+                ) : (
+                  <div className="p-3 border rounded-lg opacity-50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Booking e-post - ikke lagt til</span>
+                    </div>
                   </div>
                 )}
               </TabsContent>
