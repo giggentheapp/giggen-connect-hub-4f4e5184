@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { Upload, X, FolderOpen } from 'lucide-react';
+import { X, FolderOpen } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
@@ -48,9 +48,7 @@ export const EditBandDialog = ({
   const [foundedYear, setFoundedYear] = useState(band.founded_year?.toString() || '');
   
   // Images
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(band.image_url);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(band.banner_url);
   
   // Music links
@@ -78,48 +76,6 @@ export const EditBandDialog = ({
   
   const { toast } = useToast();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (type === 'logo') {
-        setImageFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => setImagePreview(reader.result as string);
-        reader.readAsDataURL(file);
-      } else {
-        setBannerFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => setBannerPreview(reader.result as string);
-        reader.readAsDataURL(file);
-      }
-    }
-  };
-
-  const uploadImage = async (file: File, path: string): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${path}/${Date.now()}.${fileExt}`;
-      const { data, error } = await supabase.storage
-        .from('band-images')
-        .upload(fileName, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('band-images')
-        .getPublicUrl(data.path);
-
-      return publicUrl;
-    } catch (error: any) {
-      toast({
-        title: 'Feil ved opplasting',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
-
   const handleFileFromBank = (file: any) => {
     const bucket = file.file_path.split('/')[0];
     const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
@@ -127,10 +83,8 @@ export const EditBandDialog = ({
     
     if (fileModalType === 'logo') {
       setImagePreview(data.publicUrl);
-      setImageFile(null);
     } else {
       setBannerPreview(data.publicUrl);
-      setBannerFile(null);
     }
   };
 
@@ -160,16 +114,8 @@ export const EditBandDialog = ({
     setLoading(true);
 
     try {
-      let imageUrl = imagePreview || band.image_url;
-      let bannerUrl = bannerPreview || band.banner_url;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile, `${band.id}/logo`);
-      }
-      
-      if (bannerFile) {
-        bannerUrl = await uploadImage(bannerFile, `${band.id}/banner`);
-      }
+      const imageUrl = imagePreview || band.image_url;
+      const bannerUrl = bannerPreview || band.banner_url;
 
       const { error } = await supabase
         .from('bands')
@@ -322,33 +268,18 @@ export const EditBandDialog = ({
                         {name ? name.substring(0, 2).toUpperCase() : 'B'}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="logo-upload" className="cursor-pointer">
-                        <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                          <Upload className="h-4 w-4" />
-                          Last opp logo
-                        </div>
-                        <Input
-                          id="logo-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleImageChange(e, 'logo')}
-                          className="hidden"
-                        />
-                      </Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setFileModalType('logo');
-                          setShowFileModal(true);
-                        }}
-                      >
-                        <FolderOpen className="h-4 w-4 mr-2" />
-                        Velg fra Filbank
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFileModalType('logo');
+                        setShowFileModal(true);
+                      }}
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Velg fra Filbank
+                    </Button>
                   </div>
                 </div>
 
@@ -364,33 +295,18 @@ export const EditBandDialog = ({
                         />
                       </div>
                     )}
-                    <div className="flex gap-2">
-                      <Label htmlFor="banner-upload" className="cursor-pointer">
-                        <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                          <Upload className="h-4 w-4" />
-                          {bannerPreview ? 'Endre banner' : 'Last opp banner'}
-                        </div>
-                        <Input
-                          id="banner-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleImageChange(e, 'banner')}
-                          className="hidden"
-                        />
-                      </Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setFileModalType('banner');
-                          setShowFileModal(true);
-                        }}
-                      >
-                        <FolderOpen className="h-4 w-4 mr-2" />
-                        Velg fra Filbank
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFileModalType('banner');
+                        setShowFileModal(true);
+                      }}
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Velg fra Filbank
+                    </Button>
                   </div>
                 </div>
               </TabsContent>
