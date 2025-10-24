@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { Upload, Music, Link as LinkIcon, Users, Phone } from 'lucide-react';
+import { Upload, Music, Link as LinkIcon, Users, Phone, FolderOpen } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { useUserFiles } from '@/hooks/useUserFiles';
+import { FileSelectionModal } from './FileSelectionModal';
 
 interface EditBandDialogProps {
   open: boolean;
@@ -25,7 +27,17 @@ export const EditBandDialog = ({
   band,
   onSuccess,
 }: EditBandDialogProps) => {
+  const [userId, setUserId] = useState<string | undefined>();
+  const { files } = useUserFiles(userId);
   const [loading, setLoading] = useState(false);
+  const [showFileModal, setShowFileModal] = useState(false);
+  const [fileModalType, setFileModalType] = useState<'logo' | 'banner'>('logo');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id);
+    });
+  }, []);
   
   // Basic info
   const [name, setName] = useState(band.name);
@@ -107,6 +119,20 @@ export const EditBandDialog = ({
     }
   };
 
+  const handleFileFromBank = (file: any) => {
+    const bucket = file.file_path.split('/')[0];
+    const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    
+    if (fileModalType === 'logo') {
+      setImagePreview(data.publicUrl);
+      setImageFile(null); // Clear file since we're using URL
+    } else {
+      setBannerPreview(data.publicUrl);
+      setBannerFile(null);
+    }
+  };
+
   const addSong = () => {
     if (newSong.trim()) {
       setDiscography([...discography, newSong.trim()]);
@@ -133,8 +159,8 @@ export const EditBandDialog = ({
     setLoading(true);
 
     try {
-      let imageUrl = band.image_url;
-      let bannerUrl = band.banner_url;
+      let imageUrl = imagePreview || band.image_url;
+      let bannerUrl = bannerPreview || band.banner_url;
       
       if (imageFile) {
         imageUrl = await uploadImage(imageFile, `${band.id}/logo`);
@@ -283,19 +309,33 @@ export const EditBandDialog = ({
                       {name ? name.substring(0, 2).toUpperCase() : 'B'}
                     </AvatarFallback>
                   </Avatar>
-                  <Label htmlFor="logo-upload" className="cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                      <Upload className="h-4 w-4" />
-                      Endre logo
-                    </div>
-                    <Input
-                      id="logo-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e, 'logo')}
-                      className="hidden"
-                    />
-                  </Label>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="logo-upload" className="cursor-pointer">
+                      <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
+                        <Upload className="h-4 w-4" />
+                        Last opp logo
+                      </div>
+                      <Input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, 'logo')}
+                        className="hidden"
+                      />
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFileModalType('logo');
+                        setShowFileModal(true);
+                      }}
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Velg fra Filbank
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -311,19 +351,33 @@ export const EditBandDialog = ({
                       />
                     </div>
                   )}
-                  <Label htmlFor="banner-upload" className="cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                      <Upload className="h-4 w-4" />
-                      {bannerPreview ? 'Endre banner' : 'Last opp banner'}
-                    </div>
-                    <Input
-                      id="banner-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e, 'banner')}
-                      className="hidden"
-                    />
-                  </Label>
+                  <div className="flex gap-2">
+                    <Label htmlFor="banner-upload" className="cursor-pointer">
+                      <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
+                        <Upload className="h-4 w-4" />
+                        {bannerPreview ? 'Endre banner' : 'Last opp banner'}
+                      </div>
+                      <Input
+                        id="banner-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, 'banner')}
+                        className="hidden"
+                      />
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFileModalType('banner');
+                        setShowFileModal(true);
+                      }}
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Velg fra Filbank
+                    </Button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -506,6 +560,15 @@ export const EditBandDialog = ({
             </Button>
           </div>
         </form>
+
+        <FileSelectionModal
+          open={showFileModal}
+          onOpenChange={setShowFileModal}
+          files={files}
+          allowedTypes={['image']}
+          onFileSelected={handleFileFromBank}
+          title={`Velg ${fileModalType === 'logo' ? 'logo' : 'banner'} fra Filbank`}
+        />
       </DialogContent>
     </Dialog>
   );

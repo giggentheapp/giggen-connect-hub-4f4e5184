@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BandWithMembers } from '@/types/band';
 import { Users, Music } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BandViewModal } from './BandViewModal';
 
 interface BandCardProps {
   band: BandWithMembers;
@@ -11,6 +13,7 @@ interface BandCardProps {
 
 export const BandCard = ({ band, userRole }: BandCardProps) => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -35,10 +38,11 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
   };
 
   return (
-    <Card
-      className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
-      onClick={() => navigate(`/band/${band.id}`)}
-    >
+    <>
+      <Card
+        className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
+        onClick={() => setShowModal(true)}
+      >
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
@@ -87,5 +91,12 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
         )}
       </CardContent>
     </Card>
+
+    <BandViewModal 
+      open={showModal} 
+      onOpenChange={setShowModal} 
+      band={band} 
+    />
+    </>
   );
 };
