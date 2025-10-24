@@ -1,4 +1,4 @@
-import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin, Copy, Users } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -144,7 +144,13 @@ export const ProfileSection = ({
 
       {/* Bands Section */}
       {(profile.role === 'MUSIKER' || profile.role === 'ARRANGØR') && (
-        <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+            <h2 className="text-xl md:text-2xl font-semibold">Mine Band</h2>
+          </div>
+          <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
+        </div>
       )}
 
       {/* Upcoming Events Section */}

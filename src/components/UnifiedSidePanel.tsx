@@ -20,6 +20,7 @@ import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { TicketsSection } from '@/components/sections/TicketsSection';
 import { MenuSection } from '@/components/sections/MenuSection';
+import { FileBankSection } from '@/components/sections/FileBankSection';
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
@@ -111,6 +112,9 @@ export const UnifiedSidePanel = ({
       
       case 'admin-files':
         return <AdminFilesSection profile={profile} />;
+      
+      case 'filbank':
+        return <FileBankSection profile={profile} />;
       
       case 'admin-concepts':
         return <AdminConceptsSection profile={profile} />;
