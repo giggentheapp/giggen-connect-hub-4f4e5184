@@ -249,7 +249,7 @@ const BandProfile = () => {
           />
           <EditBandDialog
             open={showEditDialog}
-            onOpenChange={setShowEditDialog}
+            onClose={() => setShowEditDialog(false)}
             band={band}
             onSuccess={() => window.location.reload()}
           />

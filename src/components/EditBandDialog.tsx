@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,22 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { Upload, Music, Link as LinkIcon, Users, Phone, FolderOpen } from 'lucide-react';
+import { Upload, X, FolderOpen } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from './FileSelectionModal';
+import BandTechSpecManager from './BandTechSpecManager';
+import BandHospitalityManager from './BandHospitalityManager';
 
 interface EditBandDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   band: Band;
   onSuccess: () => void;
 }
 
 export const EditBandDialog = ({
   open,
-  onOpenChange,
+  onClose,
   band,
   onSuccess,
 }: EditBandDialogProps) => {
@@ -126,7 +127,7 @@ export const EditBandDialog = ({
     
     if (fileModalType === 'logo') {
       setImagePreview(data.publicUrl);
-      setImageFile(null); // Clear file since we're using URL
+      setImageFile(null);
     } else {
       setBannerPreview(data.publicUrl);
       setBannerFile(null);
@@ -211,7 +212,7 @@ export const EditBandDialog = ({
         description: 'Endringene har blitt lagret',
       });
 
-      onOpenChange(false);
+      onClose();
       onSuccess();
     } catch (error: any) {
       toast({
@@ -224,352 +225,387 @@ export const EditBandDialog = ({
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Rediger {band.name}</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit}>
-          <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="basic">Grunnleggende</TabsTrigger>
-              <TabsTrigger value="visual">Visuelt</TabsTrigger>
-              <TabsTrigger value="music">Musikk</TabsTrigger>
-              <TabsTrigger value="social">Sosiale medier</TabsTrigger>
-              <TabsTrigger value="contact">Kontakt</TabsTrigger>
-            </TabsList>
+    <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+      <div className="min-h-screen">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="fixed top-4 right-4 z-10"
+        >
+          <X className="h-6 w-6" />
+        </Button>
 
-            <TabsContent value="basic" className="space-y-4 mt-4">
-              <div>
-                <Label htmlFor="name">Bandnavn *</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Bandets navn"
-                  required
-                />
-              </div>
+        <div className="max-w-4xl mx-auto p-6 md:p-8">
+          <h1 className="text-3xl font-bold mb-6">Rediger {band.name}</h1>
+          
+          <form onSubmit={handleSubmit}>
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-7 mb-6">
+                <TabsTrigger value="basic">Grunnleggende</TabsTrigger>
+                <TabsTrigger value="visual">Visuelt</TabsTrigger>
+                <TabsTrigger value="music">Musikk</TabsTrigger>
+                <TabsTrigger value="social">Sosiale medier</TabsTrigger>
+                <TabsTrigger value="contact">Kontakt</TabsTrigger>
+                <TabsTrigger value="techspecs">Tech Specs</TabsTrigger>
+                <TabsTrigger value="hospitality">Hospitality</TabsTrigger>
+              </TabsList>
 
-              <div>
-                <Label htmlFor="genre">Sjanger/Musikkstil</Label>
-                <Input
-                  id="genre"
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  placeholder="F.eks. Rock, Jazz, Pop"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="founded">Dannet år</Label>
-                <Input
-                  id="founded"
-                  type="number"
-                  value={foundedYear}
-                  onChange={(e) => setFoundedYear(e.target.value)}
-                  placeholder="F.eks. 2020"
-                  min="1900"
-                  max={new Date().getFullYear()}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Kort beskrivelse</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Kort beskrivelse av bandet..."
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="bio">Utvidet bio</Label>
-                <Textarea
-                  id="bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Fortell mer om bandet, historien, hva som gjør dere unike..."
-                  rows={5}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="visual" className="space-y-4 mt-4">
-              <div>
-                <Label>Bandlogo</Label>
-                <div className="flex items-center gap-4 mt-2">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={imagePreview || undefined} />
-                    <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
-                      {name ? name.substring(0, 2).toUpperCase() : 'B'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="logo-upload" className="cursor-pointer">
-                      <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                        <Upload className="h-4 w-4" />
-                        Last opp logo
-                      </div>
-                      <Input
-                        id="logo-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, 'logo')}
-                        className="hidden"
-                      />
-                    </Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setFileModalType('logo');
-                        setShowFileModal(true);
-                      }}
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
-                  </div>
+              <TabsContent value="basic" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="name">Bandnavn *</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Bandets navn"
+                    required
+                  />
                 </div>
-              </div>
 
-              <div>
-                <Label>Bannerbilde</Label>
-                <div className="mt-2 space-y-2">
-                  {bannerPreview && (
-                    <div className="w-full h-32 rounded-lg overflow-hidden">
-                      <img 
-                        src={bannerPreview} 
-                        alt="Banner preview" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Label htmlFor="banner-upload" className="cursor-pointer">
-                      <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                        <Upload className="h-4 w-4" />
-                        {bannerPreview ? 'Endre banner' : 'Last opp banner'}
-                      </div>
-                      <Input
-                        id="banner-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, 'banner')}
-                        className="hidden"
-                      />
-                    </Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setFileModalType('banner');
-                        setShowFileModal(true);
-                      }}
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
-                  </div>
+                <div>
+                  <Label htmlFor="genre">Sjanger/Musikkstil</Label>
+                  <Input
+                    id="genre"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    placeholder="F.eks. Rock, Jazz, Pop"
+                  />
                 </div>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="music" className="space-y-4 mt-4">
-              <div>
-                <Label htmlFor="spotify">Spotify</Label>
-                <Input
-                  id="spotify"
-                  value={spotify}
-                  onChange={(e) => setSpotify(e.target.value)}
-                  placeholder="https://open.spotify.com/artist/..."
-                />
-              </div>
+                <div>
+                  <Label htmlFor="founded">Dannet år</Label>
+                  <Input
+                    id="founded"
+                    type="number"
+                    value={foundedYear}
+                    onChange={(e) => setFoundedYear(e.target.value)}
+                    placeholder="F.eks. 2020"
+                    min="1900"
+                    max={new Date().getFullYear()}
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="youtube">YouTube</Label>
-                <Input
-                  id="youtube"
-                  value={youtube}
-                  onChange={(e) => setYoutube(e.target.value)}
-                  placeholder="https://youtube.com/@..."
-                />
-              </div>
+                <div>
+                  <Label htmlFor="description">Kort beskrivelse</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Kort beskrivelse av bandet..."
+                    rows={3}
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="soundcloud">SoundCloud</Label>
-                <Input
-                  id="soundcloud"
-                  value={soundcloud}
-                  onChange={(e) => setSoundcloud(e.target.value)}
-                  placeholder="https://soundcloud.com/..."
-                />
-              </div>
+                <div>
+                  <Label htmlFor="bio">Utvidet bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Fortell mer om bandet, historien, hva som gjør dere unike..."
+                    rows={5}
+                  />
+                </div>
+              </TabsContent>
 
-              <div>
-                <Label htmlFor="apple">Apple Music</Label>
-                <Input
-                  id="apple"
-                  value={appleMusic}
-                  onChange={(e) => setAppleMusic(e.target.value)}
-                  placeholder="https://music.apple.com/..."
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="bandcamp">Bandcamp</Label>
-                <Input
-                  id="bandcamp"
-                  value={bandcamp}
-                  onChange={(e) => setBandcamp(e.target.value)}
-                  placeholder="https://bandname.bandcamp.com"
-                />
-              </div>
-
-              <div>
-                <Label>Diskografi (låter/album)</Label>
-                <div className="space-y-2 mt-2">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newSong}
-                      onChange={(e) => setNewSong(e.target.value)}
-                      placeholder="Legg til låt eller album"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSong())}
-                    />
-                    <Button type="button" onClick={addSong} size="sm">
-                      Legg til
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {discography.map((song, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="secondary"
-                        className="cursor-pointer"
-                        onClick={() => removeSong(index)}
+              <TabsContent value="visual" className="space-y-4 mt-4">
+                <div>
+                  <Label>Bandlogo</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={imagePreview || undefined} />
+                      <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
+                        {name ? name.substring(0, 2).toUpperCase() : 'B'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="logo-upload" className="cursor-pointer">
+                        <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
+                          <Upload className="h-4 w-4" />
+                          Last opp logo
+                        </div>
+                        <Input
+                          id="logo-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageChange(e, 'logo')}
+                          className="hidden"
+                        />
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFileModalType('logo');
+                          setShowFileModal(true);
+                        }}
                       >
-                        {song} ×
-                      </Badge>
-                    ))}
+                        <FolderOpen className="h-4 w-4 mr-2" />
+                        Velg fra Filbank
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="social" className="space-y-4 mt-4">
-              <div>
-                <Label htmlFor="instagram">Instagram</Label>
-                <Input
-                  id="instagram"
-                  value={instagram}
-                  onChange={(e) => setInstagram(e.target.value)}
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
+                <div>
+                  <Label>Bannerbilde</Label>
+                  <div className="mt-2 space-y-2">
+                    {bannerPreview && (
+                      <div className="w-full h-32 rounded-lg overflow-hidden">
+                        <img 
+                          src={bannerPreview} 
+                          alt="Banner preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <Label htmlFor="banner-upload" className="cursor-pointer">
+                        <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
+                          <Upload className="h-4 w-4" />
+                          {bannerPreview ? 'Endre banner' : 'Last opp banner'}
+                        </div>
+                        <Input
+                          id="banner-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageChange(e, 'banner')}
+                          className="hidden"
+                        />
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFileModalType('banner');
+                          setShowFileModal(true);
+                        }}
+                      >
+                        <FolderOpen className="h-4 w-4 mr-2" />
+                        Velg fra Filbank
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-              <div>
-                <Label htmlFor="facebook">Facebook</Label>
-                <Input
-                  id="facebook"
-                  value={facebook}
-                  onChange={(e) => setFacebook(e.target.value)}
-                  placeholder="https://facebook.com/..."
-                />
-              </div>
+              <TabsContent value="music" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="spotify">Spotify</Label>
+                  <Input
+                    id="spotify"
+                    value={spotify}
+                    onChange={(e) => setSpotify(e.target.value)}
+                    placeholder="https://open.spotify.com/artist/..."
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="tiktok">TikTok</Label>
-                <Input
-                  id="tiktok"
-                  value={tiktok}
-                  onChange={(e) => setTiktok(e.target.value)}
-                  placeholder="https://tiktok.com/@..."
-                />
-              </div>
+                <div>
+                  <Label htmlFor="youtube">YouTube</Label>
+                  <Input
+                    id="youtube"
+                    value={youtube}
+                    onChange={(e) => setYoutube(e.target.value)}
+                    placeholder="https://youtube.com/@..."
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="twitter">Twitter/X</Label>
-                <Input
-                  id="twitter"
-                  value={twitter}
-                  onChange={(e) => setTwitter(e.target.value)}
-                  placeholder="https://twitter.com/..."
-                />
-              </div>
+                <div>
+                  <Label htmlFor="soundcloud">SoundCloud</Label>
+                  <Input
+                    id="soundcloud"
+                    value={soundcloud}
+                    onChange={(e) => setSoundcloud(e.target.value)}
+                    placeholder="https://soundcloud.com/..."
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="website">Nettside</Label>
-                <Input
-                  id="website"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-            </TabsContent>
+                <div>
+                  <Label htmlFor="apple">Apple Music</Label>
+                  <Input
+                    id="apple"
+                    value={appleMusic}
+                    onChange={(e) => setAppleMusic(e.target.value)}
+                    placeholder="https://music.apple.com/..."
+                  />
+                </div>
 
-            <TabsContent value="contact" className="space-y-4 mt-4">
-              <div>
-                <Label htmlFor="email">E-post</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="band@example.com"
-                />
-              </div>
+                <div>
+                  <Label htmlFor="bandcamp">Bandcamp</Label>
+                  <Input
+                    id="bandcamp"
+                    value={bandcamp}
+                    onChange={(e) => setBandcamp(e.target.value)}
+                    placeholder="https://bandname.bandcamp.com"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="phone">Telefon</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+47 123 45 678"
-                />
-              </div>
+                <div>
+                  <Label>Diskografi (låter/album)</Label>
+                  <div className="space-y-2 mt-2">
+                    <div className="flex gap-2">
+                      <Input
+                        value={newSong}
+                        onChange={(e) => setNewSong(e.target.value)}
+                        placeholder="Legg til låt eller album"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSong())}
+                      />
+                      <Button type="button" onClick={addSong} size="sm">
+                        Legg til
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {discography.map((song, index) => (
+                        <Badge 
+                          key={index} 
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => removeSong(index)}
+                        >
+                          {song} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-              <div>
-                <Label htmlFor="booking">Booking e-post</Label>
-                <Input
-                  id="booking"
-                  type="email"
-                  value={bookingEmail}
-                  onChange={(e) => setBookingEmail(e.target.value)}
-                  placeholder="booking@example.com"
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="social" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="instagram">Instagram</Label>
+                  <Input
+                    id="instagram"
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    placeholder="https://instagram.com/..."
+                  />
+                </div>
 
-          <div className="flex gap-2 justify-end mt-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Avbryt
-            </Button>
-            <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? 'Lagrer...' : 'Lagre endringer'}
-            </Button>
-          </div>
-        </form>
+                <div>
+                  <Label htmlFor="facebook">Facebook</Label>
+                  <Input
+                    id="facebook"
+                    value={facebook}
+                    onChange={(e) => setFacebook(e.target.value)}
+                    placeholder="https://facebook.com/..."
+                  />
+                </div>
 
-        <FileSelectionModal
-          open={showFileModal}
-          onOpenChange={setShowFileModal}
-          files={files}
-          allowedTypes={['image']}
-          onFileSelected={handleFileFromBank}
-          title={`Velg ${fileModalType === 'logo' ? 'logo' : 'banner'} fra Filbank`}
-        />
-      </DialogContent>
-    </Dialog>
+                <div>
+                  <Label htmlFor="tiktok">TikTok</Label>
+                  <Input
+                    id="tiktok"
+                    value={tiktok}
+                    onChange={(e) => setTiktok(e.target.value)}
+                    placeholder="https://tiktok.com/@..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="twitter">Twitter/X</Label>
+                  <Input
+                    id="twitter"
+                    value={twitter}
+                    onChange={(e) => setTwitter(e.target.value)}
+                    placeholder="https://twitter.com/..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="website">Nettside</Label>
+                  <Input
+                    id="website"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="contact" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="email">E-post</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="band@example.com"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone">Telefon</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+47 123 45 678"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="booking">Booking e-post</Label>
+                  <Input
+                    id="booking"
+                    type="email"
+                    value={bookingEmail}
+                    onChange={(e) => setBookingEmail(e.target.value)}
+                    placeholder="booking@example.com"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="techspecs" className="space-y-4 mt-4">
+                {userId && (
+                  <BandTechSpecManager
+                    userId={userId}
+                    bandId={band.id}
+                    title="Tekniske spesifikasjoner"
+                    description="Last opp tekniske spesifikasjoner for bandet fra filbanken"
+                  />
+                )}
+              </TabsContent>
+
+              <TabsContent value="hospitality" className="space-y-4 mt-4">
+                {userId && (
+                  <BandHospitalityManager
+                    userId={userId}
+                    bandId={band.id}
+                    title="Hospitality Rider"
+                    description="Last opp hospitality rider for bandet fra filbanken"
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex gap-2 justify-end mt-6">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Avbryt
+              </Button>
+              <Button type="submit" disabled={loading || !name.trim()}>
+                {loading ? 'Lagrer...' : 'Lagre endringer'}
+              </Button>
+            </div>
+          </form>
+
+          <FileSelectionModal
+            open={showFileModal}
+            onOpenChange={setShowFileModal}
+            files={files}
+            allowedTypes={['image']}
+            onFileSelected={handleFileFromBank}
+            title={`Velg ${fileModalType === 'logo' ? 'logo' : 'banner'} fra Filbank`}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
