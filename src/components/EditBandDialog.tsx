@@ -76,7 +76,7 @@ export const EditBandDialog = ({
   
   const { toast } = useToast();
 
-  const handleFileFromBank = (file: any) => {
+  const handleFileFromBank = async (file: any) => {
     const bucket = file.file_path.split('/')[0];
     const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
@@ -85,6 +85,21 @@ export const EditBandDialog = ({
       setImagePreview(data.publicUrl);
     } else {
       setBannerPreview(data.publicUrl);
+    }
+
+    // Register usage in file_usage table
+    try {
+      const usageType = fileModalType === 'logo' ? 'band_logo' : 'band_banner';
+      await supabase
+        .from('file_usage')
+        .insert({
+          file_id: file.id,
+          usage_type: usageType,
+          reference_id: band.id
+        });
+    } catch (error) {
+      // Ignore if already exists (unique constraint)
+      console.log('File usage already registered or error:', error);
     }
   };
 

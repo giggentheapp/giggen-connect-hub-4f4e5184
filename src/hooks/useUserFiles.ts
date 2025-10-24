@@ -19,7 +19,7 @@ export interface UserFile {
 export interface FileUsage {
   id: string;
   file_id: string;
-  usage_type: 'profile_portfolio' | 'tech_spec' | 'hospitality_rider' | 'band_portfolio' | 'band_tech_spec' | 'band_hospitality';
+  usage_type: 'profile_portfolio' | 'tech_spec' | 'hospitality_rider' | 'band_portfolio' | 'band_tech_spec' | 'band_hospitality' | 'band_logo' | 'band_banner';
   reference_id: string | null;
   created_at: string;
 }
@@ -90,14 +90,7 @@ export const useUserFiles = (userId: string | undefined) => {
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
       const fileUrl = urlData.publicUrl;
 
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from(bucket)
-        .remove([path]);
-
-      if (storageError) throw storageError;
-
-      // Get all usages of this file
+      // Get all usages of this file from file_usage table
       const { data: usages } = await supabase
         .from('file_usage')
         .select('*')
@@ -118,11 +111,25 @@ export const useUserFiles = (userId: string | undefined) => {
             await supabase.from('profile_tech_specs').delete().eq('file_path', filePath);
           } else if (usage.usage_type === 'hospitality_rider') {
             await supabase.from('hospitality_riders').delete().eq('file_path', filePath);
+          } else if (usage.usage_type === 'band_logo' && usage.reference_id) {
+            // Remove band logo
+            await supabase
+              .from('bands')
+              .update({ image_url: null })
+              .eq('id', usage.reference_id)
+              .eq('image_url', fileUrl);
+          } else if (usage.usage_type === 'band_banner' && usage.reference_id) {
+            // Remove band banner
+            await supabase
+              .from('bands')
+              .update({ banner_url: null })
+              .eq('id', usage.reference_id)
+              .eq('banner_url', fileUrl);
           }
         }
       }
 
-      // Also check bands table for logo/banner usage (these might not have file_usage entries)
+      // Also check bands table for any logo/banner usage not in file_usage (legacy data)
       const { data: bandsWithImage } = await supabase
         .from('bands')
         .select('id, image_url, banner_url')
@@ -142,6 +149,13 @@ export const useUserFiles = (userId: string | undefined) => {
           }
         }
       }
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from(bucket)
+        .remove([path]);
+
+      if (storageError) throw storageError;
 
       // Delete from database (cascade will handle file_usage)
       const { error: dbError } = await supabase
