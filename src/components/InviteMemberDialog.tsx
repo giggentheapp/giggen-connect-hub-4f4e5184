@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -52,7 +52,7 @@ export const InviteMemberDialog = ({
         const { data, error } = await supabase
           .from('profiles')
           .select('user_id, display_name, username, avatar_url')
-          .eq('role', 'MUSIKER' as any)
+          .eq('role', 'musician')
           .not('user_id', 'in', `(${memberIds.join(',')})`)
           .or(`display_name.ilike.%${search}%,username.ilike.%${search}%`)
           .limit(20);
@@ -122,6 +122,9 @@ export const InviteMemberDialog = ({
       <SheetContent side="right" className="w-full sm:max-w-full p-0 flex flex-col">
         <SheetHeader className="p-6 pb-4 border-b">
           <SheetTitle>Inviter musikere til {bandName}</SheetTitle>
+          <SheetDescription>
+            Søk og inviter musikere til å bli med i bandet ditt
+          </SheetDescription>
         </SheetHeader>
         <div className="flex-1 flex flex-col min-h-0 p-6">
           <div className="relative mb-4">
