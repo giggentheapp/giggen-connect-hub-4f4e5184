@@ -16,6 +16,7 @@ import { ProfileSection } from '@/components/sections/ProfileSection';
 import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
 import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
 import { AdminBandsSection } from '@/components/sections/AdminBandsSection';
+import { AdminEventsSection } from '@/components/sections/AdminEventsSection';
 import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
 import { BookingsSection } from '@/components/sections/BookingsSection';
 import { TicketsSection } from '@/components/sections/TicketsSection';
@@ -121,6 +122,9 @@ export const UnifiedSidePanel = ({
       
       case 'admin-bands':
         return <AdminBandsSection profile={profile} />;
+      
+      case 'admin-events':
+        return <AdminEventsSection profile={profile} />;
       
       case 'settings':
         return <AdminSettingsSection profile={profile} />;

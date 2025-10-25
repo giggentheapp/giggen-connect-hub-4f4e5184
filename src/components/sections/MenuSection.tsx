@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Briefcase, Lightbulb, FileText, Users } from "lucide-react";
+import { Settings, Briefcase, Lightbulb, FileText, Users, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserProfile } from "@/types/auth";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -52,6 +52,13 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
       description: "Administrer dine band og medlemskap",
       icon: Users,
       section: "admin-bands",
+    },
+    {
+      id: "admin-events",
+      label: "Mine Arrangementer",
+      description: "Administrer dine arrangementer",
+      icon: Calendar,
+      section: "admin-events",
     },
     {
       id: "admin-files",
