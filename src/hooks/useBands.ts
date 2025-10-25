@@ -89,63 +89,68 @@ export const useUserBands = (userId: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
+  const fetchUserBands = async () => {
     if (!userId) {
       setBands([]);
       setLoading(false);
       return;
     }
 
-    const fetchUserBands = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('band_members')
-          .select(`
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('band_members')
+        .select(`
+          id,
+          role,
+          joined_at,
+          show_in_profile,
+          band:band_id (
             id,
-            role,
-            joined_at,
-            band:band_id (
+            name,
+            description,
+            image_url,
+            genre,
+            founded_year,
+            created_by,
+            created_at,
+            updated_at,
+            band_members (
               id,
-              name,
-              description,
-              image_url,
-              created_by,
-              created_at,
-              updated_at,
-              band_members (
-                id,
-                user_id,
-                role
-              )
+              user_id,
+              role
             )
-          `)
-          .eq('user_id', userId);
+          )
+        `)
+        .eq('user_id', userId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const userBands = (data || [])
-          .filter(item => item.band)
-          .map(item => ({
-            ...item.band,
-            user_role: item.role,
-            member_count: item.band.band_members?.length || 0,
-          }));
+      const userBands = (data || [])
+        .filter(item => item.band)
+        .map(item => ({
+          ...item.band,
+          user_role: item.role,
+          show_in_profile: item.show_in_profile,
+          member_id: item.id,
+          member_count: item.band.band_members?.length || 0,
+        }));
 
-        setBands(userBands as any);
-      } catch (error: any) {
-        toast({
-          title: 'Feil ved lasting av band',
-          description: error.message,
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      setBands(userBands as any);
+    } catch (error: any) {
+      toast({
+        title: 'Feil ved lasting av band',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserBands();
   }, [userId, toast]);
 
-  return { bands, loading };
+  return { bands, loading, refetch: fetchUserBands };
 };

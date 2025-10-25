@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Users } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Users, Eye, EyeOff } from "lucide-react";
 import { BandCard } from "@/components/BandCard";
 import { CreateBandModal } from "@/components/CreateBandModal";
 import { BandInvites } from "@/components/BandInvites";
 import { useUserBands } from "@/hooks/useBands";
 import { UserProfile } from "@/types/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AdminBandsSectionProps {
   profile: UserProfile;
@@ -13,7 +17,40 @@ interface AdminBandsSectionProps {
 
 export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const { bands, loading } = useUserBands(profile.user_id);
+  const { bands, loading, refetch } = useUserBands(profile.user_id);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const toggleBandVisibility = async (memberId: string, bandName: string, currentState: boolean) => {
+    try {
+      const newVisibilityState = !currentState;
+      
+      const { error } = await supabase
+        .from('band_members')
+        .update({ 
+          show_in_profile: newVisibilityState
+        })
+        .eq('id', memberId);
+
+      if (error) throw error;
+
+      toast({
+        title: newVisibilityState ? '✅ Band vist i profil' : '🔒 Band skjult fra profil',
+        description: newVisibilityState 
+          ? `"${bandName}" er nå synlig på profilsiden` 
+          : `"${bandName}" er nå skjult fra profilsiden`,
+      });
+      
+      await refetch();
+      
+    } catch (error: any) {
+      toast({
+        title: 'Kunne ikke endre synlighet',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
@@ -46,9 +83,57 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
               <p className="text-sm text-muted-foreground">Laster band...</p>
             </div>
           ) : bands.length > 0 ? (
-            <div className="grid gap-4">
-              {bands.map((band) => (
-                <BandCard key={band.id} band={band} userRole={(band as any).user_role} />
+            <div className="space-y-3">
+              {bands.map((band: any) => (
+                <div key={band.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 hover:border-border transition-all">
+                  <div className="flex items-start gap-3 p-3">
+                    <div className="flex-1 min-w-0">
+                      <div 
+                        onClick={() => navigate(`/band/${band.id}`)}
+                        className="cursor-pointer"
+                      >
+                        <h3 className="text-sm font-semibold truncate">{band.name}</h3>
+                        {band.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {band.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
+                            {band.member_count} medlemmer
+                          </span>
+                          {band.genre && (
+                            <span className="inline-flex items-center gap-1">
+                              <span>•</span>
+                              {band.genre}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Visibility Toggle */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                      {band.show_in_profile ? (
+                        <>
+                          <Eye className="h-3 w-3 text-green-600" />
+                          <span className="text-xs font-medium">Offentlig</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs font-medium">Skjult</span>
+                        </>
+                      )}
+                      <Switch
+                        checked={band.show_in_profile}
+                        onCheckedChange={() => toggleBandVisibility(band.member_id, band.name, band.show_in_profile)}
+                        className="data-[state=checked]:bg-green-500 scale-75"
+                      />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
