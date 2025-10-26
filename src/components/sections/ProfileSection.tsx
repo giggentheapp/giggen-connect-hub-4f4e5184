@@ -138,12 +138,12 @@ export const ProfileSection = ({
       )}
 
       {/* Band Invites (only for own profile) */}
-      {isOwnProfile && (profile.role === 'MUSIKER' || profile.role === 'ARRANGØR') && (
+      {isOwnProfile && (profile.role === 'musician' || profile.role === 'organizer') && (
         <BandInvites userId={profile.user_id} />
       )}
 
       {/* Bands Section */}
-      {(profile.role === 'MUSIKER' || profile.role === 'ARRANGØR') && (
+      {(profile.role === 'musician' || profile.role === 'organizer') && (
         <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
       )}
 
