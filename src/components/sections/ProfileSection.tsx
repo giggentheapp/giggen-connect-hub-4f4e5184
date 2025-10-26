@@ -52,34 +52,16 @@ export const ProfileSection = ({
 
   const handleFileSelect = async (file: any) => {
     try {
-      const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
-      
-      // Add to profile portfolio
-      const { error } = await supabase
-        .from('profile_portfolio')
-        .insert({
-          user_id: profile.user_id,
-          file_url: publicUrl,
-          file_path: file.file_path,
-          filename: file.filename,
-          file_type: file.file_type,
-          mime_type: file.mime_type,
-          file_size: file.file_size,
-          is_public: true,
-          title: file.filename
-        });
-
-      if (error) throw error;
-
+      // File is already in user_files/filbank, just show success message
       toast({
-        title: 'Fil lagt til',
-        description: 'Filen ble lagt til i porteføljen din',
+        title: 'Fil valgt',
+        description: 'Filen vises nå i porteføljen din',
       });
 
-      // Refresh the page to show the new file
+      // Refresh to show the file
       window.location.reload();
     } catch (error: any) {
-      console.error('Error adding file to portfolio:', error);
+      console.error('Error selecting file:', error);
       toast({
         title: 'Feil',
         description: error.message,

@@ -58,7 +58,7 @@ export const FilebankSelectionModal = ({
 
       // Filter by category if specified
       if (category !== 'all') {
-        query = query.ilike('file_path', `%/${category}/%`);
+        query = query.ilike('file_path', `${category}/%`);
       }
 
       const { data, error } = await query;

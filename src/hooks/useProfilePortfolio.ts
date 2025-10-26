@@ -15,7 +15,9 @@ export interface ProfilePortfolioFile {
   updated_at: string;
   title?: string;
   description?: string;
-  is_public: boolean;
+  is_public?: boolean;
+  bucket_name?: string;
+  category?: string;
 }
 
 export const useProfilePortfolio = (userId: string | undefined) => {
@@ -35,9 +37,10 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('profile_portfolio')
+        .from('user_files')
         .select('*')
         .eq('user_id', userId)
+        .ilike('file_path', 'portfolio/%')
         .order('created_at', { ascending: false });
 
       if (fetchError) {
