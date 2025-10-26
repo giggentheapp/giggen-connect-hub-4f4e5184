@@ -18,10 +18,16 @@ export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) =>
   }
 
   return (
-    <div className="space-y-3 md:space-y-4">
-      {visibleBands.map((band) => (
-        <ProfileBandCard key={band.id} band={band as any} />
-      ))}
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3">
+        <Users className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
+        <h2 className="text-xl md:text-2xl font-semibold">Mine Band</h2>
+      </div>
+      <div className="space-y-3 md:space-y-4">
+        {visibleBands.map((band) => (
+          <ProfileBandCard key={band.id} band={band as any} />
+        ))}
+      </div>
     </div>
   );
 };
