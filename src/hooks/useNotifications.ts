@@ -29,12 +29,13 @@ export const useNotifications = () => {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
+        .eq('read', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.read).length || 0);
+      setUnreadCount(data?.length || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({
@@ -56,8 +57,9 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
+      // Remove the notification from list since we only show unread
       setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        prev.filter(n => n.id !== notificationId)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
@@ -78,7 +80,8 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      // Clear all notifications since we only show unread
+      setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all as read:', error);
