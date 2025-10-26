@@ -1336,6 +1336,7 @@ export type Database = {
       }
       user_files: {
         Row: {
+          bucket_name: string | null
           category: string
           created_at: string | null
           file_path: string
@@ -1349,6 +1350,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bucket_name?: string | null
           category?: string
           created_at?: string | null
           file_path: string
@@ -1362,6 +1364,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bucket_name?: string | null
           category?: string
           created_at?: string | null
           file_path?: string
@@ -1628,6 +1631,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      migrate_file_to_filbank: {
+        Args: {
+          file_id: string
+          old_bucket: string
+          old_path: string
+          user_id: string
+        }
+        Returns: boolean
       }
       permanently_delete_any_booking: {
         Args: { booking_uuid: string }

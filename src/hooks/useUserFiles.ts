@@ -86,10 +86,9 @@ export const useUserFiles = (userId: string | undefined) => {
     try {
       console.log('Deleting file:', fileId, filePath);
       
-      // Get the public URL before deleting
-      const bucket = filePath.split('/')[0];
-      const path = filePath.substring(filePath.indexOf('/') + 1);
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+      // All files now in filbank bucket
+      const bucket = 'filbank';
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
       const fileUrl = urlData.publicUrl;
       console.log('File URL to remove:', fileUrl);
 
@@ -107,13 +106,13 @@ export const useUserFiles = (userId: string | undefined) => {
           const updates: any = {};
           
           // Check if image_url contains the file path
-          if (band.image_url && (band.image_url === fileUrl || band.image_url.includes(path))) {
+          if (band.image_url && (band.image_url === fileUrl || band.image_url.includes(filePath))) {
             updates.image_url = null;
             console.log('Removing logo from band:', band.id);
           }
           
           // Check if banner_url contains the file path
-          if (band.banner_url && (band.banner_url === fileUrl || band.banner_url.includes(path))) {
+          if (band.banner_url && (band.banner_url === fileUrl || band.banner_url.includes(filePath))) {
             updates.banner_url = null;
             console.log('Removing banner from band:', band.id);
           }
@@ -174,11 +173,11 @@ export const useUserFiles = (userId: string | undefined) => {
         }
       }
 
-      // Delete from storage
+      // Delete from storage (now always from filbank)
       console.log('Deleting from storage...');
       const { error: storageError } = await supabase.storage
         .from(bucket)
-        .remove([path]);
+        .remove([filePath]);
 
       if (storageError) {
         console.error('Storage delete error:', storageError);

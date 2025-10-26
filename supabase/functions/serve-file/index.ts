@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const filePath = url.searchParams.get('path');
-    const bucket = url.searchParams.get('bucket') || 'portfolio';
+    const bucket = url.searchParams.get('bucket') || 'filbank';
     const authHeader = req.headers.get('authorization');
 
     if (!filePath) {

@@ -17,11 +17,11 @@ interface FileUploadModalProps {
 type FileCategory = 'image' | 'video' | 'audio' | 'tech_spec' | 'hospitality_rider';
 
 const categories = [
-  { value: 'image' as FileCategory, label: 'Bilde', icon: Image, accept: 'image/*', bucket: 'portfolio' },
-  { value: 'video' as FileCategory, label: 'Video', icon: Video, accept: 'video/*', bucket: 'portfolio' },
-  { value: 'audio' as FileCategory, label: 'Lydfil', icon: Music, accept: 'audio/*', bucket: 'portfolio' },
-  { value: 'tech_spec' as FileCategory, label: 'Tech Spec', icon: FileText, accept: '.pdf,.doc,.docx', bucket: 'tech-specs' },
-  { value: 'hospitality_rider' as FileCategory, label: 'Hospitality Rider', icon: Coffee, accept: '.pdf,.doc,.docx', bucket: 'hospitality' },
+  { value: 'image' as FileCategory, label: 'Bilde', icon: Image, accept: 'image/*', category: 'image' },
+  { value: 'video' as FileCategory, label: 'Video', icon: Video, accept: 'video/*', category: 'video' },
+  { value: 'audio' as FileCategory, label: 'Lydfil', icon: Music, accept: 'audio/*', category: 'audio' },
+  { value: 'tech_spec' as FileCategory, label: 'Tech Spec', icon: FileText, accept: '.pdf,.doc,.docx', category: 'tech_spec' },
+  { value: 'hospitality_rider' as FileCategory, label: 'Hospitality Rider', icon: Coffee, accept: '.pdf,.doc,.docx', category: 'hospitality_rider' },
 ];
 
 export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: FileUploadModalProps) => {
@@ -39,20 +39,21 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       if (!category) throw new Error('Invalid category');
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
-      const filePath = `${category.bucket}/${fileName}`;
+      const timestamp = Date.now();
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${userId}/${category.category}/${timestamp}_${sanitizedFileName}`;
 
-      // Upload to storage
+      // Upload to unified filbank bucket
       const { error: uploadError } = await supabase.storage
-        .from(category.bucket)
-        .upload(fileName, file);
+        .from('filbank')
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(category.bucket)
-        .getPublicUrl(fileName);
+      // Determine file type for database
+      const fileType = file.type.startsWith('image/') ? 'image' :
+                      file.type.startsWith('video/') ? 'video' :
+                      file.type.startsWith('audio/') ? 'audio' : 'document';
 
       // Insert into user_files
       const { error: dbError } = await supabase
@@ -61,11 +62,12 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
           user_id: userId,
           filename: file.name,
           file_path: filePath,
-          file_url: publicUrl,
-          file_type: file.type.split('/')[0] || 'document',
+          file_type: fileType,
           file_size: file.size,
           mime_type: file.type,
           category: selectedCategory,
+          is_public: false,
+          bucket_name: 'filbank'
         });
 
       if (dbError) throw dbError;
