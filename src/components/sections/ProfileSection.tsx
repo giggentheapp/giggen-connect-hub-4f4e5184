@@ -142,11 +142,6 @@ export const ProfileSection = ({
         <BandInvites userId={profile.user_id} />
       )}
 
-      {/* Bands Section */}
-      {(profile.role === 'musician' || profile.role === 'organizer') && (
-        <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
-      )}
-
       {/* Upcoming Events Section */}
       {events.length > 0 && (
         <div className="space-y-4 md:space-y-6">
@@ -161,6 +156,11 @@ export const ProfileSection = ({
             ))}
           </div>
         </div>
+      )}
+
+      {/* Bands Section */}
+      {(profile.role === 'musician' || profile.role === 'organizer') && (
+        <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
       )}
       </div>
     </div>
