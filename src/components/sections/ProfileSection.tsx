@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { User, Lightbulb, Calendar, MapPin, Copy, FolderOpen } from 'lucide-react';
-import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { BandsInProfile } from '@/components/BandsInProfile';
@@ -143,9 +142,9 @@ export const ProfileSection = ({
       </div>
 
       {/* Portfolio Section */}
-      <div className="space-y-4 md:space-y-6">
-        {isOwnProfile && (
-          <div className="flex justify-end">
+      {isOwnProfile && (
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex justify-start">
             <Button
               onClick={() => setShowFilebankModal(true)}
               variant="outline"
@@ -156,9 +155,8 @@ export const ProfileSection = ({
               Velg fra Filbank
             </Button>
           </div>
-        )}
-        <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
-      </div>
+        </div>
+      )}
 
       {/* Concepts Section */}
       {concepts.length > 0 && (
