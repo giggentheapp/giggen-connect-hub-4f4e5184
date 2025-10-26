@@ -60,34 +60,37 @@ const FileUpload = ({ fileType, folderPath, onFileUploaded, acceptedTypes = ".jp
         throw new Error('Must be authenticated to upload files');
       }
 
-      // Use separate buckets for different file types
-      let bucketName;
+      // All files go to filbank with category structure
+      const bucketName = 'filbank';
+      
+      // Map fileType to category
+      let category: string;
       switch(fileType) {
         case 'hospitality':
-          bucketName = 'hospitality';
+          category = 'hospitality';
           break;
         case 'tech-spec':
-          bucketName = 'tech-specs'; // Note: with hyphen
+          category = 'tech-specs';
           break;
         case 'concepts':
-          bucketName = 'concepts';
+          category = 'concepts';
           break;
         case 'avatars':
-          bucketName = 'avatars';
+          category = 'avatars';
           break;
         case 'portfolio':
         default:
-          bucketName = 'portfolio';
+          category = 'portfolio';
           break;
       }
 
-      // Velger viktig - LAG din egen filePath
+      // Create file path: user_id/category/timestamp-filename
       const timestamp = Date.now();
       const sanitizedFileName = file.name
         .replace(/[^a-zA-Z0-9._\-æøåÆØÅ]/g, '_')
         .replace(/_{2,}/g, '_');
       const fileName = `${timestamp}-${sanitizedFileName}`;
-      const filePath = `${user.id}/${fileName}`; // <-- DENNE brukes overalt
+      const filePath = `${user.id}/${category}/${fileName}`;
 
       console.log('🎯 Creating file at path:', filePath);
 

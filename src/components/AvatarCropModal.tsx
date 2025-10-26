@@ -137,22 +137,22 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
       
       // Generate unique filename
       const fileName = `${userId}_${Date.now()}.jpg`;
-      const filePath = `${userId}/${fileName}`;
 
       // Delete old avatar if exists
       if (currentAvatarUrl) {
         const oldPath = currentAvatarUrl.split('/').pop();
         if (oldPath) {
           await supabase.storage
-            .from('avatars')
-            .remove([`${userId}/${oldPath}`]);
+            .from('filbank')
+            .remove([`${userId}/avatars/${oldPath}`]);
         }
       }
 
-      // Upload new avatar
+      // Upload new avatar to filbank
+      const avatarPath = `${userId}/avatars/${fileName}`;
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, croppedBlob, {
+        .from('filbank')
+        .upload(avatarPath, croppedBlob, {
           contentType: 'image/jpeg',
           upsert: true
         });
@@ -161,8 +161,8 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+        .from('filbank')
+        .getPublicUrl(avatarPath);
 
       // Update profile in database
       const { error: updateError } = await supabase

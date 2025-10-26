@@ -17,12 +17,12 @@ interface FileItem {
 }
 
 interface FileViewerByPathProps {
-  bucketName: 'portfolio' | 'concepts';
+  bucketName?: 'filbank';
   folderPath: string;
   showControls?: boolean;
 }
 
-const FileViewerByPath = ({ bucketName, folderPath, showControls = false }: FileViewerByPathProps) => {
+const FileViewerByPath = ({ bucketName = 'filbank', folderPath, showControls = false }: FileViewerByPathProps) => {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -38,23 +38,14 @@ const FileViewerByPath = ({ bucketName, folderPath, showControls = false }: File
         const pathParts = folderPath.split('/');
         const userId = pathParts[pathParts.length - 1];
         
-        if (bucketName === 'portfolio') {
-          const result = await supabase
-            .from('profile_portfolio')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-          data = result.data || [];
-          error = result.error;
-        } else {
-          const result = await supabase
-            .from('concept_files')
-            .select('*')
-            .eq('creator_id', userId)
-            .order('created_at', { ascending: false });
-          data = result.data || [];
-          error = result.error;
-        }
+        // Query both portfolio and concept files from user_files table
+        const result = await supabase
+          .from('user_files')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        data = result.data || [];
+        error = result.error;
 
         if (error) throw error;
         setFiles(data);

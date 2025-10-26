@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     );
 
     // Security: Verify authentication for sensitive files
-    if (authHeader && bucket !== 'avatars') {
+    if (authHeader && bucket === 'filbank') {
       const supabaseAuth = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_ANON_KEY') ?? ''

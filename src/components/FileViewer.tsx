@@ -21,12 +21,12 @@ interface FileItem {
 
 interface FileViewerProps {
   files: FileItem[];
-  bucketName: 'portfolio' | 'concepts';
+  bucketName?: 'filbank';
   canDelete?: boolean;
   onFileDeleted?: (fileId: string) => void;
 }
 
-const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: FileViewerProps) => {
+const FileViewer = ({ files, bucketName = 'filbank', canDelete = false, onFileDeleted }: FileViewerProps) => {
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -48,7 +48,7 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
 
   const getPublicUrl = (filePath: string) => {
     const { data } = supabase.storage
-      .from(bucketName)
+      .from('filbank')
       .getPublicUrl(filePath);
     return data.publicUrl;
   };
@@ -57,17 +57,16 @@ const FileViewer = ({ files, bucketName, canDelete = false, onFileDeleted }: Fil
     setDeletingFiles(prev => new Set([...prev, file.id]));
 
     try {
-      // Delete from storage
+      // Delete from storage (filbank)
       const { error: storageError } = await supabase.storage
-        .from(bucketName)
+        .from('filbank')
         .remove([file.file_path]);
 
       if (storageError) throw storageError;
 
-      // Delete from database
-      const tableName = bucketName === 'portfolio' ? 'profile_portfolio' : 'concept_files';
+      // Delete from database (user_files table)
       const { error: dbError } = await supabase
-        .from(tableName)
+        .from('user_files')
         .delete()
         .eq('id', file.id);
 

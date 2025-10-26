@@ -182,7 +182,7 @@ export default function CreateOffer() {
     if (fileData.file_path) {
       try {
         await supabase.storage
-          .from('concept-drafts')
+          .from('filbank')
           .remove([fileData.file_path]);
       } catch (error) {
         console.error('Error removing file:', error);
@@ -263,7 +263,7 @@ export default function CreateOffer() {
             filename: file.filename,
             file_path: file.file_path,
             file_type: file.file_type,
-            file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concept-drafts/${file.file_path}`,
+            file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
             mime_type: file.mime_type,
             file_size: file.file_size,
             title: file.title || file.filename,
@@ -380,7 +380,7 @@ export default function CreateOffer() {
               filename: file.filename,
               file_path: file.file_path,
               file_type: file.file_type,
-              file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concept-drafts/${file.file_path}`,
+              file_url: file.publicUrl || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
               mime_type: file.mime_type,
               file_size: file.file_size,
               title: file.title || file.filename,
@@ -393,47 +393,19 @@ export default function CreateOffer() {
         }
       }
 
-      // Move files from draft bucket to production bucket
+      // All files are already in filbank, just update is_public status
       if (conceptData.portfolio_files.length > 0) {
         for (const file of conceptData.portfolio_files) {
-          if (file.file_path?.startsWith(`${userId}/`)) {
+          if (file.id) {
             try {
-              // Try to download from draft bucket
-              const { data: fileData, error: downloadError } = await supabase.storage
-                .from('concept-drafts')
-                .download(file.file_path);
-
-              if (!downloadError && fileData) {
-                // Upload to production bucket
-                const newPath = file.file_path;
-                const { error: uploadError } = await supabase.storage
-                  .from('concepts')
-                  .upload(newPath, fileData, {
-                    contentType: file.mime_type,
-                    upsert: true
-                  });
-
-                if (!uploadError) {
-                  // Delete from draft bucket
-                  await supabase.storage
-                    .from('concept-drafts')
-                    .remove([file.file_path]);
-
-                  // Update file URL if file has an id
-                  if (file.id) {
-                    await supabase
-                      .from('concept_files')
-                      .update({
-                        file_url: `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${newPath}`,
-                        is_public: true
-                      })
-                      .eq('id', file.id);
-                  }
-                }
-              }
+              await supabase
+                .from('concept_files')
+                .update({
+                  is_public: true
+                })
+                .eq('id', file.id);
             } catch (fileError) {
-              console.warn('Could not move file from draft to production:', fileError);
-              // Continue with other files
+              console.warn('Could not update file visibility:', fileError);
             }
           }
         }

@@ -45,7 +45,7 @@ export const BookingPortfolioAttachments = ({
   };
 
   const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
+    const { data } = supabase.storage.from('filbank').getPublicUrl(filePath);
     return data.publicUrl;
   };
 

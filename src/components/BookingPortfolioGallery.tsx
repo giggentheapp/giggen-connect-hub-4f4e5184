@@ -16,7 +16,7 @@ export const BookingPortfolioGallery = ({ portfolioAttachments }: BookingPortfol
   }
 
   const getPublicUrl = (file: any) => {
-    return file.file_url || supabase.storage.from('portfolio').getPublicUrl(file.file_path).data.publicUrl;
+    return file.file_url || supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
   };
 
   const isAudioFile = (file: any) => {

@@ -48,7 +48,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
 
   const getPublicUrl = (filePath: string) => {
     if (!filePath) return null;
-    const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
+    const { data } = supabase.storage.from('filbank').getPublicUrl(filePath);
     return data?.publicUrl || null;
   };
 
