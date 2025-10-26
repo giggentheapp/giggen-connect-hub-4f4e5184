@@ -10,10 +10,20 @@ interface BandsInProfileProps {
 export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) => {
   const { bands, loading } = useUserBands(userId);
 
+  console.log('BandsInProfile - userId:', userId);
+  console.log('BandsInProfile - all bands:', bands);
+  console.log('BandsInProfile - loading:', loading);
+
   // Filter to only show bands where show_in_profile is true
   const visibleBands = bands.filter((band: any) => band.show_in_profile === true);
+  
+  console.log('BandsInProfile - visibleBands:', visibleBands);
 
-  if (loading || visibleBands.length === 0) {
+  if (loading) {
+    return null;
+  }
+
+  if (visibleBands.length === 0) {
     return null;
   }
 
@@ -21,7 +31,7 @@ export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) =>
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center gap-3">
         <Users className="h-5 w-5 md:h-6 md:w-6 text-accent-orange" />
-        <h2 className="text-xl md:text-2xl font-semibold">Mine Band</h2>
+        <h2 className="text-xl md:text-2xl font-semibold">Medvirkende</h2>
       </div>
       <div className="space-y-3 md:space-y-4">
         {visibleBands.map((band) => (
