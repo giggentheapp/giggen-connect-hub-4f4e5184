@@ -20,12 +20,13 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { validateDisplayName, validateEmail, validatePhone, validateBio } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2 } from "lucide-react";
+import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { AvatarCropModal } from "@/components/AvatarCropModal";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { UserProfile } from "@/types/auth";
+import { FilebankSelectionModal } from "@/components/FilebankSelectionModal";
 
 interface ProfileSettings {
   show_public_profile: boolean;
@@ -82,6 +83,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [changingUsername, setChangingUsername] = useState(false);
   const [showAvatarCrop, setShowAvatarCrop] = useState(false);
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -522,6 +524,26 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     }
   };
 
+  const handleAvatarFileSelect = async (file: any) => {
+    try {
+      const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+      
+      await updateProfile({ avatar_url: publicUrl });
+      
+      toast({
+        title: 'Profilbilde oppdatert',
+        description: 'Ditt profilbilde ble oppdatert fra filbanken',
+      });
+    } catch (error: any) {
+      console.error('Error updating avatar from filebank:', error);
+      toast({
+        title: 'Feil',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-8">
       {/* Profile Information */}
@@ -542,9 +564,9 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             </Avatar>
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-medium mb-1">{t("profilePicture")}</h3>
-              <Button variant="outline" size="sm" onClick={() => setShowAvatarCrop(true)} className="h-8 text-xs">
-                <Camera className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                {t("changePicture")}
+              <Button variant="outline" size="sm" onClick={() => setShowFilebankModal(true)} className="h-8 text-xs">
+                <FolderOpen className="h-3 w-3 md:h-4 md:w-4 mr-2" />
+                Velg fra Filbank
               </Button>
             </div>
           </div>
@@ -1038,6 +1060,17 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         }}
         currentAvatarUrl={profileData.avatar_url}
         userId={profileData.user_id}
+      />
+
+      {/* Filebank Selection Modal */}
+      <FilebankSelectionModal
+        isOpen={showFilebankModal}
+        onClose={() => setShowFilebankModal(false)}
+        onSelect={handleAvatarFileSelect}
+        userId={profileData.user_id}
+        category="avatars"
+        title="Velg profilbilde fra Filbank"
+        description="Velg et bilde fra din filbank for å bruke som profilbilde"
       />
     </div>
   );

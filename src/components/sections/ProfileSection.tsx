@@ -1,4 +1,5 @@
-import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
+import { useState } from 'react';
+import { User, Lightbulb, Calendar, MapPin, Copy, FolderOpen } from 'lucide-react';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -11,6 +12,9 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useToast } from '@/hooks/use-toast';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 interface ProfileSectionProps {
   profile: UserProfile;
   isOwnProfile?: boolean;
@@ -21,6 +25,7 @@ export const ProfileSection = ({
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
   const { toast } = useToast();
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
   
   const handleCopyUsername = () => {
     const username = `@${(profile as any).username}`;
@@ -44,6 +49,44 @@ export const ProfileSection = ({
   
   // Filter events to only show public ones (is_public_after_approval = true)
   const events = allEvents.filter(e => e.is_public_after_approval === true);
+
+  const handleFileSelect = async (file: any) => {
+    try {
+      const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+      
+      // Add to profile portfolio
+      const { error } = await supabase
+        .from('profile_portfolio')
+        .insert({
+          user_id: profile.user_id,
+          file_url: publicUrl,
+          file_path: file.file_path,
+          filename: file.filename,
+          file_type: file.file_type,
+          mime_type: file.mime_type,
+          file_size: file.file_size,
+          is_public: true,
+          title: file.filename
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Fil lagt til',
+        description: 'Filen ble lagt til i porteføljen din',
+      });
+
+      // Refresh the page to show the new file
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error adding file to portfolio:', error);
+      toast({
+        title: 'Feil',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
   
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
@@ -119,6 +162,19 @@ export const ProfileSection = ({
 
       {/* Portfolio Section */}
       <div className="space-y-4 md:space-y-6">
+        {isOwnProfile && (
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setShowFilebankModal(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <FolderOpen className="h-4 w-4" />
+              Velg fra Filbank
+            </Button>
+          </div>
+        )}
         <ProfilePortfolioViewer userId={profile.user_id} isOwnProfile={true} />
       </div>
 
@@ -163,6 +219,17 @@ export const ProfileSection = ({
         <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
       )}
       </div>
+
+      {/* Filebank Selection Modal */}
+      <FilebankSelectionModal
+        isOpen={showFilebankModal}
+        onClose={() => setShowFilebankModal(false)}
+        onSelect={handleFileSelect}
+        userId={profile.user_id}
+        category="portfolio"
+        title="Velg porteføljefil fra Filbank"
+        description="Velg en fil fra din filbank for å legge til i porteføljen"
+      />
     </div>
   );
 };
