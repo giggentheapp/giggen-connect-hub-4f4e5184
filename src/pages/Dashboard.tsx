@@ -90,6 +90,29 @@ const Dashboard = () => {
           }
           
           setProfile(profileData as unknown as UserProfile);
+          
+          // Set up realtime subscription for profile updates (avatar etc)
+          const profileChannel = supabase
+            .channel(`profile-${authUser.id}`)
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `user_id=eq.${authUser.id}`
+              },
+              (payload) => {
+                console.log('Profile updated:', payload);
+                setProfile(payload.new as unknown as UserProfile);
+              }
+            )
+            .subscribe();
+
+          // Clean up subscription when component unmounts
+          return () => {
+            profileChannel.unsubscribe();
+          };
         } catch (err) {
           toast({
             title: t("profileLoadError"),
