@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Image, Video, Music } from 'lucide-react';
 
 interface PortfolioFile {
@@ -181,6 +182,12 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
 
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
+          <VisuallyHidden>
+            <DialogTitle>{selectedFile?.filename}</DialogTitle>
+            <DialogDescription>
+              Forhåndsvisning av {selectedFile?.file_type === 'image' ? 'bilde' : selectedFile?.file_type === 'video' ? 'video' : 'lydfil'}
+            </DialogDescription>
+          </VisuallyHidden>
           {selectedFile && renderModalContent(selectedFile)}
         </DialogContent>
       </Dialog>
