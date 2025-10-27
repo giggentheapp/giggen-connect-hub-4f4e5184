@@ -156,7 +156,6 @@ const Auth = () => {
       });
 
       if (error) {
-        console.error('❌ Signup error:', error);
         toast({
           title: t('signupError'),
           description: error.message,
@@ -166,25 +165,16 @@ const Auth = () => {
       }
 
       if (data.user) {
-        console.log('✅ User created successfully:', data.user.id);
-        
-        // Give the database trigger time to create the profile
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Verify profile was created
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('id')
           .eq('user_id', data.user.id)
           .maybeSingle();
 
-        if (profileError) {
-          console.error('⚠️ Profile check error:', profileError);
-        } else if (!profile) {
-          console.warn('⚠️ Profile not created by trigger, creating manually...');
-          
-          // Fallback: Create profile manually if trigger failed
-          const { error: createError } = await supabase
+        if (!profile) {
+          await supabase
             .from('profiles')
             .insert([{
               user_id: data.user.id,
@@ -193,14 +183,6 @@ const Auth = () => {
               username: username.toLowerCase(),
               username_changed: false
             }]);
-
-          if (createError) {
-            console.error('❌ Manual profile creation failed:', createError);
-          } else {
-            console.log('✅ Profile created manually');
-          }
-        } else {
-          console.log('✅ Profile created successfully by trigger');
         }
         
         toast({
@@ -209,7 +191,6 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      console.error('❌ Unexpected signup error:', error);
       toast({
         title: t('signupError'),
         description: t('unexpectedError'),

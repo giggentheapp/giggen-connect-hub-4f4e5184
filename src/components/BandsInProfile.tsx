@@ -10,14 +10,7 @@ interface BandsInProfileProps {
 export const BandsInProfile = ({ userId, isOwnProfile }: BandsInProfileProps) => {
   const { bands, loading } = useUserBands(userId);
 
-  console.log('BandsInProfile - userId:', userId);
-  console.log('BandsInProfile - all bands:', bands);
-  console.log('BandsInProfile - loading:', loading);
-
-  // Filter to only show bands where show_in_profile is true
   const visibleBands = bands.filter((band: any) => band.show_in_profile === true);
-  
-  console.log('BandsInProfile - visibleBands:', visibleBands);
 
   if (loading) {
     return null;

@@ -486,9 +486,6 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   };
 
   const handleDeleteUser = async () => {
-    console.log('=== SLETT KONTO STARTET ===');
-    console.log('Bekreftelse input:', deleteConfirmation);
-    
     if (deleteConfirmation !== "SLETT") {
       toast({
         title: "Ugyldig bekreftelse",
@@ -500,23 +497,16 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     try {
       setLoading(true);
-      console.log('Loading satt til true');
 
-      // Get current user to verify authentication
-      console.log('Henter bruker...');
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log('Bruker hentet:', { user: user?.id, error: userError });
+      const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
         throw new Error('Du må være innlogget for å slette kontoen din');
       }
 
-      console.log('Sletter brukerkonto (dette vil også slette all brukerdata via trigger)...');
-      // Delete the user from Supabase Auth - this automatically triggers deletion of all user data
       const { error: authDeleteError } = await supabase.rpc('delete_auth_user');
       
       if (authDeleteError) {
-        console.error('Auth delete error:', authDeleteError);
         throw new Error('Kunne ikke slette brukerkonto');
       }
 
@@ -525,11 +515,9 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         description: "Din konto og alle tilknyttede data har blitt permanent slettet",
       });
 
-      // Sign out and redirect
       await supabase.auth.signOut();
       navigate("/");
     } catch (error: any) {
-      console.error("Delete user error:", error);
       toast({
         title: "Feil ved sletting",
         description: error.message || "Kunne ikke slette brukeren",
