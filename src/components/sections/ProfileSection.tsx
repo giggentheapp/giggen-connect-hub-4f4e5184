@@ -1,5 +1,5 @@
 import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
-import { ProfileFilebankViewer } from '@/components/ProfileFilebankViewer';
+import { ProfilePortfolioDisplay } from '@/components/ProfilePortfolioDisplay';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { BandsInProfile } from '@/components/BandsInProfile';
@@ -131,7 +131,7 @@ export const ProfileSection = ({
             </Button>
           </div>
         )}
-        <ProfileFilebankViewer userId={profile.user_id} />
+        <ProfilePortfolioDisplay userId={profile.user_id} />
       </div>
 
       {/* Concepts Section */}

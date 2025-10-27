@@ -1,0 +1,189 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Image, Video, Music } from 'lucide-react';
+
+interface PortfolioFile {
+  id: string;
+  filename: string;
+  file_path: string;
+  file_type: string;
+  mime_type: string;
+  file_size: number;
+  file_url: string | null;
+}
+
+interface ProfilePortfolioDisplayProps {
+  userId: string;
+}
+
+export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps) => {
+  const [files, setFiles] = useState<PortfolioFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<PortfolioFile | null>(null);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [userId]);
+
+  const fetchFiles = async () => {
+    try {
+      setLoading(true);
+      
+      // Get files via file_usage table
+      const { data, error } = await supabase
+        .from('file_usage')
+        .select(`
+          file_id,
+          user_files!inner(
+            id,
+            filename,
+            file_path,
+            file_type,
+            mime_type,
+            file_size
+          )
+        `)
+        .eq('usage_type', 'profile_portfolio')
+        .eq('reference_id', userId);
+
+      if (error) throw error;
+      
+      // Transform and get public URLs
+      const fileData = (data?.map(item => item.user_files).flat() || []) as any[];
+      const filesWithUrls = await Promise.all(
+        fileData.map(async (file) => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('filbank')
+            .getPublicUrl(file.file_path);
+          
+          return {
+            ...file,
+            file_url: publicUrl
+          };
+        })
+      );
+      
+      setFiles(filesWithUrls);
+    } catch (error) {
+      console.error('Error fetching portfolio files:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPublicUrl = (path: string) => {
+    const { data } = supabase.storage.from('filbank').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const renderFilePreview = (file: PortfolioFile) => {
+    if (file.file_type === 'image' && file.file_url) {
+      return (
+        <img 
+          src={file.file_url} 
+          alt={file.filename}
+          className="w-full h-full object-cover"
+        />
+      );
+    }
+    
+    if (file.file_type === 'video' && file.file_url) {
+      return (
+        <video 
+          src={file.file_url}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+        />
+      );
+    }
+    
+    const Icon = file.file_type === 'audio' ? Music : 
+                 file.file_type === 'video' ? Video : Image;
+    
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-muted">
+        <Icon className="h-12 w-12 text-muted-foreground" />
+      </div>
+    );
+  };
+
+  const renderModalContent = (file: PortfolioFile) => {
+    if (file.file_type === 'image' && file.file_url) {
+      return (
+        <img 
+          src={file.file_url} 
+          alt={file.filename}
+          className="w-full h-auto max-h-[90vh] object-contain"
+        />
+      );
+    }
+    
+    if (file.file_type === 'video' && file.file_url) {
+      return (
+        <video 
+          src={file.file_url}
+          controls
+          autoPlay
+          className="w-full h-auto max-h-[90vh]"
+        />
+      );
+    }
+    
+    if (file.file_type === 'audio' && file.file_url) {
+      return (
+        <div className="p-8">
+          <audio 
+            src={file.file_url}
+            controls
+            autoPlay
+            className="w-full"
+          />
+          <div className="mt-4 text-center text-white">
+            <Music className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium">{file.filename}</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (files.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+        {files.map((file) => (
+          <div
+            key={file.id}
+            onClick={() => setSelectedFile(file)}
+            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all"
+          >
+            {renderFilePreview(file)}
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
+          {selectedFile && renderModalContent(selectedFile)}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
