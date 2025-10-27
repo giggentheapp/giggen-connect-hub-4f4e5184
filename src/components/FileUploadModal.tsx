@@ -29,6 +29,34 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
+  const uploadWithRetry = async (filePath: string, file: File, maxRetries = 2): Promise<void> => {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from('filbank')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          // If SSL/network error and we have retries left, try again
+          if (attempt < maxRetries && uploadError.message.includes('Failed to fetch')) {
+            logger.debug(`Upload attempt ${attempt + 1} failed, retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // Exponential backoff
+            continue;
+          }
+          throw uploadError;
+        }
+        return; // Success
+      } catch (err) {
+        if (attempt === maxRetries) throw err;
+        logger.debug(`Upload attempt ${attempt + 1} failed, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  };
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !selectedCategory) return;
@@ -43,12 +71,8 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filePath = `${userId}/${category.category}/${timestamp}_${sanitizedFileName}`;
 
-      // Upload to unified filbank bucket
-      const { error: uploadError } = await supabase.storage
-        .from('filbank')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
+      // Upload to unified filbank bucket with retry logic
+      await uploadWithRetry(filePath, file);
 
       // Determine file type for database
       const fileType = file.type.startsWith('image/') ? 'image' :
@@ -82,9 +106,18 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       setSelectedCategory(null);
     } catch (err) {
       logger.error('File upload failed', err);
+      const errorMessage = err instanceof Error ? err.message : 'Ukjent feil';
+      
+      // Provide helpful message for SSL/network errors
+      const isNetworkError = errorMessage.includes('Failed to fetch') || 
+                             errorMessage.includes('SSL') || 
+                             errorMessage.includes('ERR_');
+      
       toast({
         title: 'Opplasting feilet',
-        description: err instanceof Error ? err.message : 'Ukjent feil',
+        description: isNetworkError 
+          ? 'Nettverksfeil - sjekk nettverkstilkobling, deaktiver antivirus HTTPS-skanning, eller prøv igjen'
+          : errorMessage,
         variant: 'destructive',
       });
     } finally {
