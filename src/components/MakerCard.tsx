@@ -53,7 +53,7 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             <CardDescription className="text-xs">@{maker.username}</CardDescription>
           </div>
           <Badge variant="secondary" className="text-xs shrink-0">
-            {maker.role === 'MUSIKER' ? 'Musiker' : 'Arrangør'}
+            {maker.role === 'musician' || maker.role === 'MUSIKER' ? 'Musiker' : 'Arrangør'}
           </Badge>
         </div>
       </CardHeader>
