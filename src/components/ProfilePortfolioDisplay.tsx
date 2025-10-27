@@ -59,6 +59,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
             .from('filbank')
             .getPublicUrl(file.file_path);
           
+          console.log('Portfolio file URL:', { filename: file.filename, type: file.file_type, url: publicUrl });
+          
           return {
             ...file,
             file_url: publicUrl
@@ -66,6 +68,7 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
         })
       );
       
+      console.log('Portfolio files loaded:', filesWithUrls);
       setFiles(filesWithUrls);
     } catch (error) {
       console.error('Error fetching portfolio files:', error);
@@ -143,7 +146,15 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
             controls
             autoPlay
             className="w-full max-w-md"
+            onError={(e) => {
+              console.error('Audio playback error:', e);
+              console.error('Audio source:', file.file_url);
+              console.error('Audio element:', e.currentTarget);
+            }}
+            onCanPlay={() => console.log('Audio ready to play:', file.filename)}
+            onLoadedData={() => console.log('Audio data loaded:', file.filename)}
           />
+          <p className="text-xs text-white/50 mt-4">URL: {file.file_url}</p>
         </div>
       );
     }
