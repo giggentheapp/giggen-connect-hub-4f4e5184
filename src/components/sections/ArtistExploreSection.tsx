@@ -19,11 +19,13 @@ export const ArtistExploreSection = ({
   profile
 }: ArtistExploreSectionProps) => {
   const location = useLocation();
-  const [activeView, setActiveView] = useState<'map' | 'list' | 'makers' | 'bands'>('list');
+  const [activeView, setActiveView] = useState<'map' | 'list' | 'makers' | 'bands' | 'organizers'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [makers, setMakers] = useState<any[]>([]);
   const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
+  const [organizers, setOrganizers] = useState<any[]>([]);
+  const [filteredOrganizers, setFilteredOrganizers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [bookingMaker, setBookingMaker] = useState<{
@@ -40,10 +42,11 @@ export const ArtistExploreSection = ({
     }
   }, [location.state]);
 
-  // Auto-fetch published events and makers when component mounts
+  // Auto-fetch published events, makers and organizers when component mounts
   useEffect(() => {
     fetchPublishedEvents();
     fetchMakers();
+    fetchOrganizers();
   }, []);
   const fetchPublishedEvents = async () => {
     try {
@@ -117,11 +120,58 @@ export const ArtistExploreSection = ({
     }
   };
 
-  // Filter events and makers based on search term
+  const fetchOrganizers = async () => {
+    try {
+      setLoading(true);
+      console.log('🎪 Fetching organizers...');
+
+      // Fetch profiles with role 'organizer' from user_roles table
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'organizer');
+
+      if (roleError) {
+        console.error('❌ Error fetching organizer roles:', roleError);
+        throw roleError;
+      }
+
+      const organizerIds = roleData?.map(r => r.user_id) || [];
+
+      if (organizerIds.length === 0) {
+        console.log('✅ No organizers found');
+        setOrganizers([]);
+        setFilteredOrganizers([]);
+        return;
+      }
+
+      // Fetch profiles for organizers
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('user_id', organizerIds);
+
+      if (error) {
+        console.error('❌ Error fetching organizer profiles:', error);
+        throw error;
+      }
+
+      console.log('✅ Fetched organizers:', data?.length || 0);
+      setOrganizers(data || []);
+      setFilteredOrganizers(data || []);
+    } catch (err) {
+      console.error('Error fetching organizers:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter events, makers and organizers based on search term
   useEffect(() => {
     if (!searchTerm) {
       setFilteredEvents(publishedEvents);
       setFilteredMakers(makers);
+      setFilteredOrganizers(organizers);
     } else {
       const filteredEvts = publishedEvents.filter(event =>
         event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,8 +188,16 @@ export const ArtistExploreSection = ({
         maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredMakers(filteredMkrs);
+
+      const filteredOrgs = organizers.filter(organizer =>
+        organizer.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        organizer.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        organizer.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        organizer.address?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredOrganizers(filteredOrgs);
     }
-  }, [publishedEvents, makers, searchTerm]);
+  }, [publishedEvents, makers, organizers, searchTerm]);
   const handleViewEvent = (eventId: string) => {
     // Navigate to public event view
     window.location.href = `/arrangement/${eventId}`;
@@ -151,12 +209,13 @@ export const ArtistExploreSection = ({
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             {/* Icon Navigation */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto">
               <Button
                 variant={activeView === 'map' ? 'default' : 'outline'}
                 size="icon"
                 onClick={() => setActiveView('map')}
                 className="shrink-0"
+                title="Kart"
               >
                 <MapPin className="w-4 h-4" />
               </Button>
@@ -165,6 +224,7 @@ export const ArtistExploreSection = ({
                 size="icon"
                 onClick={() => setActiveView('list')}
                 className="shrink-0"
+                title="Arrangementer"
               >
                 <Calendar className="w-4 h-4" />
               </Button>
@@ -173,6 +233,7 @@ export const ArtistExploreSection = ({
                 size="icon"
                 onClick={() => setActiveView('makers')}
                 className="shrink-0"
+                title="Musikere"
               >
                 <Users className="w-4 h-4" />
               </Button>
@@ -185,10 +246,19 @@ export const ArtistExploreSection = ({
               >
                 <User className="w-4 h-4" />
               </Button>
+              <Button
+                variant={activeView === 'organizers' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setActiveView('organizers')}
+                className="shrink-0"
+                title="Arrangører"
+              >
+                <Calendar className="w-4 h-4" />
+              </Button>
             </div>
             
             {/* Search Field */}
-            {(activeView === 'list' || activeView === 'makers' || activeView === 'bands') && (
+            {activeView !== 'map' && (
               <div className="flex-1 max-w-md">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -210,18 +280,6 @@ export const ArtistExploreSection = ({
       {activeView === 'list' && (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="flex-1 flex flex-col min-h-0">
-            {/* List Header */}
-            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
-              <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base md:text-lg font-semibold text-foreground">Kommende arrangementer</h2>
-                  <Badge variant="outline" className="text-xs bg-muted">
-                    {loading ? '...' : filteredEvents.length}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
             {/* Main Content Area */}
             <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
               <div className="max-w-4xl mx-auto">
@@ -236,18 +294,6 @@ export const ArtistExploreSection = ({
       {activeView === 'makers' && (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="flex-1 flex flex-col min-h-0">
-            {/* List Header */}
-            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
-              <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base md:text-lg font-semibold text-foreground">Artister og arrangører</h2>
-                  <Badge variant="outline" className="text-xs bg-muted">
-                    {loading ? '...' : filteredMakers.length}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            
             {/* Main Content Area */}
             <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
               <div className="max-w-4xl mx-auto">
@@ -296,19 +342,61 @@ export const ArtistExploreSection = ({
       {activeView === 'bands' && (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="flex-1 flex flex-col min-h-0">
-            {/* List Header */}
-            <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0 mobile-sticky-header" style={{ top: '56px' }}>
-              <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base md:text-lg font-semibold text-foreground">Band</h2>
-                </div>
-              </div>
-            </div>
-            
             {/* Main Content Area */}
             <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
               <div className="max-w-4xl mx-auto">
                 <BandExploreTab />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Organizers View */}
+      {activeView === 'organizers' && (
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+              <div className="max-w-4xl mx-auto">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <p>Laster arrangører...</p>
+                    </div>
+                  </div>
+                ) : filteredOrganizers.length === 0 ? (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    <div className="text-center max-w-md space-y-2">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">
+                        {searchTerm 
+                          ? 'Ingen arrangører funnet'
+                          : 'Ingen arrangører registrert'
+                        }
+                      </p>
+                      {searchTerm && (
+                        <p className="text-sm">
+                          Prøv et annet søk
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredOrganizers.map((organizer) => (
+                      <MakerCard
+                        key={organizer.id}
+                        maker={{
+                          ...organizer,
+                          role: 'ARRANGØR'
+                        }}
+                        onViewProfile={(userId) => navigate(`/profile/${userId}`)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
