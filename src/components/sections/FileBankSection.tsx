@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useUserFiles, FileWithUsage } from '@/hooks/useUserFiles';
-import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye, Plus, X } from 'lucide-react';
+import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye, Plus, X, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AvatarCropModal } from '@/components/AvatarCropModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [hoveredFile, setHoveredFile] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageForCrop, setImageForCrop] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { files, loading, deleteFile, refetch } = useUserFiles(profile.user_id);
@@ -374,9 +377,24 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                     {/* Hover overlay with actions */}
                     {isHovered && (
                       <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex gap-2 mb-2">
+                        <div className="flex gap-2 mb-2 flex-wrap justify-center">
                           {file.file_url && (
                             <>
+                              {file.file_type === 'image' && (
+                                <Button
+                                  size="icon"
+                                  variant="secondary"
+                                  className="h-8 w-8"
+                                  title="Sett som profilbilde"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setImageForCrop(file.file_url);
+                                    setCropModalOpen(true);
+                                  }}
+                                >
+                                  <User className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button
                                 size="icon"
                                 variant="secondary"
@@ -486,6 +504,24 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
           onClose={() => setUploadModalOpen(false)}
           onUploadComplete={refetch}
           userId={profile.user_id}
+        />
+
+        <AvatarCropModal
+          isOpen={cropModalOpen}
+          onClose={() => {
+            setCropModalOpen(false);
+            setImageForCrop(null);
+          }}
+          onAvatarUpdate={(newUrl) => {
+            toast({
+              title: 'Profilbilde oppdatert!',
+              description: 'Ditt nye profilbilde er nå synlig på profilen din',
+            });
+            refetch();
+          }}
+          currentAvatarUrl={profile.avatar_url || undefined}
+          userId={profile.user_id}
+          initialImageUrl={imageForCrop || undefined}
         />
       </div>
     </div>

@@ -14,6 +14,7 @@ interface AvatarCropModalProps {
   onAvatarUpdate: (avatarUrl: string) => void;
   currentAvatarUrl?: string;
   userId: string;
+  initialImageUrl?: string;
 }
 
 export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
@@ -21,7 +22,8 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   onClose,
   onAvatarUpdate,
   currentAvatarUrl,
-  userId
+  userId,
+  initialImageUrl
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>({
@@ -36,6 +38,14 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   const [uploading, setUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load initial image if provided
+  React.useEffect(() => {
+    if (initialImageUrl && isOpen) {
+      console.log('Loading initial image:', initialImageUrl);
+      setImageSrc(initialImageUrl);
+    }
+  }, [initialImageUrl, isOpen]);
 
   // Debug logging
   React.useEffect(() => {
