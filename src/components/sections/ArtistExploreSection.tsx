@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Search, Calendar, Music2, Building2 } from 'lucide-react';
+import { MapPin, Users, Search, Calendar, Mic, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -244,7 +244,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Band"
               >
-                <Music2 className="w-4 h-4" />
+                <Mic className="w-4 h-4" />
               </Button>
               <Button
                 variant={activeView === 'organizers' ? 'default' : 'outline'}
