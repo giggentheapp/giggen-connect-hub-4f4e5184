@@ -99,22 +99,31 @@ export const ArtistExploreSection = ({
   const fetchMakers = async () => {
     try {
       setLoading(true);
-      console.log('👥 Fetching public makers...');
+      console.log('👥 Fetching musicians...');
 
-      // Use RPC function to get only artists with show_public_profile enabled
+      // Fetch profiles with role 'artist' who have show_public_profile enabled
       const { data, error } = await supabase
-        .rpc('get_public_artists_for_explore');
+        .from('profiles')
+        .select('*')
+        .eq('role', 'artist')
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error fetching makers:', error);
+        console.error('❌ Error fetching musicians:', error);
         throw error;
       }
 
-      console.log('✅ Fetched public makers:', data?.length || 0);
-      setMakers(data || []);
-      setFilteredMakers(data || []);
+      // Filter by privacy settings
+      const publicMusicians = data?.filter(profile => {
+        const privacySettings = profile.privacy_settings as any || {};
+        return privacySettings.show_profile_to_goers === true;
+      }) || [];
+
+      console.log('✅ Fetched musicians:', publicMusicians.length, 'out of', data?.length || 0);
+      setMakers(publicMusicians);
+      setFilteredMakers(publicMusicians);
     } catch (err) {
-      console.error('Error fetching makers:', err);
+      console.error('Error fetching musicians:', err);
     } finally {
       setLoading(false);
     }
@@ -166,7 +175,7 @@ export const ArtistExploreSection = ({
     }
   };
 
-  // Filter events, makers and organizers based on search term
+  // Filter events, musicians and organizers based on search term
   useEffect(() => {
     if (!searchTerm) {
       setFilteredEvents(publishedEvents);
@@ -301,7 +310,7 @@ export const ArtistExploreSection = ({
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
                       <Users className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                      <p>Laster makers...</p>
+                      <p>Laster musikere...</p>
                     </div>
                   </div>
                 ) : filteredMakers.length === 0 ? (
@@ -310,8 +319,8 @@ export const ArtistExploreSection = ({
                       <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
-                          ? 'Ingen makers funnet'
-                          : 'Ingen makers registrert'
+                          ? 'Ingen musikere funnet'
+                          : 'Ingen musikere registrert'
                         }
                       </p>
                       {searchTerm && (
