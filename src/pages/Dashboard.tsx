@@ -36,7 +36,18 @@ const Dashboard = () => {
     // Check for existing session and load profile
     supabase.auth
       .getSession()
-      .then(async ({ data: { session } }) => {
+      .then(async ({ data: { session }, error: sessionError }) => {
+        // Handle 403 or invalid session errors
+        if (sessionError || (!session && !sessionError)) {
+          console.log('Invalid session detected, signing out...');
+          await supabase.auth.signOut();
+          localStorage.clear();
+          sessionStorage.clear();
+          navigate("/auth");
+          setLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -53,7 +64,12 @@ const Dashboard = () => {
             error: authError,
           } = await supabase.auth.getUser();
 
+          // Handle 403 Forbidden errors (invalid/expired token)
           if (authError || !authUser) {
+            console.log('Auth error or no user, clearing session...');
+            await supabase.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
             navigate("/auth");
             setLoading(false);
             return;
