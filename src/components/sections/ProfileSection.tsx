@@ -55,39 +55,21 @@ export const ProfileSection = ({
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      // Create a copy in the portfolio folder
-      const originalPath = file.file_path;
-      const fileName = originalPath.split('/').pop();
-      const portfolioPath = `portfolio/${user.data.user.id}/${fileName}`;
-
-      // Copy file in storage
-      const { data: fileData } = await supabase.storage
-        .from('filbank')
-        .download(originalPath);
-
-      if (!fileData) throw new Error('Failed to download file');
-
-      const { error: uploadError } = await supabase.storage
-        .from('filbank')
-        .upload(portfolioPath, fileData, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Create database entry for portfolio file
-      const { error: dbError } = await supabase
-        .from('user_files')
+      // Create a file_usage entry to mark this file as used in portfolio
+      const { error: usageError } = await supabase
+        .from('file_usage')
         .insert({
-          user_id: user.data.user.id,
-          filename: file.filename,
-          file_path: portfolioPath,
-          file_type: file.file_type,
-          file_size: file.file_size,
-          mime_type: file.mime_type,
-          bucket_name: 'filbank',
-          is_public: true
+          file_id: file.id,
+          usage_type: 'profile_portfolio',
+          reference_id: user.data.user.id
         });
 
-      if (dbError) throw dbError;
+      if (usageError) {
+        // If already exists, ignore the error
+        if (usageError.code !== '23505') {
+          throw usageError;
+        }
+      }
 
       toast({
         title: 'Fil lagt til',

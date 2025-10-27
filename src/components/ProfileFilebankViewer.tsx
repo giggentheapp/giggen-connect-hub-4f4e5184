@@ -36,16 +36,34 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
   const fetchFiles = async () => {
     try {
       setLoading(true);
+      
+      // Get files via file_usage table
       const { data, error } = await supabase
-        .from('user_files')
-        .select('*')
-        .eq('user_id', userId)
-        .ilike('file_path', 'portfolio/%')
-        .in('file_type', ['image', 'video', 'audio'])
-        .order('created_at', { ascending: false });
+        .from('file_usage')
+        .select(`
+          file_id,
+          user_files!inner(
+            id,
+            filename,
+            file_path,
+            file_type,
+            mime_type,
+            file_size,
+            created_at,
+            category,
+            bucket_name,
+            user_id,
+            is_public
+          )
+        `)
+        .eq('usage_type', 'profile_portfolio')
+        .eq('reference_id', userId);
 
       if (error) throw error;
-      setFiles(data || []);
+      
+      // Transform the data to match the expected structure
+      const fileData = data?.map(item => item.user_files).flat() || [];
+      setFiles(fileData as FilebankFile[]);
     } catch (error) {
       console.error('Error fetching files:', error);
     } finally {
@@ -57,20 +75,18 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
     e.stopPropagation();
     
     try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('filbank')
-        .remove([file.file_path]);
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
       
-      if (storageError) throw storageError;
-      
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('user_files')
+      // Only delete from file_usage, not from storage or user_files
+      const { error: usageError } = await supabase
+        .from('file_usage')
         .delete()
-        .eq('id', file.id);
+        .eq('file_id', file.id)
+        .eq('usage_type', 'profile_portfolio')
+        .eq('reference_id', user.data.user.id);
       
-      if (dbError) throw dbError;
+      if (usageError) throw usageError;
       
       toast.success('Fil fjernet fra portfolio');
       fetchFiles();
