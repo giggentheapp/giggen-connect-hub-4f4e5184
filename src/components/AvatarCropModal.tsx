@@ -208,50 +208,54 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
       console.log('Dialog onOpenChange:', open);
       if (!open) onClose();
     }}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto border-gradient shadow-glow">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-2 text-gradient text-2xl">
+            <Camera className="h-6 w-6 text-primary" />
             Endre profilbilde
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-base">
             Last opp og beskjær bildet ditt. Anbefalt format er kvadratisk.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 pb-4">
           {!imageSrc ? (
-            <div className="border-2 border-dashed border-border rounded-lg bg-card">
+            <div className="border-2 border-dashed border-primary/30 rounded-xl bg-gradient-to-br from-card to-accent/10 hover:border-primary/50 transition-all duration-300">
               <div 
-                className="p-8 text-center cursor-pointer hover:bg-accent/5 transition-colors"
+                className="p-10 text-center cursor-pointer hover:bg-accent/20 transition-all duration-300 rounded-xl"
                 onClick={() => {
                   console.log('Upload area clicked');
                   fileInputRef.current?.click();
                 }}
               >
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2 text-foreground">Last opp et bilde</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
+                  <Upload className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Last opp et bilde</h3>
+                <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
                   Støttede formater: JPG, PNG, GIF<br />
                   Maksimal størrelse: 5MB
                 </p>
                 <Button 
-                  variant="outline" 
+                  variant="default"
+                  size="lg"
                   type="button" 
+                  className="bg-gradient-primary hover:opacity-90 shadow-primary"
                   onClick={(e) => {
                     e.stopPropagation();
                     console.log('Button clicked');
                     fileInputRef.current?.click();
                   }}
                 >
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="h-5 w-5 mr-2" />
                   Velg fil
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="relative bg-black/5 rounded-lg overflow-hidden">
+              <div className="relative rounded-xl overflow-hidden border-2 border-primary/20 shadow-primary">
                 <ReactCrop
                   crop={crop}
                   onChange={(c) => setCrop(c)}
@@ -260,12 +264,13 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                   minWidth={50}
                   minHeight={50}
                   circularCrop
+                  className="bg-gradient-to-br from-muted to-accent/20"
                 >
                   <img
                     ref={imgRef}
                     src={imageSrc}
                     alt="Crop me"
-                    style={{ maxHeight: '400px', maxWidth: '100%' }}
+                    style={{ maxHeight: '450px', maxWidth: '100%' }}
                     onLoad={() => {
                       // Set initial crop to center
                       const { naturalWidth, naturalHeight } = imgRef.current!;
@@ -285,28 +290,30 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                 </ReactCrop>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-gradient-to-br from-accent/30 to-accent/10 rounded-xl border border-primary/10">
+                <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={resetCrop}
+                    className="border-primary/30 hover:border-primary hover:bg-primary/5"
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
-                    Tilbakestill crop
+                    Tilbakestill
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => fileInputRef.current?.click()}
+                    className="border-primary/30 hover:border-primary hover:bg-primary/5"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Velg nytt bilde
+                    Velg nytt
                   </Button>
                 </div>
 
-                <div className="text-sm text-muted-foreground">
-                  Dra for å flytte • Hjørner for å endre størrelse
+                <div className="text-sm text-muted-foreground text-center sm:text-right">
+                  💡 Dra for å flytte • Hjørner for størrelse
                 </div>
               </div>
             </div>
@@ -320,15 +327,20 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
             className="hidden"
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} disabled={uploading}>
+          <div className="flex justify-end gap-3 pt-4 border-t border-primary/10">
+            <Button 
+              variant="outline" 
+              onClick={onClose} 
+              disabled={uploading}
+              className="border-primary/20 hover:border-primary hover:bg-primary/5"
+            >
               <X className="h-4 w-4 mr-2" />
               Avbryt
             </Button>
             <Button 
               onClick={handleUpload} 
               disabled={!completedCrop || uploading}
-              className="min-w-[120px]"
+              className="min-w-[140px] bg-gradient-primary hover:opacity-90 shadow-primary"
             >
               {uploading ? (
                 <div className="flex items-center gap-2">
