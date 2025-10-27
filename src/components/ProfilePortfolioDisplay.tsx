@@ -31,7 +31,7 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     try {
       setLoading(true);
       
-      // Get files via file_usage table
+      // Get files via file_usage table - only image, video, audio
       const { data, error } = await supabase
         .from('file_usage')
         .select(`
@@ -46,7 +46,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
           )
         `)
         .eq('usage_type', 'profile_portfolio')
-        .eq('reference_id', userId);
+        .eq('reference_id', userId)
+        .in('user_files.file_type', ['image', 'video', 'audio']);
 
       if (error) throw error;
       
