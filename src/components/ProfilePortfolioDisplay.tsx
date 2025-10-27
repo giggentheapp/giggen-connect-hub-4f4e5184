@@ -145,16 +145,29 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
             src={file.file_url}
             controls
             autoPlay
+            preload="auto"
             className="w-full max-w-md"
             onError={(e) => {
               console.error('Audio playback error:', e);
               console.error('Audio source:', file.file_url);
-              console.error('Audio element:', e.currentTarget);
+              const audioEl = e.currentTarget;
+              if (audioEl.error) {
+                console.error('Error code:', audioEl.error.code);
+                console.error('Error message:', audioEl.error.message);
+              }
             }}
             onCanPlay={() => console.log('Audio ready to play:', file.filename)}
             onLoadedData={() => console.log('Audio data loaded:', file.filename)}
-          />
-          <p className="text-xs text-white/50 mt-4">URL: {file.file_url}</p>
+          >
+            <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
+            Din nettleser støtter ikke dette lydformatet.
+          </audio>
+          <p className="text-xs text-white/50 mt-4">
+            Format: {file.mime_type} • Filnavn: {file.filename}
+          </p>
+          <p className="text-xs text-yellow-400 mt-2">
+            ⚠️ M4A-filer kan ha kompatibilitetsproblemer. Prøv å konvertere til MP3 for bedre støtte.
+          </p>
         </div>
       );
     }
