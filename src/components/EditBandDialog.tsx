@@ -221,8 +221,13 @@ export const EditBandDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       console.log('Current user:', user?.id);
       
+      if (!user) {
+        throw new Error('Du må være innlogget for å slette band');
+      }
+      
       const { data, error } = await supabase.rpc('delete_band_permanently', {
-        band_uuid: band.id
+        band_uuid: band.id,
+        requesting_user_id: user.id
       });
 
       console.log('RPC response:', { data, error });
