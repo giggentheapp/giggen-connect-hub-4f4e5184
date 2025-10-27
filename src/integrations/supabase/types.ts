@@ -1570,6 +1570,7 @@ export type Database = {
           longitude: number
           role: string
           user_id: string
+          username: string
         }[]
       }
       get_safe_profile_fields: {
