@@ -212,12 +212,25 @@ export const EditBandDialog = ({
     }
 
     setDeleting(true);
+    
+    console.log('Starting delete for band:', band.id);
+    console.log('Band name:', band.name);
+    
     try {
-      const { error } = await supabase.rpc('delete_band_permanently', {
+      // Get current user to verify
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user?.id);
+      
+      const { data, error } = await supabase.rpc('delete_band_permanently', {
         band_uuid: band.id
       });
 
-      if (error) throw error;
+      console.log('RPC response:', { data, error });
+
+      if (error) {
+        console.error('RPC error details:', error);
+        throw error;
+      }
 
       toast({
         title: 'Band slettet',
@@ -228,7 +241,10 @@ export const EditBandDialog = ({
       navigate('/dashboard?section=bands');
       window.location.reload();
     } catch (error: any) {
-      console.error('Delete band error:', error);
+      console.error('Delete band error full:', error);
+      console.error('Error message:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error details:', error.details);
       toast({
         title: 'Feil ved sletting',
         description: error.message || 'Kunne ikke slette bandet',
