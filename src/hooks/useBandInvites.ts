@@ -29,9 +29,14 @@ export const useBandInvites = (userId: string | undefined) => {
       // Fetch related data separately
       const invitesWithData = await Promise.all((data || []).map(async (invite) => {
         const [{ data: band }, { data: inviter }] = await Promise.all([
-          supabase.from('bands').select('id, name, description, image_url').eq('id', invite.band_id).single(),
-          supabase.from('profiles').select('display_name, avatar_url').eq('user_id', invite.invited_by).single()
+          supabase.from('bands').select('id, name, description, image_url').eq('id', invite.band_id).maybeSingle(),
+          supabase.from('profiles').select('display_name, avatar_url').eq('user_id', invite.invited_by).maybeSingle()
         ]);
+
+        // Skip invites with missing data
+        if (!band || !inviter) {
+          return null;
+        }
 
         return {
           ...invite,
@@ -41,7 +46,8 @@ export const useBandInvites = (userId: string | undefined) => {
         };
       }));
 
-      setInvites(invitesWithData as BandInvite[]);
+      // Filter out null entries (invites with missing data)
+      setInvites(invitesWithData.filter(Boolean) as BandInvite[]);
     } catch (error: any) {
       toast({
         title: 'Feil ved lasting av invitasjoner',

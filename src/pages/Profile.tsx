@@ -57,15 +57,19 @@ const Profile = () => {
           return;
         }
 
-        // If own profile, fetch full data directly
         if (isOwnProfile) {
           const { data: ownProfileData, error: ownError } = await supabase
             .from('profiles')
             .select('*')
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
 
           if (ownError) throw ownError;
+          if (!ownProfileData) {
+            setProfile(null);
+            setLoading(false);
+            return;
+          }
           setProfile(ownProfileData as unknown as UserProfile);
         } else {
           // Use public profile data
