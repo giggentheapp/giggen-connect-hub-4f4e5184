@@ -486,6 +486,9 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   };
 
   const handleDeleteUser = async () => {
+    console.log('=== SLETT KONTO STARTET ===');
+    console.log('Bekreftelse input:', deleteConfirmation);
+    
     if (deleteConfirmation !== "SLETT") {
       toast({
         title: "Ugyldig bekreftelse",
@@ -497,19 +500,31 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
     try {
       setLoading(true);
+      console.log('Loading satt til true');
 
       // Get current user to verify authentication
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Henter bruker...');
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('Bruker hentet:', { user: user?.id, error: userError });
       
       if (!user) {
         throw new Error('Du må være innlogget for å slette kontoen din');
       }
 
+      console.log('Kaller delete_user_data RPC...');
+      console.log('Parametre:', { 
+        user_uuid: profile.user_id, 
+        requesting_user_id: user.id,
+        matching: profile.user_id === user.id 
+      });
+      
       // Call the database function to delete all user data including storage files
-      const { error: deleteError } = await supabase.rpc('delete_user_data', {
+      const { data, error: deleteError } = await supabase.rpc('delete_user_data', {
         user_uuid: profile.user_id,
         requesting_user_id: user.id
       });
+
+      console.log('RPC respons:', { data, error: deleteError });
 
       if (deleteError) throw deleteError;
 
