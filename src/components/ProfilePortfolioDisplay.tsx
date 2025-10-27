@@ -51,19 +51,37 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
 
       if (error) throw error;
       
-      // Transform and get public URLs
+      // Transform and get URLs (signed for audio, public for images/video)
       const fileData = (data?.map(item => item.user_files).flat() || []) as any[];
       const filesWithUrls = await Promise.all(
         fileData.map(async (file) => {
-          const { data: { publicUrl } } = supabase.storage
-            .from('filbank')
-            .getPublicUrl(file.file_path);
+          let fileUrl: string;
           
-          console.log('Portfolio file URL:', { filename: file.filename, type: file.file_type, url: publicUrl });
+          // Use signed URLs for audio files (valid for 1 hour)
+          if (file.file_type === 'audio') {
+            const { data: signedData, error } = await supabase.storage
+              .from('filbank')
+              .createSignedUrl(file.file_path, 3600); // 1 hour
+            
+            if (error) {
+              console.error('Error creating signed URL:', error);
+              fileUrl = '';
+            } else {
+              fileUrl = signedData.signedUrl;
+            }
+          } else {
+            // Use public URLs for images and videos
+            const { data: { publicUrl } } = supabase.storage
+              .from('filbank')
+              .getPublicUrl(file.file_path);
+            fileUrl = publicUrl;
+          }
+          
+          console.log('Portfolio file URL:', { filename: file.filename, type: file.file_type, url: fileUrl });
           
           return {
             ...file,
-            file_url: publicUrl
+            file_url: fileUrl
           };
         })
       );
