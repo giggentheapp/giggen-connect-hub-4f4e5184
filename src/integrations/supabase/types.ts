@@ -1434,7 +1434,12 @@ export type Database = {
       }
       delete_portfolio_file: { Args: { file_id: string }; Returns: undefined }
       delete_tech_spec_file: { Args: { file_id: string }; Returns: undefined }
-      delete_user_data: { Args: { user_uuid: string }; Returns: undefined }
+      delete_user_data:
+        | {
+            Args: { requesting_user_id: string; user_uuid: string }
+            Returns: undefined
+          }
+        | { Args: { user_uuid: string }; Returns: undefined }
       get_all_visible_artists: {
         Args: never
         Returns: {

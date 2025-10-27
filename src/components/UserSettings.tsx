@@ -498,9 +498,17 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     try {
       setLoading(true);
 
+      // Get current user to verify authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Du må være innlogget for å slette kontoen din');
+      }
+
       // Call the database function to delete all user data including storage files
       const { error: deleteError } = await supabase.rpc('delete_user_data', {
-        user_uuid: profile.user_id
+        user_uuid: profile.user_id,
+        requesting_user_id: user.id
       });
 
       if (deleteError) throw deleteError;
