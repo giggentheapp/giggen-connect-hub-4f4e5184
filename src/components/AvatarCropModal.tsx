@@ -270,6 +270,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
                     ref={imgRef}
                     src={imageSrc}
                     alt="Crop me"
+                    crossOrigin="anonymous"
                     style={{ maxHeight: '450px', maxWidth: '100%' }}
                     onLoad={() => {
                       // Set initial crop to center
