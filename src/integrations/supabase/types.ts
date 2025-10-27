@@ -1345,6 +1345,7 @@ export type Database = {
           file_url: string | null
           filename: string
           id: string
+          is_public: boolean | null
           mime_type: string | null
           updated_at: string | null
           user_id: string
@@ -1359,6 +1360,7 @@ export type Database = {
           file_url?: string | null
           filename: string
           id?: string
+          is_public?: boolean | null
           mime_type?: string | null
           updated_at?: string | null
           user_id: string
@@ -1373,6 +1375,7 @@ export type Database = {
           file_url?: string | null
           filename?: string
           id?: string
+          is_public?: boolean | null
           mime_type?: string | null
           updated_at?: string | null
           user_id?: string

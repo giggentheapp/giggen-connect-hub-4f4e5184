@@ -15,6 +15,7 @@ interface FilebankFile {
   category?: string;
   bucket_name: string;
   user_id: string;
+  is_public: boolean;
 }
 
 interface ProfileFilebankViewerProps {

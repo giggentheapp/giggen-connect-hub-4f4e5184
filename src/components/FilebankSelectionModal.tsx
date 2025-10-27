@@ -16,6 +16,7 @@ interface FilebankFile {
   file_size: number;
   created_at: string;
   category?: string;
+  is_public?: boolean;
 }
 
 interface FilebankSelectionModalProps {
