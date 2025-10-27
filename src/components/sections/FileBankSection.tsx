@@ -29,6 +29,7 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
   const [selectedFile, setSelectedFile] = useState<FileWithUsage | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [hoveredFile, setHoveredFile] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const { files, loading, deleteFile, refetch } = useUserFiles(profile.user_id);
@@ -110,52 +111,103 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
     }
   };
 
-  const togglePortfolioUsage = async (file: FileWithUsage, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    const isInPortfolio = file.usage.some(u => u.usage_type === 'profile_portfolio');
-    
+  const toggleFileSelection = (fileId: string) => {
+    const newSelected = new Set(selectedFiles);
+    if (newSelected.has(fileId)) {
+      newSelected.delete(fileId);
+    } else {
+      newSelected.add(fileId);
+    }
+    setSelectedFiles(newSelected);
+  };
+
+  const addSelectedToPortfolio = async () => {
+    if (selectedFiles.size === 0) return;
+
     try {
-      if (isInPortfolio) {
-        // Remove from portfolio
-        const usageId = file.usage.find(u => u.usage_type === 'profile_portfolio')?.id;
-        if (usageId) {
-          const { error } = await supabase
-            .from('file_usage')
-            .delete()
-            .eq('id', usageId);
-          
-          if (error) throw error;
-          
-          toast({
-            title: 'Fjernet fra portefølje',
-            description: 'Filen vises ikke lenger i porteføljen din',
-          });
-        }
-      } else {
-        // Add to portfolio
-        const { error } = await supabase
-          .from('file_usage')
-          .insert({
+      const filesToAdd = files.filter(f => 
+        selectedFiles.has(f.id) && 
+        (f.file_type === 'image' || f.file_type === 'video' || f.file_type === 'audio') &&
+        !f.usage.some(u => u.usage_type === 'profile_portfolio')
+      );
+
+      if (filesToAdd.length === 0) {
+        toast({
+          title: 'Ingen nye filer',
+          description: 'Alle valgte filer er allerede i porteføljen',
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('file_usage')
+        .insert(
+          filesToAdd.map(file => ({
             file_id: file.id,
             usage_type: 'profile_portfolio',
             reference_id: profile.user_id
-          });
-        
-        if (error) throw error;
-        
-        toast({
-          title: 'Lagt til i portefølje',
-          description: 'Filen vises nå i porteføljen din',
-        });
-      }
-      
+          }))
+        );
+
+      if (error) throw error;
+
+      toast({
+        title: 'Lagt til i portefølje',
+        description: `${filesToAdd.length} fil(er) lagt til i porteføljen`,
+      });
+
+      setSelectedFiles(new Set());
       refetch();
     } catch (error) {
-      console.error('Error toggling portfolio:', error);
+      console.error('Error adding to portfolio:', error);
       toast({
         title: 'Feil',
-        description: 'Kunne ikke oppdatere portefølje',
+        description: 'Kunne ikke legge til filer i porteføljen',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const removeSelectedFromPortfolio = async () => {
+    if (selectedFiles.size === 0) return;
+
+    try {
+      const filesToRemove = files.filter(f => 
+        selectedFiles.has(f.id) && 
+        f.usage.some(u => u.usage_type === 'profile_portfolio')
+      );
+
+      if (filesToRemove.length === 0) {
+        toast({
+          title: 'Ingen filer',
+          description: 'Ingen av de valgte filene er i porteføljen',
+        });
+        return;
+      }
+
+      const usageIds = filesToRemove
+        .map(f => f.usage.find(u => u.usage_type === 'profile_portfolio')?.id)
+        .filter(Boolean);
+
+      const { error } = await supabase
+        .from('file_usage')
+        .delete()
+        .in('id', usageIds);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Fjernet fra portefølje',
+        description: `${filesToRemove.length} fil(er) fjernet fra porteføljen`,
+      });
+
+      setSelectedFiles(new Set());
+      refetch();
+    } catch (error) {
+      console.error('Error removing from portfolio:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke fjerne filer fra porteføljen',
         variant: 'destructive',
       });
     }
@@ -192,17 +244,36 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="container mx-auto py-6 px-4 max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Filbank</h1>
-            <p className="text-muted-foreground">
-              {files.length} filer totalt
-            </p>
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Filbank</h1>
+              <p className="text-muted-foreground">
+                {files.length} filer totalt
+                {selectedFiles.size > 0 && ` • ${selectedFiles.size} valgt`}
+              </p>
+            </div>
+            <Button onClick={() => setUploadModalOpen(true)} size="lg" className="mt-4 md:mt-0">
+              <Upload className="mr-2 h-5 w-5" />
+              Last opp fil
+            </Button>
           </div>
-          <Button onClick={() => setUploadModalOpen(true)} size="lg" className="mt-4 md:mt-0">
-            <Upload className="mr-2 h-5 w-5" />
-            Last opp fil
-          </Button>
+
+          {selectedFiles.size > 0 && (
+            <div className="flex gap-2 items-center">
+              <Button onClick={addSelectedToPortfolio} size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Legg til i portefølje ({selectedFiles.size})
+              </Button>
+              <Button onClick={removeSelectedFromPortfolio} variant="outline" size="sm">
+                <X className="mr-2 h-4 w-4" />
+                Fjern fra portefølje
+              </Button>
+              <Button onClick={() => setSelectedFiles(new Set())} variant="ghost" size="sm">
+                Avbryt
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="mb-8">
@@ -249,15 +320,44 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {categorizedFiles[category].map((file) => {
                 const isHovered = hoveredFile === file.id;
+                const isSelected = selectedFiles.has(file.id);
+                const isInPortfolio = file.usage.some(u => u.usage_type === 'profile_portfolio');
                 const Icon = getFileIcon(file.file_type);
                 
                 return (
                   <div
                     key={file.id}
-                    className="group relative aspect-square rounded-lg overflow-hidden border bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                    className={`group relative aspect-square rounded-lg overflow-hidden border transition-all cursor-pointer ${
+                      isSelected 
+                        ? 'ring-2 ring-accent-orange bg-accent-orange/10' 
+                        : 'bg-muted/30 hover:bg-muted/50'
+                    }`}
+                    onClick={() => toggleFileSelection(file.id)}
                     onMouseEnter={() => setHoveredFile(file.id)}
                     onMouseLeave={() => setHoveredFile(null)}
                   >
+                    {/* Selection checkbox */}
+                    <div className="absolute top-2 left-2 z-10">
+                      <div className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-all ${
+                        isSelected 
+                          ? 'bg-accent-orange border-accent-orange' 
+                          : 'bg-white/80 border-white/80'
+                      }`}>
+                        {isSelected && (
+                          <div className="h-3 w-3 bg-white rounded-sm" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Portfolio badge */}
+                    {isInPortfolio && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <div className="bg-accent-orange text-white text-xs px-2 py-1 rounded">
+                          Portefølje
+                        </div>
+                      </div>
+                    )}
+
                     {/* File preview/icon */}
                     <div className="absolute inset-0 flex items-center justify-center p-4">
                       {file.file_type === 'image' && file.file_url ? (
@@ -273,30 +373,18 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
 
                     {/* Hover overlay with actions */}
                     {isHovered && (
-                      <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3">
+                      <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-2 mb-2">
-                          {(file.file_type === 'image' || file.file_type === 'video' || file.file_type === 'audio') && (
-                            <Button
-                              size="icon"
-                              variant={file.usage.some(u => u.usage_type === 'profile_portfolio') ? 'default' : 'secondary'}
-                              className="h-8 w-8"
-                              onClick={(e) => togglePortfolioUsage(file, e)}
-                              title={file.usage.some(u => u.usage_type === 'profile_portfolio') ? 'Fjern fra portefølje' : 'Legg til i portefølje'}
-                            >
-                              {file.usage.some(u => u.usage_type === 'profile_portfolio') ? (
-                                <X className="h-4 w-4" />
-                              ) : (
-                                <Plus className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
                           {file.file_url && (
                             <>
                               <Button
                                 size="icon"
                                 variant="secondary"
                                 className="h-8 w-8"
-                                onClick={() => copyFileUrl(file.file_url)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyFileUrl(file.file_url);
+                                }}
                               >
                                 <Copy className="h-4 w-4" />
                               </Button>
@@ -304,7 +392,10 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                 size="icon"
                                 variant="secondary"
                                 className="h-8 w-8"
-                                onClick={() => downloadFile(file.file_url, file.filename)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadFile(file.file_url, file.filename);
+                                }}
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
@@ -314,7 +405,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                             size="icon"
                             variant="destructive"
                             className="h-8 w-8"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSelectedFile(file);
                               setDeleteDialogOpen(true);
                             }}
