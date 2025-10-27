@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, Lightbulb, Calendar, MapPin, Copy, FolderOpen } from 'lucide-react';
+import { ProfileFilebankViewer } from '@/components/ProfileFilebankViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { BandsInProfile } from '@/components/BandsInProfile';
@@ -49,24 +50,13 @@ export const ProfileSection = ({
   // Filter events to only show public ones (is_public_after_approval = true)
   const events = allEvents.filter(e => e.is_public_after_approval === true);
 
-  const handleFileSelect = async (file: any) => {
-    try {
-      // File is already in user_files/filbank, just show success message
-      toast({
-        title: 'Fil valgt',
-        description: 'Filen vises nå i porteføljen din',
-      });
-
-      // Refresh to show the file
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error selecting file:', error);
-      toast({
-        title: 'Feil',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+  const handleFileSelect = (file: any) => {
+    // File is already in filbank and will be displayed automatically
+    setShowFilebankModal(false);
+    toast({
+      title: 'Fil valgt',
+      description: 'Filen vises i porteføljen din',
+    });
   };
   
   return (
@@ -142,8 +132,8 @@ export const ProfileSection = ({
       </div>
 
       {/* Portfolio Section */}
-      {isOwnProfile && (
-        <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6">
+        {isOwnProfile && (
           <div className="flex justify-start">
             <Button
               onClick={() => setShowFilebankModal(true)}
@@ -155,8 +145,9 @@ export const ProfileSection = ({
               Velg fra Filbank
             </Button>
           </div>
-        </div>
-      )}
+        )}
+        <ProfileFilebankViewer userId={profile.user_id} />
+      </div>
 
       {/* Concepts Section */}
       {concepts.length > 0 && (
@@ -206,9 +197,9 @@ export const ProfileSection = ({
         onClose={() => setShowFilebankModal(false)}
         onSelect={handleFileSelect}
         userId={profile.user_id}
-        category="portfolio"
-        title="Velg porteføljefil fra Filbank"
-        description="Velg en fil fra din filbank for å legge til i porteføljen"
+        fileTypes={['image', 'video', 'audio']}
+        title="Velg fra Filbank"
+        description="Velg bilder, videoer eller lydfiler fra din filbank"
       />
     </div>
   );

@@ -24,6 +24,7 @@ interface FilebankSelectionModalProps {
   onSelect: (file: FilebankFile) => void;
   userId: string;
   category?: 'portfolio' | 'avatars' | 'all';
+  fileTypes?: string[]; // e.g., ['image'], ['image', 'video', 'audio']
   title?: string;
   description?: string;
 }
@@ -34,6 +35,7 @@ export const FilebankSelectionModal = ({
   onSelect,
   userId,
   category = 'all',
+  fileTypes,
   title = 'Velg fra Filbank',
   description = 'Velg en fil fra din filbank'
 }: FilebankSelectionModalProps) => {
@@ -45,7 +47,7 @@ export const FilebankSelectionModal = ({
     if (isOpen) {
       fetchFiles();
     }
-  }, [isOpen, userId, category]);
+  }, [isOpen, userId, category, fileTypes]);
 
   const fetchFiles = async () => {
     try {
@@ -59,6 +61,11 @@ export const FilebankSelectionModal = ({
       // Filter by category if specified
       if (category !== 'all') {
         query = query.ilike('file_path', `${category}/%`);
+      }
+
+      // Filter by file types if specified
+      if (fileTypes && fileTypes.length > 0) {
+        query = query.in('file_type', fileTypes);
       }
 
       const { data, error } = await query;

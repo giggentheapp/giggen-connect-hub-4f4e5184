@@ -1068,7 +1068,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         onClose={() => setShowFilebankModal(false)}
         onSelect={handleAvatarFileSelect}
         userId={profileData.user_id}
-        category="avatars"
+        fileTypes={['image']}
         title="Velg profilbilde fra Filbank"
         description="Velg et bilde fra din filbank for å bruke som profilbilde"
       />
