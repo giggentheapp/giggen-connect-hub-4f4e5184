@@ -366,16 +366,6 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                           alt={file.filename}
                           className="w-full h-full object-cover"
                         />
-                      ) : file.file_type === 'audio' && file.file_url ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                          <Music className="h-12 w-12 text-muted-foreground" />
-                          <audio 
-                            src={file.file_url}
-                            controls
-                            className="w-full"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
                       ) : (
                         <Icon className="h-12 w-12 text-muted-foreground" />
                       )}

@@ -101,19 +101,6 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
       );
     }
     
-    if (file.file_type === 'audio' && file.file_url) {
-      return (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2 p-4">
-          <Music className="h-12 w-12 text-muted-foreground" />
-          <audio 
-            src={file.file_url}
-            controls
-            className="w-full"
-          />
-        </div>
-      );
-    }
-    
     const Icon = file.file_type === 'audio' ? Music : 
                  file.file_type === 'video' ? Video : Image;
     
@@ -148,17 +135,15 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     
     if (file.file_type === 'audio' && file.file_url) {
       return (
-        <div className="p-8">
+        <div className="p-12 flex flex-col items-center justify-center">
+          <Music className="h-24 w-24 mb-8 text-white/50" />
+          <p className="text-xl font-medium text-white mb-6">{file.filename}</p>
           <audio 
             src={file.file_url}
             controls
             autoPlay
-            className="w-full"
+            className="w-full max-w-md"
           />
-          <div className="mt-4 text-center text-white">
-            <Music className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">{file.filename}</p>
-          </div>
         </div>
       );
     }
