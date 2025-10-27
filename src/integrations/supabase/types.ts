@@ -1417,6 +1417,10 @@ export type Database = {
         Args: { booking_uuid: string }
         Returns: undefined
       }
+      delete_band_permanently: {
+        Args: { band_uuid: string }
+        Returns: undefined
+      }
       delete_cancelled_booking: {
         Args: { booking_uuid: string }
         Returns: undefined

@@ -7,13 +7,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer } from 'lucide-react';
+import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FileSelectionModal } from './FileSelectionModal';
 import BandTechSpecManager from './BandTechSpecManager';
 import BandHospitalityManager from './BandHospitalityManager';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom';
 
 interface EditBandDialogProps {
   open: boolean;
@@ -33,6 +45,9 @@ export const EditBandDialog = ({
   const [loading, setLoading] = useState(false);
   const [showFileModal, setShowFileModal] = useState(false);
   const [fileModalType, setFileModalType] = useState<'logo' | 'banner'>('logo');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -183,6 +198,45 @@ export const EditBandDialog = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteBand = async () => {
+    if (deleteConfirmation !== 'SLETT') {
+      toast({
+        title: 'Ugyldig bekreftelse',
+        description: 'Du må skrive SLETT for å bekrefte slettingen',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase.rpc('delete_band_permanently', {
+        band_uuid: band.id
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Band slettet',
+        description: 'Bandet og alle tilknyttede data har blitt permanent slettet',
+      });
+
+      onClose();
+      navigate('/dashboard?section=bands');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Delete band error:', error);
+      toast({
+        title: 'Feil ved sletting',
+        description: error.message || 'Kunne ikke slette bandet',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmation('');
     }
   };
 
@@ -538,13 +592,57 @@ export const EditBandDialog = ({
               </TabsContent>
             </Tabs>
 
-            <div className="flex gap-2 justify-end mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Avbryt
-              </Button>
-              <Button type="submit" disabled={loading || !name.trim()}>
-                {loading ? 'Lagrer...' : 'Lagre endringer'}
-              </Button>
+            <div className="flex gap-2 justify-between mt-6 pt-6 border-t">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Slett band permanent
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Denne handlingen kan ikke angres. Alle bandets data, inkludert medlemmer, portfolio,
+                      tech specs og hospitality riders vil bli permanent slettet.
+                      <br />
+                      <br />
+                      Skriv <strong>SLETT</strong> for å bekrefte at du vil slette bandet permanent.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="my-4">
+                    <Input
+                      value={deleteConfirmation}
+                      onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      placeholder="Skriv SLETT her"
+                    />
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>Avbryt</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteBand}
+                      disabled={deleting || deleteConfirmation !== 'SLETT'}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleting ? 'Sletter...' : 'Slett band permanent'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Avbryt
+                </Button>
+                <Button type="submit" disabled={loading || !name.trim()}>
+                  {loading ? 'Lagrer...' : 'Lagre endringer'}
+                </Button>
+              </div>
             </div>
           </form>
 
