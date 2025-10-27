@@ -76,52 +76,52 @@ const Dashboard = () => {
             return;
           }
 
-          if (!profileData) {
-            // Profile should have been created by database trigger
-            toast({
-              title: "Profil ikke funnet",
-              description: "Vennligst logg ut og inn igjen",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-            navigate('/auth');
-            setLoading(false);
-            return;
-          }
-          
-          setProfile(profileData as unknown as UserProfile);
-          
-          // Set up realtime subscription for profile updates (avatar etc)
-          const profileChannel = supabase
-            .channel(`profile-${authUser.id}`)
-            .on(
-              'postgres_changes',
-              {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'profiles',
-                filter: `user_id=eq.${authUser.id}`
-              },
-              (payload) => {
-                console.log('Profile updated:', payload);
-                setProfile(payload.new as unknown as UserProfile);
-              }
-            )
-            .subscribe();
-
-          // Clean up subscription when component unmounts
-          return () => {
-            profileChannel.unsubscribe();
-          };
-        } catch (err) {
+        if (!profileData) {
+          // Profile should have been created by database trigger
           toast({
-            title: t("profileLoadError"),
-            description: "Unexpected error occurred",
+            title: "Profil ikke funnet",
+            description: "Vennligst logg ut og inn igjen",
             variant: "destructive",
           });
+          await supabase.auth.signOut();
+          navigate('/auth');
+          setLoading(false);
+          return;
         }
+        
+        setProfile(profileData as unknown as UserProfile);
+        setLoading(false); // Set loading to false after profile is loaded
+        
+        // Set up realtime subscription for profile updates (avatar etc)
+        const profileChannel = supabase
+          .channel(`profile-${authUser.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `user_id=eq.${authUser.id}`
+            },
+            (payload) => {
+              console.log('Profile updated:', payload);
+              setProfile(payload.new as unknown as UserProfile);
+            }
+          )
+          .subscribe();
 
+        // Clean up subscription when component unmounts
+        return () => {
+          profileChannel.unsubscribe();
+        };
+      } catch (err) {
+        toast({
+          title: t("profileLoadError"),
+          description: "Unexpected error occurred",
+          variant: "destructive",
+        });
         setLoading(false);
+      }
       })
       .catch((err) => {
         setLoading(false);
