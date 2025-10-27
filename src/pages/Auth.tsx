@@ -136,6 +136,12 @@ const Auth = () => {
       
       console.log('🔐 Starting signup with:', { email, displayName, role, username });
       
+      // Map Norwegian roles to English database values
+      const roleMapping = {
+        'MUSIKER': 'musician',
+        'ARRANGØR': 'organizer'
+      } as const;
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -143,7 +149,7 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             display_name: displayName,
-            role: role,
+            role: roleMapping[role],
             username: username.toLowerCase()
           }
         }
@@ -183,7 +189,7 @@ const Auth = () => {
             .insert([{
               user_id: data.user.id,
               display_name: displayName || email.split('@')[0],
-              role: role as any,
+              role: roleMapping[role] as any,
               username: username.toLowerCase(),
               username_changed: false
             }]);
