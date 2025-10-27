@@ -511,30 +511,13 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         throw new Error('Du må være innlogget for å slette kontoen din');
       }
 
-      console.log('Kaller delete_user_data RPC...');
-      console.log('Parametre:', { 
-        user_uuid: profile.user_id, 
-        requesting_user_id: user.id,
-        matching: profile.user_id === user.id 
-      });
-      
-      // Call the database function to delete all user data including storage files
-      const { data, error: deleteError } = await supabase.rpc('delete_user_data', {
-        user_uuid: profile.user_id,
-        requesting_user_id: user.id
-      });
-
-      console.log('RPC respons:', { data, error: deleteError });
-
-      if (deleteError) throw deleteError;
-
-      console.log('Sletter bruker fra auth.users...');
-      // Delete the user from Supabase Auth (user can delete themselves)
+      console.log('Sletter brukerkonto (dette vil også slette all brukerdata via trigger)...');
+      // Delete the user from Supabase Auth - this automatically triggers deletion of all user data
       const { error: authDeleteError } = await supabase.rpc('delete_auth_user');
       
       if (authDeleteError) {
         console.error('Auth delete error:', authDeleteError);
-        throw new Error('Kunne ikke slette brukerkonto fra autentiseringssystemet');
+        throw new Error('Kunne ikke slette brukerkonto');
       }
 
       toast({
