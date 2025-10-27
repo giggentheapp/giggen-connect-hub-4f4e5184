@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Search, Calendar, User } from 'lucide-react';
+import { MapPin, Users, Search, Calendar, Music2, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -244,7 +244,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Band"
               >
-                <User className="w-4 h-4" />
+                <Music2 className="w-4 h-4" />
               </Button>
               <Button
                 variant={activeView === 'organizers' ? 'default' : 'outline'}
@@ -253,7 +253,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Arrangører"
               >
-                <Calendar className="w-4 h-4" />
+                <Building2 className="w-4 h-4" />
               </Button>
             </div>
             
@@ -300,14 +300,14 @@ export const ArtistExploreSection = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
-                      <User className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                       <p>Laster makers...</p>
                     </div>
                   </div>
                 ) : filteredMakers.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center max-w-md space-y-2">
-                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
                           ? 'Ingen makers funnet'
@@ -362,14 +362,14 @@ export const ArtistExploreSection = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                       <p>Laster arrangører...</p>
                     </div>
                   </div>
                 ) : filteredOrganizers.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center max-w-md space-y-2">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
                           ? 'Ingen arrangører funnet'
