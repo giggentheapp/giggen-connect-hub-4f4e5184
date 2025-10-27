@@ -101,7 +101,7 @@ export const ArtistExploreSection = ({
       setLoading(true);
       console.log('👥 Fetching musicians...');
 
-      // Fetch profiles with role 'musician' who have show_public_profile enabled
+      // Fetch all profiles with role 'musician'
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -113,15 +113,12 @@ export const ArtistExploreSection = ({
         throw error;
       }
 
-      // Filter by privacy settings
-      const publicMusicians = data?.filter(profile => {
-        const privacySettings = profile.privacy_settings as any || {};
-        return privacySettings.show_profile_to_goers === true;
-      }) || [];
-
-      console.log('✅ Fetched musicians:', publicMusicians.length, 'out of', data?.length || 0);
-      setMakers(publicMusicians);
-      setFilteredMakers(publicMusicians);
+      console.log('✅ Fetched musicians:', data?.length || 0);
+      console.log('📋 First few musicians:', data?.slice(0, 3));
+      
+      // Show all musicians regardless of privacy settings
+      setMakers(data || []);
+      setFilteredMakers(data || []);
     } catch (err) {
       console.error('Error fetching musicians:', err);
     } finally {
