@@ -1,6 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FileWithUsage } from '@/hooks/useUserFiles';
 import { useState } from 'react';
 import { FileImage, FileVideo, FileAudio, FileText, File } from 'lucide-react';
@@ -11,7 +12,7 @@ interface FileSelectionModalProps {
   onOpenChange: (open: boolean) => void;
   files: FileWithUsage[];
   allowedTypes?: string[]; // e.g., ['image', 'video'] for portfolio, ['document'] for tech specs
-  onFileSelected: (file: FileWithUsage) => void;
+  onFilesSelected: (files: FileWithUsage[]) => void;
   title?: string;
 }
 
@@ -20,10 +21,11 @@ export const FileSelectionModal = ({
   onOpenChange,
   files,
   allowedTypes,
-  onFileSelected,
+  onFilesSelected,
   title = 'Velg fra Filbank'
 }: FileSelectionModalProps) => {
   const [search, setSearch] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image')) return <FileImage className="w-5 h-5" />;
@@ -55,6 +57,25 @@ export const FileSelectionModal = ({
     });
     return matchesSearch && matchesType;
   });
+
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleConfirm = () => {
+    const selected = files.filter(f => selectedFiles.has(f.id));
+    onFilesSelected(selected);
+    setSelectedFiles(new Set());
+    onOpenChange(false);
+  };
 
   const renderFilePreview = (file: FileWithUsage) => {
     if (file.file_type.startsWith('image')) {
@@ -93,24 +114,34 @@ export const FileSelectionModal = ({
 
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredFiles.map(file => (
-              <button
-                key={file.id}
-                onClick={() => {
-                  onFileSelected(file);
-                  onOpenChange(false);
-                }}
-                className="border rounded-lg p-3 hover:border-primary transition-colors text-left"
-              >
-                {renderFilePreview(file)}
-                <div className="mt-2">
-                  <p className="text-sm font-medium truncate">{file.filename}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {file.usage.length > 0 ? `Brukt i ${file.usage.length} ${file.usage.length === 1 ? 'sted' : 'steder'}` : 'Ikke brukt'}
-                  </p>
+            {filteredFiles.map(file => {
+              const isSelected = selectedFiles.has(file.id);
+              return (
+                <div
+                  key={file.id}
+                  onClick={() => toggleFileSelection(file.id)}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    isSelected ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="relative">
+                    {renderFilePreview(file)}
+                    <div className="absolute top-2 right-2">
+                      <Checkbox 
+                        checked={isSelected}
+                        className="bg-background shadow-md"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-sm font-medium truncate">{file.filename}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {file.usage.length > 0 ? `Brukt i ${file.usage.length} ${file.usage.length === 1 ? 'sted' : 'steder'}` : 'Ikke brukt'}
+                    </p>
+                  </div>
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
           
           {filteredFiles.length === 0 && (
@@ -119,6 +150,15 @@ export const FileSelectionModal = ({
             </div>
           )}
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Avbryt
+          </Button>
+          <Button onClick={handleConfirm} disabled={selectedFiles.size === 0}>
+            Legg til {selectedFiles.size > 0 && `(${selectedFiles.size})`}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

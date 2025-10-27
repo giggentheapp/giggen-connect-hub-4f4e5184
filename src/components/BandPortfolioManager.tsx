@@ -230,7 +230,7 @@ const BandPortfolioManager = ({
         onOpenChange={setShowFileModal}
         files={userFiles}
         allowedTypes={['image', 'video']}
-        onFileSelected={handleFileSelected}
+        onFilesSelected={(files) => files[0] && handleFileSelected(files[0])}
         title={t('selectFromFileBank')}
       />
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, File, Expand, Play } from 'lucide-react';
+import { Volume2, File, Expand, Play, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface FilebankFile {
   id: string;
@@ -51,6 +53,33 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
     }
   };
 
+  const handleRemoveFile = async (file: FilebankFile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('filbank')
+        .remove([file.file_path]);
+      
+      if (storageError) throw storageError;
+      
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('user_files')
+        .delete()
+        .eq('id', file.id);
+      
+      if (dbError) throw dbError;
+      
+      toast.success('Fil fjernet fra portfolio');
+      fetchFiles();
+    } catch (error) {
+      console.error('Error removing file:', error);
+      toast.error('Kunne ikke fjerne fil');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -96,7 +125,15 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
             alt={file.filename}
             className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
           />
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            <Button
+              size="icon"
+              variant="destructive"
+              className="w-8 h-8 rounded-full"
+              onClick={(e) => handleRemoveFile(file, e)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
             <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
               <Expand className="w-4 h-4 text-white" />
             </div>
@@ -114,7 +151,15 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
             className="w-full h-full object-cover"
             preload="metadata"
           />
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            <Button
+              size="icon"
+              variant="destructive"
+              className="w-8 h-8 rounded-full"
+              onClick={(e) => handleRemoveFile(file, e)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
             <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
               <Expand className="w-4 h-4 text-white" />
             </div>
@@ -139,7 +184,15 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
               <Play className="w-6 h-6 text-black ml-1" fill="black" />
             </div>
           </div>
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            <Button
+              size="icon"
+              variant="destructive"
+              className="w-8 h-8 rounded-full"
+              onClick={(e) => handleRemoveFile(file, e)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
             <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
               <Expand className="w-4 h-4 text-white" />
             </div>

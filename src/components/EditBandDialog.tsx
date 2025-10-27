@@ -553,7 +553,7 @@ export const EditBandDialog = ({
             onOpenChange={setShowFileModal}
             files={files}
             allowedTypes={['image']}
-            onFileSelected={handleFileFromBank}
+            onFilesSelected={(files) => files[0] && handleFileFromBank(files[0])}
             title={`Velg ${fileModalType === 'logo' ? 'logo' : 'banner'} fra Filbank`}
           />
         </div>

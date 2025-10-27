@@ -212,7 +212,7 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
         onOpenChange={setShowFileModal}
         files={userFiles}
         allowedTypes={['document', 'pdf', 'hospitality', 'rider', 'application']}
-        onFileSelected={handleFileSelected}
+        onFilesSelected={(files) => files[0] && handleFileSelected(files[0])}
         title={t('selectFromFileBank')}
       />
 
