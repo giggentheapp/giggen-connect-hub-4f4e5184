@@ -83,7 +83,6 @@ export const ProfileSection = ({
           file_type: file.file_type,
           file_size: file.file_size,
           mime_type: file.mime_type,
-          category: 'portfolio',
           bucket_name: 'filbank',
           is_public: true
         });
