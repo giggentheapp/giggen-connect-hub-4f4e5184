@@ -38,6 +38,7 @@ export const ProfileFilebankViewer = ({ userId }: ProfileFilebankViewerProps) =>
         .from('user_files')
         .select('*')
         .eq('user_id', userId)
+        .ilike('file_path', 'portfolio/%')
         .in('file_type', ['image', 'video', 'audio'])
         .order('created_at', { ascending: false });
 

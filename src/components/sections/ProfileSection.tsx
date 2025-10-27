@@ -50,13 +50,59 @@ export const ProfileSection = ({
   // Filter events to only show public ones (is_public_after_approval = true)
   const events = allEvents.filter(e => e.is_public_after_approval === true);
 
-  const handleFileSelect = (file: any) => {
-    // File is already in filbank and will be displayed automatically
-    setShowFilebankModal(false);
-    toast({
-      title: 'Fil valgt',
-      description: 'Filen vises i porteføljen din',
-    });
+  const handleFileSelect = async (file: any) => {
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+
+      // Create a copy in the portfolio folder
+      const originalPath = file.file_path;
+      const fileName = originalPath.split('/').pop();
+      const portfolioPath = `portfolio/${user.data.user.id}/${fileName}`;
+
+      // Copy file in storage
+      const { data: fileData } = await supabase.storage
+        .from('filbank')
+        .download(originalPath);
+
+      if (!fileData) throw new Error('Failed to download file');
+
+      const { error: uploadError } = await supabase.storage
+        .from('filbank')
+        .upload(portfolioPath, fileData, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Create database entry for portfolio file
+      const { error: dbError } = await supabase
+        .from('user_files')
+        .insert({
+          user_id: user.data.user.id,
+          filename: file.filename,
+          file_path: portfolioPath,
+          file_type: file.file_type,
+          file_size: file.file_size,
+          mime_type: file.mime_type,
+          category: 'portfolio',
+          bucket_name: 'filbank',
+          is_public: true
+        });
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: 'Fil lagt til',
+        description: 'Filen er nå synlig i porteføljen din',
+      });
+      setShowFilebankModal(false);
+    } catch (error) {
+      console.error('Error adding file to portfolio:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke legge til fil i porteføljen',
+        variant: 'destructive',
+      });
+    }
   };
   
   return (
