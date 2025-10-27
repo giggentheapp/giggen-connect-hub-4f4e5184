@@ -101,11 +101,11 @@ export const ArtistExploreSection = ({
       setLoading(true);
       console.log('👥 Fetching musicians...');
 
-      // Fetch profiles with role 'artist' who have show_public_profile enabled
+      // Fetch profiles with role 'musician' who have show_public_profile enabled
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'artist')
+        .eq('role', 'musician')
         .order('created_at', { ascending: false });
 
       if (error) {
