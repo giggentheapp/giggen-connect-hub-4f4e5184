@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useUserFiles, FileWithUsage } from '@/hooks/useUserFiles';
-import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye } from 'lucide-react';
+import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye, Plus, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -104,6 +105,57 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
       toast({
         title: 'Feil ved sletting',
         description: 'Kunne ikke slette filen',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const togglePortfolioUsage = async (file: FileWithUsage, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const isInPortfolio = file.usage.some(u => u.usage_type === 'profile_portfolio');
+    
+    try {
+      if (isInPortfolio) {
+        // Remove from portfolio
+        const usageId = file.usage.find(u => u.usage_type === 'profile_portfolio')?.id;
+        if (usageId) {
+          const { error } = await supabase
+            .from('file_usage')
+            .delete()
+            .eq('id', usageId);
+          
+          if (error) throw error;
+          
+          toast({
+            title: 'Fjernet fra portefølje',
+            description: 'Filen vises ikke lenger i porteføljen din',
+          });
+        }
+      } else {
+        // Add to portfolio
+        const { error } = await supabase
+          .from('file_usage')
+          .insert({
+            file_id: file.id,
+            usage_type: 'profile_portfolio',
+            reference_id: profile.user_id
+          });
+        
+        if (error) throw error;
+        
+        toast({
+          title: 'Lagt til i portefølje',
+          description: 'Filen vises nå i porteføljen din',
+        });
+      }
+      
+      refetch();
+    } catch (error) {
+      console.error('Error toggling portfolio:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke oppdatere portefølje',
         variant: 'destructive',
       });
     }
@@ -223,6 +275,21 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                     {isHovered && (
                       <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3">
                         <div className="flex gap-2 mb-2">
+                          {(file.file_type === 'image' || file.file_type === 'video' || file.file_type === 'audio') && (
+                            <Button
+                              size="icon"
+                              variant={file.usage.some(u => u.usage_type === 'profile_portfolio') ? 'default' : 'secondary'}
+                              className="h-8 w-8"
+                              onClick={(e) => togglePortfolioUsage(file, e)}
+                              title={file.usage.some(u => u.usage_type === 'profile_portfolio') ? 'Fjern fra portefølje' : 'Legg til i portefølje'}
+                            >
+                              {file.usage.some(u => u.usage_type === 'profile_portfolio') ? (
+                                <X className="h-4 w-4" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
                           {file.file_url && (
                             <>
                               <Button

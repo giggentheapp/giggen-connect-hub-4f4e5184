@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { User, Lightbulb, Calendar, MapPin, Copy, FolderOpen } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
 import { ProfileFilebankViewer } from '@/components/ProfileFilebankViewer';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -12,9 +11,8 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useToast } from '@/hooks/use-toast';
-import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 interface ProfileSectionProps {
   profile: UserProfile;
   isOwnProfile?: boolean;
@@ -25,7 +23,6 @@ export const ProfileSection = ({
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
   const { toast } = useToast();
-  const [showFilebankModal, setShowFilebankModal] = useState(false);
   
   const handleCopyUsername = () => {
     const username = `@${(profile as any).username}`;
@@ -50,41 +47,6 @@ export const ProfileSection = ({
   // Filter events to only show public ones (is_public_after_approval = true)
   const events = allEvents.filter(e => e.is_public_after_approval === true);
 
-  const handleFileSelect = async (file: any) => {
-    try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('Not authenticated');
-
-      // Create a file_usage entry to mark this file as used in portfolio
-      const { error: usageError } = await supabase
-        .from('file_usage')
-        .insert({
-          file_id: file.id,
-          usage_type: 'profile_portfolio',
-          reference_id: user.data.user.id
-        });
-
-      if (usageError) {
-        // If already exists, ignore the error
-        if (usageError.code !== '23505') {
-          throw usageError;
-        }
-      }
-
-      toast({
-        title: 'Fil lagt til',
-        description: 'Filen er nå synlig i porteføljen din',
-      });
-      setShowFilebankModal(false);
-    } catch (error) {
-      console.error('Error adding file to portfolio:', error);
-      toast({
-        title: 'Feil',
-        description: 'Kunne ikke legge til fil i porteføljen',
-        variant: 'destructive',
-      });
-    }
-  };
   
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
@@ -162,14 +124,10 @@ export const ProfileSection = ({
       <div className="space-y-4 md:space-y-6">
         {isOwnProfile && (
           <div className="flex justify-start">
-            <Button
-              onClick={() => setShowFilebankModal(true)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <FolderOpen className="h-4 w-4" />
-              Velg fra Filbank
+            <Button asChild variant="outline" size="sm">
+              <Link to="/dashboard?section=filbank">
+                Administrer portefølje i Filbank
+              </Link>
             </Button>
           </div>
         )}
@@ -217,17 +175,6 @@ export const ProfileSection = ({
         <BandsInProfile userId={profile.user_id} isOwnProfile={isOwnProfile} />
       )}
       </div>
-
-      {/* Filebank Selection Modal */}
-      <FilebankSelectionModal
-        isOpen={showFilebankModal}
-        onClose={() => setShowFilebankModal(false)}
-        onSelect={handleFileSelect}
-        userId={profile.user_id}
-        fileTypes={['image', 'video', 'audio']}
-        title="Velg fra Filbank"
-        description="Velg bilder, videoer eller lydfiler fra din filbank"
-      />
     </div>
   );
 };
