@@ -138,9 +138,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     
     if (file.file_type === 'audio' && file.file_url) {
       return (
-        <div className="p-12 flex flex-col items-center justify-center">
-          <Music className="h-24 w-24 mb-8 text-white/50" />
-          <p className="text-xl font-medium text-white mb-6">{file.filename}</p>
+        <div className="p-8 flex flex-col items-center justify-center gap-6">
+          <p className="text-lg font-medium text-foreground">{file.filename}</p>
           <audio 
             src={file.file_url}
             controls
@@ -163,12 +162,6 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
             <source src={file.file_url} type={file.mime_type || 'audio/mpeg'} />
             Din nettleser støtter ikke dette lydformatet.
           </audio>
-          <p className="text-xs text-white/50 mt-4">
-            Format: {file.mime_type} • Filnavn: {file.filename}
-          </p>
-          <p className="text-xs text-yellow-400 mt-2">
-            ⚠️ M4A-filer kan ha kompatibilitetsproblemer. Prøv å konvertere til MP3 for bedre støtte.
-          </p>
         </div>
       );
     }
@@ -205,7 +198,7 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
       </div>
 
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-background">
           <VisuallyHidden>
             <DialogTitle>{selectedFile?.filename}</DialogTitle>
             <DialogDescription>
