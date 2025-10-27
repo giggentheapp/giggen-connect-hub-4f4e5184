@@ -1417,6 +1417,7 @@ export type Database = {
         Args: { booking_uuid: string }
         Returns: undefined
       }
+      delete_auth_user: { Args: never; Returns: undefined }
       delete_band_permanently:
         | {
             Args: { band_uuid: string; requesting_user_id: string }

@@ -528,6 +528,15 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
       if (deleteError) throw deleteError;
 
+      console.log('Sletter bruker fra auth.users...');
+      // Delete the user from Supabase Auth (user can delete themselves)
+      const { error: authDeleteError } = await supabase.rpc('delete_auth_user');
+      
+      if (authDeleteError) {
+        console.error('Auth delete error:', authDeleteError);
+        throw new Error('Kunne ikke slette brukerkonto fra autentiseringssystemet');
+      }
+
       toast({
         title: "Bruker slettet",
         description: "Din konto og alle tilknyttede data har blitt permanent slettet",
