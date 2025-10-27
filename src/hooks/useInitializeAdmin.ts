@@ -14,7 +14,7 @@ export function useInitializeAdmin() {
           .from('admin_whitelist' as any)
           .select('email')
           .eq('email', user.email)
-          .single();
+          .maybeSingle();
 
         if (!whitelistEntry) {
           // E-posten er ikke på whitelist, ikke gjør til admin
