@@ -84,6 +84,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [changingUsername, setChangingUsername] = useState(false);
   const [showAvatarCrop, setShowAvatarCrop] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -526,16 +527,16 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
   const handleAvatarFileSelect = async (file: any) => {
     try {
+      // Get public URL of the selected file
       const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
       
-      await updateProfile({ avatar_url: publicUrl });
+      // Set the image and open crop modal
+      setSelectedImageForCrop(publicUrl);
+      setShowFilebankModal(false);
+      setShowAvatarCrop(true);
       
-      toast({
-        title: 'Profilbilde oppdatert',
-        description: 'Ditt profilbilde ble oppdatert fra filbanken',
-      });
     } catch (error: any) {
-      console.error('Error updating avatar from filebank:', error);
+      console.error('Error selecting file:', error);
       toast({
         title: 'Feil',
         description: error.message,
@@ -1051,15 +1052,20 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       {/* Avatar Crop Modal */}
       <AvatarCropModal
         isOpen={showAvatarCrop}
-        onClose={() => setShowAvatarCrop(false)}
+        onClose={() => {
+          setShowAvatarCrop(false);
+          setSelectedImageForCrop(null);
+        }}
         onAvatarUpdate={(avatarUrl) => {
           const updatedProfile = { ...profileData, avatar_url: avatarUrl };
           setProfileData(updatedProfile);
           onProfileUpdate?.(updatedProfile);
           setShowAvatarCrop(false);
+          setSelectedImageForCrop(null);
         }}
         currentAvatarUrl={profileData.avatar_url}
         userId={profileData.user_id}
+        initialImageUrl={selectedImageForCrop || undefined}
       />
 
       {/* Filebank Selection Modal */}
