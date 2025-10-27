@@ -142,47 +142,73 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
     setUploading(true);
     try {
+      console.log('Starting upload for user:', userId);
+      
       // Get cropped image blob
       const croppedBlob = await getCroppedImg();
       
       // Generate unique filename
       const fileName = `${userId}_${Date.now()}.jpg`;
+      const avatarPath = `${userId}/avatars/${fileName}`;
+
+      console.log('Uploading to path:', avatarPath);
 
       // Delete old avatar if exists
       if (currentAvatarUrl) {
-        const oldPath = currentAvatarUrl.split('/').pop();
-        if (oldPath) {
-          await supabase.storage
-            .from('filbank')
-            .remove([`${userId}/avatars/${oldPath}`]);
+        try {
+          const oldPath = currentAvatarUrl.split('/storage/v1/object/public/filbank/')[1];
+          if (oldPath) {
+            console.log('Deleting old avatar:', oldPath);
+            await supabase.storage
+              .from('filbank')
+              .remove([oldPath]);
+          }
+        } catch (err) {
+          console.warn('Could not delete old avatar:', err);
         }
       }
 
       // Upload new avatar to filbank
-      const avatarPath = `${userId}/avatars/${fileName}`;
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('filbank')
         .upload(avatarPath, croppedBlob, {
           contentType: 'image/jpeg',
           upsert: true
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('filbank')
         .getPublicUrl(avatarPath);
 
+      console.log('Public URL:', publicUrl);
+
       // Update profile in database
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ 
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', userId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Database update error:', updateError);
+        throw updateError;
+      }
 
+      console.log('Profile updated successfully');
+
+      // Call the callback to update UI immediately
       onAvatarUpdate(publicUrl);
+      
       toast.success('Profilbilde oppdatert!');
       onClose();
       
@@ -193,7 +219,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
       
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      toast.error('Kunne ikke laste opp bilde. Prøv igjen.');
+      toast.error(`Kunne ikke laste opp bilde: ${error.message || 'Prøv igjen'}`);
     } finally {
       setUploading(false);
     }
