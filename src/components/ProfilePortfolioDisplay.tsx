@@ -101,6 +101,19 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
       );
     }
     
+    if (file.file_type === 'audio' && file.file_url) {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2 p-4">
+          <Music className="h-12 w-12 text-muted-foreground" />
+          <audio 
+            src={file.file_url}
+            controls
+            className="w-full"
+          />
+        </div>
+      );
+    }
+    
     const Icon = file.file_type === 'audio' ? Music : 
                  file.file_type === 'video' ? Video : Image;
     
