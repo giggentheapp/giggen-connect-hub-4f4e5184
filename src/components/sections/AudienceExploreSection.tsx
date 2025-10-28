@@ -130,6 +130,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           longitude,
           is_address_public,
           privacy_settings,
+          instruments,
           created_at
         `)
         .order('created_at', { ascending: false });
@@ -158,6 +159,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           longitude: maker.is_address_public ? maker.longitude : null,
           is_address_public: maker.is_address_public,
           privacy_settings: maker.privacy_settings,
+          instruments: maker.instruments,
           created_at: maker.created_at
         };
       });

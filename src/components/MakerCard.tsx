@@ -16,6 +16,7 @@ interface MakerCardProps {
     address: string | null;
     privacy_settings: any;
     created_at: string;
+    instruments?: Array<{ instrument: string; details: string }>;
   };
   onViewProfile: (userId: string) => void;
   onBookMaker?: (userId: string) => void;
@@ -70,6 +71,23 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
           <p className="text-sm text-muted-foreground line-clamp-3">
             {maker.bio}
           </p>
+        )}
+
+        {/* Instruments - Only for Musicians */}
+        {maker.role === 'musician' && maker.instruments && maker.instruments.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 text-xs pt-2 border-t border-border/50">
+            {maker.instruments.slice(0, 3).map((item, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {item.instrument}
+                {item.details && <span className="ml-1 opacity-70">({item.details})</span>}
+              </Badge>
+            ))}
+            {maker.instruments.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{maker.instruments.length - 3}
+              </Badge>
+            )}
+          </div>
         )}
 
         {(showPortfolio || showEvents) && (
