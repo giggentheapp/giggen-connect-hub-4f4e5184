@@ -194,7 +194,7 @@ export const AdminConceptsSection = ({
                   <div className="flex items-start gap-3 p-3">
                     <div className="flex-1 min-w-0">
                       <div 
-                        onClick={() => navigate(`/concept-owner-view/${concept.id}`)} 
+                        onClick={() => navigate(`/concept/${concept.id}`)} 
                         className="cursor-pointer"
                       >
                         <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
@@ -213,7 +213,10 @@ export const AdminConceptsSection = ({
                     </div>
                     
                     {/* Visibility Toggle */}
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0"
+                    >
                       {concept.is_published ? (
                         <>
                           <Eye className="h-3 w-3 text-green-600" />
@@ -236,7 +239,10 @@ export const AdminConceptsSection = ({
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => navigate(`/create-offer?edit=${concept.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/create-offer?edit=${concept.id}`);
+                      }}
                       className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Edit className="h-3 w-3 mr-1" />
@@ -247,7 +253,10 @@ export const AdminConceptsSection = ({
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDeleteConcept(concept.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteConcept(concept.id);
+                      }}
                       className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-3 w-3" />
