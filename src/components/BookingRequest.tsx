@@ -14,14 +14,16 @@ import { Send } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { cn } from '@/lib/utils';
 import { logger } from '@/utils/logger';
+import { Badge } from '@/components/ui/badge';
 
 interface BookingRequestProps {
   receiverId: string;
   receiverName: string;
   onSuccess?: () => void;
+  preselectedConceptId?: string; // For å kunne pre-velge et spesifikt concept
 }
 
-export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingRequestProps) => {
+export const BookingRequest = ({ receiverId, receiverName, onSuccess, preselectedConceptId }: BookingRequestProps) => {
   const [open, setOpen] = useState(false);
   const [selectedConcept, setSelectedConcept] = useState<any>(null);
   const [personalMessage, setPersonalMessage] = useState('');
@@ -37,9 +39,11 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
   const submissionTimeoutRef = useRef<NodeJS.Timeout>();
   const renderCountRef = useRef(0);
 
-  // Get current user's concepts
+  // Get current user's concepts AND receiver's concepts
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const { concepts } = useUserConcepts(currentUserId);
+  const [allAvailableConcepts, setAllAvailableConcepts] = useState<any[]>([]);
+  const { concepts: ownConcepts } = useUserConcepts(currentUserId);
+  const { concepts: receiverConcepts } = useUserConcepts(receiverId);
   
   useEffect(() => {
     renderCountRef.current += 1;
@@ -58,6 +62,25 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
     getCurrentUser();
   }, []);
 
+  // Kombiner egne og mottakerens concepts
+  useEffect(() => {
+    const combined = [
+      ...ownConcepts.filter(c => c.is_published).map(c => ({ ...c, isOwn: true })),
+      ...receiverConcepts.filter(c => c.is_published).map(c => ({ ...c, isOwn: false }))
+    ];
+    setAllAvailableConcepts(combined);
+  }, [ownConcepts, receiverConcepts]);
+
+  // Pre-select concept if provided
+  useEffect(() => {
+    if (preselectedConceptId && allAvailableConcepts.length > 0) {
+      const concept = allAvailableConcepts.find(c => c.id === preselectedConceptId);
+      if (concept) {
+        setSelectedConcept(concept);
+      }
+    }
+  }, [preselectedConceptId, allAvailableConcepts]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -74,22 +97,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
       receiverName 
     });
     
-    // Validate inputs
+    // Validate inputs - Personlig melding er PÅKREVD, men concept er valgfritt
     if (!personalMessage.trim()) {
       logger.warn('Missing personal message');
       toast({
         title: t('missingInformation'),
         description: 'Vennligst skriv en personlig melding',
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!selectedConcept) {
-      logger.warn('No concept selected');
-      toast({
-        title: t('missingInformation'),
-        description: 'Vennligst velg et tilbud',
         variant: "destructive",
       });
       return;
@@ -143,36 +156,38 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         email: user?.email
       };
 
-      // Fetch tech spec and hospitality rider documents from concept
+      // Hvis et concept er valgt, fetch dokumenter
       let techSpecUrl = null;
       let hospitalityRiderUrl = null;
 
-      if (selectedConcept.tech_spec_reference) {
-        const { data: techSpecData } = await supabase
-          .from('profile_tech_specs')
-          .select('file_url')
-          .eq('id', selectedConcept.tech_spec_reference)
-          .maybeSingle();
-        
-        techSpecUrl = techSpecData?.file_url || null;
-      }
+      if (selectedConcept) {
+        if (selectedConcept.tech_spec_reference) {
+          const { data: techSpecData } = await supabase
+            .from('profile_tech_specs')
+            .select('file_url')
+            .eq('id', selectedConcept.tech_spec_reference)
+            .maybeSingle();
+          
+          techSpecUrl = techSpecData?.file_url || null;
+        }
 
-      if (selectedConcept.hospitality_rider_reference) {
-        const { data: hospitalityRiderData } = await supabase
-          .from('hospitality_riders')
-          .select('file_url')
-          .eq('id', selectedConcept.hospitality_rider_reference)
-          .maybeSingle();
-        
-        hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
+        if (selectedConcept.hospitality_rider_reference) {
+          const { data: hospitalityRiderData } = await supabase
+            .from('hospitality_riders')
+            .select('file_url')
+            .eq('id', selectedConcept.hospitality_rider_reference)
+            .maybeSingle();
+          
+          hospitalityRiderUrl = hospitalityRiderData?.file_url || null;
+        }
       }
 
       const bookingData: CreateBookingRequest = {
         receiverId: receiverId,
-        conceptIds: [selectedConcept.id],
-        selectedConceptId: selectedConcept.id,
-        title: selectedConcept.title,
-        description: selectedConcept.description || '',
+        conceptIds: selectedConcept ? [selectedConcept.id] : [],
+        selectedConceptId: selectedConcept?.id || null,
+        title: selectedConcept?.title || 'Booking Request',
+        description: selectedConcept?.description || '',
         personalMessage: personalMessage,
         contactInfo: contactInfoToShare as ContactInfo,
       };
@@ -251,18 +266,52 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
         
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto min-h-0">
           <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-6">
-            {/* Concept Selection */}
+            {/* Concept Selection - VALGFRITT */}
             <div className="space-y-3">
-              <Label className="text-base font-medium">
-                {t('selectOffer')}
-              </Label>
-              {concepts.filter(c => c.is_published).length === 0 ? (
+              <div>
+                <Label className="text-base font-medium">
+                  {t('selectOffer')} <span className="text-muted-foreground font-normal">(valgfritt)</span>
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Du kan velge et tilbud som utgangspunkt, eller sende forespørsel uten tilbud
+                </p>
+              </div>
+              
+              {/* Option to send without concept */}
+              <Card 
+                className={cn(
+                  "cursor-pointer transition-colors",
+                  selectedConcept === null 
+                    ? "border-primary bg-primary/5" 
+                    : "hover:border-muted-foreground"
+                )}
+                onClick={() => setSelectedConcept(null)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-3">
+                    <div className={cn(
+                      "mt-1 h-4 w-4 rounded border-2 shrink-0",
+                      selectedConcept === null 
+                        ? "border-primary bg-primary" 
+                        : "border-muted-foreground"
+                    )} />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium">Send uten tilbud</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Send en forespørsel uten å velge et spesifikt tilbud
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {allAvailableConcepts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  {t('mustCreateOffersFirst')}
+                  Ingen publiserte tilbud tilgjengelig
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-3">
-                  {concepts.filter(concept => concept && concept.id && concept.is_published).map((concept) => (
+                  {allAvailableConcepts.map((concept) => (
                     <Card 
                       key={concept.id} 
                       className={cn(
@@ -282,7 +331,14 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                               : "border-muted-foreground"
                           )} />
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{concept.title || 'Untitled'}</h4>
+                              {!concept.isOwn && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Fra {receiverName}
+                                </Badge>
+                              )}
+                            </div>
                             {concept.description && (
                               <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
                                 {concept.description}
@@ -304,33 +360,46 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
                   <Label className="text-base font-medium">{t('selectedOffer')}</Label>
                   <Card className="bg-muted/50">
                     <CardContent className="p-3">
-                      <h4 className="font-medium">{selectedConcept.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{selectedConcept.title}</h4>
+                        {!selectedConcept.isOwn && (
+                          <Badge variant="secondary" className="text-xs">
+                            Fra {receiverName}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {selectedConcept.description || t('noDescription')}
                       </p>
                     </CardContent>
                   </Card>
                 </div>
+              </>
+            )}
 
-                {/* Personal Message */}
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="message" className="text-base font-medium">
-                      {t('personalMessage')} *
-                    </Label>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t('personalMessageNote')}
-                    </p>
-                  </div>
-                  <Textarea
-                    id="message"
-                    placeholder={t('personalMessagePlaceholder')}
-                    value={personalMessage}
-                    onChange={(e) => setPersonalMessage(e.target.value)}
-                    className="min-h-[120px] text-base resize-none"
-                    required
-                  />
-                </div>
+            {/* Personal Message - ALLTID SYNLIG OG PÅKREVD */}
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="message" className="text-base font-medium">
+                  {t('personalMessage')} *
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('personalMessageNote')}
+                </p>
+              </div>
+              <Textarea
+                id="message"
+                placeholder={t('personalMessagePlaceholder')}
+                value={personalMessage}
+                onChange={(e) => setPersonalMessage(e.target.value)}
+                className="min-h-[120px] text-base resize-none"
+                required
+              />
+            </div>
+
+            {selectedConcept && (
+              <>
+                {/* Next Steps Information */}
 
                 {/* Next Steps Information */}
                 <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -361,7 +430,7 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess }: BookingR
             </Button>
             <Button 
               type="submit" 
-              disabled={submitting || !selectedConcept || !personalMessage.trim()}
+              disabled={submitting || !personalMessage.trim()}
               className="min-h-[44px]"
             >
               {submitting ? t('sending') : t('sendRequest')}
