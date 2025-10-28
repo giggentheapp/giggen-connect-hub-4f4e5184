@@ -37,11 +37,13 @@ const Profile = () => {
 
       try {
         setLoading(true);
-        const isOwnProfile = currentUser?.id === userId;
 
-        // Use get_public_profile RPC which checks show_public_profile setting
+        // Fetch profile directly from profiles table
+        // RLS policy "authenticated_can_view_all_profiles" allows this
         const { data: profileData, error: profileError } = await supabase
-          .rpc('get_public_profile', { target_user_id: userId })
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (profileError) {
@@ -49,32 +51,14 @@ const Profile = () => {
           throw profileError;
         }
 
-        // If display_name is NULL, profile is private
-        if (!profileData || (!profileData.display_name && !isOwnProfile)) {
-          console.log('Profile is private or not found');
+        if (!profileData) {
+          console.log('Profile not found');
           setProfile(null);
           setLoading(false);
           return;
         }
 
-        if (isOwnProfile) {
-          const { data: ownProfileData, error: ownError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', userId)
-            .maybeSingle();
-
-          if (ownError) throw ownError;
-          if (!ownProfileData) {
-            setProfile(null);
-            setLoading(false);
-            return;
-          }
-          setProfile(ownProfileData as unknown as UserProfile);
-        } else {
-          // Use public profile data
-          setProfile(profileData as unknown as UserProfile);
-        }
+        setProfile(profileData as unknown as UserProfile);
       } catch (error: any) {
         console.error('Error fetching profile:', error);
         setProfile(null);
