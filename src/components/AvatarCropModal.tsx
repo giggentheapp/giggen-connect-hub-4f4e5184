@@ -15,6 +15,9 @@ interface AvatarCropModalProps {
   currentAvatarUrl?: string;
   userId: string;
   initialImageUrl?: string;
+  updateTable?: 'profiles' | 'bands';
+  updateField?: string;
+  recordId?: string;
 }
 
 export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
@@ -23,7 +26,10 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   onAvatarUpdate,
   currentAvatarUrl,
   userId,
-  initialImageUrl
+  initialImageUrl,
+  updateTable = 'profiles',
+  updateField = 'avatar_url',
+  recordId
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>({
@@ -199,21 +205,24 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
       console.log('Public URL:', publicUrl);
 
-      // Update profile in database
+      // Update database
+      const idField = updateTable === 'profiles' ? 'user_id' : 'id';
+      const idValue = recordId || userId;
+      
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from(updateTable as any)
         .update({ 
-          avatar_url: publicUrl,
+          [updateField]: publicUrl,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId);
+        .eq(idField, idValue);
 
       if (updateError) {
         console.error('Database update error:', updateError);
         throw updateError;
       }
 
-      console.log('Profile updated successfully');
+      console.log(`${updateTable} updated successfully`);
 
       // Call the callback to update UI immediately
       onAvatarUpdate(publicUrl);

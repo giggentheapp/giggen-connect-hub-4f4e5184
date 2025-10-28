@@ -762,6 +762,9 @@ export const EditBandDialog = ({
             currentAvatarUrl={imagePreview}
             userId={userId || ''}
             initialImageUrl={selectedImageForCrop || undefined}
+            updateTable="bands"
+            updateField="image_url"
+            recordId={band?.id}
           />
 
           {/* Filebank Selection Modal */}
