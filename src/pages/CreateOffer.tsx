@@ -418,26 +418,70 @@ export default function CreateOffer() {
             }));
 
           if (fileRecords.length > 0) {
-            await supabase.from('concept_files').insert(fileRecords);
+            const { data: insertedFiles, error: insertError } = await supabase
+              .from('concept_files')
+              .insert(fileRecords)
+              .select('id');
+            
+            if (insertError) {
+              console.error('Error inserting files:', insertError);
+            } else if (insertedFiles) {
+              // Update conceptData with the new concept_file IDs
+              setConceptData(prev => ({
+                ...prev,
+                portfolio_files: prev.portfolio_files.map((file, index) => {
+                  if (!file.conceptFileId && insertedFiles[index]) {
+                    return { ...file, conceptFileId: insertedFiles[index].id };
+                  }
+                  return file;
+                })
+              }));
+            }
           }
         }
       }
 
-      // Update is_public status for all concept files
-      if (conceptData.portfolio_files.length > 0) {
-        for (const file of conceptData.portfolio_files) {
-          if (file.conceptFileId) {
-            try {
-              await supabase
-                .from('concept_files')
-                .update({
-                  is_public: true
-                })
-                .eq('id', file.conceptFileId);
-            } catch (fileError) {
-              console.warn('Could not update file visibility:', fileError);
-            }
+      // Save portfolio files for existing concepts too
+      if (conceptId && conceptData.portfolio_files.length > 0) {
+        const unsavedFiles = conceptData.portfolio_files.filter(file => file && file.filename && !file.conceptFileId);
+        
+        console.log('📁 Publishing - Portfolio files status:', {
+          totalFiles: conceptData.portfolio_files.length,
+          unsavedFiles: unsavedFiles.length,
+          files: conceptData.portfolio_files.map(f => ({
+            filename: f.filename,
+            hasConceptFileId: !!f.conceptFileId,
+            file_path: f.file_path
+          }))
+        });
+        
+        if (unsavedFiles.length > 0) {
+          const fileRecords = unsavedFiles.map(file => ({
+            creator_id: userId,
+            concept_id: conceptId,
+            filename: file.filename,
+            file_path: file.file_path,
+            file_type: file.file_type,
+            file_url: file.publicUrl || file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
+            mime_type: file.mime_type,
+            file_size: file.file_size,
+            title: file.title || file.filename,
+            is_public: true // Already public since we're publishing
+          }));
+
+          console.log('💾 Saving concept files:', fileRecords);
+
+          const { data: savedFiles, error: insertError } = await supabase
+            .from('concept_files')
+            .insert(fileRecords)
+            .select('*');
+          
+          if (insertError) {
+            console.error('❌ Error inserting files for existing concept:', insertError);
+            throw insertError;
           }
+          
+          console.log('✅ Files saved successfully:', savedFiles);
         }
       }
 
