@@ -32,21 +32,33 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     try {
       setLoading(true);
       
-      // Get files directly from user_files with portfolio category
+      // Get files via file_usage table - only image, video, audio
       const { data, error } = await supabase
-        .from('user_files')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('category', 'portfolio')
-        .eq('is_public', true)
-        .in('file_type', ['image', 'video', 'audio'])
-        .order('created_at', { ascending: false });
+        .from('file_usage')
+        .select(`
+          file_id,
+          user_files!inner(
+            id,
+            filename,
+            file_path,
+            file_type,
+            mime_type,
+            file_size,
+            thumbnail_path,
+            is_public
+          )
+        `)
+        .eq('usage_type', 'profile_portfolio')
+        .eq('reference_id', userId)
+        .eq('user_files.is_public', true)
+        .in('user_files.file_type', ['image', 'video', 'audio']);
 
       if (error) throw error;
       
       // Transform and get public URLs
+      const fileData = (data?.map(item => item.user_files).flat() || []) as any[];
       const filesWithUrls = await Promise.all(
-        (data || []).map(async (file) => {
+        fileData.map(async (file) => {
           const { data: { publicUrl } } = supabase.storage
             .from('filbank')
             .getPublicUrl(file.file_path);

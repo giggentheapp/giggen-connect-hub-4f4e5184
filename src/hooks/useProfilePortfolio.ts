@@ -38,20 +38,24 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('user_files')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('category', 'portfolio')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
+        .from('file_usage')
+        .select(`
+          file_id,
+          user_files!inner(*)
+        `)
+        .eq('usage_type', 'profile_portfolio')
+        .eq('reference_id', userId)
+        .eq('user_files.is_public', true);
 
       if (fetchError) {
         logger.error('Failed to fetch portfolio', fetchError);
         throw fetchError;
       }
 
-      logger.debug('Portfolio fetched', { userId, count: data?.length || 0 });
-      setFiles(data || []);
+      // Transform the data - extract user_files from the join
+      const files = data?.map(item => item.user_files).flat() || [];
+      logger.debug('Portfolio fetched', { userId, count: files.length });
+      setFiles(files as ProfilePortfolioFile[]);
     } catch (err: unknown) {
       logger.error('Error fetching portfolio', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
