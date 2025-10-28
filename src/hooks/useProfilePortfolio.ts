@@ -41,8 +41,8 @@ export const useProfilePortfolio = (userId: string | undefined) => {
         .from('user_files')
         .select('*')
         .eq('user_id', userId)
+        .eq('category', 'portfolio')
         .eq('is_public', true)
-        .ilike('file_path', 'portfolio/%')
         .order('created_at', { ascending: false });
 
       if (fetchError) {
