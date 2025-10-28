@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, File, Expand, Play } from 'lucide-react';
+import { Volume2, File, Expand, Play, Music } from 'lucide-react';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,8 +126,8 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-              <Play className="w-6 h-6 text-black ml-1" fill="black" />
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+              <Music className="w-6 h-6 text-accent-orange" />
             </div>
           </div>
         </div>

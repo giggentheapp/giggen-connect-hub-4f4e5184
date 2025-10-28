@@ -110,11 +110,18 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     if (file.file_type === 'audio' && file.thumbnail_path) {
       const thumbnailUrl = getPublicUrl(file.thumbnail_path);
       return (
-        <img 
-          src={thumbnailUrl} 
-          alt={file.filename}
-          className="w-full h-full object-cover"
-        />
+        <div className="relative w-full h-full">
+          <img 
+            src={thumbnailUrl} 
+            alt={file.filename}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+              <Music className="w-6 h-6 text-accent-orange" />
+            </div>
+          </div>
+        </div>
       );
     }
     
