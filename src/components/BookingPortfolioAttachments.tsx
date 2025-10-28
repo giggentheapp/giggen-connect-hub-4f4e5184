@@ -149,7 +149,12 @@ export const BookingPortfolioAttachments = ({
               </CardDescription>
             </div>
             {canEdit && (
-              <Button size="sm" variant="outline" onClick={() => setIsFilebankOpen(true)}>
+              <Button 
+                type="button" 
+                size="sm" 
+                variant="outline" 
+                onClick={() => setIsFilebankOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-1" />
                 Legg ved fra filbank
               </Button>
