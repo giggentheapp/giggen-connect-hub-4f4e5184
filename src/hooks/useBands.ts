@@ -23,6 +23,7 @@ export const useBands = () => {
             joined_at
           )
         `)
+        .eq('is_public', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
