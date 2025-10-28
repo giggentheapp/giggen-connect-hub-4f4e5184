@@ -75,12 +75,21 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
 
         {/* Instruments - Only for Musicians */}
         {maker.role === 'musician' && maker.instruments && maker.instruments.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 text-xs pt-2 border-t border-border/50">
+          <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-border/50">
             {maker.instruments.slice(0, 3).map((item, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {item.instrument}
-                {item.details && <span className="ml-1 opacity-70">({item.details})</span>}
-              </Badge>
+              <div 
+                key={index}
+                className="inline-flex flex-col px-2.5 py-1.5 rounded-md bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 border border-accent-orange/20"
+              >
+                <span className="text-xs font-semibold text-accent-orange leading-none">
+                  {item.instrument}
+                </span>
+                {item.details && (
+                  <span className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                    {item.details}
+                  </span>
+                )}
+              </div>
             ))}
             {maker.instruments.length > 3 && (
               <Badge variant="outline" className="text-xs">

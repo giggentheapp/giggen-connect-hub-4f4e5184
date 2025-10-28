@@ -114,17 +114,21 @@ export const ProfileSection = ({
           {/* Instruments Display - Only for Musicians */}
           {profile.role === 'musician' && (profile as any).instruments && Array.isArray((profile as any).instruments) && (profile as any).instruments.length > 0 && (
             <div className="max-w-2xl mx-auto px-4">
-              <div className="flex flex-wrap items-center justify-center gap-2 text-sm md:text-base">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 {((profile as any).instruments as Array<{ instrument: string; details: string }>).map((item, index) => (
-                  <span key={index} className="inline-flex items-center gap-1">
-                    <span className="font-medium text-accent-orange">{item.instrument}</span>
+                  <div 
+                    key={index}
+                    className="inline-flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 border border-accent-orange/20"
+                  >
+                    <span className="text-sm font-semibold text-accent-orange">
+                      {item.instrument}
+                    </span>
                     {item.details && (
-                      <span className="text-muted-foreground">({item.details})</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.details}
+                      </span>
                     )}
-                    {index < (profile as any).instruments.length - 1 && (
-                      <span className="text-muted-foreground ml-1">•</span>
-                    )}
-                  </span>
+                  </div>
                 ))}
               </div>
             </div>
