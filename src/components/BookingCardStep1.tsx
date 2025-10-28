@@ -123,7 +123,7 @@ export const BookingCardStep1 = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex gap-2">
-            {booking.concept_ids && booking.concept_ids.length > 0 && (
+            {booking.concept_ids && booking.concept_ids.length > 0 ? (
               <Button 
                 size="sm" 
                 variant="outline"
@@ -131,6 +131,10 @@ export const BookingCardStep1 = ({
               >
                 Se tilbud
               </Button>
+            ) : (
+              <span className="text-xs text-muted-foreground italic py-2">
+                Ingen tilbud vedlagt
+              </span>
             )}
           </div>
           

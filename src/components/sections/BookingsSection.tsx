@@ -242,7 +242,7 @@ export const BookingsSection = ({
               <Eye className="h-4 w-4 mr-1" />
               Se detaljer
             </Button>
-            {booking.concept_ids && booking.concept_ids.length > 0 && (
+            {booking.concept_ids && booking.concept_ids.length > 0 ? (
               <Button 
                 size="sm" 
                 variant="outline"
@@ -250,6 +250,10 @@ export const BookingsSection = ({
               >
                 Se tilbud
               </Button>
+            ) : (
+              <span className="text-xs text-muted-foreground italic py-2">
+                Ingen tilbud vedlagt
+              </span>
             )}
           </div>
           <BookingActions booking={booking} currentUserId={profile.user_id} onAction={handleBookingAction} />
