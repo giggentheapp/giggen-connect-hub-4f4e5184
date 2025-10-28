@@ -313,6 +313,7 @@ export type Database = {
           genre: string | null
           id: string
           image_url: string | null
+          is_public: boolean
           music_links: Json | null
           name: string
           social_media_links: Json | null
@@ -330,6 +331,7 @@ export type Database = {
           genre?: string | null
           id?: string
           image_url?: string | null
+          is_public?: boolean
           music_links?: Json | null
           name: string
           social_media_links?: Json | null
@@ -347,6 +349,7 @@ export type Database = {
           genre?: string | null
           id?: string
           image_url?: string | null
+          is_public?: boolean
           music_links?: Json | null
           name?: string
           social_media_links?: Json | null

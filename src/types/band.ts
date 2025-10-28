@@ -7,6 +7,7 @@ export interface Band {
   genre: string | null;
   bio: string | null;
   founded_year: number | null;
+  is_public: boolean;
   music_links: {
     spotify?: string;
     youtube?: string;
