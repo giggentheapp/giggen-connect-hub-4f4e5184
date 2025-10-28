@@ -748,6 +748,7 @@ export const EditBandDialog = ({
 
           {/* Avatar Crop Modal for Logo */}
           <AvatarCropModal
+            key={`band-logo-${band?.id || 'new'}`}
             isOpen={showAvatarCrop}
             onClose={() => {
               setShowAvatarCrop(false);

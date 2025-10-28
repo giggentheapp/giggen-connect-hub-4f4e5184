@@ -1145,6 +1145,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
       {/* Avatar Crop Modal */}
       <AvatarCropModal
+        key={`user-avatar-${profileData.user_id}`}
         isOpen={showAvatarCrop}
         onClose={() => {
           setShowAvatarCrop(false);
