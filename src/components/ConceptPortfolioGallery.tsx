@@ -88,7 +88,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
     // Image
     if (file.file_type?.includes('image')) {
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+        <div className="relative w-full h-full group">
           <img 
             src={publicUrl} 
             alt=""
@@ -105,11 +105,11 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
 
     // Video with thumbnail
     if (isVideoFile(file) && file.thumbnail_path) {
-      const thumbnailUrl = getPublicUrl(file);
+      const thumbnailUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.thumbnail_path}`;
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+        <div className="relative w-full h-full group">
           <img 
-            src={`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.thumbnail_path}`}
+            src={thumbnailUrl}
             alt=""
             className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
           />
@@ -119,7 +119,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
               <Play className="w-6 h-6 text-black ml-1" fill="black" />
             </div>
           </div>
@@ -130,7 +130,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
     // Video without thumbnail
     if (isVideoFile(file)) {
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+        <div className="relative w-full h-full group">
           <video 
             src={publicUrl}
             className="w-full h-full object-cover"
@@ -142,7 +142,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
               <Play className="w-6 h-6 text-black ml-1" fill="black" />
             </div>
           </div>
@@ -153,11 +153,11 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
     // Audio
     if (isAudioFile(file)) {
       return (
-        <div className="relative w-full aspect-square overflow-hidden bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 border border-border group cursor-pointer flex flex-col items-center justify-center p-4">
+        <div className="relative w-full h-full bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 group flex flex-col items-center justify-center p-4">
           <Volume2 className="w-12 h-12 text-accent-orange mb-2" />
           <p className="text-xs font-medium text-center truncate w-full px-2">{file.title || file.filename}</p>
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
               <Play className="w-6 h-6 text-black ml-1" fill="black" />
             </div>
           </div>
@@ -172,7 +172,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
 
     // Other files
     return (
-      <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+      <div className="relative w-full h-full group">
         <div className="absolute inset-0 flex items-center justify-center">
           <File className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/60" />
         </div>
@@ -228,11 +228,12 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
 
   return (
     <ErrorBoundary>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
         {files.map((file) => (
           <div 
             key={file.id} 
             onClick={() => setSelectedFile(file)}
+            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all"
           >
             {renderGridItem(file)}
           </div>
