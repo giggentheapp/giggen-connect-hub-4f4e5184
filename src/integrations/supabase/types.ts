@@ -1577,10 +1577,12 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          instruments: Json
           is_address_public: boolean
           latitude: number
           longitude: number
           role: string
+          social_media_links: Json
           user_id: string
           username: string
         }[]
