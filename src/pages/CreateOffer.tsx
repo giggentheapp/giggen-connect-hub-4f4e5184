@@ -133,6 +133,7 @@ export default function CreateOffer() {
           file_url: file.file_url,
           publicUrl: file.file_url,
           title: file.title || file.filename,
+          thumbnail_path: file.thumbnail_path,
           uploadedAt: file.created_at
         }));
 
@@ -205,6 +206,7 @@ export default function CreateOffer() {
         publicUrl: publicUrl,
         file_url: publicUrl,
         title: file.filename,
+        thumbnail_path: file.thumbnail_path,
         uploadedAt: file.created_at,
         fromFilbank: true // Flag to indicate this is from filebank
       }]
@@ -308,6 +310,7 @@ export default function CreateOffer() {
             mime_type: file.mime_type,
             file_size: file.file_size,
             title: file.title || file.filename,
+            thumbnail_path: file.thumbnail_path,
             is_public: false
           }));
 
@@ -437,6 +440,7 @@ export default function CreateOffer() {
               mime_type: file.mime_type,
               file_size: file.file_size,
               title: file.title || file.filename,
+              thumbnail_path: file.thumbnail_path,
               is_public: false
             }));
 
@@ -489,6 +493,7 @@ export default function CreateOffer() {
             mime_type: file.mime_type,
             file_size: file.file_size,
             title: file.title || file.filename,
+            thumbnail_path: file.thumbnail_path,
             is_public: true // Already public since we're publishing
           }));
 
