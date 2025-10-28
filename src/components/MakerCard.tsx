@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Music, Calendar, Image, User, Guitar } from 'lucide-react';
+import { MapPin, Music, Calendar, Image, User } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,15 +53,8 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             <CardTitle className="line-clamp-1 text-base">{maker.display_name}</CardTitle>
             <CardDescription className="text-xs">@{maker.username}</CardDescription>
           </div>
-          <Badge variant="secondary" className="text-xs shrink-0 flex items-center gap-1">
-            {maker.role === 'musician' || maker.role === 'MUSIKER' ? (
-              <>
-                <Guitar className="h-3 w-3" />
-                Musiker
-              </>
-            ) : (
-              'Arrangør'
-            )}
+          <Badge variant="secondary" className="text-xs shrink-0">
+            {maker.role === 'musician' || maker.role === 'MUSIKER' ? 'Musiker' : 'Arrangør'}
           </Badge>
         </div>
       </CardHeader>
