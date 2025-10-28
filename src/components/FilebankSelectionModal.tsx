@@ -17,6 +17,7 @@ interface FilebankFile {
   created_at: string;
   category?: string;
   is_public?: boolean;
+  thumbnail_path?: string;
 }
 
 interface FilebankSelectionModalProps {
@@ -100,6 +101,18 @@ export const FilebankSelectionModal = ({
       return (
         <img
           src={publicUrl}
+          alt={file.filename}
+          className="w-full h-32 object-cover rounded"
+        />
+      );
+    }
+    
+    // Show thumbnail for video/audio if available
+    if ((file.file_type === 'video' || file.file_type === 'audio') && file.thumbnail_path) {
+      const thumbnailUrl = getPublicUrl(file.thumbnail_path);
+      return (
+        <img
+          src={thumbnailUrl}
           alt={file.filename}
           className="w-full h-32 object-cover rounded"
         />
