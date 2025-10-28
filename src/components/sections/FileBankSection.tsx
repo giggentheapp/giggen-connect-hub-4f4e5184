@@ -374,12 +374,28 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                           loading="lazy"
                         />
                       ) : file.file_type === 'video' ? (
-                        <video 
-                          src={supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl}
-                          className="w-full h-full object-cover"
-                          muted
-                          playsInline
-                        />
+                        file.thumbnail_path ? (
+                          <div className="relative w-full h-full">
+                            <img 
+                              src={supabase.storage.from('filbank').getPublicUrl(file.thumbnail_path).data.publicUrl}
+                              alt={file.filename}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                              <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                                <Video className="w-6 h-6 text-red-500" />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <video 
+                            src={supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                          />
+                        )
                       ) : file.file_type === 'audio' && file.thumbnail_path ? (
                         <div className="relative w-full h-full">
                           <img 
@@ -432,6 +448,21 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedAudioFile(file);
+                                    setThumbnailModalOpen(true);
+                                  }}
+                                >
+                                  <ImageIcon className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {file.file_type === 'video' && (
+                                <Button
+                                  size="icon"
+                                  variant="secondary"
+                                  className="h-8 w-8"
+                                  title="Legg til miniatyrbilde"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAudioFile(file); // Reuse same state for video
                                     setThumbnailModalOpen(true);
                                   }}
                                 >
@@ -598,7 +629,7 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
 
                 toast({
                   title: 'Miniatyrbilde oppdatert',
-                  description: 'Miniatyrbildet er nå knyttet til lydfilen',
+                  description: `Miniatyrbildet er nå knyttet til ${selectedAudioFile.file_type === 'video' ? 'videoen' : 'lydfilen'}`,
                 });
 
                 refetch();
@@ -616,7 +647,7 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
             userId={profile.user_id}
             fileTypes={['image']}
             title="Velg miniatyrbilde"
-            description="Velg et bilde fra filbanken som skal vises for denne lydfilen"
+            description={`Velg et bilde fra filbanken som skal vises for denne ${selectedAudioFile.file_type === 'video' ? 'videoen' : 'lydfilen'}`}
           />
         )}
       </div>

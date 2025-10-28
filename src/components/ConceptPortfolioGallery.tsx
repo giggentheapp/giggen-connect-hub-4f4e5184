@@ -16,6 +16,7 @@ interface ConceptFile {
   file_type: string;
   mime_type: string | null;
   title?: string;
+  thumbnail_path?: string | null;
 }
 
 export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryProps) => {
@@ -28,7 +29,7 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
       try {
         const { data, error } = await supabase
           .from('concept_files')
-          .select('*')
+          .select('id, filename, file_path, file_url, file_type, mime_type, title, thumbnail_path, created_at')
           .eq('concept_id', conceptId)
           .order('created_at', { ascending: false });
 
@@ -102,7 +103,31 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
       );
     }
 
-    // Video
+    // Video with thumbnail
+    if (isVideoFile(file) && file.thumbnail_path) {
+      const thumbnailUrl = getPublicUrl(file);
+      return (
+        <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+          <img 
+            src={`https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.thumbnail_path}`}
+            alt=""
+            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+              <Expand className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+              <Play className="w-6 h-6 text-black ml-1" fill="black" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Video without thumbnail
     if (isVideoFile(file)) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">

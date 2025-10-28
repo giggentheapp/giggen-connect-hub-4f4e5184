@@ -681,6 +681,7 @@ export type Database = {
           id: string
           is_public: boolean
           mime_type: string | null
+          thumbnail_path: string | null
           title: string | null
           updated_at: string
         }
@@ -697,6 +698,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          thumbnail_path?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -713,6 +715,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           mime_type?: string | null
+          thumbnail_path?: string | null
           title?: string | null
           updated_at?: string
         }
