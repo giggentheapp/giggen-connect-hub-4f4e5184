@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, User, UsersRound, Search, Calendar, CalendarCheck } from 'lucide-react';
+import { MapPin, User, UsersRound, Search, Calendar, Building } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -243,21 +243,21 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Arrangører"
               >
-                <CalendarCheck className="w-4 h-4" />
+                <Building className="w-4 h-4" />
               </Button>
             </div>
             
             {/* Search Field */}
             {activeView !== 'map' && (
-              <div className="flex-1 max-w-md">
+              <div className="flex-1 min-w-0 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Search className="absolute left-2.5 md:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Søk"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-8 md:pl-10 text-sm md:text-base h-9 md:h-10"
                   />
                 </div>
               </div>
@@ -352,14 +352,14 @@ export const ArtistExploreSection = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
-                      <CalendarCheck className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <Building className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                       <p>Laster arrangører...</p>
                     </div>
                   </div>
                 ) : filteredOrganizers.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center max-w-md space-y-2">
-                      <CalendarCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
                           ? 'Ingen arrangører funnet'
