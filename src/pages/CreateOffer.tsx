@@ -218,7 +218,30 @@ export default function CreateOffer() {
     });
   };
 
-  const removePortfolioFile = (fileData: any) => {
+  const removePortfolioFile = async (fileData: any) => {
+    // If file has a conceptFileId, delete it from the database
+    if (fileData.conceptFileId) {
+      try {
+        const { error } = await supabase
+          .from('concept_files')
+          .delete()
+          .eq('id', fileData.conceptFileId);
+        
+        if (error) {
+          console.error('Error deleting concept file:', error);
+          toast({
+            title: 'Feil ved sletting',
+            description: 'Kunne ikke slette filen fra databasen',
+            variant: 'destructive',
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('Error deleting concept file:', error);
+        return;
+      }
+    }
+    
     setConceptData(prev => ({
       ...prev,
       portfolio_files: prev.portfolio_files.filter(file => 
@@ -226,6 +249,10 @@ export default function CreateOffer() {
       )
     }));
     setHasChanges(true);
+    toast({
+      title: 'Fil fjernet',
+      description: 'Filen er fjernet fra portfolio',
+    });
   };
 
   const getFileIcon = (fileType: string) => {
