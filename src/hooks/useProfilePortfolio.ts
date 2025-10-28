@@ -38,10 +38,10 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('user_files')
+        .from('profile_portfolio')
         .select('*')
         .eq('user_id', userId)
-        .ilike('file_path', 'portfolio/%')
+        .eq('is_public', true)
         .order('created_at', { ascending: false });
 
       if (fetchError) {
