@@ -11,7 +11,8 @@ import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2 } from 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
-import { FileSelectionModal } from './FileSelectionModal';
+import { FilebankSelectionModal } from './FilebankSelectionModal';
+import { AvatarCropModal } from './AvatarCropModal';
 import BandTechSpecManager from './BandTechSpecManager';
 import BandHospitalityManager from './BandHospitalityManager';
 import {
@@ -43,7 +44,9 @@ export const EditBandDialog = ({
   const [userId, setUserId] = useState<string | undefined>();
   const { files } = useUserFiles(userId);
   const [loading, setLoading] = useState(false);
-  const [showFileModal, setShowFileModal] = useState(false);
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [showAvatarCrop, setShowAvatarCrop] = useState(false);
+  const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
   const [fileModalType, setFileModalType] = useState<'logo' | 'banner'>('logo');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -92,29 +95,42 @@ export const EditBandDialog = ({
   const { toast } = useToast();
 
   const handleFileFromBank = async (file: any) => {
-    const bucket = file.file_path.split('/')[0];
-    const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    
-    if (fileModalType === 'logo') {
-      setImagePreview(data.publicUrl);
-    } else {
-      setBannerPreview(data.publicUrl);
-    }
-
-    // Register usage in file_usage table
     try {
-      const usageType = fileModalType === 'logo' ? 'band_logo' : 'band_banner';
-      await supabase
-        .from('file_usage')
-        .insert({
-          file_id: file.id,
-          usage_type: usageType,
-          reference_id: band.id
-        });
-    } catch (error) {
-      // Ignore if already exists (unique constraint)
-      console.log('File usage already registered or error:', error);
+      // Get public URL of the selected file
+      const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+      
+      if (fileModalType === 'logo') {
+        // For logo, use crop modal
+        setSelectedImageForCrop(publicUrl);
+        setShowFilebankModal(false);
+        setShowAvatarCrop(true);
+      } else {
+        // For banner, set directly
+        setBannerPreview(publicUrl);
+        setShowFilebankModal(false);
+      }
+
+      // Register usage in file_usage table
+      try {
+        const usageType = fileModalType === 'logo' ? 'band_logo' : 'band_banner';
+        await supabase
+          .from('file_usage')
+          .insert({
+            file_id: file.id,
+            usage_type: usageType,
+            reference_id: band.id
+          });
+      } catch (error) {
+        // Ignore if already exists (unique constraint)
+        console.log('File usage already registered or error:', error);
+      }
+    } catch (error: any) {
+      console.error('Error selecting file:', error);
+      toast({
+        title: 'Feil',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -377,7 +393,7 @@ export const EditBandDialog = ({
                       size="sm"
                       onClick={() => {
                         setFileModalType('logo');
-                        setShowFileModal(true);
+                        setShowFilebankModal(true);
                       }}
                     >
                       <FolderOpen className="h-4 w-4 mr-2" />
@@ -404,7 +420,7 @@ export const EditBandDialog = ({
                       size="sm"
                       onClick={() => {
                         setFileModalType('banner');
-                        setShowFileModal(true);
+                        setShowFilebankModal(true);
                       }}
                     >
                       <FolderOpen className="h-4 w-4 mr-2" />
@@ -659,13 +675,32 @@ export const EditBandDialog = ({
             </div>
           </form>
 
-          <FileSelectionModal
-            open={showFileModal}
-            onOpenChange={setShowFileModal}
-            files={files}
-            allowedTypes={['image']}
-            onFilesSelected={(files) => files[0] && handleFileFromBank(files[0])}
-            title={`Velg ${fileModalType === 'logo' ? 'logo' : 'banner'} fra Filbank`}
+          {/* Avatar Crop Modal for Logo */}
+          <AvatarCropModal
+            isOpen={showAvatarCrop}
+            onClose={() => {
+              setShowAvatarCrop(false);
+              setSelectedImageForCrop(null);
+            }}
+            onAvatarUpdate={(avatarUrl) => {
+              setImagePreview(avatarUrl);
+              setShowAvatarCrop(false);
+              setSelectedImageForCrop(null);
+            }}
+            currentAvatarUrl={imagePreview}
+            userId={userId || ''}
+            initialImageUrl={selectedImageForCrop || undefined}
+          />
+
+          {/* Filebank Selection Modal */}
+          <FilebankSelectionModal
+            isOpen={showFilebankModal}
+            onClose={() => setShowFilebankModal(false)}
+            onSelect={handleFileFromBank}
+            userId={userId || ''}
+            fileTypes={fileModalType === 'logo' ? ['image'] : ['image']}
+            title={fileModalType === 'logo' ? 'Velg bandlogo fra Filbank' : 'Velg bannerbilde fra Filbank'}
+            description={fileModalType === 'logo' ? 'Velg et bilde fra din filbank for å bruke som bandlogo' : 'Velg et bilde fra din filbank for å bruke som banner'}
           />
         </div>
       </div>
