@@ -18,6 +18,7 @@ export interface ProfilePortfolioFile {
   is_public?: boolean;
   bucket_name?: string;
   category?: string;
+  thumbnail_path?: string | null;
 }
 
 export const useProfilePortfolio = (userId: string | undefined) => {

@@ -12,6 +12,7 @@ interface PortfolioFile {
   mime_type: string;
   file_size: number;
   file_url: string | null;
+  thumbnail_path?: string | null;
 }
 
 interface ProfilePortfolioDisplayProps {
@@ -42,7 +43,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
             file_path,
             file_type,
             mime_type,
-            file_size
+            file_size,
+            thumbnail_path
           )
         `)
         .eq('usage_type', 'profile_portfolio')
@@ -82,7 +84,7 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     return data.publicUrl;
   };
 
-  const renderFilePreview = (file: PortfolioFile) => {
+  const renderFilePreview = (file: PortfolioFile & { thumbnail_path?: string }) => {
     if (file.file_type === 'image' && file.file_url) {
       return (
         <img 
@@ -100,6 +102,18 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
           className="w-full h-full object-cover"
           muted
           playsInline
+        />
+      );
+    }
+    
+    // Audio with thumbnail
+    if (file.file_type === 'audio' && file.thumbnail_path) {
+      const thumbnailUrl = getPublicUrl(file.thumbnail_path);
+      return (
+        <img 
+          src={thumbnailUrl} 
+          alt={file.filename}
+          className="w-full h-full object-cover"
         />
       );
     }

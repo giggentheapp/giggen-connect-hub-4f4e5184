@@ -110,7 +110,31 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
       );
     }
 
-    // Audio - show audio player with filename
+    // Audio with thumbnail
+    if (isAudioFile(file) && file.thumbnail_path) {
+      const thumbnailUrl = getPublicUrl(file.thumbnail_path);
+      return (
+        <div className="relative w-full aspect-square overflow-hidden bg-muted group cursor-pointer">
+          <img 
+            src={thumbnailUrl} 
+            alt=""
+            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+              <Expand className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+              <Play className="w-6 h-6 text-black ml-1" fill="black" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Audio without thumbnail - show audio player with filename
     if (isAudioFile(file)) {
       return (
         <div className="relative w-full aspect-square overflow-hidden bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 border border-border group cursor-pointer flex flex-col items-center justify-center p-4">
