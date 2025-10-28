@@ -50,9 +50,9 @@ export const ConceptPortfolioUpload = ({
         return;
       }
 
-      // ✅ Generate correct file URL
+      // ✅ Generate correct file URL from filbank
       const correctUrl = fileData.file_url || fileData.publicUrl || 
-        `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${fileData.file_path}`;
+        `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${fileData.file_path}`;
 
       const enrichedFileData = {
         ...fileData,

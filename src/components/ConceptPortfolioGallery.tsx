@@ -57,7 +57,17 @@ export const ConceptPortfolioGallery = ({ conceptId }: ConceptPortfolioGalleryPr
   }
 
   const getPublicUrl = (file: ConceptFile) => {
-    return file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/concepts/${file.file_path}`;
+    // file_url should already be set correctly during upload/creation
+    // Fallback to constructing URL from file_path using filbank bucket
+    if (file.file_url) {
+      return file.file_url;
+    }
+    // Construct URL based on the file path - check if it's already a full path
+    if (file.file_path?.startsWith('http')) {
+      return file.file_path;
+    }
+    // Default to filbank bucket since files come from there
+    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`;
   };
 
   const isAudioFile = (file: ConceptFile) => {
