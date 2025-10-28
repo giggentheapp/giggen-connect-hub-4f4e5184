@@ -363,16 +363,16 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
 
                     {/* File preview/icon */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      {file.file_type === 'image' && file.file_url ? (
+                      {file.file_type === 'image' ? (
                         <img 
-                          src={file.file_url} 
+                          src={supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl}
                           alt={file.filename}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                      ) : file.file_type === 'video' && file.file_url ? (
+                      ) : file.file_type === 'video' ? (
                         <video 
-                          src={file.file_url}
+                          src={supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl}
                           className="w-full h-full object-cover"
                           muted
                           playsInline
@@ -388,7 +388,7 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                     {isHovered && (
                       <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-2 mb-2 flex-wrap justify-center">
-                          {file.file_url && (
+                          {(file.file_type === 'image' || file.file_type === 'video') && (
                             <>
                               {file.file_type === 'image' && (
                                 <Button
@@ -398,7 +398,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                   title="Sett som profilbilde"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setImageForCrop(file.file_url);
+                                    const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+                                    setImageForCrop(publicUrl);
                                     setCropModalOpen(true);
                                   }}
                                 >
@@ -411,7 +412,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                 className="h-8 w-8"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  copyFileUrl(file.file_url);
+                                  const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+                                  copyFileUrl(publicUrl);
                                 }}
                               >
                                 <Copy className="h-4 w-4" />
@@ -422,7 +424,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                 className="h-8 w-8"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  downloadFile(file.file_url, file.filename);
+                                  const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+                                  downloadFile(publicUrl, file.filename);
                                 }}
                               >
                                 <Download className="h-4 w-4" />
