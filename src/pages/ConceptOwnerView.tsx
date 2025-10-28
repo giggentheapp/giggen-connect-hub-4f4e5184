@@ -58,6 +58,8 @@ export default function ConceptOwnerView() {
   const loadConceptData = async (id: string) => {
     setLoading(true);
     try {
+      console.log('🔍 Loading concept with ID:', id);
+      
       // Load concept
       const { data: conceptData, error: conceptError } = await supabase
         .from('concepts')
@@ -65,7 +67,31 @@ export default function ConceptOwnerView() {
         .eq('id', id)
         .single();
 
-      if (conceptError) throw conceptError;
+      console.log('📊 Concept query result:', { data: conceptData, error: conceptError });
+
+      if (conceptError) {
+        console.error('❌ Concept error:', conceptError);
+        toast({
+          title: 'Kunne ikke laste tilbud',
+          description: 'Tilbudet ble ikke funnet eller du har ikke tilgang til det',
+          variant: 'destructive',
+        });
+        // Navigate back to offers section instead of generic dashboard
+        setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
+        return;
+      }
+      
+      if (!conceptData) {
+        console.warn('⚠️ No concept data returned');
+        toast({
+          title: 'Tilbud ikke funnet',
+          description: 'Dette tilbudet eksisterer ikke',
+          variant: 'destructive',
+        });
+        setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
+        return;
+      }
+
       setConcept(conceptData);
 
       // Load concept files
@@ -75,15 +101,19 @@ export default function ConceptOwnerView() {
         .eq('concept_id', id)
         .order('created_at', { ascending: false });
 
-      if (filesError) throw filesError;
+      if (filesError) {
+        console.error('❌ Files error:', filesError);
+      }
+      
       setConceptFiles(filesData || []);
     } catch (error: any) {
-      console.error('Error loading concept:', error);
+      console.error('💥 Unexpected error loading concept:', error);
       toast({
         title: 'Feil ved lasting',
-        description: error.message,
+        description: error.message || 'Noe gikk galt',
         variant: 'destructive',
       });
+      setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
     } finally {
       setLoading(false);
     }
@@ -320,9 +350,9 @@ export default function ConceptOwnerView() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Fant ikke tilbudet</p>
-          <Button onClick={() => navigate('/dashboard')}>
+          <Button onClick={() => navigate('/dashboard?section=admin-concepts')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake
+            Tilbake til Mine tilbud
           </Button>
         </div>
       </div>
@@ -339,7 +369,7 @@ export default function ConceptOwnerView() {
           {/* Back Button */}
           <Button
             variant="ghost"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/dashboard?section=admin-concepts')}
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
