@@ -362,15 +362,25 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                     )}
 
                     {/* File preview/icon */}
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 flex items-center justify-center">
                       {file.file_type === 'image' && file.file_url ? (
                         <img 
                           src={file.file_url} 
                           alt={file.filename}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : file.file_type === 'video' && file.file_url ? (
+                        <video 
+                          src={file.file_url}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
                         />
                       ) : (
-                        <Icon className="h-12 w-12 text-muted-foreground" />
+                        <div className="flex items-center justify-center w-full h-full bg-muted/50">
+                          <Icon className="h-12 w-12 text-muted-foreground" />
+                        </div>
                       )}
                     </div>
 
