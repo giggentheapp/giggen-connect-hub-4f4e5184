@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin, User, UsersRound, Search, Calendar, Building } from 'lucide-react';
@@ -12,6 +10,8 @@ import { UserProfile } from '@/types/auth';
 import { EventsTicketMarket } from '@/components/EventsTicketMarket';
 import { BandExploreTab } from '@/components/BandExploreTab';
 import { MakerCard } from '@/components/MakerCard';
+import { useExploreMakers } from '@/hooks/useExploreMakers';
+import { useDebounce } from '@/hooks/useDebounce';
 interface ArtistExploreSectionProps {
   profile: UserProfile;
 }
@@ -19,21 +19,25 @@ export const ArtistExploreSection = ({
   profile
 }: ArtistExploreSectionProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { t } = useAppTranslation();
+  
   const [activeView, setActiveView] = useState<'map' | 'list' | 'makers' | 'bands' | 'organizers'>('list');
   const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
-  const [makers, setMakers] = useState<any[]>([]);
-  const [filteredMakers, setFilteredMakers] = useState<any[]>([]);
-  const [organizers, setOrganizers] = useState<any[]>([]);
-  const [filteredOrganizers, setFilteredOrganizers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [bookingMaker, setBookingMaker] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const { t } = useAppTranslation();
-  const navigate = useNavigate();
+
+  // Use optimized hooks
+  const { makers: allMusicians, loading: musiciansLoading } = useExploreMakers('musician');
+  const { makers: allOrganizers, loading: organizersLoading } = useExploreMakers('organizer');
+  
+  // Debounce search to reduce re-renders
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
+  const loading = musiciansLoading || organizersLoading;
 
   // Check if we should set active view from navigation state
   useEffect(() => {
@@ -42,15 +46,12 @@ export const ArtistExploreSection = ({
     }
   }, [location.state]);
 
-  // Auto-fetch published events, makers and organizers when component mounts
+  // Auto-fetch published events when component mounts
   useEffect(() => {
     fetchPublishedEvents();
-    fetchMakers();
-    fetchOrganizers();
   }, []);
   const fetchPublishedEvents = async () => {
     try {
-      setLoading(true);
       console.log('🎭 Fetching published upcoming events...');
 
       // Fetch published upcoming events from bookings
@@ -85,113 +86,53 @@ export const ArtistExploreSection = ({
       }
 
       console.log('✅ Fetched published events:', data?.length || 0);
-      console.log('📋 Events data:', JSON.stringify(data, null, 2));
-      console.log('🔍 First event:', data?.[0]);
       setPublishedEvents(data || []);
-      setFilteredEvents(data || []);
     } catch (err) {
       console.error('Error fetching published events:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const fetchMakers = async () => {
-    try {
-      setLoading(true);
-      console.log('👥 Fetching musicians...');
+  // Memoized filtered lists - only recompute when data or search changes
+  const filteredEvents = useMemo(() => {
+    if (!debouncedSearchTerm) return publishedEvents;
+    
+    return publishedEvents.filter(event =>
+      event.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      event.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      event.venue?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      event.address?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+  }, [publishedEvents, debouncedSearchTerm]);
 
-      // Fetch all profiles with role 'musician'
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'musician')
-        .order('created_at', { ascending: false });
+  const filteredMakers = useMemo(() => {
+    if (!debouncedSearchTerm) return allMusicians;
+    
+    return allMusicians.filter(maker =>
+      maker.display_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      maker.username?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      maker.bio?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      maker.address?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+  }, [allMusicians, debouncedSearchTerm]);
 
-      if (error) {
-        console.error('❌ Error fetching musicians:', error);
-        throw error;
-      }
-
-      console.log('✅ Fetched musicians:', data?.length || 0);
-      console.log('📋 First few musicians:', data?.slice(0, 3));
-      
-      // Show all musicians regardless of privacy settings
-      setMakers(data || []);
-      setFilteredMakers(data || []);
-    } catch (err) {
-      console.error('Error fetching musicians:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchOrganizers = async () => {
-    try {
-      setLoading(true);
-      console.log('🎪 Fetching organizers...');
-
-      // Fetch all profiles with role 'organizer'
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'organizer')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Error fetching organizers:', error);
-        throw error;
-      }
-
-      console.log('✅ Fetched organizers:', data?.length || 0);
-      console.log('📋 First few organizers:', data?.slice(0, 3));
-      
-      // Show all organizers regardless of privacy settings
-      setOrganizers(data || []);
-      setFilteredOrganizers(data || []);
-    } catch (err) {
-      console.error('Error fetching organizers:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Filter events, musicians and organizers based on search term
-  useEffect(() => {
-    if (!searchTerm) {
-      setFilteredEvents(publishedEvents);
-      setFilteredMakers(makers);
-      setFilteredOrganizers(organizers);
-    } else {
-      const filteredEvts = publishedEvents.filter(event =>
-        event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.venue?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredEvents(filteredEvts);
-
-      const filteredMkrs = makers.filter(maker =>
-        maker.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maker.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maker.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maker.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredMakers(filteredMkrs);
-
-      const filteredOrgs = organizers.filter(organizer =>
-        organizer.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        organizer.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        organizer.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        organizer.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredOrganizers(filteredOrgs);
-    }
-  }, [publishedEvents, makers, organizers, searchTerm]);
-  const handleViewEvent = (eventId: string) => {
-    // Navigate to public event view
+  const filteredOrganizers = useMemo(() => {
+    if (!debouncedSearchTerm) return allOrganizers;
+    
+    return allOrganizers.filter(organizer =>
+      organizer.display_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      organizer.username?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      organizer.bio?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      organizer.address?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+  }, [allOrganizers, debouncedSearchTerm]);
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleViewEvent = useCallback((eventId: string) => {
     window.location.href = `/arrangement/${eventId}`;
-  };
+  }, []);
+
+  const handleViewProfile = useCallback((userId: string) => {
+    navigate(`/profile/${userId}`);
+  }, [navigate]);
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-background">
       {/* Top Navigation Header - Sticky on mobile */}
@@ -317,7 +258,7 @@ export const ArtistExploreSection = ({
                       <MakerCard
                         key={maker.id}
                         maker={maker}
-                        onViewProfile={(userId) => navigate(`/profile/${userId}`)}
+                        onViewProfile={handleViewProfile}
                       />
                     ))}
                   </div>
@@ -335,7 +276,7 @@ export const ArtistExploreSection = ({
             {/* Main Content Area */}
             <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
               <div className="max-w-4xl mx-auto">
-                <BandExploreTab />
+                <BandExploreTab searchTerm={searchTerm} />
               </div>
             </div>
           </div>
@@ -382,7 +323,7 @@ export const ArtistExploreSection = ({
                           ...organizer,
                           role: 'ARRANGØR'
                         }}
-                        onViewProfile={(userId) => navigate(`/profile/${userId}`)}
+                        onViewProfile={handleViewProfile}
                       />
                     ))}
                   </div>
