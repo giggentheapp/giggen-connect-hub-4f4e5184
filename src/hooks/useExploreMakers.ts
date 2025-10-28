@@ -15,7 +15,11 @@ interface Maker {
   latitude?: number | null;
   longitude?: number | null;
   is_address_public?: boolean;
-  instruments?: Array<{ instrument: string; details: string }>;
+  instruments?: any; // jsonb from Supabase
+  contact_info?: any;
+  social_media_links?: any;
+  updated_at?: string;
+  username_changed?: boolean;
 }
 
 export const useExploreMakers = (roleFilter?: 'musician' | 'organizer') => {
@@ -32,9 +36,12 @@ export const useExploreMakers = (roleFilter?: 'musician' | 'organizer') => {
       setLoading(true);
       setError(null);
 
-      // Use the optimized database function instead of client-side filtering
+      // Fetch all profiles with the specified role (like the old behavior)
       const { data, error: fetchError } = await supabase
-        .rpc('get_public_artists_for_explore');
+        .from('profiles')
+        .select('*')
+        .eq('role', roleFilter || 'musician')
+        .order('created_at', { ascending: false });
 
       if (fetchError) {
         console.error('Error fetching makers:', fetchError);
@@ -42,14 +49,7 @@ export const useExploreMakers = (roleFilter?: 'musician' | 'organizer') => {
         return;
       }
 
-      let filteredData = data || [];
-      
-      // Apply role filter if specified
-      if (roleFilter) {
-        filteredData = filteredData.filter((maker: Maker) => maker.role === roleFilter);
-      }
-
-      setMakers(filteredData);
+      setMakers((data || []) as Maker[]);
     } catch (err) {
       console.error('Unexpected error fetching makers:', err);
       setError('Failed to load makers');
