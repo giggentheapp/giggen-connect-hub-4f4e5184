@@ -32,6 +32,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
     try {
       setLoading(true);
       
+      console.log('Fetching portfolio for userId:', userId);
+      
       // Get files via file_usage table - only image, video, audio
       const { data, error } = await supabase
         .from('file_usage')
@@ -52,6 +54,8 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
         .eq('reference_id', userId)
         .in('user_files.file_type', ['image', 'video', 'audio']);
 
+      console.log('Portfolio query result:', { data, error, count: data?.length || 0 });
+      
       if (error) throw error;
       
       // Transform and get public URLs
