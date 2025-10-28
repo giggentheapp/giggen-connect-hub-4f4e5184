@@ -21,24 +21,35 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const toggleBandVisibility = async (memberId: string, bandName: string, currentState: boolean) => {
+  const toggleBandVisibility = async (bandId: string, memberId: string, bandName: string, currentState: boolean, userRole: string) => {
+    // Only admin or founder can change public visibility
+    if (!['admin', 'founder'].includes(userRole)) {
+      toast({
+        title: 'Ingen tilgang',
+        description: 'Kun admin eller grunnlegger kan endre synlighet',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const newVisibilityState = !currentState;
       
+      // Update is_public in bands table instead of show_in_profile
       const { error } = await supabase
-        .from('band_members')
+        .from('bands')
         .update({ 
-          show_in_profile: newVisibilityState
+          is_public: newVisibilityState
         })
-        .eq('id', memberId);
+        .eq('id', bandId);
 
       if (error) throw error;
 
       toast({
-        title: newVisibilityState ? '✅ Band vist i profil' : '🔒 Band skjult fra profil',
+        title: newVisibilityState ? '✅ Band synlig i utforsk' : '🔒 Band skjult fra utforsk',
         description: newVisibilityState 
-          ? `"${bandName}" er nå synlig på profilsiden` 
-          : `"${bandName}" er nå skjult fra profilsiden`,
+          ? `"${bandName}" er nå synlig i utforsk-seksjonen` 
+          : `"${bandName}" er nå skjult fra utforsk-seksjonen`,
       });
       
       await refetch();
@@ -115,7 +126,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
                     
                     {/* Visibility Toggle */}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
-                      {band.show_in_profile ? (
+                      {band.is_public ? (
                         <>
                           <Eye className="h-3 w-3 text-green-600" />
                           <span className="text-xs font-medium">Offentlig</span>
@@ -127,8 +138,8 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
                         </>
                       )}
                       <Switch
-                        checked={band.show_in_profile}
-                        onCheckedChange={() => toggleBandVisibility(band.member_id, band.name, band.show_in_profile)}
+                        checked={band.is_public}
+                        onCheckedChange={() => toggleBandVisibility(band.id, band.member_id, band.name, band.is_public, band.user_role)}
                         className="data-[state=checked]:bg-green-500 scale-75"
                       />
                     </div>
