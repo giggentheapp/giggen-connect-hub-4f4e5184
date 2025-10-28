@@ -18,6 +18,7 @@ import Map from "./pages/Map";
 import FeedbackButton from "./components/FeedbackButton";
 
 import ConceptView from "./pages/ConceptView";
+import ConceptOwnerView from "./pages/ConceptOwnerView";
 import ProfileConceptView from "./pages/ProfileConceptView";
 import CreateOffer from "./pages/CreateOffer";
 import NotFound from "./pages/NotFound";
@@ -66,7 +67,7 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
-              <Route path="/concept/:conceptId" element={<ConceptView />} />
+              <Route path="/concept/:conceptId" element={<ConceptOwnerView />} />
               <Route path="/create-offer" element={<CreateOffer />} />
               <Route path="/arrangement/:id" element={<PublicEventView />} />
               <Route path="/bookings" element={<Bookings />} />

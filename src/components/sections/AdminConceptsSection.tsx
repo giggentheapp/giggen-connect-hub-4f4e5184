@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Lightbulb, Plus, ChevronDown, Edit, X, Clock, Eye, EyeOff } from 'lucide-react';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
-import { ConceptViewModal } from '@/components/ConceptViewModal';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,8 +24,6 @@ export const AdminConceptsSection = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDrafts, setShowDrafts] = useState(true);
-  const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null);
-  const [showConceptModal, setShowConceptModal] = useState(false);
   
   const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
@@ -197,10 +194,7 @@ export const AdminConceptsSection = ({
                   <div className="flex items-start gap-3 p-3">
                     <div className="flex-1 min-w-0">
                       <div 
-                        onClick={() => {
-                          setSelectedConceptId(concept.id);
-                          setShowConceptModal(true);
-                        }} 
+                        onClick={() => navigate(`/concept/${concept.id}`)} 
                         className="cursor-pointer"
                       >
                         <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
@@ -358,19 +352,6 @@ export const AdminConceptsSection = ({
         </div>
       </Collapsible>
       </div>
-      
-      {/* Concept View Modal */}
-      {selectedConceptId && (
-        <ConceptViewModal
-          conceptIds={[selectedConceptId]}
-          isOpen={showConceptModal}
-          onClose={() => {
-            setShowConceptModal(false);
-            setSelectedConceptId(null);
-          }}
-          viewMode="owner"
-        />
-      )}
     </div>
   );
 };
