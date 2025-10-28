@@ -98,23 +98,6 @@ export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps)
             )}
           </div>
         )}
-
-        {(showPortfolio || showEvents) && (
-          <div className="flex items-center gap-2 flex-wrap pt-2">
-            {showPortfolio && (
-              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                <Image className="w-3 h-3" />
-                Portfolio
-              </Badge>
-            )}
-            {showEvents && (
-              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                Arrangementer
-              </Badge>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
