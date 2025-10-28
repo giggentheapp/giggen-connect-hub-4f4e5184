@@ -28,6 +28,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { UserProfile } from "@/types/auth";
 import { FilebankSelectionModal } from "@/components/FilebankSelectionModal";
 import { SocialMusicLinksManager } from "@/components/SocialMusicLinksManager";
+import { InstrumentManager } from "@/components/InstrumentManager";
 
 interface ProfileSettings {
   show_public_profile: boolean;
@@ -89,6 +90,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [showAvatarCrop, setShowAvatarCrop] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
   const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
+  const [instruments, setInstruments] = useState<Array<{ instrument: string; details: string }>>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -136,6 +138,11 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             appleMusic: social.appleMusic || "",
             bandcamp: social.bandcamp || "",
           });
+        }
+
+        // Parse instruments if it exists (for musicians)
+        if (currentProfile.instruments && Array.isArray(currentProfile.instruments)) {
+          setInstruments(currentProfile.instruments as Array<{ instrument: string; details: string }>);
         }
       }
 
@@ -341,6 +348,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         is_address_public: profileData.is_address_public,
         contact_info: contactInfo,
         social_media_links: validatedSocialLinks,
+        ...(profileData.role === 'musician' && { instruments }),
       };
 
       // Update profile
@@ -766,6 +774,26 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           </Button>
         </div>
       </div>
+
+      {/* Instruments Section - Only for Musicians */}
+      {profileData.role === 'musician' && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">Instrumenter & Roller</h2>
+            <p className="text-sm text-muted-foreground">Legg til dine instrumenter og roller med detaljer</p>
+          </div>
+
+          <InstrumentManager
+            instruments={instruments}
+            onChange={setInstruments}
+          />
+
+          <Button onClick={handleProfileSubmit} disabled={loading} className="w-full md:w-auto">
+            <Save className="h-4 w-4 mr-2" />
+            {loading ? "Lagrer..." : "Lagre endringer"}
+          </Button>
+        </div>
+      )}
 
       {/* Social Media Settings - For All Users */}
       <>

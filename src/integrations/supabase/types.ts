@@ -1192,6 +1192,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          instruments: Json | null
           is_address_public: boolean
           latitude: number | null
           longitude: number | null
@@ -1211,6 +1212,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          instruments?: Json | null
           is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
@@ -1230,6 +1232,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          instruments?: Json | null
           is_address_public?: boolean
           latitude?: number | null
           longitude?: number | null
