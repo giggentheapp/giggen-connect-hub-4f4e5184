@@ -44,8 +44,7 @@ export const useProfilePortfolio = (userId: string | undefined) => {
           user_files!inner(*)
         `)
         .eq('usage_type', 'profile_portfolio')
-        .eq('reference_id', userId)
-        .eq('user_files.is_public', true);
+        .eq('reference_id', userId);
 
       if (fetchError) {
         logger.error('Failed to fetch portfolio', fetchError);

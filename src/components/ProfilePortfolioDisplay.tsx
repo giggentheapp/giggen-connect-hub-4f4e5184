@@ -50,7 +50,6 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
         `)
         .eq('usage_type', 'profile_portfolio')
         .eq('reference_id', userId)
-        .eq('user_files.is_public', true)
         .in('user_files.file_type', ['image', 'video', 'audio']);
 
       if (error) throw error;
