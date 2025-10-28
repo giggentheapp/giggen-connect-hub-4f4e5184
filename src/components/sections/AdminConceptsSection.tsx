@@ -194,7 +194,7 @@ export const AdminConceptsSection = ({
                   <div className="flex items-start gap-3 p-3">
                     <div className="flex-1 min-w-0">
                       <div 
-                        onClick={() => navigate(`/concept/${concept.id}`)} 
+                        onClick={() => navigate(`/concept-owner-view/${concept.id}`)} 
                         className="cursor-pointer"
                       >
                         <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
