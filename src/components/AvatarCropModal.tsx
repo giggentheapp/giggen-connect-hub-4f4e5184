@@ -39,6 +39,15 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Reset state when dialog closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setImageSrc('');
+      setCrop({ unit: '%', width: 90, height: 90, x: 5, y: 5 });
+      setCompletedCrop(undefined);
+    }
+  }, [isOpen]);
+
   // Load initial image if provided
   React.useEffect(() => {
     if (initialImageUrl && isOpen) {
