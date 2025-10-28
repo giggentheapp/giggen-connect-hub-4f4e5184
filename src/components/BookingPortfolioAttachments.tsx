@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, X, Image, Video, Music, File, Eye } from 'lucide-react';
+import { Plus, X, Image, Video, Music, File } from 'lucide-react';
 import { useBookingPortfolio } from '@/hooks/useBookingPortfolio';
-import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { supabase } from '@/integrations/supabase/client';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 
 interface BookingPortfolioAttachmentsProps {
   bookingId: string;
@@ -21,21 +19,63 @@ export const BookingPortfolioAttachments = ({
   currentUserId,
   canEdit,
 }: BookingPortfolioAttachmentsProps) => {
-  const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState<any>(null);
+  const [isFilebankOpen, setIsFilebankOpen] = useState(false);
   
   const { attachments, loading, attachPortfolioFile, removeAttachment } = useBookingPortfolio(bookingId);
-  const { files: userPortfolioFiles, loading: portfolioLoading } = useProfilePortfolio(currentUserId);
 
-  console.log('📂 BookingPortfolioAttachments rendering:', {
-    bookingId,
-    currentUserId,
-    canEdit,
-    attachmentsCount: attachments.length,
-    userPortfolioFilesCount: userPortfolioFiles.length,
-    loading,
-    portfolioLoading
-  });
+  const handleFilebankSelect = async (file: any) => {
+    console.log('📎 Selected file from filbank:', file);
+    
+    try {
+      // Sjekk om filen allerede er i porteføljen
+      const { data: existingUsage } = await supabase
+        .from('file_usage')
+        .select('*')
+        .eq('file_id', file.id)
+        .eq('usage_type', 'profile_portfolio')
+        .maybeSingle();
+
+      let portfolioFileId = file.id;
+
+      // Hvis filen ikke er i porteføljen, legg den til først
+      if (!existingUsage) {
+        const { data: portfolioEntry, error: portfolioError } = await supabase
+          .from('profile_portfolio')
+          .insert({
+            user_id: currentUserId,
+            filename: file.filename,
+            file_path: file.file_path,
+            file_type: file.file_type || 'document',
+            mime_type: file.mime_type,
+            file_size: file.file_size,
+            is_public: false, // Default til privat for booking-vedlegg
+            title: file.filename,
+          })
+          .select()
+          .single();
+
+        if (portfolioError) throw portfolioError;
+
+        // Registrer at filen er i bruk i porteføljen
+        await supabase.from('file_usage').insert({
+          file_id: file.id,
+          usage_type: 'profile_portfolio',
+          reference_id: portfolioEntry.id,
+        });
+
+        portfolioFileId = portfolioEntry.id;
+      } else {
+        // Finn portfolio_file_id fra file_usage
+        portfolioFileId = existingUsage.reference_id;
+      }
+
+      // Nå kan vi legge ved porteføljefilen til bookingen
+      await attachPortfolioFile(portfolioFileId);
+      setIsFilebankOpen(false);
+    } catch (error: any) {
+      console.error('Error adding file from filbank:', error);
+    }
+  };
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
@@ -95,17 +135,6 @@ export const BookingPortfolioAttachments = ({
     );
   };
 
-  const availableFiles = userPortfolioFiles.filter(
-    (file) => file.is_public && !attachments.some((att) => att.portfolio_file_id === file.id)
-  );
-
-  console.log('🎨 Render state:', {
-    isSelectDialogOpen,
-    portfolioLoading,
-    userPortfolioFilesCount: userPortfolioFiles.length,
-    availableFilesCount: availableFiles.length,
-    attachmentsCount: attachments.length
-  });
 
   return (
     <>
@@ -115,84 +144,15 @@ export const BookingPortfolioAttachments = ({
             <div>
               <CardTitle>Portefølje for publisert arrangement</CardTitle>
               <CardDescription>
-                Kun filer lagt ved her vil vises når arrangementet publiseres. 
+                Legg ved filer fra filbanken som vil vises når arrangementet publiseres. 
                 {attachments.length > 0 && ` (${attachments.length} ${attachments.length === 1 ? 'fil' : 'filer'} valgt)`}
               </CardDescription>
             </div>
             {canEdit && (
-              <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Legg ved
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-3xl bg-white dark:bg-slate-950 text-foreground">
-                  <DialogHeader>
-                    <DialogTitle className="text-foreground">Velg fra din portefølje</DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
-                      Klikk på en fil for å legge den ved denne bookingen
-                    </DialogDescription>
-                  </DialogHeader>
-                  {portfolioLoading ? (
-                    <div className="py-8 flex items-center justify-center bg-background">
-                      <p className="text-muted-foreground">Laster portefølje...</p>
-                    </div>
-                  ) : availableFiles.length === 0 ? (
-                    <div className="py-8 flex flex-col items-center justify-center gap-4 bg-background">
-                      <p className="text-muted-foreground text-center">
-                        {userPortfolioFiles.length === 0 
-                          ? "Du har ingen porteføljeefiler ennå. Gå til Din Profil for å laste opp filer."
-                          : "Alle dine porteføljeefiler er allerede lagt ved denne bookingen."}
-                      </p>
-                      {userPortfolioFiles.length === 0 && (
-                        <Button variant="outline" onClick={() => {
-                          window.location.href = '/dashboard?section=files';
-                        }}>
-                          Gå til Din Profil
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="max-h-[60vh] overflow-y-auto py-4 bg-background">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {availableFiles.map((file) => {
-                          console.log('🎨 Rendering file card:', file.title || file.filename);
-                          
-                          const handleFileSelect = async (e: React.MouseEvent | React.TouchEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log('📎 Attaching file:', file.id);
-                            await attachPortfolioFile(file.id);
-                            setIsSelectDialogOpen(false);
-                          };
-                          
-                          return (
-                            <Card
-                              key={file.id}
-                              className="cursor-pointer hover:shadow-md transition-shadow border border-border bg-white dark:bg-slate-900"
-                              onClick={handleFileSelect}
-                              onTouchEnd={handleFileSelect}
-                            >
-                              <CardContent className="p-3 space-y-2">
-                                {renderFilePreview(file)}
-                                <div className="space-y-1">
-                                  <p className="text-sm font-medium truncate text-foreground">
-                                    {file.title || file.filename}
-                                  </p>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {file.file_type}
-                                  </Badge>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                     </div>
-                   )}
-                </DialogContent>
-              </Dialog>
+              <Button size="sm" variant="outline" onClick={() => setIsFilebankOpen(true)}>
+                <Plus className="h-4 w-4 mr-1" />
+                Legg ved fra filbank
+              </Button>
             )}
           </div>
         </CardHeader>
@@ -235,22 +195,16 @@ export const BookingPortfolioAttachments = ({
         </CardContent>
       </Card>
 
-      {/* Preview Dialog */}
-      {previewFile && (
-        <Dialog open={!!previewFile} onOpenChange={() => setPreviewFile(null)}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>{previewFile.title || previewFile.filename}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {renderFilePreview(previewFile)}
-              {previewFile.description && (
-                <p className="text-sm text-muted-foreground">{previewFile.description}</p>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Filbank Selection Modal */}
+      <FilebankSelectionModal
+        isOpen={isFilebankOpen}
+        onClose={() => setIsFilebankOpen(false)}
+        onSelect={handleFilebankSelect}
+        userId={currentUserId}
+        fileTypes={['image', 'video', 'audio', 'document']}
+        title="Velg filer fra filbanken"
+        description="Velg filer som skal vises når arrangementet publiseres"
+      />
     </>
   );
 };
