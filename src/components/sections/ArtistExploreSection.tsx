@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Users, Search, Calendar, Mic, Building2 } from 'lucide-react';
+import { MapPin, User, UsersRound, Search, Calendar, CalendarCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -225,7 +225,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Musikere"
               >
-                <Users className="w-4 h-4" />
+                <User className="w-4 h-4" />
               </Button>
               <Button
                 variant={activeView === 'bands' ? 'default' : 'outline'}
@@ -234,7 +234,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Band"
               >
-                <Mic className="w-4 h-4" />
+                <UsersRound className="w-4 h-4" />
               </Button>
               <Button
                 variant={activeView === 'organizers' ? 'default' : 'outline'}
@@ -243,7 +243,7 @@ export const ArtistExploreSection = ({
                 className="shrink-0"
                 title="Arrangører"
               >
-                <Building2 className="w-4 h-4" />
+                <CalendarCheck className="w-4 h-4" />
               </Button>
             </div>
             
@@ -290,14 +290,14 @@ export const ArtistExploreSection = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
-                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                       <p>Laster musikere...</p>
                     </div>
                   </div>
                 ) : filteredMakers.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center max-w-md space-y-2">
-                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
                           ? 'Ingen musikere funnet'
@@ -352,14 +352,14 @@ export const ArtistExploreSection = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center">
-                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                      <CalendarCheck className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                       <p>Laster arrangører...</p>
                     </div>
                   </div>
                 ) : filteredOrganizers.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
                     <div className="text-center max-w-md space-y-2">
-                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <CalendarCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="font-medium">
                         {searchTerm 
                           ? 'Ingen arrangører funnet'
