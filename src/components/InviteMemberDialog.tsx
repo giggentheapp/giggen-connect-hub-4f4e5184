@@ -89,6 +89,19 @@ export const InviteMemberDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Check if there's already a pending invite for this user to this band
+      const { data: existingInvite } = await supabase
+        .from('band_invites')
+        .select('id, status')
+        .eq('band_id', bandId)
+        .eq('invited_user_id', userId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingInvite) {
+        throw { code: 'PENDING_INVITE', message: 'Denne musikeren har allerede en aktiv invitasjon til dette bandet' };
+      }
+
       const { error } = await supabase
         .from('band_invites')
         .insert({
@@ -108,16 +121,16 @@ export const InviteMemberDialog = ({
       // Remove from list
       setMusicians(prev => prev.filter(m => m.user_id !== userId));
     } catch (error: any) {
-      if (error.code === '23505') {
+      if (error.code === 'PENDING_INVITE') {
         toast({
           title: 'Allerede invitert',
-          description: 'Denne musikeren har allerede en aktiv invitasjon',
+          description: error.message,
           variant: 'destructive',
         });
       } else {
         toast({
           title: 'Feil ved sending av invitasjon',
-          description: error.message,
+          description: error.message || 'Kunne ikke sende invitasjon',
           variant: 'destructive',
         });
       }
