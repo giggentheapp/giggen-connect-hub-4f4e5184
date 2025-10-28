@@ -9,10 +9,10 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText } from 'lucide-react';
-import ConceptPortfolioUpload from '@/components/ConceptPortfolioUpload';
+import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image, Video, File as FileIcon } from 'lucide-react';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -59,6 +59,7 @@ export default function CreateOffer() {
   const [loading, setLoading] = useState(!!draftId);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
 
   const [conceptData, setConceptData] = useState<ConceptData>({
     title: '',
@@ -165,37 +166,53 @@ export default function CreateOffer() {
     setHasChanges(true);
   };
 
-  const handleFileUploaded = (fileData: any) => {
+  const handleFileSelected = (file: any) => {
+    // Generate public URL for the file
+    const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`;
+    
     setConceptData(prev => ({
       ...prev,
       portfolio_files: [...prev.portfolio_files, {
-        ...fileData,
-        tempId: Date.now() + Math.random(),
-        title: fileData.title || fileData.filename,
-        uploadedAt: new Date().toISOString()
+        id: file.id,
+        filename: file.filename,
+        file_path: file.file_path,
+        file_type: file.file_type,
+        mime_type: file.mime_type,
+        file_size: file.file_size,
+        publicUrl: publicUrl,
+        file_url: publicUrl,
+        title: file.filename,
+        uploadedAt: file.created_at
       }]
+    }));
+    setHasChanges(true);
+    toast({
+      title: 'Fil lagt til',
+      description: `${file.filename} er lagt til i portfolio`,
+    });
+  };
+
+  const removePortfolioFile = (fileData: any) => {
+    setConceptData(prev => ({
+      ...prev,
+      portfolio_files: prev.portfolio_files.filter(file => 
+        file.id !== fileData.id
+      )
     }));
     setHasChanges(true);
   };
 
-  const removePortfolioFile = async (fileData: any) => {
-    if (fileData.file_path) {
-      try {
-        await supabase.storage
-          .from('filbank')
-          .remove([fileData.file_path]);
-      } catch (error) {
-        console.error('Error removing file:', error);
-      }
-    }
-    
-    setConceptData(prev => ({
-      ...prev,
-      portfolio_files: prev.portfolio_files.filter(file => 
-        file.tempId !== fileData.tempId && file.id !== fileData.id
-      )
-    }));
-    setHasChanges(true);
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes('image')) return <Image className="h-4 w-4 text-blue-500" />;
+    if (fileType.includes('video')) return <Video className="h-4 w-4 text-red-500" />;
+    if (fileType.includes('audio')) return <Music className="h-4 w-4 text-green-500" />;
+    return <FileIcon className="h-4 w-4 text-gray-500" />;
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(1)}MB`;
   };
 
   const handleSaveDraft = async () => {
@@ -673,12 +690,56 @@ export default function CreateOffer() {
 
           {/* Step 2: Portfolio */}
           {currentStep === 2 && (
-            <ConceptPortfolioUpload
-              userId={userId}
-              files={conceptData.portfolio_files}
-              onFileUploaded={handleFileUploaded}
-              onFileRemoved={removePortfolioFile}
-            />
+            <div className="space-y-4">
+              <div>
+                <Label>Portfolio filer</Label>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Velg filer fra din filbank som viser tilbudet ditt
+                </p>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowFilebankModal(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Velg fra Filbank
+                </Button>
+
+                {conceptData.portfolio_files.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <Label>Valgte filer ({conceptData.portfolio_files.length}):</Label>
+                    <div className="grid gap-3">
+                      {conceptData.portfolio_files.map((file, index) => (
+                        <div key={file.id || index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {getFileIcon(file.file_type)}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {file.title || file.filename}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>{file.file_type}</span>
+                                {file.file_size && <span>• {formatFileSize(file.file_size)}</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removePortfolioFile(file)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Step 3: Technical */}
@@ -883,6 +944,17 @@ export default function CreateOffer() {
           )}
         </div>
       </main>
+
+      {/* Filbank Selection Modal */}
+      <FilebankSelectionModal
+        isOpen={showFilebankModal}
+        onClose={() => setShowFilebankModal(false)}
+        onSelect={handleFileSelected}
+        userId={userId}
+        category="all"
+        title="Velg Portfolio Filer"
+        description="Velg filer fra din filbank for å legge til i portfolio"
+      />
     </div>
   );
 }
