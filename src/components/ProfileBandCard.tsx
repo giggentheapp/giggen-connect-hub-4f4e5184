@@ -22,7 +22,7 @@ export const ProfileBandCard = ({ band }: ProfileBandCardProps) => {
   };
 
   const handleClick = () => {
-    navigate(`/band/${band.id}`);
+    navigate(`/band/${band.id}?view=public`);
   };
 
   return (

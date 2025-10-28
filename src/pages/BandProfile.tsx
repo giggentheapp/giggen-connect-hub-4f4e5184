@@ -24,6 +24,10 @@ const BandProfile = () => {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPublicView, setShowPublicView] = useState(false);
+  
+  // Check if we should force public view (from profile section)
+  const searchParams = new URLSearchParams(window.location.search);
+  const forcePublicView = searchParams.get('view') === 'public';
 
   useEffect(() => {
     if (!bandId) return;
@@ -98,9 +102,9 @@ const BandProfile = () => {
   const isAdmin = currentUserRole === 'admin' || currentUserRole === 'founder';
   const isMember = !!currentUserRole;
 
-  // If user is a member but not admin, show public view
-  if (!loading && band && isMember && !isAdmin) {
-    return <BandViewModal open={true} onClose={() => navigate('/dashboard')} band={band} showContactInfo={false} />;
+  // If force public view (from profile section) OR user is a member but not admin, show public view
+  if (!loading && band && (forcePublicView || (isMember && !isAdmin))) {
+    return <BandViewModal open={true} onClose={() => navigate(-1)} band={band} showContactInfo={false} />;
   }
 
   if (loading) {
