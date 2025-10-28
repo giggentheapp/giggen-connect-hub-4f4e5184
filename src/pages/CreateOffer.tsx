@@ -105,6 +105,12 @@ export default function CreateOffer() {
 
         if (error) throw error;
 
+        console.log('📂 Loading concept for editing:', {
+          conceptId: draftId,
+          hasFiles: !!data.concept_files,
+          fileCount: data.concept_files?.length || 0
+        });
+
         // Parse and set data
         const availableDates = data.available_dates 
           ? (typeof data.available_dates === 'string' 
@@ -115,6 +121,23 @@ export default function CreateOffer() {
         const isIndefinite = availableDates && typeof availableDates === 'object' && 'indefinite' in availableDates;
         const dateArray = Array.isArray(availableDates) ? availableDates : [];
 
+        // Process concept_files - convert them to the format expected by the form
+        const portfolioFiles = (data.concept_files || []).map((file: any) => ({
+          conceptFileId: file.id, // Store the concept_file ID
+          filebankId: null, // This came from concept_files, not filebank
+          filename: file.filename,
+          file_path: file.file_path,
+          file_type: file.file_type,
+          mime_type: file.mime_type,
+          file_size: file.file_size,
+          file_url: file.file_url,
+          publicUrl: file.file_url,
+          title: file.title || file.filename,
+          uploadedAt: file.created_at
+        }));
+
+        console.log('✅ Loaded portfolio files:', portfolioFiles);
+
         setConceptData({
           id: data.id,
           title: data.title || '',
@@ -123,7 +146,7 @@ export default function CreateOffer() {
           expected_audience: data.expected_audience?.toString() || '',
           tech_spec: data.tech_spec || '',
           available_dates: dateArray.map((d: any) => new Date(d)),
-          portfolio_files: data.concept_files || [],
+          portfolio_files: portfolioFiles,
           selected_tech_spec_file: data.tech_spec_reference || '',
           selected_hospitality_rider_file: data.hospitality_rider_reference || '',
           is_indefinite: isIndefinite,

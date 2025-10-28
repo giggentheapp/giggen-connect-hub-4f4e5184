@@ -238,6 +238,17 @@ export const AdminConceptsSection = ({
                       />
                     </div>
                     
+                    {/* Edit Button */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => navigate(`/create-offer?edit=${concept.id}`)}
+                      className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Rediger
+                    </Button>
+                    
                     {/* Delete Button */}
                     <Button
                       size="sm"
