@@ -173,7 +173,7 @@ export default function CreateOffer() {
     setConceptData(prev => ({
       ...prev,
       portfolio_files: [...prev.portfolio_files, {
-        id: file.id,
+        filebankId: file.id, // Store original filebank ID separately
         filename: file.filename,
         file_path: file.file_path,
         file_type: file.file_type,
@@ -182,7 +182,8 @@ export default function CreateOffer() {
         publicUrl: publicUrl,
         file_url: publicUrl,
         title: file.filename,
-        uploadedAt: file.created_at
+        uploadedAt: file.created_at,
+        fromFilbank: true // Flag to indicate this is from filebank
       }]
     }));
     setHasChanges(true);
@@ -196,7 +197,7 @@ export default function CreateOffer() {
     setConceptData(prev => ({
       ...prev,
       portfolio_files: prev.portfolio_files.filter(file => 
-        file.id !== fileData.id
+        file.filebankId !== fileData.filebankId && file.conceptFileId !== fileData.conceptFileId
       )
     }));
     setHasChanges(true);
@@ -270,10 +271,10 @@ export default function CreateOffer() {
         setConceptData(prev => ({ ...prev, id: conceptId }));
       }
 
-      // Handle files
+      // Handle files - only insert files that haven't been saved yet
       if (conceptData.portfolio_files.length > 0 && conceptId) {
         const fileRecords = conceptData.portfolio_files
-          .filter(file => file && file.filename && !file.id)
+          .filter(file => file && file.filename && !file.conceptFileId) // Use conceptFileId instead of id
           .map(file => ({
             creator_id: userId,
             concept_id: conceptId,
@@ -288,7 +289,19 @@ export default function CreateOffer() {
           }));
 
         if (fileRecords.length > 0) {
-          await supabase.from('concept_files').insert(fileRecords);
+          const { data: insertedFiles } = await supabase.from('concept_files').insert(fileRecords).select('id');
+          // Update conceptData with the new concept_file IDs
+          if (insertedFiles) {
+            setConceptData(prev => ({
+              ...prev,
+              portfolio_files: prev.portfolio_files.map((file, index) => {
+                if (!file.conceptFileId && insertedFiles[index]) {
+                  return { ...file, conceptFileId: insertedFiles[index].id };
+                }
+                return file;
+              })
+            }));
+          }
         }
       }
 
@@ -390,7 +403,7 @@ export default function CreateOffer() {
         // Save any portfolio files
         if (conceptData.portfolio_files.length > 0) {
           const fileRecords = conceptData.portfolio_files
-            .filter(file => file && file.filename && !file.id)
+            .filter(file => file && file.filename && !file.conceptFileId) // Use conceptFileId instead of id
             .map(file => ({
               creator_id: userId,
               concept_id: conceptId,
@@ -410,17 +423,17 @@ export default function CreateOffer() {
         }
       }
 
-      // All files are already in filbank, just update is_public status
+      // Update is_public status for all concept files
       if (conceptData.portfolio_files.length > 0) {
         for (const file of conceptData.portfolio_files) {
-          if (file.id) {
+          if (file.conceptFileId) {
             try {
               await supabase
                 .from('concept_files')
                 .update({
                   is_public: true
                 })
-                .eq('id', file.id);
+                .eq('id', file.conceptFileId);
             } catch (fileError) {
               console.warn('Could not update file visibility:', fileError);
             }
@@ -711,8 +724,8 @@ export default function CreateOffer() {
                   <div className="mt-6 space-y-3">
                     <Label>Valgte filer ({conceptData.portfolio_files.length}):</Label>
                     <div className="grid gap-3">
-                      {conceptData.portfolio_files.map((file, index) => (
-                        <div key={file.id || index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                       {conceptData.portfolio_files.map((file, index) => (
+                        <div key={file.filebankId || file.conceptFileId || index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             {getFileIcon(file.file_type)}
                             <div className="flex-1 min-w-0">
@@ -858,9 +871,9 @@ export default function CreateOffer() {
                 {conceptData.portfolio_files.length > 0 && (
                   <div>
                     <span className="text-sm text-muted-foreground block mb-2">Portfolio filer:</span>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {conceptData.portfolio_files.map((file, index) => (
-                        <div key={file.tempId || file.id || index} className="bg-muted/30 rounded-lg overflow-hidden">
+                        <div key={file.filebankId || file.conceptFileId || index} className="bg-muted/30 rounded-lg overflow-hidden">
                           {file.file_type === 'image' && (
                             <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
                               <img 
