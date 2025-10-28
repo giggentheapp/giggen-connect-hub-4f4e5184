@@ -14,6 +14,8 @@ export interface UserFile {
   category: string;
   created_at: string;
   updated_at: string;
+  thumbnail_path?: string | null;
+  thumbnail_url?: string | null;
 }
 
 export interface FileUsage {

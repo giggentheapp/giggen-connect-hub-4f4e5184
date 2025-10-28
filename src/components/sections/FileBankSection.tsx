@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useUserFiles, FileWithUsage } from '@/hooks/useUserFiles';
-import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye, Plus, X, User } from 'lucide-react';
+import { Search, Trash2, Upload, Image, FileText, Video, Music, Download, Copy, Eye, Plus, X, User, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AvatarCropModal } from '@/components/AvatarCropModal';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,8 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageForCrop, setImageForCrop] = useState<string | null>(null);
+  const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+  const [selectedAudioFile, setSelectedAudioFile] = useState<FileWithUsage | null>(null);
   const { toast } = useToast();
 
   const { files, loading, deleteFile, refetch } = useUserFiles(profile.user_id);
@@ -377,6 +380,13 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                           muted
                           playsInline
                         />
+                      ) : file.file_type === 'audio' && file.thumbnail_path ? (
+                        <img 
+                          src={supabase.storage.from('filbank').getPublicUrl(file.thumbnail_path).data.publicUrl}
+                          alt={file.filename}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
                       ) : (
                         <div className="flex items-center justify-center w-full h-full bg-muted/50">
                           <Icon className="h-12 w-12 text-muted-foreground" />
@@ -388,7 +398,7 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                     {isHovered && (
                       <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-2 mb-2 flex-wrap justify-center">
-                          {(file.file_type === 'image' || file.file_type === 'video') && (
+                          {(file.file_type === 'image' || file.file_type === 'video' || file.file_type === 'audio') && (
                             <>
                               {file.file_type === 'image' && (
                                 <Button
@@ -404,6 +414,21 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
                                   }}
                                 >
                                   <User className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {file.file_type === 'audio' && (
+                                <Button
+                                  size="icon"
+                                  variant="secondary"
+                                  className="h-8 w-8"
+                                  title="Legg til miniatyrbilde"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAudioFile(file);
+                                    setThumbnailModalOpen(true);
+                                  }}
+                                >
+                                  <ImageIcon className="h-4 w-4" />
                                 </Button>
                               )}
                               <Button
@@ -536,6 +561,57 @@ export const FileBankSection = ({ profile }: FileBankSectionProps) => {
           userId={profile.user_id}
           initialImageUrl={imageForCrop || undefined}
         />
+
+        {thumbnailModalOpen && selectedAudioFile && (
+          <FilebankSelectionModal
+            isOpen={thumbnailModalOpen}
+            onClose={() => {
+              setThumbnailModalOpen(false);
+              setSelectedAudioFile(null);
+            }}
+            onSelect={async (selectedFile) => {
+              if (selectedFile.file_type !== 'image') {
+                toast({
+                  title: 'Ugyldig filtype',
+                  description: 'Kun bildefiler kan brukes som miniatyrbilde',
+                  variant: 'destructive',
+                });
+                return;
+              }
+
+              try {
+                const { error } = await supabase
+                  .from('user_files')
+                  .update({
+                    thumbnail_path: selectedFile.file_path,
+                  })
+                  .eq('id', selectedAudioFile.id);
+
+                if (error) throw error;
+
+                toast({
+                  title: 'Miniatyrbilde oppdatert',
+                  description: 'Miniatyrbildet er nå knyttet til lydfilen',
+                });
+
+                refetch();
+                setThumbnailModalOpen(false);
+                setSelectedAudioFile(null);
+              } catch (error) {
+                console.error('Error updating thumbnail:', error);
+                toast({
+                  title: 'Feil',
+                  description: 'Kunne ikke oppdatere miniatyrbilde',
+                  variant: 'destructive',
+                });
+              }
+            }}
+            userId={profile.user_id}
+            fileTypes={['image']}
+            title="Velg miniatyrbilde"
+            description="Velg et bilde fra filbanken som skal vises for denne lydfilen"
+          />
+        )}
       </div>
     </div>
   );
