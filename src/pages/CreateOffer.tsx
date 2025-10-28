@@ -222,26 +222,49 @@ export default function CreateOffer() {
     // If file has a conceptFileId, delete it from the database
     if (fileData.conceptFileId) {
       try {
+        console.log('🗑️ Deleting concept file from database:', {
+          conceptFileId: fileData.conceptFileId,
+          filename: fileData.filename
+        });
+        
         const { error } = await supabase
           .from('concept_files')
           .delete()
           .eq('id', fileData.conceptFileId);
         
         if (error) {
-          console.error('Error deleting concept file:', error);
+          console.error('❌ Error deleting concept file:', error);
           toast({
             title: 'Feil ved sletting',
-            description: 'Kunne ikke slette filen fra databasen',
+            description: `Kunne ikke slette filen: ${error.message}`,
             variant: 'destructive',
           });
           return;
         }
+        
+        console.log('✅ Concept file deleted from database');
+        
+        toast({
+          title: 'Fil fjernet',
+          description: 'Filen er fjernet fra portfolio og databasen',
+        });
       } catch (error) {
-        console.error('Error deleting concept file:', error);
+        console.error('❌ Exception deleting concept file:', error);
+        toast({
+          title: 'Feil ved sletting',
+          description: 'Kunne ikke slette filen',
+          variant: 'destructive',
+        });
         return;
       }
+    } else {
+      toast({
+        title: 'Fil fjernet',
+        description: 'Filen er fjernet fra portfolio',
+      });
     }
     
+    // Remove from local state
     setConceptData(prev => ({
       ...prev,
       portfolio_files: prev.portfolio_files.filter(file => 
@@ -249,10 +272,6 @@ export default function CreateOffer() {
       )
     }));
     setHasChanges(true);
-    toast({
-      title: 'Fil fjernet',
-      description: 'Filen er fjernet fra portfolio',
-    });
   };
 
   const getFileIcon = (fileType: string) => {
@@ -510,33 +529,54 @@ export default function CreateOffer() {
         });
         
         if (unsavedFiles.length > 0) {
-          const fileRecords = unsavedFiles.map(file => ({
-            creator_id: userId,
-            concept_id: conceptId,
-            filename: file.filename,
-            file_path: file.file_path,
-            file_type: file.file_type,
-            file_url: file.publicUrl || file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
-            mime_type: file.mime_type,
-            file_size: file.file_size,
-            title: file.title || file.filename,
-            thumbnail_path: file.thumbnail_path,
-            is_public: true // Already public since we're publishing
-          }));
-
-          console.log('💾 Saving concept files:', fileRecords);
-
-          const { data: savedFiles, error: insertError } = await supabase
+          // Check which files already exist in the database to avoid duplicates
+          const { data: existingFiles } = await supabase
             .from('concept_files')
-            .insert(fileRecords)
-            .select('*');
+            .select('file_path')
+            .eq('concept_id', conceptId);
           
-          if (insertError) {
-            console.error('❌ Error inserting files for existing concept:', insertError);
-            throw insertError;
+          const existingPaths = new Set(existingFiles?.map(f => f.file_path) || []);
+          
+          // Only insert files that don't already exist
+          const filesToInsert = unsavedFiles.filter(file => !existingPaths.has(file.file_path));
+          
+          console.log('📊 Files comparison:', {
+            unsavedCount: unsavedFiles.length,
+            existingCount: existingPaths.size,
+            toInsertCount: filesToInsert.length
+          });
+          
+          if (filesToInsert.length > 0) {
+            const fileRecords = filesToInsert.map(file => ({
+              creator_id: userId,
+              concept_id: conceptId,
+              filename: file.filename,
+              file_path: file.file_path,
+              file_type: file.file_type,
+              file_url: file.publicUrl || file.file_url || `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
+              mime_type: file.mime_type,
+              file_size: file.file_size,
+              title: file.title || file.filename,
+              thumbnail_path: file.thumbnail_path,
+              is_public: true // Already public since we're publishing
+            }));
+
+            console.log('💾 Saving concept files:', fileRecords);
+
+            const { data: savedFiles, error: insertError } = await supabase
+              .from('concept_files')
+              .insert(fileRecords)
+              .select('*');
+            
+            if (insertError) {
+              console.error('❌ Error inserting files for existing concept:', insertError);
+              throw insertError;
+            }
+            
+            console.log('✅ Files saved successfully:', savedFiles);
+          } else {
+            console.log('ℹ️ No new files to insert');
           }
-          
-          console.log('✅ Files saved successfully:', savedFiles);
         }
       }
 
