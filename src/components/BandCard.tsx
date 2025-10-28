@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BandWithMembers } from '@/types/band';
-import { Users, Music } from 'lucide-react';
+import { Users, UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BandViewModal } from './BandViewModal';
 
@@ -66,7 +66,7 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Music className="w-6 h-6 text-primary" />
+              <UsersRound className="w-6 h-6 text-primary" />
             )}
           </div>
           <div className="flex-1 min-w-0">
