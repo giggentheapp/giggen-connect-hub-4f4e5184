@@ -115,6 +115,7 @@ export const useUserBands = (userId: string | undefined) => {
             created_by,
             created_at,
             updated_at,
+            is_public,
             band_members (
               id,
               user_id,
