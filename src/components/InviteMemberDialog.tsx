@@ -49,13 +49,22 @@ export const InviteMemberDialog = ({
         const memberIds = members?.map(m => m.user_id) || [];
 
         // Get all musicians except current members
-        const { data, error } = await supabase
+        let query = supabase
           .from('profiles')
           .select('user_id, display_name, username, avatar_url')
-          .eq('role', 'musician')
-          .not('user_id', 'in', `(${memberIds.join(',')})`)
-          .or(`display_name.ilike.%${search}%,username.ilike.%${search}%`)
-          .limit(20);
+          .eq('role', 'musician');
+
+        // Only exclude existing members if there are any
+        if (memberIds.length > 0) {
+          query = query.not('user_id', 'in', `(${memberIds.join(',')})`);
+        }
+
+        // Apply search filter if there's a search term
+        if (search) {
+          query = query.or(`display_name.ilike.%${search}%,username.ilike.%${search}%`);
+        }
+
+        const { data, error } = await query.limit(100);
 
         if (error) throw error;
         setMusicians(data || []);
