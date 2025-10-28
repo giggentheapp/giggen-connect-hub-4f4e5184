@@ -131,38 +131,22 @@ export const ArtistExploreSection = ({
       setLoading(true);
       console.log('🎪 Fetching organizers...');
 
-      // Fetch profiles with role 'organizer' from user_roles table
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'organizer');
-
-      if (roleError) {
-        console.error('❌ Error fetching organizer roles:', roleError);
-        throw roleError;
-      }
-
-      const organizerIds = roleData?.map(r => r.user_id) || [];
-
-      if (organizerIds.length === 0) {
-        console.log('✅ No organizers found');
-        setOrganizers([]);
-        setFilteredOrganizers([]);
-        return;
-      }
-
-      // Fetch profiles for organizers
+      // Fetch all profiles with role 'organizer'
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .in('user_id', organizerIds);
+        .eq('role', 'organizer')
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error fetching organizer profiles:', error);
+        console.error('❌ Error fetching organizers:', error);
         throw error;
       }
 
       console.log('✅ Fetched organizers:', data?.length || 0);
+      console.log('📋 First few organizers:', data?.slice(0, 3));
+      
+      // Show all organizers regardless of privacy settings
       setOrganizers(data || []);
       setFilteredOrganizers(data || []);
     } catch (err) {
