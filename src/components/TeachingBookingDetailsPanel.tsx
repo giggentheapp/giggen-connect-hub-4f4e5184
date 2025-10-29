@@ -11,27 +11,38 @@ interface TeachingBookingDetailsPanelProps {
 export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBookingDetailsPanelProps) => {
   const teachingData = conceptData?.teaching_data || {};
   
-  // Helper function to safely render values
-  const renderValue = (value: any): string | null => {
-    if (value === null || value === undefined) return '';
+  // Helper function to render field items with labels
+  const renderFieldItems = (value: any) => {
+    if (!value) return null;
     
-    // Handle arrays (like form field data)
+    // Handle arrays (form field data with label/value structure)
     if (Array.isArray(value)) {
-      // Filter for enabled items with values
-      const items = value
-        .filter((item: any) => item.enabled && item.value)
-        .map((item: any) => item.value)
-        .filter(Boolean);
+      const items = value.filter((item: any) => item.enabled && item.value);
       
-      return items.length > 0 ? items.join('\n') : null;
+      if (items.length === 0) return null;
+      
+      return (
+        <div className="space-y-3">
+          {items.map((item: any, index: number) => (
+            <div key={index} className="p-3 border rounded bg-muted/30">
+              <div className="font-medium text-sm mb-1">{item.label}</div>
+              <div className="text-sm whitespace-pre-wrap">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      );
     }
     
-    // Handle objects - don't render them
-    if (typeof value === 'object') {
-      return null;
+    // Handle simple string values
+    if (typeof value === 'string' && value.trim()) {
+      return (
+        <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+          {value}
+        </div>
+      );
     }
     
-    return String(value);
+    return null;
   };
 
   return (
@@ -72,14 +83,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {teachingData.schedule && renderValue(teachingData.schedule) && (
-            <div>
-              <Label>Ukentlig timeplan</Label>
-              <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-                {renderValue(teachingData.schedule)}
-              </div>
-            </div>
-          )}
+          {teachingData.schedule && renderFieldItems(teachingData.schedule)}
           
           {teachingData.start_date && (
             <div>
@@ -96,19 +100,12 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             </div>
           )}
           
-          {teachingData.duration && renderValue(teachingData.duration) && (
-            <div>
-              <Label>Varighet</Label>
-              <div className="p-3 border rounded bg-muted/30 text-sm">
-                {renderValue(teachingData.duration)}
-              </div>
-            </div>
-          )}
+          {teachingData.duration && renderFieldItems(teachingData.duration)}
         </CardContent>
       </Card>
 
       {/* Location */}
-      {teachingData.location && renderValue(teachingData.location) && (
+      {teachingData.location && renderFieldItems(teachingData.location) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -117,15 +114,13 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm">
-              {renderValue(teachingData.location)}
-            </div>
+            {renderFieldItems(teachingData.location)}
           </CardContent>
         </Card>
       )}
 
       {/* Payment */}
-      {teachingData.payment && renderValue(teachingData.payment) && (
+      {teachingData.payment && renderFieldItems(teachingData.payment) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -134,79 +129,67 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.payment)}
-            </div>
+            {renderFieldItems(teachingData.payment)}
           </CardContent>
         </Card>
       )}
 
       {/* Responsibilities */}
-      {teachingData.responsibilities && renderValue(teachingData.responsibilities) && (
+      {teachingData.responsibilities && renderFieldItems(teachingData.responsibilities) && (
         <Card>
           <CardHeader>
             <CardTitle>Ansvar og forventninger</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.responsibilities)}
-            </div>
+            {renderFieldItems(teachingData.responsibilities)}
           </CardContent>
         </Card>
       )}
 
       {/* Focus */}
-      {teachingData.focus && renderValue(teachingData.focus) && (
+      {teachingData.focus && renderFieldItems(teachingData.focus) && (
         <Card>
           <CardHeader>
             <CardTitle>Fokus og innhold</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.focus)}
-            </div>
+            {renderFieldItems(teachingData.focus)}
           </CardContent>
         </Card>
       )}
 
       {/* Termination */}
-      {teachingData.termination && renderValue(teachingData.termination) && (
+      {teachingData.termination && renderFieldItems(teachingData.termination) && (
         <Card>
           <CardHeader>
             <CardTitle>Oppsigelsesvilkår</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.termination)}
-            </div>
+            {renderFieldItems(teachingData.termination)}
           </CardContent>
         </Card>
       )}
 
       {/* Liability */}
-      {teachingData.liability && renderValue(teachingData.liability) && (
+      {teachingData.liability && renderFieldItems(teachingData.liability) && (
         <Card>
           <CardHeader>
             <CardTitle>Forsikring og ansvar</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.liability)}
-            </div>
+            {renderFieldItems(teachingData.liability)}
           </CardContent>
         </Card>
       )}
 
       {/* Communication */}
-      {teachingData.communication && renderValue(teachingData.communication) && (
+      {teachingData.communication && renderFieldItems(teachingData.communication) && (
         <Card>
           <CardHeader>
             <CardTitle>Kommunikasjon og avlysning</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {renderValue(teachingData.communication)}
-            </div>
+            {renderFieldItems(teachingData.communication)}
           </CardContent>
         </Card>
       )}
