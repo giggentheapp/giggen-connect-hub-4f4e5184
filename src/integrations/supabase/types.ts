@@ -492,6 +492,7 @@ export type Database = {
           door_percentage: number | null
           end_date: string | null
           end_time: string | null
+          event_admin_id: string | null
           event_date: string | null
           hospitality_rider: string | null
           hospitality_rider_status: string | null
@@ -552,6 +553,7 @@ export type Database = {
           door_percentage?: number | null
           end_date?: string | null
           end_time?: string | null
+          event_admin_id?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
@@ -612,6 +614,7 @@ export type Database = {
           door_percentage?: number | null
           end_date?: string | null
           end_time?: string | null
+          event_admin_id?: string | null
           event_date?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null

@@ -406,6 +406,37 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
           <CardTitle>Arrangementsdetaljer</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Event Admin Selection - Only visible during negotiation phase */}
+          {isNegotiationPhase && (
+            <div className="p-4 border border-primary/20 bg-primary/5 rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-primary mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-semibold text-sm mb-1">Hvem skal administrere arrangementet?</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Velg hvem som skal ha kontroll over synlighet og andre innstillinger for arrangementet.
+                  </p>
+                  <Select 
+                    value={(booking as any).event_admin_id || ''} 
+                    onValueChange={(value) => handleFieldEdit('event_admin_id', value)}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Velg arrangement-administrator..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={booking.sender_id}>
+                        Avsender {isSender && '(deg)'}
+                      </SelectItem>
+                      <SelectItem value={booking.receiver_id}>
+                        Mottaker {isReceiver && '(deg)'}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
           <EditableField 
             fieldName="description"
             label="Beskrivelse"

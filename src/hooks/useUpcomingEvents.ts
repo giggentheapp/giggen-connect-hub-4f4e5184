@@ -35,11 +35,12 @@ export const useUpcomingEvents = (userId: string) => {
       setLoading(true);
       setError(null);
 
-      // Fetch upcoming bookings where user is involved
+      // Fetch upcoming bookings where user is the EVENT ADMIN
+      // Only event admin can see and manage events in admin section
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
         .select('*')
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .eq('event_admin_id', userId)
         .eq('status', 'upcoming')
         .order('event_date', { ascending: true });
 

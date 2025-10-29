@@ -33,6 +33,7 @@ export interface Booking {
   id: string;
   sender_id: string;
   receiver_id: string;
+  event_admin_id?: string;  // User designated as event administrator
   title: string;
   description?: string;
   status: BookingStatus;
@@ -176,6 +177,7 @@ export interface UpdateBookingRequest {
   hospitality_rider?: string;
   tech_spec?: string;
   is_public_after_approval?: boolean;
+  event_admin_id?: string;  // User designated as event administrator
   status?: BookingStatus;
   public_visibility_settings?: Record<string, string | number | boolean | null>;
   door_deal?: boolean;

@@ -83,10 +83,14 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
 
   const handlePublishAgreement = async () => {
     try {
-      // Update booking status to published AND set public visibility
+      // Determine event admin - default to sender if not set
+      const eventAdminId = (booking as any).event_admin_id || booking.sender_id;
+      
+      // Update booking status to published AND set public visibility + admin
       await updateBooking(booking.id, { 
         status: 'upcoming',
-        is_public_after_approval: true 
+        is_public_after_approval: true,
+        event_admin_id: eventAdminId
       });
 
       // Create event in events_market

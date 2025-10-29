@@ -24,6 +24,26 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
       
       console.log('🔄 Toggling event visibility:', { eventId, eventTitle, currentState, newVisibilityState });
       
+      // Verify user is event admin before allowing toggle
+      const { data: booking, error: checkError } = await supabase
+        .from('bookings')
+        .select('event_admin_id')
+        .eq('id', eventId)
+        .single();
+
+      if (checkError || !booking) {
+        throw new Error('Kunne ikke hente arrangement-info');
+      }
+
+      if (booking.event_admin_id !== profile.user_id) {
+        toast({
+          title: 'Ingen tilgang',
+          description: 'Kun arrangement-administrator kan endre synlighet',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
       // Update bookings table
       const { error: bookingError } = await supabase
         .from('bookings')
@@ -39,33 +59,19 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
 
       console.log('✅ Booking updated successfully');
 
-      // Get booking details for matching
-      const { data: booking } = await supabase
-        .from('bookings')
-        .select('title, event_date')
-        .eq('id', eventId)
-        .single();
+      // Update all events_market rows that match this title
+      const { data: updated, error: marketError } = await supabase
+        .from('events_market')
+        .update({ 
+          is_public: newVisibilityState
+        })
+        .eq('title', eventTitle)
+        .select();
 
-      if (booking) {
-        const eventDate = booking.event_date ? new Date(booking.event_date).toISOString().split('T')[0] : null;
-        
-        console.log('🔍 Updating ALL events_market with title:', booking.title);
-
-        // Update ALL events_market rows that match this title (regardless of created_by)
-        // This handles cases where duplicates were created
-        const { data: updated, error: marketError } = await supabase
-          .from('events_market')
-          .update({ 
-            is_public: newVisibilityState
-          })
-          .eq('title', booking.title)
-          .select();
-
-        if (marketError) {
-          console.error('❌ Could not update events_market:', marketError);
-        } else {
-          console.log('✅ Events_market updated:', updated?.length, 'rows');
-        }
+      if (marketError) {
+        console.error('❌ Could not update events_market:', marketError);
+      } else {
+        console.log('✅ Events_market updated:', updated?.length, 'rows');
       }
 
       toast({
