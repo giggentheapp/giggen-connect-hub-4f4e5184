@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ interface TeachingConceptWizardProps {
   userId: string;
   onSuccess: () => void;
   onBack: () => void;
+  existingConcept?: any;
 }
 
 const STEPS = [
@@ -89,10 +90,11 @@ const DEFAULT_SECTIONS: TeachingSectionData = {
   ],
 };
 
-export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingConceptWizardProps) => {
+export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConcept }: TeachingConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [conceptId, setConceptId] = useState<string | undefined>(existingConcept?.id);
   const { toast } = useToast();
 
   const [basicData, setBasicData] = useState({
@@ -104,6 +106,64 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
   const [sections, setSections] = useState<TeachingSectionData>(DEFAULT_SECTIONS);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [isIndefinite, setIsIndefinite] = useState(false);
+
+  // Load existing concept data
+  useEffect(() => {
+    if (existingConcept) {
+      console.log('📂 Loading existing teaching concept:', existingConcept);
+      
+      // Set basic data
+      setBasicData({
+        title: existingConcept.title || '',
+        description: existingConcept.description || '',
+      });
+
+      // Set concept ID
+      setConceptId(existingConcept.id);
+
+      // Load teaching_data sections
+      if (existingConcept.teaching_data) {
+        setSections(existingConcept.teaching_data);
+      }
+
+      // Load portfolio files
+      if (existingConcept.concept_files && existingConcept.concept_files.length > 0) {
+        const files = existingConcept.concept_files.map((file: any) => ({
+          conceptFileId: file.id,
+          filebankId: null,
+          filename: file.filename,
+          file_path: file.file_path,
+          file_type: file.file_type,
+          mime_type: file.mime_type,
+          file_size: file.file_size,
+          publicUrl: file.file_url,
+          file_url: file.file_url,
+          title: file.title || file.filename,
+          thumbnail_path: file.thumbnail_path,
+          uploadedAt: file.created_at,
+        }));
+        setPortfolioFiles(files);
+      }
+
+      // Load dates
+      if (existingConcept.available_dates) {
+        const datesData = typeof existingConcept.available_dates === 'string' 
+          ? JSON.parse(existingConcept.available_dates)
+          : existingConcept.available_dates;
+        
+        if (datesData && typeof datesData === 'object' && datesData.indefinite) {
+          setIsIndefinite(true);
+        } else if (Array.isArray(datesData)) {
+          setSelectedDates(datesData.map((d: string) => new Date(d)));
+        }
+      }
+
+      toast({
+        title: 'Konsept lastet',
+        description: 'Fortsett der du slapp',
+      });
+    }
+  }, [existingConcept]);
 
   const handleFileSelected = (file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`;
@@ -129,12 +189,44 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
     });
   };
 
-  const removePortfolioFile = (fileId: string) => {
-    setPortfolioFiles(prev => prev.filter(f => f.filebankId !== fileId));
-    toast({
-      title: 'Fil fjernet',
-      description: 'Filen er fjernet fra portfolio',
-    });
+  const removePortfolioFile = async (fileData: any) => {
+    // If file has a conceptFileId, delete it from the database
+    if (fileData.conceptFileId) {
+      try {
+        const { error } = await supabase
+          .from('concept_files')
+          .delete()
+          .eq('id', fileData.conceptFileId);
+        
+        if (error) {
+          toast({
+            title: 'Feil ved sletting',
+            description: `Kunne ikke slette filen: ${error.message}`,
+            variant: 'destructive',
+          });
+          return;
+        }
+        
+        toast({
+          title: 'Fil fjernet',
+          description: 'Filen er fjernet fra portfolio og databasen',
+        });
+      } catch (error) {
+        toast({
+          title: 'Feil ved sletting',
+          description: 'Kunne ikke slette filen',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else {
+      toast({
+        title: 'Fil fjernet',
+        description: 'Filen er fjernet fra portfolio',
+      });
+    }
+    
+    setPortfolioFiles(prev => prev.filter(f => f.filebankId !== fileData.filebankId && f.conceptFileId !== fileData.conceptFileId));
   };
 
   const getFileIcon = (fileType: string) => {
@@ -193,52 +285,82 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
 
     setSaving(true);
     try {
-      const { data, error } = await supabase
-        .from('concepts')
-        .insert({
-          maker_id: userId,
-          title: basicData.title,
-          description: basicData.description || null,
-          concept_type: 'teaching',
-          teaching_data: sections as any,
-          available_dates: isIndefinite 
-            ? JSON.stringify({ indefinite: true })
-            : (selectedDates.length > 0 ? JSON.stringify(selectedDates) : null),
-          is_published: isPublished,
-          status: isPublished ? 'published' : 'draft',
-        } as any)
-        .select()
-        .single();
+      const payload = {
+        maker_id: userId,
+        title: basicData.title,
+        description: basicData.description || null,
+        concept_type: 'teaching',
+        teaching_data: sections as any,
+        available_dates: isIndefinite 
+          ? JSON.stringify({ indefinite: true })
+          : (selectedDates.length > 0 ? JSON.stringify(selectedDates) : null),
+        is_published: isPublished,
+        status: isPublished ? 'published' : 'draft',
+      };
 
-      if (error) throw error;
+      let savedConceptId = conceptId;
 
-      // Save portfolio files to concept_files table
-      if (data && portfolioFiles.length > 0) {
-        const conceptFilesData = portfolioFiles.map(file => ({
-          concept_id: data.id,
-          creator_id: userId,
-          filename: file.filename,
-          file_path: file.file_path,
-          file_url: file.publicUrl,
-          file_type: file.file_type,
-          mime_type: file.mime_type,
-          file_size: file.file_size,
-          title: file.title || file.filename,
-          thumbnail_path: file.thumbnail_path || null,
-          is_public: true,
-        }));
+      if (conceptId) {
+        // Update existing concept
+        const { error } = await supabase
+          .from('concepts')
+          .update(payload)
+          .eq('id', conceptId);
 
-        const { error: filesError } = await supabase
-          .from('concept_files')
-          .insert(conceptFilesData);
+        if (error) throw error;
+      } else {
+        // Create new concept
+        const { data, error } = await supabase
+          .from('concepts')
+          .insert(payload as any)
+          .select()
+          .single();
 
-        if (filesError) {
-          console.error('Error saving portfolio files:', filesError);
-          toast({
-            title: 'Advarsel',
-            description: 'Konseptet ble lagret, men noen porteføljefiler kunne ikke lagres',
-            variant: 'destructive',
-          });
+        if (error) throw error;
+        savedConceptId = data.id;
+        setConceptId(savedConceptId);
+      }
+
+      // Save portfolio files to concept_files table (only new files without conceptFileId)
+      if (savedConceptId && portfolioFiles.length > 0) {
+        const newFiles = portfolioFiles.filter(file => !file.conceptFileId);
+        
+        if (newFiles.length > 0) {
+          const conceptFilesData = newFiles.map(file => ({
+            concept_id: savedConceptId,
+            creator_id: userId,
+            filename: file.filename,
+            file_path: file.file_path,
+            file_url: file.publicUrl,
+            file_type: file.file_type,
+            mime_type: file.mime_type,
+            file_size: file.file_size,
+            title: file.title || file.filename,
+            thumbnail_path: file.thumbnail_path || null,
+            is_public: true,
+          }));
+
+          const { data: insertedFiles, error: filesError } = await supabase
+            .from('concept_files')
+            .insert(conceptFilesData)
+            .select('id');
+
+          if (filesError) {
+            console.error('Error saving portfolio files:', filesError);
+            toast({
+              title: 'Advarsel',
+              description: 'Konseptet ble lagret, men noen porteføljefiler kunne ikke lagres',
+              variant: 'destructive',
+            });
+          } else if (insertedFiles) {
+            // Update local state with new conceptFileIds
+            setPortfolioFiles(prev => prev.map((file, index) => {
+              if (!file.conceptFileId && insertedFiles[index]) {
+                return { ...file, conceptFileId: insertedFiles[index].id };
+              }
+              return file;
+            }));
+          }
         }
       }
 
@@ -505,7 +627,7 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removePortfolioFile(file.filebankId)}
+                        onClick={() => removePortfolioFile(file)}
                       >
                         <X className="h-4 w-4" />
                       </Button>

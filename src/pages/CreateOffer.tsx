@@ -63,6 +63,7 @@ export default function CreateOffer() {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [loadedTeachingConcept, setLoadedTeachingConcept] = useState<any>(null);
 
   const [conceptData, setConceptData] = useState<ConceptData>({
     title: '',
@@ -118,6 +119,13 @@ export default function CreateOffer() {
         // Set concept type from database
         if (data.concept_type) {
           setConceptType(data.concept_type as 'session_musician' | 'teaching');
+          
+          // If it's a teaching concept, store the full concept for TeachingConceptWizard
+          if (data.concept_type === 'teaching') {
+            setLoadedTeachingConcept(data);
+            setLoading(false);
+            return;
+          }
         }
 
         // Parse and set data
@@ -670,6 +678,7 @@ export default function CreateOffer() {
         <div className="container mx-auto px-4 py-8">
           <TeachingConceptWizard
             userId={userId}
+            existingConcept={loadedTeachingConcept}
             onSuccess={() => {
               toast({
                 title: 'Suksess!',
