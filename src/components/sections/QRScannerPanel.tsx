@@ -41,10 +41,26 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            console.log('✅ Video metadata lastet');
-            setCameraLoading(false);
-          };
+          
+          // Prøv å spille av videoen
+          videoRef.current.play()
+            .then(() => {
+              console.log('✅ Video spiller');
+              setCameraLoading(false);
+            })
+            .catch((err) => {
+              console.error('⚠️ Video play error:', err);
+              // Selv om play feiler, prøv å sette loading til false
+              setCameraLoading(false);
+            });
+          
+          // Fallback timeout i tilfelle play aldri fullfører
+          setTimeout(() => {
+            if (cameraLoading) {
+              console.log('⏱️ Timeout: Setter loading til false');
+              setCameraLoading(false);
+            }
+          }, 2000);
         }
       } catch (err: any) {
         console.error('❌ Kamerafeil:', err);
