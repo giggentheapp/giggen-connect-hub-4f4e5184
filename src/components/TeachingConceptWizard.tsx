@@ -504,8 +504,8 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
 
         <Separator />
 
-        {/* Step Content */}
-        {currentStep === 0 && (
+        {/* Step Content - Fixed min-height to prevent button jumping */}
+        <div className="min-h-[400px]">{currentStep === 0 && (
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
               <h3 className="text-lg font-semibold mb-3">Velkommen til undervisningsavtale</h3>
@@ -774,10 +774,11 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
             </div>
           </div>
         )}
+        </div>
 
-        {/* Navigation */}
+        {/* Navigation - Fixed at bottom */}
         {currentStep < STEPS.length - 1 && (
-          <div className="flex justify-between pt-4">
+          <div className="flex justify-between pt-6 border-t">
             <Button
               variant="outline"
               onClick={currentStep === 0 ? onBack : prevStep}

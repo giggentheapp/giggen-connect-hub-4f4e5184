@@ -796,8 +796,8 @@ export default function CreateOffer() {
 
         <Separator className="mb-6" />
 
-        {/* Step Content */}
-        <div className="space-y-6">
+        {/* Step Content - Fixed min-height to prevent button jumping */}
+        <div className="min-h-[450px] mb-8">
           {/* Step 0: Basic Info */}
           {currentStep === 0 && (
             <div className="space-y-4">
@@ -1127,8 +1127,8 @@ export default function CreateOffer() {
           )}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
+        {/* Navigation Buttons - Fixed at bottom with border */}
+        <div className="flex justify-between pt-6 border-t">
           <Button
             variant="outline"
             onClick={prevStep}
