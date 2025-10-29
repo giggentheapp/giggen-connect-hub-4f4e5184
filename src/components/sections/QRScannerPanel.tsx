@@ -14,20 +14,52 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
   const [scanning, setScanning] = useState(true);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cameraLoading, setCameraLoading] = useState(true);
 
   useEffect(() => {
     if (!scanning) return;
 
     const startCamera = async () => {
       try {
+        console.log('📸 Starter kamera...');
+        setCameraLoading(true);
+        
+        // Sjekk om mediaDevices er tilgjengelig
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Kamera er ikke tilgjengelig i denne nettleseren');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
         });
+        
+        console.log('✅ Kamerastrøm mottatt');
+        
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            console.log('✅ Video metadata lastet');
+            setCameraLoading(false);
+          };
         }
       } catch (err: any) {
-        setError(err.message || 'Kunne ikke få tilgang til kamera');
+        console.error('❌ Kamerafeil:', err);
+        let errorMessage = 'Kunne ikke få tilgang til kamera';
+        
+        if (err.name === 'NotAllowedError') {
+          errorMessage = 'Kameratilgang ble nektet. Vennligst gi tillatelse i nettleserens innstillinger.';
+        } else if (err.name === 'NotFoundError') {
+          errorMessage = 'Ingen kamera funnet på enheten.';
+        } else if (err.name === 'NotReadableError') {
+          errorMessage = 'Kameraet er allerede i bruk av en annen app.';
+        }
+        
+        setError(errorMessage);
+        setCameraLoading(false);
       }
     };
 
@@ -37,6 +69,7 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach(track => track.stop());
+        console.log('🛑 Kamera stoppet');
       }
     };
   }, [scanning]);
@@ -172,22 +205,37 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
         {/* Content */}
         <div className="flex-1 overflow-auto p-4">
           {error ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-center p-4">
               <AlertCircle className="h-12 w-12 text-destructive" />
               <p className="font-medium text-foreground">{error}</p>
+              <button 
+                onClick={() => {
+                  setError(null);
+                  setScanning(true);
+                }}
+                className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                Prøv igjen
+              </button>
             </div>
           ) : result?.success ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
               <CheckCircle className="h-12 w-12 text-green-500" />
               <p className="font-medium text-foreground">{result.message}</p>
             </div>
+          ) : cameraLoading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-3">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">Starter kamera...</p>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full">
               <video
                 ref={videoRef}
-                className="w-full rounded-lg"
+                className="w-full rounded-lg bg-black"
                 autoPlay
                 playsInline
+                muted
               />
               <canvas ref={canvasRef} className="hidden" />
               <p className="text-sm text-muted-foreground mt-2">Pek kamera mot QR-koden</p>
