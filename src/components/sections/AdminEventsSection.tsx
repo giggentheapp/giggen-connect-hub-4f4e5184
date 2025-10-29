@@ -22,20 +22,47 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
     try {
       const newVisibilityState = !currentState;
       
-      const { error } = await supabase
+      // Update bookings table
+      const { error: bookingError } = await supabase
         .from('bookings')
         .update({ 
           is_public_after_approval: newVisibilityState
         })
         .eq('id', eventId);
 
-      if (error) throw error;
+      if (bookingError) throw bookingError;
+
+      // Also update events_market table - synkroniser synlighet
+      // Find event in events_market by matching title and created_by
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('title, event_date, sender_id, receiver_id')
+        .eq('id', eventId)
+        .single();
+
+      if (booking) {
+        // Update events_market using title and date to find the right event
+        const eventDate = booking.event_date ? new Date(booking.event_date).toISOString().split('T')[0] : null;
+        
+        const { error: marketError } = await supabase
+          .from('events_market')
+          .update({ 
+            is_public: newVisibilityState
+          })
+          .eq('title', booking.title)
+          .eq('created_by', profile.user_id);
+
+        if (marketError) {
+          console.error('Could not update events_market:', marketError);
+          // Don't throw - booking was updated successfully
+        }
+      }
 
       toast({
-        title: newVisibilityState ? '✅ Arrangement vist i profil' : '🔒 Arrangement skjult fra profil',
+        title: newVisibilityState ? '✅ Arrangement vist offentlig' : '🔒 Arrangement skjult fra offentlig visning',
         description: newVisibilityState 
-          ? `"${eventTitle}" er nå synlig på profilsiden` 
-          : `"${eventTitle}" er nå skjult fra profilsiden`,
+          ? `"${eventTitle}" er nå synlig for alle i Explore` 
+          : `"${eventTitle}" er nå skjult fra offentlig visning`,
       });
       
       await refetch();
