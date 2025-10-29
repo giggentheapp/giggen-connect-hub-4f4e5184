@@ -796,8 +796,8 @@ export default function CreateOffer() {
 
         <Separator className="mb-6" />
 
-        {/* Step Content - Fixed min-height to prevent button jumping */}
-        <div className="min-h-[450px] mb-8">
+        {/* Step Content - Scrollable with fixed navigation */}
+        <div className="max-h-[500px] overflow-y-auto pr-2 mb-6">
           {/* Step 0: Basic Info */}
           {currentStep === 0 && (
             <div className="space-y-4">
