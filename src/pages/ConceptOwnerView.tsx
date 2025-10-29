@@ -48,12 +48,22 @@ export default function ConceptOwnerView() {
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    if (conceptId) {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (conceptId && currentUserId) {
       loadConceptData(conceptId);
     }
-  }, [conceptId]);
+  }, [conceptId, currentUserId]);
 
   const loadConceptData = async (id: string) => {
     setLoading(true);
@@ -93,6 +103,10 @@ export default function ConceptOwnerView() {
       }
 
       setConcept(conceptData);
+      
+      // Check if current user is the owner
+      const userIsOwner = currentUserId === conceptData.maker_id;
+      setIsOwner(userIsOwner);
 
       // Load concept files
       const { data: filesData, error: filesError } = await supabase
@@ -369,11 +383,11 @@ export default function ConceptOwnerView() {
           {/* Back Button */}
           <Button
             variant="ghost"
-            onClick={() => navigate('/dashboard?section=admin-concepts')}
+            onClick={() => navigate(isOwner ? '/dashboard?section=admin-concepts' : '/dashboard?section=bookings')}
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Tilbake til Mine tilbud
+            {isOwner ? 'Tilbake til Mine tilbud' : 'Tilbake'}
           </Button>
 
           {/* Header */}
@@ -391,25 +405,27 @@ export default function ConceptOwnerView() {
                 )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2 shrink-0">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background border">
-                  {concept.is_published ? (
-                    <Eye className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <Switch
-                    checked={concept.is_published}
-                    onCheckedChange={togglePublished}
-                    className="data-[state=checked]:bg-green-500"
-                  />
+              {/* Action Buttons - Only for owner */}
+              {isOwner && (
+                <div className="flex gap-2 shrink-0">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background border">
+                    {concept.is_published ? (
+                      <Eye className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <Switch
+                      checked={concept.is_published}
+                      onCheckedChange={togglePublished}
+                      className="data-[state=checked]:bg-green-500"
+                    />
+                  </div>
+                  <Button onClick={() => navigate(`/create-offer?edit=${concept.id}`)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Rediger
+                  </Button>
                 </div>
-                <Button onClick={() => navigate(`/create-offer?edit=${concept.id}`)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Rediger
-                </Button>
-              </div>
+              )}
             </div>
 
             {/* Key Info Cards */}
