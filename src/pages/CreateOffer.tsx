@@ -110,9 +110,15 @@ export default function CreateOffer() {
 
         console.log('📂 Loading concept for editing:', {
           conceptId: draftId,
+          conceptType: data.concept_type,
           hasFiles: !!data.concept_files,
           fileCount: data.concept_files?.length || 0
         });
+
+        // Set concept type from database
+        if (data.concept_type) {
+          setConceptType(data.concept_type as 'session_musician' | 'teaching');
+        }
 
         // Parse and set data
         const availableDates = data.available_dates 
@@ -677,7 +683,7 @@ export default function CreateOffer() {
       )}
 
       {/* Show Session Musician Wizard (original flow) */}
-      {(conceptType === 'session_musician' || draftId) && (
+      {conceptType === 'session_musician' && (
         <>
           {/* Sticky Header */}
           <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
