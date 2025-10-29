@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserProfile } from '@/types/auth';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 interface AdminConceptsSectionProps {
   profile: UserProfile;
 }
@@ -197,7 +198,17 @@ export const AdminConceptsSection = ({
                         onClick={() => navigate(`/concept/${concept.id}`)} 
                         className="cursor-pointer"
                       >
-                        <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-semibold truncate">{concept.title}</h3>
+                          <span className={cn(
+                            "text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0",
+                            concept.concept_type === 'teaching' 
+                              ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                          )}>
+                            {concept.concept_type === 'teaching' ? '📚 Undervisning' : '🎵 Session'}
+                          </span>
+                        </div>
                         {concept.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {concept.description}
@@ -220,12 +231,12 @@ export const AdminConceptsSection = ({
                       {concept.is_published ? (
                         <>
                           <Eye className="h-3 w-3 text-green-600" />
-                          <span className="text-xs font-medium">Offentlig</span>
+                          <span className="text-xs font-medium">Publisert</span>
                         </>
                       ) : (
                         <>
                           <EyeOff className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs font-medium">Skjult</span>
+                          <span className="text-xs font-medium">Utkast</span>
                         </>
                       )}
                       <Switch
@@ -304,12 +315,22 @@ export const AdminConceptsSection = ({
                 {drafts.map((draft) => {
                   const progress = calculateProgress(draft);
                   return (
-                    <div key={draft.id} className="rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3">
+                  <div key={draft.id} className="rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3">
                       <div className="flex items-start gap-3">
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium truncate">
-                            {draft.title || 'Nytt tilbud'}
-                          </h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-medium truncate">
+                              {draft.title || 'Nytt tilbud'}
+                            </h4>
+                            <span className={cn(
+                              "text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0",
+                              draft.concept_type === 'teaching' 
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                            )}>
+                              {draft.concept_type === 'teaching' ? '📚 Undervisning' : '🎵 Session'}
+                            </span>
+                          </div>
                           <p className="text-[10px] text-muted-foreground mt-1">
                             Sist endret: {format(new Date(draft.updated_at), 'dd.MM.yyyy HH:mm')}
                           </p>

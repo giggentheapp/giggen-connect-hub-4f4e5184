@@ -17,6 +17,7 @@ export interface UserConcept {
   created_at: string;
   updated_at: string;
   maker_id: string;
+  concept_type?: string;
   // Flexible pricing fields
   door_deal?: boolean;
   door_percentage?: number | null;
