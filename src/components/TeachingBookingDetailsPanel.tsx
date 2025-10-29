@@ -10,6 +10,13 @@ interface TeachingBookingDetailsPanelProps {
 
 export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBookingDetailsPanelProps) => {
   const teachingData = conceptData?.teaching_data || {};
+  
+  // Helper function to safely render values
+  const renderValue = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+  };
 
   return (
     <div className="space-y-6">
@@ -53,7 +60,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             <div>
               <Label>Ukentlig timeplan</Label>
               <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-                {teachingData.schedule}
+                {renderValue(teachingData.schedule)}
               </div>
             </div>
           )}
@@ -77,7 +84,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             <div>
               <Label>Varighet</Label>
               <div className="p-3 border rounded bg-muted/30 text-sm">
-                {teachingData.duration}
+                {renderValue(teachingData.duration)}
               </div>
             </div>
           )}
@@ -95,7 +102,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm">
-              {teachingData.location}
+              {renderValue(teachingData.location)}
             </div>
           </CardContent>
         </Card>
@@ -112,7 +119,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.payment}
+              {renderValue(teachingData.payment)}
             </div>
           </CardContent>
         </Card>
@@ -126,7 +133,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.responsibilities}
+              {renderValue(teachingData.responsibilities)}
             </div>
           </CardContent>
         </Card>
@@ -140,7 +147,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.focus}
+              {renderValue(teachingData.focus)}
             </div>
           </CardContent>
         </Card>
@@ -154,7 +161,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.termination}
+              {renderValue(teachingData.termination)}
             </div>
           </CardContent>
         </Card>
@@ -168,7 +175,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.liability}
+              {renderValue(teachingData.liability)}
             </div>
           </CardContent>
         </Card>
@@ -182,7 +189,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardHeader>
           <CardContent>
             <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-              {teachingData.communication}
+              {renderValue(teachingData.communication)}
             </div>
           </CardContent>
         </Card>
