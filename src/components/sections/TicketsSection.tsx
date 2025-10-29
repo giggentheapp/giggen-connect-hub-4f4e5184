@@ -61,12 +61,16 @@ export const TicketsSection = ({ profile }: TicketsSectionProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      console.log('🔍 Sjekker admin tilgang for:', user.email, user.id);
+
+      // Sjekk både på user_id OG email
       const { data } = await supabase
         .from('admin_whitelist')
-        .select('can_scan_tickets')
-        .eq('user_id', user.id)
+        .select('can_scan_tickets, email, user_id')
+        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
         .maybeSingle();
 
+      console.log('📋 Admin whitelist data:', data);
       setCanScan(data?.can_scan_tickets || false);
     } catch (error) {
       console.error('Error checking admin access:', error);
