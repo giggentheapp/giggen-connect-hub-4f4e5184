@@ -12,9 +12,25 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
   const teachingData = conceptData?.teaching_data || {};
   
   // Helper function to safely render values
-  const renderValue = (value: any): string => {
+  const renderValue = (value: any): string | null => {
     if (value === null || value === undefined) return '';
-    if (typeof value === 'object') return JSON.stringify(value);
+    
+    // Handle arrays (like form field data)
+    if (Array.isArray(value)) {
+      // Filter for enabled items with values
+      const items = value
+        .filter((item: any) => item.enabled && item.value)
+        .map((item: any) => item.value)
+        .filter(Boolean);
+      
+      return items.length > 0 ? items.join('\n') : null;
+    }
+    
+    // Handle objects - don't render them
+    if (typeof value === 'object') {
+      return null;
+    }
+    
     return String(value);
   };
 
@@ -56,7 +72,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {teachingData.schedule && (
+          {teachingData.schedule && renderValue(teachingData.schedule) && (
             <div>
               <Label>Ukentlig timeplan</Label>
               <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
@@ -80,7 +96,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             </div>
           )}
           
-          {teachingData.duration && (
+          {teachingData.duration && renderValue(teachingData.duration) && (
             <div>
               <Label>Varighet</Label>
               <div className="p-3 border rounded bg-muted/30 text-sm">
@@ -92,7 +108,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       </Card>
 
       {/* Location */}
-      {teachingData.location && (
+      {teachingData.location && renderValue(teachingData.location) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -109,7 +125,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Payment */}
-      {teachingData.payment && (
+      {teachingData.payment && renderValue(teachingData.payment) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -126,7 +142,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Responsibilities */}
-      {teachingData.responsibilities && (
+      {teachingData.responsibilities && renderValue(teachingData.responsibilities) && (
         <Card>
           <CardHeader>
             <CardTitle>Ansvar og forventninger</CardTitle>
@@ -140,7 +156,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Focus */}
-      {teachingData.focus && (
+      {teachingData.focus && renderValue(teachingData.focus) && (
         <Card>
           <CardHeader>
             <CardTitle>Fokus og innhold</CardTitle>
@@ -154,7 +170,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Termination */}
-      {teachingData.termination && (
+      {teachingData.termination && renderValue(teachingData.termination) && (
         <Card>
           <CardHeader>
             <CardTitle>Oppsigelsesvilkår</CardTitle>
@@ -168,7 +184,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Liability */}
-      {teachingData.liability && (
+      {teachingData.liability && renderValue(teachingData.liability) && (
         <Card>
           <CardHeader>
             <CardTitle>Forsikring og ansvar</CardTitle>
@@ -182,7 +198,7 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
       )}
 
       {/* Communication */}
-      {teachingData.communication && (
+      {teachingData.communication && renderValue(teachingData.communication) && (
         <Card>
           <CardHeader>
             <CardTitle>Kommunikasjon og avlysning</CardTitle>
