@@ -750,8 +750,8 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
                 <div className="mb-4">
                   <h4 className="font-medium mb-2">Vedlagte filer</h4>
                   <ul className="text-sm space-y-1 ml-4">
-                    {portfolioFiles.map(file => (
-                      <li key={file.filebankId}>{file.filename}</li>
+                    {portfolioFiles.map((file, index) => (
+                      <li key={file.filebankId || file.conceptFileId || `file-${index}`}>{file.filename}</li>
                     ))}
                   </ul>
                 </div>
