@@ -212,6 +212,36 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
 
       if (error) throw error;
 
+      // Save portfolio files to concept_files table
+      if (data && portfolioFiles.length > 0) {
+        const conceptFilesData = portfolioFiles.map(file => ({
+          concept_id: data.id,
+          creator_id: userId,
+          filename: file.filename,
+          file_path: file.file_path,
+          file_url: file.publicUrl,
+          file_type: file.file_type,
+          mime_type: file.mime_type,
+          file_size: file.file_size,
+          title: file.title || file.filename,
+          thumbnail_path: file.thumbnail_path || null,
+          is_public: true,
+        }));
+
+        const { error: filesError } = await supabase
+          .from('concept_files')
+          .insert(conceptFilesData);
+
+        if (filesError) {
+          console.error('Error saving portfolio files:', filesError);
+          toast({
+            title: 'Advarsel',
+            description: 'Konseptet ble lagret, men noen porteføljefiler kunne ikke lagres',
+            variant: 'destructive',
+          });
+        }
+      }
+
       toast({
         title: isPublished ? 'Publisert' : 'Utkast lagret',
         description: isPublished ? 'Undervisningsavtalen er publisert' : 'Dine endringer er lagret',
