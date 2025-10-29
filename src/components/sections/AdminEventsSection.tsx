@@ -39,7 +39,7 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
 
       console.log('✅ Booking updated successfully');
 
-      // Also update events_market table - synkroniser synlighet
+      // Get booking details for matching
       const { data: booking } = await supabase
         .from('bookings')
         .select('title, event_date')
@@ -47,41 +47,24 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
         .single();
 
       if (booking) {
-        // Update events_market using title, date AND created_by to find the exact event
         const eventDate = booking.event_date ? new Date(booking.event_date).toISOString().split('T')[0] : null;
         
-        console.log('🔍 Searching events_market with:', { 
-          title: booking.title, 
-          date: eventDate, 
-          created_by: profile.user_id 
-        });
+        console.log('🔍 Updating ALL events_market with title:', booking.title);
 
-        const { data: marketEvents, error: findError } = await supabase
-          .from('events_market')
-          .select('*')
-          .eq('title', booking.title)
-          .eq('created_by', profile.user_id);
-
-        console.log('📋 Found events in market:', marketEvents);
-
-        if (findError) {
-          console.error('❌ Error finding events:', findError);
-        }
-
-        // Update all matching events (should be 1, but use title+date+created_by to be safe)
+        // Update ALL events_market rows that match this title (regardless of created_by)
+        // This handles cases where duplicates were created
         const { data: updated, error: marketError } = await supabase
           .from('events_market')
           .update({ 
             is_public: newVisibilityState
           })
           .eq('title', booking.title)
-          .eq('created_by', profile.user_id)
           .select();
 
         if (marketError) {
           console.error('❌ Could not update events_market:', marketError);
         } else {
-          console.log('✅ Events_market updated:', updated);
+          console.log('✅ Events_market updated:', updated?.length, 'rows');
         }
       }
 
