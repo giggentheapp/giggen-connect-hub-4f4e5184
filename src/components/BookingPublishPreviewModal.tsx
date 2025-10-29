@@ -142,8 +142,11 @@ export const BookingPublishPreviewModal = ({
         hasPaidTickets = !!currentUserWhitelist;
       }
 
-      // Update booking status to published
-      await updateBooking(booking.id, { status: 'upcoming' });
+      // Update booking status to published AND set public visibility
+      await updateBooking(booking.id, { 
+        status: 'upcoming',
+        is_public_after_approval: true
+      });
 
       // Create event in events_market with fresh booking data
       const eventDate = booking.event_date ? new Date(booking.event_date) : new Date();
