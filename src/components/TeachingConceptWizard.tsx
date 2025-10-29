@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { PublicVisibilitySettings } from '@/components/PublicVisibilitySettings';
 import { format } from 'date-fns';
 
 interface TeachingField {
@@ -47,6 +48,7 @@ const STEPS = [
   { id: 'termination', title: 'Avslutning', description: 'Oppsigelse og varsel' },
   { id: 'liability', title: 'Forsikring', description: 'Ansvar og forsikring' },
   { id: 'communication', title: 'Kommunikasjon', description: 'Avlysning og kommunikasjon' },
+  { id: 'visibility', title: 'Offentlig synlighet', description: 'Hva skal vises offentlig' },
   { id: 'preview', title: 'Forhåndsvisning', description: 'Gjennomgå og publiser' },
 ];
 
@@ -106,6 +108,12 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
   const [sections, setSections] = useState<TeachingSectionData>(DEFAULT_SECTIONS);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [isIndefinite, setIsIndefinite] = useState(false);
+  const [visibilitySettings, setVisibilitySettings] = useState<Record<string, boolean>>({
+    show_description: true,
+    show_schedule: true,
+    show_payment: true,
+    show_portfolio: true,
+  });
 
   // Load existing concept data
   useEffect(() => {
@@ -156,6 +164,11 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
         } else if (Array.isArray(datesData)) {
           setSelectedDates(datesData.map((d: string) => new Date(d)));
         }
+      }
+
+      // Load visibility settings
+      if (existingConcept.public_visibility_settings) {
+        setVisibilitySettings(existingConcept.public_visibility_settings);
       }
 
       toast({
@@ -296,6 +309,7 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
           : (selectedDates.length > 0 ? JSON.stringify(selectedDates) : null),
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft',
+        public_visibility_settings: visibilitySettings,
       };
 
       let savedConceptId = conceptId;
@@ -695,6 +709,15 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
         {currentStep === 9 && renderSectionFields('communication')}
 
         {currentStep === 10 && (
+          <div className="space-y-4">
+            <PublicVisibilitySettings
+              value={visibilitySettings}
+              onChange={setVisibilitySettings}
+            />
+          </div>
+        )}
+
+        {currentStep === 11 && (
           <div className="space-y-6">
             <div className="bg-muted p-6 rounded-lg">
               <h3 className="font-semibold text-lg mb-4">{basicData.title}</h3>
