@@ -12,6 +12,8 @@ import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { PublicVisibilitySettings } from '@/components/PublicVisibilitySettings';
 import { TeachingBookingDetailsPanel } from '@/components/TeachingBookingDetailsPanel';
+import { EditableTeachingDetails } from '@/components/EditableTeachingDetails';
+import { TeachingAgreementApproval } from '@/components/TeachingAgreementApproval';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarIcon, Save, Clock } from 'lucide-react';
@@ -243,18 +245,38 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
     );
   }
 
-  // If it's a teaching concept, show read-only teaching details
+  // If it's a teaching concept, handle differently based on status
   if (isTeaching) {
+    // If both parties have approved, show the approval confirmation view
+    if (booking.approved_by_sender && booking.approved_by_receiver) {
+      return <TeachingAgreementApproval 
+        booking={booking} 
+        conceptData={conceptData} 
+        currentUserId={currentUserId}
+      />;
+    }
+
+    // If status is approved_by_both, show approval interface
+    if (booking.status === 'approved_by_both') {
+      return <TeachingAgreementApproval 
+        booking={booking} 
+        conceptData={conceptData} 
+        currentUserId={currentUserId}
+      />;
+    }
+
+    // Otherwise show editable details during negotiation
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Save className="h-5 w-5" />
-            <h1 className="text-xl font-semibold">Undervisningsavtale</h1>
+            <h1 className="text-xl font-semibold">Undervisningsavtale - Forhandling</h1>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">Undervisning</Badge>
             {isSender && <Badge variant="outline">Du er avsender</Badge>}
+            <Badge variant="secondary">{booking.status}</Badge>
           </div>
         </div>
 
@@ -285,7 +307,12 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           </Card>
         )}
 
-        <TeachingBookingDetailsPanel booking={booking} conceptData={conceptData} />
+        <EditableTeachingDetails 
+          booking={booking} 
+          conceptData={conceptData} 
+          currentUserId={currentUserId}
+          onSaved={onSaved}
+        />
       </div>
     );
   }
