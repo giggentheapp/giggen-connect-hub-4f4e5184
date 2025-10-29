@@ -62,7 +62,13 @@ export const TeachingBookingDetailsPanel = ({ booking, conceptData }: TeachingBo
             <div>
               <Label>Startdato</Label>
               <div className="p-3 border rounded bg-muted/30 text-sm">
-                {format(new Date(teachingData.start_date), 'dd.MM.yyyy')}
+                {(() => {
+                  try {
+                    return format(new Date(teachingData.start_date), 'dd.MM.yyyy');
+                  } catch (error) {
+                    return teachingData.start_date;
+                  }
+                })()}
               </div>
             </div>
           )}
