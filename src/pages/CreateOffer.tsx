@@ -797,7 +797,7 @@ export default function CreateOffer() {
         <Separator className="mb-6" />
 
         {/* Step Content - Fixed height with scroll */}
-        <div className="h-[500px] overflow-y-auto pr-2 mb-6">
+        <div className="h-[400px] overflow-y-auto pr-2 mb-6">
           {/* Step 0: Basic Info */}
           {currentStep === 0 && (
             <div className="space-y-4">

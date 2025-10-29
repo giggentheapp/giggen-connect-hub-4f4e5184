@@ -505,7 +505,7 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
         <Separator />
 
         {/* Step Content - Fixed height with scroll */}
-        <div className="h-[500px] overflow-y-auto pr-2">{currentStep === 0 && (
+        <div className="h-[400px] overflow-y-auto pr-2">{currentStep === 0 && (
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
               <h3 className="text-lg font-semibold mb-3">Velkommen til undervisningsavtale</h3>
