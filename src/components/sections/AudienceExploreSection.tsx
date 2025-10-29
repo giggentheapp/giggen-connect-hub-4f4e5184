@@ -47,10 +47,32 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
   const navigate = useNavigate();
   const { t } = useAppTranslation();
 
-  // Auto-fetch data when component mounts
+  // Auto-fetch data when component mounts and setup realtime
   useEffect(() => {
     fetchAllMakers();
     fetchPublishedEvents();
+
+    // Setup realtime subscription for events_market changes
+    const channel = supabase
+      .channel('events-market-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events_market'
+        },
+        (payload) => {
+          console.log('🔄 Event market change detected:', payload);
+          // Refetch events when any change occurs
+          fetchPublishedEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchPublishedEvents = async () => {

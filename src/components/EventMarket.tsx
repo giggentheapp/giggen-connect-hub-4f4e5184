@@ -24,6 +24,28 @@ export const EventMarket = () => {
 
   useEffect(() => {
     loadPublicEvents();
+
+    // Setup realtime subscription for events_market changes
+    const channel = supabase
+      .channel('events-market-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events_market'
+        },
+        (payload) => {
+          console.log('🔄 Event market change detected:', payload);
+          // Refetch events when any change occurs
+          loadPublicEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadPublicEvents = async () => {
