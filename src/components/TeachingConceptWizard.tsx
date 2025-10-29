@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, Plus, X, Save, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 
 interface TeachingField {
   id: string;
@@ -31,8 +32,9 @@ interface TeachingConceptWizardProps {
 }
 
 const STEPS = [
+  { id: 'intro', title: 'Introduksjon', description: 'Hva er dette?' },
   { id: 'basic', title: 'Grunnleggende', description: 'Tittel og beskrivelse' },
-  { id: 'contact', title: 'Elevinfo', description: 'Informasjon om elev' },
+  { id: 'portfolio', title: 'Portfolio', description: 'Last opp filer' },
   { id: 'schedule', title: 'Undervisningstider', description: 'Lokasjon og tidspunkt' },
   { id: 'payment', title: 'Betaling', description: 'Betalingsbetingelser' },
   { id: 'responsibilities', title: 'Ansvar', description: 'Elevens ansvar og forventninger' },
@@ -44,12 +46,6 @@ const STEPS = [
 ];
 
 const DEFAULT_SECTIONS: TeachingSectionData = {
-  contact: [
-    { id: 'student_name', label: 'Elevens navn', value: '', enabled: true },
-    { id: 'student_age', label: 'Elevens alder', value: '', enabled: true },
-    { id: 'student_phone', label: 'Elevens telefon', value: '', enabled: true },
-    { id: 'guardian_email', label: 'Foresatt e-post (hvis under 18)', value: '', enabled: true },
-  ],
   schedule: [
     { id: 'location', label: 'Lokasjon for undervisning', value: '', enabled: true },
     { id: 'day_time', label: 'Dag og tid', value: '', enabled: true },
@@ -92,6 +88,7 @@ const DEFAULT_SECTIONS: TeachingSectionData = {
 export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
   const { toast } = useToast();
 
   const [basicData, setBasicData] = useState({
@@ -99,7 +96,53 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
     description: '',
   });
 
+  const [portfolioFiles, setPortfolioFiles] = useState<any[]>([]);
   const [sections, setSections] = useState<TeachingSectionData>(DEFAULT_SECTIONS);
+
+  const handleFileSelected = (file: any) => {
+    const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`;
+    
+    setPortfolioFiles(prev => [...prev, {
+      filebankId: file.id,
+      filename: file.filename,
+      file_path: file.file_path,
+      file_type: file.file_type,
+      mime_type: file.mime_type,
+      file_size: file.file_size,
+      publicUrl: publicUrl,
+      file_url: publicUrl,
+      title: file.filename,
+      thumbnail_path: file.thumbnail_path,
+      uploadedAt: file.created_at,
+      fromFilbank: true
+    }]);
+    
+    toast({
+      title: 'Fil lagt til',
+      description: `${file.filename} er lagt til i portfolio`,
+    });
+  };
+
+  const removePortfolioFile = (fileId: string) => {
+    setPortfolioFiles(prev => prev.filter(f => f.filebankId !== fileId));
+    toast({
+      title: 'Fil fjernet',
+      description: 'Filen er fjernet fra portfolio',
+    });
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes('image')) return '🖼️';
+    if (fileType.includes('video')) return '🎬';
+    if (fileType.includes('audio')) return '🎵';
+    return '📄';
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(1)}MB`;
+  };
 
   const addCustomField = (sectionKey: string) => {
     setSections(prev => ({
@@ -302,6 +345,65 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
 
         {/* Step Content */}
         {currentStep === 0 && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
+              <h3 className="text-lg font-semibold mb-3">Velkommen til undervisningsavtale</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Dette verktøyet hjelper deg med å lage en profesjonell undervisningsavtale på få minutter.
+              </p>
+              
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">1</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Tittel og beskrivelse</p>
+                    <p className="text-xs text-muted-foreground">Gi avtalen en tittel</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">2</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Portfolio</p>
+                    <p className="text-xs text-muted-foreground">Legg ved relevante filer (2 min)</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">3</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Velg relevante punkter</p>
+                    <p className="text-xs text-muted-foreground">Kryss av for punkter du vil inkludere (5-8 min)</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">4</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Gjennomgå og publiser</p>
+                    <p className="text-xs text-muted-foreground">Se over avtalen før publisering (1 min)</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-primary/20">
+                <p className="text-xs text-muted-foreground">
+                  ⏱️ <strong>Total tid:</strong> Ca. 10-15 minutter
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 1 && (
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">Tittel på avtalen</Label>
@@ -325,25 +427,66 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
           </div>
         )}
 
-        {currentStep === 1 && (
+        {currentStep === 2 && (
           <div className="space-y-4">
-            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-900 dark:text-blue-100">
-                <strong>ℹ️ Om kontaktinformasjon:</strong> Din kontaktinformasjon (navn, e-post, telefon) vil automatisk deles med eleven når avtalen godkjennes. Du trenger ikke å fylle inn dette her.
+                Legg ved relevante filer som kan hjelpe eleven å forstå hva du tilbyr (presentasjoner, videoer, tidligere elevarbeider osv.)
               </p>
             </div>
-            {renderSectionFields('contact')}
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowFilebankModal(true)}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Legg til filer fra filbank
+            </Button>
+            
+            {portfolioFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label>Vedlagte filer ({portfolioFiles.length})</Label>
+                <div className="space-y-2">
+                  {portfolioFiles.map((file) => (
+                    <div
+                      key={file.filebankId}
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-2xl">{getFileIcon(file.file_type)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{file.filename}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {file.file_type} • {formatFileSize(file.file_size)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePortfolioFile(file.filebankId)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
-        {currentStep === 2 && renderSectionFields('schedule')}
-        {currentStep === 3 && renderSectionFields('payment')}
-        {currentStep === 4 && renderSectionFields('responsibilities')}
-        {currentStep === 5 && renderSectionFields('focus')}
-        {currentStep === 6 && renderSectionFields('termination')}
-        {currentStep === 7 && renderSectionFields('liability')}
-        {currentStep === 8 && renderSectionFields('communication')}
 
-        {currentStep === 9 && (
+        {currentStep === 3 && renderSectionFields('schedule')}
+        {currentStep === 4 && renderSectionFields('payment')}
+        {currentStep === 5 && renderSectionFields('responsibilities')}
+        {currentStep === 6 && renderSectionFields('focus')}
+        {currentStep === 7 && renderSectionFields('termination')}
+        {currentStep === 8 && renderSectionFields('liability')}
+        {currentStep === 9 && renderSectionFields('communication')}
+
+        {currentStep === 10 && (
           <div className="space-y-6">
             <div className="bg-muted p-6 rounded-lg">
               <h3 className="font-semibold text-lg mb-4">{basicData.title}</h3>
@@ -405,7 +548,7 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
             </Button>
             <Button
               onClick={nextStep}
-              disabled={currentStep === 0 && !basicData.title.trim()}
+              disabled={currentStep === 1 && !basicData.title.trim()}
             >
               Neste
               <ChevronRight className="h-4 w-4 ml-2" />
@@ -413,6 +556,13 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
           </div>
         )}
       </CardContent>
+      
+      <FilebankSelectionModal
+        isOpen={showFilebankModal}
+        onClose={() => setShowFilebankModal(false)}
+        onSelect={handleFileSelected}
+        userId={userId}
+      />
     </Card>
   );
 };
