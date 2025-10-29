@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { PublicVisibilitySettings } from '@/components/PublicVisibilitySettings';
+import { TeachingBookingDetailsPanel } from '@/components/TeachingBookingDetailsPanel';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarIcon, Save, Clock } from 'lucide-react';
@@ -18,6 +19,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 // Validation schema
 const bookingEditSchema = z.object({
@@ -47,8 +49,37 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
+  const [conceptData, setConceptData] = useState<any>(null);
+  const [loadingConcept, setLoadingConcept] = useState(true);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
+
+  // Fetch concept data to determine if it's a teaching concept
+  useEffect(() => {
+    const fetchConcept = async () => {
+      if (!booking?.selected_concept_id) {
+        setLoadingConcept(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('concepts')
+          .select('*')
+          .eq('id', booking.selected_concept_id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setConceptData(data);
+      } catch (error) {
+        console.error('Failed to fetch concept', error);
+      } finally {
+        setLoadingConcept(false);
+      }
+    };
+
+    fetchConcept();
+  }, [booking?.selected_concept_id]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -201,7 +232,65 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
   const canEdit = booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both';
   const isInNegotiation = booking.status === 'allowed' || booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver' || booking.status === 'approved_by_both';
   const showContactInfo = isInNegotiation && booking.contact_info_shared_at;
+  const isTeaching = conceptData?.concept_type === 'teaching';
 
+  if (loadingConcept) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Laster...</p>
+      </div>
+    );
+  }
+
+  // If it's a teaching concept, show read-only teaching details
+  if (isTeaching) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Save className="h-5 w-5" />
+            <h1 className="text-xl font-semibold">Undervisningsavtale</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">Undervisning</Badge>
+            {isSender && <Badge variant="outline">Du er avsender</Badge>}
+          </div>
+        </div>
+
+        {/* Delt kontaktinfo */}
+        {showContactInfo && booking.sender_contact_info && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Delt kontaktinformasjon</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {booking.sender_contact_info.email && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium min-w-[80px]">E-post:</span>
+                  <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
+                    {booking.sender_contact_info.email}
+                  </a>
+                </div>
+              )}
+              {booking.sender_contact_info.phone && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium min-w-[80px]">Telefon:</span>
+                  <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                    {booking.sender_contact_info.phone}
+                  </a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <TeachingBookingDetailsPanel booking={booking} conceptData={conceptData} />
+      </div>
+    );
+  }
+
+  // Regular concert/event booking form
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
