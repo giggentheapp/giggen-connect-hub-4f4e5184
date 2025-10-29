@@ -15,7 +15,7 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [cameraLoading, setCameraLoading] = useState(true);
-  const loadingTimeoutRef = useRef<number | null>(null);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     if (!scanning) return;
@@ -41,31 +41,32 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
         console.log('✅ Kamerastrøm mottatt');
         
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          const video = videoRef.current;
+          video.srcObject = stream;
           
-          // Sett en timeout som ALLTID kjører etter 2 sekunder
-          loadingTimeoutRef.current = window.setTimeout(() => {
-            console.log('⏱️ Timeout: Tvinger loading til false');
+          // Vent på at metadata er lastet
+          video.onloadedmetadata = () => {
+            console.log('✅ Video metadata lastet');
+            setVideoReady(true);
+            
+            // Prøv å spille av videoen
+            video.play()
+              .then(() => {
+                console.log('✅ Video spiller');
+                setCameraLoading(false);
+              })
+              .catch((err) => {
+                console.error('⚠️ Video play error:', err);
+                setCameraLoading(false);
+              });
+          };
+          
+          // Fallback timeout
+          setTimeout(() => {
+            console.log('⏱️ Fallback timeout');
             setCameraLoading(false);
-          }, 2000);
-          
-          // Prøv å spille av videoen
-          videoRef.current.play()
-            .then(() => {
-              console.log('✅ Video spiller');
-              if (loadingTimeoutRef.current) {
-                clearTimeout(loadingTimeoutRef.current);
-              }
-              setCameraLoading(false);
-            })
-            .catch((err) => {
-              console.error('⚠️ Video play error:', err);
-              // Selv om play feiler, prøv å sette loading til false
-              if (loadingTimeoutRef.current) {
-                clearTimeout(loadingTimeoutRef.current);
-              }
-              setCameraLoading(false);
-            });
+            setVideoReady(true);
+          }, 3000);
         }
       } catch (err: any) {
         console.error('❌ Kamerafeil:', err);
@@ -87,9 +88,6 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
     startCamera();
 
     return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach(track => track.stop());
@@ -254,14 +252,21 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full">
-              <video
-                ref={videoRef}
-                className="w-full rounded-lg bg-black"
-                autoPlay
-                playsInline
-                muted
-              />
-              <canvas ref={canvasRef} className="hidden" />
+              <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  playsInline
+                  muted
+                  style={{ display: videoReady ? 'block' : 'none' }}
+                />
+                {!videoReady && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                  </div>
+                )}
+              </div>
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
               <p className="text-sm text-muted-foreground mt-2">Pek kamera mot QR-koden</p>
             </div>
           )}
