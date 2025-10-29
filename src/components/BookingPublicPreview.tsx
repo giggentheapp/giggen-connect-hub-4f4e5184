@@ -22,6 +22,9 @@ export const BookingPublicPreview = ({
 }: BookingPublicPreviewProps) => {
   if (!booking) return null;
 
+  // Get visibility settings from booking, with defaults
+  const visibilitySettings = booking.public_visibility_settings || {};
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -58,7 +61,7 @@ export const BookingPublicPreview = ({
                   <p className="text-lg text-muted-foreground mb-2">
                     med {makerProfile?.display_name || 'Artist'}
                   </p>
-                  {booking.description && (
+                  {booking.description && visibilitySettings.show_description !== false && (
                     <p className="text-base leading-relaxed">{booking.description}</p>
                   )}
                 </div>
@@ -67,7 +70,7 @@ export const BookingPublicPreview = ({
 
             {/* Event Information Grid */}
             <div className="grid md:grid-cols-2 gap-6">
-              {booking.event_date && (
+              {booking.event_date && visibilitySettings.show_date !== false && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <Calendar className="h-5 w-5" />
@@ -75,23 +78,23 @@ export const BookingPublicPreview = ({
                   </div>
                   <p className="text-lg">
                     {format(new Date(booking.event_date), 'dd.MM.yyyy')}
-                    {booking.time && ` kl. ${booking.time}`}
+                    {booking.time && visibilitySettings.show_time !== false && ` kl. ${booking.time}`}
                   </p>
                 </div>
               )}
 
-              {(booking.venue || booking.address) && (
+              {(booking.venue || booking.address) && (visibilitySettings.show_venue !== false || visibilitySettings.show_address !== false) && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <MapPin className="h-5 w-5" />
                     <span className="font-semibold">Sted</span>
                   </div>
-                  {booking.venue && <p className="text-lg">{booking.venue}</p>}
-                  {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
+                  {booking.venue && visibilitySettings.show_venue !== false && <p className="text-lg">{booking.venue}</p>}
+                  {booking.address && visibilitySettings.show_address !== false && <p className="text-sm text-muted-foreground">{booking.address}</p>}
                 </div>
               )}
 
-              {booking.ticket_price && (
+              {booking.ticket_price && visibilitySettings.show_ticket_price !== false && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <Users className="h-5 w-5" />
@@ -101,7 +104,7 @@ export const BookingPublicPreview = ({
                 </div>
               )}
 
-              {booking.audience_estimate && (
+              {booking.audience_estimate && visibilitySettings.show_audience_estimate !== false && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <Users className="h-5 w-5" />
@@ -113,7 +116,7 @@ export const BookingPublicPreview = ({
             </div>
 
             {/* Portfolio Attachments */}
-            {booking.id && (
+            {booking.id && visibilitySettings.show_portfolio !== false && (
               <div className="pt-4">
                 <BookingPortfolioAttachments
                   bookingId={booking.id}
@@ -124,7 +127,7 @@ export const BookingPublicPreview = ({
             )}
 
             {/* Artist Bio */}
-            {makerProfile?.bio && (
+            {makerProfile?.bio && visibilitySettings.show_artist_bio !== false && (
               <div className="pt-8 border-t border-border">
                 <h3 className="text-lg font-semibold mb-3">Om artisten</h3>
                 <p className="text-base leading-relaxed text-muted-foreground">

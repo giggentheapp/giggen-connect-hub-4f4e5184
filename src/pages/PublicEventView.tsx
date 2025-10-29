@@ -26,6 +26,7 @@ interface PublicEventData {
   selected_concept_id: string | null;
   is_public_after_approval: boolean | null;
   has_paid_tickets?: boolean;
+  public_visibility_settings?: Record<string, boolean>;
 }
 
 const PublicEventView = () => {
@@ -128,7 +129,7 @@ const PublicEventView = () => {
       // If not in events_market, try bookings
       const { data: eventData, error: eventError } = await supabase
         .from('bookings')
-        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval')
+        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval, public_visibility_settings')
         .eq('id', id)
         .eq('status', 'upcoming')
         .maybeSingle();
@@ -159,7 +160,10 @@ const PublicEventView = () => {
         return;
       }
 
-      setEvent(eventData);
+      setEvent({
+        ...eventData,
+        public_visibility_settings: eventData.public_visibility_settings as Record<string, boolean> || {}
+      });
 
       // Check if event has paid tickets in events_market
       const { data: marketEvent } = await supabase
@@ -245,6 +249,9 @@ const PublicEventView = () => {
     );
   }
 
+  // Get visibility settings from event, with defaults
+  const visibilitySettings = event.public_visibility_settings || {};
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -273,7 +280,7 @@ const PublicEventView = () => {
             </p>
           )}
           
-          {event.description && (
+          {event.description && visibilitySettings.show_description !== false && (
             <p className="text-lg text-muted-foreground leading-relaxed">
               {event.description}
             </p>
@@ -282,7 +289,7 @@ const PublicEventView = () => {
 
         {/* Event Details */}
         <div className="space-y-4 py-6">
-          {event.ticket_price && (
+          {event.ticket_price && visibilitySettings.show_ticket_price !== false && (
             <div className="flex items-start gap-3">
               <Banknote className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
@@ -292,31 +299,31 @@ const PublicEventView = () => {
             </div>
           )}
 
-          {event.event_date && (
+          {event.event_date && visibilitySettings.show_date !== false && (
             <div className="flex items-start gap-3">
               <Calendar className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-semibold text-base mb-0.5">Dato{event.time && ' og tid'}</p>
+                <p className="font-semibold text-base mb-0.5">Dato{event.time && visibilitySettings.show_time !== false && ' og tid'}</p>
                 <p className="text-muted-foreground">
                   {format(new Date(event.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
-                  {event.time && ` kl. ${event.time}`}
+                  {event.time && visibilitySettings.show_time !== false && ` kl. ${event.time}`}
                 </p>
               </div>
             </div>
           )}
 
-          {(event.venue || event.address) && (
+          {(event.venue || event.address) && (visibilitySettings.show_venue !== false || visibilitySettings.show_address !== false) && (
             <div className="flex items-start gap-3">
               <MapPin className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="font-semibold text-base mb-0.5">Sted</p>
-                {event.venue && <p className="text-muted-foreground">{event.venue}</p>}
-                {event.address && <p className="text-sm text-muted-foreground">{event.address}</p>}
+                {event.venue && visibilitySettings.show_venue !== false && <p className="text-muted-foreground">{event.venue}</p>}
+                {event.address && visibilitySettings.show_address !== false && <p className="text-sm text-muted-foreground">{event.address}</p>}
               </div>
             </div>
           )}
 
-          {event.audience_estimate && (
+          {event.audience_estimate && visibilitySettings.show_audience_estimate !== false && (
             <div className="flex items-start gap-3">
               <Users className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
@@ -328,7 +335,7 @@ const PublicEventView = () => {
         </div>
 
         {/* Portfolio Gallery */}
-        {portfolioAttachments.length > 0 && (
+        {portfolioAttachments.length > 0 && visibilitySettings.show_portfolio !== false && (
           <div className="mt-8 space-y-4">
             <BookingPortfolioGallery portfolioAttachments={portfolioAttachments} />
           </div>

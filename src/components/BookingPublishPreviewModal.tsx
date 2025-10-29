@@ -219,6 +219,9 @@ export const BookingPublishPreviewModal = ({
 
   if (!booking) return null;
 
+  // Get visibility settings from booking, with defaults
+  const visibilitySettings = booking.public_visibility_settings || {};
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
@@ -250,7 +253,7 @@ export const BookingPublishPreviewModal = ({
           </AlertDescription>
         </Alert>
 
-        {/* Hero Section */}
+      {/* Hero Section */}
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-4xl md:text-5xl font-bold flex-1">{booking.title}</h1>
@@ -265,7 +268,7 @@ export const BookingPublishPreviewModal = ({
             </p>
           )}
 
-          {booking.description && (
+          {booking.description && visibilitySettings.show_description !== false && (
             <p className="text-lg text-muted-foreground leading-relaxed">
               {booking.description}
             </p>
@@ -274,7 +277,7 @@ export const BookingPublishPreviewModal = ({
 
         {/* Event Information List */}
         <div className="space-y-4">
-          {booking.ticket_price && (
+          {booking.ticket_price && visibilitySettings.show_ticket_price !== false && (
             <div className="flex items-start gap-3">
               <Banknote className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
@@ -284,31 +287,31 @@ export const BookingPublishPreviewModal = ({
             </div>
           )}
 
-          {booking.event_date && (
+          {booking.event_date && visibilitySettings.show_date !== false && (
             <div className="flex items-start gap-3">
               <Calendar className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="font-semibold text-base mb-0.5">Dato og tid</p>
                 <p className="text-muted-foreground">
                   {format(new Date(booking.event_date), 'EEEE d. MMMM yyyy', { locale: nb })}
-                  {booking.time && ` kl. ${booking.time}`}
+                  {booking.time && visibilitySettings.show_time !== false && ` kl. ${booking.time}`}
                 </p>
               </div>
             </div>
           )}
 
-          {(booking.venue || booking.address) && (
+          {(booking.venue || booking.address) && (visibilitySettings.show_venue !== false || visibilitySettings.show_address !== false) && (
             <div className="flex items-start gap-3">
               <MapPin className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="font-semibold text-base mb-0.5">Sted</p>
-                {booking.venue && <p className="text-muted-foreground">{booking.venue}</p>}
-                {booking.address && <p className="text-sm text-muted-foreground">{booking.address}</p>}
+                {booking.venue && visibilitySettings.show_venue !== false && <p className="text-muted-foreground">{booking.venue}</p>}
+                {booking.address && visibilitySettings.show_address !== false && <p className="text-sm text-muted-foreground">{booking.address}</p>}
               </div>
             </div>
           )}
 
-          {booking.audience_estimate && (
+          {booking.audience_estimate && visibilitySettings.show_audience_estimate !== false && (
             <div className="flex items-start gap-3">
               <Users className="h-6 w-6 text-accent-orange mt-0.5 flex-shrink-0" />
               <div className="flex-1">
@@ -320,14 +323,14 @@ export const BookingPublishPreviewModal = ({
         </div>
 
         {/* Portfolio Attachments */}
-        {portfolioAttachments.length > 0 && (
+        {portfolioAttachments.length > 0 && visibilitySettings.show_portfolio !== false && (
           <div className="space-y-4 pt-4">
             <BookingPortfolioGallery portfolioAttachments={portfolioAttachments} />
           </div>
         )}
 
         {/* Artist Bio */}
-        {makerProfile?.bio && (
+        {makerProfile?.bio && visibilitySettings.show_artist_bio !== false && (
           <div className="pt-8 border-t border-border">
             <h2 className="text-2xl font-semibold mb-4">Om artisten</h2>
             <p className="text-lg leading-relaxed text-muted-foreground">

@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
+import { PublicVisibilitySettings } from '@/components/PublicVisibilitySettings';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarIcon, Save, Clock } from 'lucide-react';
@@ -68,6 +69,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
     personal_message: '',
     latitude: null as number | null,
     longitude: null as number | null,
+    public_visibility_settings: {} as Record<string, boolean>,
   });
 
   // Initialize form with booking data
@@ -91,6 +93,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         personal_message: booking.personal_message || '',
         latitude: booking.latitude || null,
         longitude: booking.longitude || null,
+        public_visibility_settings: booking.public_visibility_settings || {},
       });
       setErrors({});
     }
@@ -142,6 +145,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         personal_message: validatedData.personal_message,
         latitude: formData.latitude,
         longitude: formData.longitude,
+        public_visibility_settings: formData.public_visibility_settings,
         last_modified_by: currentUserId,
         last_modified_at: new Date().toISOString()
       };
@@ -570,6 +574,14 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             </div>
           </CardContent>
         </Card>
+
+        {/* Public Visibility Settings */}
+        {isInNegotiation && (
+          <PublicVisibilitySettings
+            value={formData.public_visibility_settings}
+            onChange={(settings) => updateFormField('public_visibility_settings', settings)}
+          />
+        )}
 
         {/* Portfolio Attachments */}
         {isInNegotiation && (
