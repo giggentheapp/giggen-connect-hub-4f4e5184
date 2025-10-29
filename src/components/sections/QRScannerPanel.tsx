@@ -15,6 +15,7 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [cameraLoading, setCameraLoading] = useState(true);
+  const loadingTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!scanning) return;
@@ -42,25 +43,29 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           
+          // Sett en timeout som ALLTID kjører etter 2 sekunder
+          loadingTimeoutRef.current = window.setTimeout(() => {
+            console.log('⏱️ Timeout: Tvinger loading til false');
+            setCameraLoading(false);
+          }, 2000);
+          
           // Prøv å spille av videoen
           videoRef.current.play()
             .then(() => {
               console.log('✅ Video spiller');
+              if (loadingTimeoutRef.current) {
+                clearTimeout(loadingTimeoutRef.current);
+              }
               setCameraLoading(false);
             })
             .catch((err) => {
               console.error('⚠️ Video play error:', err);
               // Selv om play feiler, prøv å sette loading til false
+              if (loadingTimeoutRef.current) {
+                clearTimeout(loadingTimeoutRef.current);
+              }
               setCameraLoading(false);
             });
-          
-          // Fallback timeout i tilfelle play aldri fullfører
-          setTimeout(() => {
-            if (cameraLoading) {
-              console.log('⏱️ Timeout: Setter loading til false');
-              setCameraLoading(false);
-            }
-          }, 2000);
         }
       } catch (err: any) {
         console.error('❌ Kamerafeil:', err);
@@ -82,6 +87,9 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
     startCamera();
 
     return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach(track => track.stop());
