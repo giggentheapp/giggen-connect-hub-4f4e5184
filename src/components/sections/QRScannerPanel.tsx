@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import jsQR from 'jsqr';
@@ -210,7 +211,7 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
     return uuidRegex.test(uuid);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-card rounded-lg max-w-md w-full max-h-[500px] flex flex-col border shadow-lg">
         {/* Header */}
@@ -272,6 +273,7 @@ export const QRScannerPanel = ({ onClose, onScan }: QRScannerPanelProps) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
