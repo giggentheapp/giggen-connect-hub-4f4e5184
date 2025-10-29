@@ -11,12 +11,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote } from 'lucide-react';
+import { CalendarIcon, Check, X, Edit3, Clock, Users, Banknote, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logger } from '@/utils/logger';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
+import { supabase } from '@/integrations/supabase/client';
 
 // Extend Window interface for TypeScript
 declare global {
@@ -50,13 +51,37 @@ export const BookingDetailsPanel = ({
 }: BookingDetailsPanelProps) => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, any>>({});
+  const [conceptData, setConceptData] = useState<any>(null);
+  const [loadingConcept, setLoadingConcept] = useState(true);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
 
-  // DEBUG: Log booking data to see door deal transfer
+  // Fetch concept data to determine if it's a teaching concept
   useEffect(() => {
-    // Data is loaded, no need for logging
-  }, [booking]);
+    const fetchConcept = async () => {
+      if (!booking?.selected_concept_id) {
+        setLoadingConcept(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('concepts')
+          .select('*')
+          .eq('id', booking.selected_concept_id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setConceptData(data);
+      } catch (error) {
+        logger.error('Failed to fetch concept', error);
+      } finally {
+        setLoadingConcept(false);
+      }
+    };
+
+    fetchConcept();
+  }, [booking?.selected_concept_id]);
   const handleFieldUpdate = async (fieldName: string, oldValue: any, newValue: any) => {
     if (!canEdit) {
       toast({
@@ -379,43 +404,202 @@ export const BookingDetailsPanel = ({
           </div>}
       </div>;
   };
-  return <div className="space-y-6">
-      {/* Basic Event Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Grunnleggende informasjon</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <EditableField fieldName="title" label="Tittel" value={booking.title} placeholder="Navn på arrangementet" onPropose={handleFieldUpdate} />
-          
-          <EditableField fieldName="description" label="Beskrivelse" value={booking.description} type="textarea" placeholder="Beskriv arrangementet..." onPropose={handleFieldUpdate} />
-        </CardContent>
-      </Card>
+  const isTeaching = conceptData?.concept_type === 'teaching';
+  const teachingData = conceptData?.teaching_data || {};
 
-      {/* Event Details */}
+  if (loadingConcept) {
+    return <div className="p-6 text-center">Laster...</div>;
+  }
+
+  return <div className="space-y-6">
+      {/* Basic Info */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Tidspunkt og sted
+            {isTeaching && <GraduationCap className="h-5 w-5" />}
+            Grunnleggende informasjon
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <EditableField fieldName="event_date" label="Dato" value={booking.event_date} type="date" placeholder="Velg dato" onPropose={handleFieldUpdate} />
-            
-            <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
-          </div>
+          <EditableField fieldName="title" label="Tittel" value={booking.title} placeholder={isTeaching ? "Navn på undervisning" : "Navn på arrangementet"} onPropose={handleFieldUpdate} />
+          
+          <EditableField fieldName="description" label="Beskrivelse" value={booking.description} type="textarea" placeholder={isTeaching ? "Beskriv undervisningen..." : "Beskriv arrangementet..."} onPropose={handleFieldUpdate} />
+        </CardContent>
+      </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Venue/Spillested field */}
-            <EditableField 
-              fieldName="venue" 
-              label="" 
-              value={booking.venue} 
-              placeholder="Spillested" 
-              onPropose={handleFieldUpdate} 
-            />
+      {/* Teaching-specific fields */}
+      {isTeaching ? (
+        <>
+          {/* Schedule */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Undervisningstider
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Ukentlig timeplan</Label>
+                <div className="p-3 border rounded bg-muted/30 text-sm">
+                  {teachingData.schedule ? (
+                    <div className="whitespace-pre-wrap">{teachingData.schedule}</div>
+                  ) : (
+                    <span className="text-muted-foreground">Ikke definert</span>
+                  )}
+                </div>
+              </div>
+              
+              {teachingData.start_date && (
+                <div>
+                  <Label>Startdato</Label>
+                  <div className="p-2 border rounded bg-muted/30 text-sm">
+                    {format(new Date(teachingData.start_date), 'dd.MM.yyyy')}
+                  </div>
+                </div>
+              )}
+              
+              {teachingData.duration && (
+                <div>
+                  <Label>Varighet</Label>
+                  <div className="p-2 border rounded bg-muted/30 text-sm">
+                    {teachingData.duration}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Location */}
+          {teachingData.location && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Sted</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-2 border rounded bg-muted/30 text-sm">
+                  {teachingData.location}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Payment */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Banknote className="h-5 w-5" />
+                Betaling
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {teachingData.payment && (
+                <div>
+                  <Label>Betalingsvilkår</Label>
+                  <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                    {teachingData.payment}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Responsibilities */}
+          {teachingData.responsibilities && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Ansvar og forventninger</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                  {teachingData.responsibilities}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Focus */}
+          {teachingData.focus && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Fokus og innhold</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                  {teachingData.focus}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Termination */}
+          {teachingData.termination && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Oppsigelsesvilkår</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                  {teachingData.termination}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Liability */}
+          {teachingData.liability && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Forsikring og ansvar</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                  {teachingData.liability}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Communication */}
+          {teachingData.communication && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Kommunikasjon og avlysning</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
+                  {teachingData.communication}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Concert/Event Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                Tidspunkt og sted
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <EditableField fieldName="event_date" label="Dato" value={booking.event_date} type="date" placeholder="Velg dato" onPropose={handleFieldUpdate} />
+                
+                <EditableField fieldName="time" label="Klokkeslett" value={booking.time} type="time" placeholder="19:00" onPropose={handleFieldUpdate} />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Venue/Spillested field */}
+                <EditableField 
+                  fieldName="venue" 
+                  label="" 
+                  value={booking.venue} 
+                  placeholder="Spillested" 
+                  onPropose={handleFieldUpdate} 
+                />
 
             {/* Address field - Custom implementation for AddressAutocomplete */}
             <div className="space-y-2">
@@ -506,208 +690,214 @@ export const BookingDetailsPanel = ({
                   )}
                 </div>
               )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Audience and Pricing */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Publikum og prising
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <EditableField fieldName="audience_estimate" label="Estimert publikum" value={booking.audience_estimate} type="number" placeholder="100" onPropose={handleFieldUpdate} />
-
-          <div className="space-y-4">
-            <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
-            
-            {/* Artist Payment Section - Auto-filled from concept */}
-            <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-              <Label className="text-base font-semibold">Artist honorar</Label>
-              
-              <div className="space-y-3">
-                {/* Payment Type Selection */}
-                <div className="grid grid-cols-3 gap-2">
-                   <Button
-                     variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
-                     size="sm"
-                     onClick={async () => {
-                       if (!canEdit) return;
-                       
-                       const updates = {
-                         door_deal: false,
-                         by_agreement: false,
-                         last_modified_by: currentUserId,
-                         last_modified_at: new Date().toISOString()
-                       };
-                       
-                       try {
-                         await updateBooking(booking.id, updates);
-                         if (window.updateBookingInParent) {
-                           window.updateBookingInParent(booking.id, updates);
-                         }
-                         toast({
-                           title: "Oppdatert",
-                           description: "Betalingstype satt til fast honorar",
-                         });
-                       } catch (error) {
-                         toast({
-                           title: "Feil",
-                           description: "Kunne ikke oppdatere betalingstype",
-                           variant: "destructive"
-                         });
-                       }
-                     }}
-                     disabled={!canEdit}
-                     className="h-auto p-3 flex flex-col items-center gap-1"
-                   >
-                     <span className="font-medium">Fast honorar</span>
-                     <span className="text-xs opacity-70">Garantert beløp</span>
-                   </Button>
-                   
-                   <Button
-                     variant={booking.door_deal ? "default" : "outline"}
-                     size="sm"
-                     onClick={async () => {
-                       if (!canEdit) return;
-                       
-                       const updates = {
-                         door_deal: true,
-                         by_agreement: false,
-                         last_modified_by: currentUserId,
-                         last_modified_at: new Date().toISOString()
-                       };
-                       
-                       try {
-                         await updateBooking(booking.id, updates);
-                         if (window.updateBookingInParent) {
-                           window.updateBookingInParent(booking.id, updates);
-                         }
-                         toast({
-                           title: "Oppdatert",
-                           description: "Betalingstype satt til spiller for døra",
-                         });
-                       } catch (error) {
-                         toast({
-                           title: "Feil",
-                           description: "Kunne ikke oppdatere betalingstype",
-                           variant: "destructive"
-                         });
-                       }
-                     }}
-                     disabled={!canEdit}
-                     className="h-auto p-3 flex flex-col items-center gap-1"
-                   >
-                     <span className="font-medium">Spiller for døra</span>
-                     <span className="text-xs opacity-70">Andel av inntekt</span>
-                   </Button>
-                   
-                   <Button
-                     variant={booking.by_agreement ? "default" : "outline"}
-                     size="sm"
-                     onClick={async () => {
-                       if (!canEdit) return;
-                       
-                       const updates = {
-                         door_deal: false,
-                         by_agreement: true,
-                         last_modified_by: currentUserId,
-                         last_modified_at: new Date().toISOString()
-                       };
-                       
-                       try {
-                         await updateBooking(booking.id, updates);
-                         if (window.updateBookingInParent) {
-                           window.updateBookingInParent(booking.id, updates);
-                         }
-                         toast({
-                           title: "Oppdatert",
-                           description: "Betalingstype satt til ved avtale",
-                         });
-                       } catch (error) {
-                         toast({
-                           title: "Feil",
-                           description: "Kunne ikke oppdatere betalingstype",
-                           variant: "destructive"
-                         });
-                       }
-                     }}
-                     disabled={!canEdit}
-                     className="h-auto p-3 flex flex-col items-center gap-1"
-                   >
-                     <span className="font-medium">Ved avtale</span>
-                     <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
-                   </Button>
-                </div>
-
-                {/* Payment Details */}
-                {booking.door_deal && (
-                  <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
-                    <EditableField 
-                      fieldName="door_percentage" 
-                      label="Andel av dørinntekter (%)" 
-                      value={booking.door_percentage} 
-                      type="number" 
-                      placeholder="70" 
-                      onPropose={handleFieldUpdate} 
-                    />
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      Artist får {booking.door_percentage || 'X'}% av total dørinntekt
-                    </p>
-                  </div>
-                )}
-
-                {!booking.door_deal && !booking.by_agreement && (
-                  <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
-                    <EditableField 
-                      fieldName="artist_fee" 
-                      label="Fast honorar (kr)" 
-                      value={booking.artist_fee} 
-                      type="number" 
-                      placeholder="5000" 
-                      onPropose={handleFieldUpdate} 
-                    />
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      Garantert utbetaling uavhengig av billettsalg
-                    </p>
-                  </div>
-                )}
-
-                {booking.by_agreement && (
-                  <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
-                    <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
-                      Honorar avtales direkte mellom partene
-                    </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                      Detaljer om betaling diskuteres og bestemmes i direkte kontakt
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Hospitality */}
-      
+        {/* Audience and Pricing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Publikum og prising
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <EditableField fieldName="audience_estimate" label="Estimert publikum" value={booking.audience_estimate} type="number" placeholder="100" onPropose={handleFieldUpdate} />
 
-      {/* Portfolio Attachments */}
-      <BookingPortfolioAttachments 
-        bookingId={booking.id} 
-        currentUserId={currentUserId} 
-        canEdit={canEdit} 
-      />
+            <div className="space-y-4">
+              <EditableField fieldName="ticket_price" label="Billettpris (kr)" value={booking.ticket_price} type="number" placeholder="200" onPropose={handleFieldUpdate} />
+              
+              {/* Artist Payment Section */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                <Label className="text-base font-semibold">Artist honorar</Label>
+                
+                <div className="space-y-3">
+                  {/* Payment Type Selection */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
+                      size="sm"
+                      onClick={async () => {
+                        if (!canEdit) return;
+                        
+                        const updates = {
+                          door_deal: false,
+                          by_agreement: false,
+                          last_modified_by: currentUserId,
+                          last_modified_at: new Date().toISOString()
+                        };
+                        
+                        try {
+                          await updateBooking(booking.id, updates);
+                          if (window.updateBookingInParent) {
+                            window.updateBookingInParent(booking.id, updates);
+                          }
+                          toast({
+                            title: "Oppdatert",
+                            description: "Betalingstype satt til fast honorar",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Feil",
+                            description: "Kunne ikke oppdatere betalingstype",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      disabled={!canEdit}
+                      className="h-auto p-3 flex flex-col items-center gap-1"
+                    >
+                      <span className="font-medium">Fast honorar</span>
+                      <span className="text-xs opacity-70">Garantert beløp</span>
+                    </Button>
+                    
+                    <Button
+                      variant={booking.door_deal ? "default" : "outline"}
+                      size="sm"
+                      onClick={async () => {
+                        if (!canEdit) return;
+                        
+                        const updates = {
+                          door_deal: true,
+                          by_agreement: false,
+                          last_modified_by: currentUserId,
+                          last_modified_at: new Date().toISOString()
+                        };
+                        
+                        try {
+                          await updateBooking(booking.id, updates);
+                          if (window.updateBookingInParent) {
+                            window.updateBookingInParent(booking.id, updates);
+                          }
+                          toast({
+                            title: "Oppdatert",
+                            description: "Betalingstype satt til spiller for døra",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Feil",
+                            description: "Kunne ikke oppdatere betalingstype",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      disabled={!canEdit}
+                      className="h-auto p-3 flex flex-col items-center gap-1"
+                    >
+                      <span className="font-medium">Spiller for døra</span>
+                      <span className="text-xs opacity-70">Andel av inntekt</span>
+                    </Button>
+                    
+                    <Button
+                      variant={booking.by_agreement ? "default" : "outline"}
+                      size="sm"
+                      onClick={async () => {
+                        if (!canEdit) return;
+                        
+                        const updates = {
+                          door_deal: false,
+                          by_agreement: true,
+                          last_modified_by: currentUserId,
+                          last_modified_at: new Date().toISOString()
+                        };
+                        
+                        try {
+                          await updateBooking(booking.id, updates);
+                          if (window.updateBookingInParent) {
+                            window.updateBookingInParent(booking.id, updates);
+                          }
+                          toast({
+                            title: "Oppdatert",
+                            description: "Betalingstype satt til ved avtale",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Feil",
+                            description: "Kunne ikke oppdatere betalingstype",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      disabled={!canEdit}
+                      className="h-auto p-3 flex flex-col items-center gap-1"
+                    >
+                      <span className="font-medium">Ved avtale</span>
+                      <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
+                    </Button>
+                  </div>
 
-      {/* Documents */}
-      <BookingDocumentViewer techSpec={booking.tech_spec} hospitalityRider={booking.hospitality_rider} bookingStatus={booking.status} isVisible={canEdit || booking.status === 'upcoming' || booking.status === 'published'} />
+                  {/* Payment Details */}
+                  {booking.door_deal && (
+                    <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
+                      <EditableField 
+                        fieldName="door_percentage" 
+                        label="Andel av dørinntekter (%)" 
+                        value={booking.door_percentage} 
+                        type="number" 
+                        placeholder="70" 
+                        onPropose={handleFieldUpdate} 
+                      />
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        Artist får {booking.door_percentage || 'X'}% av total dørinntekt
+                      </p>
+                    </div>
+                  )}
 
-      {!canEdit && <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-          💡 Detaljer kan redigeres når bookingen er godkjent og i forhandlingsfase
-        </div>}
-    </div>;
+                  {!booking.door_deal && !booking.by_agreement && (
+                    <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
+                      <EditableField 
+                        fieldName="artist_fee" 
+                        label="Fast honorar (kr)" 
+                        value={booking.artist_fee} 
+                        type="number" 
+                        placeholder="5000" 
+                        onPropose={handleFieldUpdate} 
+                      />
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        Garantert utbetaling uavhengig av billettsalg
+                      </p>
+                    </div>
+                  )}
+
+                  {booking.by_agreement && (
+                    <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+                      <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
+                        Honorar avtales direkte mellom partene
+                      </p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        Detaljer om betaling diskuteres og bestemmes i direkte kontakt
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </>
+    )}
+
+    {/* Portfolio Attachments */}
+    <BookingPortfolioAttachments 
+      bookingId={booking.id} 
+      currentUserId={currentUserId} 
+      canEdit={canEdit} 
+    />
+
+    {/* Documents */}
+    <BookingDocumentViewer 
+      techSpec={booking.tech_spec} 
+      hospitalityRider={booking.hospitality_rider} 
+      bookingStatus={booking.status} 
+      isVisible={canEdit || booking.status === 'upcoming' || booking.status === 'published'} 
+    />
+
+    {!canEdit && (
+      <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
+        💡 Detaljer kan redigeres når bookingen er godkjent og i forhandlingsfase
+      </div>
+    )}
+  </div>;
 };
