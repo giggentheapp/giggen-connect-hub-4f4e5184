@@ -713,6 +713,7 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack, existingConce
             <PublicVisibilitySettings
               value={visibilitySettings}
               onChange={setVisibilitySettings}
+              mode="teaching"
             />
           </div>
         )}

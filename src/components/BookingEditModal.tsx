@@ -580,6 +580,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           <PublicVisibilitySettings
             value={formData.public_visibility_settings}
             onChange={(settings) => updateFormField('public_visibility_settings', settings)}
+            mode="booking"
           />
         )}
 

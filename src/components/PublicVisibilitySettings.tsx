@@ -7,9 +7,10 @@ import { Info } from 'lucide-react';
 interface PublicVisibilitySettingsProps {
   value: Record<string, boolean>;
   onChange: (settings: Record<string, boolean>) => void;
+  mode?: 'booking' | 'teaching';
 }
 
-const VISIBILITY_FIELDS = [
+const BOOKING_VISIBILITY_FIELDS = [
   { key: 'show_description', label: 'Beskrivelse', defaultValue: true },
   { key: 'show_venue', label: 'Spillested', defaultValue: true },
   { key: 'show_address', label: 'Adresse', defaultValue: true },
@@ -23,13 +24,30 @@ const VISIBILITY_FIELDS = [
   { key: 'show_artist_bio', label: 'Artist bio', defaultValue: true },
 ];
 
-export const PublicVisibilitySettings = ({ value, onChange }: PublicVisibilitySettingsProps) => {
+const TEACHING_VISIBILITY_FIELDS = [
+  { key: 'show_description', label: 'Beskrivelse', defaultValue: true },
+  { key: 'show_schedule', label: 'Undervisningstider', defaultValue: true },
+  { key: 'show_payment', label: 'Betaling', defaultValue: false },
+  { key: 'show_responsibilities', label: 'Ansvar og forventninger', defaultValue: true },
+  { key: 'show_focus', label: 'Fokus og innhold', defaultValue: true },
+  { key: 'show_termination', label: 'Oppsigelsesvilkår', defaultValue: false },
+  { key: 'show_liability', label: 'Forsikring og ansvar', defaultValue: true },
+  { key: 'show_communication', label: 'Kommunikasjon og avlysning', defaultValue: true },
+  { key: 'show_portfolio', label: 'Portfolio filer', defaultValue: true },
+];
+
+export const PublicVisibilitySettings = ({ value, onChange, mode = 'booking' }: PublicVisibilitySettingsProps) => {
   const handleToggle = (key: string, checked: boolean) => {
     onChange({
       ...value,
       [key]: checked,
     });
   };
+
+  const visibilityFields = mode === 'teaching' ? TEACHING_VISIBILITY_FIELDS : BOOKING_VISIBILITY_FIELDS;
+  const alertText = mode === 'teaching' 
+    ? '💡 Betaling og oppsigelsesvilkår er som standard skjult fra offentligheten'
+    : '💡 Honorar og dørprosent er som standard skjult fra offentligheten';
 
   return (
     <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
@@ -45,12 +63,12 @@ export const PublicVisibilitySettings = ({ value, onChange }: PublicVisibilitySe
       <CardContent className="space-y-4">
         <Alert className="border-blue-200 bg-blue-100/50 dark:bg-blue-950/10">
           <AlertDescription className="text-sm text-blue-900 dark:text-blue-100">
-            💡 Honorar og dørprosent er som standard skjult fra offentligheten
+            {alertText}
           </AlertDescription>
         </Alert>
         
         <div className="grid gap-4 sm:grid-cols-2">
-          {VISIBILITY_FIELDS.map((field) => {
+          {visibilityFields.map((field) => {
             const isChecked = value[field.key] ?? field.defaultValue;
             
             return (
