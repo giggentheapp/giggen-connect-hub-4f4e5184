@@ -22,6 +22,8 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
     try {
       const newVisibilityState = !currentState;
       
+      console.log('🔄 Toggling event visibility:', { eventId, eventTitle, currentState, newVisibilityState });
+      
       // Update bookings table
       const { error: bookingError } = await supabase
         .from('bookings')
@@ -30,31 +32,56 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
         })
         .eq('id', eventId);
 
-      if (bookingError) throw bookingError;
+      if (bookingError) {
+        console.error('❌ Failed to update booking:', bookingError);
+        throw bookingError;
+      }
+
+      console.log('✅ Booking updated successfully');
 
       // Also update events_market table - synkroniser synlighet
-      // Find event in events_market by matching title and created_by
       const { data: booking } = await supabase
         .from('bookings')
-        .select('title, event_date, sender_id, receiver_id')
+        .select('title, event_date')
         .eq('id', eventId)
         .single();
 
       if (booking) {
-        // Update events_market using title and date to find the right event
+        // Update events_market using title, date AND created_by to find the exact event
         const eventDate = booking.event_date ? new Date(booking.event_date).toISOString().split('T')[0] : null;
         
-        const { error: marketError } = await supabase
+        console.log('🔍 Searching events_market with:', { 
+          title: booking.title, 
+          date: eventDate, 
+          created_by: profile.user_id 
+        });
+
+        const { data: marketEvents, error: findError } = await supabase
+          .from('events_market')
+          .select('*')
+          .eq('title', booking.title)
+          .eq('created_by', profile.user_id);
+
+        console.log('📋 Found events in market:', marketEvents);
+
+        if (findError) {
+          console.error('❌ Error finding events:', findError);
+        }
+
+        // Update all matching events (should be 1, but use title+date+created_by to be safe)
+        const { data: updated, error: marketError } = await supabase
           .from('events_market')
           .update({ 
             is_public: newVisibilityState
           })
           .eq('title', booking.title)
-          .eq('created_by', profile.user_id);
+          .eq('created_by', profile.user_id)
+          .select();
 
         if (marketError) {
-          console.error('Could not update events_market:', marketError);
-          // Don't throw - booking was updated successfully
+          console.error('❌ Could not update events_market:', marketError);
+        } else {
+          console.log('✅ Events_market updated:', updated);
         }
       }
 
@@ -68,6 +95,7 @@ export const AdminEventsSection = ({ profile }: AdminEventsSectionProps) => {
       await refetch();
       
     } catch (error: any) {
+      console.error('❌ Toggle visibility error:', error);
       toast({
         title: 'Kunne ikke endre synlighet',
         description: error.message,
