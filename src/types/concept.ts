@@ -23,6 +23,8 @@ export interface UserConcept {
   door_deal?: boolean;
   door_percentage?: number;
   price_by_agreement?: boolean;
+  concept_type?: 'session_musician' | 'teaching';
+  teaching_data?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }

@@ -742,6 +742,7 @@ export type Database = {
       concepts: {
         Row: {
           available_dates: Json | null
+          concept_type: string
           created_at: string
           description: string | null
           door_deal: boolean | null
@@ -754,6 +755,7 @@ export type Database = {
           price: number | null
           price_by_agreement: boolean | null
           status: string | null
+          teaching_data: Json | null
           tech_spec: string | null
           tech_spec_reference: string | null
           title: string
@@ -761,6 +763,7 @@ export type Database = {
         }
         Insert: {
           available_dates?: Json | null
+          concept_type?: string
           created_at?: string
           description?: string | null
           door_deal?: boolean | null
@@ -773,6 +776,7 @@ export type Database = {
           price?: number | null
           price_by_agreement?: boolean | null
           status?: string | null
+          teaching_data?: Json | null
           tech_spec?: string | null
           tech_spec_reference?: string | null
           title: string
@@ -780,6 +784,7 @@ export type Database = {
         }
         Update: {
           available_dates?: Json | null
+          concept_type?: string
           created_at?: string
           description?: string | null
           door_deal?: boolean | null
@@ -792,6 +797,7 @@ export type Database = {
           price?: number | null
           price_by_agreement?: boolean | null
           status?: string | null
+          teaching_data?: Json | null
           tech_spec?: string | null
           tech_spec_reference?: string | null
           title?: string

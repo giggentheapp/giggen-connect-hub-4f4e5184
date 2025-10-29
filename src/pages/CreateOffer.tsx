@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ConceptTypeSelector } from '@/components/ConceptTypeSelector';
+import { TeachingConceptWizard } from '@/components/TeachingConceptWizard';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -53,6 +55,7 @@ export default function CreateOffer() {
   const { toast } = useToast();
   const { t } = useAppTranslation();
   
+  const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [userId, setUserId] = useState<string>('');
   const [saving, setSaving] = useState(false);
@@ -649,18 +652,51 @@ export default function CreateOffer() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/dashboard')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Tilbake
-            </Button>
+      {/* Show type selector if no type selected */}
+      {!conceptType && !draftId && (
+        <div className="container mx-auto px-4 py-16">
+          <ConceptTypeSelector onSelect={setConceptType} />
+        </div>
+      )}
+
+      {/* Show Teaching Wizard */}
+      {conceptType === 'teaching' && (
+        <div className="container mx-auto px-4 py-8">
+          <TeachingConceptWizard
+            userId={userId}
+            onSuccess={() => {
+              toast({
+                title: 'Suksess!',
+                description: 'Undervisningsavtalen er lagret',
+              });
+              navigate('/dashboard');
+            }}
+            onBack={() => setConceptType(null)}
+          />
+        </div>
+      )}
+
+      {/* Show Session Musician Wizard (original flow) */}
+      {(conceptType === 'session_musician' || draftId) && (
+        <>
+          {/* Sticky Header */}
+          <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (conceptType && !draftId) {
+                      setConceptType(null);
+                    } else {
+                      navigate('/dashboard');
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Tilbake
+                </Button>
 
             {/* Progress indicator */}
             <div className="hidden md:flex items-center gap-2">
@@ -1107,6 +1143,8 @@ export default function CreateOffer() {
         title="Velg Portfolio Filer"
         description="Velg filer fra din filbank for å legge til i portfolio"
       />
+        </>
+      )}
     </div>
   );
 }
