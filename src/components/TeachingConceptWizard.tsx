@@ -7,11 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ChevronLeft, ChevronRight, Plus, X, Save, Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChevronLeft, ChevronRight, Plus, X, Save, Loader2, CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { format } from 'date-fns';
 
 interface TeachingField {
   id: string;
@@ -98,6 +102,8 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
 
   const [portfolioFiles, setPortfolioFiles] = useState<any[]>([]);
   const [sections, setSections] = useState<TeachingSectionData>(DEFAULT_SECTIONS);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [isIndefinite, setIsIndefinite] = useState(false);
 
   const handleFileSelected = (file: any) => {
     const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`;
@@ -195,6 +201,9 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
           description: basicData.description || null,
           concept_type: 'teaching',
           teaching_data: sections as any,
+          available_dates: isIndefinite 
+            ? JSON.stringify({ indefinite: true })
+            : (selectedDates.length > 0 ? JSON.stringify(selectedDates) : null),
           is_published: isPublished,
           status: isPublished ? 'published' : 'draft',
         } as any)
@@ -478,7 +487,54 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
           </div>
         )}
 
-        {currentStep === 3 && renderSectionFields('schedule')}
+        {currentStep === 3 && (
+          <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="indefinite"
+                  checked={isIndefinite}
+                  onCheckedChange={setIsIndefinite}
+                />
+                <Label htmlFor="indefinite">Ubestemt tidsramme</Label>
+              </div>
+
+              {!isIndefinite && (
+                <div className="space-y-2">
+                  <Label>Velg tilgjengelige datoer</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDates.length > 0
+                          ? `${selectedDates.length} dato(er) valgt`
+                          : 'Velg datoer'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="multiple"
+                        selected={selectedDates}
+                        onSelect={(dates) => setSelectedDates(dates || [])}
+                        initialFocus
+                        className={cn('p-3 pointer-events-auto')}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {selectedDates.length > 0 && (
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      Valgte datoer: {selectedDates.map(d => format(d, 'dd.MM.yyyy')).join(', ')}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            {renderSectionFields('schedule')}
+          </div>
+        )}
         {currentStep === 4 && renderSectionFields('payment')}
         {currentStep === 5 && renderSectionFields('responsibilities')}
         {currentStep === 6 && renderSectionFields('focus')}
@@ -492,6 +548,37 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
               <h3 className="font-semibold text-lg mb-4">{basicData.title}</h3>
               {basicData.description && (
                 <p className="text-sm text-muted-foreground mb-4">{basicData.description}</p>
+              )}
+              
+              {/* Show dates */}
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">Tilgjengelighet</h4>
+                {isIndefinite ? (
+                  <p className="text-sm">Ubestemt tidsramme</p>
+                ) : selectedDates.length > 0 ? (
+                  <div className="text-sm">
+                    <p className="mb-1">Tilgjengelige datoer:</p>
+                    <ul className="ml-4 space-y-1">
+                      {selectedDates.map((date, index) => (
+                        <li key={index}>{format(date, 'dd.MM.yyyy')}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Ingen datoer valgt</p>
+                )}
+              </div>
+              
+              {/* Show portfolio files */}
+              {portfolioFiles.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-medium mb-2">Vedlagte filer</h4>
+                  <ul className="text-sm space-y-1 ml-4">
+                    {portfolioFiles.map(file => (
+                      <li key={file.filebankId}>{file.filename}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
               
               {Object.entries(sections).map(([key, fields]) => {
