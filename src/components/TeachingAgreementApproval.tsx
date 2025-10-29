@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { GraduationCap, Clock, MapPin, Banknote, CheckCircle, XCircle } from 'lucide-react';
+import { GraduationCap, Clock, MapPin, Banknote, CheckCircle, XCircle, Printer, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,11 +33,11 @@ export const TeachingAgreementApproval = ({
   const otherPartyApproved = isSender ? booking.approved_by_receiver : booking.approved_by_sender;
   const bothApproved = booking.approved_by_sender && booking.approved_by_receiver;
 
-  // Helper to render field items
+  // Helper to render field items - only show if they have values
   const renderFieldItems = (value: any) => {
     if (!value || !Array.isArray(value)) return null;
     
-    const items = value.filter((item: any) => item.enabled && item.value);
+    const items = value.filter((item: any) => item.enabled && item.value && item.value.trim());
     if (items.length === 0) return null;
     
     return (
@@ -50,6 +50,10 @@ export const TeachingAgreementApproval = ({
         ))}
       </div>
     );
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const handleApprove = async () => {
@@ -111,15 +115,44 @@ export const TeachingAgreementApproval = ({
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Godkjenn undervisningsavtale</h1>
-        <p className="text-muted-foreground">
-          Les gjennom detaljene og godkjenn avtalen når du er klar
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
+
+      <div className="mb-6 no-print">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Godkjenn undervisningsavtale</h1>
+            <p className="text-muted-foreground">
+              Les gjennom detaljene og godkjenn avtalen når du er klar
+            </p>
+          </div>
+          <Button variant="outline" onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-2" />
+            Skriv ut / PDF
+          </Button>
+        </div>
+      </div>
+
+      {/* Print Header */}
+      <div className="hidden print:block mb-6">
+        <h1 className="text-2xl font-bold">Undervisningsavtale</h1>
+        <p className="text-sm text-muted-foreground">
+          Generert: {format(new Date(), 'dd.MM.yyyy HH:mm')}
         </p>
       </div>
 
       {/* Approval Status */}
-      <Card className="mb-6">
+      <Card className="mb-6 no-print">
         <CardHeader>
           <CardTitle>Godkjenningsstatus</CardTitle>
         </CardHeader>
@@ -146,26 +179,31 @@ export const TeachingAgreementApproval = ({
         </CardContent>
       </Card>
 
-      {/* Agreement Details */}
+      {/* Agreement Details - Complete View */}
       <div className="space-y-6 mb-8">
         {/* Basic Info */}
-        <div>
+        <div className="border-b pb-4">
           <h2 className="text-lg font-semibold mb-3">Grunnleggende informasjon</h2>
           <div className="space-y-2">
             <div>
               <span className="font-medium">Tittel:</span> {booking.title}
             </div>
-            {booking.description && (
+            {booking.description && booking.description.trim() && (
               <div>
                 <span className="font-medium">Beskrivelse:</span> {booking.description}
+              </div>
+            )}
+            {booking.personal_message && booking.personal_message.trim() && (
+              <div>
+                <span className="font-medium">Personlig melding:</span> {booking.personal_message}
               </div>
             )}
           </div>
         </div>
 
         {/* Schedule */}
-        {teachingData.schedule && (
-          <div>
+        {teachingData.schedule && renderFieldItems(teachingData.schedule) && (
+          <div className="border-b pb-4">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-5 w-5" />
               <h2 className="text-lg font-semibold">Undervisningstider</h2>
@@ -176,7 +214,7 @@ export const TeachingAgreementApproval = ({
 
         {/* Start Date */}
         {teachingData.start_date && (
-          <div>
+          <div className="border-b pb-4">
             <span className="font-medium">Startdato:</span> {
               (() => {
                 try {
@@ -190,16 +228,16 @@ export const TeachingAgreementApproval = ({
         )}
 
         {/* Duration */}
-        {teachingData.duration && (
-          <div>
+        {teachingData.duration && renderFieldItems(teachingData.duration) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Varighet</h2>
             {renderFieldItems(teachingData.duration)}
           </div>
         )}
 
         {/* Location */}
-        {teachingData.location && (
-          <div>
+        {teachingData.location && renderFieldItems(teachingData.location) && (
+          <div className="border-b pb-4">
             <div className="flex items-center gap-2 mb-3">
               <MapPin className="h-5 w-5" />
               <h2 className="text-lg font-semibold">Sted</h2>
@@ -209,8 +247,8 @@ export const TeachingAgreementApproval = ({
         )}
 
         {/* Payment */}
-        {teachingData.payment && (
-          <div>
+        {teachingData.payment && renderFieldItems(teachingData.payment) && (
+          <div className="border-b pb-4">
             <div className="flex items-center gap-2 mb-3">
               <Banknote className="h-5 w-5" />
               <h2 className="text-lg font-semibold">Betaling</h2>
@@ -220,49 +258,96 @@ export const TeachingAgreementApproval = ({
         )}
 
         {/* Responsibilities */}
-        {teachingData.responsibilities && (
-          <div>
+        {teachingData.responsibilities && renderFieldItems(teachingData.responsibilities) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Ansvar og forventninger</h2>
             {renderFieldItems(teachingData.responsibilities)}
           </div>
         )}
 
         {/* Focus */}
-        {teachingData.focus && (
-          <div>
+        {teachingData.focus && renderFieldItems(teachingData.focus) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Fokus og innhold</h2>
             {renderFieldItems(teachingData.focus)}
           </div>
         )}
 
         {/* Termination */}
-        {teachingData.termination && (
-          <div>
+        {teachingData.termination && renderFieldItems(teachingData.termination) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Oppsigelsesvilkår</h2>
             {renderFieldItems(teachingData.termination)}
           </div>
         )}
 
         {/* Liability */}
-        {teachingData.liability && (
-          <div>
+        {teachingData.liability && renderFieldItems(teachingData.liability) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Forsikring og ansvar</h2>
             {renderFieldItems(teachingData.liability)}
           </div>
         )}
 
         {/* Communication */}
-        {teachingData.communication && (
-          <div>
+        {teachingData.communication && renderFieldItems(teachingData.communication) && (
+          <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Kommunikasjon og avlysning</h2>
             {renderFieldItems(teachingData.communication)}
+          </div>
+        )}
+
+        {/* Contact Info - Show all details when agreed */}
+        {booking.sender_contact_info && (
+          <div className="border-b pb-4">
+            <h2 className="text-lg font-semibold mb-3">Kontaktinformasjon</h2>
+            <div className="space-y-2">
+              {booking.sender_contact_info.email && (
+                <div>
+                  <span className="font-medium">E-post:</span> {booking.sender_contact_info.email}
+                </div>
+              )}
+              {booking.sender_contact_info.phone && (
+                <div>
+                  <span className="font-medium">Telefon:</span> {booking.sender_contact_info.phone}
+                </div>
+              )}
+              {booking.sender_contact_info.website && (
+                <div>
+                  <span className="font-medium">Nettside:</span> {booking.sender_contact_info.website}
+                </div>
+              )}
+              {booking.sender_contact_info.instagram && (
+                <div>
+                  <span className="font-medium">Instagram:</span> @{booking.sender_contact_info.instagram.replace('@', '')}
+                </div>
+              )}
+              {booking.sender_contact_info.facebook && (
+                <div>
+                  <span className="font-medium">Facebook:</span> {booking.sender_contact_info.facebook}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Additional booking details if present */}
+        {booking.venue && booking.venue.trim() && (
+          <div className="border-b pb-4">
+            <span className="font-medium">Spillested:</span> {booking.venue}
+          </div>
+        )}
+        
+        {booking.address && booking.address.trim() && (
+          <div className="border-b pb-4">
+            <span className="font-medium">Adresse:</span> {booking.address}
           </div>
         )}
       </div>
 
       {/* Approval Section */}
       {!hasApproved && (
-        <Card>
+        <Card className="no-print">
           <CardHeader>
             <CardTitle>Godkjenn avtalen</CardTitle>
           </CardHeader>
@@ -300,7 +385,7 @@ export const TeachingAgreementApproval = ({
       )}
 
       {hasApproved && (
-        <Card>
+        <Card className="no-print">
           <CardContent className="pt-6">
             <div className="text-center">
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
