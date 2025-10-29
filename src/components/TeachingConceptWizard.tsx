@@ -32,7 +32,7 @@ interface TeachingConceptWizardProps {
 
 const STEPS = [
   { id: 'basic', title: 'Grunnleggende', description: 'Tittel og beskrivelse' },
-  { id: 'contact', title: 'Kontaktinfo', description: 'Parti- og kontaktinformasjon' },
+  { id: 'contact', title: 'Elevinfo', description: 'Informasjon om elev' },
   { id: 'schedule', title: 'Undervisningstider', description: 'Lokasjon og tidspunkt' },
   { id: 'payment', title: 'Betaling', description: 'Betalingsbetingelser' },
   { id: 'responsibilities', title: 'Ansvar', description: 'Elevens ansvar og forventninger' },
@@ -45,10 +45,6 @@ const STEPS = [
 
 const DEFAULT_SECTIONS: TeachingSectionData = {
   contact: [
-    { id: 'instructor_name', label: 'Instruktørens navn', value: '', enabled: true },
-    { id: 'instructor_address', label: 'Instruktørens adresse', value: '', enabled: true },
-    { id: 'instructor_phone', label: 'Instruktørens telefon', value: '', enabled: true },
-    { id: 'instructor_email', label: 'Instruktørens e-post', value: '', enabled: true },
     { id: 'student_name', label: 'Elevens navn', value: '', enabled: true },
     { id: 'student_age', label: 'Elevens alder', value: '', enabled: true },
     { id: 'student_phone', label: 'Elevens telefon', value: '', enabled: true },
@@ -329,7 +325,16 @@ export const TeachingConceptWizard = ({ userId, onSuccess, onBack }: TeachingCon
           </div>
         )}
 
-        {currentStep === 1 && renderSectionFields('contact')}
+        {currentStep === 1 && (
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                <strong>ℹ️ Om kontaktinformasjon:</strong> Din kontaktinformasjon (navn, e-post, telefon) vil automatisk deles med eleven når avtalen godkjennes. Du trenger ikke å fylle inn dette her.
+              </p>
+            </div>
+            {renderSectionFields('contact')}
+          </div>
+        )}
         {currentStep === 2 && renderSectionFields('schedule')}
         {currentStep === 3 && renderSectionFields('payment')}
         {currentStep === 4 && renderSectionFields('responsibilities')}
