@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Printer, ArrowLeft, Clock, MapPin, Banknote, GraduationCap } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Printer, ArrowLeft, Clock, MapPin, Banknote, GraduationCap, Edit2, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +14,14 @@ export default function TeachingAgreementView() {
   const { toast } = useToast();
   const [booking, setBooking] = useState<any>(null);
   const [conceptData, setConceptData] = useState<any>(null);
+  const [senderProfile, setSenderProfile] = useState<any>(null);
+  const [receiverProfile, setReceiverProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContacts, setEditedContacts] = useState({
+    sender: { name: '', email: '', phone: '' },
+    receiver: { name: '', email: '', phone: '' }
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +47,39 @@ export default function TeachingAgreementView() {
           if (conceptError) throw conceptError;
           setConceptData(conceptDataRes);
         }
+
+        // Fetch sender and receiver profiles
+        const { data: sender } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', bookingData.sender_id)
+          .single();
+        
+        const { data: receiver } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', bookingData.receiver_id)
+          .single();
+
+        setSenderProfile(sender);
+        setReceiverProfile(receiver);
+
+        // Initialize edited contacts with profile data
+        const senderContactInfo = sender?.contact_info as { email?: string; phone?: string } | null;
+        const receiverContactInfo = receiver?.contact_info as { email?: string; phone?: string } | null;
+
+        setEditedContacts({
+          sender: {
+            name: sender?.display_name || '',
+            email: senderContactInfo?.email || '',
+            phone: senderContactInfo?.phone || ''
+          },
+          receiver: {
+            name: receiver?.display_name || '',
+            email: receiverContactInfo?.email || '',
+            phone: receiverContactInfo?.phone || ''
+          }
+        });
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -55,6 +97,48 @@ export default function TeachingAgreementView() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSaveContacts = async () => {
+    try {
+      // Save the edited contact info to the booking
+      const { error } = await supabase
+        .from('bookings')
+        .update({
+          sender_contact_info: {
+            ...booking.sender_contact_info,
+            name: editedContacts.sender.name,
+            email: editedContacts.sender.email,
+            phone: editedContacts.sender.phone
+          }
+        })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Kontaktinfo lagret",
+        description: "Kontaktinformasjonen er oppdatert"
+      });
+
+      setIsEditing(false);
+      
+      // Refresh booking data
+      const { data: updatedBooking } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+      
+      if (updatedBooking) setBooking(updatedBooking);
+    } catch (error) {
+      console.error('Error saving contacts:', error);
+      toast({
+        title: "Feil ved lagring",
+        description: "Kunne ikke lagre kontaktinformasjon",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -300,24 +384,194 @@ export default function TeachingAgreementView() {
           </div>
         )}
 
-        {/* Approval Status */}
-        {(booking.approved_by_sender || booking.approved_by_receiver) && (
-          <div className="border-t pt-4 mt-6">
-            <h2 className="text-lg font-semibold mb-3">Godkjenningsstatus</h2>
-            <div className="space-y-2">
-              {booking.approved_by_sender && booking.sender_approved_at && (
-                <div>
-                  <span className="font-medium">Avsender godkjent:</span> {format(new Date(booking.sender_approved_at), 'dd.MM.yyyy HH:mm')}
-                </div>
-              )}
-              {booking.approved_by_receiver && booking.receiver_approved_at && (
-                <div>
-                  <span className="font-medium">Mottaker godkjent:</span> {format(new Date(booking.receiver_approved_at), 'dd.MM.yyyy HH:mm')}
-                </div>
-              )}
-            </div>
+        {/* Party Information */}
+        <div className="border-t pt-4 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Parter</h2>
+            {!isEditing && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+                className="no-print"
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Rediger
+              </Button>
+            )}
           </div>
-        )}
+
+          {isEditing ? (
+            <div className="space-y-6 no-print">
+              {/* Sender Editable */}
+              <div className="space-y-3">
+                <h3 className="font-medium">Avsender (Lærer)</h3>
+                <div className="grid gap-3">
+                  <div>
+                    <Label>Fullt navn</Label>
+                    <Input
+                      value={editedContacts.sender.name}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        sender: { ...prev.sender, name: e.target.value }
+                      }))}
+                    />
+                  </div>
+                  <div>
+                    <Label>E-post</Label>
+                    <Input
+                      type="email"
+                      value={editedContacts.sender.email}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        sender: { ...prev.sender, email: e.target.value }
+                      }))}
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefon</Label>
+                    <Input
+                      type="tel"
+                      value={editedContacts.sender.phone}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        sender: { ...prev.sender, phone: e.target.value }
+                      }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Receiver Editable */}
+              <div className="space-y-3">
+                <h3 className="font-medium">Mottaker (Elev)</h3>
+                <div className="grid gap-3">
+                  <div>
+                    <Label>Fullt navn</Label>
+                    <Input
+                      value={editedContacts.receiver.name}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        receiver: { ...prev.receiver, name: e.target.value }
+                      }))}
+                    />
+                  </div>
+                  <div>
+                    <Label>E-post</Label>
+                    <Input
+                      type="email"
+                      value={editedContacts.receiver.email}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        receiver: { ...prev.receiver, email: e.target.value }
+                      }))}
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefon</Label>
+                    <Input
+                      type="tel"
+                      value={editedContacts.receiver.phone}
+                      onChange={(e) => setEditedContacts(prev => ({
+                        ...prev,
+                        receiver: { ...prev.receiver, phone: e.target.value }
+                      }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleSaveContacts}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Lagre
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  <X className="h-4 w-4 mr-2" />
+                  Avbryt
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Sender Display */}
+              <div className="space-y-2">
+                <h3 className="font-medium">Avsender (Lærer)</h3>
+                <div className="space-y-1 text-sm">
+                  <div>
+                    <span className="font-medium">Navn:</span>{' '}
+                    {senderProfile ? (
+                      <Link 
+                        to={`/profile/${senderProfile.user_id}`} 
+                        className="text-primary hover:underline no-print"
+                      >
+                        {editedContacts.sender.name || senderProfile.display_name}
+                      </Link>
+                    ) : (
+                      editedContacts.sender.name
+                    )}
+                    <span className="hidden print:inline">
+                      {editedContacts.sender.name || senderProfile?.display_name}
+                    </span>
+                  </div>
+                  {editedContacts.sender.email && (
+                    <div>
+                      <span className="font-medium">E-post:</span> {editedContacts.sender.email}
+                    </div>
+                  )}
+                  {editedContacts.sender.phone && (
+                    <div>
+                      <span className="font-medium">Telefon:</span> {editedContacts.sender.phone}
+                    </div>
+                  )}
+                </div>
+                {booking.approved_by_sender && booking.sender_approved_at && (
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Godkjent: {format(new Date(booking.sender_approved_at), 'dd.MM.yyyy HH:mm')}
+                  </div>
+                )}
+              </div>
+
+              {/* Receiver Display */}
+              <div className="space-y-2">
+                <h3 className="font-medium">Mottaker (Elev)</h3>
+                <div className="space-y-1 text-sm">
+                  <div>
+                    <span className="font-medium">Navn:</span>{' '}
+                    {receiverProfile ? (
+                      <Link 
+                        to={`/profile/${receiverProfile.user_id}`} 
+                        className="text-primary hover:underline no-print"
+                      >
+                        {editedContacts.receiver.name || receiverProfile.display_name}
+                      </Link>
+                    ) : (
+                      editedContacts.receiver.name
+                    )}
+                    <span className="hidden print:inline">
+                      {editedContacts.receiver.name || receiverProfile?.display_name}
+                    </span>
+                  </div>
+                  {editedContacts.receiver.email && (
+                    <div>
+                      <span className="font-medium">E-post:</span> {editedContacts.receiver.email}
+                    </div>
+                  )}
+                  {editedContacts.receiver.phone && (
+                    <div>
+                      <span className="font-medium">Telefon:</span> {editedContacts.receiver.phone}
+                    </div>
+                  )}
+                </div>
+                {booking.approved_by_receiver && booking.receiver_approved_at && (
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Godkjent: {format(new Date(booking.receiver_approved_at), 'dd.MM.yyyy HH:mm')}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
