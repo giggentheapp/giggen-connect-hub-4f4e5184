@@ -13,6 +13,7 @@ import { BookingCardStep3 } from '@/components/BookingCardStep3';
 import { format } from 'date-fns';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserProfile } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 interface BookingsSectionProps {
   profile: UserProfile;
 }
@@ -186,7 +187,25 @@ export const BookingsSection = ({
   }: {
     booking: any;
   }) => {
-    const handleDetailsClick = () => {
+    const handleDetailsClick = async () => {
+      // Check if this is a teaching booking
+      if (booking.selected_concept_id) {
+        try {
+          const { data: conceptData } = await supabase
+            .from('concepts')
+            .select('concept_type')
+            .eq('id', booking.selected_concept_id)
+            .single();
+          
+          if (conceptData?.concept_type === 'teaching') {
+            navigate(`/booking/${booking.id}/teaching-agreement`);
+            return;
+          }
+        } catch (error) {
+          console.error('Error checking concept type:', error);
+        }
+      }
+      
       navigate(`/booking/${booking.id}/view`);
     };
 
