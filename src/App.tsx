@@ -30,6 +30,7 @@ import BookingAgreementSummary from "./pages/BookingAgreementSummary";
 import BookingAgreementReview from "./pages/BookingAgreementReview";
 import BookingPublishPreview from "./pages/BookingPublishPreview";
 import BookingAgreementView from "./pages/BookingAgreementView";
+import TeachingAgreementView from "./pages/TeachingAgreementView";
 import Bookings from "./pages/Bookings";
 import PublicEventView from "./pages/PublicEventView";
 import Events from "./pages/Events";
@@ -80,6 +81,7 @@ const App = () => {
               <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
               <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
               <Route path="/booking/:bookingId/view" element={<BookingAgreementView />} />
+              <Route path="/booking/:bookingId/teaching-agreement" element={<TeachingAgreementView />} />
               
               {/* Ticket System Routes */}
               <Route path="/events" element={<Events />} />
