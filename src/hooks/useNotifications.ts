@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +18,7 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [bookingUnreadCount, setBookingUnreadCount] = useState(0);
   const { toast } = useToast();
 
   const fetchNotifications = async () => {
@@ -47,6 +48,26 @@ export const useNotifications = () => {
       setLoading(false);
     }
   };
+
+  const fetchBookingUnreadCount = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Count incoming pending bookings
+      const { count, error } = await supabase
+        .from('bookings')
+        .select('*', { count: 'exact', head: true })
+        .eq('receiver_id', user.id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+
+      setBookingUnreadCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching booking unread count:', error);
+    }
+  }, []);
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -114,6 +135,7 @@ export const useNotifications = () => {
 
   useEffect(() => {
     fetchNotifications();
+    fetchBookingUnreadCount();
 
     // Get current user for real-time filtering
     const setupRealtimeSubscription = async () => {
@@ -122,7 +144,7 @@ export const useNotifications = () => {
 
       // Subscribe to real-time notifications
       const channel = supabase
-        .channel('notifications-changes')
+        .channel('notifications-bookings-changes')
         .on(
           'postgres_changes',
           {
@@ -166,6 +188,19 @@ export const useNotifications = () => {
             }
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'bookings',
+            filter: `receiver_id=eq.${user.id}`,
+          },
+          (payload) => {
+            // Refetch booking count whenever bookings change
+            fetchBookingUnreadCount();
+          }
+        )
         .subscribe();
 
       return channel;
@@ -180,11 +215,11 @@ export const useNotifications = () => {
         }
       });
     };
-  }, [toast]);
+  }, [toast, fetchBookingUnreadCount]);
 
   return {
     notifications,
-    unreadCount,
+    unreadCount: bookingUnreadCount, // Use booking unread count instead
     loading,
     markAsRead,
     markAllAsRead,

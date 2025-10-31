@@ -14,9 +14,11 @@ import { format } from 'date-fns';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserProfile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
+
 interface BookingsSectionProps {
   profile: UserProfile;
 }
+
 export const BookingsSection = ({
   profile
 }: BookingsSectionProps) => {
@@ -25,6 +27,13 @@ export const BookingsSection = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
+  const [tabCounts, setTabCounts] = useState({
+    incoming: 0,
+    sent: 0,
+    ongoing: 0,
+    upcoming: 0,
+    history: 0
+  });
 
   // Handle URL tab parameter
   useEffect(() => {
@@ -88,6 +97,15 @@ export const BookingsSection = ({
         (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
         (b?.status === 'completed' || b?.status === 'cancelled')
       );
+
+      // Update tab counts
+      setTabCounts({
+        incoming: incomingRequests.length,
+        sent: sentRequests.length,
+        ongoing: ongoingAgreements.length,
+        upcoming: upcomingEvents.length,
+        history: historicalBookings.length
+      });
     }
   } catch (error) {
     console.error('Error filtering bookings:', error);
@@ -299,20 +317,45 @@ export const BookingsSection = ({
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
                 <TabsList className="grid w-full grid-cols-5 max-w-[600px]">
-                  <TabsTrigger value="incoming" className="flex items-center justify-center">
+                  <TabsTrigger value="incoming" className="flex items-center justify-center gap-1">
                     <Inbox className="w-4 h-4" />
+                    {tabCounts.incoming > 0 && (
+                      <Badge variant="destructive" className="h-5 min-w-[20px] px-1 text-xs">
+                        {tabCounts.incoming}
+                      </Badge>
+                    )}
                   </TabsTrigger>
-                  <TabsTrigger value="sent" className="flex items-center justify-center">
+                  <TabsTrigger value="sent" className="flex items-center justify-center gap-1">
                     <Send className="w-4 h-4" />
+                    {tabCounts.sent > 0 && (
+                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
+                        {tabCounts.sent}
+                      </Badge>
+                    )}
                   </TabsTrigger>
-                  <TabsTrigger value="ongoing" className="flex items-center justify-center">
+                  <TabsTrigger value="ongoing" className="flex items-center justify-center gap-1">
                     <Clock className="w-4 h-4" />
+                    {tabCounts.ongoing > 0 && (
+                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
+                        {tabCounts.ongoing}
+                      </Badge>
+                    )}
                   </TabsTrigger>
-                  <TabsTrigger value="upcoming" className="flex items-center justify-center">
+                  <TabsTrigger value="upcoming" className="flex items-center justify-center gap-1">
                     <Check className="w-4 h-4" />
+                    {tabCounts.upcoming > 0 && (
+                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
+                        {tabCounts.upcoming}
+                      </Badge>
+                    )}
                   </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center justify-center">
+                  <TabsTrigger value="history" className="flex items-center justify-center gap-1">
                     <Archive className="w-4 h-4" />
+                    {tabCounts.history > 0 && (
+                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
+                        {tabCounts.history}
+                      </Badge>
+                    )}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
