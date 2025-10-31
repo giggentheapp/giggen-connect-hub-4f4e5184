@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Band, BandMember } from '@/types/band';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ import { BandViewModal } from '@/components/BandViewModal';
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [band, setBand] = useState<Band | null>(null);
   const [members, setMembers] = useState<BandMember[]>([]);
@@ -102,6 +103,15 @@ const BandProfile = () => {
   const isAdmin = currentUserRole === 'admin' || currentUserRole === 'founder';
   const isMember = !!currentUserRole;
 
+  const handleBack = () => {
+    const fromSection = location.state?.fromSection;
+    if (fromSection) {
+      navigate('/dashboard', { state: { section: fromSection } });
+    } else {
+      navigate('/dashboard?section=admin-bands');
+    }
+  };
+
   // If force public view (from profile section) OR user is a member but not admin, show public view
   if (!loading && band && (forcePublicView || (isMember && !isAdmin))) {
     return <BandViewModal open={true} onClose={() => navigate(-1)} band={band} showContactInfo={false} />;
@@ -149,7 +159,7 @@ const BandProfile = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/dashboard?section=admin-bands')}
+            onClick={handleBack}
             className="h-8 w-8 md:h-10 md:w-10"
           >
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />

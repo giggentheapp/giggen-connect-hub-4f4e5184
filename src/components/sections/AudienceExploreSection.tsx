@@ -244,7 +244,9 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
   }, [filteredAndSearchedMakers]);
 
   const handleViewProfile = (userId: string) => {
-    navigate(`/profile/${userId}`);
+    navigate(`/profile/${userId}`, { 
+      state: { fromSection: 'explore' } 
+    });
   };
 
   const handleBookMaker = (makerId: string) => {
@@ -438,7 +440,6 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
                     <MakerCard
                       maker={maker}
                       onViewProfile={handleViewProfile}
-                      onBookMaker={handleBookMaker}
                     />
                   </div>
                 ))}

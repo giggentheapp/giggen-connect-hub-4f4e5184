@@ -131,7 +131,9 @@ export const ArtistExploreSection = ({
   }, []);
 
   const handleViewProfile = useCallback((userId: string) => {
-    navigate(`/profile/${userId}`);
+    navigate(`/profile/${userId}`, { 
+      state: { fromSection: 'explore' } 
+    });
   }, [navigate]);
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-background">

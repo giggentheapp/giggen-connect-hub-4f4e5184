@@ -19,12 +19,10 @@ interface MakerCardProps {
     instruments?: Array<{ instrument: string; details: string }>;
   };
   onViewProfile: (userId: string) => void;
-  onBookMaker?: (userId: string) => void;
 }
 
-export const MakerCard = ({ maker, onViewProfile, onBookMaker }: MakerCardProps) => {
+export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
   const { t } = useAppTranslation();
-  const navigate = useNavigate();
   
   const privacySettings = maker.privacy_settings || {};
   const showPortfolio = privacySettings.show_portfolio_to_goers;

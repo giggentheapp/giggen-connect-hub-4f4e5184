@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { User, Search, Ticket, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -34,24 +34,25 @@ export const UnifiedSidePanel = ({
   className,
   isOwnProfile = true
 }: UnifiedSidePanelProps) => {
-  const [searchParams] = useSearchParams();
-  const initialSection = searchParams.get('section') || 'profile';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const initialSection = searchParams.get('section') || location.state?.section || 'profile';
   const [activeSection, setActiveSection] = useState(initialSection);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useAppTranslation();
   const { unreadCount } = useNotifications();
 
-  // Update activeSection when URL changes
+  // Update activeSection when URL changes or location state changes
   useEffect(() => {
-    const section = searchParams.get('section');
-    if (section) {
+    const section = searchParams.get('section') || location.state?.section;
+    if (section && section !== activeSection) {
       setActiveSection(section);
     }
-  }, [searchParams]);
+  }, [searchParams, location.state]);
 
   const handleSignOut = async () => {
     const {

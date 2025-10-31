@@ -122,7 +122,9 @@ export const BandMembersList = ({
         >
           <Avatar
             className="h-10 w-10 md:h-12 md:w-12 cursor-pointer flex-shrink-0"
-            onClick={() => navigate(`/profile/${member.user_id}`)}
+            onClick={() => navigate(`/profile/${member.user_id}`, { 
+              state: { fromSection: 'admin-bands' } 
+            })}
           >
             <AvatarImage src={member.profile?.avatar_url || undefined} />
             <AvatarFallback className="text-xs md:text-sm">
@@ -131,7 +133,9 @@ export const BandMembersList = ({
           </Avatar>
           <div
             className="flex-1 min-w-0 cursor-pointer"
-            onClick={() => navigate(`/profile/${member.user_id}`)}
+            onClick={() => navigate(`/profile/${member.user_id}`, { 
+              state: { fromSection: 'admin-bands' } 
+            })}
           >
             <h4 className="font-semibold truncate text-sm md:text-base">
               {member.profile?.display_name || 'Ukjent'}

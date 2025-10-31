@@ -1,4 +1,4 @@
-import { User, Lightbulb, Calendar, MapPin, Copy } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin, Copy, ArrowLeft } from 'lucide-react';
 import { ProfilePortfolioDisplay } from '@/components/ProfilePortfolioDisplay';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
@@ -11,7 +11,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { UserProfile } from '@/types/auth';
 import { BookingRequest } from '@/components/BookingRequest';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 interface ProfileSectionProps {
   profile: UserProfile;
@@ -23,6 +23,8 @@ export const ProfileSection = ({
 }: ProfileSectionProps) => {
   const { t } = useAppTranslation();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const handleCopyUsername = () => {
     const username = `@${(profile as any).username}`;
@@ -48,19 +50,41 @@ export const ProfileSection = ({
   const events = allEvents.filter(e => e.is_public_after_approval === true);
 
   
+  const handleBack = () => {
+    // Check if we have a fromSection state
+    const fromSection = location.state?.fromSection;
+    if (fromSection) {
+      navigate('/dashboard', { state: { section: fromSection } });
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8">
       
-      {/* Book Now Button - Top Right (Only for other profiles) */}
-      {!isOwnProfile && (
-        <div className="flex justify-end">
+      {/* Back Button and Actions */}
+      <div className="flex items-center justify-between gap-4">
+        {!isOwnProfile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Tilbake</span>
+          </Button>
+        )}
+        
+        {!isOwnProfile && (
           <BookingRequest 
             receiverId={profile.user_id} 
             receiverName={profile.display_name}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Profile Header */}
       <div className="text-center space-y-4 md:space-y-6">

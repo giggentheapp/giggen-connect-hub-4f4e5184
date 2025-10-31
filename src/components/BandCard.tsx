@@ -44,7 +44,9 @@ export const BandCard = ({ band, userRole }: BandCardProps) => {
     // If admin/founder, navigate to band profile page (has edit button)
     // Otherwise, show modal
     if (isAdmin) {
-      navigate(`/band/${band.id}`);
+      navigate(`/band/${band.id}`, { 
+        state: { fromSection: 'explore' } 
+      });
     } else {
       setShowModal(true);
     }

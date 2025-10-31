@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Banknote, Calendar, Users } from 'lucide-react';
@@ -13,9 +13,14 @@ import { nb } from 'date-fns/locale';
 const ProfileConceptView = () => {
   const { userId, conceptId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [concept, setConcept] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleBack = () => {
+    navigate(`/profile/${userId}`);
+  };
 
   useEffect(() => {
     const loadConcept = async () => {
@@ -74,7 +79,7 @@ const ProfileConceptView = () => {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Tilbud ikke funnet</p>
-            <Button onClick={() => navigate(`/profile/${userId}`)}>
+            <Button onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tilbake til profil
             </Button>
@@ -92,7 +97,7 @@ const ProfileConceptView = () => {
         {/* Back button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate(`/profile/${userId}`)}
+          onClick={handleBack}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
