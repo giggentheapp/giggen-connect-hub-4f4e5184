@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MapPin, Music, Calendar, Image, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useNavigate } from 'react-router-dom';
 import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 import { supabase } from '@/integrations/supabase/client';
 import useEmblaCarousel from 'embla-carousel-react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface MakerCardProps {
   maker: {
@@ -108,7 +109,7 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
         {/* Portfolio Gallery */}
         {showPortfolio && imageFiles.length > 0 && !portfolioLoading && (
           <div 
-            className="relative w-full aspect-[4/3] bg-muted overflow-hidden"
+            className="relative w-full aspect-[4/3] bg-muted overflow-hidden rounded-t-lg"
             onMouseEnter={() => setHoveredImage(true)}
             onMouseLeave={() => setHoveredImage(false)}
           >
@@ -127,7 +128,7 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
                       <img
                         src={imageUrl}
                         alt={file.title || file.filename || 'Portfolio image'}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-t-lg"
                       />
                     </div>
                   );
@@ -254,13 +255,19 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
 
     {/* Full Image Modal */}
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <DialogContent className="max-w-5xl w-full p-0 overflow-hidden">
+      <DialogContent className="max-w-5xl w-full p-0 overflow-hidden rounded-lg">
+        <VisuallyHidden>
+          <DialogTitle>Portfolio bilde</DialogTitle>
+          <DialogDescription>
+            {imageFiles[modalImageIndex]?.title || imageFiles[modalImageIndex]?.filename || 'Portfolio bilde'}
+          </DialogDescription>
+        </VisuallyHidden>
         {imageFiles[modalImageIndex] && (
-          <div className="relative w-full aspect-video bg-background">
+          <div className="relative w-full aspect-video bg-background rounded-lg overflow-hidden">
             <img
               src={getPublicUrl(imageFiles[modalImageIndex]?.file_path)}
               alt={imageFiles[modalImageIndex]?.title || imageFiles[modalImageIndex]?.filename || 'Portfolio image'}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-lg"
             />
           
           {/* Modal Navigation */}
