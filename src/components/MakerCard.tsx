@@ -41,9 +41,9 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
   const privacySettings = maker.privacy_settings || {};
   const showPortfolio = privacySettings.show_portfolio_to_goers;
   
-  // Filter for image files only
+  // Filter for image files only with valid paths
   const imageFiles = portfolioFiles.filter(file => 
-    file.mime_type?.startsWith('image/')
+    file?.mime_type?.startsWith('image/') && file?.file_path
   );
 
   const onSelect = useCallback(() => {
@@ -75,9 +75,15 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
     if (emblaApi) emblaApi.scrollTo(index);
   }, [emblaApi]);
 
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from('user_files').getPublicUrl(filePath);
-    return data.publicUrl;
+  const getPublicUrl = (filePath: string | undefined) => {
+    if (!filePath) return '';
+    try {
+      const { data } = supabase.storage.from('user_files').getPublicUrl(filePath);
+      return data.publicUrl || '';
+    } catch (error) {
+      console.error('Error getting public URL:', error);
+      return '';
+    }
   };
 
   const handleImageClick = (e: React.MouseEvent, index: number) => {
@@ -100,7 +106,7 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
         onClick={handleCardClick}
       >
         {/* Portfolio Gallery */}
-        {showPortfolio && imageFiles.length > 0 && (
+        {showPortfolio && imageFiles.length > 0 && !portfolioLoading && (
           <div 
             className="relative w-full aspect-[4/3] bg-muted overflow-hidden"
             onMouseEnter={() => setHoveredImage(true)}
@@ -108,19 +114,24 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
           >
             <div className="embla w-full h-full" ref={emblaRef}>
               <div className="embla__container h-full flex">
-                {imageFiles.map((file, index) => (
-                  <div 
-                    key={file.id} 
-                    className="embla__slide flex-[0_0_100%] min-w-0 relative"
-                    onClick={(e) => handleImageClick(e, index)}
-                  >
-                    <img
-                      src={getPublicUrl(file.file_path)}
-                      alt={file.title || file.filename}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                ))}
+                {imageFiles.map((file, index) => {
+                  const imageUrl = getPublicUrl(file.file_path);
+                  if (!imageUrl) return null;
+                  
+                  return (
+                    <div 
+                      key={file.id} 
+                      className="embla__slide flex-[0_0_100%] min-w-0 relative"
+                      onClick={(e) => handleImageClick(e, index)}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={file.title || file.filename || 'Portfolio image'}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -244,12 +255,13 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
     {/* Full Image Modal */}
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogContent className="max-w-5xl w-full p-0 overflow-hidden">
-        <div className="relative w-full aspect-video bg-background">
-          <img
-            src={getPublicUrl(imageFiles[modalImageIndex]?.file_path)}
-            alt={imageFiles[modalImageIndex]?.title || imageFiles[modalImageIndex]?.filename}
-            className="w-full h-full object-contain"
-          />
+        {imageFiles[modalImageIndex] && (
+          <div className="relative w-full aspect-video bg-background">
+            <img
+              src={getPublicUrl(imageFiles[modalImageIndex]?.file_path)}
+              alt={imageFiles[modalImageIndex]?.title || imageFiles[modalImageIndex]?.filename || 'Portfolio image'}
+              className="w-full h-full object-contain"
+            />
           
           {/* Modal Navigation */}
           {imageFiles.length > 1 && (
@@ -274,7 +286,8 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
               </div>
             </>
           )}
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
     </>
