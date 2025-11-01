@@ -97,19 +97,21 @@ export const BookingsSection = ({
         (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
         (b?.status === 'completed' || b?.status === 'cancelled')
       );
-
-      // Update tab counts
-      setTabCounts({
-        incoming: incomingRequests.length,
-        sent: sentRequests.length,
-        ongoing: ongoingAgreements.length,
-        upcoming: upcomingEvents.length,
-        history: historicalBookings.length
-      });
     }
   } catch (error) {
     console.error('Error filtering bookings:', error);
   }
+
+  // Update tab counts in useEffect to avoid setState during render
+  useEffect(() => {
+    setTabCounts({
+      incoming: incomingRequests.length,
+      sent: sentRequests.length,
+      ongoing: ongoingAgreements.length,
+      upcoming: upcomingEvents.length,
+      history: historicalBookings.length
+    });
+  }, [bookings, profile.user_id]);
 
   // Helper functions for booking status display with new workflow
   const getStatusColor = (status: string) => {
