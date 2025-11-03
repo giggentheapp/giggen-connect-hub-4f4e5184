@@ -3,10 +3,13 @@ import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Beer } from 'lucide-react';
+import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Beer, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface BandViewModalProps {
   open: boolean;
@@ -18,14 +21,17 @@ interface BandViewModalProps {
 export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: BandViewModalProps) => {
   const [techSpecs, setTechSpecs] = useState<any[]>([]);
   const [hospitalityRiders, setHospitalityRiders] = useState<any[]>([]);
+  const [portfolioFiles, setPortfolioFiles] = useState<any[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchFiles = async () => {
       if (!band.id) return;
       
       try {
-        const [techSpecsRes, hospitalityRes] = await Promise.all([
+        const [techSpecsRes, hospitalityRes, portfolioRes] = await Promise.all([
           supabase
             .from('band_tech_specs')
             .select('*')
@@ -35,11 +41,18 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
             .from('band_hospitality')
             .select('*')
             .eq('band_id', band.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('band_portfolio')
+            .select('*')
+            .eq('band_id', band.id)
+            .eq('is_public', true)
             .order('created_at', { ascending: false })
         ]);
 
         if (techSpecsRes.data) setTechSpecs(techSpecsRes.data);
         if (hospitalityRes.data) setHospitalityRiders(hospitalityRes.data);
+        if (portfolioRes.data) setPortfolioFiles(portfolioRes.data);
       } catch (error) {
         console.error('Error fetching band files:', error);
       } finally {
@@ -52,6 +65,27 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
     }
   }, [band.id, open]);
 
+  // Get image files for gallery
+  const imageFiles = portfolioFiles.filter(file => 
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+  );
+
+  // Keyboard navigation for modal
+  useEffect(() => {
+    if (!modalOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setModalImageIndex((prev) => (prev - 1 + imageFiles.length) % imageFiles.length);
+      } else if (e.key === 'ArrowRight') {
+        setModalImageIndex((prev) => (prev + 1) % imageFiles.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen, imageFiles.length]);
+
   // When showContactInfo is true (admin), show all tabs even if empty
   // When false (public), only show tabs with data
   const hasMusicLinks = showContactInfo || (band.music_links && Object.values(band.music_links).some(link => link));
@@ -60,6 +94,7 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
   const hasContactInfo = showContactInfo;
   const hasTechSpecs = showContactInfo || techSpecs.length > 0;
   const hasHospitality = showContactInfo || hospitalityRiders.length > 0;
+  const hasPortfolio = showContactInfo || portfolioFiles.length > 0;
 
   if (!open) return null;
 
@@ -120,11 +155,17 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
 
           {/* Tabs */}
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${[true, hasMusicLinks, hasDiscography, hasSocialLinks, hasTechSpecs, hasHospitality, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
+            <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${[true, hasPortfolio, hasMusicLinks, hasDiscography, hasSocialLinks, hasTechSpecs, hasHospitality, hasContactInfo].filter(Boolean).length}, 1fr)` }}>
               <TabsTrigger value="about" className="flex-col gap-1 py-2" title="Om bandet">
                 <Info className="h-5 w-5" />
                 <span className="text-xs hidden md:inline">Om</span>
               </TabsTrigger>
+              {hasPortfolio && (
+                <TabsTrigger value="portfolio" className="flex-col gap-1 py-2" title="Portfolio">
+                  <ImageIcon className="h-5 w-5" />
+                  <span className="text-xs hidden md:inline">Portfolio</span>
+                </TabsTrigger>
+              )}
               {hasMusicLinks && (
                 <TabsTrigger value="music" className="flex-col gap-1 py-2" title="Musikk">
                   <Music className="h-5 w-5" />
@@ -173,6 +214,75 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                 <p className="text-muted-foreground text-center py-8">Ingen biografi tilgjengelig</p>
               )}
             </TabsContent>
+
+            {hasPortfolio && (
+              <TabsContent value="portfolio" className="mt-4">
+                {loadingFiles ? (
+                  <p className="text-center text-muted-foreground py-4">Laster...</p>
+                ) : portfolioFiles.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {portfolioFiles.map((file, index) => {
+                      const isImage = file.file_type === 'image' || file.mime_type?.startsWith('image/');
+                      const imageUrl = file.file_path ? 
+                        supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl : 
+                        file.file_url;
+
+                      return (
+                        <div 
+                          key={file.id} 
+                          className="group relative aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer hover:shadow-lg transition-all"
+                          onClick={() => {
+                            if (isImage) {
+                              const imageIndex = imageFiles.findIndex(f => f.id === file.id);
+                              if (imageIndex !== -1) {
+                                setModalImageIndex(imageIndex);
+                                setModalOpen(true);
+                              }
+                            }
+                          }}
+                        >
+                          {isImage ? (
+                            <>
+                              <img 
+                                src={imageUrl}
+                                alt={file.title || file.filename}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute bottom-0 left-0 right-0 p-3">
+                                  <p className="text-white text-sm font-medium truncate">
+                                    {file.title || file.filename}
+                                  </p>
+                                  {file.description && (
+                                    <p className="text-white/80 text-xs truncate mt-1">
+                                      {file.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-accent-purple/10 to-accent-pink/10">
+                              <FileText className="h-8 w-8 text-accent-purple mb-2" />
+                              <p className="text-sm font-medium text-center line-clamp-2">
+                                {file.title || file.filename}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {file.file_type}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    {showContactInfo ? 'Ingen portfolio-filer lagt til ennå' : 'Ingen portfolio tilgjengelig'}
+                  </p>
+                )}
+              </TabsContent>
+            )}
 
             {hasMusicLinks && (
               <TabsContent value="music" className="space-y-3 mt-4">
@@ -449,6 +559,66 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
           </Tabs>
         </div>
       </div>
+
+      {/* Image Modal with Airbnb-style navigation */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent 
+          className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-transparent shadow-none"
+          onClick={() => setModalOpen(false)}
+        >
+          <VisuallyHidden>
+            <DialogTitle>Portfoliobilde</DialogTitle>
+          </VisuallyHidden>
+          <VisuallyHidden>
+            <DialogDescription>
+              Bilde {modalImageIndex + 1} av {imageFiles.length}
+            </DialogDescription>
+          </VisuallyHidden>
+          
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            {imageFiles[modalImageIndex] && (
+              <img 
+                src={
+                  imageFiles[modalImageIndex].file_path ? 
+                    supabase.storage.from('filbank').getPublicUrl(imageFiles[modalImageIndex].file_path).data.publicUrl : 
+                    imageFiles[modalImageIndex].file_url
+                }
+                alt={imageFiles[modalImageIndex].title || imageFiles[modalImageIndex].filename}
+                className="max-w-[90vw] max-h-[85vh] w-auto h-auto object-contain rounded-lg"
+              />
+            )}
+
+            {imageFiles.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModalImageIndex((prev) => (prev - 1 + imageFiles.length) % imageFiles.length);
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/95 hover:bg-background border-2 border-border/50 flex items-center justify-center shadow-xl transition-all duration-200 z-50 hover:scale-110"
+                  aria-label="Forrige bilde"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModalImageIndex((prev) => (prev + 1) % imageFiles.length);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/95 hover:bg-background border-2 border-border/50 flex items-center justify-center shadow-xl transition-all duration-200 z-50 hover:scale-110"
+                  aria-label="Neste bilde"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+                
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-background/95 border border-border/50 text-base font-semibold shadow-xl z-50">
+                  {modalImageIndex + 1} / {imageFiles.length}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
