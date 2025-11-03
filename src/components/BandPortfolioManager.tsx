@@ -219,7 +219,7 @@ const BandPortfolioManager = ({
       <Button 
         onClick={() => setShowFileModal(true)}
         variant="outline"
-        className="w-full h-9 text-xs"
+        className="w-full h-10 text-sm"
       >
         <Cloud className="h-4 w-4 mr-2" />
         {t('selectFromFileBank')}
@@ -237,7 +237,7 @@ const BandPortfolioManager = ({
       {loading ? (
         <div className="text-center py-3 text-xs text-muted-foreground">Laster portefølje...</div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-2">
           {items.map(item => (
             <div key={item.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3 hover:border-border transition-all">
               {editingItem === item.id ? (
@@ -248,7 +248,7 @@ const BandPortfolioManager = ({
                       id="title" 
                       value={editTitle} 
                       onChange={e => setEditTitle(e.target.value)}
-                      className="h-8 text-xs"
+                      className="h-9 text-sm"
                     />
                   </div>
                   <div>
@@ -257,46 +257,48 @@ const BandPortfolioManager = ({
                       id="description" 
                       value={editDescription} 
                       onChange={e => setEditDescription(e.target.value)}
-                      className="text-xs min-h-[60px]"
+                      className="text-sm min-h-[80px]"
                     />
                   </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" onClick={() => handleUpdateItem(item.id)} className="h-7 text-xs">
-                      <Save className="h-3 w-3 mr-1" />
+                  <div className="flex gap-2 flex-col sm:flex-row">
+                    <Button size="sm" onClick={() => handleUpdateItem(item.id)} className="h-9 text-sm flex-1">
+                      <Save className="h-4 w-4 mr-2" />
                       {t('save')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={cancelEditing} className="h-7 text-xs">
-                      <X className="h-3 w-3 mr-1" />
+                    <Button size="sm" variant="outline" onClick={cancelEditing} className="h-9 text-sm flex-1">
+                      <X className="h-4 w-4 mr-2" />
                       {t('cancel')}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-orange/20 to-accent-pink/20 flex items-center justify-center">
-                    {item.file_type === 'image' && <ImageIcon className="h-4 w-4 text-accent-orange" />}
-                    {item.file_type === 'video' && <VideoIcon className="h-4 w-4 text-accent-pink" />}
-                    {item.file_type === 'audio' && <MusicIcon className="h-4 w-4 text-accent-purple" />}
-                    {item.file_type === 'document' && <FileText className="h-4 w-4 text-muted-foreground" />}
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-accent-orange/20 to-accent-pink/20 flex items-center justify-center">
+                    {item.file_type === 'image' && <ImageIcon className="h-5 w-5 text-accent-orange" />}
+                    {item.file_type === 'video' && <VideoIcon className="h-5 w-5 text-accent-pink" />}
+                    {item.file_type === 'audio' && <MusicIcon className="h-5 w-5 text-accent-purple" />}
+                    {item.file_type === 'document' && <FileText className="h-5 w-5 text-muted-foreground" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium truncate">{item.title || item.filename}</h4>
                     {item.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {item.description}
                       </p>
                     )}
-                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-2">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
-                      {item.file_type} • {new Date(item.created_at).toLocaleDateString('no-NO')}
+                      <span className="capitalize">{item.file_type}</span>
+                      <span>•</span>
+                      <span>{new Date(item.created_at).toLocaleDateString('no-NO')}</span>
                     </p>
                   </div>
-                  <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="ghost" onClick={() => startEditing(item)} className="h-7 w-7 p-0">
-                      <Edit2 className="h-3 w-3" />
+                  <div className="flex flex-col sm:flex-row gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="ghost" onClick={() => startEditing(item)} className="h-8 w-8 sm:h-7 sm:w-7 p-0">
+                      <Edit2 className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="h-7 w-7 p-0 hover:bg-muted">
-                      <X className="h-3 w-3" />
+                    <Button size="sm" variant="ghost" onClick={() => handleDeleteItem(item.id)} className="h-8 w-8 sm:h-7 sm:w-7 p-0 hover:bg-destructive/10 hover:text-destructive">
+                      <X className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                     </Button>
                   </div>
                 </div>
@@ -304,8 +306,9 @@ const BandPortfolioManager = ({
             </div>
           ))}
           {items.length === 0 && (
-            <div className="text-center py-4 text-xs text-muted-foreground">
-              Ingen porteføljefiler ennå
+            <div className="text-center py-8 text-sm text-muted-foreground border border-dashed rounded-lg">
+              <p>Ingen porteføljefiler ennå</p>
+              <p className="text-xs mt-1">Klikk på knappen over for å legge til filer</p>
             </div>
           )}
         </div>

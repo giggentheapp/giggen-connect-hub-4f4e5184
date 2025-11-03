@@ -15,6 +15,7 @@ import { FilebankSelectionModal } from './FilebankSelectionModal';
 import { AvatarCropModal } from './AvatarCropModal';
 import BandTechSpecManager from './BandTechSpecManager';
 import BandHospitalityManager from './BandHospitalityManager';
+import BandPortfolioManager from './BandPortfolioManager';
 import { SocialMusicLinksManager } from './SocialMusicLinksManager';
 import {
   AlertDialog,
@@ -289,34 +290,34 @@ export const EditBandDialog = ({
           
           <form onSubmit={handleSubmit}>
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-7 mb-6 h-auto">
-                <TabsTrigger value="basic" className="flex-col gap-1 py-2">
-                  <Info className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Grunnleggende</span>
+              <TabsList className="grid w-full mb-6 h-auto overflow-x-auto" style={{ gridTemplateColumns: 'repeat(7, minmax(60px, 1fr))' }}>
+                <TabsTrigger value="basic" className="flex-col gap-1 py-2 px-2">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Info</span>
                 </TabsTrigger>
-                <TabsTrigger value="visual" className="flex-col gap-1 py-2">
-                  <FolderOpen className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Portfolio</span>
+                <TabsTrigger value="visual" className="flex-col gap-1 py-2 px-2">
+                  <FolderOpen className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Portfolio</span>
                 </TabsTrigger>
-                <TabsTrigger value="music" className="flex-col gap-1 py-2">
-                  <Disc className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Musikk</span>
+                <TabsTrigger value="music" className="flex-col gap-1 py-2 px-2">
+                  <Disc className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Musikk</span>
                 </TabsTrigger>
-                <TabsTrigger value="social" className="flex-col gap-1 py-2">
-                  <Share2 className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Sosiale medier</span>
+                <TabsTrigger value="social" className="flex-col gap-1 py-2 px-2">
+                  <Share2 className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Sosiale</span>
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="flex-col gap-1 py-2">
-                  <Mail className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Kontakt</span>
+                <TabsTrigger value="contact" className="flex-col gap-1 py-2 px-2">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Kontakt</span>
                 </TabsTrigger>
-                <TabsTrigger value="techspecs" className="flex-col gap-1 py-2">
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Tech Specs</span>
+                <TabsTrigger value="techspecs" className="flex-col gap-1 py-2 px-2">
+                  <Settings className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Tech</span>
                 </TabsTrigger>
-                <TabsTrigger value="hospitality" className="flex-col gap-1 py-2">
-                  <Beer className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Hospitality</span>
+                <TabsTrigger value="hospitality" className="flex-col gap-1 py-2 px-2">
+                  <Beer className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Hosp.</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -378,55 +379,81 @@ export const EditBandDialog = ({
                 </div>
               </TabsContent>
 
-              <TabsContent value="visual" className="space-y-4 mt-4">
-                <div>
-                  <Label>Bandlogo</Label>
-                  <div className="flex items-center gap-4 mt-2">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={imagePreview || undefined} />
-                      <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
-                        {name ? name.substring(0, 2).toUpperCase() : 'B'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setFileModalType('logo');
-                        setShowFilebankModal(true);
-                      }}
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Bannerbilde</Label>
-                  <div className="mt-2 space-y-2">
-                    {bannerPreview && (
-                      <div className="w-full h-32 rounded-lg overflow-hidden">
-                        <img 
-                          src={bannerPreview} 
-                          alt="Banner preview" 
-                          className="w-full h-full object-cover"
-                        />
+              <TabsContent value="visual" className="space-y-6 mt-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-base font-semibold">Profil & Banner</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">Bandlogo og bannerbilde</p>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm">Bandlogo</Label>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+                          <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                            <AvatarImage src={imagePreview || undefined} />
+                            <AvatarFallback className="text-xl sm:text-2xl bg-gradient-primary text-primary-foreground">
+                              {name ? name.substring(0, 2).toUpperCase() : 'B'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setFileModalType('logo');
+                              setShowFilebankModal(true);
+                            }}
+                            className="w-full sm:w-auto"
+                          >
+                            <FolderOpen className="h-4 w-4 mr-2" />
+                            Velg fra Filbank
+                          </Button>
+                        </div>
                       </div>
+
+                      <div>
+                        <Label className="text-sm">Bannerbilde</Label>
+                        <div className="mt-2 space-y-2">
+                          {bannerPreview && (
+                            <div className="w-full h-24 sm:h-32 rounded-lg overflow-hidden">
+                              <img 
+                                src={bannerPreview} 
+                                alt="Banner preview" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setFileModalType('banner');
+                              setShowFilebankModal(true);
+                            }}
+                            className="w-full sm:w-auto"
+                          >
+                            <FolderOpen className="h-4 w-4 mr-2" />
+                            Velg fra Filbank
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <Label className="text-base font-semibold">Portfolio</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">
+                      Bilder, videoer og dokumenter som vises i bandets portfolio
+                    </p>
+                    {userId && (
+                      <BandPortfolioManager
+                        userId={userId}
+                        bandId={band.id}
+                        title=""
+                        description=""
+                      />
                     )}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setFileModalType('banner');
-                        setShowFilebankModal(true);
-                      }}
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
                   </div>
                 </div>
               </TabsContent>
