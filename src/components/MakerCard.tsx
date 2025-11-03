@@ -100,6 +100,22 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
     }
   };
 
+  // Keyboard navigation for modal
+  useEffect(() => {
+    if (!modalOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setModalImageIndex((prev) => (prev - 1 + imageFiles.length) % imageFiles.length);
+      } else if (e.key === 'ArrowRight') {
+        setModalImageIndex((prev) => (prev + 1) % imageFiles.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen, imageFiles.length]);
+
   return (
     <>
       <Card 
@@ -274,21 +290,27 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
           {imageFiles.length > 1 && (
             <>
               <button
-                onClick={() => setModalImageIndex((prev) => (prev - 1 + imageFiles.length) % imageFiles.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/90 hover:bg-background flex items-center justify-center shadow-lg transition-all duration-200"
-                aria-label="Previous image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalImageIndex((prev) => (prev - 1 + imageFiles.length) % imageFiles.length);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/95 hover:bg-background border-2 border-border/50 flex items-center justify-center shadow-xl transition-all duration-200 z-50 hover:scale-110"
+                aria-label="Forrige bilde"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-6 h-6" />
               </button>
               <button
-                onClick={() => setModalImageIndex((prev) => (prev + 1) % imageFiles.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/90 hover:bg-background flex items-center justify-center shadow-lg transition-all duration-200"
-                aria-label="Next image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalImageIndex((prev) => (prev + 1) % imageFiles.length);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/95 hover:bg-background border-2 border-border/50 flex items-center justify-center shadow-xl transition-all duration-200 z-50 hover:scale-110"
+                aria-label="Neste bilde"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-6 h-6" />
               </button>
               
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-background/90 text-sm font-medium shadow-md">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-background/95 border border-border/50 text-base font-semibold shadow-xl z-50">
                 {modalImageIndex + 1} / {imageFiles.length}
               </div>
             </>
