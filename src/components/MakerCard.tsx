@@ -79,7 +79,7 @@ export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
   const getPublicUrl = (filePath: string | undefined) => {
     if (!filePath) return '';
     try {
-      const { data } = supabase.storage.from('user_files').getPublicUrl(filePath);
+      const { data } = supabase.storage.from('filbank').getPublicUrl(filePath);
       return data.publicUrl || '';
     } catch (error) {
       console.error('Error getting public URL:', error);
