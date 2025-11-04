@@ -12,6 +12,7 @@ import { BandMembersList } from '@/components/BandMembersList';
 import { InviteMemberDialog } from '@/components/InviteMemberDialog';
 import { EditBandDialog } from '@/components/EditBandDialog';
 import { BandViewModal } from '@/components/BandViewModal';
+import { BandInvites } from '@/components/BandInvites';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
@@ -25,6 +26,7 @@ const BandProfile = () => {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPublicView, setShowPublicView] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   // Check if we should force public view (from profile section)
   const searchParams = new URLSearchParams(window.location.search);
@@ -83,6 +85,7 @@ const BandProfile = () => {
         // Check current user's role in band
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          setCurrentUserId(user.id);
           const userMember = membersData?.find(m => m.user_id === user.id);
           setCurrentUserRole(userMember?.role || null);
         }
@@ -238,6 +241,9 @@ const BandProfile = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Band Invites - show for the current user */}
+        {currentUserId && <BandInvites userId={currentUserId} />}
 
         {/* Members Card */}
         <Card>
