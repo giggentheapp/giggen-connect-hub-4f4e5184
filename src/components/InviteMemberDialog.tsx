@@ -89,16 +89,39 @@ export const InviteMemberDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
+      // Check if there's already a pending invite
+      const { data: existingInvite } = await supabase
         .from('band_invites')
-        .insert({
-          band_id: bandId,
-          invited_by: user.id,
-          invited_user_id: userId,
-          status: 'pending',
-        });
+        .select('id')
+        .eq('band_id', bandId)
+        .eq('invited_user_id', userId)
+        .eq('status', 'pending')
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingInvite) {
+        // Update existing invite to "resend" it
+        const { error } = await supabase
+          .from('band_invites')
+          .update({ 
+            created_at: new Date().toISOString(),
+            invited_by: user.id 
+          })
+          .eq('id', existingInvite.id);
+
+        if (error) throw error;
+      } else {
+        // Create new invite
+        const { error } = await supabase
+          .from('band_invites')
+          .insert({
+            band_id: bandId,
+            invited_by: user.id,
+            invited_user_id: userId,
+            status: 'pending',
+          });
+
+        if (error) throw error;
+      }
 
       // Check if user wants band invite notifications
       const { data: profileSettings } = await supabase
