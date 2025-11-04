@@ -1103,6 +1103,7 @@ export type Database = {
           created_at: string
           id: string
           maker_id: string
+          notifications_band_invites: boolean | null
           notifications_booking_requests: boolean
           show_about: boolean | null
           show_contact: boolean
@@ -1117,6 +1118,7 @@ export type Database = {
           created_at?: string
           id?: string
           maker_id: string
+          notifications_band_invites?: boolean | null
           notifications_booking_requests?: boolean
           show_about?: boolean | null
           show_contact?: boolean
@@ -1131,6 +1133,7 @@ export type Database = {
           created_at?: string
           id?: string
           maker_id?: string
+          notifications_band_invites?: boolean | null
           notifications_booking_requests?: boolean
           show_about?: boolean | null
           show_contact?: boolean

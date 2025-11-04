@@ -113,6 +113,26 @@ export const InviteMemberDialog = ({
 
       if (error) throw error;
 
+      // Check if user wants band invite notifications
+      const { data: profileSettings } = await supabase
+        .from('profile_settings')
+        .select('notifications_band_invites')
+        .eq('maker_id', userId)
+        .maybeSingle();
+
+      // Create notification if user has notifications enabled (default to true if not set)
+      if (profileSettings?.notifications_band_invites !== false) {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: userId,
+            type: 'band_invite',
+            title: 'Ny bandinvitasjon',
+            message: `Du har blitt invitert til å bli med i ${bandName}`,
+            link: '/dashboard?section=bands',
+          });
+      }
+
       toast({
         title: 'Invitasjon sendt!',
         description: 'Musikeren har mottatt invitasjonen',

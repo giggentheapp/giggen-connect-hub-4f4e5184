@@ -35,6 +35,7 @@ interface ProfileSettings {
   show_on_map: boolean;
   show_contact: boolean;
   notifications_booking_requests?: boolean;
+  notifications_band_invites?: boolean;
 }
 
 interface PrivacySettings {
@@ -1062,6 +1063,19 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             <Switch
               checked={profileSettings?.notifications_booking_requests !== false}
               onCheckedChange={(checked) => updateProfileSettings({ notifications_booking_requests: checked })}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Band Invite Notifications Toggle */}
+          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+            <div className="flex-1 pr-4">
+              <Label className="text-sm font-medium cursor-pointer">Bandinvitasjoner</Label>
+              <p className="text-xs text-muted-foreground mt-1">Få varsel når noen inviterer deg til et band</p>
+            </div>
+            <Switch
+              checked={profileSettings?.notifications_band_invites !== false}
+              onCheckedChange={(checked) => updateProfileSettings({ notifications_band_invites: checked })}
               disabled={loading}
             />
           </div>
