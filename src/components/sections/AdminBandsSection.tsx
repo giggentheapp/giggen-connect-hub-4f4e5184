@@ -75,6 +75,49 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
     }
   };
 
+  const toggleProfileVisibility = async (memberId: string, bandName: string, currentState: boolean) => {
+    console.log('🔄 Toggle profile visibility:', { memberId, bandName, currentState });
+
+    try {
+      const newVisibilityState = !currentState;
+      console.log('➡️ Setting show_in_profile to:', newVisibilityState);
+      
+      const { error, data } = await supabase
+        .from('band_members')
+        .update({ 
+          show_in_profile: newVisibilityState
+        })
+        .eq('id', memberId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Toggle error:', error);
+        throw error;
+      }
+      
+      console.log('✅ Band member updated:', data);
+
+      toast({
+        title: newVisibilityState ? '✅ Synlig i profil' : '🔒 Skjult fra profil',
+        description: newVisibilityState 
+          ? `"${bandName}" vises nå i din profil` 
+          : `"${bandName}" er nå skjult fra din profil`,
+      });
+      
+      // Refetch to get updated data
+      await refetch();
+      
+    } catch (error: any) {
+      console.error('❌ Toggle profile visibility error:', error);
+      toast({
+        title: 'Kunne ikke endre profilsynlighet',
+        description: error.message || 'En ukjent feil oppstod',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-auto pb-24 md:pb-0">
       <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-6">
@@ -109,52 +152,70 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
             <div className="space-y-3">
               {bands.map((band: any) => (
                 <div key={band.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 hover:border-border transition-all">
-                  <div className="flex items-start gap-3 p-3">
-                    <div className="flex-1 min-w-0">
-                      <div 
-                        onClick={() => navigate(`/band/${band.id}`)}
-                        className="cursor-pointer"
-                      >
-                        <h3 className="text-sm font-semibold truncate">{band.name}</h3>
-                        {band.description && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {band.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
-                            {band.member_count} medlemmer
-                          </span>
-                          {band.genre && (
-                            <span className="inline-flex items-center gap-1">
-                              <span>•</span>
-                              {band.genre}
-                            </span>
+                  <div className="flex flex-col gap-3 p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div 
+                          onClick={() => navigate(`/band/${band.id}`)}
+                          className="cursor-pointer"
+                        >
+                          <h3 className="text-sm font-semibold truncate">{band.name}</h3>
+                          {band.description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {band.description}
+                            </p>
                           )}
+                          <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-orange"></span>
+                              {band.member_count} medlemmer
+                            </span>
+                            {band.genre && (
+                              <span className="inline-flex items-center gap-1">
+                                <span>•</span>
+                                {band.genre}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                     
-                    {/* Visibility Toggle */}
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
-                      {band.is_public ? (
-                        <>
-                          <Eye className="h-3 w-3 text-green-600" />
-                          <span className="text-xs font-medium">Offentlig</span>
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs font-medium">Skjult</span>
-                        </>
-                      )}
-                      <Switch
-                        checked={band.is_public}
-                        onCheckedChange={() => toggleBandVisibility(band.id, band.name, band.is_public, band.user_role)}
-                        className="data-[state=checked]:bg-green-500 scale-75"
-                        disabled={!['admin', 'founder'].includes(band.user_role)}
-                      />
+                    {/* Toggles Row */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Profile Visibility Toggle - Available to all members */}
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                        <Users className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium">
+                          {band.show_in_profile ? 'I profil' : 'Ikke i profil'}
+                        </span>
+                        <Switch
+                          checked={band.show_in_profile}
+                          onCheckedChange={() => toggleProfileVisibility(band.member_id, band.name, band.show_in_profile)}
+                          className="data-[state=checked]:bg-blue-500 scale-75"
+                        />
+                      </div>
+
+                      {/* Public Visibility Toggle - Only for admin/founder */}
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                        {band.is_public ? (
+                          <>
+                            <Eye className="h-3 w-3 text-green-600" />
+                            <span className="text-xs font-medium">Offentlig</span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs font-medium">Skjult</span>
+                          </>
+                        )}
+                        <Switch
+                          checked={band.is_public}
+                          onCheckedChange={() => toggleBandVisibility(band.id, band.name, band.is_public, band.user_role)}
+                          className="data-[state=checked]:bg-green-500 scale-75"
+                          disabled={!['admin', 'founder'].includes(band.user_role)}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
