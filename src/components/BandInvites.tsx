@@ -32,7 +32,9 @@ export const BandInvites = ({ userId }: BandInvitesProps) => {
     );
   }
 
-  if (invites.length === 0) {
+  console.log('BandInvites rendering:', { userId, invites, loading });
+
+  if (invites.length === 0 && !loading) {
     return null;
   }
 

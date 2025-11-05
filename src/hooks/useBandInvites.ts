@@ -35,6 +35,7 @@ export const useBandInvites = (userId: string | undefined) => {
 
         // Skip invites with missing data
         if (!band || !inviter) {
+          console.log('Skipping invite due to missing data:', { invite, band, inviter });
           return null;
         }
 
@@ -47,7 +48,9 @@ export const useBandInvites = (userId: string | undefined) => {
       }));
 
       // Filter out null entries (invites with missing data)
-      setInvites(invitesWithData.filter(Boolean) as BandInvite[]);
+      const validInvites = invitesWithData.filter(Boolean) as BandInvite[];
+      console.log('Valid band invites:', validInvites);
+      setInvites(validInvites);
     } catch (error: any) {
       toast({
         title: 'Feil ved lasting av invitasjoner',
