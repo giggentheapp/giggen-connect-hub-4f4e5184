@@ -21,8 +21,8 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const toggleBandVisibility = async (bandId: string, memberId: string, bandName: string, currentState: boolean, userRole: string) => {
-    console.log('Toggle band visibility:', { bandId, bandName, currentState, userRole });
+  const toggleBandVisibility = async (bandId: string, bandName: string, currentState: boolean, userRole: string) => {
+    console.log('🔄 Toggle band visibility:', { bandId, bandName, currentState, userRole });
     
     // Only admin or founder can change public visibility
     if (!['admin', 'founder'].includes(userRole)) {
@@ -36,23 +36,24 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
 
     try {
       const newVisibilityState = !currentState;
-      console.log('Setting is_public to:', newVisibilityState);
+      console.log('➡️ Setting is_public to:', newVisibilityState);
       
-      // Update is_public in bands table instead of show_in_profile
       const { error, data } = await supabase
         .from('bands')
         .update({ 
-          is_public: newVisibilityState
+          is_public: newVisibilityState,
+          updated_at: new Date().toISOString()
         })
         .eq('id', bandId)
-        .select();
+        .select()
+        .single();
 
       if (error) {
-        console.error('Toggle error:', error);
+        console.error('❌ Toggle error:', error);
         throw error;
       }
       
-      console.log('Updated band:', data);
+      console.log('✅ Band updated:', data);
 
       toast({
         title: newVisibilityState ? '✅ Band synlig i utforsk' : '🔒 Band skjult fra utforsk',
@@ -61,13 +62,14 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
           : `"${bandName}" er nå skjult fra utforsk-seksjonen`,
       });
       
+      // Refetch to get updated data
       await refetch();
       
     } catch (error: any) {
-      console.error('Toggle visibility error:', error);
+      console.error('❌ Toggle visibility error:', error);
       toast({
         title: 'Kunne ikke endre synlighet',
-        description: error.message,
+        description: error.message || 'En ukjent feil oppstod',
         variant: 'destructive',
       });
     }
@@ -149,8 +151,9 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
                       )}
                       <Switch
                         checked={band.is_public}
-                        onCheckedChange={() => toggleBandVisibility(band.id, band.member_id, band.name, band.is_public, band.user_role)}
+                        onCheckedChange={() => toggleBandVisibility(band.id, band.name, band.is_public, band.user_role)}
                         className="data-[state=checked]:bg-green-500 scale-75"
+                        disabled={!['admin', 'founder'].includes(band.user_role)}
                       />
                     </div>
                   </div>
