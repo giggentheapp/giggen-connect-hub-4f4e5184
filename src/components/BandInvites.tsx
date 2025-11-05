@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +12,7 @@ interface BandInvitesProps {
 
 export const BandInvites = ({ userId }: BandInvitesProps) => {
   const { invites, loading, acceptInvite, declineInvite } = useBandInvites(userId);
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   if (loading) {
     return (
@@ -66,7 +68,12 @@ export const BandInvites = ({ userId }: BandInvitesProps) => {
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 size="sm"
-                onClick={() => acceptInvite(invite.id)}
+                onClick={async () => {
+                  setIsProcessing(true);
+                  await acceptInvite(invite.id);
+                  setIsProcessing(false);
+                }}
+                disabled={isProcessing}
                 className="gap-1 bg-green-600 hover:bg-green-700 min-w-[90px]"
               >
                 <Check className="h-4 w-4" />
@@ -75,7 +82,12 @@ export const BandInvites = ({ userId }: BandInvitesProps) => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => declineInvite(invite.id)}
+                onClick={async () => {
+                  setIsProcessing(true);
+                  await declineInvite(invite.id);
+                  setIsProcessing(false);
+                }}
+                disabled={isProcessing}
                 className="gap-1 min-w-[90px]"
               >
                 <X className="h-4 w-4" />
