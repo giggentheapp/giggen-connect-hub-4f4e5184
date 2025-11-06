@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Image, File, Check } from 'lucide-react';
+import { Image, File, Check, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -138,66 +138,83 @@ export const FilebankSelectionModal = ({
     );
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+  if (!isOpen) return null;
 
-        <ScrollArea className="flex-1 pr-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  return (
+    <div className="fixed inset-0 z-50 bg-background">
+      <div className="h-full flex flex-col">
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">{title}</h1>
+                <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-          ) : files.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Ingen filer funnet i filbanken</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {files.map((file) => (
-                <Card
-                  key={file.id}
-                  className={`cursor-pointer hover:border-primary transition-all ${
-                    selectedFile?.id === file.id ? 'border-primary ring-2 ring-primary' : ''
-                  }`}
-                  onClick={() => setSelectedFile(file)}
-                >
-                  <CardContent className="p-3 space-y-2">
-                    <div className="relative">
-                      {renderFilePreview(file)}
-                      {selectedFile?.id === file.id && (
-                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
-                          <Check className="h-4 w-4" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium truncate" title={file.filename}>
-                        {file.filename}
-                      </p>
-                      <Badge variant="secondary" className="text-xs">
-                        {file.file_type}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          </div>
+        </div>
+
+        <ScrollArea className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : files.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Ingen filer funnet i filbanken</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {files.map((file) => (
+                  <Card
+                    key={file.id}
+                    className={`cursor-pointer hover:border-primary transition-all ${
+                      selectedFile?.id === file.id ? 'border-primary ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => setSelectedFile(file)}
+                  >
+                    <CardContent className="p-3 space-y-2">
+                      <div className="relative">
+                        {renderFilePreview(file)}
+                        {selectedFile?.id === file.id && (
+                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                            <Check className="h-4 w-4" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium truncate" title={file.filename}>
+                          {file.filename}
+                        </p>
+                        <Badge variant="secondary" className="text-xs">
+                          {file.file_type}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </ScrollArea>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={onClose}>
-            Avbryt
-          </Button>
-          <Button onClick={handleSelect} disabled={!selectedFile}>
-            Velg fil
-          </Button>
+        <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Avbryt
+              </Button>
+              <Button onClick={handleSelect} disabled={!selectedFile}>
+                Velg fil
+              </Button>
+            </div>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
