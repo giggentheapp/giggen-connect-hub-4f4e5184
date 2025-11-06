@@ -246,7 +246,7 @@ const BandPortfolioManager = ({
         className="w-full h-10 text-sm"
       >
         <Cloud className="h-4 w-4 mr-2" />
-        {t('selectFromFileBank')}
+        Velg fra Filbank
       </Button>
 
       <FilebankSelectionModal
@@ -258,7 +258,7 @@ const BandPortfolioManager = ({
         onSelect={handleFileSelected}
         userId={userId}
         fileTypes={['image', 'video']}
-        title={t('selectFromFileBank')}
+        title="Velg fra Filbank"
         description="Velg bilder eller videoer fra filbanken"
       />
 
