@@ -74,9 +74,11 @@ const BandPortfolioManager = ({
   };
 
   const handleFileSelected = async (file: any) => {
+    console.log('📎 File selected from filebank:', file);
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
+        console.error('❌ Auth error:', authError);
         toast({
           title: "Ikke innlogget",
           description: "Du må være innlogget",
@@ -84,6 +86,8 @@ const BandPortfolioManager = ({
         });
         return;
       }
+
+      console.log('✅ User authenticated, adding file to band portfolio');
 
       // Generate file_url from file_path if it doesn't exist
       let fileUrl = file.file_url;
@@ -93,6 +97,7 @@ const BandPortfolioManager = ({
       }
 
       // Add to file_usage
+      console.log('📝 Adding file usage entry');
       const { error: usageError } = await supabase
         .from('file_usage')
         .insert({
@@ -101,9 +106,13 @@ const BandPortfolioManager = ({
           reference_id: bandId
         });
 
-      if (usageError) throw usageError;
+      if (usageError) {
+        console.error('❌ Usage error:', usageError);
+        throw usageError;
+      }
 
       // Create band portfolio entry
+      console.log('📝 Creating band portfolio entry');
       const portfolioData = {
         band_id: bandId,
         file_type: file.file_type,
@@ -123,8 +132,12 @@ const BandPortfolioManager = ({
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Portfolio insert error:', error);
+        throw error;
+      }
 
+      console.log('✅ File added to band portfolio');
       setItems(prev => [data, ...prev]);
       setShowFileModal(false);
       toast({
@@ -132,6 +145,7 @@ const BandPortfolioManager = ({
         description: 'Filen er lagt til i bandporteføljen'
       });
     } catch (error: any) {
+      console.error('❌ Error in handleFileSelected:', error);
       toast({
         title: 'Feil',
         description: error.message,
@@ -224,7 +238,10 @@ const BandPortfolioManager = ({
       </div>
       
       <Button 
-        onClick={() => setShowFileModal(true)}
+        onClick={() => {
+          console.log('🔘 Opening filebank modal', { userId, bandId });
+          setShowFileModal(true);
+        }}
         variant="outline"
         className="w-full h-10 text-sm"
       >
@@ -234,7 +251,10 @@ const BandPortfolioManager = ({
 
       <FilebankSelectionModal
         isOpen={showFileModal}
-        onClose={() => setShowFileModal(false)}
+        onClose={() => {
+          console.log('🔘 Closing filebank modal');
+          setShowFileModal(false);
+        }}
         onSelect={handleFileSelected}
         userId={userId}
         fileTypes={['image', 'video']}

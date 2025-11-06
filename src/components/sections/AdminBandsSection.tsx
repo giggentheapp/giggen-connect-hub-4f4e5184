@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Users, Eye, EyeOff } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { BandCard } from "@/components/BandCard";
 import { CreateBandModal } from "@/components/CreateBandModal";
 import { BandInvites } from "@/components/BandInvites";
@@ -21,59 +21,6 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const toggleBandVisibility = async (bandId: string, bandName: string, currentState: boolean, userRole: string) => {
-    console.log('🔄 Toggle band visibility:', { bandId, bandName, currentState, userRole });
-    
-    // Only admin or founder can change public visibility
-    if (!['admin', 'founder'].includes(userRole)) {
-      toast({
-        title: 'Ingen tilgang',
-        description: 'Kun admin eller grunnlegger kan endre synlighet',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      const newVisibilityState = !currentState;
-      console.log('➡️ Setting is_public to:', newVisibilityState);
-      
-      const { error, data } = await supabase
-        .from('bands')
-        .update({ 
-          is_public: newVisibilityState,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', bandId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Toggle error:', error);
-        throw error;
-      }
-      
-      console.log('✅ Band updated:', data);
-
-      toast({
-        title: newVisibilityState ? '✅ Band synlig i utforsk' : '🔒 Band skjult fra utforsk',
-        description: newVisibilityState 
-          ? `"${bandName}" er nå synlig i utforsk-seksjonen` 
-          : `"${bandName}" er nå skjult fra utforsk-seksjonen`,
-      });
-      
-      // Refetch to get updated data
-      await refetch();
-      
-    } catch (error: any) {
-      console.error('❌ Toggle visibility error:', error);
-      toast({
-        title: 'Kunne ikke endre synlighet',
-        description: error.message || 'En ukjent feil oppstod',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const toggleProfileVisibility = async (memberId: string, bandName: string, currentState: boolean) => {
     console.log('🔄 Toggle profile visibility:', { memberId, bandName, currentState });
@@ -181,41 +128,17 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
                       </div>
                     </div>
                     
-                    {/* Toggles Row */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Profile Visibility Toggle - Available to all members */}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
-                        <Users className="h-3 w-3 text-blue-600" />
-                        <span className="text-xs font-medium">
-                          {band.show_in_profile ? 'I profil' : 'Ikke i profil'}
-                        </span>
-                        <Switch
-                          checked={band.show_in_profile}
-                          onCheckedChange={() => toggleProfileVisibility(band.member_id, band.name, band.show_in_profile)}
-                          className="data-[state=checked]:bg-blue-500 scale-75"
-                        />
-                      </div>
-
-                      {/* Public Visibility Toggle - Only for admin/founder */}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
-                        {band.is_public ? (
-                          <>
-                            <Eye className="h-3 w-3 text-green-600" />
-                            <span className="text-xs font-medium">Offentlig</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs font-medium">Skjult</span>
-                          </>
-                        )}
-                        <Switch
-                          checked={band.is_public}
-                          onCheckedChange={() => toggleBandVisibility(band.id, band.name, band.is_public, band.user_role)}
-                          className="data-[state=checked]:bg-green-500 scale-75"
-                          disabled={!['admin', 'founder'].includes(band.user_role)}
-                        />
-                      </div>
+                    {/* Profile Visibility Toggle */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                      <Users className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs font-medium">
+                        {band.show_in_profile ? 'I profil' : 'Ikke i profil'}
+                      </span>
+                      <Switch
+                        checked={band.show_in_profile}
+                        onCheckedChange={() => toggleProfileVisibility(band.member_id, band.name, band.show_in_profile)}
+                        className="data-[state=checked]:bg-blue-500 scale-75"
+                      />
                     </div>
                   </div>
                 </div>

@@ -54,6 +54,14 @@ export const FilebankSelectionModal = ({
   const fetchFiles = async () => {
     try {
       setLoading(true);
+      console.log('📂 Fetching filebank files:', { userId, category, fileTypes });
+      
+      if (!userId) {
+        console.error('❌ No userId provided to FilebankSelectionModal');
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('user_files')
         .select('*')
@@ -72,11 +80,15 @@ export const FilebankSelectionModal = ({
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching files:', error);
+        throw error;
+      }
 
+      console.log('✅ Files fetched:', data?.length || 0, 'files');
       setFiles(data || []);
     } catch (error) {
-      console.error('Error fetching files:', error);
+      console.error('❌ Error in fetchFiles:', error);
     } finally {
       setLoading(false);
     }
