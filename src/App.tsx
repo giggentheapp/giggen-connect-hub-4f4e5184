@@ -8,6 +8,7 @@ import { RoleProvider } from "@/contexts/RoleProvider";
 import { MobileLayoutOptimizer } from "@/components/MobileLayoutOptimizer";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
+import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -59,6 +60,7 @@ const App = () => {
             <Sonner />
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/start" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />

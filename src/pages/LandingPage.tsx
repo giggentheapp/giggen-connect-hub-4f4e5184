@@ -16,7 +16,13 @@ const LandingPage = () => {
 
   const navigateToApp = () => {
     console.log('Navigating to main app with language:', language);
-    navigate('/dashboard');
+    // Check if user has seen onboarding
+    const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+    if (hasSeenOnboarding !== 'true') {
+      navigate('/onboarding');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
