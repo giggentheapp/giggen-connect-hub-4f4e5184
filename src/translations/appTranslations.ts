@@ -1055,6 +1055,59 @@ export const appTranslations = {
     contact: "Contact",
     allRightsReserved: "All rights reserved.",
     
+    // Onboarding
+    onboarding: {
+      roleSelection: {
+        title: "Who are you?",
+        subtitle: "Choose your role to get started",
+        musician: "Musician / Artist",
+        musicianDescription: "I make music and want to build a profile",
+        organizer: "Organizer",
+        organizerDescription: "I book artists and organize concerts"
+      },
+      slides: {
+        welcome: {
+          title: "Welcome to GIGGEN",
+          content1: "A platform for musicians, organizers and audiences.",
+          content2: "One place for everything – visibility, offers, booking and collaboration.",
+          content3: "Become your own manager today."
+        },
+        profile: {
+          title: "Create profile and portfolio",
+          content1: "Create a profile as a musician or organizer.",
+          content2: "Show who you are and what you offer.",
+          content3: "Add images, videos and projects – build your own portfolio."
+        },
+        booking: {
+          title: "Create offers and book collaborations",
+          content1: "Create offers for gigs, courses or projects.",
+          content2: "Send and receive requests – agree, approve and play.",
+          content3: "Everything you need to work professionally with music."
+        },
+        publish: {
+          title: "Publish when you're ready",
+          content1: "Decide what's visible – and when.",
+          content2: "Keep internal agreements and courses private, or publish concerts when the time comes.",
+          content3: "Take the initiative. Get started now."
+        }
+      },
+      source: {
+        title: "Where did you hear about GIGGEN?",
+        subtitle: "Help us improve",
+        instagram: "Instagram",
+        tiktok: "TikTok",
+        friend: "A friend",
+        festival: "Festival",
+        other: "Other"
+      },
+      buttons: {
+        next: "Next",
+        getStarted: "Get Started",
+        skip: "Skip",
+        close: "Close"
+      }
+    },
+    
     // ConceptCard translations
     conceptCard: {
       published: "Published",

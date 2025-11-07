@@ -2,15 +2,25 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Music, User, Handshake, Zap, ChevronRight, X } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import giggenLogo from '@/assets/giggen-logo.png';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface OnboardingProps {
   mode?: 'first-time' | 'menu';
 }
 
+type OnboardingScreen = 'role' | 'slides' | 'source';
+
 const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const navigate = useNavigate();
+  const { t, language } = useAppTranslation();
+  const [currentScreen, setCurrentScreen] = useState<OnboardingScreen>('role');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Check if user has already seen onboarding (only for first-time mode)
@@ -22,11 +32,45 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
     }
   }, [navigate, mode]);
 
+  const handleRoleSelect = (role: string) => {
+    setSelectedRole(role);
+    setCurrentScreen('slides');
+  };
+
   const handleNext = () => {
     if (currentSlide < 3) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Mark onboarding as seen and navigate to auth (only for first-time mode)
+      // Move to source question screen
+      setCurrentScreen('source');
+    }
+  };
+
+  const handleSourceSelect = async (source: string) => {
+    setIsSubmitting(true);
+    
+    try {
+      // Send onboarding data to edge function
+      const { error } = await supabase.functions.invoke('send-onboarding-email', {
+        body: {
+          language: language,
+          role: selectedRole,
+          source: source,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      if (error) {
+        console.error('Error sending onboarding email:', error);
+        // Don't block user flow
+      }
+    } catch (error) {
+      console.error('Error in onboarding submission:', error);
+      // Don't block user flow
+    } finally {
+      setIsSubmitting(false);
+      
+      // Mark onboarding as seen and navigate
       if (mode === 'first-time') {
         localStorage.setItem('has_seen_onboarding', 'true');
         navigate('/auth');
@@ -51,51 +95,186 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
 
   const slides = [
     {
-      title: '🎶 Velkommen til GIGGEN',
+      title: t('onboarding.slides.welcome.title'),
       content: [
-        'En plattform for musikere, arrangører og publikum.',
-        'Ett sted for alt – synlighet, tilbud, booking og samarbeid.',
-        'Bli din egen manager i dag.'
+        t('onboarding.slides.welcome.content1'),
+        t('onboarding.slides.welcome.content2'),
+        t('onboarding.slides.welcome.content3')
       ],
       icon: Music,
-      gradient: 'from-[#FF914D] to-[#FF3D81]',
-      buttonText: 'Neste'
+      gradient: 'from-[#FF914D] to-[#FF3D81]'
     },
     {
-      title: 'Lag profil og portefølje',
+      title: t('onboarding.slides.profile.title'),
       content: [
-        'Opprett profil som musiker eller arrangør.',
-        'Vis hvem du er og hva du tilbyr.',
-        'Legg til bilder, videoer og prosjekter – bygg din egen portefølje.'
+        t('onboarding.slides.profile.content1'),
+        t('onboarding.slides.profile.content2'),
+        t('onboarding.slides.profile.content3')
       ],
       icon: User,
-      gradient: 'from-[#FF914D]/80 to-[#FF3D81]/80',
-      buttonText: 'Neste'
+      gradient: 'from-[#FF914D]/80 to-[#FF3D81]/80'
     },
     {
-      title: '🎸 Lag tilbud og book samarbeid',
+      title: t('onboarding.slides.booking.title'),
       content: [
-        'Lag tilbud på gigs, kurs eller prosjekter.',
-        'Send og motta forespørsler – avtal, godkjenn og spill.',
-        'Alt du trenger for å jobbe profesjonelt med musikk.'
+        t('onboarding.slides.booking.content1'),
+        t('onboarding.slides.booking.content2'),
+        t('onboarding.slides.booking.content3')
       ],
       icon: Handshake,
-      gradient: 'from-[#FF914D] via-[#FF3D81] to-[#FF914D]/60',
-      buttonText: 'Neste'
+      gradient: 'from-[#FF914D] via-[#FF3D81] to-[#FF914D]/60'
     },
     {
-      title: '🌍 Publiser når du er klar',
+      title: t('onboarding.slides.publish.title'),
       content: [
-        'Bestem selv hva som er synlig – og når.',
-        'Hold interne avtaler og kurs privat, eller publiser konserter når tiden er inne.',
-        'Ta initiativ. Kom i gang nå.'
+        t('onboarding.slides.publish.content1'),
+        t('onboarding.slides.publish.content2'),
+        t('onboarding.slides.publish.content3')
       ],
       icon: Zap,
-      gradient: 'from-[#2B2B2B] via-[#FF914D] to-[#FF3D81]',
-      buttonText: 'Kom i gang'
+      gradient: 'from-[#2B2B2B] via-[#FF914D] to-[#FF3D81]'
     }
   ];
 
+  // Role Selection Screen
+  if (currentScreen === 'role') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FF914D] to-[#FF3D81] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+
+        {/* Skip/Close button */}
+        {mode === 'first-time' ? (
+          <button 
+            onClick={handleSkip}
+            className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
+          >
+            {t('onboarding.buttons.skip')}
+          </button>
+        ) : (
+          <button 
+            onClick={handleClose}
+            className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors z-10 bg-white/10 backdrop-blur-sm rounded-full p-2"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Content */}
+        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
+          {/* Logo */}
+          <div className="mb-8">
+            <img 
+              src={giggenLogo} 
+              alt="GIGGEN" 
+              className="h-24 w-auto mx-auto drop-shadow-2xl"
+            />
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+            {t('onboarding.roleSelection.title')}
+          </h1>
+          
+          <p className="text-xl text-white/90">
+            {t('onboarding.roleSelection.subtitle')}
+          </p>
+
+          {/* Role Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto pt-8">
+            <Card 
+              className="cursor-pointer hover:scale-105 transition-all duration-300 bg-white/95 backdrop-blur-sm border-0 shadow-2xl"
+              onClick={() => handleRoleSelect('musician')}
+            >
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#FF914D] to-[#FF3D81] rounded-full flex items-center justify-center">
+                  <Music className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {t('onboarding.roleSelection.musician')}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {t('onboarding.roleSelection.musicianDescription')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:scale-105 transition-all duration-300 bg-white/95 backdrop-blur-sm border-0 shadow-2xl"
+              onClick={() => handleRoleSelect('organizer')}
+            >
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#FF914D] to-[#FF3D81] rounded-full flex items-center justify-center">
+                  <Handshake className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {t('onboarding.roleSelection.organizer')}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {t('onboarding.roleSelection.organizerDescription')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Source Question Screen
+  if (currentScreen === 'source') {
+    const sources = [
+      { id: 'instagram', label: t('onboarding.source.instagram') },
+      { id: 'tiktok', label: t('onboarding.source.tiktok') },
+      { id: 'friend', label: t('onboarding.source.friend') },
+      { id: 'festival', label: t('onboarding.source.festival') },
+      { id: 'other', label: t('onboarding.source.other') }
+    ];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FF914D] to-[#FF3D81] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+            {t('onboarding.source.title')}
+          </h1>
+          
+          <p className="text-xl text-white/90">
+            {t('onboarding.source.subtitle')}
+          </p>
+
+          {/* Source Options */}
+          <div className="grid grid-cols-1 gap-3 max-w-md mx-auto pt-8">
+            {sources.map((source) => (
+              <Button
+                key={source.id}
+                onClick={() => handleSourceSelect(source.id)}
+                disabled={isSubmitting}
+                size="lg"
+                className="bg-white text-[#FF914D] hover:bg-white/90 text-lg font-bold py-6 h-auto rounded-full shadow-2xl hover:scale-105 transition-all duration-300"
+              >
+                {source.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Slides Screen
   const currentSlideData = slides[currentSlide];
   const Icon = currentSlideData.icon;
 
@@ -113,7 +292,7 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
           onClick={handleSkip}
           className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
         >
-          Hopp over
+          {t('onboarding.buttons.skip')}
         </button>
       ) : (
         <button 
@@ -177,7 +356,7 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
             size="lg"
             className="bg-white text-[#FF914D] hover:bg-white/90 text-lg font-bold px-8 py-6 h-auto rounded-full shadow-2xl hover:scale-105 transition-all duration-300 group"
           >
-            {currentSlideData.buttonText}
+            {currentSlide < 3 ? t('onboarding.buttons.next') : t('onboarding.buttons.getStarted')}
             {currentSlide < 3 && (
               <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             )}

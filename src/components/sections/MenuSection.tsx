@@ -71,6 +71,10 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
 
   const handleItemClick = (section?: string, path?: string) => {
     if (path) {
+      // Special handling for getting-started to reset onboarding
+      if (path === '/getting-started') {
+        localStorage.removeItem('has_seen_onboarding');
+      }
       navigate(path);
     } else if (section) {
       navigate(`/dashboard?section=${section}`);
