@@ -9,6 +9,7 @@ import { MobileLayoutOptimizer } from "@/components/MobileLayoutOptimizer";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
+import GettingStarted from "./pages/GettingStarted";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -61,6 +62,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/getting-started" element={<GettingStarted />} />
               <Route path="/start" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />

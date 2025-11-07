@@ -1,34 +1,52 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Music, User, Handshake, Zap, ChevronRight } from 'lucide-react';
+import { Music, User, Handshake, Zap, ChevronRight, X } from 'lucide-react';
 import giggenLogo from '@/assets/giggen-logo.png';
 
-const Onboarding = () => {
+interface OnboardingProps {
+  mode?: 'first-time' | 'menu';
+}
+
+const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    // Check if user has already seen onboarding
-    const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
-    if (hasSeenOnboarding === 'true') {
-      navigate('/');
+    // Check if user has already seen onboarding (only for first-time mode)
+    if (mode === 'first-time') {
+      const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+      if (hasSeenOnboarding === 'true') {
+        navigate('/');
+      }
     }
-  }, [navigate]);
+  }, [navigate, mode]);
 
   const handleNext = () => {
     if (currentSlide < 3) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Mark onboarding as seen and navigate to auth
-      localStorage.setItem('has_seen_onboarding', 'true');
-      navigate('/auth');
+      // Mark onboarding as seen and navigate to auth (only for first-time mode)
+      if (mode === 'first-time') {
+        localStorage.setItem('has_seen_onboarding', 'true');
+        navigate('/auth');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
   const handleSkip = () => {
-    localStorage.setItem('has_seen_onboarding', 'true');
-    navigate('/auth');
+    if (mode === 'first-time') {
+      localStorage.setItem('has_seen_onboarding', 'true');
+      navigate('/auth');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const handleClose = () => {
+    navigate('/dashboard');
   };
 
   const slides = [
@@ -89,13 +107,22 @@ const Onboarding = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
       </div>
 
-      {/* Skip button */}
-      <button 
-        onClick={handleSkip}
-        className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
-      >
-        Hopp over
-      </button>
+      {/* Skip/Close button */}
+      {mode === 'first-time' ? (
+        <button 
+          onClick={handleSkip}
+          className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
+        >
+          Hopp over
+        </button>
+      ) : (
+        <button 
+          onClick={handleClose}
+          className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors z-10 bg-white/10 backdrop-blur-sm rounded-full p-2"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Slide indicators */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">

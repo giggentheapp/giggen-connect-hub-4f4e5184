@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Briefcase, Lightbulb, FileText, Users } from "lucide-react";
+import { Settings, Briefcase, Lightbulb, FileText, Users, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserProfile } from "@/types/auth";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -24,6 +24,13 @@ export const MenuSection = ({ profile }: MenuSectionProps) => {
     path?: string;
     badge?: number;
   }> = [
+    {
+      id: "getting-started",
+      label: "Kom i gang",
+      description: "Se introduksjonsguiden til GIGGEN",
+      icon: Rocket,
+      path: "/getting-started",
+    },
     {
       id: "settings",
       label: "Innstillinger",
