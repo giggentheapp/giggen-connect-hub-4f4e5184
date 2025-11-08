@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import giggenLogo from '@/assets/giggen-logo.png';
+import FirstLoginFeedback from '@/components/FirstLoginFeedback';
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +29,7 @@ const Auth = () => {
   const [usernameError, setUsernameError] = useState('');
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useAppTranslation();
@@ -43,9 +45,20 @@ const Auth = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        if (session?.user) {
-          console.log('✅ Auth.tsx: User authenticated, navigating to dashboard');
-          navigate('/dashboard');
+        if (session?.user && event === 'SIGNED_IN') {
+          console.log('✅ Auth.tsx: User authenticated');
+          
+          // Check if this is first login and feedback not yet submitted
+          const feedbackSubmitted = localStorage.getItem('feedback_submitted');
+          const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+          
+          if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
+            console.log('🎯 Auth.tsx: First login detected, showing feedback');
+            setShowFeedback(true);
+          } else {
+            console.log('✅ Auth.tsx: Navigating to dashboard');
+            navigate('/dashboard');
+          }
         }
       }
     );
@@ -209,6 +222,18 @@ const Auth = () => {
           <p>{t('loading')}</p>
         </div>
       </div>
+    );
+  }
+
+  // Show feedback form after first login
+  if (showFeedback) {
+    return (
+      <FirstLoginFeedback 
+        onComplete={() => {
+          setShowFeedback(false);
+          navigate('/dashboard');
+        }} 
+      />
     );
   }
 

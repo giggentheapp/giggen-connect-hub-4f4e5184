@@ -6,8 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import { AppLanguageProvider } from "@/contexts/AppLanguageContext";
 import { RoleProvider } from "@/contexts/RoleProvider";
 import { MobileLayoutOptimizer } from "@/components/MobileLayoutOptimizer";
-import LandingPage from "./pages/LandingPage";
-import Index from "./pages/Index";
+import Root from "./pages/Root";
 import Onboarding from "./pages/Onboarding";
 import GettingStarted from "./pages/GettingStarted";
 import Auth from "./pages/Auth";
@@ -60,10 +59,9 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<Root />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/getting-started" element={<GettingStarted />} />
-              <Route path="/start" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile/:userId" element={<Profile />} />

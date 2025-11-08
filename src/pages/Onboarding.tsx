@@ -12,12 +12,12 @@ interface OnboardingProps {
   mode?: 'first-time' | 'menu';
 }
 
-type OnboardingScreen = 'role' | 'slides' | 'source';
+type OnboardingScreen = 'role' | 'slides';
 
 const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const navigate = useNavigate();
   const { t, language } = useAppTranslation();
-  const [currentScreen, setCurrentScreen] = useState<OnboardingScreen>('role');
+  const [currentScreen, setCurrentScreen] = useState<OnboardingScreen>(mode === 'menu' ? 'slides' : 'role');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,38 +41,11 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
     if (currentSlide < 3) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Move to source question screen
-      setCurrentScreen('source');
-    }
-  };
-
-  const handleSourceSelect = async (source: string) => {
-    setIsSubmitting(true);
-    
-    try {
-      // Send onboarding data to edge function
-      const { error } = await supabase.functions.invoke('send-onboarding-email', {
-        body: {
-          language: language,
-          role: selectedRole,
-          source: source,
-          timestamp: new Date().toISOString()
-        }
-      });
-
-      if (error) {
-        console.error('Error sending onboarding email:', error);
-        // Don't block user flow
-      }
-    } catch (error) {
-      console.error('Error in onboarding submission:', error);
-      // Don't block user flow
-    } finally {
-      setIsSubmitting(false);
-      
-      // Mark onboarding as seen and navigate
+      // After last slide, save onboarding completion and navigate
       if (mode === 'first-time') {
         localStorage.setItem('has_seen_onboarding', 'true');
+        // Store the selected role for later feedback
+        localStorage.setItem('onboarding_role', selectedRole);
         navigate('/auth');
       } else {
         navigate('/dashboard');
@@ -221,53 +194,6 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Source Question Screen
-  if (currentScreen === 'source') {
-    const sources = [
-      { id: 'instagram', label: t('onboarding.heardAbout.instagram') },
-      { id: 'tiktok', label: t('onboarding.heardAbout.tiktok') },
-      { id: 'friend', label: t('onboarding.heardAbout.friend') },
-      { id: 'festival', label: t('onboarding.heardAbout.festival') },
-      { id: 'other', label: t('onboarding.heardAbout.other') }
-    ];
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FF914D] to-[#FF3D81] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
-          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
-            {t('onboarding.heardAbout.title')}
-          </h1>
-          
-          <p className="text-xl text-white/90">
-            {t('onboarding.heardAbout.subtitle')}
-          </p>
-
-          {/* Source Options */}
-          <div className="grid grid-cols-1 gap-3 max-w-md mx-auto pt-8">
-            {sources.map((source) => (
-              <Button
-                key={source.id}
-                onClick={() => handleSourceSelect(source.id)}
-                disabled={isSubmitting}
-                size="lg"
-                className="bg-white text-[#FF914D] hover:bg-white/90 text-lg font-bold py-6 h-auto rounded-full shadow-2xl hover:scale-105 transition-all duration-300"
-              >
-                {source.label}
-              </Button>
-            ))}
           </div>
         </div>
       </div>
