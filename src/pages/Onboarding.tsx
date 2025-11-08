@@ -230,11 +230,11 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   // Source Question Screen
   if (currentScreen === 'source') {
     const sources = [
-      { id: 'instagram', label: t('onboarding.source.instagram') },
-      { id: 'tiktok', label: t('onboarding.source.tiktok') },
-      { id: 'friend', label: t('onboarding.source.friend') },
-      { id: 'festival', label: t('onboarding.source.festival') },
-      { id: 'other', label: t('onboarding.source.other') }
+      { id: 'instagram', label: t('onboarding.heardAbout.instagram') },
+      { id: 'tiktok', label: t('onboarding.heardAbout.tiktok') },
+      { id: 'friend', label: t('onboarding.heardAbout.friend') },
+      { id: 'festival', label: t('onboarding.heardAbout.festival') },
+      { id: 'other', label: t('onboarding.heardAbout.other') }
     ];
 
     return (
@@ -248,11 +248,11 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
         {/* Content */}
         <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
           <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
-            {t('onboarding.source.title')}
+            {t('onboarding.heardAbout.title')}
           </h1>
           
           <p className="text-xl text-white/90">
-            {t('onboarding.source.subtitle')}
+            {t('onboarding.heardAbout.subtitle')}
           </p>
 
           {/* Source Options */}

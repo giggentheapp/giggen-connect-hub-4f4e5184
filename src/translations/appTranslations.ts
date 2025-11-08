@@ -529,6 +529,59 @@ export const appTranslations = {
     contact: "Kontakt",
     allRightsReserved: "Alle rettigheter forbeholdt.",
     
+    // Onboarding
+    onboarding: {
+      roleSelection: {
+        title: "Velg din rolle",
+        subtitle: "Hvilken beskrivelse passer deg best?",
+        musician: "Musiker / Artist",
+        musicianDescription: "Del prosjekter, bygg portefølje og motta bookinger.",
+        organizer: "Arrangør",
+        organizerDescription: "Publiser events, finn artister og bygg samarbeid."
+      },
+      slides: {
+        welcome: {
+          title: "Velkommen til GIGGEN",
+          content1: "En plattform for musikere, arrangører og publikum.",
+          content2: "Ett sted for alt – synlighet, tilbud, booking og samarbeid.",
+          content3: "Bli din egen manager i dag."
+        },
+        profile: {
+          title: "Lag profil og portefølje",
+          content1: "Opprett profil som musiker eller arrangør.",
+          content2: "Vis hvem du er og hva du tilbyr.",
+          content3: "Legg til bilder, videoer og prosjekter – bygg din egen portefølje."
+        },
+        booking: {
+          title: "Lag tilbud og book samarbeid",
+          content1: "Lag tilbud på gigs, kurs eller prosjekter.",
+          content2: "Send og motta forespørsler – avtal, godkjenn og spill.",
+          content3: "Alt du trenger for å jobbe profesjonelt med musikk."
+        },
+        publish: {
+          title: "Publiser når du er klar",
+          content1: "Bestem selv hva som er synlig – og når.",
+          content2: "Hold interne avtaler og kurs privat, eller publiser konserter når tiden er inne.",
+          content3: "Ta initiativ. Kom i gang nå."
+        }
+      },
+      heardAbout: {
+        title: "Hvor hørte du om GIGGEN?",
+        subtitle: "Dette hjelper oss å forstå hvor folk finner oss.",
+        instagram: "Instagram",
+        tiktok: "TikTok",
+        friend: "En venn",
+        festival: "Festival",
+        other: "Annet"
+      },
+      buttons: {
+        next: "Neste",
+        getStarted: "Kom i gang",
+        skip: "Hopp over",
+        close: "Lukk"
+      }
+    },
+    
     // ConceptCard translations
     conceptCard: {
       published: "Publisert",
@@ -1091,9 +1144,9 @@ export const appTranslations = {
           content3: "Take the initiative. Get started now."
         }
       },
-      source: {
+      heardAbout: {
         title: "Where did you hear about GIGGEN?",
-        subtitle: "Help us improve",
+        subtitle: "This helps us understand where people find us.",
         instagram: "Instagram",
         tiktok: "TikTok",
         friend: "A friend",
