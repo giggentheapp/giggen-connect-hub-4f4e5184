@@ -7,6 +7,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Inbox, Clock, Eye, Check, Archive } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
@@ -26,6 +27,7 @@ export const BookingsSection = ({
   
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useAppTranslation();
   const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
   const [tabCounts, setTabCounts] = useState({
     incoming: 0,
@@ -47,16 +49,6 @@ export const BookingsSection = ({
   // Hooks with error handling
   const { bookings, loading, updateBooking, refetch } = useBookings(profile.user_id);
   const { toast } = useToast();
-  
-  // Safe translation function
-  const safeT = (key: string) => {
-    try {
-      return key; // Just return the key as fallback for now
-    } catch (error) {
-      console.warn('Translation failed for key:', key);
-      return key;
-    }
-  };
 
   console.log('📊 Bookings data:', { 
     bookingsCount: bookings?.length || 0, 
@@ -140,21 +132,21 @@ export const BookingsSection = ({
     try {
       switch (status) {
         case 'pending':
-          return 'Venter på svar';
+          return t('bookings.statusTexts.waitingForResponse');
         case 'allowed':
-          return 'Tillatt - kan redigeres';
+          return t('bookings.statusTexts.allowedEditable');
         case 'approved_by_sender':
-          return 'Godkjent av avsender';
+          return t('bookings.statusTexts.approvedBySender');
         case 'approved_by_receiver':
-          return 'Godkjent av mottaker';
+          return t('bookings.statusTexts.approvedByReceiver');
         case 'approved_by_both':
-          return 'Godkjent av begge';
+          return t('bookings.statusTexts.approvedByBoth');
         case 'upcoming':
-          return 'Publisert';
+          return t('bookings.statusTexts.published');
         case 'completed':
-          return 'Gjennomført';
+          return t('bookings.statusTexts.completed');
         case 'cancelled':
-          return 'Avlyst';
+          return t('bookings.statusTexts.cancelled');
         default:
           return status;
       }
@@ -167,27 +159,27 @@ export const BookingsSection = ({
     try {
       switch (booking?.status) {
         case 'pending':
-          return booking.receiver_id === profile.user_id ? 'Mottatt forespørsel' : 'Sendt forespørsel';
+          return booking.receiver_id === profile.user_id ? t('bookings.phaseTexts.receivedRequest') : t('bookings.phaseTexts.sentRequest');
         case 'allowed':
-          return 'Forhandlingsfase - kan redigeres';
+          return t('bookings.phaseTexts.negotiationPhase');
         case 'approved_by_sender':
-          return 'Godkjent av avsender - venter på mottaker';
+          return t('bookings.phaseTexts.approvedBySenderWaiting');
         case 'approved_by_receiver':
-          return 'Godkjent av mottaker - venter på avsender';
+          return t('bookings.phaseTexts.approvedByReceiverWaiting');
         case 'approved_by_both':
-          return 'Godkjent av begge - klar for publisering';
+          return t('bookings.phaseTexts.approvedByBothReady');
         case 'upcoming':
-          return 'Publisert arrangement';
+          return t('bookings.phaseTexts.publishedEvent');
         case 'completed':
-          return 'Gjennomført arrangement';
+          return t('bookings.phaseTexts.completedEvent');
         case 'cancelled':
-          return 'Avlyst arrangement';
+          return t('bookings.phaseTexts.cancelledEvent');
         default:
-          return 'Ukjent status';
+          return t('bookings.phaseTexts.unknownStatus');
       }
     } catch (error) {
       console.warn('Error in getPhaseText:', error);
-      return 'Ukjent status';
+      return t('bookings.phaseTexts.unknownStatus');
     }
   };
   const handleBookingAction = async () => {
@@ -196,8 +188,8 @@ export const BookingsSection = ({
     } catch (error) {
       console.error('Failed to refresh bookings:', error);
       toast({
-        title: safeT('couldNotUpdateList'),
-        description: safeT('tryRefreshManually'),
+        title: t('bookings.couldNotUpdateList'),
+        description: t('bookings.tryRefreshManually'),
         variant: "destructive"
       });
     }
@@ -279,7 +271,7 @@ export const BookingsSection = ({
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={handleDetailsClick}>
               <Eye className="h-4 w-4 mr-1" />
-              Se detaljer
+              {t('bookings.seeDetails')}
             </Button>
             {booking.concept_ids && booking.concept_ids.length > 0 ? (
               <Button 
@@ -287,11 +279,11 @@ export const BookingsSection = ({
                 variant="outline"
                 onClick={handleConceptClick}
               >
-                Se tilbud
+                {t('bookings.seeOffer')}
               </Button>
             ) : (
               <span className="text-xs text-muted-foreground italic py-2">
-                Ingen tilbud vedlagt
+                {t('bookings.noOfferAttached')}
               </span>
             )}
           </div>
@@ -305,7 +297,7 @@ export const BookingsSection = ({
     return (
       <div className="bookings-loading text-center py-8 min-h-[200px] flex flex-col justify-center">
         <div className="loading-spinner animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading Bookings...</p>
+        <p className="text-muted-foreground">{t('bookings.loadingBookings')}</p>
       </div>
     );
   }
@@ -373,7 +365,7 @@ export const BookingsSection = ({
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">Innkommende forespørsler</h2>
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.incomingRequests')}</h2>
                       <Badge variant="secondary" className="text-xs">
                         {incomingRequests.length}
                       </Badge>
@@ -384,9 +376,9 @@ export const BookingsSection = ({
                   <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
                     <div className="max-w-4xl mx-auto space-y-4">
                       {incomingRequests.length === 0 ? (
-                         <div className="text-center py-8">
+                        <div className="text-center py-8">
                            <Inbox className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">Ingen innkommende forespørsler</p>
+                           <p className="text-muted-foreground">{t('bookings.noIncomingRequests')}</p>
                          </div>
                       ) : (
                         incomingRequests.map((booking) => (
@@ -404,7 +396,7 @@ export const BookingsSection = ({
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">Sendte forespørsler</h2>
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.sentRequests')}</h2>
                       <Badge variant="secondary" className="text-xs">
                         {sentRequests.length}
                       </Badge>
@@ -417,7 +409,7 @@ export const BookingsSection = ({
                       {sentRequests.length === 0 ? (
                          <div className="text-center py-8">
                            <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">Ingen sendte forespørsler</p>
+                           <p className="text-muted-foreground">{t('bookings.noSentRequests')}</p>
                          </div>
                       ) : (
                         sentRequests.map((booking) => (
@@ -435,7 +427,7 @@ export const BookingsSection = ({
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">Pågående avtaler</h2>
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.ongoingAgreements')}</h2>
                       <Badge variant="secondary" className="text-xs">
                         {ongoingAgreements.length}
                       </Badge>
@@ -448,7 +440,7 @@ export const BookingsSection = ({
                       {ongoingAgreements.length === 0 ? (
                          <div className="text-center py-8">
                            <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">Ingen pågående avtaler</p>
+                           <p className="text-muted-foreground">{t('bookings.noOngoingAgreements')}</p>
                          </div>
                       ) : (
                         ongoingAgreements.map((booking) => (
@@ -466,7 +458,7 @@ export const BookingsSection = ({
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">Publiserte arrangementer</h2>
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.upcomingEvents')}</h2>
                       <Badge variant="secondary" className="text-xs">
                         {upcomingEvents.length}
                       </Badge>
@@ -479,7 +471,7 @@ export const BookingsSection = ({
                       {upcomingEvents.length === 0 ? (
                          <div className="text-center py-8">
                            <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">Ingen publiserte arrangementer</p>
+                           <p className="text-muted-foreground">{t('bookings.noUpcomingEvents')}</p>
                          </div>
                       ) : (
                         upcomingEvents.map((booking) => (
@@ -497,7 +489,7 @@ export const BookingsSection = ({
                   {/* List Header */}
                   <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
                     <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">Historikk</h2>
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.historicalBookings')}</h2>
                       <Badge variant="secondary" className="text-xs">
                         {historicalBookings.length}
                       </Badge>
@@ -510,7 +502,7 @@ export const BookingsSection = ({
                       {historicalBookings.length === 0 ? (
                          <div className="text-center py-8">
                            <Archive className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">Ingen historiske arrangementer</p>
+                           <p className="text-muted-foreground">{t('bookings.noHistoricalBookings')}</p>
                          </div>
                       ) : (
                         historicalBookings.map((booking) => (

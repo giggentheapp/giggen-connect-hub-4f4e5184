@@ -4,14 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Users, FileText, Music, Calendar, Star } from 'lucide-react';
 import { useAppLanguage } from '@/contexts/AppLanguageContext';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useLanguageNotification } from '@/hooks/useLanguageNotification';
 import giggenLogo from '@/assets/giggen-logo.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { language, changeLanguage } = useAppLanguage();
-  const { t } = useTranslation();
+  const { t } = useAppTranslation();
   useLanguageNotification(); // Add visual feedback for language changes
 
   const navigateToApp = () => {
