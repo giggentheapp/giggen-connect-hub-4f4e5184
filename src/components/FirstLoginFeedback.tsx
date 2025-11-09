@@ -11,8 +11,24 @@ interface FirstLoginFeedbackProps {
 const FirstLoginFeedback = ({ onComplete }: FirstLoginFeedbackProps) => {
   const { t, language } = useAppTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [otherText, setOtherText] = useState('');
 
   const handleSourceSelect = async (source: string) => {
+    if (source === 'other') {
+      setSelectedSource('other');
+      return;
+    }
+    
+    await submitFeedback(source);
+  };
+
+  const handleOtherSubmit = async () => {
+    if (!otherText.trim()) return;
+    await submitFeedback('other', otherText);
+  };
+
+  const submitFeedback = async (source: string, otherDetail?: string) => {
     setIsSubmitting(true);
     
     try {
@@ -25,6 +41,7 @@ const FirstLoginFeedback = ({ onComplete }: FirstLoginFeedbackProps) => {
           language: language,
           role: storedRole,
           source: source,
+          other_text: otherDetail,
           timestamp: new Date().toISOString(),
           context: 'first_login'
         }
@@ -52,6 +69,56 @@ const FirstLoginFeedback = ({ onComplete }: FirstLoginFeedbackProps) => {
     { id: 'festival', label: t('onboarding.heardAbout.festival') },
     { id: 'other', label: t('onboarding.heardAbout.other') }
   ];
+
+  if (selectedSource === 'other') {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#FF914D] to-[#FF3D81] flex flex-col items-center justify-center p-6 animate-in fade-in duration-700">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+            {t('onboarding.heardAbout.title')}
+          </h1>
+          
+          <p className="text-xl text-white/90">
+            {language === 'no' ? 'Fortell oss gjerne mer' : 'Tell us more'}
+          </p>
+
+          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <CardContent className="p-6 space-y-4">
+              <textarea
+                value={otherText}
+                onChange={(e) => setOtherText(e.target.value)}
+                placeholder={language === 'no' ? 'Skriv her...' : 'Write here...'}
+                className="w-full min-h-[120px] p-4 rounded-lg border border-border bg-background text-foreground resize-none"
+                disabled={isSubmitting}
+              />
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setSelectedSource(null)}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={isSubmitting}
+                >
+                  {language === 'no' ? 'Tilbake' : 'Back'}
+                </Button>
+                <Button
+                  onClick={handleOtherSubmit}
+                  className="flex-1 bg-white text-primary hover:bg-white/90"
+                  disabled={isSubmitting || !otherText.trim()}
+                >
+                  {isSubmitting ? (language === 'no' ? 'Sender...' : 'Sending...') : (language === 'no' ? 'Send' : 'Submit')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#FF914D] to-[#FF3D81] flex flex-col items-center justify-center p-6 animate-in fade-in duration-700">

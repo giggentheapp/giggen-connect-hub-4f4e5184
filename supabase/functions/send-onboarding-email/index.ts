@@ -1,4 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +13,9 @@ interface OnboardingEmailRequest {
   language: string;
   role: string;
   source: string;
+  other_text?: string;
   timestamp: string;
+  context: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -20,35 +25,32 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { language, role, source, timestamp }: OnboardingEmailRequest = await req.json();
+    const { language, role, source, other_text, timestamp, context }: OnboardingEmailRequest = await req.json();
 
-    console.log("Onboarding data received:", { language, role, source, timestamp });
+    console.log("Onboarding data received:", { language, role, source, other_text, timestamp, context });
 
-    // For now, just log the data since we don't have Resend set up
-    // In production, you would send this via Resend to giggen.main@gmail.com
-    
-    // Example Resend implementation (commented out):
-    /*
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    const sourceLabel = source === 'other' && other_text ? `Annet: ${other_text}` : source;
     
     const emailResponse = await resend.emails.send({
       from: "GIGGEN <onboarding@resend.dev>",
       to: ["giggen.main@gmail.com"],
-      subject: "Ny onboarding-bruker",
+      subject: "Ny bruker etter første innlogging",
       html: `
-        <h1>Ny onboarding-bruker</h1>
+        <h1>Ny bruker etter første innlogging</h1>
         <p><strong>Språk:</strong> ${language}</p>
         <p><strong>Valgt rolle:</strong> ${role}</p>
-        <p><strong>Kilde:</strong> ${source}</p>
+        <p><strong>Kilde:</strong> ${sourceLabel}</p>
         <p><strong>Tidspunkt:</strong> ${timestamp}</p>
+        <p><strong>Kontekst:</strong> ${context}</p>
       `,
     });
-    */
+
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: "Onboarding data logged successfully"
+        message: "Onboarding email sent successfully"
       }), 
       {
         status: 200,
