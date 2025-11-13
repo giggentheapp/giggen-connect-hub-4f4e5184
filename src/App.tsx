@@ -44,6 +44,8 @@ import FileBank from "./pages/FileBank";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useInitializeAdmin } from "./hooks/useInitializeAdmin";
 
+import SecurityDashboard from "./pages/SecurityDashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -96,6 +98,9 @@ const App = () => {
               
               {/* File Bank Route */}
               <Route path="/filbank" element={<FileBank />} />
+              
+              {/* Security Dashboard */}
+              <Route path="/admin/security" element={<SecurityDashboard />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

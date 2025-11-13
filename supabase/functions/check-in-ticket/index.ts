@@ -1,23 +1,33 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeString } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  const securityHeaders = getSecurityHeaders(origin);
   
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: securityHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   try {
@@ -61,6 +71,9 @@ serve(async (req) => {
       throw new Error("Ticket code is required");
     }
 
+    // Sanitize input
+    const sanitizedTicketCode = sanitizeString(ticketCode);
+
     // Fetch ticket with event and user details
     const { data: ticket, error: ticketError } = await supabaseClient
       .from("tickets")
@@ -69,7 +82,7 @@ serve(async (req) => {
         events (*),
         profiles:user_id (display_name, avatar_url)
       `)
-      .eq("ticket_code", ticketCode)
+      .eq("ticket_code", sanitizedTicketCode)
       .single();
 
     if (ticketError || !ticket) {
@@ -80,7 +93,7 @@ serve(async (req) => {
           message: "Billetten ble ikke funnet i systemet"
         }),
         {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
           status: 404,
         }
       );
@@ -95,7 +108,7 @@ serve(async (req) => {
           ticket
         }),
         {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
           status: 400,
         }
       );
@@ -110,7 +123,7 @@ serve(async (req) => {
           ticket
         }),
         {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
           status: 400,
         }
       );
@@ -144,7 +157,7 @@ serve(async (req) => {
         ticket: updatedTicket
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
         status: 200,
       }
     );
@@ -156,7 +169,7 @@ serve(async (req) => {
         error: error.message 
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
         status: 500,
       }
     );

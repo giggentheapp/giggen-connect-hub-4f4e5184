@@ -1,24 +1,34 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeString } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  const securityHeaders = getSecurityHeaders(origin);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: securityHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   if (req.method !== "POST") {
@@ -26,15 +36,20 @@ serve(async (req) => {
       JSON.stringify({ error: "Method not allowed" }), 
       { 
         status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
       }
     );
   }
 
   try {
-    const { username } = await req.json();
+    let { username } = await req.json();
 
     console.log('Validating username:', username);
+
+    // Sanitize username
+    if (username) {
+      username = sanitizeString(username);
+    }
 
     // Validate username length
     if (!username || username.length < 3 || username.length > 50) {
@@ -45,7 +60,7 @@ serve(async (req) => {
         }),
         { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       );
     }
@@ -59,7 +74,7 @@ serve(async (req) => {
         }),
         { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       );
     }
@@ -92,7 +107,7 @@ serve(async (req) => {
       }),
       { 
         status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
@@ -101,7 +116,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       { 
         status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
       }
     );
   }

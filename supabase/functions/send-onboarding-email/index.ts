@@ -1,22 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeObject } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
-
-const handler = async (req: Request): Promise<Response> => {
-  const origin = req.headers.get('origin') || '';
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
 
 interface OnboardingEmailRequest {
   language: string;
@@ -27,13 +15,39 @@ interface OnboardingEmailRequest {
   context: string;
 }
 
+const handler = async (req: Request): Promise<Response> => {
+  const origin = req.headers.get('origin') || '';
+  const securityHeaders = getSecurityHeaders(origin);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: securityHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   try {
-    const { language, role, source, other_text, timestamp, context }: OnboardingEmailRequest = await req.json();
+    const rawData: OnboardingEmailRequest = await req.json();
+    
+    // Sanitize all input
+    const sanitizedData = sanitizeObject(rawData);
+    const { language, role, source, other_text, timestamp, context } = sanitizedData;
 
     console.log("Onboarding data received:", { language, role, source, other_text, timestamp, context });
 
@@ -63,8 +77,9 @@ interface OnboardingEmailRequest {
       {
         status: 200,
         headers: {
+          ...securityHeaders,
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
           "Content-Type": "application/json",
-          ...corsHeaders,
         },
       }
     );
@@ -74,7 +89,11 @@ interface OnboardingEmailRequest {
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { 
+          ...securityHeaders,
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          "Content-Type": "application/json" 
+        },
       }
     );
   }

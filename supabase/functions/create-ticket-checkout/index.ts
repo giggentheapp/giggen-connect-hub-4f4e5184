@@ -1,24 +1,34 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeString } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  const securityHeaders = getSecurityHeaders(origin);
   
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: securityHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   try {
@@ -36,11 +46,14 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const { eventId } = await req.json();
+    let { eventId } = await req.json();
 
     if (!eventId) {
       throw new Error("Event ID is required");
     }
+
+    // Sanitize event ID
+    eventId = sanitizeString(eventId);
 
     // Fetch event details
     const { data: event, error: eventError } = await supabaseClient
@@ -100,7 +113,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
         status: 200,
       }
     );
@@ -109,7 +122,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), "Content-Type": "application/json" },
         status: 500,
       }
     );

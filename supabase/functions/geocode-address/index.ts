@@ -1,37 +1,50 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeString } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  const securityHeaders = getSecurityHeaders(origin);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: securityHeaders })
+  }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   try {
-    const { address } = await req.json()
+    let { address } = await req.json()
     
     if (!address || address.trim().length < 3) {
       return new Response(
         JSON.stringify({ error: 'Address must be at least 3 characters' }),
         { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       )
     }
+
+    // Sanitize address input
+    address = sanitizeString(address);
 
     // Get Mapbox token from secrets
     const mapboxToken = Deno.env.get('MAPBOX_ACCESS_TOKEN')
@@ -41,7 +54,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Geocoding service not configured' }),
         { 
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       )
     }
@@ -60,7 +73,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Geocoding service unavailable' }),
         { 
           status: 503,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       )
     }
@@ -76,7 +89,7 @@ serve(async (req) => {
         }),
         { 
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
         }
       )
     }
@@ -95,7 +108,7 @@ serve(async (req) => {
         query: address
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
       }
     )
 
@@ -108,7 +121,7 @@ serve(async (req) => {
       }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...securityHeaders, ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt), 'Content-Type': 'application/json' }
       }
     )
   }

@@ -1,23 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
-
-function getCorsHeaders(requestOrigin: string) {
-  const origin = allowedOrigins.includes(requestOrigin) 
-    ? requestOrigin 
-    : allowedOrigins[0];
-  
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  };
-}
+import { checkRateLimit, getClientIp } from '../_shared/rateLimiter.ts'
+import { sanitizeFilename } from '../_shared/sanitize.ts'
+import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHeaders.ts'
 
 // Whitelist av tillatte buckets
 const ALLOWED_BUCKETS = ['filbank', 'avatars'] as const;
@@ -79,20 +63,61 @@ function validateBucket(bucket: string | null): bucket is AllowedBucket {
 
 Deno.serve(async (req) => {
   const requestOrigin = req.headers.get('origin') || '';
-  const corsHeaders = getCorsHeaders(requestOrigin);
+  const securityHeaders = getSecurityHeaders(requestOrigin);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: securityHeaders });
+  }
+
+  // Rate limiting check
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: new Date(rateCheck.resetAt).toISOString() }),
+      { 
+        status: 429,
+        headers: { 
+          ...securityHeaders, 
+          ...getRateLimitHeaders(rateCheck.remaining, rateCheck.resetAt),
+          'Content-Type': 'application/json' 
+        }
+      }
+    );
   }
 
   const requestStart = Date.now();
 
+  // Helper function to determine content type
+  const getContentType = (path: string): string => {
+    const ext = path.toLowerCase().split('.').pop();
+    switch (ext) {
+      case 'pdf': return 'application/pdf';
+      case 'jpg':
+      case 'jpeg': return 'image/jpeg';
+      case 'png': return 'image/png';
+      case 'gif': return 'image/gif';
+      case 'webp': return 'image/webp';
+      case 'txt': return 'text/plain';
+      case 'json': return 'application/json';
+      case 'doc': return 'application/msword';
+      case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default: return 'application/octet-stream';
+    }
+  };
+
   try {
     const url = new URL(req.url);
-    const filePath = url.searchParams.get('path');
+    let filePath = url.searchParams.get('path');
     const bucket = url.searchParams.get('bucket') || 'filbank';
     const authHeader = req.headers.get('authorization');
+
+    // Sanitize filename
+    if (filePath) {
+      filePath = sanitizeFilename(filePath);
+    }
 
     // Valider bucket først
     if (!validateBucket(bucket)) {
@@ -110,7 +135,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'File path is required' }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -136,7 +161,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Unauthorized: Authentication required for private buckets' }),
         { 
           status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -151,7 +176,7 @@ Deno.serve(async (req) => {
           JSON.stringify({ error: validation.error }),
           { 
             status: 403, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
           }
         );
       }
@@ -168,7 +193,7 @@ Deno.serve(async (req) => {
           JSON.stringify({ error: 'File not found' }),
           { 
             status: 404, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
           }
         );
       }
@@ -178,12 +203,10 @@ Deno.serve(async (req) => {
 
       return new Response(data, {
         headers: {
-          ...corsHeaders,
+          ...securityHeaders,
           'Content-Type': contentType,
           'Content-Disposition': `inline; filename="${filename}"`,
           'Cache-Control': 'public, max-age=3600',
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'SAMEORIGIN',
         },
       });
     }
@@ -197,7 +220,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Unauthorized access' }),
         { 
           status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -224,7 +247,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: validation.error }),
         { 
           status: 403, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -259,7 +282,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'File not found or access denied' }),
         { 
           status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -269,7 +292,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'File data is empty' }),
         { 
           status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -332,7 +355,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: 'Internal server error' }),
       { 
         status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...securityHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
