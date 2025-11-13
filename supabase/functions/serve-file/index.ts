@@ -1,8 +1,22 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const allowedOrigins = [
+  'https://giggen.org',
+  'https://www.giggen.org',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+function getCorsHeaders(requestOrigin: string) {
+  const origin = allowedOrigins.includes(requestOrigin) 
+    ? requestOrigin 
+    : allowedOrigins[0];
+  
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  };
 }
 
 // Whitelist av tillatte buckets
@@ -64,6 +78,9 @@ function validateBucket(bucket: string | null): bucket is AllowedBucket {
 }
 
 Deno.serve(async (req) => {
+  const requestOrigin = req.headers.get('origin') || '';
+  const corsHeaders = getCorsHeaders(requestOrigin);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -109,16 +126,66 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // KRITISK: Autentisering er ALLTID påkrevd
-    if (!authHeader) {
-      console.warn(`⚠️ NO AUTH HEADER: Attempted access to ${bucket}/${filePath}`);
+    // Check if authentication is required for this bucket
+    const privateBuckets: AllowedBucket[] = ['filbank'];
+    const requiresAuth = privateBuckets.includes(bucket);
+    
+    if (requiresAuth && !authHeader) {
+      console.warn(`⚠️ NO AUTH HEADER: Attempted access to private bucket ${bucket}/${filePath}`);
       return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
+        JSON.stringify({ error: 'Unauthorized: Authentication required for private buckets' }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
+    }
+    
+    // For public buckets (like avatars), allow access without auth
+    if (!requiresAuth && !authHeader) {
+      // Public bucket access - skip user validation
+      const validation = validateFilePath(filePath, 'public', bucket);
+      
+      if (!validation.valid) {
+        return new Response(
+          JSON.stringify({ error: validation.error }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const safePath = validation.normalizedPath!;
+      
+      // Download file from public bucket
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .download(safePath);
+
+      if (error || !data) {
+        return new Response(
+          JSON.stringify({ error: 'File not found' }),
+          { 
+            status: 404, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const contentType = getContentType(safePath);
+      const filename = safePath.split('/').pop() || 'file';
+
+      return new Response(data, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': contentType,
+          'Content-Disposition': `inline; filename="${filename}"`,
+          'Cache-Control': 'public, max-age=3600',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+        },
+      });
     }
     
     const token = authHeader.replace('Bearer ', '');
@@ -226,7 +293,7 @@ Deno.serve(async (req) => {
 
     console.log(`✅ File served: ${bucket}/${safePath} (${data.size} bytes, ${requestDuration}ms)`);
 
-    // Determine content type based on file extension
+    // Helper function to determine content type
     const getContentType = (path: string): string => {
       const ext = path.toLowerCase().split('.').pop();
       switch (ext) {

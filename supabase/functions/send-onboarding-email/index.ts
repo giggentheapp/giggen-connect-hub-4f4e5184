@@ -3,11 +3,20 @@ import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+const allowedOrigins = [
+  'https://giggen.org',
+  'https://www.giggen.org',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+const handler = async (req: Request): Promise<Response> => {
+  const origin = req.headers.get('origin') || '';
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
 
 interface OnboardingEmailRequest {
   language: string;
@@ -18,7 +27,6 @@ interface OnboardingEmailRequest {
   context: string;
 }
 
-const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
