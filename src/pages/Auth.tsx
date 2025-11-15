@@ -142,8 +142,8 @@ const Auth = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth`
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: { email: resetEmail }
       });
 
       if (error) {
@@ -160,7 +160,8 @@ const Auth = () => {
         setIsForgotPassword(false);
         setResetEmail('');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Password reset error:', error);
       toast({
         title: "Feil",
         description: "Kunne ikke sende tilbakestillings-e-post",
