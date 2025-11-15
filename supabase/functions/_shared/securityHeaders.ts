@@ -17,9 +17,11 @@ const CSP_HEADER = [
 ].join('; ');
 
 export function getSecurityHeaders(requestOrigin: string) {
-  const origin = allowedOrigins.includes(requestOrigin) 
-    ? requestOrigin 
-    : allowedOrigins[0];
+  // Check if origin is allowed or is a Lovable preview domain
+  const isLovablePreview = requestOrigin.includes('.lovableproject.com');
+  const isAllowedOrigin = allowedOrigins.includes(requestOrigin) || isLovablePreview;
+  
+  const origin = isAllowedOrigin ? requestOrigin : allowedOrigins[0];
   
   return {
     'Access-Control-Allow-Origin': origin,
