@@ -1264,6 +1264,62 @@ export type Database = {
         }
         Relationships: []
       }
+      stems: {
+        Row: {
+          created_at: string | null
+          duration: number | null
+          file_path: string
+          file_size: number | null
+          file_url: string
+          group_tag: string
+          id: string
+          is_default: boolean | null
+          name: string
+          price: number | null
+          project_id: string | null
+          track_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration?: number | null
+          file_path: string
+          file_size?: number | null
+          file_url: string
+          group_tag: string
+          id?: string
+          is_default?: boolean | null
+          name: string
+          price?: number | null
+          project_id?: string | null
+          track_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration?: number | null
+          file_path?: string
+          file_size?: number | null
+          file_url?: string
+          group_tag?: string
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          price?: number | null
+          project_id?: string | null
+          track_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stems_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           checked_in_by: string | null
@@ -1316,6 +1372,113 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      track_files: {
+        Row: {
+          created_at: string | null
+          duration: number | null
+          file_path: string
+          file_type: string
+          file_url: string
+          id: string
+          preview_end: number | null
+          preview_start: number | null
+          track_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          duration?: number | null
+          file_path: string
+          file_type: string
+          file_url: string
+          id?: string
+          preview_end?: number | null
+          preview_start?: number | null
+          track_id: string
+        }
+        Update: {
+          created_at?: string | null
+          duration?: number | null
+          file_path?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          preview_end?: number | null
+          preview_start?: number | null
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_files_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          approved: boolean | null
+          bpm: number | null
+          created_at: string | null
+          description: string | null
+          final_mix_score: number | null
+          genre: string | null
+          id: string
+          is_subscription_friendly: boolean | null
+          key: string | null
+          license_type: string | null
+          price: number | null
+          project_id: string | null
+          quality_status: string | null
+          review_notes: string | null
+          rights_type: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean | null
+          bpm?: number | null
+          created_at?: string | null
+          description?: string | null
+          final_mix_score?: number | null
+          genre?: string | null
+          id?: string
+          is_subscription_friendly?: boolean | null
+          key?: string | null
+          license_type?: string | null
+          price?: number | null
+          project_id?: string | null
+          quality_status?: string | null
+          review_notes?: string | null
+          rights_type?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          approved?: boolean | null
+          bpm?: number | null
+          created_at?: string | null
+          description?: string | null
+          final_mix_score?: number | null
+          genre?: string | null
+          id?: string
+          is_subscription_friendly?: boolean | null
+          key?: string | null
+          license_type?: string | null
+          price?: number | null
+          project_id?: string | null
+          quality_status?: string | null
+          review_notes?: string | null
+          rights_type?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
