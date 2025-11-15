@@ -30,6 +30,8 @@ const Auth = () => {
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useAppTranslation();
@@ -132,6 +134,40 @@ const Auth = () => {
       return false;
     } finally {
       setCheckingUsername(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`
+      });
+
+      if (error) {
+        toast({
+          title: "Feil",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "E-post sendt",
+          description: "Sjekk e-posten din for å tilbakestille passordet",
+        });
+        setIsForgotPassword(false);
+        setResetEmail('');
+      }
+    } catch (error) {
+      toast({
+        title: "Feil",
+        description: "Kunne ikke sende tilbakestillings-e-post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -283,54 +319,105 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          {isForgotPassword ? (
+            // Forgot password form
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">{t('email')}</Label>
+                <Input
+                  id="resetEmail"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  placeholder={t('enterYourEmail') || 'Skriv inn e-posten din'}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full min-h-[48px] text-base md:text-sm"
                 disabled={isSubmitting}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('password')}</Label>
-              {isLogin ? (
-                // Simple password input for login
-                <div className="relative">
+              >
+                {isSubmitting ? t('working') : 'Send tilbakestillingslenke'}
+              </Button>
+
+              <div className="text-center">
+                <Button
+                  variant="link"
+                  onClick={() => setIsForgotPassword(false)}
+                  disabled={isSubmitting}
+                  className="min-h-[44px] touch-target text-base md:text-sm"
+                >
+                  Tilbake til innlogging
+                </Button>
+              </div>
+            </form>
+          ) : (
+            // Normal login/signup form
+            <>
+              <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('email')}</Label>
                   <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="pr-10"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted/50"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
                 </div>
-              ) : (
-                // Enhanced password validation for signup
-                <PasswordStrengthValidator
-                  password={password}
-                  onPasswordChange={setPassword}
-                  showPassword={showPassword}
-                  onToggleShowPassword={() => setShowPassword(!showPassword)}
-                  placeholder={t('createStrongPassword')}
-                />
-              )}
-            </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t('password')}</Label>
+                  {isLogin ? (
+                    // Simple password input for login
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isSubmitting}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted/50"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  ) : (
+                    // Enhanced password validation for signup
+                    <PasswordStrengthValidator
+                      password={password}
+                      onPasswordChange={setPassword}
+                      showPassword={showPassword}
+                      onToggleShowPassword={() => setShowPassword(!showPassword)}
+                      placeholder={t('createStrongPassword')}
+                    />
+                  )}
+                </div>
+
+                {isLogin && (
+                  <div className="text-right">
+                    <Button
+                      variant="link"
+                      onClick={() => setIsForgotPassword(true)}
+                      disabled={isSubmitting}
+                      className="text-sm p-0 h-auto"
+                    >
+                      Glemt passord?
+                    </Button>
+                  </div>
+                )}
 
             {!isLogin && (
               <>
@@ -457,6 +544,8 @@ const Auth = () => {
               }
             </Button>
           </div>
+          </>
+        )}
         </CardContent>
       </Card>
     </div>
