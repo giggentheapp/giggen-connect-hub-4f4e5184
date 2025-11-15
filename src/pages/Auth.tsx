@@ -107,11 +107,11 @@ const Auth = () => {
     }
   };
 
-  const checkUsername = async (value: string) => {
+  const checkUsername = async (value: string): Promise<boolean> => {
     if (value.length < 3) {
       setUsernameError(t('usernameMinLength') || "Minimum 3 characters");
       setUsernameAvailable(null);
-      return;
+      return false;
     }
 
     setCheckingUsername(true);
@@ -125,9 +125,11 @@ const Auth = () => {
       const data = response.data;
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
+      return data.available;
     } catch (error: any) {
       console.error('Username check error:', error);
       setUsernameError(t('usernameCheckFailed') || "Could not check availability");
+      return false;
     } finally {
       setCheckingUsername(false);
     }
@@ -137,9 +139,37 @@ const Auth = () => {
     e.preventDefault();
 
     // Validate username before submission
-    if (!usernameAvailable) {
-      setUsernameError(t('usernameNotAvailable') || "Username not available");
+    if (username.length < 3) {
+      setUsernameError(t('usernameMinLength') || "Minimum 3 characters");
+      toast({
+        title: t('signupError'),
+        description: t('usernameMinLength') || "Username must be at least 3 characters",
+        variant: "destructive",
+      });
       return;
+    }
+
+    if (usernameAvailable === false) {
+      setUsernameError(t('usernameNotAvailable') || "Username not available");
+      toast({
+        title: t('signupError'),
+        description: t('usernameNotAvailable') || "Username is already taken",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // If username hasn't been checked yet, check it now
+    if (usernameAvailable === null) {
+      const isAvailable = await checkUsername(username);
+      if (!isAvailable) {
+        toast({
+          title: t('signupError'),
+          description: usernameError || t('usernameNotAvailable') || "Username is not available",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsSubmitting(true);
