@@ -39,7 +39,7 @@ export function sanitizeSQLInput(input: string): string {
   if (typeof input !== 'string') return '';
   
   // Remove SQL special characters
-  let sanitized = input.replace(/[;--]/g, '');
+  let sanitized = input.replace(/[;\-]/g, ''); // Escape hyphen in character class
   sanitized = sanitized.replace(/\/\*/g, '');
   sanitized = sanitized.replace(/\*\//g, '');
   
