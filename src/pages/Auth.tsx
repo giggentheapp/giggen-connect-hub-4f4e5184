@@ -32,6 +32,9 @@ const Auth = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useAppTranslation();
@@ -46,6 +49,12 @@ const Auth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('🔑 Auth.tsx: Password recovery detected');
+          setIsResettingPassword(true);
+          return;
+        }
         
         if (session?.user && event === 'SIGNED_IN') {
           console.log('✅ Auth.tsx: User authenticated');
@@ -165,6 +174,57 @@ const Auth = () => {
       toast({
         title: "Feil",
         description: "Kunne ikke sende tilbakestillings-e-post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Feil',
+        description: 'Passordene matcher ikke',
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: 'Feil',
+        description: 'Passordet må være minst 6 tegn',
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Suksess!',
+        description: 'Passordet ditt har blitt oppdatert',
+      });
+
+      setIsResettingPassword(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: 'Feil',
+        description: error.message || 'Kunne ikke oppdatere passord',
         variant: "destructive",
       });
     } finally {
@@ -320,7 +380,42 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isForgotPassword ? (
+          {isResettingPassword ? (
+            // Reset password form
+            <form onSubmit={handlePasswordReset} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nytt passord</Label>
+                <PasswordStrengthValidator
+                  password={newPassword}
+                  onPasswordChange={setNewPassword}
+                  showPassword={showPassword}
+                  onToggleShowPassword={() => setShowPassword(!showPassword)}
+                  placeholder="Skriv inn nytt passord"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Bekreft nytt passord</Label>
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  placeholder="Skriv inn passordet på nytt"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full min-h-[48px] text-base md:text-sm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? t('working') : 'Oppdater passord'}
+              </Button>
+            </form>
+          ) : isForgotPassword ? (
             // Forgot password form
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="space-y-2">
