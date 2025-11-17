@@ -41,6 +41,8 @@ const Auth = () => {
 
   useEffect(() => {
     console.log('🔍 Auth.tsx: Setting up auth listener...');
+    console.log('🔍 Auth.tsx: Current URL:', window.location.href);
+    console.log('🔍 Auth.tsx: URL hash:', window.location.hash);
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

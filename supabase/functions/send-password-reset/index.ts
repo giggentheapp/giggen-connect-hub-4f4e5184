@@ -81,10 +81,19 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
 
+    // Get the redirect URL from the request origin or use production URL
+    const origin = requestOrigin || 'https://giggen.org';
+    const redirectTo = `${origin}/auth`;
+    
+    console.log("Generating reset link with redirectTo:", redirectTo);
+
     // Generate password reset link
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: sanitizedEmail,
+      options: {
+        redirectTo: redirectTo,
+      }
     });
 
     if (error) {
