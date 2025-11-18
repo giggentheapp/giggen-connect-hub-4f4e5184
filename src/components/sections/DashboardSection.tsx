@@ -16,8 +16,6 @@ import {
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { EventCreateWizard } from "@/components/events/create/EventCreateWizard";
-import { useState } from "react";
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -26,7 +24,6 @@ interface DashboardSectionProps {
 export const DashboardSection = ({ profile }: DashboardSectionProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showEventWizard, setShowEventWizard] = useState(false);
 
   // Fetch bookings data
   const { data: bookingsData } = useQuery({
@@ -259,7 +256,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => setShowEventWizard(true)}
+              onClick={() => navigate('/create-event')}
             >
               <Plus className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Nytt arrangement</span>
@@ -319,11 +316,6 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
           )}
         </div>
       </div>
-
-      <EventCreateWizard 
-        isOpen={showEventWizard} 
-        onClose={() => setShowEventWizard(false)} 
-      />
     </div>
   );
 };

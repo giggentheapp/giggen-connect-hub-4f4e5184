@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,13 +10,12 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { supabase } from '@/integrations/supabase/client';
 import { EventFormData } from '@/hooks/useCreateEvent';
 import { useToast } from '@/hooks/use-toast';
 
 interface EventCreateModalAProps {
-  isOpen: boolean;
-  onClose: () => void;
   onNext: () => void;
   eventData: EventFormData;
   setEventData: (data: EventFormData) => void;
@@ -25,8 +23,6 @@ interface EventCreateModalAProps {
 }
 
 export const EventCreateModalA = ({ 
-  isOpen, 
-  onClose, 
   onNext, 
   eventData, 
   setEventData,
@@ -138,19 +134,10 @@ export const EventCreateModalA = ({
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Opprett arrangement - Grunninformasjon</SheetTitle>
-            <SheetDescription>
-              Fyll inn grunnleggende informasjon om arrangementet
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="space-y-6 mt-6">
-            {/* Banner Image */}
-            <div className="space-y-2">
-              <Label>Bannerbilde (valgfri)</Label>
+      <div className="space-y-6">
+        {/* Banner Image */}
+        <div className="space-y-2">
+          <Label>Bannerbilde (valgfri)</Label>
               {bannerPreview ? (
                 <div className="relative">
                   <img
@@ -266,11 +253,10 @@ export const EventCreateModalA = ({
             {/* Address */}
             <div className="space-y-2">
               <Label htmlFor="address">Adresse (valgfri)</Label>
-              <Input
-                id="address"
-                placeholder="F.eks. Olaf Ryes plass 2, Oslo"
+              <AddressAutocomplete
                 value={eventData.address || ''}
-                onChange={(e) => setEventData({ ...eventData, address: e.target.value })}
+                onChange={(address) => setEventData({ ...eventData, address })}
+                placeholder="F.eks. Olaf Ryes plass 2, Oslo"
               />
             </div>
 
@@ -350,8 +336,6 @@ export const EventCreateModalA = ({
               </Button>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
 
       <FilebankSelectionModal
         isOpen={showFilebankModal}
