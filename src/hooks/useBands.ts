@@ -141,6 +141,7 @@ export const useUserBands = (userId: string | undefined) => {
         .filter(item => item.band)
         .map(item => ({
           ...item.band,
+          role: item.role,
           user_role: item.role,
           show_in_profile: item.show_in_profile,
           member_id: item.id,
