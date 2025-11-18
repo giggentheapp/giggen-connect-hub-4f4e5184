@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon, FolderOpen } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
-import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { FileSelectionModal } from '@/components/FileSelectionModal';
 
 interface BandPortfolioItem {
   id: string;
@@ -46,6 +46,7 @@ const BandPortfolioManager = ({
   const [showFileModal, setShowFileModal] = useState(false);
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  const { files: userFiles } = useUserFiles(userId);
 
   useEffect(() => {
     fetchItems();
@@ -73,8 +74,12 @@ const BandPortfolioManager = ({
     }
   };
 
-  const handleFileSelected = async (file: any) => {
+  const handleFileSelected = async (files: any[]) => {
+    if (!files || files.length === 0) return;
+    
+    const file = files[0]; // Take first file
     console.log('📎 File selected from filebank:', file);
+    
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -92,7 +97,9 @@ const BandPortfolioManager = ({
       // Generate file_url from file_path if it doesn't exist
       let fileUrl = file.file_url;
       if (!fileUrl && file.file_path) {
-        const { data } = supabase.storage.from('filbank').getPublicUrl(file.file_path);
+        const bucket = file.file_path.split('/')[0];
+        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
         fileUrl = data.publicUrl;
       }
 
@@ -139,7 +146,6 @@ const BandPortfolioManager = ({
 
       console.log('✅ File added to band portfolio');
       setItems(prev => [data, ...prev]);
-      setShowFileModal(false);
       toast({
         title: 'Fil lagt til',
         description: 'Filen er lagt til i bandporteføljen'
@@ -238,10 +244,7 @@ const BandPortfolioManager = ({
       </div>
       
       <Button 
-        onClick={() => {
-          console.log('🔘 Opening filebank modal', { userId, bandId });
-          setShowFileModal(true);
-        }}
+        onClick={() => setShowFileModal(true)}
         variant="outline"
         className="w-full h-10 text-sm"
       >
@@ -249,17 +252,13 @@ const BandPortfolioManager = ({
         Velg fra Filbank
       </Button>
 
-      <FilebankSelectionModal
-        isOpen={showFileModal}
-        onClose={() => {
-          console.log('🔘 Closing filebank modal');
-          setShowFileModal(false);
-        }}
-        onSelect={handleFileSelected}
-        userId={userId}
-        fileTypes={['image', 'video']}
+      <FileSelectionModal
+        open={showFileModal}
+        onOpenChange={setShowFileModal}
+        files={userFiles}
+        allowedTypes={['image', 'video']}
+        onFilesSelected={handleFileSelected}
         title="Velg fra Filbank"
-        description="Velg bilder eller videoer fra filbanken"
       />
 
       {loading ? (
