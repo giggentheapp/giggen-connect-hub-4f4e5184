@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Search, Ticket, Menu } from 'lucide-react';
+import { User, Search, Ticket, Menu, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
 // Import sections
+import { DashboardSection } from '@/components/sections/DashboardSection';
 import { ArtistExploreSection } from '@/components/sections/ArtistExploreSection';
 import { ProfileSection } from '@/components/sections/ProfileSection';
 import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
@@ -37,7 +38,7 @@ export const UnifiedSidePanel = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialSection = searchParams.get('section') || location.state?.section || 'profile';
+  const initialSection = searchParams.get('section') || location.state?.section || 'dashboard';
   const [activeSection, setActiveSection] = useState(initialSection);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
@@ -76,6 +77,10 @@ export const UnifiedSidePanel = ({
   // Unified navigation items - same for all roles
   const getNavigationItems = () => {
     return [{
+      id: 'dashboard',
+      label: 'Hjem',
+      icon: Home
+    }, {
       id: 'profile',
       label: t('profile'),
       icon: User
@@ -97,6 +102,9 @@ export const UnifiedSidePanel = ({
   const renderActiveSection = () => {
     // All sections available to all users
     switch (activeSection) {
+      case 'dashboard':
+        return <DashboardSection profile={profile} />;
+      
       case 'explore':
         return <ArtistExploreSection profile={profile} />;
       
