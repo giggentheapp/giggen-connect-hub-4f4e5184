@@ -6,6 +6,7 @@ import { EventCreateModalA } from './EventCreateModalA';
 import { EventCreateModalB } from './EventCreateModalB';
 import { EventCreateModalC } from './EventCreateModalC';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ export const EventCreateWizard = () => {
   const draftId = searchParams.get('draft');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { createEvent, updateEvent, isCreating, isUpdating } = useCreateEvent();
   const [currentModal, setCurrentModal] = useState<'A' | 'B' | 'C'>('A');
   const [userId, setUserId] = useState<string>('');
