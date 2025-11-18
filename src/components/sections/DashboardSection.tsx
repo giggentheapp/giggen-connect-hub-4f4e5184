@@ -237,7 +237,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate("/create-offer")}
+              onClick={() => navigate(`${location.pathname}?section=profile`)}
             >
               <BriefcaseIcon className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Mine tilbud</span>
@@ -246,7 +246,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate(`${location.pathname}?section=profile#bands`)}
+              onClick={() => navigate(`${location.pathname}?section=profile`)}
             >
               <Users className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Mine band</span>
@@ -255,7 +255,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate(`${location.pathname}?section=profile`)}
+              onClick={() => navigate(`${location.pathname}?section=settings`)}
             >
               <Settings className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Innstillinger</span>
