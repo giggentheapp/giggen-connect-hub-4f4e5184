@@ -390,18 +390,6 @@ const Auth = () => {
     }
   };
 
-  // If we have a session, don't show auth forms - we're navigating
-  if (session && !showFeedback) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Logger inn...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
