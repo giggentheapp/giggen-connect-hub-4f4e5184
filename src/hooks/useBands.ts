@@ -11,7 +11,7 @@ export const useBands = () => {
   const fetchBands = async () => {
     try {
       setLoading(true);
-      // Fetch only bands with complete profiles (image and description/bio required)
+      // Fetch only bands with complete profiles (image_url, banner_url, and description/bio required)
       const { data, error } = await supabase
         .from('bands')
         .select(`
@@ -26,6 +26,7 @@ export const useBands = () => {
         `)
         .eq('is_public', true)
         .not('image_url', 'is', null)
+        .not('banner_url', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
