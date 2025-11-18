@@ -213,7 +213,9 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">
               {profileCompletion === 100 
                 ? "🎉 Profilen din er fullstendig!" 
-                : "Oppdater portefølje for å nå 100%"}
+                : missingFields.length > 0 
+                  ? `Mangler: ${missingFields.join(", ")}`
+                  : "Nesten ferdig!"}
             </p>
           </CardContent>
         </Card>
