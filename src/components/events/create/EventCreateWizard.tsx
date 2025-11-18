@@ -179,6 +179,8 @@ export const EventCreateWizard = () => {
       }
       setIsDraft(false);
       setShowSuccessDialog(true);
+      queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     } catch (error) {
       // Error is handled in the hook
       console.error('Error publishing event:', error);
@@ -213,6 +215,8 @@ export const EventCreateWizard = () => {
       }
       setIsDraft(true);
       setShowSuccessDialog(true);
+      queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     } catch (error) {
       // Error is handled in the hook
       console.error('Error saving draft:', error);
