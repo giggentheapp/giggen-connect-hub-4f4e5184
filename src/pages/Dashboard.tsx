@@ -159,7 +159,7 @@ const Dashboard = () => {
       icon: Settings,
       title: "Fullfør profilen",
       description: `${missingFields.length} felt mangler`,
-      action: () => navigate("/profile/" + profile.user_id),
+      action: () => navigate("/profile/" + profile.user_id + "?section=settings"),
     });
   }
   if (!filesData || filesData.length === 0) {

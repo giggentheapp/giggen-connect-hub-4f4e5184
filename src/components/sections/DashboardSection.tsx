@@ -89,7 +89,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
       description: `${missingFields.length} felt mangler`,
       action: () => {
         const currentPath = location.pathname;
-        navigate(`${currentPath}?section=profile`, { 
+        navigate(`${currentPath}?section=settings`, { 
           state: { missingFields, scrollToMissing: true } 
         });
       },
