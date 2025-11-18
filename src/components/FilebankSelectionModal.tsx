@@ -6,13 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 interface FilebankFile {
   id: string;
@@ -149,67 +149,65 @@ export const FilebankSelectionModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto">
+        <SheetHeader className="px-6 py-4 border-b">
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
+        </SheetHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <div className="py-4">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : files.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Ingen filer funnet i filbanken</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {files.map((file) => (
-                  <Card
-                    key={file.id}
-                    className={`cursor-pointer hover:border-primary transition-all ${
-                      selectedFile?.id === file.id ? 'border-primary ring-2 ring-primary' : ''
-                    }`}
-                    onClick={() => setSelectedFile(file)}
-                  >
-                    <CardContent className="p-3 space-y-2">
-                      <div className="relative">
-                        {renderFilePreview(file)}
-                        {selectedFile?.id === file.id && (
-                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
-                            <Check className="h-4 w-4" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium truncate" title={file.filename}>
-                          {file.filename}
-                        </p>
-                        <Badge variant="secondary" className="text-xs">
-                          {file.file_type}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+        <div className="px-6 py-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : files.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Ingen filer funnet i filbanken</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {files.map((file) => (
+                <Card
+                  key={file.id}
+                  className={`cursor-pointer hover:border-primary transition-all ${
+                    selectedFile?.id === file.id ? 'border-primary ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => setSelectedFile(file)}
+                >
+                  <CardContent className="p-3 space-y-2">
+                    <div className="relative">
+                      {renderFilePreview(file)}
+                      {selectedFile?.id === file.id && (
+                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium truncate" title={file.filename}>
+                        {file.filename}
+                      </p>
+                      <Badge variant="secondary" className="text-xs">
+                        {file.file_type}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <DialogFooter className="px-6 py-4 border-t">
+        <SheetFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={onClose}>
             Avbryt
           </Button>
           <Button onClick={handleSelect} disabled={!selectedFile}>
             Velg fil
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
