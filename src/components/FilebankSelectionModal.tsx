@@ -150,7 +150,7 @@ export const FilebankSelectionModal = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose} modal={false}>
-      <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto z-[60]" onInteractOutside={(e) => e.preventDefault()}>
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>

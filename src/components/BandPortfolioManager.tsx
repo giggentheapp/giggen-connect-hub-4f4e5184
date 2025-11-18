@@ -236,7 +236,10 @@ const BandPortfolioManager = ({
       </div>
       
       <Button 
-        onClick={() => setShowFileModal(true)}
+        onClick={() => {
+          console.log('🔘 Portfolio: Opening filebank modal', { userId, bandId, showFileModal });
+          setShowFileModal(true);
+        }}
         variant="outline"
         className="w-full h-10 text-sm"
       >
@@ -246,7 +249,10 @@ const BandPortfolioManager = ({
 
       <FilebankSelectionModal
         isOpen={showFileModal}
-        onClose={() => setShowFileModal(false)}
+        onClose={() => {
+          console.log('🔘 Portfolio: Closing filebank modal');
+          setShowFileModal(false);
+        }}
         onSelect={handleFileSelected}
         userId={userId}
         fileTypes={['image', 'video']}
