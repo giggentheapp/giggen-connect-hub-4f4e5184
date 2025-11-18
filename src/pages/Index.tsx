@@ -1,9 +1,31 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Get user profile to navigate to dashboard
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (profile) {
+          navigate(`/profile/${profile.user_id}?section=dashboard`);
+        }
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -36,7 +58,6 @@ const Index = () => {
           <div className="pt-4">
             <Button 
               onClick={() => {
-                console.log('🚀 Index.tsx: "Kom i gang" clicked - navigating to /auth');
                 navigate('/auth');
               }} 
               className="w-full"
