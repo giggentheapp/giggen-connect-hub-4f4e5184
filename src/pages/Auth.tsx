@@ -40,40 +40,36 @@ const Auth = () => {
   const { t } = useAppTranslation();
 
   useEffect(() => {
-    console.log('🚀 Auth.tsx: Setting up auth listener');
+    let mounted = true;
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event);
+        if (!mounted) return;
+        
+        console.log('🔄 Auth state changed:', event, session ? 'has session' : 'no session');
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
         
-        // Only show password reset form if it's a PASSWORD_RECOVERY event
+        // Handle password recovery
         if (event === 'PASSWORD_RECOVERY') {
-          console.log('🔑 Auth.tsx: Password recovery detected');
           setIsResettingPassword(true);
           setIsForgotPassword(false);
-          setIsLogin(true);
+          setIsLogin(false);
+          setLoading(false);
           return;
         }
         
-        // For any other event, ensure we're in login mode
-        if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+        // Handle sign out
+        if (event === 'SIGNED_OUT') {
           setIsResettingPassword(false);
           setIsForgotPassword(false);
           setIsLogin(true);
+          setLoading(false);
+          return;
         }
         
-        if (session?.user && event === 'SIGNED_IN') {
-          console.log('✅ Auth.tsx: User authenticated');
-          
-          // Reset all form states on successful login
-          setIsForgotPassword(false);
-          setIsResettingPassword(false);
-          setIsLogin(true);
-          
-          // Get user profile to navigate to correct URL
+        // Handle successful sign in
+        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id')
@@ -82,49 +78,34 @@ const Auth = () => {
           
           const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
           
-          // Check if this is first login and feedback not yet submitted
+          // Check if first login
           const feedbackSubmitted = localStorage.getItem('feedback_submitted');
           const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
           
           if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
-            console.log('🎯 Auth.tsx: First login detected, showing feedback');
             setShowFeedback(true);
+            setLoading(false);
           } else {
-            console.log('✅ Auth.tsx: Navigating to dashboard');
-            navigate(dashboardUrl);
+            navigate(dashboardUrl, { replace: true });
           }
+        } else {
+          setLoading(false);
         }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('📋 Auth.tsx: Existing session check:', session ? 'Found session' : 'No session');
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      if (session?.user) {
-        console.log('✅ Auth.tsx: Found existing session, navigating to dashboard');
-        
-        // Get user profile to navigate to correct URL
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-        navigate(dashboardUrl);
-      } else {
-        // No session - make sure we're in login mode
-        setIsLogin(true);
-        setIsForgotPassword(false);
-        setIsResettingPassword(false);
-      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
