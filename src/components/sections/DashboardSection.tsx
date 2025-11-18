@@ -86,7 +86,9 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
       icon: Settings,
       title: "Fullfør profilen",
       description: `${missingFields.length} felt mangler`,
-      action: () => navigate("/dashboard?section=profile"),
+      action: () => navigate("/dashboard?section=profile", { 
+        state: { missingFields, scrollToMissing: true } 
+      }),
     });
   }
   if (!filesData || filesData.length === 0) {

@@ -610,7 +610,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
         <div className="space-y-4">
           {/* Avatar Upload Section */}
-          <div className="flex items-center gap-4">
+          <div id="avatar" className="flex items-center gap-4 transition-all duration-200 rounded-lg p-2">
             <Avatar className="h-16 w-16 md:h-20 md:w-20 shrink-0">
               <AvatarImage src={profileData.avatar_url || undefined} />
               <AvatarFallback className="text-lg md:text-xl">
@@ -628,7 +628,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
           {/* Basic Information */}
           <div className="space-y-4">
-            <div>
+            <div id="display-name" className="transition-all duration-200 rounded-lg p-2">
               <Label htmlFor="display_name">{t("displayName")}</Label>
               <Input
                 id="display_name"
@@ -651,7 +651,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             </div>
 
             {/* Username Section */}
-            <div className="space-y-3">
+            <div id="username" className="space-y-3 transition-all duration-200 rounded-lg p-2">
               <Label htmlFor="username">Brukernavn</Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -705,7 +705,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             {/* Bio, address, and contact info for all users */}
             <>
               <>
-                <div>
+                <div id="bio" className="transition-all duration-200 rounded-lg p-2">
                   <Label htmlFor="bio">{t("biography")}</Label>
                   <Textarea
                     id="bio"
@@ -743,7 +743,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
                 </div>
 
                 {/* Contact Information */}
-                <div className="space-y-3">
+                <div id="contact" className="space-y-3 transition-all duration-200 rounded-lg p-2">
                   <h3 className="text-sm font-medium">{t("contactInformation")}</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -833,7 +833,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
       {/* Social Media Settings - For All Users */}
       <>
-        <div className="space-y-6">
+        <div id="social-links" className="space-y-6 transition-all duration-200 rounded-lg p-2">
           <div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">Sosiale medier</h2>
             <p className="text-sm text-muted-foreground">Administrer dine sosiale medier</p>
@@ -1028,7 +1028,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       </>
 
       {/* Simplified Privacy Settings for ALL USERS */}
-      <div className="space-y-6">
+      <div id="visibility" className="space-y-6 transition-all duration-200 rounded-lg p-2">
         <div>
           <h2 className="text-xl md:text-2xl font-bold mb-2">Synlighetsinnstillinger</h2>
           <p className="text-sm text-muted-foreground">Kontroller hva som er synlig for andre</p>
