@@ -11,6 +11,7 @@ export const useBands = () => {
   const fetchBands = async () => {
     try {
       setLoading(true);
+      // Fetch only bands with complete profiles (image and description/bio required)
       const { data, error } = await supabase
         .from('bands')
         .select(`
@@ -24,12 +25,19 @@ export const useBands = () => {
           )
         `)
         .eq('is_public', true)
+        .not('image_url', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
+      // Filter bands that have either description or bio filled
+      const completeBands = (data || []).filter(band => 
+        (band.description && band.description.length > 0) || 
+        (band.bio && band.bio.length > 0)
+      );
+
       // Fetch profiles separately for members
-      const bandsWithCounts = await Promise.all((data || []).map(async (band) => {
+      const bandsWithCounts = await Promise.all(completeBands.map(async (band) => {
         const memberIds = band.band_members?.map(m => m.user_id) || [];
         
         let profiles: any[] = [];
