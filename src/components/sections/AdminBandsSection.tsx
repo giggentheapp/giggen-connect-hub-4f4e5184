@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, Globe } from "lucide-react";
 import { BandCard } from "@/components/BandCard";
 import { CreateBandModal } from "@/components/CreateBandModal";
 import { BandInvites } from "@/components/BandInvites";
@@ -59,6 +59,49 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
       console.error('❌ Toggle profile visibility error:', error);
       toast({
         title: 'Kunne ikke endre profilsynlighet',
+        description: error.message || 'En ukjent feil oppstod',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const toggleBandPublicVisibility = async (bandId: string, bandName: string, currentState: boolean) => {
+    console.log('🔄 Toggle band public visibility:', { bandId, bandName, currentState });
+
+    try {
+      const newVisibilityState = !currentState;
+      console.log('➡️ Setting is_public to:', newVisibilityState);
+      
+      const { error, data } = await supabase
+        .from('bands')
+        .update({ 
+          is_public: newVisibilityState
+        })
+        .eq('id', bandId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Toggle error:', error);
+        throw error;
+      }
+      
+      console.log('✅ Band updated:', data);
+
+      toast({
+        title: newVisibilityState ? '✅ Synlig i Utforsk' : '🔒 Skjult fra Utforsk',
+        description: newVisibilityState 
+          ? `"${bandName}" vises nå i utforskningsseksjonen` 
+          : `"${bandName}" er nå skjult fra utforskningsseksjonen`,
+      });
+      
+      // Refetch to get updated data
+      await refetch();
+      
+    } catch (error: any) {
+      console.error('❌ Toggle band public visibility error:', error);
+      toast({
+        title: 'Kunne ikke endre synlighet',
         description: error.message || 'En ukjent feil oppstod',
         variant: 'destructive',
       });
@@ -128,17 +171,35 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
                       </div>
                     </div>
                     
-                    {/* Profile Visibility Toggle */}
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
-                      <Users className="h-3 w-3 text-blue-600" />
-                      <span className="text-xs font-medium">
-                        {band.show_in_profile ? 'I profil' : 'Ikke i profil'}
-                      </span>
-                      <Switch
-                        checked={band.show_in_profile}
-                        onCheckedChange={() => toggleProfileVisibility(band.member_id, band.name, band.show_in_profile)}
-                        className="data-[state=checked]:bg-blue-500 scale-75"
-                      />
+                    {/* Visibility Toggles */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Profile Visibility Toggle */}
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                        <Users className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium">
+                          {band.show_in_profile ? 'I profil' : 'Ikke i profil'}
+                        </span>
+                        <Switch
+                          checked={band.show_in_profile}
+                          onCheckedChange={() => toggleProfileVisibility(band.member_id, band.name, band.show_in_profile)}
+                          className="data-[state=checked]:bg-blue-500 scale-75"
+                        />
+                      </div>
+                      
+                      {/* Public Visibility Toggle - Only for admins/founders */}
+                      {(band.role === 'admin' || band.role === 'founder') && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border shrink-0">
+                          <Globe className="h-3 w-3 text-accent-orange" />
+                          <span className="text-xs font-medium">
+                            {band.is_public ? 'Synlig i Utforsk' : 'Skjult fra Utforsk'}
+                          </span>
+                          <Switch
+                            checked={band.is_public}
+                            onCheckedChange={() => toggleBandPublicVisibility(band.id, band.name, band.is_public)}
+                            className="data-[state=checked]:bg-accent-orange scale-75"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
