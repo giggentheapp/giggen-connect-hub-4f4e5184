@@ -55,11 +55,17 @@ const Auth = () => {
         if (event === 'PASSWORD_RECOVERY') {
           console.log('🔑 Auth.tsx: Password recovery detected');
           setIsResettingPassword(true);
+          setIsForgotPassword(false);
+          setIsLogin(true);
           return;
         }
         
         if (session?.user && event === 'SIGNED_IN') {
           console.log('✅ Auth.tsx: User authenticated');
+          
+          // Reset form states on successful login
+          setIsForgotPassword(false);
+          setIsResettingPassword(false);
           
           // Check if this is first login and feedback not yet submitted
           const feedbackSubmitted = localStorage.getItem('feedback_submitted');
