@@ -228,6 +228,8 @@ const BandPortfolioManager = ({
     setEditDescription('');
   };
 
+  console.log('🔍 BandPortfolioManager render', { showFileModal, userId, bandId });
+
   return (
     <div className="space-y-3">
       <div>
@@ -236,8 +238,11 @@ const BandPortfolioManager = ({
       </div>
       
       <Button 
-        onClick={() => {
-          console.log('🔘 Portfolio: Opening filebank modal', { userId, bandId, showFileModal });
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('🔘 PORTFOLIO BUTTON CLICKED', { userId, bandId, showFileModal });
           setShowFileModal(true);
         }}
         variant="outline"
@@ -246,19 +251,21 @@ const BandPortfolioManager = ({
         <FolderOpen className="h-4 w-4 mr-2" />
         Velg fra Filbank
       </Button>
-
-      <FilebankSelectionModal
-        isOpen={showFileModal}
-        onClose={() => {
-          console.log('🔘 Portfolio: Closing filebank modal');
-          setShowFileModal(false);
-        }}
-        onSelect={handleFileSelected}
-        userId={userId}
-        fileTypes={['image', 'video']}
-        title="Velg fra Filbank"
-        description="Velg bilder eller videoer fra filbanken"
-      />
+      
+      {showFileModal && (
+        <FilebankSelectionModal
+          isOpen={showFileModal}
+          onClose={() => {
+            console.log('🔘 Portfolio: Closing filebank modal');
+            setShowFileModal(false);
+          }}
+          onSelect={handleFileSelected}
+          userId={userId}
+          fileTypes={['image', 'video']}
+          title="Velg fra Filbank"
+          description="Velg bilder eller videoer fra filbanken"
+        />
+      )}
 
       {loading ? (
         <div className="text-center py-3 text-xs text-muted-foreground">Laster portefølje...</div>
