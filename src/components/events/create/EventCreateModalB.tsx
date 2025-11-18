@@ -98,7 +98,7 @@ export const EventCreateModalB = ({
       if (user) {
         const { data: currentUserProfile } = await supabase
           .from('profiles')
-          .select('user_id, display_name, username, avatar_url')
+          .select('user_id, display_name, username, avatar_url, role')
           .eq('user_id', user.id)
           .single();
         
@@ -117,7 +117,10 @@ export const EventCreateModalB = ({
           const visibleIds = new Set(settings?.map(s => s.maker_id));
           const visibleProfiles = data?.filter(p => visibleIds.has(p.user_id)) || [];
           
-          const allOrganizers = [currentUserProfile, ...visibleProfiles];
+          // Only add current user if they are an organizer
+          const allOrganizers = currentUserProfile.role === 'organizer' 
+            ? [currentUserProfile, ...visibleProfiles]
+            : visibleProfiles;
           const uniqueOrganizers = allOrganizers.filter((org, index, self) =>
             index === self.findIndex((t) => t.user_id === org.user_id)
           );
