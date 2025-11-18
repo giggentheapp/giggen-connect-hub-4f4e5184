@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +13,6 @@ import { useUserBands } from '@/hooks/useBands';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface EventCreateModalBProps {
-  isOpen: boolean;
-  onClose: () => void;
   onNext: () => void;
   onBack: () => void;
   eventData: EventFormData;
@@ -24,8 +21,6 @@ interface EventCreateModalBProps {
 }
 
 export const EventCreateModalB = ({
-  isOpen,
-  onClose,
   onNext,
   onBack,
   eventData,
@@ -39,11 +34,9 @@ export const EventCreateModalB = ({
   const { bands } = useUserBands(userId);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchMusicians();
-      fetchOrganizers();
-    }
-  }, [isOpen, searchTerm]);
+    fetchMusicians();
+    fetchOrganizers();
+  }, [searchTerm]);
 
   const fetchMusicians = async () => {
     setLoading(true);
@@ -51,7 +44,11 @@ export const EventCreateModalB = ({
       let query = supabase
         .from('profiles')
         .select('user_id, display_name, username, avatar_url')
-        .eq('role', 'musician');
+        .eq('role', 'musician')
+        .not('avatar_url', 'is', null)
+        .not('bio', 'is', null)
+        .neq('display_name', '')
+        .neq('bio', '');
 
       if (searchTerm) {
         query = query.or(`display_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
@@ -59,7 +56,22 @@ export const EventCreateModalB = ({
 
       const { data, error } = await query.limit(20);
       if (error) throw error;
-      setMusicians(data || []);
+      
+      // Filter by profile_settings.show_public_profile
+      const profileIds = data?.map(p => p.user_id) || [];
+      if (profileIds.length > 0) {
+        const { data: settings } = await supabase
+          .from('profile_settings')
+          .select('maker_id')
+          .in('maker_id', profileIds)
+          .eq('show_public_profile', true);
+        
+        const visibleIds = new Set(settings?.map(s => s.maker_id));
+        const visibleProfiles = data?.filter(p => visibleIds.has(p.user_id)) || [];
+        setMusicians(visibleProfiles);
+      } else {
+        setMusicians([]);
+      }
     } catch (error) {
       console.error('Error fetching musicians:', error);
     } finally {
@@ -72,13 +84,16 @@ export const EventCreateModalB = ({
       let query = supabase
         .from('profiles')
         .select('user_id, display_name, username, avatar_url')
-        .eq('role', 'organizer');
+        .eq('role', 'organizer')
+        .not('avatar_url', 'is', null)
+        .not('bio', 'is', null)
+        .neq('display_name', '')
+        .neq('bio', '');
 
       if (searchTerm) {
         query = query.or(`display_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
       }
 
-      // Also include current user
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: currentUserProfile } = await supabase
@@ -91,8 +106,18 @@ export const EventCreateModalB = ({
           const { data, error } = await query.limit(19);
           if (error) throw error;
           
-          const allOrganizers = [currentUserProfile, ...(data || [])];
-          // Remove duplicates
+          // Filter by visibility settings
+          const profileIds = data?.map(p => p.user_id) || [];
+          const { data: settings } = await supabase
+            .from('profile_settings')
+            .select('maker_id')
+            .in('maker_id', profileIds)
+            .eq('show_public_profile', true);
+          
+          const visibleIds = new Set(settings?.map(s => s.maker_id));
+          const visibleProfiles = data?.filter(p => visibleIds.has(p.user_id)) || [];
+          
+          const allOrganizers = [currentUserProfile, ...visibleProfiles];
           const uniqueOrganizers = allOrganizers.filter((org, index, self) =>
             index === self.findIndex((t) => t.user_id === org.user_id)
           );
@@ -191,62 +216,57 @@ export const EventCreateModalB = ({
 
     return (
       <Card
-        className={`p-4 cursor-pointer transition-all hover:border-primary/50 ${
+        className={`p-4 transition-all hover:border-primary/50 ${
           isSelected ? 'border-primary bg-primary/5' : ''
         }`}
-        onClick={onToggle}
       >
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={
-              type === 'band' 
-                ? (participant as BandParticipant).image_url || undefined 
-                : (participant as EventParticipant).avatar_url || undefined
-            } />
-            <AvatarFallback>
-              {type === 'band' 
-                ? (participant as BandParticipant).name.charAt(0).toUpperCase()
-                : (participant as EventParticipant).display_name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <p className="font-medium">
-              {type === 'band' 
-                ? (participant as BandParticipant).name 
-                : (participant as EventParticipant).display_name}
-            </p>
-            {type !== 'band' && (
-              <p className="text-sm text-muted-foreground">
-                @{(participant as EventParticipant).username}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar>
+              <AvatarImage src={
+                type === 'band' 
+                  ? (participant as BandParticipant).image_url || undefined 
+                  : (participant as EventParticipant).avatar_url || undefined
+              } />
+              <AvatarFallback>
+                {type === 'band' 
+                  ? (participant as BandParticipant).name.charAt(0).toUpperCase()
+                  : (participant as EventParticipant).display_name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium">
+                {type === 'band' 
+                  ? (participant as BandParticipant).name 
+                  : (participant as EventParticipant).display_name}
               </p>
-            )}
+              {type !== 'band' && (
+                <p className="text-sm text-muted-foreground">
+                  @{(participant as EventParticipant).username}
+                </p>
+              )}
+            </div>
           </div>
-          {isSelected && (
-            <Badge variant="default" className="bg-primary">
-              Valgt
-            </Badge>
-          )}
+          <Button
+            onClick={onToggle}
+            variant={isSelected ? "default" : "outline"}
+            size="sm"
+          >
+            {isSelected ? 'Fjern' : 'Velg'}
+          </Button>
         </div>
       </Card>
     );
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[90vh] flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Legg til deltakere</SheetTitle>
-          <SheetDescription>
-            Velg musikere, band og arrangører som skal være med
-          </SheetDescription>
-        </SheetHeader>
-
-        {/* Selected Participants Summary */}
-        {(eventData.participants.musicians.length > 0 || 
-          eventData.participants.bands.length > 0 || 
-          eventData.participants.organizers.length > 0) && (
-          <div className="space-y-3 py-4 border-b">
-            <Label className="text-base font-semibold">Valgte deltakere</Label>
+    <div className="space-y-6">
+      {/* Selected Participants Summary */}
+      {(eventData.participants.musicians.length > 0 || 
+        eventData.participants.bands.length > 0 || 
+        eventData.participants.organizers.length > 0) && (
+        <div className="space-y-3 py-4 border-b">
+          <Label className="text-base font-semibold">Valgte deltakere</Label>
             <div className="flex flex-wrap gap-2">
               {eventData.participants.musicians.map((musician) => (
                 <Badge key={musician.user_id} variant="secondary" className="gap-1">
@@ -381,19 +401,18 @@ export const EventCreateModalB = ({
           </TabsContent>
         </Tabs>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 border-t">
-          <Button variant="outline" onClick={onBack}>
-            Tilbake
-          </Button>
-          <Button
-            onClick={onNext}
-            className="bg-gradient-to-r from-accent-orange to-accent-pink hover:opacity-90"
-          >
-            Neste
-          </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
+      {/* Navigation Buttons */}
+      <div className="flex justify-between pt-6 border-t">
+        <Button variant="outline" onClick={onBack}>
+          Tilbake
+        </Button>
+        <Button
+          onClick={onNext}
+          className="bg-gradient-to-r from-accent-orange to-accent-pink hover:opacity-90"
+        >
+          Neste
+        </Button>
+      </div>
+    </div>
   );
 };
