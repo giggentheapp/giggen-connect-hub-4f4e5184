@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon, Cloud } from 'lucide-react';
+import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon, FolderOpen } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
@@ -245,7 +245,7 @@ const BandPortfolioManager = ({
         variant="outline"
         className="w-full h-10 text-sm"
       >
-        <Cloud className="h-4 w-4 mr-2" />
+        <FolderOpen className="h-4 w-4 mr-2" />
         Velg fra Filbank
       </Button>
 
