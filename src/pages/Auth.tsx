@@ -119,9 +119,23 @@ const Auth = () => {
       });
 
       if (error) {
+        let errorMessage = error.message;
+        let errorTitle = t('loginError');
+        
+        // Check for email confirmation issues
+        if (error.message.toLowerCase().includes('email not confirmed') || 
+            error.message.toLowerCase().includes('email verification')) {
+          errorTitle = "E-post ikke bekreftet";
+          errorMessage = "Vennligst bekreft e-postadressen din ved å klikke på lenken i e-posten vi sendte deg. Hvis du ikke finner den, kan du bruke 'Glemt passord' for å logge inn direkte.";
+        }
+        // Check for invalid credentials
+        else if (error.message.toLowerCase().includes('invalid login credentials')) {
+          errorMessage = "Feil e-post eller passord. Hvis du er usikker på passordet ditt, kan du bruke 'Glemt passord' for å få tilsendt en innloggingslenke.";
+        }
+        
         toast({
-          title: t('loginError'),
-          description: error.message,
+          title: errorTitle,
+          description: errorMessage,
           variant: "destructive",
         });
       }
