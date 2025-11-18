@@ -40,6 +40,7 @@ import TicketSuccess from "./pages/TicketSuccess";
 import TicketView from "./pages/TicketView";
 import BandProfile from "./pages/BandProfile";
 import FileBank from "./pages/FileBank";
+import CreateEvent from "./pages/CreateEvent";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useInitializeAdmin } from "./hooks/useInitializeAdmin";
@@ -73,6 +74,7 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/concept/:conceptId" element={<ConceptOwnerView />} />
               <Route path="/create-offer" element={<CreateOffer />} />
+              <Route path="/create-event" element={<CreateEvent />} />
               <Route path="/arrangement/:id" element={<PublicEventView />} />
               <Route path="/bookings" element={<Bookings />} />
               

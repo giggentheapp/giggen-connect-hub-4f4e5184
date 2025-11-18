@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { EventFormData, useCreateEvent } from '@/hooks/useCreateEvent';
 import { EventCreateModalA } from './EventCreateModalA';
 import { EventCreateModalB } from './EventCreateModalB';
 import { EventCreateModalC } from './EventCreateModalC';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,13 +19,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-interface EventCreateWizardProps {
-  isOpen: boolean;
-  onClose: () => void;
-  draftId?: string;
-}
-
-export const EventCreateWizard = ({ isOpen, onClose, draftId }: EventCreateWizardProps) => {
+export const EventCreateWizard = () => {
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createEvent, updateEvent, isCreating, isUpdating } = useCreateEvent();
@@ -221,83 +220,89 @@ export const EventCreateWizard = ({ isOpen, onClose, draftId }: EventCreateWizar
   const handleSuccessDialogAction = () => {
     setShowSuccessDialog(false);
     if (isDraft) {
-      navigate('/dashboard');
+      navigate(`/profile/${userId}?section=dashboard`);
     } else if (createdEventId) {
       navigate(`/arrangement/${createdEventId}`);
     }
-    onClose();
-  };
-
-  const handleCloseWizard = () => {
-    setCurrentModal('A');
-    setEventData({
-      title: '',
-      description: '',
-      banner_url: '',
-      event_date: '',
-      start_time: '',
-      end_time: '',
-      venue: '',
-      address: '',
-      ticket_price: '',
-      has_paid_tickets: false,
-      expected_audience: '',
-      participants: {
-        musicians: [],
-        bands: [],
-        organizers: [],
-      },
-    });
-    onClose();
   };
 
   return (
     <>
-      <EventCreateModalA
-        isOpen={isOpen && currentModal === 'A'}
-        onClose={handleCloseWizard}
-        onNext={() => setCurrentModal('B')}
-        eventData={eventData}
-        setEventData={setEventData}
-        userId={userId}
-      />
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="container max-w-4xl mx-auto px-4 py-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="mb-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tilbake
+          </Button>
+          <h1 className="text-2xl font-bold">Opprett arrangement</h1>
+          <div className="flex gap-2 mt-4">
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              currentModal === 'A' || currentModal === 'B' || currentModal === 'C' ? 'bg-primary' : 'bg-muted'
+            )} />
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              currentModal === 'B' || currentModal === 'C' ? 'bg-primary' : 'bg-muted'
+            )} />
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              currentModal === 'C' ? 'bg-primary' : 'bg-muted'
+            )} />
+          </div>
+        </div>
+      </div>
 
-      <EventCreateModalB
-        isOpen={isOpen && currentModal === 'B'}
-        onClose={handleCloseWizard}
-        onNext={() => setCurrentModal('C')}
-        onBack={() => setCurrentModal('A')}
-        eventData={eventData}
-        setEventData={setEventData}
-        userId={userId}
-      />
+      <div className="container max-w-4xl mx-auto px-4 py-8">
+        {currentModal === 'A' && (
+          <EventCreateModalA
+            onNext={() => setCurrentModal('B')}
+            eventData={eventData}
+            setEventData={setEventData}
+            userId={userId}
+          />
+        )}
 
-      <EventCreateModalC
-        isOpen={isOpen && currentModal === 'C'}
-        onClose={handleCloseWizard}
-        onBack={() => setCurrentModal('B')}
-        eventData={eventData}
-        userId={userId}
-        onPublish={handlePublish}
-        onSaveDraft={handleSaveDraft}
-        isCreating={isCreating || isUpdating}
-      />
+        {currentModal === 'B' && (
+          <EventCreateModalB
+            onNext={() => setCurrentModal('C')}
+            onBack={() => setCurrentModal('A')}
+            eventData={eventData}
+            setEventData={setEventData}
+            userId={userId}
+          />
+        )}
+
+        {currentModal === 'C' && (
+          <EventCreateModalC
+            onBack={() => setCurrentModal('B')}
+            eventData={eventData}
+            userId={userId}
+            onPublish={handlePublish}
+            onSaveDraft={handleSaveDraft}
+            isCreating={isCreating || isUpdating}
+          />
+        )}
+      </div>
 
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isDraft ? '✓ Utkast lagret' : '✓ Arrangement opprettet'}
+              {isDraft ? 'Utkast lagret!' : 'Arrangement opprettet!'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isDraft
-                ? 'Dine endringer er trygt lagret. Du finner utkastet i dashboardet under "Fortsett der du slapp".'
-                : 'Arrangementet er nå publisert og synlig for andre brukere.'}
+                ? 'Arrangementet er lagret som utkast. Du kan fortsette å redigere det senere.'
+                : 'Arrangementet er nå publisert og synlig for alle.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleSuccessDialogAction}>
-              {isDraft ? 'Gå til dashboard' : 'Gå til arrangement'}
+              {isDraft ? 'Gå til dashboard' : 'Se arrangement'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
