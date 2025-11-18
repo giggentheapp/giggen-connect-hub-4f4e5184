@@ -1140,8 +1140,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
               <p className="text-xs text-muted-foreground mt-1">Vis profilbilde, navn og om meg-tekst for alle</p>
             </div>
             <Switch
-              checked={privacySettings.show_profile_to_goers ?? true}
-              onCheckedChange={(checked) => updatePrivacySettings({ show_profile_to_goers: checked })}
+              checked={profileSettings?.show_public_profile || false}
+              onCheckedChange={(checked) => updateProfileSettings({ show_public_profile: checked })}
               disabled={loading}
             />
           </div>
