@@ -52,6 +52,7 @@ const Auth = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         
+        // Only show password reset form if it's a PASSWORD_RECOVERY event
         if (event === 'PASSWORD_RECOVERY') {
           console.log('🔑 Auth.tsx: Password recovery detected');
           setIsResettingPassword(true);
@@ -60,12 +61,20 @@ const Auth = () => {
           return;
         }
         
+        // For any other event, ensure we're in login mode
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+          setIsResettingPassword(false);
+          setIsForgotPassword(false);
+          setIsLogin(true);
+        }
+        
         if (session?.user && event === 'SIGNED_IN') {
           console.log('✅ Auth.tsx: User authenticated');
           
-          // Reset form states on successful login
+          // Reset all form states on successful login
           setIsForgotPassword(false);
           setIsResettingPassword(false);
+          setIsLogin(true);
           
           // Check if this is first login and feedback not yet submitted
           const feedbackSubmitted = localStorage.getItem('feedback_submitted');
@@ -92,6 +101,11 @@ const Auth = () => {
       if (session?.user) {
         console.log('✅ Auth.tsx: Found existing session, navigating to dashboard');
         navigate('/dashboard');
+      } else {
+        // No session - make sure we're in login mode
+        setIsLogin(true);
+        setIsForgotPassword(false);
+        setIsResettingPassword(false);
       }
     });
 
