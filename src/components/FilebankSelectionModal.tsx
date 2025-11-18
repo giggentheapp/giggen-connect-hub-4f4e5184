@@ -5,6 +5,7 @@ import { Image, File, Check, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { createPortal } from 'react-dom';
 import {
   Sheet,
   SheetContent,
@@ -148,7 +149,7 @@ export const FilebankSelectionModal = ({
     );
   };
 
-  return (
+  const content = (
     <Sheet open={isOpen} onOpenChange={onClose} modal={false}>
       <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto z-[60]" onInteractOutside={(e) => e.preventDefault()}>
         <SheetHeader className="px-6 py-4 border-b">
@@ -224,4 +225,6 @@ export const FilebankSelectionModal = ({
       </SheetContent>
     </Sheet>
   );
+
+  return isOpen ? createPortal(content, document.body) : null;
 };
