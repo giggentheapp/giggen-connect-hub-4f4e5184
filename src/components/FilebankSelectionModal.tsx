@@ -5,6 +5,14 @@ import { Image, File, Check, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface FilebankFile {
   id: string;
@@ -95,7 +103,10 @@ export const FilebankSelectionModal = ({
 
   const handleSelect = () => {
     if (selectedFile) {
+      console.log('✅ File selected, calling onSelect');
       onSelect(selectedFile);
+      setSelectedFile(null); // Reset selection
+      console.log('🔘 Closing modal after selection');
       onClose();
     }
   };
@@ -137,27 +148,16 @@ export const FilebankSelectionModal = ({
     );
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-background">
-      <div className="h-full flex flex-col">
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold">{title}</h1>
-                <p className="text-sm text-muted-foreground mt-1">{description}</p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-6xl h-[90vh] p-0">
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <ScrollArea className="flex-1 px-6">
+          <div className="py-4">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -201,19 +201,15 @@ export const FilebankSelectionModal = ({
           </div>
         </ScrollArea>
 
-        <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose}>
-                Avbryt
-              </Button>
-              <Button onClick={handleSelect} disabled={!selectedFile}>
-                Velg fil
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Avbryt
+          </Button>
+          <Button onClick={handleSelect} disabled={!selectedFile}>
+            Velg fil
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
