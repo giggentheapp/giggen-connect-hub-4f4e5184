@@ -149,8 +149,8 @@ export const FilebankSelectionModal = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto">
+    <Sheet open={isOpen} onOpenChange={onClose} modal={false}>
+      <SheetContent side="right" className="w-full sm:max-w-6xl p-0 overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>
@@ -200,10 +200,24 @@ export const FilebankSelectionModal = ({
         </div>
 
         <SheetFooter className="px-6 py-4 border-t">
-          <Button variant="outline" onClick={onClose}>
+          <Button 
+            variant="outline" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+          >
             Avbryt
           </Button>
-          <Button onClick={handleSelect} disabled={!selectedFile}>
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSelect();
+            }} 
+            disabled={!selectedFile}
+          >
             Velg fil
           </Button>
         </SheetFooter>
