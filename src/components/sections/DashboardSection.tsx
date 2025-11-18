@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,19 @@ import {
   Upload,
   MessageSquare,
   BriefcaseIcon,
-  Plus
+  Plus,
+  Clock,
+  ChevronDown
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useUserDrafts } from '@/hooks/useUserDrafts';
+import { useUserEventDrafts } from '@/hooks/useUserEventDrafts';
+import { DraftEventCard } from '@/components/events/DraftEventCard';
+import { DraftOfferCard } from '@/components/concepts/DraftOfferCard';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useToast } from '@/hooks/use-toast';
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -24,6 +32,11 @@ interface DashboardSectionProps {
 export const DashboardSection = ({ profile }: DashboardSectionProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  const { drafts: offerDrafts, loading: offerDraftsLoading } = useUserDrafts(profile.user_id);
+  const { drafts: eventDrafts, loading: eventDraftsLoading } = useUserEventDrafts(profile.user_id);
 
   // Fetch bookings data
   const { data: bookingsData } = useQuery({
@@ -154,29 +167,121 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
           </CardContent>
         </Card>
 
-        {/* Continue where you left off */}
-        {displaySuggestions.length > 0 && (
+        {/* Continue where you left off - Drafts Section */}
+        {(offerDrafts.length > 0 || eventDrafts.length > 0 || displaySuggestions.length > 0) && (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold px-1">Fortsett der du slapp</h2>
-            <div className="space-y-2">
-              {displaySuggestions.map((suggestion, idx) => (
-                <Card
-                  key={idx}
-                  className="border-border/40 hover:border-primary/50 transition-all cursor-pointer"
-                  onClick={suggestion.action}
-                >
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <suggestion.icon className="h-5 w-5 text-primary" />
+            <Collapsible defaultOpen={true}>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold">
+                    Fortsett der du slapp ({offerDrafts.length + eventDrafts.length + displaySuggestions.length})
+                  </h2>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent>
+                <div className="space-y-2 pt-2">
+                  {/* Event Drafts - Show first */}
+                  {eventDraftsLoading ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{suggestion.title}</p>
-                      <p className="text-xs text-muted-foreground">{suggestion.description}</p>
+                  ) : (
+                    eventDrafts.map(event => (
+                      <DraftEventCard
+                        key={event.id}
+                        event={event}
+                        onContinue={() => navigate(`/create-event?draft=${event.id}`)}
+                        onDelete={async () => {
+                          const { error } = await supabase.from('events_market').delete().eq('id', event.id);
+                          if (error) {
+                            toast({
+                              title: 'Kunne ikke slette utkast',
+                              description: error.message,
+                              variant: 'destructive',
+                            });
+                            return;
+                          }
+                          toast({ title: 'Utkast slettet', description: 'Arrangement-utkastet er permanent fjernet' });
+                          queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
+                        }}
+                      />
+                    ))
+                  )}
+
+                  {/* Offer Drafts */}
+                  {offerDraftsLoading ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  ) : (
+                    offerDrafts.map(draft => (
+                      <DraftOfferCard
+                        key={draft.id}
+                        draft={draft}
+                        onContinue={() => navigate(`/create-offer?edit=${draft.id}`)}
+                        onDelete={async () => {
+                          const { data: files } = await supabase
+                            .from('concept_files')
+                            .select('id')
+                            .eq('concept_id', draft.id);
+
+                          if (files && files.length > 0) {
+                            for (const file of files) {
+                              await supabase.rpc('delete_concept_file', { file_id: file.id });
+                            }
+                          }
+
+                          const { error } = await supabase.from('concepts').delete().eq('id', draft.id);
+                          if (error) {
+                            toast({
+                              title: 'Kunne ikke slette utkast',
+                              description: error.message,
+                              variant: 'destructive',
+                            });
+                            return;
+                          }
+                          toast({ title: 'Utkast slettet', description: 'Utkastet og alle filer er permanent fjernet' });
+                          queryClient.invalidateQueries({ queryKey: ['user-concepts'] });
+                        }}
+                        calculateProgress={(d) => {
+                          let completed = 0;
+                          const total = 6;
+                          if (d.title) completed++;
+                          if (d.expected_audience && (d.price || d.door_percentage || d.price_by_agreement)) completed++;
+                          completed++; // Portfolio
+                          completed++; // Tech specs
+                          if (d.available_dates) completed++;
+                          if (d.is_published) completed++;
+                          return { completed, total };
+                        }}
+                      />
+                    ))
+                  )}
+
+                  {/* Original suggestions */}
+                  {displaySuggestions.map((suggestion, idx) => (
+                    <Card
+                      key={idx}
+                      className="border-border/40 hover:border-primary/50 transition-all cursor-pointer"
+                      onClick={suggestion.action}
+                    >
+                      <CardContent className="flex items-center gap-4 p-4">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <suggestion.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{suggestion.title}</p>
+                          <p className="text-xs text-muted-foreground">{suggestion.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         )}
 
