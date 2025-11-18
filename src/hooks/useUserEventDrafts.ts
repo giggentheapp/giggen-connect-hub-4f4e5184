@@ -31,11 +31,7 @@ export const useUserEventDrafts = (userId: string | undefined) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchDrafts = async () => {
-    if (!userId) {
-      setDrafts([]);
-      setLoading(false);
-      return;
-    }
+    if (!userId) return;
 
     try {
       setLoading(true);
@@ -46,11 +42,15 @@ export const useUserEventDrafts = (userId: string | undefined) => {
         .select('*')
         .eq('created_by', userId)
         .eq('status', 'draft')
-        .order('updated_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
       setDrafts(data || []);
+      
+      if (data?.length === 0) {
+        console.warn('No event drafts found for user. Query executed correctly.');
+      }
     } catch (err: unknown) {
       logger.error('Failed to fetch event drafts', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
