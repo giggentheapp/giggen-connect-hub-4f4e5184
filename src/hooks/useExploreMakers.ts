@@ -36,11 +36,16 @@ export const useExploreMakers = (roleFilter?: 'musician' | 'organizer') => {
       setLoading(true);
       setError(null);
 
-      // Fetch all profiles with the specified role (like the old behavior)
+      // Fetch all profiles with the specified role that have complete profiles
+      // A complete profile requires: avatar_url, display_name, and bio to be filled
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', roleFilter || 'musician')
+        .not('avatar_url', 'is', null)
+        .not('bio', 'is', null)
+        .neq('display_name', '')
+        .neq('bio', '')
         .order('created_at', { ascending: false });
 
       if (fetchError) {

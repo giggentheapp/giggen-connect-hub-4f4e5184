@@ -137,7 +137,7 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
         return;
       }
 
-      // Fetch all profiles - no privacy filtering, show everyone
+      // Fetch all profiles with complete profiles (avatar, display_name, and bio required)
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select(`
@@ -155,6 +155,10 @@ export const AudienceExploreSection = ({ profile, viewMode = 'list', exploreType
           instruments,
           created_at
         `)
+        .not('avatar_url', 'is', null)
+        .not('bio', 'is', null)
+        .neq('display_name', '')
+        .neq('bio', '')
         .order('created_at', { ascending: false });
       
       if (profileError) {
