@@ -7,8 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { X, Edit2, Save, FileText, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon, FolderOpen } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { useUserFiles } from '@/hooks/useUserFiles';
-import { FileSelectionModal } from '@/components/FileSelectionModal';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 
 interface BandPortfolioItem {
   id: string;
@@ -46,7 +45,6 @@ const BandPortfolioManager = ({
   const [showFileModal, setShowFileModal] = useState(false);
   const { toast } = useToast();
   const { t } = useAppTranslation();
-  const { files: userFiles } = useUserFiles(userId);
 
   useEffect(() => {
     fetchItems();
@@ -74,12 +72,8 @@ const BandPortfolioManager = ({
     }
   };
 
-  const handleFileSelected = async (files: any[]) => {
-    if (!files || files.length === 0) return;
-    
-    const file = files[0]; // Take first file
+  const handleFileSelected = async (file: any) => {
     console.log('📎 File selected from filebank:', file);
-    
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -97,9 +91,7 @@ const BandPortfolioManager = ({
       // Generate file_url from file_path if it doesn't exist
       let fileUrl = file.file_url;
       if (!fileUrl && file.file_path) {
-        const bucket = file.file_path.split('/')[0];
-        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
-        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        const { data } = supabase.storage.from('filbank').getPublicUrl(file.file_path);
         fileUrl = data.publicUrl;
       }
 
@@ -252,13 +244,14 @@ const BandPortfolioManager = ({
         Velg fra Filbank
       </Button>
 
-      <FileSelectionModal
-        open={showFileModal}
-        onOpenChange={setShowFileModal}
-        files={userFiles}
-        allowedTypes={['image', 'video']}
-        onFilesSelected={handleFileSelected}
+      <FilebankSelectionModal
+        isOpen={showFileModal}
+        onClose={() => setShowFileModal(false)}
+        onSelect={handleFileSelected}
+        userId={userId}
+        fileTypes={['image', 'video']}
         title="Velg fra Filbank"
+        description="Velg bilder eller videoer fra filbanken"
       />
 
       {loading ? (
