@@ -42,7 +42,6 @@ export const useUserEventDrafts = (userId: string | undefined) => {
         .select('*')
         .eq('created_by', userId)
         .eq('status', 'draft')
-        .or('is_public.is.null,is_public.eq.true')
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
