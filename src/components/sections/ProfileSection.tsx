@@ -1,12 +1,10 @@
-import { User, Lightbulb, Calendar, MapPin, Copy, ArrowLeft, Clock, ChevronDown } from 'lucide-react';
+import { User, Lightbulb, Calendar, MapPin, Copy, ArrowLeft } from 'lucide-react';
 import { ProfilePortfolioDisplay } from '@/components/ProfilePortfolioDisplay';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { BandsInProfile } from '@/components/BandsInProfile';
 import { BandInvites } from '@/components/BandInvites';
 import { useUserConcepts } from '@/hooks/useUserConcepts';
-import { useUserDrafts } from '@/hooks/useUserDrafts';
-import { useUserEventDrafts } from '@/hooks/useUserEventDrafts';
 import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -16,11 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
-import { DraftEventCard } from '@/components/events/DraftEventCard';
-import { DraftOfferCard } from '@/components/concepts/DraftOfferCard';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileSectionProps {
   profile: UserProfile;
@@ -34,10 +27,6 @@ export const ProfileSection = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
-  
-  const { drafts: offerDrafts, loading: offerDraftsLoading } = useUserDrafts(isOwnProfile ? profile.user_id : undefined);
-  const { drafts: eventDrafts, loading: eventDraftsLoading } = useUserEventDrafts(isOwnProfile ? profile.user_id : undefined);
 
   // Handle scrolling to missing field
   useEffect(() => {
@@ -192,59 +181,6 @@ export const ProfileSection = ({
             </div>
           )}
 
-          {/* Continue Drafts Section - Only for own profile */}
-          {isOwnProfile && (offerDrafts.length > 0 || eventDrafts.length > 0) && (
-            <div className="max-w-4xl mx-auto px-4 space-y-3">
-              <Collapsible defaultOpen={true}>
-                <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <h2 className="text-sm font-semibold">
-                      Fortsett der du slapp ({offerDrafts.length + eventDrafts.length})
-                    </h2>
-                  </div>
-                  <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent>
-                  <div className="space-y-2 pt-2">
-                    {eventDrafts.map(event => (
-                      <DraftEventCard
-                        key={event.id}
-                        event={event}
-                        onContinue={() => navigate(`/create-event?draft=${event.id}`)}
-                        onDelete={async () => {
-                          const { error } = await supabase.from('events_market').delete().eq('id', event.id);
-                          if (!error) {
-                            toast({ title: 'Utkast slettet' });
-                            queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
-                          }
-                        }}
-                      />
-                    ))}
-                    {offerDrafts.map(draft => (
-                      <DraftOfferCard
-                        key={draft.id}
-                        draft={draft}
-                        onContinue={() => navigate(`/create-offer?edit=${draft.id}`)}
-                        onDelete={async () => {
-                          await supabase.from('concepts').delete().eq('id', draft.id);
-                          toast({ title: 'Utkast slettet' });
-                          queryClient.invalidateQueries({ queryKey: ['user-concepts'] });
-                        }}
-                        calculateProgress={(d) => {
-                          let completed = 0;
-                          if (d.title) completed++;
-                          if (d.price || d.price_by_agreement) completed++;
-                          return { completed, total: 6 };
-                        }}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
 
           {/* Instruments Display - Only for Musicians */}
           {profile.role === 'musician' && (profile as any).instruments && Array.isArray((profile as any).instruments) && (profile as any).instruments.length > 0 && (
