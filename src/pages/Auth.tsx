@@ -41,6 +41,7 @@ const Auth = () => {
 
   useEffect(() => {
     let mounted = true;
+    let isInPasswordRecovery = false;
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -52,6 +53,7 @@ const Auth = () => {
         
         // Handle password recovery
         if (event === 'PASSWORD_RECOVERY') {
+          isInPasswordRecovery = true;
           setIsResettingPassword(true);
           setIsForgotPassword(false);
           setIsLogin(false);
@@ -61,6 +63,7 @@ const Auth = () => {
         
         // Handle sign out
         if (event === 'SIGNED_OUT') {
+          isInPasswordRecovery = false;
           setIsResettingPassword(false);
           setIsForgotPassword(false);
           setIsLogin(true);
@@ -70,6 +73,13 @@ const Auth = () => {
         
         // Handle successful sign in
         if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          // SECURITY: If we're in password recovery mode, DON'T navigate away
+          // User MUST set a new password before gaining access
+          if (isInPasswordRecovery) {
+            setLoading(false);
+            return;
+          }
+          
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id')
@@ -246,7 +256,7 @@ const Auth = () => {
 
       toast({
         title: 'Suksess!',
-        description: 'Passordet ditt har blitt oppdatert',
+        description: 'Passordet ditt har blitt oppdatert. Logger inn...',
       });
 
       setIsResettingPassword(false);
@@ -263,7 +273,10 @@ const Auth = () => {
           .single();
         
         const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-        navigate(dashboardUrl);
+        // Small delay to ensure state is updated before navigation
+        setTimeout(() => {
+          navigate(dashboardUrl, { replace: true });
+        }, 100);
       }
     } catch (error: any) {
       toast({
