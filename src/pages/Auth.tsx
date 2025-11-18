@@ -40,14 +40,11 @@ const Auth = () => {
   const { t } = useAppTranslation();
 
   useEffect(() => {
-    console.log('🔍 Auth.tsx: Setting up auth listener...');
-    console.log('🔍 Auth.tsx: Current URL:', window.location.href);
-    console.log('🔍 Auth.tsx: URL hash:', window.location.hash);
+    console.log('🚀 Auth.tsx: Setting up auth listener');
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔄 Auth.tsx: Auth state changed:', event, session ? 'User logged in' : 'No user');
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -67,15 +64,6 @@ const Auth = () => {
           setIsForgotPassword(false);
           setIsLogin(true);
         }
-        
-  useEffect(() => {
-    console.log('🚀 Auth.tsx: Setting up auth listener');
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔄 Auth state changed:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
         
         if (session?.user && event === 'SIGNED_IN') {
           console.log('✅ Auth.tsx: User authenticated');
