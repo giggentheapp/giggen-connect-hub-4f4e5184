@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Upload, Info, CheckCircle2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface CreateBandModalProps {
   open: boolean;
@@ -142,6 +143,29 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
           <DialogTitle>Opprett nytt band</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Band Completeness Guide */}
+          <Alert className="border-primary/20 bg-primary/5">
+            <Info className="h-4 w-4 text-primary" />
+            <AlertTitle className="text-sm font-semibold mb-2">Tips: Bli synlig i Utforsk</AlertTitle>
+            <AlertDescription className="text-sm space-y-2">
+              <p>For at bandet skal vises i Utforsk trenger du:</p>
+              <ul className="space-y-1 ml-4">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${imagePreview ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                  <span className={imagePreview ? 'text-foreground' : 'text-muted-foreground'}>
+                    Bandlogo/bilde
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${description && description.length > 0 ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                  <span className={description && description.length > 0 ? 'text-foreground' : 'text-muted-foreground'}>
+                    Beskrivelse
+                  </span>
+                </li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-24 w-24">
               <AvatarImage src={imagePreview || undefined} />

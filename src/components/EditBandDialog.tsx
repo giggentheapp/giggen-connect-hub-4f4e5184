@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Band } from '@/types/band';
-import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2 } from 'lucide-react';
+import { X, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2, CheckCircle2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserFiles } from '@/hooks/useUserFiles';
@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
 
 interface EditBandDialogProps {
@@ -325,6 +326,34 @@ export const EditBandDialog = ({
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4 mt-4">
+                {/* Band Completeness Guide */}
+                <Alert className="border-primary/20 bg-primary/5">
+                  <Info className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-sm font-semibold mb-2">Bli synlig i Utforsk-seksjonen</AlertTitle>
+                  <AlertDescription className="text-sm space-y-2">
+                    <p>For at bandet skal vises i Utforsk må følgende være fylt ut:</p>
+                    <ul className="space-y-1 ml-4">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${imagePreview ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                        <span className={imagePreview ? 'text-foreground' : 'text-muted-foreground'}>
+                          Bandlogo/bilde
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${(description && description.length > 0) || (bio && bio.length > 0) ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                        <span className={(description && description.length > 0) || (bio && bio.length > 0) ? 'text-foreground' : 'text-muted-foreground'}>
+                          Beskrivelse eller bio
+                        </span>
+                      </li>
+                    </ul>
+                    {imagePreview && ((description && description.length > 0) || (bio && bio.length > 0)) ? (
+                      <p className="text-green-600 font-medium mt-2">✓ Bandet er komplett og synlig i Utforsk!</p>
+                    ) : (
+                      <p className="text-muted-foreground mt-2">Fyll ut de manglende feltene for å bli synlig.</p>
+                    )}
+                  </AlertDescription>
+                </Alert>
+
                 <div>
                   <Label htmlFor="name">Bandnavn *</Label>
                   <Input
