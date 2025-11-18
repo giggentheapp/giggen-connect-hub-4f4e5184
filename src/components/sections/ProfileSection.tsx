@@ -13,6 +13,8 @@ import { BookingRequest } from '@/components/BookingRequest';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
+
 interface ProfileSectionProps {
   profile: UserProfile;
   isOwnProfile?: boolean;
@@ -25,6 +27,50 @@ export const ProfileSection = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Handle scrolling to missing field
+  useEffect(() => {
+    const state = location.state as { missingFields?: string[]; scrollToMissing?: boolean };
+    if (state?.scrollToMissing && state?.missingFields && state.missingFields.length > 0) {
+      // Show toast with missing fields
+      toast({
+        title: "Fullfør profilen din",
+        description: `Mangler: ${state.missingFields.join(", ")}`,
+        duration: 5000,
+      });
+
+      // Scroll to first missing field
+      const firstMissing = state.missingFields[0];
+      const fieldMap: Record<string, string> = {
+        "Profilbilde": "avatar",
+        "Visningsnavn": "display-name",
+        "Brukernavn": "username",
+        "Bio": "bio",
+        "Kontaktinformasjon": "contact",
+        "Sosiale medier": "social-links",
+        "Musikkplattform": "social-links",
+        "Offentlige innstillinger": "visibility",
+      };
+
+      const elementId = fieldMap[firstMissing];
+      if (elementId) {
+        setTimeout(() => {
+          const element = document.getElementById(elementId);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+            // Add highlight effect
+            element.classList.add("ring-2", "ring-primary", "ring-offset-2");
+            setTimeout(() => {
+              element.classList.remove("ring-2", "ring-primary", "ring-offset-2");
+            }, 2000);
+          }
+        }, 300);
+      }
+
+      // Clear the state
+      navigate(location.pathname + location.search, { replace: true, state: {} });
+    }
+  }, [location.state, toast, navigate, location.pathname, location.search]);
   
   const handleCopyUsername = () => {
     const username = `@${(profile as any).username}`;

@@ -65,7 +65,6 @@ const App = () => {
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/getting-started" element={<GettingStarted />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/profile/:userId/concept/:conceptId" element={<ProfileConceptView />} />
               <Route path="/map" element={<Map />} />
