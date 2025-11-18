@@ -879,48 +879,66 @@ export type Database = {
       }
       events_market: {
         Row: {
+          address: string | null
+          banner_url: string | null
           created_at: string | null
           created_by: string | null
           date: string
           description: string | null
+          end_time: string | null
           event_datetime: string | null
           expected_audience: number | null
           has_paid_tickets: boolean | null
           id: string
           is_public: boolean | null
+          participants: Json | null
           portfolio_id: string | null
+          start_time: string | null
+          status: string | null
           ticket_price: number | null
           time: string | null
           title: string
           venue: string | null
         }
         Insert: {
+          address?: string | null
+          banner_url?: string | null
           created_at?: string | null
           created_by?: string | null
           date: string
           description?: string | null
+          end_time?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
           has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
+          participants?: Json | null
           portfolio_id?: string | null
+          start_time?: string | null
+          status?: string | null
           ticket_price?: number | null
           time?: string | null
           title: string
           venue?: string | null
         }
         Update: {
+          address?: string | null
+          banner_url?: string | null
           created_at?: string | null
           created_by?: string | null
           date?: string
           description?: string | null
+          end_time?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
           has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
+          participants?: Json | null
           portfolio_id?: string | null
+          start_time?: string | null
+          status?: string | null
           ticket_price?: number | null
           time?: string | null
           title?: string
