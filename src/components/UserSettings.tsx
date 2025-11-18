@@ -17,10 +17,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { validateDisplayName, validateEmail, validatePhone, validateBio } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2, FolderOpen } from "lucide-react";
+import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2, FolderOpen, Info, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { AvatarCropModal } from "@/components/AvatarCropModal";
@@ -572,6 +573,40 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           <h2 className="text-xl md:text-2xl font-bold mb-2">{t("profileInformationSettings")}</h2>
           <p className="text-sm text-muted-foreground">Oppdater dine profildetaljer</p>
         </div>
+
+        {/* Profile Completeness Guide */}
+        <Alert className="border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertTitle className="text-sm font-semibold mb-2">Bli synlig i Utforsk-seksjonen</AlertTitle>
+          <AlertDescription className="text-sm space-y-2">
+            <p>For at profilen din skal vises i Utforsk må følgende være fylt ut:</p>
+            <ul className="space-y-1 ml-4">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${profileData.avatar_url ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                <span className={profileData.avatar_url ? 'text-foreground' : 'text-muted-foreground'}>
+                  Profilbilde (avatar)
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${profileData.display_name ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                <span className={profileData.display_name ? 'text-foreground' : 'text-muted-foreground'}>
+                  Visningsnavn
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${(profileData.bio && profileData.bio.length > 0) ? 'text-green-600' : 'text-muted-foreground/40'}`} />
+                <span className={(profileData.bio && profileData.bio.length > 0) ? 'text-foreground' : 'text-muted-foreground'}>
+                  Bio/Om meg tekst
+                </span>
+              </li>
+            </ul>
+            {profileData.avatar_url && profileData.display_name && profileData.bio && profileData.bio.length > 0 ? (
+              <p className="text-green-600 font-medium mt-2">✓ Profilen din er komplett og synlig i Utforsk!</p>
+            ) : (
+              <p className="text-muted-foreground mt-2">Fyll ut de manglende feltene nedenfor for å bli synlig.</p>
+            )}
+          </AlertDescription>
+        </Alert>
 
         <div className="space-y-4">
           {/* Avatar Upload Section */}
