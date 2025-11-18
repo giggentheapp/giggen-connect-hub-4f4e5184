@@ -68,6 +68,15 @@ const Auth = () => {
           setIsLogin(true);
         }
         
+  useEffect(() => {
+    console.log('🚀 Auth.tsx: Setting up auth listener');
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
         if (session?.user && event === 'SIGNED_IN') {
           console.log('✅ Auth.tsx: User authenticated');
           
@@ -75,6 +84,15 @@ const Auth = () => {
           setIsForgotPassword(false);
           setIsResettingPassword(false);
           setIsLogin(true);
+          
+          // Get user profile to navigate to correct URL
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
           
           // Check if this is first login and feedback not yet submitted
           const feedbackSubmitted = localStorage.getItem('feedback_submitted');
@@ -85,14 +103,14 @@ const Auth = () => {
             setShowFeedback(true);
           } else {
             console.log('✅ Auth.tsx: Navigating to dashboard');
-            navigate('/dashboard');
+            navigate(dashboardUrl);
           }
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('📋 Auth.tsx: Existing session check:', session ? 'Found session' : 'No session');
       setSession(session);
       setUser(session?.user ?? null);
@@ -100,7 +118,16 @@ const Auth = () => {
       
       if (session?.user) {
         console.log('✅ Auth.tsx: Found existing session, navigating to dashboard');
-        navigate('/dashboard');
+        
+        // Get user profile to navigate to correct URL
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
+        navigate(dashboardUrl);
       } else {
         // No session - make sure we're in login mode
         setIsLogin(true);
@@ -242,7 +269,19 @@ const Auth = () => {
       setIsResettingPassword(false);
       setNewPassword('');
       setConfirmPassword('');
-      navigate('/dashboard');
+      
+      // Get user profile to navigate to correct URL
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .single();
+        
+        const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
+        navigate(dashboardUrl);
+      }
     } catch (error: any) {
       toast({
         title: 'Feil',
@@ -378,9 +417,21 @@ const Auth = () => {
   if (showFeedback) {
     return (
       <FirstLoginFeedback 
-        onComplete={() => {
+        onComplete={async () => {
           setShowFeedback(false);
-          navigate('/dashboard');
+          
+          // Get user profile to navigate to correct URL
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('user_id', user.id)
+              .single();
+            
+            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
+            navigate(dashboardUrl);
+          }
         }} 
       />
     );

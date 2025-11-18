@@ -71,7 +71,13 @@ export const UnifiedSidePanel = ({
   };
   const handleNavigation = (section: string) => {
     setActiveSection(section);
-    navigate(`/dashboard?section=${section}`);
+    const currentPath = location.pathname;
+    // If we're on a profile page, use that path, otherwise navigate to own profile
+    if (currentPath.startsWith('/profile/')) {
+      navigate(`${currentPath}?section=${section}`);
+    } else {
+      navigate(`/profile/${profile.user_id}?section=${section}`);
+    }
   };
 
   // Unified navigation items - same for all roles

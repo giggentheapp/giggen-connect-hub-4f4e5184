@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -22,6 +22,7 @@ interface DashboardSectionProps {
 
 export const DashboardSection = ({ profile }: DashboardSectionProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Fetch bookings data
   const { data: bookingsData } = useQuery({
@@ -86,9 +87,12 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
       icon: Settings,
       title: "Fullfør profilen",
       description: `${missingFields.length} felt mangler`,
-      action: () => navigate("/dashboard?section=profile", { 
-        state: { missingFields, scrollToMissing: true } 
-      }),
+      action: () => {
+        const currentPath = location.pathname;
+        navigate(`${currentPath}?section=profile`, { 
+          state: { missingFields, scrollToMissing: true } 
+        });
+      },
     });
   }
   if (!filesData || filesData.length === 0) {
@@ -96,7 +100,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
       icon: Upload,
       title: "Last opp en fil til Filbank",
       description: "Organiser dine filer",
-      action: () => navigate("/dashboard?section=filbank"),
+      action: () => navigate(`${location.pathname}?section=filbank`),
     });
   }
   if (pendingRequests > 0) {
@@ -104,7 +108,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
       icon: MessageSquare,
       title: "Svar på forespørsel",
       description: `${pendingRequests} ventende`,
-      action: () => navigate("/dashboard?section=bookings"),
+      action: () => navigate(`${location.pathname}?section=bookings`),
     });
   }
 
@@ -222,7 +226,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate("/dashboard?section=bookings")}
+              onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
               <Calendar className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Booking</span>
@@ -240,7 +244,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate("/dashboard?section=profile#bands")}
+              onClick={() => navigate(`${location.pathname}?section=profile#bands`)}
             >
               <Users className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Mine band</span>
@@ -249,7 +253,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate("/dashboard?section=profile")}
+              onClick={() => navigate(`${location.pathname}?section=profile`)}
             >
               <Settings className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Innstillinger</span>
@@ -273,7 +277,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
                 <Card
                   key={event.id}
                   className="border-border/40 hover:border-primary/50 transition-all cursor-pointer"
-                  onClick={() => navigate("/dashboard?section=bookings")}
+                  onClick={() => navigate(`${location.pathname}?section=bookings`)}
                 >
                   <CardContent className="flex items-start gap-4 p-4">
                     <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
