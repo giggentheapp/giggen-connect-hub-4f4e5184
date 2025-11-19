@@ -83,19 +83,27 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       // Upload to unified filbank bucket with retry logic
       await uploadWithRetry(filePath, file);
 
+      // Generate the public URL for the file
+      const { data: urlData } = supabase.storage
+        .from('filbank')
+        .getPublicUrl(filePath);
+      
+      const publicUrl = urlData.publicUrl;
+
       // Determine file type for database
       const fileType = file.type.startsWith('image/') ? 'image' :
                       file.type.startsWith('video/') ? 'video' :
                       file.type.startsWith('audio/') ? 'audio' : 'document';
 
       // Insert into user_files with authenticated user's ID
-      logger.debug('Inserting file to database', { userId: actualUserId, filename: file.name, fileType });
+      logger.debug('Inserting file to database', { userId: actualUserId, filename: file.name, fileType, publicUrl });
       const { error: dbError } = await supabase
         .from('user_files')
         .insert({
           user_id: actualUserId,
           filename: file.name,
           file_path: filePath,
+          file_url: publicUrl,
           file_type: fileType,
           file_size: file.size,
           mime_type: file.type,
