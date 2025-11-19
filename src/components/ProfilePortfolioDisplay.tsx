@@ -96,6 +96,14 @@ export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps
           src={file.file_url} 
           alt={file.filename}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            console.error('Image failed to load:', file.file_url);
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
+            if (parent) {
+              parent.innerHTML = `<div class="flex items-center justify-center h-full p-4 text-center text-sm text-muted-foreground">Bilde lastet ikke. Last opp på nytt via Filbank.</div>`;
+            }
+          }}
         />
       );
     }
