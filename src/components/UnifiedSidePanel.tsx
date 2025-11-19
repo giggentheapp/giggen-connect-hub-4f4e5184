@@ -28,12 +28,14 @@ interface UnifiedSidePanelProps {
   profile: UserProfile;
   className?: string;
   isOwnProfile?: boolean;
+  currentUserId?: string;
 }
 
 export const UnifiedSidePanel = ({
   profile,
   className,
-  isOwnProfile = true
+  isOwnProfile = true,
+  currentUserId
 }: UnifiedSidePanelProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -84,9 +86,15 @@ export const UnifiedSidePanel = ({
     }
   };
   const handleNavigation = (section: string) => {
+    // If viewing someone else's profile, navigate to own profile with the selected section
+    if (!isOwnProfile && currentUserId) {
+      navigate(`/profile/${currentUserId}?section=${section}`);
+      return;
+    }
+    
+    // If on own profile, just change section
     setActiveSection(section);
     const currentPath = location.pathname;
-    // If we're on a profile page, use that path, otherwise navigate to own profile
     if (currentPath.startsWith('/profile/')) {
       navigate(`${currentPath}?section=${section}`);
     } else {
@@ -94,18 +102,9 @@ export const UnifiedSidePanel = ({
     }
   };
 
-  // Unified navigation items - restricted when viewing other profiles
+  // Unified navigation items - always show full navigation
+  // When viewing someone else's profile, clicking nav items will take you to your own profile
   const getNavigationItems = () => {
-    // If viewing someone else's profile, only show profile section
-    if (!isOwnProfile) {
-      return [{
-        id: 'profile',
-        label: t('profile'),
-        icon: User
-      }];
-    }
-    
-    // Full navigation for own profile
     return [{
       id: 'dashboard',
       label: 'Hjem',
