@@ -21,7 +21,6 @@ import { AdminEventsSection } from "@/components/sections/AdminEventsSection";
 import { AdminSettingsSection } from "@/components/sections/AdminSettingsSection";
 import { BookingsSection } from "@/components/sections/BookingsSection";
 import { TicketsSection } from "@/components/sections/TicketsSection";
-import { MenuSection } from "@/components/sections/MenuSection";
 import { FileBankSection } from "@/components/sections/FileBankSection";
 import { UpcomingEventsSection } from "@/components/sections/UpcomingEventsSection";
 import { HistorySection } from "@/components/sections/HistorySection";
@@ -158,9 +157,6 @@ export const UnifiedSidePanel = ({
       
       case 'history':
         return <HistorySection profile={profile} />;
-      
-      case 'menu':
-        return <MenuSection profile={profile} />;
       
       case 'admin-files':
         return <AdminFilesSection profile={profile} />;
