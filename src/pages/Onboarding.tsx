@@ -244,39 +244,42 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
-        {/* Logo - only on first slide */}
-        {currentSlide === 0 && (
-          <div className="mb-8">
-            <img 
-              src={giggenLogo} 
-              alt="GIGGEN" 
-              className="h-24 w-auto mx-auto drop-shadow-2xl"
-            />
+      <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center" style={{ minHeight: 'calc(100vh - 8rem)' }}>
+        {/* Content area with flexible height */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-700 py-8">
+          {/* Logo - only on first slide */}
+          {currentSlide === 0 && (
+            <div className="mb-4">
+              <img 
+                src={giggenLogo} 
+                alt="GIGGEN" 
+                className="h-24 w-auto mx-auto drop-shadow-2xl"
+              />
+            </div>
+          )}
+
+          {/* Icon */}
+          <div className="mx-auto w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl">
+            <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
           </div>
-        )}
 
-        {/* Icon */}
-        <div className="mx-auto w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 shadow-2xl">
-          <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
+          {/* Title */}
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight tracking-tight px-4">
+            {currentSlideData.title}
+          </h1>
+
+          {/* Content with min height to prevent jumping */}
+          <div className="space-y-4 text-lg md:text-xl text-white/95 font-medium max-w-xl mx-auto min-h-[12rem] flex flex-col justify-center px-4">
+            {currentSlideData.content.map((text, index) => (
+              <p key={index} className="leading-relaxed">
+                {text}
+              </p>
+            ))}
+          </div>
         </div>
 
-        {/* Title */}
-        <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight tracking-tight">
-          {currentSlideData.title}
-        </h1>
-
-        {/* Content */}
-        <div className="space-y-4 text-lg md:text-xl text-white/95 font-medium max-w-xl mx-auto">
-          {currentSlideData.content.map((text, index) => (
-            <p key={index} className="leading-relaxed">
-              {text}
-            </p>
-          ))}
-        </div>
-
-        {/* Button */}
-        <div className="pt-8">
+        {/* Button - fixed at bottom */}
+        <div className="pb-8">
           <Button
             onClick={handleNext}
             size="lg"
