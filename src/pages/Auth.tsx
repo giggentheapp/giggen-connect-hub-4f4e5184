@@ -41,7 +41,6 @@ const Auth = () => {
 
   useEffect(() => {
     let mounted = true;
-    let isInPasswordRecovery = false;
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -51,9 +50,8 @@ const Auth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Handle password recovery
+        // Handle password recovery - ONLY show reset form
         if (event === 'PASSWORD_RECOVERY') {
-          isInPasswordRecovery = true;
           setIsResettingPassword(true);
           setIsForgotPassword(false);
           setIsLogin(false);
@@ -63,7 +61,6 @@ const Auth = () => {
         
         // Handle sign out
         if (event === 'SIGNED_OUT') {
-          isInPasswordRecovery = false;
           setIsResettingPassword(false);
           setIsForgotPassword(false);
           setIsLogin(true);
@@ -71,15 +68,8 @@ const Auth = () => {
           return;
         }
         
-        // Handle successful sign in
-        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-          // SECURITY: If we're in password recovery mode, DON'T navigate away
-          // User MUST set a new password before gaining access
-          if (isInPasswordRecovery) {
-            setLoading(false);
-            return;
-          }
-          
+        // Handle successful sign in - ONLY for normal login, not password recovery
+        if (session?.user && event === 'SIGNED_IN') {
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id')
@@ -97,6 +87,20 @@ const Auth = () => {
             setLoading(false);
           } else {
             navigate(dashboardUrl, { replace: true });
+          }
+        } else if (session?.user && event === 'INITIAL_SESSION') {
+          // Only navigate on initial session if NOT in reset password mode
+          if (!isResettingPassword) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('user_id', session.user.id)
+              .single();
+            
+            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
+            navigate(dashboardUrl, { replace: true });
+          } else {
+            setLoading(false);
           }
         } else {
           setLoading(false);
