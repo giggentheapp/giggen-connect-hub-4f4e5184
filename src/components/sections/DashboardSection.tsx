@@ -140,7 +140,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
   return (
     <div className="flex-1 overflow-auto">
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-4xl md:max-w-[1280px] mx-auto px-4 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -170,18 +170,18 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
         </div>
 
         {/* Profile Completion */}
-        <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center justify-between">
+        <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20 md:shadow-md">
+          <CardHeader className="pb-3 md:pb-4 md:px-6 md:pt-6">
+            <CardTitle className="text-base md:text-lg flex items-center justify-between">
               Fullfør profil
               <span className="text-sm font-normal text-muted-foreground">
                 {profileCompletion}%
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Progress value={profileCompletion} className="h-2" />
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="space-y-3 md:space-y-4 md:px-6 md:pb-6">
+            <Progress value={profileCompletion} className="h-2 md:h-3" />
+            <p className="text-xs md:text-sm text-muted-foreground">
               {profileCompletion === 100 
                 ? "🎉 Profilen din er fullstendig!" 
                 : missingFields.length > 0 
@@ -190,6 +190,39 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             </p>
           </CardContent>
         </Card>
+
+        {/* "Hva skjer nå?" tom-state seksjon */}
+        {(!offerDrafts || offerDrafts.length === 0) && 
+         (!eventDrafts || eventDrafts.length === 0) && 
+         (!upcomingEventsData || upcomingEventsData.length === 0) && 
+         pendingRequests === 0 && 
+         activeBookings === 0 && (
+          <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20">
+            <CardHeader>
+              <CardTitle className="text-base md:text-lg">Hva skjer nå?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <ul className="space-y-2 text-sm md:text-base text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span>•</span>
+                  <span>Du har ingen kommende arrangementer.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>•</span>
+                  <span>Opprett et arrangement for å komme i gang.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>•</span>
+                  <span>Lag et tilbud så arrangører kan kontakte deg.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>•</span>
+                  <span>Del profilen din for å bli booket.</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Continue where you left off - Drafts Section */}
         {(offerDrafts.length > 0 || eventDrafts.length > 0 || displaySuggestions.length > 0) && (
@@ -311,128 +344,139 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
         {/* Quick Stats */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold px-1 text-muted-foreground">Hurtigstatus</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <h2 className="text-sm md:text-xl font-semibold px-1 text-muted-foreground">Hurtigstatus</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors"
+              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
-              <CardContent className="py-3 px-4 flex flex-col items-center gap-1">
-                <Calendar className={cn("h-4 w-4 mb-1", activeBookings > 0 ? "text-primary" : "text-[#A1A1AA]")} />
-                <div className={cn("text-xl font-bold", activeBookings > 0 ? "text-primary" : "text-[#A1A1AA]")}>
+              <CardContent className="py-3 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+                <Calendar className={cn("h-4 w-4 md:h-5 md:w-5 mb-1", activeBookings > 0 ? "text-primary" : "text-[#A1A1AA]")} />
+                <div className={cn("text-xl md:text-[28px] font-bold", activeBookings > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {activeBookings}
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center leading-tight">Aktive bookinger</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground text-center leading-tight">Aktive bookinger</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors"
+              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm"
               onClick={() => navigate('/bookings?tab=requests')}
             >
-              <CardContent className="py-3 px-4 flex flex-col items-center gap-1">
-                <MessageSquare className={cn("h-4 w-4 mb-1", pendingRequests > 0 ? "text-primary" : "text-[#A1A1AA]")} />
-                <div className={cn("text-xl font-bold", pendingRequests > 0 ? "text-primary" : "text-[#A1A1AA]")}>
+              <CardContent className="py-3 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+                <MessageSquare className={cn("h-4 w-4 md:h-5 md:w-5 mb-1", pendingRequests > 0 ? "text-primary" : "text-[#A1A1AA]")} />
+                <div className={cn("text-xl md:text-[28px] font-bold", pendingRequests > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {pendingRequests}
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center leading-tight">Ventende forespørsler</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground text-center leading-tight">Ventende forespørsler</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors"
+              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=history`)}
             >
-              <CardContent className="py-3 px-4 flex flex-col items-center gap-1">
-                <Archive className={cn("h-4 w-4 mb-1", completedJobs > 0 ? "text-primary" : "text-[#A1A1AA]")} />
-                <div className={cn("text-xl font-bold", completedJobs > 0 ? "text-primary" : "text-[#A1A1AA]")}>
+              <CardContent className="py-3 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+                <Archive className={cn("h-4 w-4 md:h-5 md:w-5 mb-1", completedJobs > 0 ? "text-primary" : "text-[#A1A1AA]")} />
+                <div className={cn("text-xl md:text-[28px] font-bold", completedJobs > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {completedJobs}
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center leading-tight">Fullførte jobber</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground text-center leading-tight">Fullførte jobber</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors"
+              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
-              <CardContent className="py-3 px-4 flex flex-col items-center gap-1">
-                <Clock className={cn("h-4 w-4 mb-1", upcomingEvents.length > 0 ? "text-primary" : "text-[#A1A1AA]")} />
-                <div className={cn("text-xl font-bold", upcomingEvents.length > 0 ? "text-primary" : "text-[#A1A1AA]")}>
+              <CardContent className="py-3 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+                <Clock className={cn("h-4 w-4 md:h-5 md:w-5 mb-1", upcomingEvents.length > 0 ? "text-primary" : "text-[#A1A1AA]")} />
+                <div className={cn("text-xl md:text-[28px] font-bold", upcomingEvents.length > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {upcomingEvents.length}
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center leading-tight">Kommende avtaler</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground text-center leading-tight">Kommende avtaler</p>
               </CardContent>
             </Card>
           </div>
         </div>
 
+        {/* Nytt arrangement CTA */}
+        <div className="py-2 md:py-4">
+          <Button
+            onClick={() => navigate('/create-event')}
+            className="w-full h-14 md:h-16 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold text-base md:text-lg shadow-md hover:shadow-lg transition-all"
+          >
+            <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+            Opprett nytt arrangement
+          </Button>
+        </div>
+
         {/* Tools */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold px-1 text-muted-foreground">Verktøy</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-sm md:text-xl font-semibold px-1 text-muted-foreground">Verktøy</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
-              <Calendar className="h-7 w-7 text-primary" />
+              <Calendar className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Booking</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate("/create-offer")}
             >
-              <BriefcaseIcon className="h-7 w-7 text-primary" />
+              <BriefcaseIcon className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Mine tilbud</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=admin-bands`)}
             >
-              <Users className="h-7 w-7 text-primary" />
+              <Users className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Mine band</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate('/create-event')}
             >
-              <Plus className="h-7 w-7 text-primary" />
+              <Plus className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Nytt arrangement</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=filebank`)}
             >
-              <Upload className="h-7 w-7 text-primary" />
+              <Upload className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Filbank</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=settings`)}
             >
-              <Settings className="h-7 w-7 text-primary" />
+              <Settings className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Innstillinger</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-7 w-7 text-primary" />
+                  <MapPin className="h-7 w-7 md:h-8 md:w-8 text-primary" />
                   <Badge variant="secondary" className="text-xs">
                     {upcomingEventsData?.length || 0}
                   </Badge>
@@ -443,12 +487,12 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=history`)}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Archive className="h-7 w-7 text-primary" />
+                  <Archive className="h-7 w-7 md:h-8 md:w-8 text-primary" />
                   <Badge variant="secondary" className="text-xs">
                     {completedJobs}
                   </Badge>
