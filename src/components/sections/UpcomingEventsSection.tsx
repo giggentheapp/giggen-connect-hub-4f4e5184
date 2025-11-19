@@ -124,7 +124,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="flex flex-col h-full p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Kommende arrangementer</h1>
         <p className="text-muted-foreground">
@@ -151,8 +151,8 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
           </CardContent>
         </Card>
       ) : (
-        <ScrollArea className="h-[calc(100vh-16rem)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4">
+        <ScrollArea className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4 pb-4">
             {events.map((event) => {
             const isUpdating = updatingIds.has(event.id);
             const isFromMarket = !event.is_sender && !event.is_receiver;
