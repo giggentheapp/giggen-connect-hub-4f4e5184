@@ -39,12 +39,26 @@ export const ArtistExploreSection = ({
   
   const loading = musiciansLoading || organizersLoading;
 
-  // Check if we should set active view from navigation state
+  // Check if we should set active view from navigation state and restore scroll
   useEffect(() => {
-    if (location.state?.activeView) {
-      setActiveView(location.state.activeView);
+    const state = location.state;
+    if (state?.activeView) {
+      setActiveView(state.activeView);
     }
-  }, [location.state]);
+    if (state?.searchTerm) {
+      setSearchTerm(state.searchTerm);
+    }
+    
+    // Restore scroll position after a short delay to ensure content is rendered
+    if (state?.scrollPosition !== undefined) {
+      setTimeout(() => {
+        window.scrollTo(0, state.scrollPosition);
+      }, 100);
+      
+      // Clear the state so it doesn't persist on next navigation
+      navigate(location.pathname + location.search, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname, location.search]);
 
   // Auto-fetch published events when component mounts
   useEffect(() => {
@@ -131,10 +145,19 @@ export const ArtistExploreSection = ({
   }, []);
 
   const handleViewProfile = useCallback((userId: string) => {
+    // Save current state for back navigation
+    const exploreState = {
+      fromSection: 'explore',
+      activeView,
+      searchTerm,
+      // Store scroll position
+      scrollPosition: window.scrollY || document.documentElement.scrollTop
+    };
+    
     navigate(`/profile/${userId}`, { 
-      state: { fromSection: 'explore' } 
+      state: exploreState
     });
-  }, [navigate]);
+  }, [navigate, activeView, searchTerm]);
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-background">
       {/* Top Navigation Header - Sticky on mobile */}

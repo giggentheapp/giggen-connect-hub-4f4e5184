@@ -97,11 +97,19 @@ export const ProfileSection = ({
 
   
   const handleBack = () => {
-    // Check if we have a fromSection state
-    const fromSection = location.state?.fromSection;
-    if (fromSection) {
-      navigate('/dashboard', { state: { section: fromSection } });
+    // Check if we have explore state to return to
+    const exploreState = location.state;
+    if (exploreState?.fromSection === 'explore') {
+      // Navigate back to explore with all the saved state
+      navigate(`/profile/${profile.user_id}?section=explore`, { 
+        state: {
+          activeView: exploreState.activeView,
+          searchTerm: exploreState.searchTerm,
+          scrollPosition: exploreState.scrollPosition
+        }
+      });
     } else {
+      // Fallback to generic navigation
       navigate(-1);
     }
   };
