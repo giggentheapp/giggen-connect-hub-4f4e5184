@@ -427,7 +427,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate("/create-offer")}
+              onClick={() => navigate(`${location.pathname}?section=admin-concepts`)}
             >
               <BriefcaseIcon className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Mine tilbud</span>
@@ -454,7 +454,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-32 md:min-h-[120px] flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-              onClick={() => navigate(`${location.pathname}?section=filebank`)}
+              onClick={() => navigate(`${location.pathname}?section=filbank`)}
             >
               <Upload className="h-7 w-7 md:h-8 md:w-8 text-primary" />
               <span className="text-sm font-medium">Filbank</span>
