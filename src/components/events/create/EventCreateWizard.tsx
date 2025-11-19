@@ -238,7 +238,7 @@ export const EventCreateWizard = () => {
         <div className="container max-w-4xl mx-auto px-4 py-4">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/events')}
             className="mb-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
