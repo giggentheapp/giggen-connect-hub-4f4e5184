@@ -27,6 +27,7 @@ const categories = [
 export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: FileUploadModalProps) => {
   const [selectedCategory, setSelectedCategory] = useState<FileCategory | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
   const uploadWithRetry = async (filePath: string, file: File, maxRetries = 2): Promise<void> => {
@@ -57,9 +58,8 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedCategory) return;
+  const uploadFile = async (file: File) => {
+    if (!selectedCategory) return;
 
     setUploading(true);
     try {
@@ -125,6 +125,61 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
     }
   };
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    // Check if file type matches selected category
+    const category = categories.find(c => c.value === selectedCategory);
+    if (category) {
+      const acceptTypes = category.accept.split(',');
+      const isValidType = acceptTypes.some(type => {
+        if (type === 'image/*') return file.type.startsWith('image/');
+        if (type === 'video/*') return file.type.startsWith('video/');
+        if (type === 'audio/*') return file.type.startsWith('audio/');
+        return file.name.toLowerCase().endsWith(type);
+      });
+
+      if (!isValidType) {
+        toast({
+          title: 'Ugyldig filtype',
+          description: `Vennligst velg en fil som matcher ${category.label}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    await uploadFile(file);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -165,26 +220,42 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
                   {categories.find(c => c.value === selectedCategory)?.label}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Velg fil å laste opp
+                  Dra og slipp eller velg fil
                 </p>
               </div>
             </div>
 
-            <Label
-              htmlFor="file-upload"
-              className="flex items-center justify-center gap-2 h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+            <div
+              className={`relative flex items-center justify-center h-32 border-2 border-dashed rounded-lg transition-colors ${
+                isDragging 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-border hover:bg-muted/50'
+              } ${uploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
-              <Upload className="h-6 w-6" />
-              <span>Klikk for å velge fil</span>
-              <input
-                id="file-upload"
-                type="file"
-                className="sr-only"
-                accept={categories.find(c => c.value === selectedCategory)?.accept}
-                onChange={handleFileSelect}
-                disabled={uploading}
-              />
-            </Label>
+              <Label
+                htmlFor="file-upload"
+                className="flex items-center justify-center gap-2 w-full h-full cursor-pointer"
+              >
+                <Upload className={`h-6 w-6 transition-colors ${
+                  isDragging ? 'text-primary' : ''
+                }`} />
+                <span className={isDragging ? 'text-primary font-medium' : ''}>
+                  {uploading ? 'Laster opp...' : isDragging ? 'Slipp filen her' : 'Dra og slipp eller klikk her'}
+                </span>
+                <input
+                  id="file-upload"
+                  type="file"
+                  className="sr-only"
+                  accept={categories.find(c => c.value === selectedCategory)?.accept}
+                  onChange={handleFileSelect}
+                  disabled={uploading}
+                />
+              </Label>
+            </div>
 
             <Button
               variant="ghost"
@@ -192,7 +263,7 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
               disabled={uploading}
               className="w-full"
             >
-              Tilbake
+              ← Tilbake
             </Button>
           </div>
         )}
