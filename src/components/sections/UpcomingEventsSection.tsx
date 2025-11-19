@@ -6,10 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
-import { UpcomingEventCard } from '@/components/UpcomingEventCard';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe } from 'lucide-react';
+import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
+import { Calendar, MapPin, Banknote, Users, Eye, User, Phone, Mail, Globe, Clock, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { UserProfile } from '@/types/auth';
 
 interface UpcomingEvent {
@@ -35,81 +36,158 @@ interface UpcomingEvent {
 
 interface UpcomingEventsSectionProps {
   profile: UserProfile;
-  isAdminView?: boolean;
 }
 
-export const UpcomingEventsSection = ({ profile, isAdminView = false }: UpcomingEventsSectionProps) => {
+export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) => {
   const navigate = useNavigate();
-  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [portfolioUserId, setPortfolioUserId] = useState<string | null>(null);
-  const [techSpecFiles, setTechSpecFiles] = useState<any[]>([]);
-  const [hospitalityFiles, setHospitalityFiles] = useState<any[]>([]);
+  const { events, loading, error: fetchError } = useUpcomingEvents(profile.user_id);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchUpcomingEvents();
-  }, [profile.user_id, isAdminView]);
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Laster arrangementer...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const fetchUpcomingEvents = async () => {
-    try {
-      setLoading(true);
-      
-      console.log('🚨 UpcomingEventsSection.fetchUpcomingEvents CALLED');
-      console.log('🚨 isAdminView:', isAdminView);
-      console.log('🚨 profile.user_id:', profile.user_id);
-      
-      let query;
-      
-      if (isAdminView) {
-        // COPY EXACT WORKING QUERY FROM BOOKINGS SECTION
-        console.log('🚨 ADMIN VIEW: Using simple bookings query (no profile joins)');
-        
-        query = supabase
-          .from('bookings')
-          .select('*')
-          .eq('status', 'upcoming')
-          .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`)
-          .order('created_at', { ascending: false });
-      } else {
-        // Public view: get from events_market table - filter by the profile owner's events
-        console.log('🚨 PUBLIC VIEW: fetching from events_market for user:', profile.user_id);
-        query = supabase
-          .from('events_market')
-          .select('*')
-          .eq('is_public', true)
-          .eq('created_by', profile.user_id)
-          .gte('date', new Date().toISOString().split('T')[0])
-          .order('date', { ascending: true });
-      }
+  if (fetchError) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <Card className="border-destructive/50">
+          <CardContent className="pt-6">
+            <p className="text-destructive text-center">Kunne ikke laste arrangementer: {fetchError}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-      const { data, error } = await query;
+  return (
+    <div className="container mx-auto p-6 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Kommende arrangementer</h1>
+        <p className="text-muted-foreground">
+          Arrangementer fra bookingflyten og admin-opprettede events
+        </p>
+      </div>
 
-      if (error) {
-        console.error('❌ Query error:', error);
-        throw error;
-      }
-      
-      console.log('🚨 FETCHED DATA:', data?.length || 0, 'events');
-      console.log('🚨 RAW DATA:', data);
-      
-      // NO COMPLEX FILTERING - JUST SET THE DATA
-      setUpcomingEvents(data || []);
-    } catch (error: any) {
-      console.error('❌ Error fetching upcoming events:', error);
-      toast({
-        title: "Feil ved lasting av arrangementer",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      {events.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-lg font-semibold mb-2">Ingen kommende arrangementer</h3>
+            <p className="text-muted-foreground mb-6">
+              Publiserte bookinger og events vil vises her
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => navigate('/dashboard?section=bookings')}>
+                Gå til bookinger
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/create-event')}>
+                Opprett nytt arrangement
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <Card
+              key={event.id}
+              className="hover:border-primary/50 transition-all cursor-pointer group"
+              onClick={() => navigate(`/arrangement/${event.id}`)}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
+                    {event.title}
+                  </CardTitle>
+                  {event.has_paid_tickets && (
+                    <Badge variant="secondary" className="shrink-0">
+                      Betalt
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {event.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {event.description}
+                  </p>
+                )}
 
-  const openEventDetails = async (event: any) => {
+                <div className="space-y-2">
+                  {event.event_date && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-foreground font-medium">
+                        {format(new Date(event.event_date), 'dd. MMMM yyyy', { locale: nb })}
+                      </span>
+                    </div>
+                  )}
+
+                  {event.time && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">{event.time}</span>
+                    </div>
+                  )}
+
+                  {event.venue && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground truncate">{event.venue}</span>
+                    </div>
+                  )}
+
+                  {event.address && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0 opacity-0" />
+                      <span className="text-xs text-muted-foreground truncate">{event.address}</span>
+                    </div>
+                  )}
+
+                  {event.audience_estimate && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">
+                        {event.audience_estimate} forventet publikum
+                      </span>
+                    </div>
+                  )}
+
+                  {event.ticket_price && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">{event.ticket_price} kr</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-border/50">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {event.is_sender && 'Du er sender'}
+                      {event.is_receiver && 'Du er mottaker'}
+                      {!event.is_sender && !event.is_receiver && 'Admin-opprettet'}
+                    </span>
+                    <Badge variant="outline" className="text-xs">
+                      {event.status === 'upcoming' ? 'Kommende' : event.status}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
     console.log('🚨 UpcomingEventsSection: Event card clicked', { eventId: event.id, isAdminView });
     
     // For admin view, always show detailed dialog with all available info

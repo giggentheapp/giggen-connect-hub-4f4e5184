@@ -23,6 +23,7 @@ import { BookingsSection } from '@/components/sections/BookingsSection';
 import { TicketsSection } from '@/components/sections/TicketsSection';
 import { MenuSection } from '@/components/sections/MenuSection';
 import { FileBankSection } from '@/components/sections/FileBankSection';
+import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
@@ -150,6 +151,9 @@ export const UnifiedSidePanel = ({
       
       case 'bookings':
         return <BookingsSection profile={profile} />;
+      
+      case 'upcoming-events':
+        return <UpcomingEventsSection profile={profile} />;
       
       case 'menu':
         return <MenuSection profile={profile} />;

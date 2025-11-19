@@ -14,17 +14,22 @@ import {
   Plus,
   Clock,
   ChevronDown,
-  Rocket
+  Rocket,
+  MapPin
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useUserEventDrafts } from '@/hooks/useUserEventDrafts';
+import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { DraftEventCard } from '@/components/events/DraftEventCard';
 import { DraftOfferCard } from '@/components/concepts/DraftOfferCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
+import { format } from "date-fns";
+import { nb } from "date-fns/locale";
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -38,6 +43,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
   
   const { drafts: offerDrafts, loading: offerDraftsLoading } = useUserDrafts(profile.user_id);
   const { drafts: eventDrafts, loading: eventDraftsLoading } = useUserEventDrafts(profile.user_id);
+  const { events: upcomingEventsData, loading: upcomingLoading } = useUpcomingEvents(profile.user_id);
 
   // Fetch bookings data
   const { data: bookingsData } = useQuery({
@@ -390,50 +396,21 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
               <Settings className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Innstillinger</span>
             </Button>
-          </div>
-        </div>
 
-        {/* Upcoming Events */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold px-1">Kommende avtaler</h2>
-          {upcomingEvents.length === 0 ? (
-            <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20">
-              <CardContent className="py-12 text-center">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">Ingen kommende avtaler</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              {upcomingEvents.map((event) => (
-                <Card
-                  key={event.id}
-                  className="border-border/40 hover:border-primary/50 transition-all cursor-pointer"
-                  onClick={() => navigate(`${location.pathname}?section=bookings`)}
-                >
-                  <CardContent className="flex items-start gap-4 p-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-                      <div className="text-xs font-semibold text-primary">
-                        {new Date(event.event_date!).toLocaleDateString("no-NO", { month: "short" }).toUpperCase()}
-                      </div>
-                      <div className="text-lg font-bold text-primary">
-                        {new Date(event.event_date!).getDate()}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{event.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {event.venue || "Ingen lokasjon oppgitt"}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {event.start_time || event.time || "Ingen tid oppgitt"}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5 col-span-2"
+              onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="h-6 w-6 text-primary" />
+                <Badge variant="secondary" className="text-xs">
+                  {upcomingEventsData?.length || 0}
+                </Badge>
+              </div>
+              <span className="text-sm font-medium">Kommende arrangementer</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
