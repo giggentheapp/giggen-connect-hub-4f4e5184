@@ -370,92 +370,75 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
         {/* Tools */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold px-1 text-muted-foreground">Verktøy</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Booking</span>
+              <Calendar className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">Booking</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate("/create-offer")}
             >
-              <BriefcaseIcon className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Mine tilbud</span>
+              <BriefcaseIcon className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">Mine tilbud</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=admin-bands`)}
             >
-              <Users className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Mine band</span>
+              <Users className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">Mine band</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate('/create-event')}
             >
-              <Plus className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Nytt arrangement</span>
+              <Plus className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">Nytt arrangement</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
-              onClick={() => navigate(`${location.pathname}?section=settings`)}
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
-              <Settings className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Innstillinger</span>
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-6 w-6 text-primary" />
+                  <Badge variant="secondary" className="text-xs">
+                    {upcomingEventsData?.length || 0}
+                  </Badge>
+                </div>
+                <span className="text-sm font-medium">Kommende</span>
+              </div>
             </Button>
 
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-1.5 border-border/40 hover:border-primary/50 hover:bg-primary/5 py-3"
-              onClick={() => navigate(`${location.pathname}?section=filebank`)}
+              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              onClick={() => navigate(`${location.pathname}?section=history`)}
             >
-              <Upload className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Filbank</span>
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Archive className="h-6 w-6 text-primary" />
+                  <Badge variant="secondary" className="text-xs">
+                    {completedJobs}
+                  </Badge>
+                </div>
+                <span className="text-sm font-medium">Historikk</span>
+              </div>
             </Button>
           </div>
-        </div>
-
-        {/* Upcoming Events and History */}
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full h-16 flex items-center justify-between px-4 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-            onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
-          >
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Kommende arrangementer</span>
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              {upcomingEventsData?.length || 0}
-            </Badge>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full h-16 flex items-center justify-between px-4 border-border/40 hover:border-primary/50 hover:bg-primary/5"
-            onClick={() => navigate(`${location.pathname}?section=history`)}
-          >
-            <div className="flex items-center gap-3">
-              <Archive className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Historikk</span>
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              {completedJobs}
-            </Badge>
-          </Button>
         </div>
       </div>
     </div>
