@@ -47,10 +47,6 @@ export const useUserEventDrafts = (userId: string | undefined) => {
       if (fetchError) throw fetchError;
 
       setDrafts(data || []);
-      
-      if (data?.length === 0) {
-        console.warn('No event drafts found for user. Query executed correctly.');
-      }
     } catch (err: unknown) {
       logger.error('Failed to fetch event drafts', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
