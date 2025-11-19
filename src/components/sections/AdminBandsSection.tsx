@@ -95,8 +95,13 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
           : `"${bandName}" er nå skjult fra utforskningsseksjonen`,
       });
       
-      // Refetch to get updated data
+      // Force refetch to ensure UI updates
       await refetch();
+      
+      // Also trigger a manual event to force real-time updates
+      window.dispatchEvent(new CustomEvent('band-visibility-changed', { 
+        detail: { bandId, isPublic: newVisibilityState } 
+      }));
       
     } catch (error: any) {
       console.error('❌ Toggle band public visibility error:', error);

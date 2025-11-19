@@ -86,8 +86,16 @@ export const useBands = () => {
       })
       .subscribe();
 
+    // Listen for manual band visibility changes
+    const handleVisibilityChange = () => {
+      fetchBands();
+    };
+    
+    window.addEventListener('band-visibility-changed', handleVisibilityChange);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('band-visibility-changed', handleVisibilityChange);
     };
   }, []);
 
