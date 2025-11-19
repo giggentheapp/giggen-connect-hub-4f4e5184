@@ -38,7 +38,10 @@ export const UnifiedSidePanel = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialSection = searchParams.get('section') || location.state?.section || 'dashboard';
+  // For other people's profiles, always show profile section by default
+  const initialSection = isOwnProfile 
+    ? (searchParams.get('section') || location.state?.section || 'dashboard')
+    : 'profile';
   const [activeSection, setActiveSection] = useState(initialSection);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
@@ -50,10 +53,21 @@ export const UnifiedSidePanel = ({
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
     const section = searchParams.get('section') || location.state?.section;
+    // If viewing someone else's profile, restrict to profile section only
+    if (!isOwnProfile) {
+      if (section !== 'profile') {
+        setActiveSection('profile');
+        // Update URL to reflect profile section
+        const currentPath = location.pathname;
+        navigate(`${currentPath}?section=profile`, { replace: true });
+      }
+      return;
+    }
+    
     if (section && section !== activeSection) {
       setActiveSection(section);
     }
-  }, [searchParams, location.state]);
+  }, [searchParams, location.state, isOwnProfile]);
 
   const handleSignOut = async () => {
     const {
@@ -80,8 +94,18 @@ export const UnifiedSidePanel = ({
     }
   };
 
-  // Unified navigation items - same for all roles
+  // Unified navigation items - restricted when viewing other profiles
   const getNavigationItems = () => {
+    // If viewing someone else's profile, only show profile section
+    if (!isOwnProfile) {
+      return [{
+        id: 'profile',
+        label: t('profile'),
+        icon: User
+      }];
+    }
+    
+    // Full navigation for own profile
     return [{
       id: 'dashboard',
       label: 'Hjem',
@@ -106,7 +130,12 @@ export const UnifiedSidePanel = ({
     }];
   };
   const renderActiveSection = () => {
-    // All sections available to all users
+    // CRITICAL SECURITY: If viewing someone else's profile, only allow profile section
+    if (!isOwnProfile) {
+      return <ProfileSection profile={profile} isOwnProfile={false} />;
+    }
+    
+    // Full access for own profile
     switch (activeSection) {
       case 'dashboard':
         return <DashboardSection profile={profile} />;
@@ -115,7 +144,7 @@ export const UnifiedSidePanel = ({
         return <ArtistExploreSection profile={profile} />;
       
       case 'profile':
-        return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
+        return <ProfileSection profile={profile} isOwnProfile={true} />;
       
       case 'tickets':
         return <TicketsSection profile={profile} />;
@@ -145,7 +174,7 @@ export const UnifiedSidePanel = ({
         return <AdminSettingsSection profile={profile} />;
       
       default:
-        return <ProfileSection profile={profile} isOwnProfile={isOwnProfile} />;
+        return <ProfileSection profile={profile} isOwnProfile={true} />;
     }
   };
   const navItems = getNavigationItems();
