@@ -63,6 +63,17 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
 
     setUploading(true);
     try {
+      // Verify authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Du må være logget inn for å laste opp filer');
+      }
+
+      // Verify userId matches authenticated user
+      if (user.id !== userId) {
+        throw new Error('Bruker-ID matcher ikke autentisert bruker');
+      }
+
       const category = categories.find(c => c.value === selectedCategory);
       if (!category) throw new Error('Invalid category');
 
@@ -80,6 +91,7 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
                       file.type.startsWith('audio/') ? 'audio' : 'document';
 
       // Insert into user_files
+      logger.debug('Inserting file to database', { userId, filename: file.name, fileType });
       const { error: dbError } = await supabase
         .from('user_files')
         .insert({
@@ -94,7 +106,10 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
           bucket_name: 'filbank'
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        logger.error('Database insert failed', { error: dbError, userId, authenticated: user.id });
+        throw dbError;
+      }
 
       toast({
         title: 'Fil lastet opp',
@@ -108,16 +123,25 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       logger.error('File upload failed', err);
       const errorMessage = err instanceof Error ? err.message : 'Ukjent feil';
       
+      // Check for specific RLS error
+      const isRLSError = errorMessage.includes('row-level security') || 
+                         (err && typeof err === 'object' && 'code' in err && err.code === '42501');
+      
       // Provide helpful message for SSL/network errors
       const isNetworkError = errorMessage.includes('Failed to fetch') || 
                              errorMessage.includes('SSL') || 
                              errorMessage.includes('ERR_');
       
+      let description = errorMessage;
+      if (isRLSError) {
+        description = 'Sikkerhetsinnstillinger tillater ikke denne handlingen. Vennligst logg inn på nytt og prøv igjen.';
+      } else if (isNetworkError) {
+        description = 'Nettverksfeil - sjekk nettverkstilkobling, deaktiver antivirus HTTPS-skanning, eller prøv igjen';
+      }
+      
       toast({
         title: 'Opplasting feilet',
-        description: isNetworkError 
-          ? 'Nettverksfeil - sjekk nettverkstilkobling, deaktiver antivirus HTTPS-skanning, eller prøv igjen'
-          : errorMessage,
+        description,
         variant: 'destructive',
       });
     } finally {
