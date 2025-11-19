@@ -63,17 +63,14 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
 
     setUploading(true);
     try {
-      // Verify authentication
+      // Verify authentication and use the authenticated user's ID
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Du må være logget inn for å laste opp filer');
       }
 
-      // TEMPORARY: Commented out for testing
-      // TODO: Re-enable this validation after testing
-      // if (user.id !== userId) {
-      //   throw new Error('Bruker-ID matcher ikke autentisert bruker');
-      // }
+      // Always use the authenticated user's ID for uploads
+      const actualUserId = user.id;
 
       const category = categories.find(c => c.value === selectedCategory);
       if (!category) throw new Error('Invalid category');
@@ -81,7 +78,7 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
       const fileExt = file.name.split('.').pop();
       const timestamp = Date.now();
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `${userId}/${category.category}/${timestamp}_${sanitizedFileName}`;
+      const filePath = `${actualUserId}/${category.category}/${timestamp}_${sanitizedFileName}`;
 
       // Upload to unified filbank bucket with retry logic
       await uploadWithRetry(filePath, file);
@@ -91,12 +88,12 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
                       file.type.startsWith('video/') ? 'video' :
                       file.type.startsWith('audio/') ? 'audio' : 'document';
 
-      // Insert into user_files
-      logger.debug('Inserting file to database', { userId, filename: file.name, fileType });
+      // Insert into user_files with authenticated user's ID
+      logger.debug('Inserting file to database', { userId: actualUserId, filename: file.name, fileType });
       const { error: dbError } = await supabase
         .from('user_files')
         .insert({
-          user_id: userId,
+          user_id: actualUserId,
           filename: file.name,
           file_path: filePath,
           file_type: fileType,
@@ -108,7 +105,7 @@ export const FileUploadModal = ({ open, onClose, onUploadComplete, userId }: Fil
         });
 
       if (dbError) {
-        logger.error('Database insert failed', { error: dbError, userId, authenticated: user.id });
+        logger.error('Database insert failed', { error: dbError, userId: actualUserId });
         throw dbError;
       }
 
