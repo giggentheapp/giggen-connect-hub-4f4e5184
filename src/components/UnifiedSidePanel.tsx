@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Search, Ticket, Menu, Home } from 'lucide-react';
+import { User, Search, Ticket, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { useNotifications } from '@/hooks/useNotifications';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
@@ -51,7 +50,6 @@ export const UnifiedSidePanel = ({
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { t } = useAppTranslation();
-  const { unreadCount } = useNotifications();
 
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
@@ -122,11 +120,6 @@ export const UnifiedSidePanel = ({
       id: 'tickets',
       label: 'Billetter',
       icon: Ticket
-    }, {
-      id: 'menu',
-      label: 'Meny',
-      icon: Menu,
-      badge: unreadCount > 0 ? unreadCount : undefined
     }];
   };
   const renderActiveSection = () => {
@@ -209,11 +202,6 @@ export const UnifiedSidePanel = ({
                     >
                       <Icon className="h-5 w-5" />
                     </button>
-                    {item.badge && (
-                      <div className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1 text-xs bg-destructive text-destructive-foreground rounded-full">
-                        {item.badge}
-                      </div>
-                    )}
                   </div>;
           })}
             </nav>
@@ -241,11 +229,6 @@ export const UnifiedSidePanel = ({
                 <button onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 w-full', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
                   <Icon className="h-5 w-5" />
                 </button>
-                {item.badge && (
-                  <div className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1 text-xs bg-destructive text-destructive-foreground rounded-full">
-                    {item.badge}
-                  </div>
-                )}
               </div>;
         })}
           </div>
