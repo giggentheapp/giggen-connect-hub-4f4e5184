@@ -11,19 +11,20 @@ import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
 
 // Import sections
-import { DashboardSection } from '@/components/sections/DashboardSection';
-import { ArtistExploreSection } from '@/components/sections/ArtistExploreSection';
-import { ProfileSection } from '@/components/sections/ProfileSection';
-import { AdminFilesSection } from '@/components/sections/AdminFilesSection';
-import { AdminConceptsSection } from '@/components/sections/AdminConceptsSection';
-import { AdminBandsSection } from '@/components/sections/AdminBandsSection';
-import { AdminEventsSection } from '@/components/sections/AdminEventsSection';
-import { AdminSettingsSection } from '@/components/sections/AdminSettingsSection';
-import { BookingsSection } from '@/components/sections/BookingsSection';
-import { TicketsSection } from '@/components/sections/TicketsSection';
-import { MenuSection } from '@/components/sections/MenuSection';
-import { FileBankSection } from '@/components/sections/FileBankSection';
-import { UpcomingEventsSection } from '@/components/sections/UpcomingEventsSection';
+import { DashboardSection } from "@/components/sections/DashboardSection";
+import { ArtistExploreSection } from "@/components/sections/ArtistExploreSection";
+import { ProfileSection } from "@/components/sections/ProfileSection";
+import { AdminFilesSection } from "@/components/sections/AdminFilesSection";
+import { AdminConceptsSection } from "@/components/sections/AdminConceptsSection";
+import { AdminBandsSection } from "@/components/sections/AdminBandsSection";
+import { AdminEventsSection } from "@/components/sections/AdminEventsSection";
+import { AdminSettingsSection } from "@/components/sections/AdminSettingsSection";
+import { BookingsSection } from "@/components/sections/BookingsSection";
+import { TicketsSection } from "@/components/sections/TicketsSection";
+import { MenuSection } from "@/components/sections/MenuSection";
+import { FileBankSection } from "@/components/sections/FileBankSection";
+import { UpcomingEventsSection } from "@/components/sections/UpcomingEventsSection";
+import { HistorySection } from "@/components/sections/HistorySection";
 
 interface UnifiedSidePanelProps {
   profile: UserProfile;
@@ -154,6 +155,9 @@ export const UnifiedSidePanel = ({
       
       case 'upcoming-events':
         return <UpcomingEventsSection profile={profile} />;
+      
+      case 'history':
+        return <HistorySection profile={profile} />;
       
       case 'menu':
         return <MenuSection profile={profile} />;

@@ -15,7 +15,8 @@ import {
   Clock,
   ChevronDown,
   Rocket,
-  MapPin
+  MapPin,
+  Archive
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
@@ -23,6 +24,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useUserEventDrafts } from '@/hooks/useUserEventDrafts';
 import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
+import { useCompletedEvents } from '@/hooks/useCompletedEvents';
 import { DraftEventCard } from '@/components/events/DraftEventCard';
 import { DraftOfferCard } from '@/components/concepts/DraftOfferCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -44,6 +46,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
   const { drafts: offerDrafts, loading: offerDraftsLoading } = useUserDrafts(profile.user_id);
   const { drafts: eventDrafts, loading: eventDraftsLoading } = useUserEventDrafts(profile.user_id);
   const { events: upcomingEventsData, loading: upcomingLoading } = useUpcomingEvents(profile.user_id);
+  const { events: completedEventsData, loading: completedLoading } = useCompletedEvents(profile.user_id);
 
   // Fetch bookings data
   const { data: bookingsData } = useQuery({
@@ -91,9 +94,8 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
     b => b.status === "pending" && b.receiver_id === profile.user_id
   ).length || 0;
 
-  const completedJobs = bookingsData?.filter(
-    b => b.status === "completed"
-  ).length || 0;
+  // Use completed events from combined hook (bookings + events_market)
+  const completedJobs = completedEventsData?.length || 0;
 
   const upcomingEvents = bookingsData?.filter(
     b => b.status === "upcoming" && b.event_date && new Date(b.event_date) > new Date()
@@ -409,6 +411,20 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
                 </Badge>
               </div>
               <span className="text-sm font-medium">Kommende arrangementer</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center gap-2 border-border/40 hover:border-primary/50 hover:bg-primary/5 col-span-2"
+              onClick={() => navigate(`${location.pathname}?section=history`)}
+            >
+              <div className="flex items-center gap-2">
+                <Archive className="h-6 w-6 text-primary" />
+                <Badge variant="secondary" className="text-xs">
+                  {completedJobs}
+                </Badge>
+              </div>
+              <span className="text-sm font-medium">Historikk</span>
             </Button>
           </div>
         </div>
