@@ -11,6 +11,7 @@ import Onboarding from "./pages/Onboarding";
 import GettingStarted from "./pages/GettingStarted";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import DashboardRedirect from "./pages/DashboardRedirect";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
@@ -66,6 +67,7 @@ const App = () => {
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/getting-started" element={<GettingStarted />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/profile/:userId/concept/:conceptId" element={<ProfileConceptView />} />
               <Route path="/map" element={<Map />} />
