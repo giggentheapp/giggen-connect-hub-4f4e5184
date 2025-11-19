@@ -68,8 +68,12 @@ const Auth = () => {
           return;
         }
         
-        // Handle successful sign in - ONLY for normal login, not password recovery
-        if (session?.user && event === 'SIGNED_IN') {
+        // Handle successful sign in - Navigate to dashboard
+        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          // Reset password recovery mode
+          setIsResettingPassword(false);
+          setIsForgotPassword(false);
+          
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id')
@@ -87,20 +91,6 @@ const Auth = () => {
             setLoading(false);
           } else {
             navigate(dashboardUrl, { replace: true });
-          }
-        } else if (session?.user && event === 'INITIAL_SESSION') {
-          // Only navigate on initial session if NOT in reset password mode
-          if (!isResettingPassword) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('user_id')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-            navigate(dashboardUrl, { replace: true });
-          } else {
-            setLoading(false);
           }
         } else {
           setLoading(false);
