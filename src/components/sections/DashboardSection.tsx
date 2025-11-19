@@ -13,7 +13,8 @@ import {
   BriefcaseIcon,
   Plus,
   Clock,
-  ChevronDown
+  ChevronDown,
+  Rocket
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
@@ -132,17 +133,31 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
     <div className="flex-1 overflow-auto">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Avatar className="h-14 w-14 border-2 border-primary">
-            <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-              {profile.display_name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">Hei, {profile.display_name}!</h1>
-            <p className="text-sm text-muted-foreground">Velkommen tilbake</p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-14 w-14 border-2 border-primary">
+              <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {profile.display_name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold">Hei, {profile.display_name}!</h1>
+              <p className="text-sm text-muted-foreground">Velkommen tilbake</p>
+            </div>
           </div>
+          
+          {/* Getting Started Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/getting-started')}
+            className="gap-2 shrink-0"
+            title="Kom i gang guide"
+          >
+            <Rocket className="h-4 w-4" />
+            <span className="hidden sm:inline">Kom i gang</span>
+          </Button>
         </div>
 
         {/* Profile Completion */}
