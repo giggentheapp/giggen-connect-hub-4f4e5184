@@ -92,7 +92,7 @@ const Profile = () => {
     );
   }
 
-  return <UnifiedSidePanel profile={profile} isOwnProfile={isOwnProfile} />;
+  return <UnifiedSidePanel profile={profile} isOwnProfile={isOwnProfile} currentUserId={currentUserId} />;
 };
 
 export default Profile;
