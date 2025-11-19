@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface UpcomingEventsSectionProps {
   profile: UserProfile;
@@ -150,8 +151,9 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => {
+        <ScrollArea className="h-[calc(100vh-16rem)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4">
+            {events.map((event) => {
             const isUpdating = updatingIds.has(event.id);
             const isFromMarket = !event.is_sender && !event.is_receiver;
             const currentVisibility = isFromMarket ? event.is_public_after_approval : event.is_public_after_approval;
@@ -296,7 +298,8 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
               </Card>
             );
           })}
-        </div>
+          </div>
+        </ScrollArea>
       )}
     </div>
   );
