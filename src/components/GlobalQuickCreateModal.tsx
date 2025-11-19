@@ -42,7 +42,7 @@ export const GlobalQuickCreateModal = ({
       label: 'Opprett nytt band',
       description: 'Lag et nytt band',
       onClick: () => {
-        navigate(`/profile?section=profile#bands&create=true`);
+        navigate(`/profile?section=admin-bands&create=true`);
         onOpenChange(false);
       },
     },
