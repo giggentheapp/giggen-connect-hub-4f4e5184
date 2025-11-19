@@ -282,17 +282,11 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                           variant="outline"
                           size="sm"
                           className={!isFromMarket ? "w-full text-xs" : "col-span-2 text-xs"}
-                          onClick={() => {
-                            if (isFromMarket) {
-                              navigate(`/arrangement/${event.id}`);
-                            } else {
-                              navigate(`/booking/${event.id}/view`);
-                            }
-                          }}
+                          onClick={() => navigate(`/arrangement/${event.id}`)}
                           disabled={isUpdating}
                         >
-                          <CalendarCheck className="h-3 w-3 mr-1" />
-                          Se detaljer
+                          <Eye className="h-3 w-3 mr-1" />
+                          Vis arrangement
                         </Button>
                       </div>
 

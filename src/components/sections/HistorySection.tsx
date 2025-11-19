@@ -3,7 +3,7 @@ import { useCompletedEvents } from '@/hooks/useCompletedEvents';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, Clock, DollarSign, Archive, FileText, CalendarCheck } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, DollarSign, Archive, FileText, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { UserProfile } from '@/types/auth';
@@ -162,16 +162,10 @@ export const HistorySection = ({ profile }: HistorySectionProps) => {
                           variant="outline"
                           size="sm"
                           className={!isFromMarket ? "w-full text-xs" : "col-span-2 text-xs"}
-                          onClick={() => {
-                            if (isFromMarket) {
-                              navigate(`/arrangement/${event.id}`);
-                            } else {
-                              navigate(`/booking/${event.id}/view`);
-                            }
-                          }}
+                          onClick={() => navigate(`/arrangement/${event.id}`)}
                         >
-                          <CalendarCheck className="h-3 w-3 mr-1" />
-                          Se detaljer
+                          <Eye className="h-3 w-3 mr-1" />
+                          Vis arrangement
                         </Button>
                       </div>
                     </div>
