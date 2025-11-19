@@ -49,7 +49,7 @@ export const useUpcomingEvents = (userId: string) => {
         return;
       }
 
-      // Fetch events from events_market created by user
+      // Fetch events from events_market created by user (include both public and hidden)
       const { data: marketEvents, error: marketError } = await supabase
         .from('events_market')
         .select('*')

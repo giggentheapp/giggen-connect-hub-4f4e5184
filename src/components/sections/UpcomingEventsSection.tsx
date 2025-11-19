@@ -23,16 +23,27 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
   const { toast } = useToast();
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
-  const handleMoveToHistory = async (eventId: string, eventTitle: string) => {
+  const handleMoveToHistory = async (eventId: string, eventTitle: string, isFromMarket: boolean) => {
     setUpdatingIds(prev => new Set(prev).add(eventId));
     
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'completed' })
-        .eq('id', eventId);
+      if (isFromMarket) {
+        // Update events_market status to completed
+        const { error } = await supabase
+          .from('events_market')
+          .update({ status: 'completed' })
+          .eq('id', eventId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Update bookings status to completed
+        const { error } = await supabase
+          .from('bookings')
+          .update({ status: 'completed' })
+          .eq('id', eventId);
+
+        if (error) throw error;
+      }
 
       toast({
         title: "Flyttet til historikk",
@@ -279,19 +290,17 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         </Button>
                       </div>
 
-                      {/* Move to History */}
-                      {!isFromMarket && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs"
-                          onClick={() => handleMoveToHistory(event.id, event.title)}
-                          disabled={isUpdating}
-                        >
-                          <Archive className="h-3 w-3 mr-1" />
-                          {isUpdating ? 'Behandler...' : 'Legg til i historikk'}
-                        </Button>
-                      )}
+                      {/* Move to History - available for all event types */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => handleMoveToHistory(event.id, event.title, isFromMarket)}
+                        disabled={isUpdating}
+                      >
+                        <Archive className="h-3 w-3 mr-1" />
+                        {isUpdating ? 'Behandler...' : 'Legg til i historikk'}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
