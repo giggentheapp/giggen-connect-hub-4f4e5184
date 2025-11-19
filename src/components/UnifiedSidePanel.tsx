@@ -280,6 +280,7 @@ export const UnifiedSidePanel = ({
         open={showQuickModal}
         onOpenChange={setShowQuickModal}
         onFilbankUpload={() => setShowFileUploadModal(true)}
+        userId={profile.user_id}
       />
 
       <FileUploadModal
