@@ -6,12 +6,14 @@ interface GlobalQuickCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onFilbankUpload: () => void;
+  userId: string;
 }
 
 export const GlobalQuickCreateModal = ({ 
   open, 
   onOpenChange, 
-  onFilbankUpload 
+  onFilbankUpload,
+  userId
 }: GlobalQuickCreateModalProps) => {
   const navigate = useNavigate();
 
@@ -42,7 +44,7 @@ export const GlobalQuickCreateModal = ({
       label: 'Opprett nytt band',
       description: 'Lag et nytt band',
       onClick: () => {
-        navigate(`/profile?section=admin-bands&create=true`);
+        navigate(`/profile/${userId}?section=admin-bands&create=true`);
         onOpenChange(false);
       },
     },
