@@ -85,14 +85,33 @@ const PublicEventView = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       // First, try to fetch from events_market (for public ticket events)
-      const { data: marketEventData, error: marketError } = await supabase
+      let marketEventQuery = supabase
         .from('events_market')
         .select('*')
-        .eq('id', id)
-        .eq('is_public', true)
-        .maybeSingle();
+        .eq('id', id);
+      
+      // If user is not the creator, only show public events
+      if (!user) {
+        marketEventQuery = marketEventQuery.eq('is_public', true);
+      }
+      
+      const { data: marketEventData, error: marketError } = await marketEventQuery.maybeSingle();
 
       if (marketEventData) {
+        // Check if user is the creator or if event is public
+        const isCreator = user && marketEventData.created_by === user.id;
+        const isPublic = marketEventData.is_public;
+        
+        if (!isCreator && !isPublic) {
+          toast({
+            title: "Ikke tilgang",
+            description: "Dette arrangementet er ikke offentlig tilgjengelig",
+            variant: "destructive"
+          });
+          navigate('/dashboard');
+          return;
+        }
+
         // Convert events_market format to booking format for display
         setEvent({
           id: marketEventData.id,
@@ -127,12 +146,17 @@ const PublicEventView = () => {
       }
       
       // If not in events_market, try bookings
-      const { data: eventData, error: eventError } = await supabase
+      let bookingQuery = supabase
         .from('bookings')
-        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval, public_visibility_settings')
-        .eq('id', id)
-        .eq('status', 'upcoming')
-        .maybeSingle();
+        .select('id, title, description, event_date, time, venue, address, ticket_price, audience_estimate, sender_id, receiver_id, selected_concept_id, is_public_after_approval, public_visibility_settings, status')
+        .eq('id', id);
+      
+      // Allow upcoming and completed bookings for parties, only upcoming for public
+      if (!user) {
+        bookingQuery = bookingQuery.eq('status', 'upcoming');
+      }
+      
+      const { data: eventData, error: eventError } = await bookingQuery.maybeSingle();
 
       if (eventError) throw eventError;
 
@@ -146,11 +170,11 @@ const PublicEventView = () => {
         return;
       }
 
-      // Check if user has access (is a party OR event is public)
+      // Check if user has access (is a party OR event is public and upcoming)
       const isParty = user && (eventData.sender_id === user.id || eventData.receiver_id === user.id);
-      const isPublic = eventData.is_public_after_approval;
+      const isPublicAndUpcoming = eventData.is_public_after_approval && eventData.status === 'upcoming';
 
-      if (!isParty && !isPublic) {
+      if (!isParty && !isPublicAndUpcoming) {
         toast({
           title: "Ikke tilgang",
           description: "Dette arrangementet er ikke offentlig tilgjengelig",
