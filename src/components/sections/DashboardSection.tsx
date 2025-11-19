@@ -352,7 +352,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
         {/* Shortcuts */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold px-1">Snarveier</h2>
+          <h2 className="text-lg font-semibold px-1">Verktøy</h2>
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
