@@ -31,7 +31,10 @@ export const EventCreateModalB = ({
   const [musicians, setMusicians] = useState<EventParticipant[]>([]);
   const [organizers, setOrganizers] = useState<EventParticipant[]>([]);
   const [loading, setLoading] = useState(false);
-  const { bands } = useUserBands(userId);
+  const { bands: allBands } = useUserBands(userId);
+  
+  // Only show public bands in event participant selection
+  const bands = allBands.filter(band => band.is_public);
 
   useEffect(() => {
     fetchMusicians();
