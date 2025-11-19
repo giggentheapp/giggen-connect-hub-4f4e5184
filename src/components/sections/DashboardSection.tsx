@@ -156,7 +156,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             title="Kom i gang guide"
           >
             <Rocket className="h-4 w-4" />
-            <span className="hidden sm:inline">Kom i gang</span>
+            Kom i gang
           </Button>
         </div>
 
