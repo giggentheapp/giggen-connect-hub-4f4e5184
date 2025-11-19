@@ -40,7 +40,7 @@ export function EventsTicketMarket() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold mb-2">Billetter</h2>
+        <h2 className="text-3xl font-bold mb-2">Kommende arrangementer</h2>
         <p className="text-muted-foreground">Kjøp billetter til kommende arrangementer</p>
       </div>
 
