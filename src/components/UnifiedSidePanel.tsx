@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Search, Ticket, Home } from 'lucide-react';
+import { User, Search, Ticket, Home, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -263,14 +263,32 @@ export const UnifiedSidePanel = ({
       {/* Mobile Navigation */}
       {isMobile && <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
           <div className="flex items-center justify-around h-16 px-2">
-            {navItems.map(item => {
+            {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
-          return <div key={item.id} className="relative flex-1">
+          const showPlusButton = item.id === 'profile';
+          
+          return (
+            <Fragment key={item.id}>
+              <div className="relative flex-1">
                 <button onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 w-full', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
                   <Icon className="h-5 w-5" />
                 </button>
-              </div>;
+              </div>
+              {showPlusButton && (
+                <div className="relative flex-shrink-0 mx-1">
+                  <button
+                    onClick={() => setShowQuickModal(true)}
+                    className="h-12 w-12 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition"
+                    title="Opprett nytt"
+                    aria-label="Opprett nytt"
+                  >
+                    <Plus className="h-6 w-6" />
+                  </button>
+                </div>
+              )}
+            </Fragment>
+          );
         })}
           </div>
         </nav>}
