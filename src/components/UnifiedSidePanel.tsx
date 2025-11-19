@@ -8,6 +8,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { UserProfile } from '@/types/auth';
+import { GlobalQuickActionButton } from '@/components/GlobalQuickActionButton';
+import { GlobalQuickCreateModal } from '@/components/GlobalQuickCreateModal';
+import { FileUploadModal } from '@/components/FileUploadModal';
 
 // Import sections
 import { DashboardSection } from "@/components/sections/DashboardSection";
@@ -50,6 +53,8 @@ export const UnifiedSidePanel = ({
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  const [showQuickModal, setShowQuickModal] = useState(false);
+  const [showFileUploadModal, setShowFileUploadModal] = useState(false);
 
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
@@ -177,33 +182,69 @@ export const UnifiedSidePanel = ({
   return <div className={cn("flex flex-col", isMobile ? "h-screen max-h-screen" : "min-h-screen", className)}>
       {/* Desktop Sidebar - Sticky collapsed */}
       {!isMobile && <div className="fixed top-0 left-0 z-50 h-full">
-          <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
-            {/* Logo */}
-            <div className="p-6 border-b border-border">
-              <div className="flex items-center justify-center">
-                <img 
-                  src={giggenLogo} 
-                  alt="GIGGEN Logo" 
-                  className="w-20 h-20 object-contain drop-shadow-lg"
-                />
-              </div>
+          <div className="h-full w-[60px] bg-white dark:bg-card border-r border-border shadow-lg overflow-y-auto flex flex-col items-center justify-between py-6">
+            {/* Logo - Top */}
+            <div className="flex flex-col items-center">
+              <img 
+                src={giggenLogo} 
+                alt="Giggen Logo" 
+                className="w-10 h-10 object-contain mb-4"
+              />
+
+              {/* Top Navigation: Home, Profil, Utforsk */}
+              <nav className="w-full flex flex-col items-center space-y-2">
+                {navItems
+                  .filter(item => item.id !== 'tickets')
+                  .map(item => {
+                    const Icon = item.icon;
+                    const isActive = activeSection === item.id;
+                    return (
+                      <div key={item.id} className="relative">
+                        <button 
+                          onClick={() => handleNavigation(item.id)} 
+                          className={cn(
+                            'w-12 h-12 flex items-center justify-center rounded-xl p-3 transition-all',
+                            isActive 
+                              ? 'bg-orange-500/15 text-orange-500' 
+                              : 'text-muted-foreground hover:bg-orange-500/10 hover:text-orange-500'
+                          )}
+                          title={item.label}
+                        >
+                          <Icon className="h-6 w-6" />
+                        </button>
+                      </div>
+                    );
+                  })}
+              </nav>
             </div>
 
-            {/* Navigation */}
-            <nav className="p-3 space-y-2 flex-1">
-              {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            return <div key={item.id} className="relative">
-                    <button 
-                      onClick={() => handleNavigation(item.id)} 
-                      className={cn('w-full flex items-center justify-center p-3 rounded-lg transition-colors', isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
-                      title={item.label}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </button>
-                  </div>;
-          })}
+            {/* Global CTA Button - Pluss-knapp (midt) */}
+            <GlobalQuickActionButton onClick={() => setShowQuickModal(true)} />
+
+            {/* Bottom Navigation: Billetter */}
+            <nav className="w-full flex flex-col items-center">
+              {navItems
+                .filter(item => item.id === 'tickets')
+                .map(item => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.id;
+                  return (
+                    <div key={item.id} className="relative">
+                      <button 
+                        onClick={() => handleNavigation(item.id)} 
+                        className={cn(
+                          'w-12 h-12 flex items-center justify-center rounded-xl p-3 transition-all',
+                          isActive 
+                            ? 'bg-orange-500/15 text-orange-500' 
+                            : 'text-muted-foreground hover:bg-orange-500/10 hover:text-orange-500'
+                        )}
+                        title={item.label}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </button>
+                    </div>
+                  );
+                })}
             </nav>
           </div>
         </div>}
@@ -211,7 +252,7 @@ export const UnifiedSidePanel = ({
       {/* Main Content */}
       <main className={cn(
         "flex-1 flex flex-col", 
-        !isMobile ? 'ml-16 overflow-auto' : 'overflow-hidden', 
+        !isMobile ? 'ml-[60px] overflow-auto' : 'overflow-hidden', 
         isMobile ? 'pb-16' : ''
       )}>
         <div className={cn("flex-1 flex flex-col", isMobile ? "min-h-0 overflow-hidden" : "")}>
@@ -233,5 +274,21 @@ export const UnifiedSidePanel = ({
         })}
           </div>
         </nav>}
+
+      {/* Modals */}
+      <GlobalQuickCreateModal
+        open={showQuickModal}
+        onOpenChange={setShowQuickModal}
+        onFilbankUpload={() => setShowFileUploadModal(true)}
+      />
+
+      <FileUploadModal
+        open={showFileUploadModal}
+        onClose={() => setShowFileUploadModal(false)}
+        onUploadComplete={() => {
+          setShowFileUploadModal(false);
+        }}
+        userId={profile.user_id}
+      />
     </div>;
 };
