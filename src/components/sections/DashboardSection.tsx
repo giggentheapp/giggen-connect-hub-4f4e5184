@@ -373,48 +373,66 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
-              <Calendar className="h-6 w-6 text-primary" />
+              <Calendar className="h-7 w-7 text-primary" />
               <span className="text-sm font-medium">Booking</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate("/create-offer")}
             >
-              <BriefcaseIcon className="h-6 w-6 text-primary" />
+              <BriefcaseIcon className="h-7 w-7 text-primary" />
               <span className="text-sm font-medium">Mine tilbud</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=admin-bands`)}
             >
-              <Users className="h-6 w-6 text-primary" />
+              <Users className="h-7 w-7 text-primary" />
               <span className="text-sm font-medium">Mine band</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate('/create-event')}
             >
-              <Plus className="h-6 w-6 text-primary" />
+              <Plus className="h-7 w-7 text-primary" />
               <span className="text-sm font-medium">Nytt arrangement</span>
             </Button>
 
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              onClick={() => navigate(`${location.pathname}?section=filebank`)}
+            >
+              <Upload className="h-7 w-7 text-primary" />
+              <span className="text-sm font-medium">Filbank</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              onClick={() => navigate(`${location.pathname}?section=settings`)}
+            >
+              <Settings className="h-7 w-7 text-primary" />
+              <span className="text-sm font-medium">Innstillinger</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-6 w-6 text-primary" />
+                  <MapPin className="h-7 w-7 text-primary" />
                   <Badge variant="secondary" className="text-xs">
                     {upcomingEventsData?.length || 0}
                   </Badge>
@@ -425,12 +443,12 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
             <Button
               variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
+              className="h-32 flex flex-col items-center justify-center gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5"
               onClick={() => navigate(`${location.pathname}?section=history`)}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Archive className="h-6 w-6 text-primary" />
+                  <Archive className="h-7 w-7 text-primary" />
                   <Badge variant="secondary" className="text-xs">
                     {completedJobs}
                   </Badge>
