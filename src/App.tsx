@@ -10,7 +10,6 @@ import Root from "./pages/Root";
 import Onboarding from "./pages/Onboarding";
 import GettingStarted from "./pages/GettingStarted";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import DashboardRedirect from "./pages/DashboardRedirect";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
@@ -19,7 +18,6 @@ import Terms from "./pages/Terms";
 import Map from "./pages/Map";
 import FeedbackButton from "./components/FeedbackButton";
 
-import ConceptView from "./pages/ConceptView";
 import ConceptOwnerView from "./pages/ConceptOwnerView";
 import ProfileConceptView from "./pages/ProfileConceptView";
 import CreateOffer from "./pages/CreateOffer";
