@@ -1282,6 +1282,41 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          id: string
+          price_paid: number
+          purchased_at: string | null
+          track_id: string
+          user_id: string
+          version_purchased: number
+        }
+        Insert: {
+          id?: string
+          price_paid: number
+          purchased_at?: string | null
+          track_id: string
+          user_id: string
+          version_purchased: number
+        }
+        Update: {
+          id?: string
+          price_paid?: number
+          purchased_at?: string | null
+          track_id?: string
+          user_id?: string
+          version_purchased?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stems: {
         Row: {
           created_at: string | null
@@ -1297,6 +1332,7 @@ export type Database = {
           project_id: string | null
           track_id: string
           updated_at: string | null
+          version: number | null
         }
         Insert: {
           created_at?: string | null
@@ -1312,6 +1348,7 @@ export type Database = {
           project_id?: string | null
           track_id: string
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
           created_at?: string | null
@@ -1327,6 +1364,7 @@ export type Database = {
           project_id?: string | null
           track_id?: string
           updated_at?: string | null
+          version?: number | null
         }
         Relationships: [
           {
@@ -1402,6 +1440,7 @@ export type Database = {
           preview_end: number | null
           preview_start: number | null
           track_id: string
+          version: number | null
         }
         Insert: {
           created_at?: string | null
@@ -1413,6 +1452,7 @@ export type Database = {
           preview_end?: number | null
           preview_start?: number | null
           track_id: string
+          version?: number | null
         }
         Update: {
           created_at?: string | null
@@ -1424,6 +1464,7 @@ export type Database = {
           preview_end?: number | null
           preview_start?: number | null
           track_id?: string
+          version?: number | null
         }
         Relationships: [
           {
@@ -1435,11 +1476,57 @@ export type Database = {
           },
         ]
       }
+      track_versions: {
+        Row: {
+          created_at: string | null
+          id: string
+          master_file_path: string | null
+          preview_file_path: string | null
+          published_at: string | null
+          stems_data: Json | null
+          track_id: string
+          version: number
+          version_notes: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          master_file_path?: string | null
+          preview_file_path?: string | null
+          published_at?: string | null
+          stems_data?: Json | null
+          track_id: string
+          version: number
+          version_notes?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          master_file_path?: string | null
+          preview_file_path?: string | null
+          published_at?: string | null
+          stems_data?: Json | null
+          track_id?: string
+          version?: number
+          version_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_versions_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tracks: {
         Row: {
+          alignment_status: string | null
           approved: boolean | null
           bpm: number | null
           created_at: string | null
+          current_version: number | null
           description: string | null
           final_mix_score: number | null
           genre: string | null
@@ -1452,14 +1539,20 @@ export type Database = {
           quality_status: string | null
           review_notes: string | null
           rights_type: string | null
+          status: string | null
           title: string
           updated_at: string | null
+          upload_mode: string | null
           user_id: string
+          version: number | null
+          version_notes: string | null
         }
         Insert: {
+          alignment_status?: string | null
           approved?: boolean | null
           bpm?: number | null
           created_at?: string | null
+          current_version?: number | null
           description?: string | null
           final_mix_score?: number | null
           genre?: string | null
@@ -1472,14 +1565,20 @@ export type Database = {
           quality_status?: string | null
           review_notes?: string | null
           rights_type?: string | null
+          status?: string | null
           title: string
           updated_at?: string | null
+          upload_mode?: string | null
           user_id: string
+          version?: number | null
+          version_notes?: string | null
         }
         Update: {
+          alignment_status?: string | null
           approved?: boolean | null
           bpm?: number | null
           created_at?: string | null
+          current_version?: number | null
           description?: string | null
           final_mix_score?: number | null
           genre?: string | null
@@ -1492,9 +1591,13 @@ export type Database = {
           quality_status?: string | null
           review_notes?: string | null
           rights_type?: string | null
+          status?: string | null
           title?: string
           updated_at?: string | null
+          upload_mode?: string | null
           user_id?: string
+          version?: number | null
+          version_notes?: string | null
         }
         Relationships: []
       }
