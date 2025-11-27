@@ -16,9 +16,7 @@ export const useBandPermissions = (bandId: string | undefined, members: BandMemb
       }
     };
 
-    if (members.length > 0) {
-      fetchUserRole();
-    }
+    fetchUserRole();
   }, [members, bandId]);
 
   const isAdmin = currentUserRole === 'admin' || currentUserRole === 'founder';
