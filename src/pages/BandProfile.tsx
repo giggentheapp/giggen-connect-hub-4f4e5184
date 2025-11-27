@@ -283,7 +283,8 @@ const BandProfile = () => {
             <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg md:text-2xl font-bold truncate">
+            <Disc className="h-5 w-5 text-primary shrink-0" />
+            <h1 className="hidden md:block text-lg md:text-2xl font-bold truncate">
               {isCreateMode ? 'Nytt band' : `Rediger ${band?.name}`}
             </h1>
           </div>
