@@ -74,6 +74,10 @@ export const useBandImages = (userId: string, bandId?: string) => {
     console.log('[useBandImages] Logo preview set, modal closed');
   };
 
+  const closeFilebankModal = () => {
+    setShowFilebankModal(false);
+  };
+
   const closeModals = () => {
     setShowFilebankModal(false);
     setShowCropModal(false);
@@ -94,6 +98,7 @@ export const useBandImages = (userId: string, bandId?: string) => {
     handleFileSelected,
     handleCropComplete,
     closeModals,
+    closeFilebankModal,
     setLogoPreview,
     setBannerPreview,
   };
