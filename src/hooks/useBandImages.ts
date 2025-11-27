@@ -24,17 +24,23 @@ export const useBandImages = (userId: string, bandId?: string) => {
   };
 
   const handleFileSelected = async (file: any) => {
+    console.log('[useBandImages] File selected:', file.filename, 'Type:', fileModalType);
     try {
       const publicUrl = supabase.storage
         .from('filbank')
         .getPublicUrl(file.file_path).data.publicUrl;
 
+      console.log('[useBandImages] Public URL:', publicUrl);
+
       if (fileModalType === 'logo') {
+        console.log('[useBandImages] Setting up logo crop modal');
         setSelectedImageForCrop(publicUrl);
         setSelectedLogoFileId(file.id);
         setShowFilebankModal(false);
         setShowCropModal(true);
+        console.log('[useBandImages] Crop modal should now be visible');
       } else {
+        console.log('[useBandImages] Setting banner preview');
         setBannerPreview(publicUrl);
         setSelectedBannerFileId(file.id);
         setShowFilebankModal(false);
@@ -61,9 +67,11 @@ export const useBandImages = (userId: string, bandId?: string) => {
   };
 
   const handleCropComplete = (croppedUrl: string) => {
+    console.log('[useBandImages] Crop completed, URL:', croppedUrl?.substring(0, 50));
     setLogoPreview(croppedUrl);
     setShowCropModal(false);
     setSelectedImageForCrop(null);
+    console.log('[useBandImages] Logo preview set, modal closed');
   };
 
   const closeModals = () => {
