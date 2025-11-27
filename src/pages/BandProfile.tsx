@@ -200,6 +200,14 @@ const BandProfile = () => {
         }).select().single();
         if (error) throw error;
         if (newBand) {
+          // Add creator as founder
+          const { error: memberError } = await supabase.from('band_members').insert({
+            band_id: newBand.id,
+            user_id: userId,
+            role: 'founder'
+          });
+          if (memberError) throw memberError;
+          
           if (selectedLogoFileId) await supabase.from('file_usage').insert({ file_id: selectedLogoFileId, usage_type: 'band_logo', reference_id: newBand.id });
           if (selectedBannerFileId) await supabase.from('file_usage').insert({ file_id: selectedBannerFileId, usage_type: 'band_banner', reference_id: newBand.id });
         }
