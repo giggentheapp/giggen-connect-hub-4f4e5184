@@ -72,7 +72,6 @@ export const EditBandDialog = ({
   const [description, setDescription] = useState(band?.description || '');
   const [bio, setBio] = useState(band?.bio || '');
   const [foundedYear, setFoundedYear] = useState(band?.founded_year?.toString() || '');
-  const [isPublic, setIsPublic] = useState(band?.is_public || false);
   
   // Images
   const [imagePreview, setImagePreview] = useState<string | null>(band?.image_url || null);
@@ -194,7 +193,7 @@ export const EditBandDialog = ({
             image_url: imagePreview,
             banner_url: bannerPreview,
             founded_year: foundedYear ? parseInt(foundedYear) : null,
-            is_public: isPublic,
+            is_public: false,
             created_by: userId,
             music_links: {
               spotify: spotify.trim() || undefined,
@@ -271,7 +270,6 @@ export const EditBandDialog = ({
             image_url: imageUrl,
             banner_url: bannerUrl,
             founded_year: foundedYear ? parseInt(foundedYear) : null,
-            is_public: isPublic,
             music_links: {
               spotify: spotify.trim() || undefined,
               youtube: youtube.trim() || undefined,
@@ -514,19 +512,6 @@ export const EditBandDialog = ({
                   />
                 </div>
 
-                <div className="flex items-center justify-between border-t pt-4">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="public">Synlig i Utforsk</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Når dette er på vil bandet vises i utforskningsseksjonen
-                    </p>
-                  </div>
-                  <Switch
-                    id="public"
-                    checked={isPublic}
-                    onCheckedChange={setIsPublic}
-                  />
-                </div>
               </TabsContent>
 
               <TabsContent value="visual" className="space-y-6 mt-4">
