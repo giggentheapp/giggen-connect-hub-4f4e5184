@@ -47,8 +47,8 @@ export const EditBandDialog = ({
   onSuccess,
   isCreateMode = false
 }: EditBandDialogProps) => {
-  const [userId, setUserId] = useState<string | undefined>();
-  const { files } = useUserFiles(userId);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { files } = useUserFiles(userId || undefined);
   const [loading, setLoading] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
   const [showAvatarCrop, setShowAvatarCrop] = useState(false);
@@ -61,9 +61,13 @@ export const EditBandDialog = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUserId(user?.id);
-    });
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getUserId();
   }, []);
   
   // Basic info
