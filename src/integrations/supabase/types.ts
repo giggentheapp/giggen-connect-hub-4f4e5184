@@ -1727,6 +1727,7 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      can_create_band: { Args: { user_id: string }; Returns: boolean }
       clean_booking_sensitive_data: {
         Args: { booking_uuid: string }
         Returns: undefined
