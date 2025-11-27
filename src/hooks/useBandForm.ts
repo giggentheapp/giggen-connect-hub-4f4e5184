@@ -147,13 +147,12 @@ export const useBandForm = (initialBand?: Band) => {
   };
 
   const handleSubmit = async (
-    userId: string,
     bandId?: string,
     isCreate?: boolean,
     selectedLogoFileId?: string | null,
     selectedBannerFileId?: string | null
   ): Promise<Band | null> => {
-    // Only validate that name is provided
+    // Validate that name is provided
     if (!formData.name.trim()) {
       toast({
         title: 'Bandnavn er påkrevd',
@@ -165,6 +164,15 @@ export const useBandForm = (initialBand?: Band) => {
 
     setIsSubmitting(true);
     try {
+      // Get current user and validate authentication
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        console.error('[useBandForm] Auth error:', authError);
+        throw new Error('Du må være logget inn for å opprette eller redigere band');
+      }
+
+      console.log('[useBandForm] Authenticated user:', user.id);
       const bandData = {
         name: formData.name.trim(),
         genre: formData.genre.trim() || null,
@@ -196,29 +204,50 @@ export const useBandForm = (initialBand?: Band) => {
       };
 
       if (isCreate) {
-        console.log('[useBandForm] Creating band with userId:', userId);
-        console.log('[useBandForm] Band data:', { ...bandData, is_public: false, created_by: userId });
+        console.log('[useBandForm] Creating band with userId:', user.id);
+        console.log('[useBandForm] Band data:', { ...bandData, is_public: false, created_by: user.id });
         
-        const { data: newBand, error } = await supabase
+        const { data: newBand, error: bandError } = await supabase
           .from('bands')
-          .insert({ ...bandData, is_public: false, created_by: userId })
+          .insert({
+            name: bandData.name,
+            description: bandData.description,
+            genre: bandData.genre,
+            bio: bandData.bio,
+            founded_year: bandData.founded_year,
+            image_url: bandData.image_url,
+            banner_url: bandData.banner_url,
+            music_links: bandData.music_links,
+            social_media_links: bandData.social_media_links,
+            contact_info: bandData.contact_info,
+            discography: bandData.discography,
+            created_by: user.id,  // CRITICAL: Must be set for RLS
+            is_public: false
+          })
           .select()
           .single();
 
-        console.log('[useBandForm] Insert result:', { newBand, error });
-        if (error) {
-          console.error('[useBandForm] Insert error details:', error);
-          throw error;
+        console.log('[useBandForm] Insert result:', { newBand, error: bandError });
+        
+        if (bandError) {
+          console.error('[useBandForm] Band insert error:', bandError);
+          throw bandError;
         }
 
         if (newBand) {
-          // Add creator as founder
-          const { error: memberError } = await supabase.from('band_members').insert({
-            band_id: newBand.id,
-            user_id: userId,
-            role: 'founder',
-          });
-          if (memberError) throw memberError;
+          // Add creator as founder in band_members
+          const { error: memberError } = await supabase
+            .from('band_members')
+            .insert({
+              band_id: newBand.id,
+              user_id: user.id,
+              role: 'founder',
+            });
+          
+          if (memberError) {
+            console.error('[useBandForm] Member insert error:', memberError);
+            throw memberError;
+          }
 
           if (selectedLogoFileId) {
             await supabase.from('file_usage').insert({

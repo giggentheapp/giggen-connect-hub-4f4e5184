@@ -324,7 +324,7 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string | null
-          created_by: string
+          created_by?: string
           description?: string | null
           discography?: string[] | null
           founded_year?: number | null
