@@ -6,9 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Upload, Info, CheckCircle2 } from 'lucide-react';
+import { FolderOpen, Info, CheckCircle2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FilebankSelectionModal } from './FilebankSelectionModal';
+import { AvatarCropModal } from './AvatarCropModal';
+import { useUserFiles } from '@/hooks/useUserFiles';
 
 interface CreateBandModalProps {
   open: boolean;
@@ -20,12 +23,16 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [showAvatarCrop, setShowAvatarCrop] = useState(false);
+  const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Get current user ID
   const [userId, setUserId] = useState<string | null>(null);
+  const { files } = useUserFiles(userId || undefined);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -33,43 +40,29 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
     });
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadImage = async (file: File): Promise<string | null> => {
-    if (!userId) return null;
-    
+  const handleFileFromBank = async (file: any) => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
-      const { data, error } = await supabase.storage
-        .from('band-images')
-        .upload(fileName, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('band-images')
-        .getPublicUrl(data.path);
-
-      return publicUrl;
+      // Get public URL of the selected file
+      const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+      
+      // For logo, use crop modal
+      setSelectedImageForCrop(publicUrl);
+      setSelectedFileId(file.id);
+      setShowFilebankModal(false);
+      setShowAvatarCrop(true);
     } catch (error: any) {
+      console.error('Error selecting file:', error);
       toast({
-        title: 'Feil ved opplasting av bilde',
+        title: 'Feil',
         description: error.message,
         variant: 'destructive',
       });
-      return null;
     }
+  };
+
+  const handleCroppedImage = (croppedImageUrl: string) => {
+    setImagePreview(croppedImageUrl);
+    setShowAvatarCrop(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,23 +89,33 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
     setLoading(true);
 
     try {
-      let imageUrl = null;
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-      }
-
       const { data, error } = await supabase
         .from('bands')
         .insert({
           name: name.trim(),
           description: description.trim() || null,
-          image_url: imageUrl,
+          image_url: imagePreview,
           created_by: userId,
         })
         .select()
         .single();
 
       if (error) throw error;
+
+      // Register file usage if an image was selected
+      if (selectedFileId && data) {
+        try {
+          await supabase
+            .from('file_usage')
+            .insert({
+              file_id: selectedFileId,
+              usage_type: 'band_logo',
+              reference_id: data.id
+            });
+        } catch (error) {
+          console.log('File usage already registered or error:', error);
+        }
+      }
 
       toast({
         title: 'Band opprettet!',
@@ -122,8 +125,8 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
       onOpenChange(false);
       setName('');
       setDescription('');
-      setImageFile(null);
       setImagePreview(null);
+      setSelectedFileId(null);
       onSuccess?.();
     } catch (error: any) {
       toast({
@@ -173,19 +176,16 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
                 {name ? name.substring(0, 2).toUpperCase() : 'B'}
               </AvatarFallback>
             </Avatar>
-            <Label htmlFor="image-upload" className="cursor-pointer">
-              <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
-                <Upload className="h-4 w-4" />
-                Last opp bilde
-              </div>
-              <Input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilebankModal(true)}
+              className="flex items-center gap-2"
+            >
+              <FolderOpen className="h-4 w-4" />
+              Velg fra filbank
+            </Button>
           </div>
 
           <div>
@@ -221,6 +221,31 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
           </div>
         </form>
       </DialogContent>
+
+      {/* Filebank Selection Modal */}
+      {userId && (
+        <FilebankSelectionModal
+          isOpen={showFilebankModal}
+          onClose={() => setShowFilebankModal(false)}
+          onSelect={handleFileFromBank}
+          userId={userId}
+          fileTypes={['image']}
+        />
+      )}
+
+      {/* Avatar Crop Modal */}
+      {selectedImageForCrop && userId && (
+        <AvatarCropModal
+          isOpen={showAvatarCrop}
+          onClose={() => {
+            setShowAvatarCrop(false);
+            setSelectedImageForCrop(null);
+          }}
+          initialImageUrl={selectedImageForCrop}
+          onAvatarUpdate={handleCroppedImage}
+          userId={userId}
+        />
+      )}
     </Dialog>
   );
 };
