@@ -195,13 +195,20 @@ export const useBandForm = (initialBand?: Band) => {
       };
 
       if (isCreate) {
+        console.log('[useBandForm] Creating band with userId:', userId);
+        console.log('[useBandForm] Band data:', { ...bandData, is_public: false, created_by: userId });
+        
         const { data: newBand, error } = await supabase
           .from('bands')
           .insert({ ...bandData, is_public: false, created_by: userId })
           .select()
           .single();
 
-        if (error) throw error;
+        console.log('[useBandForm] Insert result:', { newBand, error });
+        if (error) {
+          console.error('[useBandForm] Insert error details:', error);
+          throw error;
+        }
 
         if (newBand) {
           // Add creator as founder

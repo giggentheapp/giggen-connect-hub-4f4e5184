@@ -30,9 +30,15 @@ export const BandCreateForm = ({ onSuccess, onCancel }: BandCreateFormProps) => 
   useEffect(() => {
     const getUserId = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) setUserId(user.id);
+        data: { session },
+        error
+      } = await supabase.auth.getSession();
+      console.log('[BandCreateForm] Auth session:', session?.user?.id, 'Error:', error);
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else if (!session) {
+        console.error('[BandCreateForm] No active session found');
+      }
     };
     getUserId();
   }, []);
