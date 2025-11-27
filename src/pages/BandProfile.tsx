@@ -292,28 +292,28 @@ const BandProfile = () => {
             <Tabs defaultValue="basic" className="w-full">
               {/* Mobile-optimized tabs with scroll */}
               <div className="relative -mx-3 md:mx-0">
-                <TabsList className="w-full h-auto flex md:grid md:grid-cols-6 overflow-x-auto overflow-y-hidden justify-start md:justify-center gap-1 p-1 bg-muted/30 rounded-none md:rounded-lg border-b md:border">
-                  <TabsTrigger value="basic" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                <TabsList className="w-full grid grid-cols-6 gap-0 p-1 bg-muted/30 rounded-none md:rounded-lg border-b md:border">
+                  <TabsTrigger value="basic" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Info className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Grunnleggende</span>
                   </TabsTrigger>
-                  <TabsTrigger value="tech" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                  <TabsTrigger value="tech" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Wrench className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Tech</span>
                   </TabsTrigger>
-                  <TabsTrigger value="hospitality" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                  <TabsTrigger value="hospitality" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Coffee className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Hospitality</span>
                   </TabsTrigger>
-                  <TabsTrigger value="portfolio" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                  <TabsTrigger value="portfolio" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Image className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Portfolio</span>
                   </TabsTrigger>
-                  <TabsTrigger value="social" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                  <TabsTrigger value="social" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Share2 className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Sosiale</span>
                   </TabsTrigger>
-                  <TabsTrigger value="music" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                  <TabsTrigger value="music" className="flex items-center justify-center gap-1.5 data-[state=active]:bg-background">
                     <Music className="h-4 w-4" />
                     <span className="hidden md:inline text-xs md:text-sm">Musikk</span>
                   </TabsTrigger>
@@ -525,18 +525,36 @@ const BandProfile = () => {
               </TabsContent>
 
               <TabsContent value="tech" className="mt-4">
-                {band?.id && userId && <BandTechSpecManager bandId={band.id} userId={userId} title="Tekniske spesifikasjoner" description="Last opp tekniske spesifikasjoner for bandet" />}
-                {!band?.id && <Alert><AlertDescription>Lagre bandet først for å legge til tekniske spesifikasjoner</AlertDescription></Alert>}
+                {!band?.id && (
+                  <Alert className="mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Info</AlertTitle>
+                    <AlertDescription>Tekniske spesifikasjoner kan lastes opp etter at bandet er lagret</AlertDescription>
+                  </Alert>
+                )}
+                {userId && <BandTechSpecManager bandId={band?.id || ''} userId={userId} title="Tekniske spesifikasjoner" description="Last opp tekniske spesifikasjoner for bandet" />}
               </TabsContent>
 
               <TabsContent value="hospitality" className="mt-4">
-                {band?.id && userId && <BandHospitalityManager bandId={band.id} userId={userId} title="Hospitality Rider" description="Last opp hospitality rider for bandet" />}
-                {!band?.id && <Alert><AlertDescription>Lagre bandet først for å legge til hospitality rider</AlertDescription></Alert>}
+                {!band?.id && (
+                  <Alert className="mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Info</AlertTitle>
+                    <AlertDescription>Hospitality rider kan lastes opp etter at bandet er lagret</AlertDescription>
+                  </Alert>
+                )}
+                {userId && <BandHospitalityManager bandId={band?.id || ''} userId={userId} title="Hospitality Rider" description="Last opp hospitality rider for bandet" />}
               </TabsContent>
 
               <TabsContent value="portfolio" className="mt-4">
-                {band?.id && userId && <BandPortfolioManager bandId={band.id} userId={userId} title="Portfolio" description="Last opp bilder, videoer og annet materiale" />}
-                {!band?.id && <Alert><AlertDescription>Lagre bandet først for å legge til portfolio</AlertDescription></Alert>}
+                {!band?.id && (
+                  <Alert className="mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Info</AlertTitle>
+                    <AlertDescription>Portfolio kan lastes opp etter at bandet er lagret</AlertDescription>
+                  </Alert>
+                )}
+                {userId && <BandPortfolioManager bandId={band?.id || ''} userId={userId} title="Portfolio" description="Last opp bilder, videoer og annet materiale" />}
               </TabsContent>
 
               <TabsContent value="social" className="mt-4">
