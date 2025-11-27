@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,12 +141,13 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Opprett nytt band</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Opprett nytt band</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
           {/* Band Completeness Guide */}
           <Alert className="border-primary/20 bg-primary/5">
             <Info className="h-4 w-4 text-primary" />
@@ -221,31 +223,34 @@ export const CreateBandModal = ({ open, onOpenChange, onSuccess }: CreateBandMod
           </div>
         </form>
       </DialogContent>
-
-      {/* Filebank Selection Modal */}
-      {userId && (
-        <FilebankSelectionModal
-          isOpen={showFilebankModal}
-          onClose={() => setShowFilebankModal(false)}
-          onSelect={handleFileFromBank}
-          userId={userId}
-          fileTypes={['image']}
-        />
-      )}
-
-      {/* Avatar Crop Modal */}
-      {selectedImageForCrop && userId && (
-        <AvatarCropModal
-          isOpen={showAvatarCrop}
-          onClose={() => {
-            setShowAvatarCrop(false);
-            setSelectedImageForCrop(null);
-          }}
-          initialImageUrl={selectedImageForCrop}
-          onAvatarUpdate={handleCroppedImage}
-          userId={userId}
-        />
-      )}
     </Dialog>
+
+    {/* Filebank Selection Modal - Rendered with Portal */}
+    {userId && showFilebankModal && createPortal(
+      <FilebankSelectionModal
+        isOpen={showFilebankModal}
+        onClose={() => setShowFilebankModal(false)}
+        onSelect={handleFileFromBank}
+        userId={userId}
+        fileTypes={['image']}
+      />,
+      document.body
+    )}
+
+    {/* Avatar Crop Modal - Rendered with Portal */}
+    {selectedImageForCrop && userId && showAvatarCrop && createPortal(
+      <AvatarCropModal
+        isOpen={showAvatarCrop}
+        onClose={() => {
+          setShowAvatarCrop(false);
+          setSelectedImageForCrop(null);
+        }}
+        initialImageUrl={selectedImageForCrop}
+        onAvatarUpdate={handleCroppedImage}
+        userId={userId}
+      />,
+      document.body
+    )}
+  </>
   );
 };
