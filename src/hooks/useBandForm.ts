@@ -153,10 +153,11 @@ export const useBandForm = (initialBand?: Band) => {
     selectedLogoFileId?: string | null,
     selectedBannerFileId?: string | null
   ): Promise<Band | null> => {
+    // Only validate that name is provided
     if (!formData.name.trim()) {
       toast({
-        title: 'Mangler bandnavn',
-        description: 'Vennligst fyll inn et bandnavn',
+        title: 'Bandnavn er påkrevd',
+        description: 'Du må fylle inn bandnavnet for å fortsette',
         variant: 'destructive',
       });
       return null;
