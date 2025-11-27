@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Users, Globe, AlertCircle } from "lucide-react";
 import { BandCard } from "@/components/BandCard";
-import { CreateBandModal } from "@/components/CreateBandModal";
 import { BandInvites } from "@/components/BandInvites";
 import { useUserBands } from "@/hooks/useBands";
 import { UserProfile } from "@/types/auth";
@@ -25,7 +24,6 @@ interface AdminBandsSectionProps {
 }
 
 export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [missingFieldsDialog, setMissingFieldsDialog] = useState<{
     open: boolean;
     type: 'profile' | 'public' | null;
@@ -202,7 +200,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Mine Band</h1>
             <p className="text-sm text-muted-foreground">Administrer dine band og medlemskap</p>
           </div>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button onClick={() => navigate('/band/new')}>
             <Plus className="h-4 w-4 mr-2" />
             Nytt band
           </Button>
@@ -294,7 +292,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
             <div className="text-center py-12 border-2 border-dashed border-muted-foreground/20 rounded-lg">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">Du er ikke medlem av noen band ennå</p>
-              <Button onClick={() => setShowCreateModal(true)}>
+              <Button onClick={() => navigate('/band/new')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Opprett ditt første band
               </Button>
@@ -302,9 +300,6 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
           )}
         </div>
       </div>
-
-      {/* Create Band Modal */}
-      <CreateBandModal open={showCreateModal} onOpenChange={setShowCreateModal} />
       
       {/* Missing Fields Dialog */}
       <AlertDialog open={missingFieldsDialog.open} onOpenChange={(open) => setMissingFieldsDialog(prev => ({ ...prev, open }))}>

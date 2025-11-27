@@ -35,8 +35,9 @@ import { useNavigate } from 'react-router-dom';
 interface EditBandDialogProps {
   open: boolean;
   onClose: () => void;
-  band: Band;
+  band: Band | null;
   onSuccess: () => void;
+  isCreateMode?: boolean;
 }
 
 export const EditBandDialog = ({
@@ -44,6 +45,7 @@ export const EditBandDialog = ({
   onClose,
   band,
   onSuccess,
+  isCreateMode = false
 }: EditBandDialogProps) => {
   const [userId, setUserId] = useState<string | undefined>();
   const { files } = useUserFiles(userId);
@@ -54,6 +56,8 @@ export const EditBandDialog = ({
   const [fileModalType, setFileModalType] = useState<'logo' | 'banner'>('logo');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [selectedLogoFileId, setSelectedLogoFileId] = useState<string | null>(null);
+  const [selectedBannerFileId, setSelectedBannerFileId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,38 +67,38 @@ export const EditBandDialog = ({
   }, []);
   
   // Basic info
-  const [name, setName] = useState(band.name);
-  const [genre, setGenre] = useState(band.genre || '');
-  const [description, setDescription] = useState(band.description || '');
-  const [bio, setBio] = useState(band.bio || '');
-  const [foundedYear, setFoundedYear] = useState(band.founded_year?.toString() || '');
-  const [isPublic, setIsPublic] = useState(band.is_public);
+  const [name, setName] = useState(band?.name || '');
+  const [genre, setGenre] = useState(band?.genre || '');
+  const [description, setDescription] = useState(band?.description || '');
+  const [bio, setBio] = useState(band?.bio || '');
+  const [foundedYear, setFoundedYear] = useState(band?.founded_year?.toString() || '');
+  const [isPublic, setIsPublic] = useState(band?.is_public || false);
   
   // Images
-  const [imagePreview, setImagePreview] = useState<string | null>(band.image_url);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(band.banner_url);
+  const [imagePreview, setImagePreview] = useState<string | null>(band?.image_url || null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(band?.banner_url || null);
   
   // Music links
-  const [spotify, setSpotify] = useState(band.music_links?.spotify || '');
-  const [youtube, setYoutube] = useState(band.music_links?.youtube || '');
-  const [soundcloud, setSoundcloud] = useState(band.music_links?.soundcloud || '');
-  const [appleMusic, setAppleMusic] = useState(band.music_links?.appleMusic || '');
-  const [bandcamp, setBandcamp] = useState(band.music_links?.bandcamp || '');
+  const [spotify, setSpotify] = useState(band?.music_links?.spotify || '');
+  const [youtube, setYoutube] = useState(band?.music_links?.youtube || '');
+  const [soundcloud, setSoundcloud] = useState(band?.music_links?.soundcloud || '');
+  const [appleMusic, setAppleMusic] = useState(band?.music_links?.appleMusic || '');
+  const [bandcamp, setBandcamp] = useState(band?.music_links?.bandcamp || '');
   
   // Social media
-  const [instagram, setInstagram] = useState(band.social_media_links?.instagram || '');
-  const [facebook, setFacebook] = useState(band.social_media_links?.facebook || '');
-  const [tiktok, setTiktok] = useState(band.social_media_links?.tiktok || '');
-  const [twitter, setTwitter] = useState(band.social_media_links?.twitter || '');
-  const [website, setWebsite] = useState(band.social_media_links?.website || '');
+  const [instagram, setInstagram] = useState(band?.social_media_links?.instagram || '');
+  const [facebook, setFacebook] = useState(band?.social_media_links?.facebook || '');
+  const [tiktok, setTiktok] = useState(band?.social_media_links?.tiktok || '');
+  const [twitter, setTwitter] = useState(band?.social_media_links?.twitter || '');
+  const [website, setWebsite] = useState(band?.social_media_links?.website || '');
   
   // Contact
-  const [email, setEmail] = useState(band.contact_info?.email || '');
-  const [phone, setPhone] = useState(band.contact_info?.phone || '');
-  const [bookingEmail, setBookingEmail] = useState(band.contact_info?.booking_email || '');
+  const [email, setEmail] = useState(band?.contact_info?.email || '');
+  const [phone, setPhone] = useState(band?.contact_info?.phone || '');
+  const [bookingEmail, setBookingEmail] = useState(band?.contact_info?.booking_email || '');
   
   // Discography
-  const [discography, setDiscography] = useState<string[]>(band.discography || []);
+  const [discography, setDiscography] = useState<string[]>(band?.discography || []);
   const [newSong, setNewSong] = useState('');
   
   const { toast } = useToast();
@@ -107,27 +111,31 @@ export const EditBandDialog = ({
       if (fileModalType === 'logo') {
         // For logo, use crop modal
         setSelectedImageForCrop(publicUrl);
+        setSelectedLogoFileId(file.id);
         setShowFilebankModal(false);
         setShowAvatarCrop(true);
       } else {
         // For banner, set directly
         setBannerPreview(publicUrl);
+        setSelectedBannerFileId(file.id);
         setShowFilebankModal(false);
       }
 
-      // Register usage in file_usage table
-      try {
-        const usageType = fileModalType === 'logo' ? 'band_logo' : 'band_banner';
-        await supabase
-          .from('file_usage')
-          .insert({
-            file_id: file.id,
-            usage_type: usageType,
-            reference_id: band.id
-          });
-      } catch (error) {
-        // Ignore if already exists (unique constraint)
-        console.log('File usage already registered or error:', error);
+      // Register usage in file_usage table (only if we have a band id)
+      if (band?.id) {
+        try {
+          const usageType = fileModalType === 'logo' ? 'band_logo' : 'band_banner';
+          await supabase
+            .from('file_usage')
+            .insert({
+              file_id: file.id,
+              usage_type: usageType,
+              reference_id: band.id
+            });
+        } catch (error) {
+          // Ignore if already exists (unique constraint)
+          console.log('File usage already registered or error:', error);
+        }
       }
     } catch (error: any) {
       console.error('Error selecting file:', error);
@@ -161,60 +169,146 @@ export const EditBandDialog = ({
       });
       return;
     }
+    
+    if (!userId) {
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke hente brukerinformasjon',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const imageUrl = imagePreview || band.image_url;
-      const bannerUrl = bannerPreview || band.banner_url;
+      if (isCreateMode) {
+        // Create new band
+        const { data: newBand, error } = await supabase
+          .from('bands')
+          .insert({
+            name: name.trim(),
+            genre: genre.trim() || null,
+            description: description.trim() || null,
+            bio: bio.trim() || null,
+            image_url: imagePreview,
+            banner_url: bannerPreview,
+            founded_year: foundedYear ? parseInt(foundedYear) : null,
+            is_public: isPublic,
+            created_by: userId,
+            music_links: {
+              spotify: spotify.trim() || undefined,
+              youtube: youtube.trim() || undefined,
+              soundcloud: soundcloud.trim() || undefined,
+              appleMusic: appleMusic.trim() || undefined,
+              bandcamp: bandcamp.trim() || undefined,
+            },
+            social_media_links: {
+              instagram: instagram.trim() || undefined,
+              facebook: facebook.trim() || undefined,
+              tiktok: tiktok.trim() || undefined,
+              twitter: twitter.trim() || undefined,
+              website: website.trim() || undefined,
+            },
+            contact_info: {
+              email: email.trim() || undefined,
+              phone: phone.trim() || undefined,
+              booking_email: bookingEmail.trim() || undefined,
+            },
+            discography: discography.length > 0 ? discography : null,
+          })
+          .select()
+          .single();
 
-      const { error } = await supabase
-        .from('bands')
-        .update({
-          name: name.trim(),
-          genre: genre.trim() || null,
-          description: description.trim() || null,
-          bio: bio.trim() || null,
-          image_url: imageUrl,
-          banner_url: bannerUrl,
-          founded_year: foundedYear ? parseInt(foundedYear) : null,
-          is_public: isPublic,
-          music_links: {
-            spotify: spotify.trim() || undefined,
-            youtube: youtube.trim() || undefined,
-            soundcloud: soundcloud.trim() || undefined,
-            appleMusic: appleMusic.trim() || undefined,
-            bandcamp: bandcamp.trim() || undefined,
-          },
-          social_media_links: {
-            instagram: instagram.trim() || undefined,
-            facebook: facebook.trim() || undefined,
-            tiktok: tiktok.trim() || undefined,
-            twitter: twitter.trim() || undefined,
-            website: website.trim() || undefined,
-          },
-          contact_info: {
-            email: email.trim() || undefined,
-            phone: phone.trim() || undefined,
-            booking_email: bookingEmail.trim() || undefined,
-          },
-          discography: discography.length > 0 ? discography : null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', band.id);
+        if (error) throw error;
+        
+        // Register file usage for newly created band
+        if (newBand) {
+          if (selectedLogoFileId) {
+            try {
+              await supabase
+                .from('file_usage')
+                .insert({
+                  file_id: selectedLogoFileId,
+                  usage_type: 'band_logo',
+                  reference_id: newBand.id
+                });
+            } catch (error) {
+              console.log('Logo file usage error:', error);
+            }
+          }
+          if (selectedBannerFileId) {
+            try {
+              await supabase
+                .from('file_usage')
+                .insert({
+                  file_id: selectedBannerFileId,
+                  usage_type: 'band_banner',
+                  reference_id: newBand.id
+                });
+            } catch (error) {
+              console.log('Banner file usage error:', error);
+            }
+          }
+        }
 
-      if (error) throw error;
+        toast({
+          title: 'Band opprettet!',
+          description: `${name} er nå opprettet`,
+        });
+      } else {
+        // Update existing band
+        const imageUrl = imagePreview || band?.image_url;
+        const bannerUrl = bannerPreview || band?.banner_url;
 
-      toast({
-        title: 'Band oppdatert!',
-        description: 'Endringene har blitt lagret',
-      });
+        const { error } = await supabase
+          .from('bands')
+          .update({
+            name: name.trim(),
+            genre: genre.trim() || null,
+            description: description.trim() || null,
+            bio: bio.trim() || null,
+            image_url: imageUrl,
+            banner_url: bannerUrl,
+            founded_year: foundedYear ? parseInt(foundedYear) : null,
+            is_public: isPublic,
+            music_links: {
+              spotify: spotify.trim() || undefined,
+              youtube: youtube.trim() || undefined,
+              soundcloud: soundcloud.trim() || undefined,
+              appleMusic: appleMusic.trim() || undefined,
+              bandcamp: bandcamp.trim() || undefined,
+            },
+            social_media_links: {
+              instagram: instagram.trim() || undefined,
+              facebook: facebook.trim() || undefined,
+              tiktok: tiktok.trim() || undefined,
+              twitter: twitter.trim() || undefined,
+              website: website.trim() || undefined,
+            },
+            contact_info: {
+              email: email.trim() || undefined,
+              phone: phone.trim() || undefined,
+              booking_email: bookingEmail.trim() || undefined,
+            },
+            discography: discography.length > 0 ? discography : null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', band!.id);
+
+        if (error) throw error;
+
+        toast({
+          title: 'Band oppdatert!',
+          description: 'Endringene har blitt lagret',
+        });
+      }
 
       onSuccess();
       onClose();
     } catch (error: any) {
       toast({
-        title: 'Feil ved oppdatering',
+        title: isCreateMode ? 'Feil ved oppretting' : 'Feil ved oppdatering',
         description: error.message,
         variant: 'destructive',
       });
@@ -242,6 +336,10 @@ export const EditBandDialog = ({
         throw new Error('Du må være innlogget for å slette band');
       }
       
+      if (!band?.id) {
+        throw new Error('Ingen band ID');
+      }
+      
       const { error } = await supabase.rpc('delete_band_permanently', {
         band_uuid: band.id,
         requesting_user_id: user.id
@@ -257,7 +355,7 @@ export const EditBandDialog = ({
       });
 
       onClose();
-      navigate('/dashboard?section=bands');
+      navigate('/dashboard?section=admin-bands');
       window.location.reload();
     } catch (error: any) {
       console.error('Delete band error full:', error);
@@ -290,11 +388,13 @@ export const EditBandDialog = ({
         </Button>
 
         <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 pr-10">Rediger {band.name}</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 pr-10">
+            {isCreateMode ? 'Opprett nytt band' : `Rediger ${band?.name}`}
+          </h1>
           
           <form onSubmit={handleSubmit}>
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full mb-6 h-auto overflow-x-auto" style={{ gridTemplateColumns: 'repeat(7, minmax(60px, 1fr))' }}>
+              <TabsList className="grid w-full mb-6 h-auto overflow-x-auto" style={{ gridTemplateColumns: isCreateMode ? 'repeat(5, minmax(60px, 1fr))' : 'repeat(7, minmax(60px, 1fr))' }}>
                 <TabsTrigger value="basic" className="flex-col gap-1 py-2 px-2">
                   <Info className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline text-[10px] md:text-xs truncate">Info</span>
@@ -315,14 +415,18 @@ export const EditBandDialog = ({
                   <Mail className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline text-[10px] md:text-xs truncate">Kontakt</span>
                 </TabsTrigger>
-                <TabsTrigger value="techspecs" className="flex-col gap-1 py-2 px-2">
-                  <Settings className="h-4 w-4 shrink-0" />
-                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Tech</span>
-                </TabsTrigger>
-                <TabsTrigger value="hospitality" className="flex-col gap-1 py-2 px-2">
-                  <Beer className="h-4 w-4 shrink-0" />
-                  <span className="hidden sm:inline text-[10px] md:text-xs truncate">Hosp.</span>
-                </TabsTrigger>
+                {!isCreateMode && (
+                  <>
+                    <TabsTrigger value="techspecs" className="flex-col gap-1 py-2 px-2">
+                      <Settings className="h-4 w-4 shrink-0" />
+                      <span className="hidden sm:inline text-[10px] md:text-xs truncate">Tech</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="hospitality" className="flex-col gap-1 py-2 px-2">
+                      <Beer className="h-4 w-4 shrink-0" />
+                      <span className="hidden sm:inline text-[10px] md:text-xs truncate">Hosp.</span>
+                    </TabsTrigger>
+                  </>
+                )}
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4 mt-4">
@@ -492,13 +596,18 @@ export const EditBandDialog = ({
                     <p className="text-sm text-muted-foreground mt-1 mb-4">
                       Bilder, videoer og dokumenter som vises i bandets portfolio
                     </p>
-                    {userId && (
+                    {userId && band && !isCreateMode && (
                       <BandPortfolioManager
                         userId={userId}
                         bandId={band.id}
                         title=""
                         description=""
                       />
+                    )}
+                    {isCreateMode && (
+                      <div className="text-center py-6 text-sm text-muted-foreground">
+                        Portfolio kan legges til etter at bandet er opprettet
+                      </div>
                     )}
                   </div>
                 </div>
@@ -743,7 +852,7 @@ export const EditBandDialog = ({
               </TabsContent>
 
               <TabsContent value="techspecs" className="space-y-4 mt-4">
-                {userId && (
+                {userId && band && (
                   <BandTechSpecManager
                     userId={userId}
                     bandId={band.id}
@@ -754,7 +863,7 @@ export const EditBandDialog = ({
               </TabsContent>
 
               <TabsContent value="hospitality" className="space-y-4 mt-4">
-                {userId && (
+                {userId && band && (
                   <BandHospitalityManager
                     userId={userId}
                     bandId={band.id}
@@ -766,54 +875,56 @@ export const EditBandDialog = ({
             </Tabs>
 
             <div className="flex gap-2 justify-between mt-6 pt-6 border-t">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Slett band permanent
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Denne handlingen kan ikke angres. Alle bandets data, inkludert medlemmer, portfolio,
-                      tech specs og hospitality riders vil bli permanent slettet.
-                      <br />
-                      <br />
-                      Skriv <strong>SLETT</strong> for å bekrefte at du vil slette bandet permanent.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="my-4">
-                    <Input
-                      value={deleteConfirmation}
-                      onChange={(e) => setDeleteConfirmation(e.target.value)}
-                      placeholder="Skriv SLETT her"
-                    />
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>Avbryt</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteBand}
-                      disabled={deleting || deleteConfirmation !== 'SLETT'}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              {!isCreateMode && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
                     >
-                      {deleting ? 'Sletter...' : 'Slett band permanent'}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Slett band permanent
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Denne handlingen kan ikke angres. Alle bandets data, inkludert medlemmer, portfolio,
+                        tech specs og hospitality riders vil bli permanent slettet.
+                        <br />
+                        <br />
+                        Skriv <strong>SLETT</strong> for å bekrefte at du vil slette bandet permanent.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="my-4">
+                      <Input
+                        value={deleteConfirmation}
+                        onChange={(e) => setDeleteConfirmation(e.target.value)}
+                        placeholder="Skriv SLETT her"
+                      />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>Avbryt</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteBand}
+                        disabled={deleting || deleteConfirmation !== 'SLETT'}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? 'Sletter...' : 'Slett band permanent'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
 
-              <div className="flex gap-2">
+              <div className={`flex gap-2 ${isCreateMode ? 'ml-auto' : ''}`}>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Avbryt
                 </Button>
                 <Button type="submit" disabled={loading || !name.trim()}>
-                  {loading ? 'Lagrer...' : 'Lagre endringer'}
+                  {loading ? (isCreateMode ? 'Oppretter...' : 'Lagrer...') : (isCreateMode ? 'Opprett band' : 'Lagre endringer')}
                 </Button>
               </div>
             </div>
