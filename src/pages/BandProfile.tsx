@@ -276,125 +276,238 @@ const BandProfile = () => {
 
   if (isEditing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
-        <div className="container max-w-4xl mx-auto p-4 md:p-6 space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={handleBack}><ArrowLeft className="h-5 w-5" /></Button>
-            <h1 className="text-2xl font-bold">{isCreateMode ? 'Opprett nytt band' : `Rediger ${band?.name}`}</h1>
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 pb-20 md:pb-6">
+        <div className="container max-w-4xl mx-auto px-3 md:px-6 py-3 md:py-6 space-y-4 md:space-y-6">
+          {/* Mobile-optimized header */}
+          <div className="flex items-center gap-2 md:gap-4 sticky top-0 z-10 bg-background/95 backdrop-blur -mx-3 md:-mx-6 px-3 md:px-6 py-2 md:py-3 border-b md:border-0">
+            <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg md:text-2xl font-bold truncate">
+              {isCreateMode ? 'Nytt band' : `Rediger ${band?.name}`}
+            </h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-                <TabsTrigger value="basic">Grunnleggende</TabsTrigger>
-                <TabsTrigger value="tech">Tech Specs</TabsTrigger>
-                <TabsTrigger value="hospitality"><Beer className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                <TabsTrigger value="social">Sosiale</TabsTrigger>
-                <TabsTrigger value="music">Musikk</TabsTrigger>
-              </TabsList>
+              {/* Mobile-optimized tabs with scroll */}
+              <div className="relative -mx-3 md:mx-0">
+                <TabsList className="w-full h-auto flex md:grid md:grid-cols-6 overflow-x-auto overflow-y-hidden justify-start md:justify-center gap-1 p-1 bg-muted/30 rounded-none md:rounded-lg border-b md:border">
+                  <TabsTrigger value="basic" className="shrink-0 text-xs md:text-sm px-3 py-2">
+                    Grunnleggende
+                  </TabsTrigger>
+                  <TabsTrigger value="tech" className="shrink-0 text-xs md:text-sm px-3 py-2">
+                    Tech
+                  </TabsTrigger>
+                  <TabsTrigger value="hospitality" className="shrink-0 px-3 py-2">
+                    <Beer className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="portfolio" className="shrink-0 text-xs md:text-sm px-3 py-2">
+                    Portfolio
+                  </TabsTrigger>
+                  <TabsTrigger value="social" className="shrink-0 text-xs md:text-sm px-3 py-2">
+                    Sosiale
+                  </TabsTrigger>
+                  <TabsTrigger value="music" className="shrink-0 text-xs md:text-sm px-3 py-2">
+                    Musikk
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-              <TabsContent value="basic" className="space-y-4 mt-4">
+              <TabsContent value="basic" className="space-y-3 md:space-y-4 mt-3 md:mt-4">
                 <Card>
-                  <CardContent className="pt-6 space-y-4">
-                    {/* Logo and Banner */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CardContent className="pt-4 md:pt-6 space-y-4 md:space-y-5">
+                    {/* Mobile-optimized Logo and Banner */}
+                    <div className="space-y-4">
+                      {/* Logo section */}
                       <div className="space-y-2">
-                        <Label>Logo</Label>
-                        <div className="flex flex-col items-center gap-3">
-                          <Avatar className="h-24 w-24">
+                        <Label className="text-sm font-medium">Logo</Label>
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-20 w-20 md:h-24 md:w-24 shrink-0 ring-2 ring-border">
                             <AvatarImage src={imagePreview || undefined} />
-                            <AvatarFallback>{name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            <AvatarFallback className="text-lg">{name.substring(0, 2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <Button type="button" variant="outline" size="sm" onClick={() => { setFileModalType('logo'); setShowFilebankModal(true); }}>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => { setFileModalType('logo'); setShowFilebankModal(true); }}
+                            className="w-full md:w-auto"
+                          >
                             <FolderOpen className="h-4 w-4 mr-2" />
-                            Velg fra Filbank
+                            <span className="hidden xs:inline">Velg fra Filbank</span>
+                            <span className="xs:hidden">Velg logo</span>
                           </Button>
                         </div>
                       </div>
+
+                      {/* Banner section */}
                       <div className="space-y-2">
-                        <Label>Banner</Label>
-                        <div className="flex flex-col gap-3">
-                          {bannerPreview && (
-                            <div className="relative w-full h-32 rounded-lg overflow-hidden border">
-                              <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          <Button type="button" variant="outline" size="sm" onClick={() => { setFileModalType('banner'); setShowFilebankModal(true); }}>
-                            <FolderOpen className="h-4 w-4 mr-2" />
-                            Velg banner fra Filbank
-                          </Button>
-                        </div>
+                        <Label className="text-sm font-medium">Banner</Label>
+                        {bannerPreview && (
+                          <div className="relative w-full h-32 md:h-40 rounded-lg overflow-hidden border">
+                            <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => { setFileModalType('banner'); setShowFilebankModal(true); }}
+                          className="w-full"
+                        >
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          {bannerPreview ? 'Endre banner' : 'Velg banner fra Filbank'}
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Basic Info */}
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Bandnavn *</Label>
-                      <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Navn på bandet" required />
+                    {/* Basic Info - Mobile optimized */}
+                    <div className="space-y-3 md:space-y-4 pt-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="name" className="text-sm">Bandnavn *</Label>
+                        <Input 
+                          id="name" 
+                          value={name} 
+                          onChange={(e) => setName(e.target.value)} 
+                          placeholder="Navn på bandet" 
+                          required 
+                          className="text-base"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="genre" className="text-sm">Sjanger</Label>
+                          <Input 
+                            id="genre" 
+                            value={genre} 
+                            onChange={(e) => setGenre(e.target.value)} 
+                            placeholder="F.eks. Rock, Jazz, Pop"
+                            className="text-base"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor="foundedYear" className="text-sm">Stiftet år</Label>
+                          <Input 
+                            id="foundedYear" 
+                            type="number" 
+                            value={foundedYear} 
+                            onChange={(e) => setFoundedYear(e.target.value)} 
+                            placeholder="F.eks. 2020"
+                            className="text-base"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="description" className="text-sm">Kort beskrivelse</Label>
+                        <Textarea 
+                          id="description" 
+                          value={description} 
+                          onChange={(e) => setDescription(e.target.value)} 
+                          placeholder="En kort beskrivelse av bandet" 
+                          rows={3}
+                          className="text-base resize-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="bio" className="text-sm">Bio</Label>
+                        <Textarea 
+                          id="bio" 
+                          value={bio} 
+                          onChange={(e) => setBio(e.target.value)} 
+                          placeholder="En lengre bio om bandet" 
+                          rows={5}
+                          className="text-base resize-none"
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="genre">Sjanger</Label>
-                      <Input id="genre" value={genre} onChange={(e) => setGenre(e.target.value)} placeholder="F.eks. Rock, Jazz, Pop" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="foundedYear">Stiftet år</Label>
-                      <Input id="foundedYear" type="number" value={foundedYear} onChange={(e) => setFoundedYear(e.target.value)} placeholder="F.eks. 2020" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Kort beskrivelse</Label>
-                      <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="En kort beskrivelse av bandet" rows={3} />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="En lengre bio om bandet" rows={5} />
-                    </div>
-
-                    {/* Contact Info */}
-                    <div className="space-y-4 pt-4 border-t">
-                      <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <Mail className="h-5 w-5" />
+                    {/* Contact Info - Mobile optimized */}
+                    <div className="space-y-3 md:space-y-4 pt-4 border-t">
+                      <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+                        <Mail className="h-4 w-4 md:h-5 md:w-5" />
                         Kontaktinformasjon
                       </h3>
-                      <div className="grid gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="email">E-post</Label>
-                          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="kontakt@band.no" />
+                      <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="email" className="text-sm">E-post</Label>
+                          <Input 
+                            id="email" 
+                            type="email" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            placeholder="kontakt@band.no"
+                            className="text-base"
+                          />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Telefon</Label>
-                          <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+47 123 45 678" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="phone" className="text-sm">Telefon</Label>
+                          <Input 
+                            id="phone" 
+                            type="tel"
+                            value={phone} 
+                            onChange={(e) => setPhone(e.target.value)} 
+                            placeholder="+47 123 45 678"
+                            className="text-base"
+                          />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="bookingEmail">Booking e-post</Label>
-                          <Input id="bookingEmail" type="email" value={bookingEmail} onChange={(e) => setBookingEmail(e.target.value)} placeholder="booking@band.no" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="bookingEmail" className="text-sm">Booking e-post</Label>
+                          <Input 
+                            id="bookingEmail" 
+                            type="email" 
+                            value={bookingEmail} 
+                            onChange={(e) => setBookingEmail(e.target.value)} 
+                            placeholder="booking@band.no"
+                            className="text-base"
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Discography */}
-                    <div className="space-y-4 pt-4 border-t">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold flex items-center gap-2">
-                          <Disc className="h-5 w-5" />
-                          Diskografi
-                        </h3>
-                      </div>
+                    {/* Discography - Mobile optimized */}
+                    <div className="space-y-3 md:space-y-4 pt-4 border-t">
+                      <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+                        <Disc className="h-4 w-4 md:h-5 md:w-5" />
+                        Diskografi
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex gap-2">
-                          <Input value={newSong} onChange={(e) => setNewSong(e.target.value)} placeholder="Navn på sang/album" onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSong())} />
-                          <Button type="button" onClick={addSong} size="sm">Legg til</Button>
+                          <Input 
+                            value={newSong} 
+                            onChange={(e) => setNewSong(e.target.value)} 
+                            placeholder="Navn på sang/album" 
+                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSong())}
+                            className="text-base"
+                          />
+                          <Button 
+                            type="button" 
+                            onClick={addSong} 
+                            size="sm"
+                            className="shrink-0 px-3 md:px-4"
+                          >
+                            <span className="hidden md:inline">Legg til</span>
+                            <span className="md:hidden">+</span>
+                          </Button>
                         </div>
                         {discography.length > 0 && (
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             {discography.map((song, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                                <span className="text-sm">{song}</span>
-                                <Button type="button" variant="ghost" size="sm" onClick={() => removeSong(idx)}>×</Button>
+                              <div key={idx} className="flex items-center justify-between p-2.5 md:p-3 rounded-lg bg-muted/30 border">
+                                <span className="text-sm flex-1 truncate pr-2">{song}</span>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => removeSong(idx)}
+                                  className="shrink-0 h-8 w-8 p-0"
+                                >
+                                  ×
+                                </Button>
                               </div>
                             ))}
                           </div>
@@ -483,13 +596,13 @@ const BandProfile = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-6 border-t">
-              <div>
+            {/* Action Buttons - Mobile optimized */}
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 md:gap-0 pt-4 md:pt-6 border-t sticky bottom-0 md:static bg-background/95 backdrop-blur -mx-3 md:mx-0 px-3 md:px-0 py-3 md:py-0 border-t">
+              <div className="order-2 md:order-1">
                 {!isCreateMode && band && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button type="button" variant="destructive" size="sm">
+                      <Button type="button" variant="destructive" size="sm" className="w-full md:w-auto">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Slett band
                       </Button>
@@ -522,20 +635,32 @@ const BandProfile = () => {
                   </AlertDialog>
                 )}
               </div>
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={handleBack} disabled={loadingSave}>
+              <div className="flex gap-2 order-1 md:order-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleBack} 
+                  disabled={loadingSave}
+                  className="flex-1 md:flex-none"
+                >
                   Avbryt
                 </Button>
-                <Button type="submit" disabled={loadingSave}>
+                <Button 
+                  type="submit" 
+                  disabled={loadingSave}
+                  className="flex-1 md:flex-none"
+                >
                   {loadingSave ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2" />
-                      Lagrer...
+                      <span className="hidden md:inline">Lagrer...</span>
+                      <span className="md:hidden">...</span>
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                      {isCreateMode ? 'Opprett band' : 'Lagre endringer'}
+                      <span className="hidden md:inline">{isCreateMode ? 'Opprett band' : 'Lagre endringer'}</span>
+                      <span className="md:hidden">{isCreateMode ? 'Opprett' : 'Lagre'}</span>
                     </>
                   )}
                 </Button>
@@ -574,8 +699,8 @@ const BandProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10">
-      <div className="container max-w-4xl mx-auto p-4 md:p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 pb-20 md:pb-6">
+      <div className="container max-w-4xl mx-auto px-3 md:px-6 py-3 md:py-6 space-y-4 md:space-y-6">
         <BandHeader
           band={band!}
           currentUserRole={currentUserRole}
