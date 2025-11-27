@@ -107,16 +107,17 @@ export const BasicInfoTab = ({
         <div className="space-y-3 md:space-y-4 pt-2">
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-sm">
-              Bandnavn *
+              Bandnavn <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => onChange('name', e.target.value)}
-              placeholder="Navn på bandet"
+              placeholder="Navn på bandet (påkrevd)"
               required
               className="text-base"
             />
+            <p className="text-xs text-muted-foreground">Dette er det eneste obligatoriske feltet</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
