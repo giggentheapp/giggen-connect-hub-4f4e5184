@@ -157,6 +157,10 @@ export const BandEditForm = ({ band, onSuccess, onCancel }: BandEditFormProps) =
           onFileSelected={imagesHook.handleFileSelected}
           onAvatarUpdate={imagesHook.handleCropComplete}
           onCloseCrop={() => imagesHook.closeModals()}
+          skipDatabaseUpdate={false}
+          updateTable="bands"
+          updateField="image_url"
+          recordId={band.id}
         />
       </div>
     </div>

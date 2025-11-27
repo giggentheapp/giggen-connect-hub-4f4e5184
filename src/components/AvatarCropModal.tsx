@@ -18,6 +18,7 @@ interface AvatarCropModalProps {
   updateTable?: 'profiles' | 'bands';
   updateField?: string;
   recordId?: string;
+  skipDatabaseUpdate?: boolean;
 }
 
 export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
@@ -29,7 +30,8 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   initialImageUrl,
   updateTable = 'profiles',
   updateField = 'avatar_url',
-  recordId
+  recordId,
+  skipDatabaseUpdate = false
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>({
@@ -205,24 +207,28 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
 
       console.log('Public URL:', publicUrl);
 
-      // Update database
-      const idField = updateTable === 'profiles' ? 'user_id' : 'id';
-      const idValue = recordId || userId;
-      
-      const { error: updateError } = await supabase
-        .from(updateTable as any)
-        .update({ 
-          [updateField]: publicUrl,
-          updated_at: new Date().toISOString()
-        })
-        .eq(idField, idValue);
+      // Update database only if not skipped
+      if (!skipDatabaseUpdate) {
+        const idField = updateTable === 'profiles' ? 'user_id' : 'id';
+        const idValue = recordId || userId;
+        
+        const { error: updateError } = await supabase
+          .from(updateTable as any)
+          .update({ 
+            [updateField]: publicUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq(idField, idValue);
 
-      if (updateError) {
-        console.error('Database update error:', updateError);
-        throw updateError;
+        if (updateError) {
+          console.error('Database update error:', updateError);
+          throw updateError;
+        }
+
+        console.log(`${updateTable} updated successfully`);
+      } else {
+        console.log('Skipping database update (will be handled by form submission)');
       }
-
-      console.log(`${updateTable} updated successfully`);
 
       // Call the callback to update UI immediately
       onAvatarUpdate(publicUrl);
