@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, FolderOpen, Info, Disc, Share2, Mail, Settings, Beer, Trash2, CheckCircle2, Wrench, Coffee, Image, Music } from 'lucide-react';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
@@ -293,23 +293,29 @@ const BandProfile = () => {
               {/* Mobile-optimized tabs with scroll */}
               <div className="relative -mx-3 md:mx-0">
                 <TabsList className="w-full h-auto flex md:grid md:grid-cols-6 overflow-x-auto overflow-y-hidden justify-start md:justify-center gap-1 p-1 bg-muted/30 rounded-none md:rounded-lg border-b md:border">
-                  <TabsTrigger value="basic" className="shrink-0 text-xs md:text-sm px-3 py-2">
-                    Grunnleggende
+                  <TabsTrigger value="basic" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Info className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Grunnleggende</span>
                   </TabsTrigger>
-                  <TabsTrigger value="tech" className="shrink-0 text-xs md:text-sm px-3 py-2">
-                    Tech
+                  <TabsTrigger value="tech" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Wrench className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Tech</span>
                   </TabsTrigger>
-                  <TabsTrigger value="hospitality" className="shrink-0 px-3 py-2">
-                    <Beer className="h-4 w-4" />
+                  <TabsTrigger value="hospitality" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Coffee className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Hospitality</span>
                   </TabsTrigger>
-                  <TabsTrigger value="portfolio" className="shrink-0 text-xs md:text-sm px-3 py-2">
-                    Portfolio
+                  <TabsTrigger value="portfolio" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Image className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Portfolio</span>
                   </TabsTrigger>
-                  <TabsTrigger value="social" className="shrink-0 text-xs md:text-sm px-3 py-2">
-                    Sosiale
+                  <TabsTrigger value="social" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Share2 className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Sosiale</span>
                   </TabsTrigger>
-                  <TabsTrigger value="music" className="shrink-0 text-xs md:text-sm px-3 py-2">
-                    Musikk
+                  <TabsTrigger value="music" className="shrink-0 px-3 py-2 flex items-center gap-1.5">
+                    <Music className="h-4 w-4" />
+                    <span className="hidden md:inline text-xs md:text-sm">Musikk</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
