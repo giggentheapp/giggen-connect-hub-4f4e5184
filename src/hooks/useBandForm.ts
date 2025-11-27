@@ -235,20 +235,9 @@ export const useBandForm = (initialBand?: Band) => {
         }
 
         if (newBand) {
-          // Add creator as founder in band_members
-          const { error: memberError } = await supabase
-            .from('band_members')
-            .insert({
-              band_id: newBand.id,
-              user_id: user.id,
-              role: 'founder',
-            });
+          // Database trigger 'add_band_founder()' automatically creates band_members entry
           
-          if (memberError) {
-            console.error('[useBandForm] Member insert error:', memberError);
-            throw memberError;
-          }
-
+          // Track file usage for logo and banner if provided
           if (selectedLogoFileId) {
             await supabase.from('file_usage').insert({
               file_id: selectedLogoFileId,
