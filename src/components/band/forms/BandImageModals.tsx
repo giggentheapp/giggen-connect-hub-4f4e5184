@@ -26,7 +26,18 @@ export const BandImageModals = ({
   onAvatarUpdate,
   onCloseCrop,
 }: BandImageModalsProps) => {
-  if (!userId) return null;
+  console.log('[BandImageModals] Render:', {
+    userId: userId ? 'set' : 'null',
+    showFilebankModal,
+    showCropModal,
+    selectedImageForCrop: selectedImageForCrop ? 'set' : 'null',
+    fileModalType,
+  });
+
+  if (!userId) {
+    console.log('[BandImageModals] UserId is null, returning null');
+    return null;
+  }
 
   return (
     <>
@@ -40,13 +51,16 @@ export const BandImageModals = ({
         />
       )}
       {showCropModal && selectedImageForCrop && (
-        <AvatarCropModal
-          isOpen={showCropModal}
-          onClose={onCloseCrop}
-          onAvatarUpdate={onAvatarUpdate}
-          userId={userId}
-          initialImageUrl={selectedImageForCrop}
-        />
+        <>
+          {console.log('[BandImageModals] Rendering AvatarCropModal')}
+          <AvatarCropModal
+            isOpen={showCropModal}
+            onClose={onCloseCrop}
+            onAvatarUpdate={onAvatarUpdate}
+            userId={userId}
+            initialImageUrl={selectedImageForCrop}
+          />
+        </>
       )}
     </>
   );
