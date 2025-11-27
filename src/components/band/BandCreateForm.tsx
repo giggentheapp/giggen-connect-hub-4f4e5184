@@ -57,10 +57,8 @@ export const BandCreateForm = ({ onSuccess, onCancel }: BandCreateFormProps) => 
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
 
     const newBand = await formHook.handleSubmit(
-      userId,
       undefined,
       true,
       imagesHook.selectedLogoFileId,

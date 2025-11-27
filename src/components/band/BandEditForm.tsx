@@ -62,9 +62,8 @@ export const BandEditForm = ({ band, onSuccess, onCancel }: BandEditFormProps) =
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
 
-    await formHook.handleSubmit(userId, band.id, false);
+    await formHook.handleSubmit(band.id, false);
     onSuccess();
   };
 
