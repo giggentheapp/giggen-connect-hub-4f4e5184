@@ -153,10 +153,10 @@ export const BandEditForm = ({ band, onSuccess, onCancel }: BandEditFormProps) =
           showCropModal={imagesHook.showCropModal}
           fileModalType={imagesHook.fileModalType}
           selectedImageForCrop={imagesHook.selectedImageForCrop}
-          onCloseFilebank={() => imagesHook.closeModals()}
+          onCloseFilebank={imagesHook.closeFilebankModal}
           onFileSelected={imagesHook.handleFileSelected}
           onAvatarUpdate={imagesHook.handleCropComplete}
-          onCloseCrop={() => imagesHook.closeModals()}
+          onCloseCrop={imagesHook.closeModals}
           skipDatabaseUpdate={false}
           updateTable="bands"
           updateField="image_url"
