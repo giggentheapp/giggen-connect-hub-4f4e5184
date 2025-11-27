@@ -138,6 +138,7 @@ export const BandCreateForm = ({ onSuccess, onCancel }: BandCreateFormProps) => 
           onFileSelected={imagesHook.handleFileSelected}
           onAvatarUpdate={imagesHook.handleCropComplete}
           onCloseCrop={() => imagesHook.closeModals()}
+          skipDatabaseUpdate={true}
         />
       </div>
     </div>

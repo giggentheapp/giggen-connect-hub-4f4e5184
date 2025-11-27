@@ -12,6 +12,10 @@ interface BandImageModalsProps {
   onFileSelected: (file: any) => void;
   onAvatarUpdate: (avatarUrl: string) => void;
   onCloseCrop: () => void;
+  skipDatabaseUpdate?: boolean;
+  updateTable?: 'profiles' | 'bands';
+  updateField?: string;
+  recordId?: string;
 }
 
 export const BandImageModals = ({
@@ -25,6 +29,10 @@ export const BandImageModals = ({
   onFileSelected,
   onAvatarUpdate,
   onCloseCrop,
+  skipDatabaseUpdate = false,
+  updateTable = 'bands',
+  updateField = 'image_url',
+  recordId,
 }: BandImageModalsProps) => {
   console.log('[BandImageModals] Render:', {
     userId: userId ? 'set' : 'null',
@@ -59,6 +67,10 @@ export const BandImageModals = ({
             onAvatarUpdate={onAvatarUpdate}
             userId={userId}
             initialImageUrl={selectedImageForCrop}
+            skipDatabaseUpdate={skipDatabaseUpdate}
+            updateTable={updateTable}
+            updateField={updateField}
+            recordId={recordId}
           />
         </>
       )}
