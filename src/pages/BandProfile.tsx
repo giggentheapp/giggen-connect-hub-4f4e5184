@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,14 +17,24 @@ const BandProfile = () => {
   const location = useLocation();
   const { getParam } = useQueryParams();
   
+  // Check if we're in "create new band" mode
+  const isCreateMode = bandId === 'new';
+  
   // Custom hooks handle complexity
-  const { band, members, loading, refetch } = useBandData(bandId);
+  const { band, members, loading, refetch } = useBandData(isCreateMode ? undefined : bandId);
   const { currentUserRole, isAdmin, isMember, currentUserId } = useBandPermissions(bandId, members);
   
   // Simplified dialog state
   const [activeDialog, setActiveDialog] = useState<'invite' | 'edit' | 'public' | null>(null);
   
   const forcePublicView = getParam('view') === 'public';
+  
+  // In create mode, open edit dialog immediately
+  useEffect(() => {
+    if (isCreateMode) {
+      setActiveDialog('edit');
+    }
+  }, [isCreateMode]);
 
   const handleBack = () => {
     const fromSection = location.state?.fromSection;
@@ -34,13 +44,17 @@ const BandProfile = () => {
       navigate('/dashboard?section=admin-bands');
     }
   };
+  
+  const handleCreateSuccess = () => {
+    navigate('/dashboard?section=admin-bands');
+  };
 
   // If force public view (from profile section) OR user is a member but not admin, show public view
   if (!loading && band && (forcePublicView || (isMember && !isAdmin))) {
     return <BandViewModal open={true} onClose={() => navigate(-1)} band={band} showContactInfo={false} />;
   }
 
-  if (loading) {
+  if (loading && !isCreateMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
@@ -48,7 +62,7 @@ const BandProfile = () => {
     );
   }
 
-  if (!band) {
+  if (!band && !isCreateMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-accent-blue/10 flex items-center justify-center">
         <Card className="max-w-md w-full">
@@ -60,6 +74,22 @@ const BandProfile = () => {
           </CardContent>
         </Card>
       </div>
+    );
+  }
+  
+  // In create mode, render EditBandDialog directly
+  if (isCreateMode) {
+    return (
+      <>
+        <BandDialogs
+          activeDialog="edit"
+          onClose={handleBack}
+          band={null}
+          bandId={null}
+          onSuccess={handleCreateSuccess}
+          isCreateMode={true}
+        />
+      </>
     );
   }
 
