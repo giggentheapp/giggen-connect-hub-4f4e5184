@@ -200,8 +200,8 @@ const BandProfile = () => {
         }).select().single();
         if (error) throw error;
         if (newBand) {
-          if (selectedLogoFileId) await supabase.from('file_usage').insert({ file_id: selectedLogoFileId, usage_type: 'band_logo', reference_id: newBand.id }).catch(console.log);
-          if (selectedBannerFileId) await supabase.from('file_usage').insert({ file_id: selectedBannerFileId, usage_type: 'band_banner', reference_id: newBand.id }).catch(console.log);
+          if (selectedLogoFileId) await supabase.from('file_usage').insert({ file_id: selectedLogoFileId, usage_type: 'band_logo', reference_id: newBand.id });
+          if (selectedBannerFileId) await supabase.from('file_usage').insert({ file_id: selectedBannerFileId, usage_type: 'band_banner', reference_id: newBand.id });
         }
         toast({ title: 'Band opprettet!', description: `${name} er nå opprettet` });
         navigate('/dashboard?section=admin-bands');
