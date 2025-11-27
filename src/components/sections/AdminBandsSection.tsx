@@ -72,6 +72,31 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
       const newVisibilityState = !currentState;
       console.log('➡️ Setting is_public to:', newVisibilityState);
       
+      // If turning ON public visibility, check if band profile is complete
+      if (newVisibilityState) {
+        const { data: bandData, error: fetchError } = await supabase
+          .from('bands')
+          .select('image_url, banner_url, description, bio')
+          .eq('id', bandId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        const missing: string[] = [];
+        if (!bandData.image_url) missing.push('Profilbilde');
+        if (!bandData.banner_url) missing.push('Banner');
+        if (!bandData.description && !bandData.bio) missing.push('Beskrivelse eller Bio');
+
+        if (missing.length > 0) {
+          toast({
+            title: '⚠️ Profil ikke komplett',
+            description: `Bandet vil ikke vises i Utforsk før disse feltene er fylt ut: ${missing.join(', ')}. Du kan fortsatt sette det som offentlig, men det vil ikke være synlig ennå.`,
+            variant: 'default',
+            duration: 7000,
+          });
+        }
+      }
+      
       const { error, data } = await supabase
         .from('bands')
         .update({ 
@@ -91,7 +116,7 @@ export const AdminBandsSection = ({ profile }: AdminBandsSectionProps) => {
       toast({
         title: newVisibilityState ? '✅ Synlig i Utforsk' : '🔒 Skjult fra Utforsk',
         description: newVisibilityState 
-          ? `"${bandName}" vises nå i utforskningsseksjonen` 
+          ? `"${bandName}" er nå satt som offentlig` 
           : `"${bandName}" er nå skjult fra utforskningsseksjonen`,
       });
       
