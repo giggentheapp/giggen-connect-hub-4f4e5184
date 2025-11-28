@@ -1,11 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Camera, Upload, RotateCcw, Check, X } from 'lucide-react';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import 'react-image-crop/dist/ReactCrop.css';
 
 interface AvatarCropModalProps {
@@ -33,6 +33,7 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
   recordId,
   skipDatabaseUpdate = false
 }) => {
+  const isMobile = useIsMobile();
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
@@ -258,153 +259,156 @@ export const AvatarCropModal: React.FC<AvatarCropModalProps> = ({
       console.log('Dialog onOpenChange:', open);
       if (!open) onClose();
     }}>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto border-gradient shadow-glow">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="flex items-center gap-2 text-gradient text-2xl">
-            <Camera className="h-6 w-6 text-primary" />
-            Endre profilbilde
-          </DialogTitle>
-          <DialogDescription className="text-base">
-            Last opp og beskjær bildet ditt. Anbefalt format er kvadratisk.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className={`${isMobile ? 'w-[95vw] max-w-[95vw] h-[90vh]' : 'sm:max-w-[550px]'} p-0 gap-0 overflow-hidden`}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b border-border">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Camera className="h-5 w-5 text-primary" />
+                Endre profilbilde
+              </DialogTitle>
+              <DialogDescription className="text-sm">
+                Last opp og beskjær bildet ditt
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-        <div className="space-y-6 pb-4">
-          {!imageSrc ? (
-            <div className="border-2 border-dashed border-primary/30 rounded-xl bg-gradient-to-br from-card to-accent/10 hover:border-primary/50 transition-all duration-300">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+            {!imageSrc ? (
               <div 
-                className="p-10 text-center cursor-pointer hover:bg-accent/20 transition-all duration-300 rounded-xl"
-                onClick={() => {
-                  console.log('Upload area clicked');
-                  fileInputRef.current?.click();
-                }}
+                className="border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors cursor-pointer h-full min-h-[300px] flex items-center justify-center"
+                onClick={() => fileInputRef.current?.click()}
               >
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
-                  <Upload className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Last opp et bilde</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-                  Støttede formater: JPG, PNG, GIF<br />
-                  Maksimal størrelse: 5MB
-                </p>
-                <Button 
-                  variant="default"
-                  size="lg"
-                  type="button" 
-                  className="bg-gradient-primary hover:opacity-90 shadow-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Button clicked');
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  <Upload className="h-5 w-5 mr-2" />
-                  Velg fil
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="relative rounded-xl overflow-hidden border-2 border-primary/20 shadow-primary">
-                <ReactCrop
-                  crop={crop}
-                  onChange={(c) => setCrop(c)}
-                  onComplete={(c) => setCompletedCrop(c)}
-                  aspect={1}
-                  minWidth={50}
-                  minHeight={50}
-                  circularCrop
-                  className="bg-gradient-to-br from-muted to-accent/20"
-                >
-                  <img
-                    ref={imgRef}
-                    src={imageSrc}
-                    alt="Crop me"
-                    crossOrigin="anonymous"
-                    style={{ maxHeight: '450px', maxWidth: '100%' }}
-                    onLoad={() => {
-                      // Set initial crop to center
-                      const { naturalWidth, naturalHeight } = imgRef.current!;
-                      const size = Math.min(naturalWidth, naturalHeight) * 0.8;
-                      const x = (naturalWidth - size) / 2;
-                      const y = (naturalHeight - size) / 2;
-                      
-                      setCrop({
-                        unit: 'px',
-                        width: size,
-                        height: size,
-                        x,
-                        y
-                      });
+                <div className="text-center p-6">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-base font-semibold mb-1">Last opp et bilde</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    JPG, PNG, GIF • Maks 5MB
+                  </p>
+                  <Button 
+                    variant="default"
+                    size={isMobile ? "default" : "lg"}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
                     }}
-                  />
-                </ReactCrop>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-gradient-to-br from-accent/30 to-accent/10 rounded-xl border border-primary/10">
-                <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={resetCrop}
-                    className="border-primary/30 hover:border-primary hover:bg-primary/5"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Tilbakestill
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-primary/30 hover:border-primary hover:bg-primary/5"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Velg nytt
+                    Velg fil
                   </Button>
                 </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(c) => setCrop(c)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    aspect={1}
+                    minWidth={50}
+                    minHeight={50}
+                    circularCrop
+                  >
+                    <img
+                      ref={imgRef}
+                      src={imageSrc}
+                      alt="Crop me"
+                      crossOrigin="anonymous"
+                      style={{ 
+                        maxHeight: isMobile ? '300px' : '400px', 
+                        maxWidth: '100%',
+                        display: 'block'
+                      }}
+                      onLoad={() => {
+                        const { naturalWidth, naturalHeight } = imgRef.current!;
+                        const size = Math.min(naturalWidth, naturalHeight) * 0.8;
+                        const x = (naturalWidth - size) / 2;
+                        const y = (naturalHeight - size) / 2;
+                        
+                        setCrop({
+                          unit: 'px',
+                          width: size,
+                          height: size,
+                          x,
+                          y
+                        });
+                      }}
+                    />
+                  </ReactCrop>
+                </div>
 
-                <div className="text-sm text-muted-foreground text-center sm:text-right">
-                  💡 Dra for å flytte • Hjørner for størrelse
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={resetCrop}
+                      className="flex-1"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1.5" />
+                      Tilbakestill
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1"
+                    >
+                      <Upload className="h-4 w-4 mr-1.5" />
+                      Velg nytt
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    {isMobile ? 'Pinch for å zoome • Dra for å flytte' : 'Dra for å flytte • Hjørner for størrelse'}
+                  </p>
                 </div>
               </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+
+          {/* Footer */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted/30">
+            <div className="flex gap-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={onClose} 
+                disabled={uploading}
+                size={isMobile ? "default" : "default"}
+              >
+                Avbryt
+              </Button>
+              <Button 
+                onClick={handleUpload} 
+                disabled={!completedCrop || uploading}
+                size={isMobile ? "default" : "default"}
+              >
+                {uploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full mr-2" />
+                    Laster opp...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Lagre
+                  </>
+                )}
+              </Button>
             </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-primary/10">
-            <Button 
-              variant="outline" 
-              onClick={onClose} 
-              disabled={uploading}
-              className="border-primary/20 hover:border-primary hover:bg-primary/5"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Avbryt
-            </Button>
-            <Button 
-              onClick={handleUpload} 
-              disabled={!completedCrop || uploading}
-              className="min-w-[140px] bg-gradient-primary hover:opacity-90 shadow-primary"
-            >
-              {uploading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
-                  Laster opp...
-                </div>
-              ) : (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Lagre bilde
-                </>
-              )}
-            </Button>
           </div>
         </div>
       </DialogContent>
