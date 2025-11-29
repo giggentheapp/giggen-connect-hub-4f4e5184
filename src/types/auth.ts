@@ -4,7 +4,7 @@
 
 import { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
 
-export type UserRole = 'musician' | 'organizer' | 'audience';
+export type UserRole = 'musician' | 'organizer' | 'audience' | 'artist';
 
 /**
  * Extended user interface with profile data

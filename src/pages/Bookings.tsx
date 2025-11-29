@@ -1,53 +1,16 @@
-import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 const Bookings = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useCurrentUser();
 
   useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          navigate('/auth');
-          return;
-        }
-
-        // Get user profile
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to load user profile',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        // Redirect to dashboard with bookings section
-        navigate('/dashboard?section=bookings');
-      } catch (err) {
-        console.error('Auth error:', err);
-        navigate('/auth');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getCurrentUser();
-  }, [navigate, toast]);
+    if (!loading && user) {
+      navigate('/dashboard?section=bookings');
+    }
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (

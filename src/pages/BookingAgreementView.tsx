@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useConcepts } from '@/hooks/useConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useBooking } from '@/hooks/useBooking';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
 import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Eye } from 'lucide-react';
@@ -16,74 +16,21 @@ import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
 const BookingAgreementView = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [booking, setBooking] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [showPublishPreview, setShowPublishPreview] = useState(false);
 
-  // Get maker's data for portfolio, tech specs, and hospitality riders
+  const { user, loading: userLoading } = useCurrentUser();
+  const { booking, loading: bookingLoading } = useBooking(bookingId);
+  
+  const currentUserId = user?.id || '';
   const makerId = booking?.receiver_id;
+  
   const { concepts } = useConcepts(makerId);
   const { files: techSpecFiles } = useProfileTechSpecs(makerId);
   const { files: hospitalityFiles } = useHospitalityRiders(makerId);
 
-  // Get selected concept details
   const selectedConcept = concepts.find(c => c.id === booking?.selected_concept_id);
-  
-  // Check if booking is approved by both parties
   const isBothApproved = booking?.status === 'approved_by_both' || booking?.status === 'upcoming';
-
-  useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (bookingId) {
-      fetchBooking();
-    }
-  }, [bookingId]);
-
-  const fetchCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setCurrentUserId(user.id);
-    }
-  };
-
-  const fetchBooking = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('id', bookingId)
-        .maybeSingle();
-
-      if (error) throw error;
-      
-      if (!data) {
-        toast({
-          title: 'Ikke funnet',
-          description: 'Fant ikke bookingen',
-          variant: 'destructive'
-        });
-        navigate('/dashboard?section=bookings');
-        return;
-      }
-      
-      setBooking(data);
-    } catch (error: any) {
-      console.error('Error fetching booking:', error);
-      toast({
-        title: 'Feil',
-        description: 'Kunne ikke laste booking',
-        variant: 'destructive'
-      });
-      navigate('/bookings');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loading = userLoading || bookingLoading;
 
   const handleBack = () => {
     if (booking && currentUserId) {
@@ -216,13 +163,6 @@ const BookingAgreementView = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Billettpris</p>
                 <p className="font-medium">{booking.ticket_price} kr</p>
-              </div>
-            )}
-
-            {booking.price_ticket && (
-              <div>
-                <p className="text-sm text-muted-foreground">Inngang</p>
-                <p className="font-medium">{booking.price_ticket}</p>
               </div>
             )}
           </div>
