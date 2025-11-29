@@ -55,9 +55,9 @@ const BookingAgreementSummary = () => {
 
   const eventDate = booking.event_date ? format(new Date(booking.event_date), 'PPP') : 'Ikke spesifisert';
   const eventTime = booking.time || 'Ikke spesifisert';
-  const numberOfParticipants = booking.number_of_participants || 'Ikke spesifisert';
-  const location = booking.location || 'Ikke spesifisert';
-  const additionalInformation = booking.additional_information || 'Ingen tilleggsinformasjon';
+  const numberOfParticipants = booking.audience_estimate || 'Ikke spesifisert';
+  const location = booking.venue || booking.address || 'Ikke spesifisert';
+  const additionalInformation = booking.personal_message || booking.description || 'Ingen tilleggsinformasjon';
 
   return (
     <div className="min-h-screen bg-background">
@@ -102,7 +102,7 @@ const BookingAgreementSummary = () => {
           <h2 className="text-xl font-semibold mb-2">Konsept</h2>
            {selectedConcept ? (
               <div>
-                <h3 className="font-semibold">{selectedConcept.name}</h3>
+                <h3 className="font-semibold">{selectedConcept.title}</h3>
                 <p className="text-sm text-muted-foreground">{selectedConcept.description}</p>
                 <ConceptPortfolioGallery conceptId={selectedConcept.id} />
               </div>
