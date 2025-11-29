@@ -42,9 +42,9 @@ export const useCurrentUser = () => {
     };
   }, [navigate, refetch]);
 
-  // Redirect to auth if not logged in
+  // Redirect to auth if not logged in (but not if we're already on auth page)
   useEffect(() => {
-    // Don't redirect if we're already on auth page
+    // Skip all redirect logic if we're on the auth page
     if (window.location.pathname === '/auth') {
       return;
     }
@@ -54,24 +54,12 @@ export const useCurrentUser = () => {
       return;
     }
     
-    // If user exists but profile doesn't, wait a bit and retry (for new signups)
-    if (data?.user && !data?.profile) {
-      logger.debug('User exists but profile not found, waiting and retrying...');
-      // Wait 2 seconds and retry once for new signups
-      const retryTimer = setTimeout(() => {
-        logger.debug('Retrying profile fetch for new user');
-        refetch();
-      }, 2000);
-      
-      return () => clearTimeout(retryTimer);
-    }
-    
     // Only redirect if no user at all
     if (!data?.user) {
       logger.debug('No user found, redirecting to auth');
       navigate('/auth');
     }
-  }, [data?.user, data?.profile, isLoading, navigate, refetch]);
+  }, [data?.user, isLoading, navigate]);
 
   // Show error toast if there's an error
   useEffect(() => {
