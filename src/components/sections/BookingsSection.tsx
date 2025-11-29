@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Inbox, Clock, Eye, Check, Archive } from 'lucide-react';
+import { Send, Inbox, Clock, Eye } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
@@ -28,20 +28,18 @@ export const BookingsSection = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useAppTranslation();
-  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'upcoming' | 'history'>('incoming');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing'>('incoming');
   const [tabCounts, setTabCounts] = useState({
     incoming: 0,
     sent: 0,
-    ongoing: 0,
-    upcoming: 0,
-    history: 0
+    ongoing: 0
   });
 
   // Handle URL tab parameter
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab') || params.get('section');
-    if (tab && ['incoming', 'sent', 'ongoing', 'upcoming', 'history'].includes(tab)) {
+    if (tab && ['incoming', 'sent', 'ongoing'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -60,8 +58,6 @@ export const BookingsSection = ({
   let incomingRequests: any[] = [];
   let sentRequests: any[] = [];
   let ongoingAgreements: any[] = [];
-  let upcomingEvents: any[] = [];
-  let historicalBookings: any[] = [];
   
   try {
     if (Array.isArray(bookings)) {
@@ -79,16 +75,6 @@ export const BookingsSection = ({
         (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
         (b?.status === 'allowed' || b?.status === 'approved_by_sender' || b?.status === 'approved_by_receiver' || b?.status === 'approved_by_both')
       );
-      
-      upcomingEvents = bookings.filter(b => 
-        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
-        b?.status === 'upcoming'
-      );
-
-      historicalBookings = bookings.filter(b => 
-        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
-        (b?.status === 'completed' || b?.status === 'cancelled')
-      );
     }
   } catch (error) {
     console.error('Error filtering bookings:', error);
@@ -99,9 +85,7 @@ export const BookingsSection = ({
     setTabCounts({
       incoming: incomingRequests.length,
       sent: sentRequests.length,
-      ongoing: ongoingAgreements.length,
-      upcoming: upcomingEvents.length,
-      history: historicalBookings.length
+      ongoing: ongoingAgreements.length
     });
   }, [bookings, profile.user_id]);
 
@@ -310,7 +294,7 @@ export const BookingsSection = ({
           <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header">
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-5 max-w-[600px]">
+                <TabsList className="grid w-full grid-cols-3 max-w-[600px]">
                   <TabsTrigger value="incoming" className="flex items-center justify-center gap-1">
                     <Inbox className="w-4 h-4" />
                     {tabCounts.incoming > 0 && (
@@ -332,22 +316,6 @@ export const BookingsSection = ({
                     {tabCounts.ongoing > 0 && (
                       <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
                         {tabCounts.ongoing}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="upcoming" className="flex items-center justify-center gap-1">
-                    <Check className="w-4 h-4" />
-                    {tabCounts.upcoming > 0 && (
-                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
-                        {tabCounts.upcoming}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center justify-center gap-1">
-                    <Archive className="w-4 h-4" />
-                    {tabCounts.history > 0 && (
-                      <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
-                        {tabCounts.history}
                       </Badge>
                     )}
                   </TabsTrigger>
@@ -444,68 +412,6 @@ export const BookingsSection = ({
                          </div>
                       ) : (
                         ongoingAgreements.map((booking) => (
-                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Published Tab Content */}
-              <TabsContent value="upcoming" className="flex-1 flex flex-col m-0 min-h-0">
-                <div className="flex-1 flex flex-col min-h-0">
-                  {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.upcomingEvents')}</h2>
-                      <Badge variant="secondary" className="text-xs">
-                        {upcomingEvents.length}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
-                    <div className="max-w-4xl mx-auto space-y-4">
-                      {upcomingEvents.length === 0 ? (
-                         <div className="text-center py-8">
-                           <Check className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">{t('bookings.noUpcomingEvents')}</p>
-                         </div>
-                      ) : (
-                        upcomingEvents.map((booking) => (
-                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
-                        ))
-                      )}
-                     </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* History Tab Content */}
-              <TabsContent value="history" className="flex-1 flex flex-col m-0 min-h-0">
-                <div className="flex-1 flex flex-col min-h-0">
-                  {/* List Header */}
-                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
-                    <div className="max-w-4xl mx-auto flex items-center justify-between">
-                      <h2 className="text-base md:text-lg font-semibold text-foreground">{t('bookings.historicalBookings')}</h2>
-                      <Badge variant="secondary" className="text-xs">
-                        {historicalBookings.length}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* Main Content Area */}
-                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
-                    <div className="max-w-4xl mx-auto space-y-4">
-                      {historicalBookings.length === 0 ? (
-                         <div className="text-center py-8">
-                           <Archive className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                           <p className="text-muted-foreground">{t('bookings.noHistoricalBookings')}</p>
-                         </div>
-                      ) : (
-                        historicalBookings.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
                         ))
                       )}
