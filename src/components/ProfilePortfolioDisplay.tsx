@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Image, Video, Music } from 'lucide-react';
+import { useProfilePortfolio } from '@/hooks/useProfilePortfolio';
 
 interface PortfolioFile {
   id: string;
@@ -20,69 +21,26 @@ interface ProfilePortfolioDisplayProps {
 }
 
 export const ProfilePortfolioDisplay = ({ userId }: ProfilePortfolioDisplayProps) => {
-  const [files, setFiles] = useState<PortfolioFile[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<PortfolioFile | null>(null);
-
-  useEffect(() => {
-    fetchFiles();
-  }, [userId]);
-
-  const fetchFiles = async () => {
-    try {
-      setLoading(true);
-      
-      console.log('Fetching portfolio for userId:', userId);
-      
-      // Get files via file_usage table - only image, video, audio
-      const { data, error } = await supabase
-        .from('file_usage')
-        .select(`
-          file_id,
-          user_files!inner(
-            id,
-            filename,
-            file_path,
-            file_type,
-            mime_type,
-            file_size,
-            thumbnail_path,
-            is_public
-          )
-        `)
-        .eq('usage_type', 'profile_portfolio')
-        .eq('reference_id', userId)
-        .in('user_files.file_type', ['image', 'video', 'audio']);
-
-      console.log('Portfolio query result:', { data, error, count: data?.length || 0 });
-      
-      if (error) throw error;
-      
-      // Transform and get public URLs
-      const fileData = (data?.map(item => item.user_files).flat() || []) as any[];
-      const filesWithUrls = await Promise.all(
-        fileData.map(async (file) => {
-          const { data: { publicUrl } } = supabase.storage
-            .from('filbank')
-            .getPublicUrl(file.file_path);
-          
-          console.log('Portfolio file URL:', { filename: file.filename, type: file.file_type, url: publicUrl });
-          
-          return {
-            ...file,
-            file_url: publicUrl
-          };
-        })
-      );
-      
-      console.log('Portfolio files loaded:', filesWithUrls);
-      setFiles(filesWithUrls);
-    } catch (error) {
-      console.error('Error fetching portfolio files:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  // Use React Query hook for data fetching
+  const { data: portfolioFiles = [], isLoading: loading } = useProfilePortfolio(userId);
+  
+  // Filter and transform files with public URLs
+  const files = useMemo(() => {
+    return portfolioFiles
+      .filter(file => ['image', 'video', 'audio'].includes(file.file_type))
+      .map(file => {
+        const { data: { publicUrl } } = supabase.storage
+          .from('filbank')
+          .getPublicUrl(file.file_path);
+        
+        return {
+          ...file,
+          file_url: publicUrl
+        } as PortfolioFile;
+      });
+  }, [portfolioFiles]);
 
   const getPublicUrl = (path: string) => {
     const { data } = supabase.storage.from('filbank').getPublicUrl(path);

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+import { queryKeys } from '@/lib/queryKeys';
 
 export interface ProfilePortfolioFile {
   id: string;
@@ -22,20 +23,10 @@ export interface ProfilePortfolioFile {
 }
 
 export const useProfilePortfolio = (userId: string | undefined) => {
-  const [files, setFiles] = useState<ProfilePortfolioFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPortfolio = async () => {
-    if (!userId) {
-      setFiles([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  return useQuery({
+    queryKey: [...queryKeys.files.profile(userId || ''), 'portfolio'],
+    queryFn: async () => {
+      if (!userId) return [];
 
       const { data, error: fetchError } = await supabase
         .from('file_usage')
@@ -54,18 +45,11 @@ export const useProfilePortfolio = (userId: string | undefined) => {
       // Transform the data - extract user_files from the join
       const files = data?.map(item => item.user_files).flat() || [];
       logger.debug('Portfolio fetched', { userId, count: files.length });
-      setFiles(files as ProfilePortfolioFile[]);
-    } catch (err: unknown) {
-      logger.error('Error fetching portfolio', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPortfolio();
-  }, [userId]);
-
-  return { files, loading, error, refetch: fetchPortfolio };
+      
+      return files as ProfilePortfolioFile[];
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    placeholderData: [], // Ensure stable array reference
+  });
 };
