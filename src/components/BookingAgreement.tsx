@@ -10,7 +10,7 @@ import { ProfilePortfolioViewer } from '@/components/ProfilePortfolioViewer';
 import FileViewer from '@/components/FileViewer';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useConcepts } from '@/hooks/useConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { Check, X, Calendar, MapPin, Banknote, Users, FileText, Music } from 'lucide-react';
@@ -39,7 +39,7 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
 
   // Get maker's data for portfolio, tech specs, and hospitality riders
   const makerId = booking?.receiver_id; // Assuming receiver is the maker
-  const { concepts } = useUserConcepts(makerId);
+  const { concepts } = useConcepts(makerId);
   const { files: techSpecFiles } = useProfileTechSpecs(makerId);
   const { files: hospitalityFiles } = useHospitalityRiders(makerId);
 

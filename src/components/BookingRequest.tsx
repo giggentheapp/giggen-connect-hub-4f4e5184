@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useBookings } from '@/hooks/useBookings';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useConcepts } from '@/hooks/useConcepts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactInfoSharingDialog } from '@/components/ContactInfoSharingDialog';
 import { Send } from 'lucide-react';
@@ -42,8 +42,8 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess, preselecte
   // Get current user's concepts AND receiver's concepts
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [allAvailableConcepts, setAllAvailableConcepts] = useState<any[]>([]);
-  const { concepts: ownConcepts } = useUserConcepts(currentUserId);
-  const { concepts: receiverConcepts } = useUserConcepts(receiverId);
+  const { concepts: ownConcepts } = useConcepts(currentUserId);
+  const { concepts: receiverConcepts } = useConcepts(receiverId);
   
   useEffect(() => {
     renderCountRef.current += 1;
@@ -182,7 +182,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess, preselecte
         }
       }
 
-      const bookingData: CreateBookingRequest = {
+      if (!currentUserId) {
+        throw new Error('User not authenticated');
+      }
+
+      const bookingData: CreateBookingRequest & { senderId: string } = {
+        senderId: currentUserId,
         receiverId: receiverId,
         conceptIds: selectedConcept ? [selectedConcept.id] : [],
         selectedConceptId: selectedConcept?.id || null,

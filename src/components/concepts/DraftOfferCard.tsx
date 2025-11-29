@@ -3,7 +3,7 @@ import { Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { UserConcept } from '@/hooks/useUserConcepts';
+import { UserConcept } from '@/types/concept';
 
 interface DraftOfferCardProps {
   draft: UserConcept;

@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Lightbulb, Plus, ChevronDown, Edit, X, Clock, Eye, EyeOff } from 'lucide-react';
 import { ProfileConceptCard } from '@/components/ProfileConceptCard';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useConcepts } from '@/hooks/useConcepts';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -26,7 +26,7 @@ export const AdminConceptsSection = ({
   const { toast } = useToast();
   const [showDrafts, setShowDrafts] = useState(true);
   
-  const { concepts, loading, refetch } = useUserConcepts(profile.user_id);
+  const { concepts, loading, refetch } = useConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
   
   const toggleConceptVisibility = async (conceptId: string, currentState: boolean) => {
