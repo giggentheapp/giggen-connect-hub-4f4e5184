@@ -1,77 +1,31 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { BookingEditModal } from '@/components/BookingEditModal';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useBooking } from '@/hooks/useBooking';
 
 const BookingEdit = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [booking, setBooking] = useState<any>(null);
-  const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const { user, loading: userLoading } = useCurrentUser();
+  const { booking, loading: bookingLoading } = useBooking(bookingId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          navigate('/auth');
-          return;
-        }
-        setCurrentUserId(user.id);
-
-        // Get booking data
-        if (bookingId) {
-          const { data, error } = await supabase
-            .from('bookings')
-            .select('*')
-            .eq('id', bookingId)
-            .maybeSingle();
-
-          if (error) throw error;
-          
-          if (!data) {
-            toast({
-              title: 'Ikke funnet',
-              description: 'Fant ikke bookingen',
-              variant: 'destructive'
-            });
-            navigate('/dashboard?section=bookings');
-            return;
-          }
-          
-          setBooking(data);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Feil',
-          description: 'Kunne ikke laste booking data',
-          variant: 'destructive'
-        });
-        navigate('/dashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [bookingId, navigate, toast]);
+  const loading = userLoading || bookingLoading;
+  const currentUserId = user?.id || '';
 
   const handleSaved = () => {
     toast({
       title: 'Lagret',
       description: 'Endringene har blitt lagret',
     });
-    // Navigate to correct tab based on booking status
-    const target = getBookingNavigationTargetWithUser(booking, currentUserId);
-    navigate(target);
+    if (booking) {
+      const target = getBookingNavigationTargetWithUser(booking, currentUserId);
+      navigate(target);
+    }
   };
 
   if (loading) {

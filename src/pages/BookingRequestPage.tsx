@@ -1,17 +1,17 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, User, MapPin, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useRole } from '@/contexts/RoleProvider';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCreateBooking } from '@/hooks/useBookingMutations';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { cn } from '@/lib/utils';
 
@@ -19,10 +19,12 @@ const BookingRequestPage = () => {
   const { makerId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useAppTranslation();
   const isMobile = useIsMobile();
+  
+  const { user } = useCurrentUser();
+  const createBookingMutation = useCreateBooking();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -48,13 +50,14 @@ const BookingRequestPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+    if (!user || !makerId) {
+      setError('Missing user or maker information');
+      return;
+    }
 
+    try {
       // Combine date and time if both are provided
       let eventDate = null;
       if (formData.date) {
@@ -63,25 +66,18 @@ const BookingRequestPage = () => {
           : new Date(`${formData.date}T00:00:00`).toISOString();
       }
 
-      const { error: insertError } = await supabase
-        .from('bookings')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          venue: formData.venue,
-          event_date: eventDate,
-          time: formData.time,
-          personal_message: formData.personal_message,
-          sender_id: user.id,
-          receiver_id: makerId,
-          status: 'pending'
-        });
-
-      if (insertError) throw insertError;
-
-      toast({
-        title: 'Booking request sent',
-        description: 'Your booking request has been sent successfully.',
+      await createBookingMutation.mutateAsync({
+        senderId: user.id,
+        receiverId: makerId,
+        title: formData.title,
+        description: formData.description,
+        venue: formData.venue,
+        eventDate: eventDate,
+        time: formData.time,
+        personalMessage: formData.personal_message,
+        conceptIds: [],
+        selectedConceptId: null,
+        contactInfo: {},
       });
 
       // Navigate back to bookings
@@ -96,217 +92,151 @@ const BookingRequestPage = () => {
         description: errorMessage,
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <div className="relative min-h-screen">
-      {/* Desktop Sidebar */}
-      {!isMobile && (
-        <div className="fixed top-0 left-0 z-50 h-full">
-          <div className="h-full w-16 bg-card border-r border-border shadow-lg overflow-y-auto">
-            <div className="p-6 border-b border-border">
-              <div className="flex items-center justify-center">
-                <img 
-                  src={giggenLogo} 
-                  alt="GIGGEN Logo" 
-                  className="w-20 h-20 object-contain drop-shadow-lg"
-                />
-              </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src={giggenLogo} alt="Giggen Logo" className="h-8" />
+              {!isMobile && <span className="text-xl font-semibold">Giggen</span>}
             </div>
             
-            <nav className="p-3 space-y-2 flex-1">
-              {navItems.map(item => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.id}>
-                    <button 
-                      onClick={() => navigate(item.path)} 
+            {!isMobile && (
+              <nav className="flex items-center gap-2">
+                {navItems.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <Button
+                      key={item.id}
+                      variant="ghost"
+                      onClick={() => navigate(item.path)}
                       className={cn(
-                        'w-full flex items-center justify-center p-3 rounded-lg transition-colors',
-                        'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                        "flex items-center gap-2",
+                        item.id === 'bookings' && "bg-accent"
                       )}
-                      title={item.label}
                     >
-                      <Icon className="h-5 w-5" />
-                    </button>
-                  </div>
-                );
-              })}
-            </nav>
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Button>
+                  );
+                })}
+              </nav>
+            )}
+            
+            <Button onClick={() => navigate('/dashboard')} variant="outline" size="sm">
+              Gå til dashboard
+            </Button>
           </div>
         </div>
-      )}
+      </header>
 
       {/* Main Content */}
-      <main className={cn("flex-1", !isMobile ? 'ml-16' : '', isMobile ? 'pb-20' : 'pb-6')}>
-        <div className="min-h-screen bg-background">
-          <div className="container mx-auto px-4 py-6 max-w-2xl">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/dashboard?section=explore')}
-                className="shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Tilbake
-              </Button>
+      <main className="container mx-auto px-4 py-8 max-w-2xl">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Tilbake
+        </Button>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Send bookingforespørsel</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Send Booking Request</h1>
-                <p className="text-muted-foreground">Create a new booking request for this artist</p>
+                <Label htmlFor="title">Tittel *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                  required
+                />
               </div>
-            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Send className="w-5 h-5 text-primary" />
-                  Booking Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {error && (
-                  <Alert variant="destructive" className="mb-6">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+              <div>
+                <Label htmlFor="description">Beskrivelse</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="venue">Spillested</Label>
+                <Input
+                  id="venue"
+                  value={formData.venue}
+                  onChange={(e) => handleChange('venue', e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date">Dato</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleChange('date', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="time">Tid</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => handleChange('time', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="personal_message">Personlig melding</Label>
+                <Textarea
+                  id="personal_message"
+                  value={formData.personal_message}
+                  onChange={(e) => handleChange('personal_message', e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={createBookingMutation.isPending}>
+                {createBookingMutation.isPending ? (
+                  <>Sender...</>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send forespørsel
+                  </>
                 )}
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Event Title *</Label>
-                    <Input
-                      id="title"
-                      type="text"
-                      required
-                      value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      placeholder="Concert at..."
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Event Description *</Label>
-                    <Textarea
-                      id="description"
-                      required
-                      rows={4}
-                      value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      placeholder="Describe the event, audience, atmosphere, etc..."
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="venue">Venue</Label>
-                    <Input
-                      id="venue"
-                      type="text"
-                      value={formData.venue}
-                      onChange={(e) => setFormData({...formData, venue: e.target.value})}
-                      placeholder="Event location"
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="date">Event Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Event Time</Label>
-                      <Input
-                        id="time"
-                        type="time"
-                        value={formData.time}
-                        onChange={(e) => setFormData({...formData, time: e.target.value})}
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="personal_message">Personal Message</Label>
-                    <Textarea
-                      id="personal_message"
-                      rows={3}
-                      value={formData.personal_message}
-                      onChange={(e) => setFormData({...formData, personal_message: e.target.value})}
-                      placeholder="Add a personal message to the artist..."
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate('/dashboard?section=explore')}
-                      className="flex-1 sm:flex-none sm:min-w-[120px]"
-                    >
-                      Cancel
-                    </Button>
-                    
-                    <Button
-                      type="submit"
-                      disabled={loading || !formData.title || !formData.description}
-                      className="flex-1 bg-primary hover:bg-primary/90"
-                    >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Request
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </main>
-
-      {/* Mobile Navigation */}
-      {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-          <div className="flex items-center justify-around h-16 px-2">
-            {navItems.map(item => {
-              const Icon = item.icon;
-              return (
-                <button 
-                  key={item.id} 
-                  onClick={() => navigate(item.path)} 
-                  className={cn(
-                    'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 flex-1',
-                    'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-      )}
     </div>
   );
 };

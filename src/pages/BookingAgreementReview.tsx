@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useBooking } from '@/hooks/useBooking';
 import { Check, Calendar, MapPin, Banknote, Users, Eye, ChevronRight, Clock, RefreshCw, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
@@ -33,71 +34,14 @@ const BookingAgreementReview = () => {
   const [hasReadConfirmation, setHasReadConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
-  const [booking, setBooking] = useState<any>(null);
   const [fetchingFreshData, setFetchingFreshData] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
+  const { user } = useCurrentUser();
+  const { booking, loading: bookingLoading, refetch } = useBooking(bookingId);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
-
-  // Get current user
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
-
-  // Fetch booking data
-  useEffect(() => {
-    const fetchBookingData = async () => {
-      if (!bookingId) return;
-      
-      setFetchingFreshData(true);
-      try {
-        console.log('🔄 Fetching fresh booking data for approval...');
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('id', bookingId)
-          .maybeSingle();
-
-        if (error) throw error;
-        
-        if (!data) {
-          toast({
-            title: 'Ikke funnet',
-            description: 'Fant ikke bookingen',
-            variant: 'destructive'
-          });
-          navigate('/dashboard?section=bookings');
-          return;
-        }
-
-        console.log('✅ Fresh booking data loaded:', {
-          id: data.id,
-          last_modified_at: data.last_modified_at,
-          event_date: data.event_date,
-          time: data.time
-        });
-
-        setBooking(data);
-      } catch (error) {
-        console.error('❌ Error fetching fresh booking data:', error);
-        toast({
-          title: "Feil ved lasting",
-          description: "Kunne ikke laste bookingdata",
-          variant: "destructive"
-        });
-        navigate('/dashboard?section=bookings');
-      } finally {
-        setFetchingFreshData(false);
-      }
-    };
-
-    fetchBookingData();
-  }, [bookingId, toast, navigate]);
+  
+  const currentUserId = user?.id || null;
 
   const isSender = currentUserId === booking?.sender_id;
   const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';

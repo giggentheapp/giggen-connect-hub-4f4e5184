@@ -22,6 +22,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { conceptService } from '@/services/conceptService';
 
 interface ConceptData {
   id?: string;
@@ -55,9 +57,11 @@ export default function CreateOffer() {
   const { toast } = useToast();
   const { t } = useAppTranslation();
   
+  const { user, loading: userLoading } = useCurrentUser();
+  const userId = user?.id || '';
+  
   const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [userId, setUserId] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!!draftId);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
@@ -83,17 +87,6 @@ export default function CreateOffer() {
   const { files: availableTechSpecs } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders } = useHospitalityRiders(userId);
 
-  // Get user ID
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-      }
-    };
-    getUser();
-  }, []);
-
   // Load draft data if editing
   useEffect(() => {
     const loadDraft = async () => {
@@ -101,19 +94,18 @@ export default function CreateOffer() {
 
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('concepts')
-          .select('*, concept_files(*)')
-          .eq('id', draftId)
-          .single();
+        const data = await conceptService.getById(draftId, true); // Include drafts
+        if (!data) {
+          throw new Error('Concept not found');
+        }
 
-        if (error) throw error;
+        const files = await conceptService.getConceptFiles(draftId);
 
         console.log('📂 Loading concept for editing:', {
           conceptId: draftId,
           conceptType: data.concept_type,
-          hasFiles: !!data.concept_files,
-          fileCount: data.concept_files?.length || 0
+          hasFiles: !!files,
+          fileCount: files.length
         });
 
         // Set concept type from database
@@ -122,7 +114,7 @@ export default function CreateOffer() {
           
           // If it's a teaching concept, store the full concept for TeachingConceptWizard
           if (data.concept_type === 'teaching') {
-            setLoadedTeachingConcept(data);
+            setLoadedTeachingConcept({ ...data, concept_files: files });
             setLoading(false);
             return;
           }
@@ -139,7 +131,7 @@ export default function CreateOffer() {
         const dateArray = Array.isArray(availableDates) ? availableDates : [];
 
         // Process concept_files - convert them to the format expected by the form
-        const portfolioFiles = (data.concept_files || []).map((file: any) => ({
+        const portfolioFiles = files.map((file: any) => ({
           conceptFileId: file.id, // Store the concept_file ID
           filebankId: null, // This came from concept_files, not filebank
           filename: file.filename,
@@ -189,7 +181,7 @@ export default function CreateOffer() {
     };
 
     loadDraft();
-  }, [draftId, userId]);
+  }, [draftId, userId, toast]);
 
   // Auto-save every 30 seconds
   useEffect(() => {

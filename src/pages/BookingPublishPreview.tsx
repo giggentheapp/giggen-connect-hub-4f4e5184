@@ -1,45 +1,13 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 const BookingPublishPreview = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUserId(user.id);
-      } else {
-        toast({
-          title: 'Ikke autentisert',
-          description: 'Du må være logget inn',
-          variant: 'destructive'
-        });
-        navigate('/auth');
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      toast({
-        title: 'Feil',
-        description: 'Kunne ikke laste brukerdata',
-        variant: 'destructive'
-      });
-      navigate('/auth');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  const { user, loading } = useCurrentUser();
+  const currentUserId = user?.id || '';
 
   const handleClose = () => {
     navigate('/dashboard?section=bookings&tab=ongoing');

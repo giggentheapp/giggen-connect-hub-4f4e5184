@@ -1,67 +1,19 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useBooking } from '@/hooks/useBooking';
 
 const BookingConfirmationPage = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [booking, setBooking] = useState<any>(null);
-  const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          navigate('/auth');
-          return;
-        }
-        setCurrentUserId(user.id);
-
-        // Get booking data
-        if (bookingId) {
-          const { data, error } = await supabase
-            .from('bookings')
-            .select('*')
-            .eq('id', bookingId)
-            .maybeSingle();
-
-          if (error) throw error;
-          
-          if (!data) {
-            toast({
-              title: 'Ikke funnet',
-              description: 'Fant ikke bookingen',
-              variant: 'destructive'
-            });
-            navigate('/dashboard?section=bookings');
-            return;
-          }
-          
-          setBooking(data);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Feil',
-          description: 'Kunne ikke laste booking data',
-          variant: 'destructive'
-        });
-        navigate('/dashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [bookingId, navigate, toast]);
+  
+  const { user, loading: userLoading } = useCurrentUser();
+  const { booking, loading: bookingLoading } = useBooking(bookingId);
+  
+  const loading = userLoading || bookingLoading;
+  const currentUserId = user?.id || '';
 
   if (loading) {
     return (
@@ -100,7 +52,7 @@ const BookingConfirmationPage = () => {
               Tilbake
             </Button>
             <h1 className="text-lg font-semibold">Bekreft booking</h1>
-            <div className="w-20"></div> {/* Spacer for centering */}
+            <div className="w-20"></div>
           </div>
         </div>
       </header>
@@ -110,9 +62,9 @@ const BookingConfirmationPage = () => {
         <div className="max-w-4xl mx-auto">
           <BookingConfirmation
             booking={booking}
+            currentUserId={currentUserId}
             isOpen={true}
             onClose={() => navigate('/dashboard')}
-            currentUserId={currentUserId}
           />
         </div>
       </main>

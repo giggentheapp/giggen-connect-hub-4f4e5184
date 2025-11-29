@@ -3,30 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-
-interface Concept {
-  id: string;
-  title: string;
-  description: string | null;
-  price: number | null;
-  expected_audience: number | null;
-  tech_spec: string | null;
-  tech_spec_reference: string | null;
-  hospitality_rider_reference?: string | null;
-  available_dates: any;
-  is_published: boolean;
-  status: string;
-  created_at: string;
-  maker_id: string;
-  door_deal?: boolean;
-  door_percentage?: number | null;
-  price_by_agreement?: boolean;
-}
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useConcepts } from '@/hooks/useConcepts';
+import { conceptService } from '@/services/conceptService';
+import { useUpdateConcept } from '@/hooks/useConceptMutations';
 
 interface ConceptFile {
   id: string;
@@ -44,92 +28,35 @@ export default function ConceptOwnerView() {
   const { conceptId } = useParams<{ conceptId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [concept, setConcept] = useState<Concept | null>(null);
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
+
+  const { user, loading: userLoading } = useCurrentUser();
+  const { concepts, loading: conceptsLoading } = useConcepts(user?.id, true); // Include drafts
+  const updateConceptMutation = useUpdateConcept();
+
+  const concept = concepts.find(c => c.id === conceptId);
+  const currentUserId = user?.id || null;
+  const isOwner = currentUserId === concept?.maker_id;
+  const loading = userLoading || conceptsLoading;
 
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (conceptId && currentUserId) {
-      loadConceptData(conceptId);
+    if (conceptId && !loading) {
+      loadConceptFiles(conceptId);
     }
-  }, [conceptId, currentUserId]);
+  }, [conceptId, loading]);
 
-  const loadConceptData = async (id: string) => {
-    setLoading(true);
+  const loadConceptFiles = async (id: string) => {
     try {
-      console.log('🔍 Loading concept with ID:', id);
-      
-      // Load concept
-      const { data: conceptData, error: conceptError } = await supabase
-        .from('concepts')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      console.log('📊 Concept query result:', { data: conceptData, error: conceptError });
-
-      if (conceptError) {
-        console.error('❌ Concept error:', conceptError);
-        toast({
-          title: 'Kunne ikke laste tilbud',
-          description: 'Tilbudet ble ikke funnet eller du har ikke tilgang til det',
-          variant: 'destructive',
-        });
-        // Navigate back to offers section instead of generic dashboard
-        setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
-        return;
-      }
-      
-      if (!conceptData) {
-        console.warn('⚠️ No concept data returned');
-        toast({
-          title: 'Tilbud ikke funnet',
-          description: 'Dette tilbudet eksisterer ikke',
-          variant: 'destructive',
-        });
-        setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
-        return;
-      }
-
-      setConcept(conceptData);
-      
-      // Check if current user is the owner
-      const userIsOwner = currentUserId === conceptData.maker_id;
-      setIsOwner(userIsOwner);
-
-      // Load concept files
-      const { data: filesData, error: filesError } = await supabase
-        .from('concept_files')
-        .select('id, filename, file_type, file_url, file_path, title, created_at, mime_type, thumbnail_path')
-        .eq('concept_id', id)
-        .order('created_at', { ascending: false });
-
-      if (filesError) {
-        console.error('❌ Files error:', filesError);
-      }
-      
-      setConceptFiles(filesData || []);
+      const files = await conceptService.getConceptFiles(id);
+      setConceptFiles(files as ConceptFile[]);
     } catch (error: any) {
-      console.error('💥 Unexpected error loading concept:', error);
+      console.error('Failed to load concept files:', error);
       toast({
-        title: 'Feil ved lasting',
-        description: error.message || 'Noe gikk galt',
+        title: 'Kunne ikke laste filer',
+        description: error.message,
         variant: 'destructive',
       });
-      setTimeout(() => navigate('/dashboard?section=admin-concepts'), 2000);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -137,23 +64,9 @@ export default function ConceptOwnerView() {
     if (!concept) return;
 
     try {
-      const newState = !concept.is_published;
-      const { error } = await supabase
-        .from('concepts')
-        .update({ 
-          is_published: newState,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', concept.id);
-
-      if (error) throw error;
-
-      setConcept({ ...concept, is_published: newState });
-      toast({
-        title: newState ? '✅ Tilbud publisert' : '🔒 Tilbud skjult',
-        description: newState 
-          ? 'Tilbudet er nå synlig på profilsiden' 
-          : 'Tilbudet er nå skjult fra profilsiden',
+      await updateConceptMutation.mutateAsync({
+        conceptId: concept.id,
+        updates: { is_published: !concept.is_published },
       });
     } catch (error: any) {
       toast({
@@ -478,17 +391,15 @@ export default function ConceptOwnerView() {
       </div>
 
       {/* Available Dates Section */}
-      {availableDates.length > 0 && !isIndefinite && (
+      {!isIndefinite && availableDates.length > 0 && (
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl">
-            <h2 className="text-xl font-semibold mb-4">Tilgjengelige datoer</h2>
-            <div className="flex flex-wrap gap-2">
-              {availableDates.map((date: string, index: number) => (
-                <Badge key={index} variant="outline" className="text-sm">
-                  {format(new Date(date), 'dd.MM.yyyy')}
-                </Badge>
-              ))}
-            </div>
+          <h2 className="text-2xl font-bold mb-4">Tilgjengelige datoer</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {availableDates.map((date: any, index: number) => (
+              <div key={index} className="bg-card p-3 rounded-lg border text-center">
+                <p className="text-sm font-medium">{format(new Date(date), 'd. MMM yyyy')}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -496,26 +407,24 @@ export default function ConceptOwnerView() {
       {/* Portfolio Section */}
       {conceptFiles.length > 0 && (
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-6">Portefølje</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-              {conceptFiles.map((file) => (
-                <div
-                  key={file.id}
-                  onClick={() => setSelectedFile(file)}
-                  className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all"
-                >
-                  {renderFilePreview(file)}
-                </div>
-              ))}
-            </div>
+          <h2 className="text-2xl font-bold mb-4">Portfolio</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {conceptFiles.map((file) => (
+              <div
+                key={file.id}
+                onClick={() => setSelectedFile(file)}
+                className="aspect-square rounded-lg overflow-hidden cursor-pointer border hover:border-primary transition-colors"
+              >
+                {renderFilePreview(file)}
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Modal for expanded view */}
+      {/* File Preview Modal */}
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
+        <DialogContent className="max-w-4xl">
           {selectedFile && renderModalContent(selectedFile)}
         </DialogContent>
       </Dialog>
