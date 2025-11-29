@@ -78,6 +78,17 @@ const FirstLoginFeedback = ({ onComplete }: FirstLoginFeedbackProps) => {
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
         </div>
 
+        {/* Skip button */}
+        <button 
+          onClick={() => {
+            localStorage.setItem('feedback_submitted', 'true');
+            onComplete();
+          }}
+          className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
+        >
+          {language === 'no' ? 'Hopp over' : 'Skip'}
+        </button>
+
         <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
             {t('onboarding.heardAbout.title')}
@@ -127,6 +138,17 @@ const FirstLoginFeedback = ({ onComplete }: FirstLoginFeedbackProps) => {
         <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
       </div>
+
+      {/* Skip button */}
+      <button 
+        onClick={() => {
+          localStorage.setItem('feedback_submitted', 'true');
+          onComplete();
+        }}
+        className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
+      >
+        {language === 'no' ? 'Hopp over' : 'Skip'}
+      </button>
 
       {/* Content */}
       <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
