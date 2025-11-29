@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Banknote, Calendar, Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
+import { conceptService } from '@/services/conceptService';
+import { handleError } from '@/lib/errorHandler';
 
 
 const ProfileConceptView = () => {
   const { userId, conceptId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const [concept, setConcept] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,22 +24,16 @@ const ProfileConceptView = () => {
 
   useEffect(() => {
     const loadConcept = async () => {
+      if (!conceptId) return;
+      
       try {
-        const { data: conceptData, error } = await supabase
-          .from('concepts')
-          .select('*')
-          .eq('id', conceptId)
-          .eq('is_published', true)
-          .maybeSingle();
-
-        if (error) throw error;
-        
-        setConcept(conceptData);
+        const data = await conceptService.getById(conceptId, false);
+        setConcept(data);
       } catch (error: any) {
-        console.error('Error loading concept:', error);
+        const message = handleError(error, 'ProfileConceptView.loadConcept');
         toast({
           title: "Feil",
-          description: "Kunne ikke laste tilbudet",
+          description: message,
           variant: "destructive"
         });
       } finally {
@@ -47,9 +41,7 @@ const ProfileConceptView = () => {
       }
     };
 
-    if (conceptId) {
-      loadConcept();
-    }
+    loadConcept();
   }, [conceptId, toast]);
 
   const parseAvailableDates = (datesData: any) => {
