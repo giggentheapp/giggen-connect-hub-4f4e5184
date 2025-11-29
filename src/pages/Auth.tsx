@@ -57,24 +57,45 @@ const Auth = () => {
           setIsResettingPassword(false);
           setIsForgotPassword(false);
           
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('user_id')
-            .eq('user_id', session.user.id)
-            .single();
+          // Wait a bit for profile to be created by database trigger
+          const checkProfileAndNavigate = async () => {
+            let profile = null;
+            let retries = 0;
+            const maxRetries = 5;
+            
+            // Retry fetching profile (database trigger might need time)
+            while (!profile && retries < maxRetries) {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('user_id')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+              
+              if (profileData) {
+                profile = profileData;
+                break;
+              }
+              
+              // Wait 500ms before retry
+              await new Promise(resolve => setTimeout(resolve, 500));
+              retries++;
+            }
+            
+            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
+            
+            // Check if first login
+            const feedbackSubmitted = localStorage.getItem('feedback_submitted');
+            const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+            
+            if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
+              setShowFeedback(true);
+              setLoading(false);
+            } else {
+              navigate(dashboardUrl, { replace: true });
+            }
+          };
           
-          const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-          
-          // Check if first login
-          const feedbackSubmitted = localStorage.getItem('feedback_submitted');
-          const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
-          
-          if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
-            setShowFeedback(true);
-            setLoading(false);
-          } else {
-            navigate(dashboardUrl, { replace: true });
-          }
+          checkProfileAndNavigate();
         } else {
           setLoading(false);
         }

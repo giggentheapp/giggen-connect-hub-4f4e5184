@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { conceptService } from '@/services/conceptService';
 import { queryKeys } from '@/lib/queryKeys';
 import { logger } from '@/utils/logger';
@@ -26,10 +27,15 @@ export const useConcepts = (userId: string | undefined, includeDrafts: boolean =
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    // Return empty array as default to ensure stable reference
+    placeholderData: [],
   });
 
+  // Use useMemo to ensure stable array reference
+  const concepts = useMemo(() => data || [], [data]);
+
   return {
-    concepts: data || [],
+    concepts,
     loading: isLoading,
     error,
     refetch,

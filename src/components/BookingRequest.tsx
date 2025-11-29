@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { CreateBookingRequest, ContactInfo } from '@/types/booking';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,6 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess, preselecte
 
   // Get current user's concepts AND receiver's concepts
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [allAvailableConcepts, setAllAvailableConcepts] = useState<any[]>([]);
   const { concepts: ownConcepts } = useConcepts(currentUserId);
   const { concepts: receiverConcepts } = useConcepts(receiverId);
   
@@ -62,13 +61,12 @@ export const BookingRequest = ({ receiverId, receiverName, onSuccess, preselecte
     getCurrentUser();
   }, []);
 
-  // Kombiner egne og mottakerens concepts
-  useEffect(() => {
-    const combined = [
+  // Kombiner egne og mottakerens concepts med useMemo for stable reference
+  const allAvailableConcepts = useMemo(() => {
+    return [
       ...ownConcepts.filter(c => c.is_published).map(c => ({ ...c, isOwn: true })),
       ...receiverConcepts.filter(c => c.is_published).map(c => ({ ...c, isOwn: false }))
     ];
-    setAllAvailableConcepts(combined);
   }, [ownConcepts, receiverConcepts]);
 
   // Pre-select concept if provided
