@@ -420,7 +420,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         description: "Du har blitt logget ut av kontoen din",
       });
 
-      navigate("/");
+      navigate("/auth");
     } catch (error: any) {
       toast({
         title: "Feil ved utlogging",
