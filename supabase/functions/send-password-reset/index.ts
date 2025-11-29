@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Get the redirect URL from the request origin or use production URL
-    const requestOrigin = req.headers.get('origin') || 'https://giggen.org';
+    const requestOrigin = req.headers.get('origin') || 'https://giggen.no';
     const redirectTo = `${requestOrigin}/auth`;
     
     console.log("Sending password reset email with redirectTo:", redirectTo);

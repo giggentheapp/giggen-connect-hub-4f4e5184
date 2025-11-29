@@ -1,8 +1,8 @@
 // Security headers for all edge functions
 
 const allowedOrigins = [
-  'https://giggen.org',
-  'https://www.giggen.org',
+  'https://giggen.no',
+  'https://www.giggen.no',
   'http://localhost:5173',
   'http://localhost:3000'
 ];
@@ -12,7 +12,7 @@ const CSP_HEADER = [
   "img-src 'self' data: blob: https://*.supabase.co",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https://*.supabase.co https://giggen.org https://www.giggen.org",
+  "connect-src 'self' https://*.supabase.co https://giggen.no https://www.giggen.no",
   "frame-ancestors 'none'"
 ].join('; ');
 

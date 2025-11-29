@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export function useInitializeAdmin() {
   useEffect(() => {
+    // Only run admin initialization in development
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
     const checkAndAddAdminRole = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -40,10 +46,10 @@ export function useInitializeAdmin() {
             .select()
             .single();
 
-          console.log('Admin rolle lagt til for:', user.email);
+          logger.info('Admin rolle lagt til for:', user.email);
         }
       } catch (error) {
-        console.error('Feil ved admin-initialisering:', error);
+        logger.error('Feil ved admin-initialisering:', error);
       }
     };
 
