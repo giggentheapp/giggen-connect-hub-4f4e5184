@@ -99,8 +99,10 @@ const App = () => {
               {/* File Bank Route */}
               <Route path="/filbank" element={<FileBank />} />
               
-              {/* Security Dashboard */}
-              <Route path="/admin/security" element={<SecurityDashboard />} />
+              {/* Security Dashboard - Development Only */}
+              {import.meta.env.DEV && (
+                <Route path="/admin/security" element={<SecurityDashboard />} />
+              )}
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
