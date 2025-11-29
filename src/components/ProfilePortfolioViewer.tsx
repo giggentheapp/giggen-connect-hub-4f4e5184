@@ -13,7 +13,7 @@ interface ProfilePortfolioViewerProps {
 }
 
 export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProfile = false }: ProfilePortfolioViewerProps) => {
-  const { files, loading, error } = useProfilePortfolio(userId);
+  const { data: files = [], isLoading: loading, error } = useProfilePortfolio(userId);
   const { t } = useAppTranslation();
   const [selectedFile, setSelectedFile] = useState<typeof files[0] | null>(null);
 
@@ -28,7 +28,7 @@ export const ProfilePortfolioViewer = ({ userId, showControls = false, isOwnProf
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-sm text-destructive">Kunne ikke laste portefølje: {error}</p>
+        <p className="text-sm text-destructive">Kunne ikke laste portefølje</p>
       </div>
     );
   }

@@ -29,7 +29,7 @@ interface MakerCardProps {
 
 export const MakerCard = ({ maker, onViewProfile }: MakerCardProps) => {
   const { t } = useAppTranslation();
-  const { files: portfolioFiles, loading: portfolioLoading } = useProfilePortfolio(maker.user_id);
+  const { data: portfolioFiles = [], isLoading: portfolioLoading } = useProfilePortfolio(maker.user_id);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, skipSnaps: false });
   const [selectedIndex, setSelectedIndex] = useState(0);
