@@ -4,7 +4,7 @@ import { ProfileConceptCard } from '@/components/ProfileConceptCard';
 import { ProfileEventCard } from '@/components/ProfileEventCard';
 import { BandsInProfile } from '@/components/BandsInProfile';
 import { BandInvites } from '@/components/BandInvites';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useConcepts } from '@/hooks/useConcepts';
 import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
 import { SocialMediaLinks } from '@/components/SocialMediaLinks';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -84,7 +84,7 @@ export const ProfileSection = ({
   const {
     concepts: allConcepts,
     loading: conceptsLoading
-  } = useUserConcepts(profile.user_id);
+  } = useConcepts(profile.user_id);
   
   const { events: allEvents, loading: eventsLoading } = useUpcomingEvents(profile.user_id);
   

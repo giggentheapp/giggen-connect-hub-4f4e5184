@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
-import { UserConcept } from './useUserConcepts';
+import { UserConcept } from '@/types/concept';
 
 export const useUserDrafts = (userId: string | undefined) => {
   const [drafts, setDrafts] = useState<UserConcept[]>([]);
@@ -29,7 +29,7 @@ export const useUserDrafts = (userId: string | undefined) => {
 
       if (fetchError) throw fetchError;
 
-      setDrafts(data || []);
+      setDrafts((data || []) as UserConcept[]);
     } catch (err: unknown) {
       logger.error('Failed to fetch user drafts', err);
       setError(err instanceof Error ? err.message : 'Unknown error');

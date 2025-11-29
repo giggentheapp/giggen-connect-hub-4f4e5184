@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserConcepts } from '@/hooks/useUserConcepts';
+import { useConcepts } from '@/hooks/useConcepts';
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
@@ -24,7 +24,7 @@ const BookingAgreementView = () => {
 
   // Get maker's data for portfolio, tech specs, and hospitality riders
   const makerId = booking?.receiver_id;
-  const { concepts } = useUserConcepts(makerId);
+  const { concepts } = useConcepts(makerId);
   const { files: techSpecFiles } = useProfileTechSpecs(makerId);
   const { files: hospitalityFiles } = useHospitalityRiders(makerId);
 
