@@ -16,8 +16,6 @@ import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image,
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
-import { FileSelectionModal } from '@/components/FileSelectionModal';
-import { useUserFiles } from '@/hooks/useUserFiles';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -94,7 +92,6 @@ export default function CreateOffer() {
 
   const { files: availableTechSpecs } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders } = useHospitalityRiders(userId);
-  const { files: userFiles } = useUserFiles(userId);
 
   // Load draft data if editing
   useEffect(() => {
@@ -292,11 +289,7 @@ export default function CreateOffer() {
     setHasChanges(true);
   };
 
-  const handleTechSpecFileSelected = async (selectedFiles: any[]) => {
-    if (selectedFiles.length === 0) return;
-    
-    const file = selectedFiles[0];
-    
+  const handleTechSpecFileSelected = async (file: any) => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -363,11 +356,7 @@ export default function CreateOffer() {
     setShowTechSpecModal(false);
   };
 
-  const handleHospitalityFileSelected = async (selectedFiles: any[]) => {
-    if (selectedFiles.length === 0) return;
-    
-    const file = selectedFiles[0];
-    
+  const handleHospitalityFileSelected = async (file: any) => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -1500,25 +1489,25 @@ export default function CreateOffer() {
       />
 
       {/* Tech Spec Selection Modal */}
-      <FileSelectionModal
-        open={showTechSpecModal}
-        onOpenChange={setShowTechSpecModal}
-        files={userFiles}
-        allowedTypes={['document']}
-        onFilesSelected={handleTechSpecFileSelected}
-        title="Velg Tech Spec"
+      <FilebankSelectionModal
+        isOpen={showTechSpecModal}
+        onClose={() => setShowTechSpecModal(false)}
+        onSelect={handleTechSpecFileSelected}
         userId={userId}
+        fileTypes={['document']}
+        title="Velg Tech Spec"
+        description="Velg en tech spec fil fra din filbank"
       />
 
       {/* Hospitality Rider Selection Modal */}
-      <FileSelectionModal
-        open={showHospitalityModal}
-        onOpenChange={setShowHospitalityModal}
-        files={userFiles}
-        allowedTypes={['document']}
-        onFilesSelected={handleHospitalityFileSelected}
-        title="Velg Hospitality Rider"
+      <FilebankSelectionModal
+        isOpen={showHospitalityModal}
+        onClose={() => setShowHospitalityModal(false)}
+        onSelect={handleHospitalityFileSelected}
         userId={userId}
+        fileTypes={['document']}
+        title="Velg Hospitality Rider"
+        description="Velg en hospitality rider fil fra din filbank"
       />
     </div>
   );
