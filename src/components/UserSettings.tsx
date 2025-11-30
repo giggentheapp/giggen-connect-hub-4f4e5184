@@ -31,6 +31,7 @@ import { FilebankSelectionModal } from "@/components/FilebankSelectionModal";
 import { SocialMusicLinksManager } from "@/components/SocialMusicLinksManager";
 import { InstrumentManager } from "@/components/InstrumentManager";
 import { useQueryClient } from "@tanstack/react-query";
+import { calculateProfileCompletion } from "@/lib/profileCompletion";
 
 interface ProfileSettings {
   show_public_profile: boolean;
@@ -99,6 +100,8 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [showFilebankModal, setShowFilebankModal] = useState(false);
   const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
   const [instruments, setInstruments] = useState<Array<{ instrument: string; details: string }>>([]);
+  const [showIncompleteProfileDialog, setShowIncompleteProfileDialog] = useState(false);
+  const [incompleteProfileFields, setIncompleteProfileFields] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -252,6 +255,17 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
 
   const updateProfileSettings = async (updates: Partial<ProfileSettings>) => {
     if (!["musician", "organizer"].includes(profile.role) || !profileSettings) return;
+
+    // If trying to enable show_public_profile, validate profile completion first
+    if (updates.show_public_profile === true) {
+      const { percentage, missingFields } = calculateProfileCompletion(profileData as any);
+      
+      if (percentage < 100) {
+        setIncompleteProfileFields(missingFields);
+        setShowIncompleteProfileDialog(true);
+        return; // Don't proceed with update
+      }
+    }
 
     try {
       setLoading(true);
@@ -1434,6 +1448,59 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         description="Velg et bilde fra din filbank for å bruke som profilbilde"
         allowClear={true}
       />
+
+      {/* Incomplete Profile Dialog */}
+      <AlertDialog open={showIncompleteProfileDialog} onOpenChange={setShowIncompleteProfileDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Profilen er ikke komplett
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 pt-2">
+              <p>Du må fylle ut følgende felt før du kan gjøre profilen offentlig:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                {incompleteProfileFields.map((field) => (
+                  <li key={field} className="text-foreground">{field}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground pt-2">
+                En komplett profil gjør det lettere for andre å finne og kontakte deg.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowIncompleteProfileDialog(false)}>
+              Lukk
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowIncompleteProfileDialog(false);
+                // Scroll to first missing field
+                const firstField = incompleteProfileFields[0];
+                if (firstField) {
+                  setTimeout(() => {
+                    // Try to scroll to the relevant section
+                    if (firstField.toLowerCase().includes('profilbilde') || firstField.toLowerCase().includes('avatar')) {
+                      document.getElementById('avatar')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else if (firstField.toLowerCase().includes('visningsnavn') || firstField.toLowerCase().includes('display')) {
+                      document.getElementById('display-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else if (firstField.toLowerCase().includes('bio')) {
+                      document.getElementById('bio')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else if (firstField.toLowerCase().includes('brukernavn') || firstField.toLowerCase().includes('username')) {
+                      document.getElementById('username')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else if (firstField.toLowerCase().includes('kontakt')) {
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }, 100);
+                }
+              }}
+            >
+              Gå til felt
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
