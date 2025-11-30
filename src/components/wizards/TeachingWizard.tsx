@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { BaseConceptWizard, WizardConfig } from './BaseConceptWizard';
 import { BasicInfoStep } from './steps/BasicInfoStep';
 import { PortfolioStep } from './steps/PortfolioStep';
@@ -74,7 +75,7 @@ export const TeachingWizard = ({
 }: TeachingWizardProps) => {
   const { toast } = useToast();
 
-  const config: WizardConfig = {
+  const config: WizardConfig = useMemo(() => ({
     conceptType: 'teaching',
     layout: 'card',
     steps: [
@@ -241,7 +242,7 @@ export const TeachingWizard = ({
       onSuccess();
     },
     onBack,
-  };
+  }), [existingConcept, userId, toast, onSuccess, onBack]);
 
   return <BaseConceptWizard config={config} userId={userId} />;
 };
