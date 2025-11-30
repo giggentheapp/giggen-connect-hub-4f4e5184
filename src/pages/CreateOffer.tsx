@@ -179,7 +179,10 @@ export default function CreateOffer() {
       {!conceptType && !draftId && (
         <div className="container mx-auto px-4 py-16">
           <ConceptTypeSelector 
-            onSelect={setConceptType}
+            onSelect={(type) => {
+              console.log('CreateOffer: Setting concept type to:', type);
+              setConceptType(type);
+            }}
             onBack={() => navigate(-1)}
           />
         </div>
@@ -209,12 +212,15 @@ export default function CreateOffer() {
 
       {/* Show Session Musician Wizard */}
       {conceptType === 'session_musician' && (
-        <SessionMusicianWizard
-          userId={userId}
-          onSuccess={handleSessionSuccess}
-          onBack={handleSessionBack}
-          existingConcept={loadedConcept}
-        />
+        <>
+          {console.log('CreateOffer: Rendering SessionMusicianWizard with userId:', userId, 'existingConcept:', loadedConcept)}
+          <SessionMusicianWizard
+            userId={userId}
+            onSuccess={handleSessionSuccess}
+            onBack={handleSessionBack}
+            existingConcept={loadedConcept}
+          />
+        </>
       )}
     </div>
   );

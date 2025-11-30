@@ -12,6 +12,13 @@ interface ConceptTypeSelectorProps {
 export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorProps) => {
   const { isOrganizer, isMusician, loading } = useRoleData();
 
+  const handleSelect = (type: 'session_musician' | 'teaching' | 'arrangør_tilbud') => {
+    console.log('ConceptTypeSelector: Selected type:', type);
+    console.log('ConceptTypeSelector: isMusician:', isMusician);
+    console.log('ConceptTypeSelector: isOrganizer:', isOrganizer);
+    onSelect(type);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -43,7 +50,7 @@ export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorPro
         {isMusician && (
           <Card
           className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
-          onClick={() => onSelect('session_musician')}
+          onClick={() => handleSelect('session_musician')}
         >
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -69,7 +76,7 @@ export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorPro
         {isOrganizer && (
           <Card 
             className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
-            onClick={() => onSelect('arrangør_tilbud')}
+            onClick={() => handleSelect('arrangør_tilbud')}
           >
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -94,7 +101,7 @@ export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorPro
         {/* Undervisning/Kurs - for alle */}
         <Card 
           className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
-          onClick={() => onSelect('teaching')}
+          onClick={() => handleSelect('teaching')}
         >
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
