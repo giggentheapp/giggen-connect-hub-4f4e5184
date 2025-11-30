@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Image, File, Check, X, FolderOpen } from 'lucide-react';
+import { Image, File, Check, X, FolderOpen, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -32,12 +32,13 @@ interface FilebankFile {
 interface FilebankSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (file: FilebankFile) => void;
+  onSelect: (file: FilebankFile | null) => void; // Allow null to clear selection
   userId: string;
   category?: 'portfolio' | 'avatars' | 'all';
   fileTypes?: string[]; // e.g., ['image'], ['image', 'video', 'audio']
   title?: string;
   description?: string;
+  allowClear?: boolean; // Allow clearing/removing selection
 }
 
 export const FilebankSelectionModal = ({
@@ -48,7 +49,8 @@ export const FilebankSelectionModal = ({
   category = 'all',
   fileTypes,
   title = 'Velg fra Filbank',
-  description = 'Velg en fil fra din filbank'
+  description = 'Velg en fil fra din filbank',
+  allowClear = false
 }: FilebankSelectionModalProps) => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<FilebankFile[]>([]);
@@ -112,6 +114,13 @@ export const FilebankSelectionModal = ({
       console.log('🔘 Closing modal after selection');
       onClose();
     }
+  };
+
+  const handleClear = () => {
+    console.log('✅ Clearing selection, calling onSelect with null');
+    onSelect(null);
+    setSelectedFile(null);
+    onClose();
   };
 
   const getPublicUrl = (filePath: string) => {
@@ -217,26 +226,45 @@ export const FilebankSelectionModal = ({
         </div>
 
         <SheetFooter className="px-6 py-4 border-t">
-          <Button 
-            variant="outline" 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-          >
-            Avbryt
-          </Button>
-          <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleSelect();
-            }} 
-            disabled={!selectedFile}
-          >
-            Velg fil
-          </Button>
+          <div className="flex gap-2 w-full">
+            <Button 
+              variant="outline" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+            >
+              Avbryt
+            </Button>
+            
+            {allowClear && (
+              <Button 
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleClear();
+                }}
+                className="gap-2"
+              >
+                <XCircle className="h-4 w-4" />
+                Fjern valg
+              </Button>
+            )}
+            
+            <Button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelect();
+              }} 
+              disabled={!selectedFile}
+              className="ml-auto"
+            >
+              Velg fil
+            </Button>
+          </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>

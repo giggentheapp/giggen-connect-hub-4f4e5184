@@ -572,8 +572,34 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     }
   };
 
-  const handleAvatarFileSelect = async (file: any) => {
+  const handleAvatarFileSelect = async (file: any | null) => {
     try {
+      // If file is null, remove the avatar
+      if (!file) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ avatar_url: null })
+          .eq('user_id', profileData.user_id);
+
+        if (error) throw error;
+
+        const updatedProfile = { ...profileData, avatar_url: null };
+        setProfileData(updatedProfile);
+        onProfileUpdate?.(updatedProfile);
+
+        // Invalidate queries to update dashboard and other components
+        queryClient.invalidateQueries({ queryKey: ['profiles'] });
+        queryClient.invalidateQueries({ queryKey: ['current-user'] });
+
+        setShowFilebankModal(false);
+        
+        toast({
+          title: 'Profilbilde fjernet',
+          description: 'Profilbildet ditt er fjernet',
+        });
+        return;
+      }
+      
       // Get public URL of the selected file
       const publicUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
       
@@ -1406,6 +1432,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         fileTypes={['image']}
         title="Velg profilbilde fra Filbank"
         description="Velg et bilde fra din filbank for å bruke som profilbilde"
+        allowClear={true}
       />
     </div>
   );
