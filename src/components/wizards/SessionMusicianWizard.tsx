@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { BaseConceptWizard, WizardConfig } from './BaseConceptWizard';
 import { BasicInfoStep } from './steps/BasicInfoStep';
 import { PricingStep } from './steps/PricingStep';
@@ -28,7 +29,7 @@ export const SessionMusicianWizard = ({
 }: SessionMusicianWizardProps) => {
   const { toast } = useToast();
 
-  const config: WizardConfig = {
+  const config: WizardConfig = useMemo(() => ({
     conceptType: 'session_musician',
     layout: 'sticky-header',
     steps: [
@@ -200,7 +201,7 @@ export const SessionMusicianWizard = ({
       }
     },
     onBack,
-  };
+  }), [existingConcept, userId, toast, onSuccess, onBack]);
 
   return <BaseConceptWizard config={config} userId={userId} />;
 };

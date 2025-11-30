@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { BaseConceptWizard, WizardConfig } from './BaseConceptWizard';
 import { BasicInfoStep } from './steps/BasicInfoStep';
 import { ProgramTypeStep } from './steps/ProgramTypeStep';
@@ -28,7 +29,7 @@ export const ArrangørTilbudWizard = ({
 }: ArrangørTilbudWizardProps) => {
   const { toast } = useToast();
 
-  const config: WizardConfig = {
+  const config: WizardConfig = useMemo(() => ({
     conceptType: 'arrangør_tilbud',
     layout: 'sticky-header',
     steps: [
@@ -196,7 +197,7 @@ export const ArrangørTilbudWizard = ({
       onSuccess();
     },
     onBack,
-  };
+  }), [existingConcept, userId, toast, onSuccess, onBack]);
 
   return <BaseConceptWizard config={config} userId={userId} />;
 };
