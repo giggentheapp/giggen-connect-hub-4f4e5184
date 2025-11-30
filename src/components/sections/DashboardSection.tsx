@@ -213,7 +213,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
         </Card>
 
         {/* Profile Visibility Alert */}
-        {profileSettings && !profileSettings.show_public_profile && (
+        {profileSettings?.show_public_profile === false && (
           <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
             <EyeOff className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="flex items-center justify-between gap-4">

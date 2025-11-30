@@ -160,7 +160,7 @@ export const ProfileSection = ({
         
         <div className="space-y-3 md:space-y-4">
           <div className="animate-fade-in flex flex-col items-center gap-2">
-            <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent hover:scale-105 transition-transform inline-block text-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-foreground hover:scale-105 transition-transform inline-block text-center">
               {profile.display_name}
             </h1>
             <button
@@ -170,10 +170,10 @@ export const ProfileSection = ({
               <span>@{(profile as any).username}</span>
               <Copy className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110" />
             </button>
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground mt-1">
-              <span className="inline-block w-2 h-2 rounded-full bg-accent-orange animate-pulse shadow-lg shadow-accent-orange/50"></span>
-              <span className="capitalize font-medium px-3 py-1 rounded-full bg-gradient-to-r from-accent-orange/10 to-accent-pink/10 border border-accent-orange/20">{profile.role}</span>
-            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground">
+            <span className="capitalize font-medium px-3 py-1 rounded-full bg-gradient-to-r from-accent-orange/10 to-accent-pink/10 border border-accent-orange/20">{profile.role}</span>
           </div>
 
           {profile.bio && (
