@@ -173,6 +173,32 @@ export default function CreateOffer() {
           program_type: data.program_type || '',
         });
 
+        // Load tech spec file if reference exists
+        if (data.tech_spec_reference) {
+          const { data: techSpecFile } = await supabase
+            .from('profile_tech_specs')
+            .select('*')
+            .eq('id', data.tech_spec_reference)
+            .single();
+          
+          if (techSpecFile) {
+            setSelectedTechSpecFile(techSpecFile);
+          }
+        }
+
+        // Load hospitality rider file if reference exists
+        if (data.hospitality_rider_reference) {
+          const { data: hospitalityFile } = await supabase
+            .from('hospitality_riders')
+            .select('*')
+            .eq('id', data.hospitality_rider_reference)
+            .single();
+          
+          if (hospitalityFile) {
+            setSelectedHospitalityFile(hospitalityFile);
+          }
+        }
+
         toast({
           title: 'Utkast lastet',
           description: 'Fortsett der du slapp',
@@ -392,8 +418,8 @@ export default function CreateOffer() {
         price_by_agreement: conceptData.pricing_type === 'by_agreement',
         expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
         tech_spec: conceptData.tech_spec || null,
-        tech_spec_reference: conceptData.selected_tech_spec_file || null,
-        hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
+        tech_spec_reference: selectedTechSpecFile?.id || conceptData.selected_tech_spec_file || null,
+        hospitality_rider_reference: selectedHospitalityFile?.id || conceptData.selected_hospitality_rider_file || null,
         program_type: conceptData.program_type || null,
         available_dates: conceptData.is_indefinite 
           ? JSON.stringify({ indefinite: true })
@@ -548,8 +574,8 @@ export default function CreateOffer() {
           price_by_agreement: conceptData.pricing_type === 'by_agreement',
           expected_audience: conceptData.expected_audience ? parseInt(conceptData.expected_audience) : null,
           tech_spec: conceptData.tech_spec || null,
-          tech_spec_reference: conceptData.selected_tech_spec_file || null,
-          hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
+          tech_spec_reference: selectedTechSpecFile?.id || conceptData.selected_tech_spec_file || null,
+          hospitality_rider_reference: selectedHospitalityFile?.id || conceptData.selected_hospitality_rider_file || null,
           program_type: conceptData.program_type || null,
           available_dates: conceptData.is_indefinite
             ? JSON.stringify({ indefinite: true })
