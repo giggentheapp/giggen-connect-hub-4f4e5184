@@ -13,8 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image, Video, File as FileIcon } from 'lucide-react';
-import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
-import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -90,8 +88,6 @@ export default function CreateOffer() {
     door_percentage: '',
   });
 
-  const { files: availableTechSpecs } = useProfileTechSpecs(userId);
-  const { files: availableHospitalityRiders } = useHospitalityRiders(userId);
 
   // Load draft data if editing
   useEffect(() => {
@@ -943,8 +939,6 @@ export default function CreateOffer() {
           currentStep={currentStep}
           conceptData={conceptData}
           updateConceptData={updateConceptData}
-          availableTechSpecs={availableTechSpecs}
-          availableHospitalityRiders={availableHospitalityRiders}
           onOpenFilebankModal={() => setShowFilebankModal(true)}
           onOpenTechSpecModal={() => setShowTechSpecModal(true)}
           onOpenHospitalityModal={() => setShowHospitalityModal(true)}
@@ -1246,70 +1240,28 @@ export default function CreateOffer() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="tech-spec-select">Tech Spec (valgfritt)</Label>
-                <Select
-                  value={conceptData.selected_tech_spec_file}
-                  onValueChange={(value) => updateConceptData('selected_tech_spec_file', value)}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowTechSpecModal(true)}
+                  className="w-full"
+                  type="button"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Velg tech spec..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTechSpecs.map((spec) => (
-                      <SelectItem key={spec.id} value={spec.id}>
-                        {spec.filename}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {availableTechSpecs.length === 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Du har ingen tech specs. Last opp i filbank for å velge.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowTechSpecModal(true)}
-                      className="w-full"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
-                  </div>
-                )}
+                  <FileText className="h-4 w-4 mr-2" />
+                  Velg fra Filbank
+                </Button>
               </div>
 
               <div>
                 <Label htmlFor="hospitality-select">Hospitality Rider (valgfritt)</Label>
-                <Select
-                  value={conceptData.selected_hospitality_rider_file}
-                  onValueChange={(value) => updateConceptData('selected_hospitality_rider_file', value)}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowHospitalityModal(true)}
+                  className="w-full"
+                  type="button"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Velg hospitality rider..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableHospitalityRiders.map((rider) => (
-                      <SelectItem key={rider.id} value={rider.id}>
-                        {rider.filename}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {availableHospitalityRiders.length === 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Du har ingen hospitality riders. Last opp i filbank for å velge.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowHospitalityModal(true)}
-                      className="w-full"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Velg fra Filbank
-                    </Button>
-                  </div>
-                )}
+                  <FileText className="h-4 w-4 mr-2" />
+                  Velg fra Filbank
+                </Button>
               </div>
 
               <div>

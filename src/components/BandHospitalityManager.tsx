@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { X, Edit2, Save, FileText, FolderOpen } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { useUserFiles } from '@/hooks/useUserFiles';
-import { FileSelectionModal } from '@/components/FileSelectionModal';
+import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 
 interface BandHospitalityItem {
   id: string;
@@ -34,7 +33,6 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
   const [showFileModal, setShowFileModal] = useState(false);
   const { toast } = useToast();
   const { t } = useAppTranslation();
-  const { files: userFiles } = useUserFiles(userId);
 
   useEffect(() => {
     fetchItems();
@@ -207,14 +205,14 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
         Velg fra Filbank
       </Button>
 
-      <FileSelectionModal
-        open={showFileModal}
-        onOpenChange={setShowFileModal}
-        files={userFiles}
-        allowedTypes={['document', 'pdf', 'hospitality', 'rider', 'application']}
-        onFilesSelected={(files) => files[0] && handleFileSelected(files[0])}
-        title={t('selectFromFileBank')}
+      <FilebankSelectionModal
+        isOpen={showFileModal}
+        onClose={() => setShowFileModal(false)}
+        onSelect={handleFileSelected}
         userId={userId}
+        fileTypes={['document']}
+        title={t('selectFromFileBank')}
+        description="Velg en hospitality rider fil fra din filbank"
       />
 
       {loading ? (

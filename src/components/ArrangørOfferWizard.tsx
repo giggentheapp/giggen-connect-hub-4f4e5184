@@ -30,8 +30,6 @@ interface ArrangørOfferWizardProps {
   currentStep: number;
   conceptData: ConceptData;
   updateConceptData: (key: string, value: any) => void;
-  availableTechSpecs: any[];
-  availableHospitalityRiders: any[];
   onOpenFilebankModal: () => void;
   onOpenTechSpecModal: () => void;
   onOpenHospitalityModal: () => void;
@@ -57,8 +55,6 @@ export const ArrangørOfferWizard = ({
   currentStep,
   conceptData,
   updateConceptData,
-  availableTechSpecs,
-  availableHospitalityRiders,
   onOpenFilebankModal,
   onOpenTechSpecModal,
   onOpenHospitalityModal,
@@ -240,71 +236,29 @@ export const ArrangørOfferWizard = ({
       {currentStep === 3 && (
         <div className="space-y-6">
           <div>
-            <Label>Tech Spec</Label>
-            <Select
-              value={conceptData.selected_tech_spec_file}
-              onValueChange={(value) => updateConceptData('selected_tech_spec_file', value)}
+            <Label>Tech Spec (valgfritt)</Label>
+            <Button
+              variant="outline"
+              onClick={onOpenTechSpecModal}
+              className="w-full"
+              type="button"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Velg fra filbank..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTechSpecs.map((spec) => (
-                  <SelectItem key={spec.id} value={spec.id}>
-                    {spec.filename}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {availableTechSpecs.length === 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground mt-2">
-                  Du har ingen tech specs. Last opp i filbank for å velge.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={onOpenTechSpecModal}
-                  className="w-full"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Velg fra Filbank
-                </Button>
-              </div>
-            )}
+              <FileText className="h-4 w-4 mr-2" />
+              Velg fra Filbank
+            </Button>
           </div>
 
           <div>
-            <Label>Hospitality Rider</Label>
-            <Select
-              value={conceptData.selected_hospitality_rider_file}
-              onValueChange={(value) => updateConceptData('selected_hospitality_rider_file', value)}
+            <Label>Hospitality Rider (valgfritt)</Label>
+            <Button
+              variant="outline"
+              onClick={onOpenHospitalityModal}
+              className="w-full"
+              type="button"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Velg fra filbank..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availableHospitalityRiders.map((rider) => (
-                  <SelectItem key={rider.id} value={rider.id}>
-                    {rider.filename}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {availableHospitalityRiders.length === 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground mt-2">
-                  Du har ingen hospitality riders. Last opp i filbank for å velge.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={onOpenHospitalityModal}
-                  className="w-full"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Velg fra Filbank
-                </Button>
-              </div>
-            )}
+              <FileText className="h-4 w-4 mr-2" />
+              Velg fra Filbank
+            </Button>
           </div>
 
           <div>
