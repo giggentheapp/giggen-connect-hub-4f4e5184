@@ -1,8 +1,8 @@
 import React, { ReactNode, createContext, useContext } from 'react';
-import { useRoleData } from '@/hooks/useRole';
+import { useRoleData, UserRole } from '@/hooks/useRole';
 
 interface RoleContextType {
-  role: 'MUSIKER' | 'ARRANGØR' | null;
+  role: UserRole | null;
   loading: boolean;
   error: string | null;
   isOrganizer: boolean;
