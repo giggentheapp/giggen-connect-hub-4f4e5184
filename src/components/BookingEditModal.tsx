@@ -16,7 +16,7 @@ import { EditableTeachingDetails } from '@/components/EditableTeachingDetails';
 import { TeachingAgreementApproval } from '@/components/TeachingAgreementApproval';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Save, Clock } from 'lucide-react';
+import { CalendarIcon, Save, Clock, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { z } from 'zod';
@@ -691,13 +691,47 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           </CardContent>
         </Card>
 
-        {/* Public Visibility Settings */}
-        {isInNegotiation && (
+        {/* Public Visibility Settings - ONLY SENDER CAN EDIT */}
+        {isInNegotiation && isSender && (
           <PublicVisibilitySettings
             value={formData.public_visibility_settings}
             onChange={(settings) => updateFormField('public_visibility_settings', settings)}
             mode="booking"
           />
+        )}
+
+        {/* Public Preview for Receiver - READ ONLY */}
+        {isInNegotiation && !isSender && (
+          <Card>
+            <CardHeader>
+              <CardTitle>📋 Slik vil arrangementet vises offentlig</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Arrangøren kontrollerer hva som er synlig for publikum. Dette er hva som vil vises når arrangementet publiseres:
+              </p>
+              <div className="bg-muted/30 rounded-lg p-4 space-y-2 text-sm">
+                {Object.entries(formData.public_visibility_settings).map(([key, visible]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <div className={cn(
+                      "h-4 w-4 rounded border-2 flex items-center justify-center",
+                      visible ? "bg-primary border-primary" : "border-muted-foreground"
+                    )}>
+                      {visible && <Check className="h-3 w-3 text-primary-foreground" />}
+                    </div>
+                    <span className={visible ? "text-foreground" : "text-muted-foreground"}>
+                      {key === 'showDate' && 'Dato'}
+                      {key === 'showTime' && 'Tidspunkt'}
+                      {key === 'showVenue' && 'Spillested'}
+                      {key === 'showAddress' && 'Adresse'}
+                      {key === 'showTicketPrice' && 'Billettpris'}
+                      {key === 'showAudienceEstimate' && 'Publikumsestimat'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Portfolio Attachments */}
