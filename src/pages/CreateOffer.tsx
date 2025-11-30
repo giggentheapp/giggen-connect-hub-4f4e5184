@@ -1340,9 +1340,20 @@ export default function CreateOffer() {
                   <div>
                     <span className="text-sm text-muted-foreground block mb-2">Portfolio filer:</span>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {conceptData.portfolio_files.map((file, index) => (
+                      {conceptData.portfolio_files.map((file, index) => {
+                        const isImage = file.file_type === 'image' || 
+                                       file.mime_type?.startsWith('image/') || 
+                                       file.filename?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
+                        const isVideo = file.file_type === 'video' || 
+                                       file.mime_type?.startsWith('video/') || 
+                                       file.filename?.match(/\.(mp4|webm|mov|avi)$/i);
+                        const isAudio = file.file_type === 'audio' || 
+                                       file.mime_type?.startsWith('audio/') || 
+                                       file.filename?.match(/\.(mp3|wav|ogg|m4a|aac)$/i);
+                        
+                        return (
                         <div key={file.filebankId || file.conceptFileId || index} className="bg-muted/30 rounded-lg overflow-hidden">
-                          {file.file_type === 'image' && (
+                          {isImage && (
                             <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
                               <img 
                                 src={file.publicUrl || file.file_url} 
@@ -1351,7 +1362,7 @@ export default function CreateOffer() {
                               />
                             </div>
                           )}
-                          {file.file_type === 'video' && (
+                          {isVideo && (
                             <div className="aspect-video bg-black">
                               <video 
                                 controls 
@@ -1360,29 +1371,26 @@ export default function CreateOffer() {
                               />
                             </div>
                           )}
-                          {file.file_type === 'audio' && (
-                            <div className="p-3 flex flex-col items-center justify-center gap-2">
-                              <Music className="h-8 w-8 text-primary" />
-                              <audio
-                                controls
-                                className="w-full"
-                                preload="metadata"
-                              >
-                                <source src={file.publicUrl || file.file_url} type={file.mime_type || 'audio/mpeg'} />
-                                Nettleseren din støtter ikke lydavspilling.
+                          {isAudio && (
+                            <div className="p-4 flex flex-col items-center justify-center min-h-[150px]">
+                              <Music className="h-8 w-8 text-primary mb-2" />
+                              <p className="text-sm font-medium text-center truncate w-full">{file.title || file.filename}</p>
+                              <audio controls className="w-full mt-2">
+                                <source src={file.publicUrl || file.file_url} />
                               </audio>
                             </div>
                           )}
-                          {file.file_type === 'document' && (
-                            <div className="p-3 flex items-center justify-center">
-                              <FileText className="h-8 w-8 text-primary" />
+                          {!isImage && !isVideo && !isAudio && (
+                            <div className="p-4 flex items-center justify-center min-h-[100px]">
+                              {getFileIcon(file.file_type)}
+                              <span className="ml-2 text-sm truncate">{file.filename}</span>
                             </div>
                           )}
                           <div className="p-2 border-t">
-                            <p className="text-xs font-medium truncate">{file.title || file.filename}</p>
+                            <p className="text-xs truncate">{file.title || file.filename}</p>
                           </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 )}
