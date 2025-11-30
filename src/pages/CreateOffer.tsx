@@ -1342,7 +1342,10 @@ export default function CreateOffer() {
         </div>
       </main>
 
-      {/* Filbank Selection Modal */}
+        </>
+      )}
+
+      {/* Filbank Selection Modal - Shared by all wizards */}
       <FilebankSelectionModal
         isOpen={showFilebankModal}
         onClose={() => setShowFilebankModal(false)}
@@ -1352,8 +1355,6 @@ export default function CreateOffer() {
         title="Velg Portfolio Filer"
         description="Velg filer fra din filbank for å legge til i portfolio"
       />
-        </>
-      )}
     </div>
   );
 }
