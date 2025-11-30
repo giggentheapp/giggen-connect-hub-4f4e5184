@@ -452,15 +452,27 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
           </div>
         </div>
 
-        {/* Nytt arrangement CTA */}
+        {/* CTA Buttons */}
         <div className="py-2 md:py-4">
-          <button
-            onClick={() => navigate('/create-event')}
-            className="w-full bg-orange-500 text-white py-4 rounded-2xl md:rounded-lg text-lg md:text-lg font-semibold flex items-center justify-center gap-3 shadow-lg md:shadow-md hover:shadow-xl md:hover:shadow-lg active:scale-[0.98] transition md:transition-all md:h-16"
-          >
-            <Plus className="h-6 w-6 md:h-6 md:w-6" />
-            Opprett nytt arrangement
-          </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            {/* Opprett nytt tilbud - Primary CTA */}
+            <button
+              onClick={() => navigate(`${location.pathname}?section=admin-concepts`)}
+              className="w-full bg-gradient-to-r from-primary to-primary/90 text-white py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-primary/20 hover:ring-primary/40"
+            >
+              <BriefcaseIcon className="h-6 w-6 md:h-7 md:w-7" />
+              Opprett nytt tilbud
+            </button>
+
+            {/* Opprett nytt arrangement - Secondary CTA */}
+            <button
+              onClick={() => navigate('/create-event')}
+              className="w-full bg-orange-500/90 text-white py-4 rounded-2xl md:rounded-lg text-lg md:text-lg font-semibold flex items-center justify-center gap-3 shadow-md hover:shadow-lg active:scale-[0.98] transition-all md:h-auto hover:bg-orange-500"
+            >
+              <Plus className="h-6 w-6 md:h-6 md:w-6" />
+              Opprett arrangement
+            </button>
+          </div>
         </div>
 
         {/* Tools */}
