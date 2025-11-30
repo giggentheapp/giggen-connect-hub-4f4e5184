@@ -1,4 +1,4 @@
-import { useState, useEffect, SetStateAction } from 'react';
+import { useState, useEffect, SetStateAction, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,11 @@ export const EventCreateModalA = ({
   onBookingSelected 
 }: EventCreateModalAProps) => {
   const { toast } = useToast();
+  
+  // Stable update function to prevent re-renders
+  const updateField = useCallback((field: keyof EventFormData, value: any) => {
+    setEventData((prev) => ({ ...prev, [field]: value }));
+  }, [setEventData]);
   const [searchParams] = useSearchParams();
   const bookingIdFromUrl = searchParams.get('bookingId');
   const [showFilebankModal, setShowFilebankModal] = useState(false);
@@ -302,7 +307,7 @@ export const EventCreateModalA = ({
                 id="title"
                 placeholder="F.eks. Sommerjazz i parken"
                 value={eventData.title}
-                onChange={(e) => setEventData((prev) => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => updateField('title', e.target.value)}
               />
             </div>
 
@@ -313,7 +318,7 @@ export const EventCreateModalA = ({
                 id="description"
                 placeholder="Beskriv arrangementet..."
                 value={eventData.description || ''}
-                onChange={(e) => setEventData((prev) => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => updateField('description', e.target.value)}
                 rows={4}
               />
             </div>
@@ -354,7 +359,7 @@ export const EventCreateModalA = ({
                   id="start_time"
                   type="time"
                   value={eventData.start_time}
-                  onChange={(e) => setEventData((prev) => ({ ...prev, start_time: e.target.value }))}
+                  onChange={(e) => updateField('start_time', e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -363,7 +368,7 @@ export const EventCreateModalA = ({
                   id="end_time"
                   type="time"
                   value={eventData.end_time || ''}
-                  onChange={(e) => setEventData((prev) => ({ ...prev, end_time: e.target.value }))}
+                  onChange={(e) => updateField('end_time', e.target.value)}
                 />
               </div>
             </div>
@@ -375,7 +380,7 @@ export const EventCreateModalA = ({
                 id="venue"
                 placeholder="F.eks. Parkteatret"
                 value={eventData.venue}
-                onChange={(e) => setEventData((prev) => ({ ...prev, venue: e.target.value }))}
+                onChange={(e) => updateField('venue', e.target.value)}
               />
             </div>
 
@@ -384,7 +389,7 @@ export const EventCreateModalA = ({
               <Label htmlFor="address">Adresse (valgfri)</Label>
               <AddressAutocomplete
                 value={eventData.address || ''}
-                onChange={(address) => setEventData((prev) => ({ ...prev, address }))}
+                onChange={(address) => updateField('address', address)}
                 placeholder="F.eks. Olaf Ryes plass 2, Oslo"
               />
             </div>
@@ -397,7 +402,7 @@ export const EventCreateModalA = ({
                 type="number"
                 placeholder="F.eks. 100"
                 value={eventData.expected_audience || ''}
-                onChange={(e) => setEventData((prev) => ({ ...prev, expected_audience: e.target.value }))}
+                onChange={(e) => updateField('expected_audience', e.target.value)}
               />
             </div>
 
@@ -415,7 +420,7 @@ export const EventCreateModalA = ({
                   {!eventData.has_paid_tickets ? (
                     <Button
                       variant="outline"
-                      onClick={() => setEventData((prev) => ({ ...prev, has_paid_tickets: true }))}
+                      onClick={() => updateField('has_paid_tickets', true)}
                       className="w-full"
                     >
                       Sett opp billettsalg
@@ -427,7 +432,10 @@ export const EventCreateModalA = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEventData((prev) => ({ ...prev, has_paid_tickets: false, ticket_price: undefined }))}
+                          onClick={() => {
+                            updateField('has_paid_tickets', false);
+                            updateField('ticket_price', undefined);
+                          }}
                         >
                           Fjern
                         </Button>
@@ -439,7 +447,7 @@ export const EventCreateModalA = ({
                           type="number"
                           placeholder="F.eks. 250"
                           value={eventData.ticket_price || ''}
-                          onChange={(e) => setEventData((prev) => ({ ...prev, ticket_price: e.target.value }))}
+                          onChange={(e) => updateField('ticket_price', e.target.value)}
                           min="0"
                           step="10"
                         />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
  * DatesStep - Available dates configuration
  * Supports multiple date selection or indefinite availability
  */
-export const DatesStep = ({ data, updateData }: WizardStepProps) => {
+export const DatesStep = React.memo(({ data, updateData }: WizardStepProps) => {
   const selectedDates = data.available_dates || [];
   const isIndefinite = data.is_indefinite || false;
 
@@ -95,4 +95,4 @@ export const DatesStep = ({ data, updateData }: WizardStepProps) => {
       )}
     </div>
   );
-};
+});

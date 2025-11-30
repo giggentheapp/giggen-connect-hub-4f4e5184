@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, X, Image, Video, Music, File as FileIcon } from 'lucide-react';
@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
  * PortfolioStep - Common portfolio file selection
  * Uses FilebankSelectionModal for file management
  */
-export const PortfolioStep = ({ data, updateData, userId }: WizardStepProps) => {
+export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardStepProps) => {
   const [showFilebankModal, setShowFilebankModal] = useState(false);
   const { toast } = useToast();
 
@@ -171,4 +171,4 @@ export const PortfolioStep = ({ data, updateData, userId }: WizardStepProps) => 
       />
     </>
   );
-};
+});

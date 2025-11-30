@@ -205,6 +205,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
           {/* Step content */}
           <div className="min-h-[400px]">
             <CurrentStepComponent
+              key={config.steps[currentStep].id}
               data={data}
               updateData={updateData}
               userId={userId}
@@ -342,6 +343,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
             </div>
 
             <CurrentStepComponent
+              key={config.steps[currentStep].id}
               data={data}
               updateData={updateData}
               userId={userId}

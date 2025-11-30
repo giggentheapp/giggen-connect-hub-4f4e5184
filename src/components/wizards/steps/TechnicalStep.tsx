@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
  * TechnicalStep - Tech spec and hospitality rider selection
  * Allows selecting existing files from profile
  */
-export const TechnicalStep = ({
+export const TechnicalStep = React.memo(({
   data,
   updateData,
   userId,
@@ -201,4 +201,4 @@ export const TechnicalStep = ({
       />
     </>
   );
-};
+});

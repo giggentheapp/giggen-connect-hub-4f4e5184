@@ -1,3 +1,4 @@
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ interface BasicInfoStepProps extends WizardStepProps {
  * BasicInfoStep - Common first step for all concept types
  * Collects title and description
  */
-export const BasicInfoStep = ({ data, updateData, placeholder }: BasicInfoStepProps) => {
+export const BasicInfoStep = React.memo(({ data, updateData, placeholder }: BasicInfoStepProps) => {
   return (
     <div className="space-y-4">
       <div>
@@ -35,4 +36,4 @@ export const BasicInfoStep = ({ data, updateData, placeholder }: BasicInfoStepPr
       </div>
     </div>
   );
-};
+});

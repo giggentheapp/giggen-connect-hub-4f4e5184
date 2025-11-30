@@ -1,3 +1,4 @@
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -8,7 +9,7 @@ import { WizardStepProps } from '../BaseConceptWizard';
  * ProgramTypeStep - For arrangør_tilbud
  * Combines program type selection with pricing and audience
  */
-export const ProgramTypeStep = ({ data, updateData }: WizardStepProps) => {
+export const ProgramTypeStep = React.memo(({ data, updateData }: WizardStepProps) => {
   return (
     <div className="space-y-6">
       {/* Programtype Selector */}
@@ -118,4 +119,4 @@ export const ProgramTypeStep = ({ data, updateData }: WizardStepProps) => {
       </div>
     </div>
   );
-};
+});
