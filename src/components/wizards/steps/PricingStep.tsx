@@ -1,3 +1,4 @@
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -7,7 +8,7 @@ import { WizardStepProps } from '../BaseConceptWizard';
  * PricingStep - Pricing and audience configuration
  * Supports fixed price, door deal, and by agreement
  */
-export const PricingStep = ({ data, updateData }: WizardStepProps) => {
+export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) => {
   return (
     <div className="space-y-6">
       {/* Pricing Model */}
@@ -107,4 +108,4 @@ export const PricingStep = ({ data, updateData }: WizardStepProps) => {
       </div>
     </div>
   );
-};
+});

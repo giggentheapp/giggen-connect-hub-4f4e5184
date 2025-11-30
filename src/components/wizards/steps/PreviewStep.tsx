@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +8,7 @@ import { CheckCircle, Calendar, Users, DollarSign, FileText } from 'lucide-react
 /**
  * PreviewStep - Summary of all entered data before publishing
  */
-export const PreviewStep = ({ data }: WizardStepProps) => {
+export const PreviewStep = React.memo(({ data }: WizardStepProps) => {
   return (
     <div className="space-y-6">
       <Card>
@@ -146,4 +147,4 @@ export const PreviewStep = ({ data }: WizardStepProps) => {
       </div>
     </div>
   );
-};
+});
