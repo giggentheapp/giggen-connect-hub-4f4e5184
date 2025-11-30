@@ -174,7 +174,7 @@ export const FilebankSelectionModal = ({
               <Button
                 onClick={() => {
                   onClose();
-                  navigate('/filbank');
+                  navigate(`/profile/${userId}?section=filbank`);
                 }}
                 className="mt-4"
               >
