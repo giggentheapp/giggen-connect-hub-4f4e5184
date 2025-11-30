@@ -30,6 +30,7 @@ import { UserProfile } from "@/types/auth";
 import { FilebankSelectionModal } from "@/components/FilebankSelectionModal";
 import { SocialMusicLinksManager } from "@/components/SocialMusicLinksManager";
 import { InstrumentManager } from "@/components/InstrumentManager";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProfileSettings {
   show_public_profile: boolean;
@@ -55,6 +56,7 @@ interface UserSettingsProps {
 export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) => {
   const { t } = useAppTranslation();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [profileData, setProfileData] = useState<UserProfile>(profile);
@@ -214,6 +216,10 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       const updatedProfile = { ...profileData, ...updates };
       setProfileData(updatedProfile);
       onProfileUpdate?.(updatedProfile);
+
+      // Invalidate queries to update dashboard and other components
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
 
       toast({
         title: "Lagret!",
@@ -490,6 +496,10 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       const updatedProfile = { ...profileData, username: newUsername.toLowerCase(), username_changed: true };
       setProfileData(updatedProfile);
       onProfileUpdate?.(updatedProfile);
+
+      // Invalidate queries to update dashboard and other components
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
 
       toast({
         title: "Brukernavn oppdatert",
@@ -1361,6 +1371,11 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           const updatedProfile = { ...profileData, avatar_url: avatarUrl };
           setProfileData(updatedProfile);
           onProfileUpdate?.(updatedProfile);
+          
+          // Invalidate queries to update dashboard and other components
+          queryClient.invalidateQueries({ queryKey: ['profiles'] });
+          queryClient.invalidateQueries({ queryKey: ['current-user'] });
+          
           setShowAvatarCrop(false);
           setSelectedImageForCrop(null);
         }}
