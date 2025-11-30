@@ -1,14 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Music, GraduationCap, ArrowLeft } from 'lucide-react';
+import { Music, GraduationCap, ArrowLeft, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useRoleData } from '@/hooks/useRole';
 
 interface ConceptTypeSelectorProps {
-  onSelect: (type: 'session_musician' | 'teaching') => void;
+  onSelect: (type: 'session_musician' | 'teaching' | 'arrangør_tilbud') => void;
   onBack?: () => void;
 }
 
 export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorProps) => {
+  const { isOrganizer, isMusician } = useRoleData();
+
   return (
     <div className="space-y-4">
       {onBack && (
@@ -28,7 +31,9 @@ export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorPro
       </div>
       
       <div className="grid md:grid-cols-2 gap-6">
-        <Card 
+        {/* Session Musiker - kun for musikere */}
+        {isMusician && (
+          <Card
           className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
           onClick={() => onSelect('session_musician')}
         >
@@ -50,7 +55,35 @@ export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorPro
             </ul>
           </CardContent>
         </Card>
+        )}
 
+        {/* Arrangør Tilbud - kun for arrangører */}
+        {isOrganizer && (
+          <Card 
+            className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
+            onClick={() => onSelect('arrangør_tilbud')}
+          >
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle>Arrangør Tilbud</CardTitle>
+              <CardDescription>
+                Lag et tilbud for faste programmer som musikere kan søke seg inn på
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm space-y-2 text-muted-foreground">
+                <li>• Beskriv programtypen (quiz, standup, jam osv.)</li>
+                <li>• Definer betingelser og forventninger</li>
+                <li>• Last opp relevant informasjon</li>
+                <li>• Angi datoer og frekvens</li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Undervisning/Kurs - for alle */}
         <Card 
           className="cursor-pointer hover:border-primary hover:shadow-lg transition-all"
           onClick={() => onSelect('teaching')}

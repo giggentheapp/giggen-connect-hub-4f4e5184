@@ -15,6 +15,7 @@ import { UserProfile } from '@/types/auth';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useRoleData } from '@/hooks/useRole';
 interface AdminConceptsSectionProps {
   profile: UserProfile;
 }
@@ -25,9 +26,30 @@ export const AdminConceptsSection = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showDrafts, setShowDrafts] = useState(true);
+  const { isOrganizer, isMusician } = useRoleData();
   
   const { concepts, loading, refetch } = useConcepts(profile.user_id);
   const { drafts, loading: draftsLoading, refetch: refetchDrafts } = useUserDrafts(profile.user_id);
+  
+  // Filter concepts based on role
+  const filteredConcepts = concepts.filter(concept => {
+    if (isOrganizer) {
+      return concept.concept_type === 'arrangør_tilbud' || concept.concept_type === 'teaching';
+    } else if (isMusician) {
+      return concept.concept_type === 'session_musician' || concept.concept_type === 'teaching';
+    }
+    return true;
+  });
+
+  // Filter drafts based on role
+  const filteredDrafts = drafts.filter(draft => {
+    if (isOrganizer) {
+      return draft.concept_type === 'arrangør_tilbud' || draft.concept_type === 'teaching';
+    } else if (isMusician) {
+      return draft.concept_type === 'session_musician' || draft.concept_type === 'teaching';
+    }
+    return true;
+  });
   
   const toggleConceptVisibility = async (conceptId: string, currentState: boolean) => {
     try {
@@ -189,8 +211,8 @@ export const AdminConceptsSection = ({
           </div>
         ) : (
           <>
-            {concepts.length > 0 ? (
-              concepts.map(concept => (
+            {filteredConcepts.length > 0 ? (
+              filteredConcepts.map(concept => (
                 <div key={concept.id} className="group relative rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 hover:border-border transition-all">
                   <div className="flex items-start gap-3 p-3">
                     <div className="flex-1 min-w-0">
@@ -204,9 +226,15 @@ export const AdminConceptsSection = ({
                             "text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0",
                             concept.concept_type === 'teaching' 
                               ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                              : concept.concept_type === 'arrangør_tilbud'
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                               : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                           )}>
-                            {concept.concept_type === 'teaching' ? '📚 Undervisning' : '🎵 Session'}
+                            {concept.concept_type === 'teaching' 
+                              ? '📚 Undervisning' 
+                              : concept.concept_type === 'arrangør_tilbud'
+                              ? '📅 Arrangør'
+                              : '🎵 Session'}
                           </span>
                         </div>
                         {concept.description && (
@@ -310,9 +338,9 @@ export const AdminConceptsSection = ({
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-3"></div>
                 <p className="text-xs text-muted-foreground">Laster utkast...</p>
               </div>
-            ) : drafts.length > 0 ? (
+            ) : filteredDrafts.length > 0 ? (
               <div className="space-y-2">
-                {drafts.map((draft) => {
+                {filteredDrafts.map((draft) => {
                   const progress = calculateProgress(draft);
                   return (
                   <div key={draft.id} className="rounded-lg border border-border/40 bg-gradient-to-br from-background to-muted/20 p-3">
@@ -326,9 +354,15 @@ export const AdminConceptsSection = ({
                               "text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0",
                               draft.concept_type === 'teaching' 
                                 ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                : draft.concept_type === 'arrangør_tilbud'
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                                 : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                             )}>
-                              {draft.concept_type === 'teaching' ? '📚 Undervisning' : '🎵 Session'}
+                              {draft.concept_type === 'teaching' 
+                                ? '📚 Undervisning' 
+                                : draft.concept_type === 'arrangør_tilbud'
+                                ? '📅 Arrangør'
+                                : '🎵 Session'}
                             </span>
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-1">

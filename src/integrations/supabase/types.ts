@@ -754,6 +754,7 @@ export type Database = {
           maker_id: string
           price: number | null
           price_by_agreement: boolean | null
+          program_type: string | null
           public_visibility_settings: Json | null
           status: string | null
           teaching_data: Json | null
@@ -776,6 +777,7 @@ export type Database = {
           maker_id: string
           price?: number | null
           price_by_agreement?: boolean | null
+          program_type?: string | null
           public_visibility_settings?: Json | null
           status?: string | null
           teaching_data?: Json | null
@@ -798,6 +800,7 @@ export type Database = {
           maker_id?: string
           price?: number | null
           price_by_agreement?: boolean | null
+          program_type?: string | null
           public_visibility_settings?: Json | null
           status?: string | null
           teaching_data?: Json | null
