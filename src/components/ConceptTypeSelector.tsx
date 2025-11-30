@@ -1,14 +1,27 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Music, GraduationCap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Music, GraduationCap, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConceptTypeSelectorProps {
   onSelect: (type: 'session_musician' | 'teaching') => void;
+  onBack?: () => void;
 }
 
-export const ConceptTypeSelector = ({ onSelect }: ConceptTypeSelectorProps) => {
+export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorProps) => {
   return (
     <div className="space-y-4">
+      {onBack && (
+        <Button
+          variant="ghost"
+          onClick={onBack}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Tilbake
+        </Button>
+      )}
+      
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold mb-2">Velg tilbudstype</h2>
         <p className="text-muted-foreground">Hva slags tilbud vil du opprette?</p>
