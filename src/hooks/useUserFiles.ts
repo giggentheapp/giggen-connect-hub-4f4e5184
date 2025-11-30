@@ -138,18 +138,25 @@ export const useUserFiles = (userId: string | undefined) => {
       }
 
       // Remove reference from profile avatar if this file is used as avatar
+      // Check ALL profiles, not just current user (for admin functionality)
       const { data: allProfiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, avatar_url');
+        .select('user_id, avatar_url')
+        .not('avatar_url', 'is', null);
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
       } else if (allProfiles) {
         console.log('Checking', allProfiles.length, 'profiles for file usage');
         for (const profile of allProfiles) {
-          // Check if avatar_url contains the file path
-          if (profile.avatar_url && (profile.avatar_url === fileUrl || profile.avatar_url.includes(filePath))) {
-            console.log('Removing avatar from profile:', profile.user_id);
+          // Check if avatar_url contains the file path (more flexible matching)
+          const avatarUrl = profile.avatar_url || '';
+          const pathMatch = avatarUrl.includes(filePath) || 
+                          avatarUrl === fileUrl || 
+                          avatarUrl.endsWith(filePath.split('/').pop() || '');
+          
+          if (pathMatch) {
+            console.log('Removing avatar from profile:', profile.user_id, 'avatar:', avatarUrl);
             const { error: updateError } = await supabase
               .from('profiles')
               .update({ avatar_url: null })
