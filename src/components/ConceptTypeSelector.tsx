@@ -10,7 +10,15 @@ interface ConceptTypeSelectorProps {
 }
 
 export const ConceptTypeSelector = ({ onSelect, onBack }: ConceptTypeSelectorProps) => {
-  const { isOrganizer, isMusician } = useRoleData();
+  const { isOrganizer, isMusician, loading } = useRoleData();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Laster...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
