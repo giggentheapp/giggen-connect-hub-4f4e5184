@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,7 @@ interface EventCreateModalBProps {
   onNext: () => void;
   onBack: () => void;
   eventData: EventFormData;
-  setEventData: (data: EventFormData) => void;
+  setEventData: (data: SetStateAction<EventFormData>) => void;
   userId: string;
 }
 
@@ -141,72 +141,78 @@ export const EventCreateModalB = ({
   };
 
   const toggleMusician = (musician: EventParticipant) => {
-    const isSelected = eventData.participants.musicians.some(m => m.user_id === musician.user_id);
-    if (isSelected) {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          musicians: eventData.participants.musicians.filter(m => m.user_id !== musician.user_id),
-        },
-      });
-    } else {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          musicians: [...eventData.participants.musicians, musician],
-        },
-      });
-    }
+    setEventData((prev) => {
+      const isSelected = prev.participants.musicians.some(m => m.user_id === musician.user_id);
+      if (isSelected) {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            musicians: prev.participants.musicians.filter(m => m.user_id !== musician.user_id),
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            musicians: [...prev.participants.musicians, musician],
+          },
+        };
+      }
+    });
   };
 
   const toggleBand = (band: any) => {
-    const isSelected = eventData.participants.bands.some(b => b.band_id === band.id);
     const bandParticipant: BandParticipant = {
       band_id: band.id,
       name: band.name,
       image_url: band.image_url,
     };
 
-    if (isSelected) {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          bands: eventData.participants.bands.filter(b => b.band_id !== band.id),
-        },
-      });
-    } else {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          bands: [...eventData.participants.bands, bandParticipant],
-        },
-      });
-    }
+    setEventData((prev) => {
+      const isSelected = prev.participants.bands.some(b => b.band_id === band.id);
+      if (isSelected) {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            bands: prev.participants.bands.filter(b => b.band_id !== band.id),
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            bands: [...prev.participants.bands, bandParticipant],
+          },
+        };
+      }
+    });
   };
 
   const toggleOrganizer = (organizer: EventParticipant) => {
-    const isSelected = eventData.participants.organizers.some(o => o.user_id === organizer.user_id);
-    if (isSelected) {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          organizers: eventData.participants.organizers.filter(o => o.user_id !== organizer.user_id),
-        },
-      });
-    } else {
-      setEventData({
-        ...eventData,
-        participants: {
-          ...eventData.participants,
-          organizers: [...eventData.participants.organizers, organizer],
-        },
-      });
-    }
+    setEventData((prev) => {
+      const isSelected = prev.participants.organizers.some(o => o.user_id === organizer.user_id);
+      if (isSelected) {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            organizers: prev.participants.organizers.filter(o => o.user_id !== organizer.user_id),
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          participants: {
+            ...prev.participants,
+            organizers: [...prev.participants.organizers, organizer],
+          },
+        };
+      }
+    });
   };
 
   const ParticipantCard = ({ participant, type, onToggle }: { 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SetStateAction } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 interface EventCreateModalAProps {
   onNext: () => void;
   eventData: EventFormData;
-  setEventData: (data: EventFormData) => void;
+  setEventData: (data: SetStateAction<EventFormData>) => void;
   userId: string;
   onBookingSelected?: (bookingId: string | null) => void;
 }
@@ -172,20 +172,20 @@ export const EventCreateModalA = ({
       .getPublicUrl(file.file_path).data.publicUrl;
     
     setBannerPreview(publicUrl);
-    setEventData({
-      ...eventData,
+    setEventData((prev) => ({
+      ...prev,
       banner_url: publicUrl,
-    });
+    }));
     setShowFilebankModal(false);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
-      setEventData({
-        ...eventData,
+      setEventData((prev) => ({
+        ...prev,
         event_date: format(date, 'yyyy-MM-dd'),
-      });
+      }));
     }
   };
 
@@ -302,7 +302,7 @@ export const EventCreateModalA = ({
                 id="title"
                 placeholder="F.eks. Sommerjazz i parken"
                 value={eventData.title}
-                onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+                onChange={(e) => setEventData((prev) => ({ ...prev, title: e.target.value }))}
               />
             </div>
 
@@ -313,7 +313,7 @@ export const EventCreateModalA = ({
                 id="description"
                 placeholder="Beskriv arrangementet..."
                 value={eventData.description || ''}
-                onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+                onChange={(e) => setEventData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={4}
               />
             </div>
@@ -354,7 +354,7 @@ export const EventCreateModalA = ({
                   id="start_time"
                   type="time"
                   value={eventData.start_time}
-                  onChange={(e) => setEventData({ ...eventData, start_time: e.target.value })}
+                  onChange={(e) => setEventData((prev) => ({ ...prev, start_time: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
@@ -363,7 +363,7 @@ export const EventCreateModalA = ({
                   id="end_time"
                   type="time"
                   value={eventData.end_time || ''}
-                  onChange={(e) => setEventData({ ...eventData, end_time: e.target.value })}
+                  onChange={(e) => setEventData((prev) => ({ ...prev, end_time: e.target.value }))}
                 />
               </div>
             </div>
@@ -375,7 +375,7 @@ export const EventCreateModalA = ({
                 id="venue"
                 placeholder="F.eks. Parkteatret"
                 value={eventData.venue}
-                onChange={(e) => setEventData({ ...eventData, venue: e.target.value })}
+                onChange={(e) => setEventData((prev) => ({ ...prev, venue: e.target.value }))}
               />
             </div>
 
@@ -384,7 +384,7 @@ export const EventCreateModalA = ({
               <Label htmlFor="address">Adresse (valgfri)</Label>
               <AddressAutocomplete
                 value={eventData.address || ''}
-                onChange={(address) => setEventData({ ...eventData, address })}
+                onChange={(address) => setEventData((prev) => ({ ...prev, address }))}
                 placeholder="F.eks. Olaf Ryes plass 2, Oslo"
               />
             </div>
@@ -397,7 +397,7 @@ export const EventCreateModalA = ({
                 type="number"
                 placeholder="F.eks. 100"
                 value={eventData.expected_audience || ''}
-                onChange={(e) => setEventData({ ...eventData, expected_audience: e.target.value })}
+                onChange={(e) => setEventData((prev) => ({ ...prev, expected_audience: e.target.value }))}
               />
             </div>
 
@@ -415,7 +415,7 @@ export const EventCreateModalA = ({
                   {!eventData.has_paid_tickets ? (
                     <Button
                       variant="outline"
-                      onClick={() => setEventData({ ...eventData, has_paid_tickets: true })}
+                      onClick={() => setEventData((prev) => ({ ...prev, has_paid_tickets: true }))}
                       className="w-full"
                     >
                       Sett opp billettsalg
@@ -427,7 +427,7 @@ export const EventCreateModalA = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEventData({ ...eventData, has_paid_tickets: false, ticket_price: undefined })}
+                          onClick={() => setEventData((prev) => ({ ...prev, has_paid_tickets: false, ticket_price: undefined }))}
                         >
                           Fjern
                         </Button>
@@ -439,7 +439,7 @@ export const EventCreateModalA = ({
                           type="number"
                           placeholder="F.eks. 250"
                           value={eventData.ticket_price || ''}
-                          onChange={(e) => setEventData({ ...eventData, ticket_price: e.target.value })}
+                          onChange={(e) => setEventData((prev) => ({ ...prev, ticket_price: e.target.value }))}
                           min="0"
                           step="10"
                         />
