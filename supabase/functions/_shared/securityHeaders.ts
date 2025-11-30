@@ -4,7 +4,9 @@ const allowedOrigins = [
   'https://giggen.no',
   'https://www.giggen.no',
   'http://localhost:5173',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'http://[::]:8080'
 ];
 
 const CSP_HEADER = [
