@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queryKeys';
 
 export interface UserFile {
   id: string;
@@ -34,6 +36,7 @@ export const useUserFiles = (userId: string | undefined) => {
   const [files, setFiles] = useState<FileWithUsage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const fetchFiles = async () => {
     if (!userId) {
@@ -226,6 +229,13 @@ export const useUserFiles = (userId: string | undefined) => {
       }
 
       console.log('File deleted successfully');
+      
+      // Invalidate profile queries to refresh avatar/images
+      await queryClient.invalidateQueries({ queryKey: queryKeys.profiles.current });
+      if (userId) {
+        await queryClient.invalidateQueries({ queryKey: queryKeys.profiles.detail(userId) });
+      }
+      
       await fetchFiles();
     } catch (err: unknown) {
       logger.error('Failed to delete file', err);
