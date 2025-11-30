@@ -7,6 +7,17 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import PasswordStrengthValidator from '@/components/PasswordStrengthValidator';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { z } from 'zod';
+
+// Input validation schemas
+const emailSchema = z.string().email().max(255);
+const displayNameSchema = z.string().trim().min(1).max(100);
+const usernameSchema = z.string().regex(/^[a-z0-9_-]+$/).min(3).max(50);
+
+// Sanitize input to prevent XSS
+const sanitizeInput = (input: string): string => {
+  return input.trim().replace(/[<>'"]/g, '');
+};
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -28,31 +39,26 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
   const { t } = useAppTranslation();
 
   const checkUsername = async (value: string): Promise<boolean> => {
-    if (value.length < 3) {
-      setUsernameError(t('usernameMinLength') || "Minimum 3 characters");
+    // Validate format first
+    try {
+      usernameSchema.parse(value);
+    } catch {
+      setUsernameError(t('usernameMinLength') || "3-50 characters, lowercase letters, numbers, _ and - only");
       setUsernameAvailable(null);
       return false;
     }
 
     setCheckingUsername(true);
     try {
-      const response = await fetch(
-        'https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/validate-username',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrY2R5cWdoZnF5cmx3amNzcm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MzAxNzcsImV4cCI6MjA3MTMwNjE3N30.zvNq7yhyyMMmbLE9trLxvCqd5HNoJ9JjokHOWGAJwWI`
-          },
-          body: JSON.stringify({ username: value })
-        }
-      );
+      // Use supabase.functions.invoke with proper authentication
+      const { data, error } = await supabase.functions.invoke('validate-username', {
+        body: { username: value }
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const data = await response.json();
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
       return data.available;
@@ -67,47 +73,64 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate username before submission
-    if (username.length < 3) {
-      setUsernameError(t('usernameMinLength') || "Minimum 3 characters");
-      toast({
-        title: t('signupError'),
-        description: t('usernameMinLength') || "Username must be at least 3 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (usernameAvailable === false) {
-      setUsernameError(t('usernameNotAvailable') || "Username not available");
-      toast({
-        title: t('signupError'),
-        description: t('usernameNotAvailable') || "Username is already taken",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // If username hasn't been checked yet, check it now
-    if (usernameAvailable === null) {
-      const isAvailable = await checkUsername(username);
-      if (!isAvailable) {
-        toast({
-          title: t('signupError'),
-          description: usernameError || t('usernameNotAvailable') || "Username is not available",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
     setIsSubmitting(true);
 
     try {
+      // Validate all inputs
+      const validationErrors: string[] = [];
+
+      try {
+        emailSchema.parse(email);
+      } catch {
+        validationErrors.push('Ugyldig e-postadresse');
+      }
+
+      try {
+        displayNameSchema.parse(displayName);
+      } catch {
+        validationErrors.push('Navn må være 1-100 tegn');
+      }
+
+      try {
+        usernameSchema.parse(username);
+      } catch {
+        validationErrors.push('Ugyldig brukernavn format');
+      }
+
+      if (usernameAvailable === false) {
+        validationErrors.push('Brukernavn er allerede tatt');
+      }
+
+      if (validationErrors.length > 0) {
+        toast({
+          title: t('signupError'),
+          description: validationErrors.join('. '),
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If username hasn't been checked yet, check it now
+      if (usernameAvailable === null) {
+        const isAvailable = await checkUsername(username);
+        if (!isAvailable) {
+          toast({
+            title: t('signupError'),
+            description: usernameError || 'Brukernavn er ikke tilgjengelig',
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Sanitize inputs
+      const sanitizedEmail = email.trim().toLowerCase();
+      const sanitizedDisplayName = sanitizeInput(displayName);
+      const sanitizedUsername = username.toLowerCase().trim();
+
       const redirectUrl = `${window.location.origin}/dashboard`;
-      
-      console.log('🔐 Starting signup with:', { email, displayName, role, username });
       
       // Map Norwegian roles to English database values
       const roleMapping = {
@@ -116,14 +139,14 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
       } as const;
 
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: sanitizedEmail,
         password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            display_name: displayName,
+            display_name: sanitizedDisplayName,
             role: roleMapping[role],
-            username: username.toLowerCase()
+            username: sanitizedUsername
           }
         }
       });
@@ -222,6 +245,7 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          maxLength={255}
           required
           disabled={isSubmitting}
         />
@@ -244,7 +268,8 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
           id="displayName"
           type="text"
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={(e) => setDisplayName(sanitizeInput(e.target.value))}
+          maxLength={100}
           required
           disabled={isSubmitting}
           placeholder={t('yourName')}
@@ -261,14 +286,15 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
             onChange={(e) => {
               const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
               setUsername(value);
-              if (value.length >= 3) {
+              if (value.length >= 3 && value.length <= 50) {
                 checkUsername(value);
               } else {
                 setUsernameAvailable(null);
-                setUsernameError(value.length > 0 ? (t('usernameMinLength') || "Minimum 3 characters") : "");
+                setUsernameError(value.length > 0 ? (t('usernameMinLength') || "3-50 tegn") : "");
               }
             }}
             placeholder="@brukernavn"
+            maxLength={50}
             required
             disabled={isSubmitting}
             className="pr-10"
