@@ -52,12 +52,16 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     setValidationError('');
 
     try {
+      console.log('🔍 Geocoding address:', address.trim());
+      
       const { data, error } = await supabase.functions.invoke('geocode-address', {
         body: { address: address.trim() }
       });
 
+      console.log('📍 Geocoding response:', { data, error });
+
       if (error) {
-        console.error('Geocoding error:', error);
+        console.error('❌ Geocoding error:', error);
         setValidationError('Kunne ikke finne adresse');
         setSuggestions([]);
         setShowSuggestions(false);
@@ -72,15 +76,17 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           properties: feature.properties
         }));
         
+        console.log('✅ Found suggestions:', formattedSuggestions.length);
         setSuggestions(formattedSuggestions);
         setShowSuggestions(true);
       } else {
+        console.log('⚠️ No features in response');
         setSuggestions([]);
         setShowSuggestions(false);
         setValidationError('Ingen adresser funnet');
       }
     } catch (error) {
-      console.error('Geocoding error:', error);
+      console.error('💥 Geocoding exception:', error);
       setValidationError('Feil ved adressesøk');
       setSuggestions([]);
       setShowSuggestions(false);
