@@ -74,6 +74,7 @@ export default function CreateOffer() {
   const [selectedTechSpecFile, setSelectedTechSpecFile] = useState<any>(null);
   const [selectedHospitalityFile, setSelectedHospitalityFile] = useState<any>(null);
   const [loadedTeachingConcept, setLoadedTeachingConcept] = useState<any>(null);
+  const [isEditingPublished, setIsEditingPublished] = useState(false);
 
   const [conceptData, setConceptData] = useState<ConceptData>({
     title: '',
@@ -152,6 +153,9 @@ export default function CreateOffer() {
 
         console.log('✅ Loaded portfolio files:', portfolioFiles);
 
+        // Track if we're editing a published concept
+        setIsEditingPublished(data.is_published || false);
+
         setConceptData({
           id: data.id,
           title: data.title || '',
@@ -166,6 +170,7 @@ export default function CreateOffer() {
           is_indefinite: isIndefinite,
           pricing_type: data.door_deal ? 'door_deal' : data.price_by_agreement ? 'by_agreement' : 'fixed',
           door_percentage: data.door_percentage?.toString() || '',
+          program_type: data.program_type || '',
         });
 
         toast({
@@ -838,7 +843,7 @@ export default function CreateOffer() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  Lagre utkast
+                  {isEditingPublished ? 'Lagre endringer' : 'Lagre utkast'}
                 </Button>
               )}
             </div>
@@ -895,7 +900,7 @@ export default function CreateOffer() {
                 ) : (
                   <CheckCircle className="h-4 w-4" />
                 )}
-                Publiser tilbud
+                {isEditingPublished ? 'Oppdater tilbud' : 'Publiser tilbud'}
               </Button>
             )}
           </div>
@@ -964,7 +969,7 @@ export default function CreateOffer() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  Lagre utkast
+                  {isEditingPublished ? 'Lagre endringer' : 'Lagre utkast'}
                 </Button>
               )}
               {currentStep === STEPS.length - 1 && (
@@ -978,7 +983,7 @@ export default function CreateOffer() {
                   ) : (
                     <CheckCircle className="h-4 w-4" />
                   )}
-                  Publiser tilbud
+                  {isEditingPublished ? 'Oppdater tilbud' : 'Publiser tilbud'}
                 </Button>
               )}
             </div>
