@@ -32,6 +32,7 @@ export const EventCreateWizard = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const [isDraft, setIsDraft] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
 
   const [eventData, setEventData] = useState<EventFormData>({
     title: '',
@@ -163,12 +164,20 @@ export const EventCreateWizard = () => {
 
     try {
       if (draftId) {
-        await updateEvent({ eventId: draftId, eventData, status: 'published' });
+        await updateEvent({ 
+          eventId: draftId, 
+          eventData: { ...eventData, booking_id: bookingId }, 
+          status: 'published' 
+        });
         setCreatedEventId(draftId);
       } else {
         const result = await new Promise<{ id: string }>((resolve, reject) => {
           createEvent(
-            { eventData, userId, status: 'published' },
+            { 
+              eventData: { ...eventData, booking_id: bookingId }, 
+              userId, 
+              status: 'published' 
+            },
             {
               onSuccess: (data) => resolve(data),
               onError: (error) => reject(error),
@@ -181,6 +190,7 @@ export const EventCreateWizard = () => {
       setShowSuccessDialog(true);
       queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     } catch (error) {
       // Error is handled in the hook
       console.error('Error publishing event:', error);
@@ -199,12 +209,20 @@ export const EventCreateWizard = () => {
 
     try {
       if (draftId) {
-        await updateEvent({ eventId: draftId, eventData, status: 'draft' });
+        await updateEvent({ 
+          eventId: draftId, 
+          eventData: { ...eventData, booking_id: bookingId }, 
+          status: 'draft' 
+        });
         setCreatedEventId(draftId);
       } else {
         const result = await new Promise<{ id: string }>((resolve, reject) => {
           createEvent(
-            { eventData, userId, status: 'draft' },
+            { 
+              eventData: { ...eventData, booking_id: bookingId }, 
+              userId, 
+              status: 'draft' 
+            },
             {
               onSuccess: (data) => resolve(data),
               onError: (error) => reject(error),
@@ -217,6 +235,7 @@ export const EventCreateWizard = () => {
       setShowSuccessDialog(true);
       queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     } catch (error) {
       // Error is handled in the hook
       console.error('Error saving draft:', error);
@@ -269,6 +288,7 @@ export const EventCreateWizard = () => {
             eventData={eventData}
             setEventData={setEventData}
             userId={userId}
+            onBookingSelected={(bookingId) => setBookingId(bookingId)}
           />
         )}
 

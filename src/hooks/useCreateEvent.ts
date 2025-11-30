@@ -32,6 +32,7 @@ export interface EventFormData {
     bands: BandParticipant[];
     organizers: EventParticipant[];
   };
+  booking_id?: string | null;
 }
 
 export const useCreateEvent = () => {
@@ -66,6 +67,7 @@ export const useCreateEvent = () => {
           ? parseInt(eventData.expected_audience) 
           : null,
         participants: eventData.participants as any, // Cast to Json type
+        booking_id: eventData.booking_id || null,
         status: status,
         is_public: status === 'published',
         created_by: userId,
@@ -78,11 +80,21 @@ export const useCreateEvent = () => {
         .single();
 
       if (error) throw error;
+
+      // If booking_id is set, update booking with event_id
+      if (eventData.booking_id) {
+        await supabase
+          .from('bookings')
+          .update({ event_id: data.id })
+          .eq('id', eventData.booking_id);
+      }
+
       return data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['user-drafts'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
       
       toast({
         title: variables.status === 'published' ? '✓ Arrangement opprettet' : '✓ Utkast lagret',
@@ -131,6 +143,7 @@ export const useCreateEvent = () => {
           ? parseInt(eventData.expected_audience) 
           : null,
         participants: eventData.participants as any, // Cast to Json type
+        booking_id: eventData.booking_id || null,
         status: status,
         is_public: status === 'published',
       };
@@ -141,11 +154,21 @@ export const useCreateEvent = () => {
         .eq('id', eventId);
 
       if (error) throw error;
+
+      // If booking_id is set, update booking with event_id
+      if (eventData.booking_id) {
+        await supabase
+          .from('bookings')
+          .update({ event_id: eventId })
+          .eq('id', eventData.booking_id);
+      }
+
       return eventId;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['user-drafts'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
       
       toast({
         title: variables.status === 'published' ? '✓ Arrangement oppdatert' : '✓ Utkast lagret',
