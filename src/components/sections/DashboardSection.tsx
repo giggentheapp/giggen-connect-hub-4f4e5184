@@ -467,7 +467,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             {/* Opprett nytt arrangement - Secondary CTA */}
             <button
               onClick={() => navigate('/create-event')}
-              className="w-full bg-orange-500/90 text-white py-4 rounded-2xl md:rounded-lg text-lg md:text-lg font-semibold flex items-center justify-center gap-3 shadow-md hover:shadow-lg active:scale-[0.98] transition-all md:h-auto hover:bg-orange-500"
+              className="w-full bg-orange-500/90 text-white py-4 rounded-2xl md:rounded-lg text-lg md:text-lg font-bold flex items-center justify-center gap-3 shadow-md hover:shadow-lg active:scale-[0.98] transition-all md:h-auto hover:bg-orange-500 opacity-0"
             >
               <Plus className="h-6 w-6 md:h-6 md:w-6" />
               Opprett arrangement
