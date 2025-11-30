@@ -16,6 +16,8 @@ import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image,
 import { useProfileTechSpecs } from '@/hooks/useProfileTechSpecs';
 import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { FileSelectionModal } from '@/components/FileSelectionModal';
+import { useUserFiles } from '@/hooks/useUserFiles';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -71,6 +73,8 @@ export default function CreateOffer() {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [showFilebankModal, setShowFilebankModal] = useState(false);
+  const [showTechSpecModal, setShowTechSpecModal] = useState(false);
+  const [showHospitalityModal, setShowHospitalityModal] = useState(false);
   const [loadedTeachingConcept, setLoadedTeachingConcept] = useState<any>(null);
 
   const [conceptData, setConceptData] = useState<ConceptData>({
@@ -90,6 +94,7 @@ export default function CreateOffer() {
 
   const { files: availableTechSpecs } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders } = useHospitalityRiders(userId);
+  const { files: userFiles } = useUserFiles(userId);
 
   // Load draft data if editing
   useEffect(() => {
@@ -285,6 +290,148 @@ export default function CreateOffer() {
       )
     }));
     setHasChanges(true);
+  };
+
+  const handleTechSpecFileSelected = async (selectedFiles: any[]) => {
+    if (selectedFiles.length === 0) return;
+    
+    const file = selectedFiles[0];
+    
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Ikke innlogget",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Generate public URL if file_url is missing
+      let fileUrl = file.file_url;
+      if (!fileUrl) {
+        const bucket = file.file_path.split('/')[0];
+        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        fileUrl = data.publicUrl;
+      }
+
+      // Add to profile_tech_specs
+      const techSpecData = {
+        profile_id: userId,
+        filename: file.filename,
+        file_path: file.file_path,
+        file_type: file.file_type,
+        file_url: fileUrl,
+        mime_type: file.mime_type,
+        file_size: file.file_size
+      };
+
+      const { data: newTechSpec, error: createError } = await supabase
+        .from('profile_tech_specs')
+        .insert(techSpecData)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      // Add to file_usage
+      await supabase
+        .from('file_usage')
+        .insert({
+          file_id: file.id,
+          usage_type: 'tech_spec',
+          reference_id: newTechSpec.id
+        });
+
+      toast({
+        title: 'Tech spec lagt til',
+        description: `${file.filename} er lagt til`,
+      });
+
+      // Refresh tech specs list (this will trigger a re-fetch)
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error adding tech spec:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke legge til tech spec',
+        variant: 'destructive',
+      });
+    }
+    
+    setShowTechSpecModal(false);
+  };
+
+  const handleHospitalityFileSelected = async (selectedFiles: any[]) => {
+    if (selectedFiles.length === 0) return;
+    
+    const file = selectedFiles[0];
+    
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Ikke innlogget",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Generate public URL if file_url is missing
+      let fileUrl = file.file_url;
+      if (!fileUrl) {
+        const bucket = file.file_path.split('/')[0];
+        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        fileUrl = data.publicUrl;
+      }
+
+      // Add to hospitality_riders
+      const riderData = {
+        user_id: userId,
+        filename: file.filename,
+        file_path: file.file_path,
+        file_type: file.file_type,
+        file_url: fileUrl,
+        mime_type: file.mime_type,
+        file_size: file.file_size
+      };
+
+      const { data: newRider, error: createError } = await supabase
+        .from('hospitality_riders')
+        .insert(riderData)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      // Add to file_usage
+      await supabase
+        .from('file_usage')
+        .insert({
+          file_id: file.id,
+          usage_type: 'hospitality_rider',
+          reference_id: newRider.id
+        });
+
+      toast({
+        title: 'Hospitality rider lagt til',
+        description: `${file.filename} er lagt til`,
+      });
+
+      // Refresh hospitality riders list
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error adding hospitality rider:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke legge til hospitality rider',
+        variant: 'destructive',
+      });
+    }
+    
+    setShowHospitalityModal(false);
   };
 
   const getFileIcon = (fileType: string) => {
@@ -803,17 +950,19 @@ export default function CreateOffer() {
           </div>
 
           <div className="bg-card border rounded-lg p-6 space-y-6">
-            <ArrangørOfferWizard
-              currentStep={currentStep}
-              conceptData={conceptData}
-              updateConceptData={updateConceptData}
-              availableTechSpecs={availableTechSpecs}
-              availableHospitalityRiders={availableHospitalityRiders}
-              onOpenFilebankModal={() => setShowFilebankModal(true)}
-              onRemovePortfolioFile={removePortfolioFile}
-              userId={userId}
-              handleSaveDraft={handleSaveDraft}
-            />
+        <ArrangørOfferWizard
+          currentStep={currentStep}
+          conceptData={conceptData}
+          updateConceptData={updateConceptData}
+          availableTechSpecs={availableTechSpecs}
+          availableHospitalityRiders={availableHospitalityRiders}
+          onOpenFilebankModal={() => setShowFilebankModal(true)}
+          onOpenTechSpecModal={() => setShowTechSpecModal(true)}
+          onOpenHospitalityModal={() => setShowHospitalityModal(true)}
+          onRemovePortfolioFile={removePortfolioFile}
+          userId={userId}
+          handleSaveDraft={handleSaveDraft}
+        />
           </div>
 
           <div className="flex justify-between mt-8">
@@ -1130,14 +1279,11 @@ export default function CreateOffer() {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={async () => {
-                        await handleSaveDraft();
-                        window.location.href = `/profile/${userId}?section=filbank`;
-                      }}
+                      onClick={() => setShowTechSpecModal(true)}
                       className="w-full"
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Last opp tech spec i filbank
+                      Velg fra Filbank
                     </Button>
                   </div>
                 )}
@@ -1167,14 +1313,11 @@ export default function CreateOffer() {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={async () => {
-                        await handleSaveDraft();
-                        window.location.href = `/profile/${userId}?section=filbank`;
-                      }}
+                      onClick={() => setShowHospitalityModal(true)}
                       className="w-full"
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Last opp hospitality rider i filbank
+                      Velg fra Filbank
                     </Button>
                   </div>
                 )}
@@ -1354,6 +1497,26 @@ export default function CreateOffer() {
         category="all"
         title="Velg Portfolio Filer"
         description="Velg filer fra din filbank for å legge til i portfolio"
+      />
+
+      {/* Tech Spec Selection Modal */}
+      <FileSelectionModal
+        open={showTechSpecModal}
+        onOpenChange={setShowTechSpecModal}
+        files={userFiles}
+        allowedTypes={['document']}
+        onFilesSelected={handleTechSpecFileSelected}
+        title="Velg Tech Spec"
+      />
+
+      {/* Hospitality Rider Selection Modal */}
+      <FileSelectionModal
+        open={showHospitalityModal}
+        onOpenChange={setShowHospitalityModal}
+        files={userFiles}
+        allowedTypes={['document']}
+        onFilesSelected={handleHospitalityFileSelected}
+        title="Velg Hospitality Rider"
       />
     </div>
   );

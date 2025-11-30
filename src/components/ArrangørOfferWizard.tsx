@@ -33,6 +33,8 @@ interface ArrangørOfferWizardProps {
   availableTechSpecs: any[];
   availableHospitalityRiders: any[];
   onOpenFilebankModal: () => void;
+  onOpenTechSpecModal: () => void;
+  onOpenHospitalityModal: () => void;
   onRemovePortfolioFile: (index: number) => void;
   userId: string;
   handleSaveDraft: () => void;
@@ -58,6 +60,8 @@ export const ArrangørOfferWizard = ({
   availableTechSpecs,
   availableHospitalityRiders,
   onOpenFilebankModal,
+  onOpenTechSpecModal,
+  onOpenHospitalityModal,
   onRemovePortfolioFile,
   userId,
   handleSaveDraft,
@@ -259,14 +263,11 @@ export const ArrangørOfferWizard = ({
                 </p>
                 <Button
                   variant="outline"
-                  onClick={async () => {
-                    await handleSaveDraft();
-                    window.location.href = `/profile/${userId}?section=filbank`;
-                  }}
+                  onClick={onOpenTechSpecModal}
                   className="w-full"
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  Last opp tech spec i filbank
+                  Velg fra Filbank
                 </Button>
               </div>
             )}
@@ -296,14 +297,11 @@ export const ArrangørOfferWizard = ({
                 </p>
                 <Button
                   variant="outline"
-                  onClick={async () => {
-                    await handleSaveDraft();
-                    window.location.href = `/profile/${userId}?section=filbank`;
-                  }}
+                  onClick={onOpenHospitalityModal}
                   className="w-full"
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  Last opp hospitality rider i filbank
+                  Velg fra Filbank
                 </Button>
               </div>
             )}
