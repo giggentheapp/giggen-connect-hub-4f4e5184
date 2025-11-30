@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +53,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
   const [endDateOpen, setEndDateOpen] = useState(false);
   const [conceptData, setConceptData] = useState<any>(null);
   const [loadingConcept, setLoadingConcept] = useState(true);
+  const isInitializedRef = useRef(false);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
 
@@ -105,9 +106,9 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
     public_visibility_settings: {} as Record<string, boolean>,
   });
 
-  // Initialize form with booking data
+  // Initialize form with booking data (only once)
   useEffect(() => {
-    if (booking) {
+    if (booking && !isInitializedRef.current) {
       setFormData({
         title: booking.title || '',
         description: booking.description || '',
@@ -129,6 +130,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         public_visibility_settings: booking.public_visibility_settings || {},
       });
       setErrors({});
+      isInitializedRef.current = true;
     }
   }, [booking]);
 
