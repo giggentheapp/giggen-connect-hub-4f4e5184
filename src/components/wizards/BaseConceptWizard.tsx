@@ -1,4 +1,4 @@
-import { useState, useRef, ComponentType } from 'react';
+import { useState, useRef, ComponentType, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -72,9 +72,9 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
   const { files: availableTechSpecs } = useProfileTechSpecs(userId);
   const { files: availableHospitalityRiders } = useHospitalityRiders(userId);
 
-  const updateData = (field: string, value: any) => {
+  const updateData = useCallback((field: string, value: any) => {
     setData((prev: any) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   const handleSaveDraft = async () => {
     setSaving(true);
