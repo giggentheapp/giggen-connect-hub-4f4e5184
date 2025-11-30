@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ConceptTypeSelector } from '@/components/ConceptTypeSelector';
 import { TeachingWizard } from '@/components/wizards/TeachingWizard';
@@ -116,6 +116,55 @@ export default function CreateOffer() {
     loadDraft();
   }, [draftId, userId, toast]);
 
+  // Stable callbacks to prevent wizard re-initialization
+  const handleTeachingSuccess = useCallback(() => {
+    toast({
+      title: 'Suksess!',
+      description: 'Undervisningsavtalen er lagret',
+    });
+    navigate(`/profile/${userId}?section=dashboard`);
+  }, [toast, navigate, userId]);
+
+  const handleTeachingBack = useCallback(() => {
+    if (!draftId) {
+      setConceptType(null);
+    } else {
+      navigate(`/profile/${userId}?section=dashboard`);
+    }
+  }, [draftId, navigate, userId]);
+
+  const handleArrangørSuccess = useCallback(() => {
+    toast({
+      title: '🎉 Tilbud publisert!',
+      description: 'Ditt arrangør-tilbud er nå synlig for musikere',
+    });
+    navigate(`/profile/${userId}?section=dashboard`);
+  }, [toast, navigate, userId]);
+
+  const handleArrangørBack = useCallback(() => {
+    if (!draftId) {
+      setConceptType(null);
+    } else {
+      navigate(`/profile/${userId}?section=dashboard`);
+    }
+  }, [draftId, navigate, userId]);
+
+  const handleSessionSuccess = useCallback(() => {
+    toast({
+      title: '🎉 Tilbud publisert!',
+      description: 'Ditt tilbud er nå synlig for andre',
+    });
+    navigate(`/profile/${userId}?section=dashboard`);
+  }, [toast, navigate, userId]);
+
+  const handleSessionBack = useCallback(() => {
+    if (!draftId) {
+      setConceptType(null);
+    } else {
+      navigate(`/profile/${userId}?section=dashboard`);
+    }
+  }, [draftId, navigate, userId]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -142,20 +191,8 @@ export default function CreateOffer() {
           <TeachingWizard
             userId={userId}
             existingConcept={loadedConcept}
-            onSuccess={() => {
-              toast({
-                title: 'Suksess!',
-                description: 'Undervisningsavtalen er lagret',
-              });
-              navigate(`/profile/${userId}?section=dashboard`);
-            }}
-            onBack={() => {
-              if (!draftId) {
-                setConceptType(null);
-              } else {
-                navigate(`/profile/${userId}?section=dashboard`);
-              }
-            }}
+            onSuccess={handleTeachingSuccess}
+            onBack={handleTeachingBack}
           />
         </div>
       )}
@@ -164,20 +201,8 @@ export default function CreateOffer() {
       {conceptType === 'arrangør_tilbud' && (
         <ArrangørTilbudWizard
           userId={userId}
-          onSuccess={() => {
-            toast({
-              title: '🎉 Tilbud publisert!',
-              description: 'Ditt arrangør-tilbud er nå synlig for musikere',
-            });
-            navigate(`/profile/${userId}?section=dashboard`);
-          }}
-          onBack={() => {
-            if (!draftId) {
-              setConceptType(null);
-            } else {
-              navigate(`/profile/${userId}?section=dashboard`);
-            }
-          }}
+          onSuccess={handleArrangørSuccess}
+          onBack={handleArrangørBack}
           existingConcept={loadedConcept}
         />
       )}
@@ -186,20 +211,8 @@ export default function CreateOffer() {
       {conceptType === 'session_musician' && (
         <SessionMusicianWizard
           userId={userId}
-          onSuccess={() => {
-            toast({
-              title: '🎉 Tilbud publisert!',
-              description: 'Ditt tilbud er nå synlig for andre',
-            });
-            navigate(`/profile/${userId}?section=dashboard`);
-          }}
-          onBack={() => {
-            if (!draftId) {
-              setConceptType(null);
-            } else {
-              navigate(`/profile/${userId}?section=dashboard`);
-            }
-          }}
+          onSuccess={handleSessionSuccess}
+          onBack={handleSessionBack}
           existingConcept={loadedConcept}
         />
       )}
