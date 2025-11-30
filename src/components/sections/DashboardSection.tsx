@@ -16,7 +16,9 @@ import {
   ChevronDown,
   Rocket,
   MapPin,
-  Archive
+  Archive,
+  EyeOff,
+  Eye
 } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
@@ -33,6 +35,7 @@ import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -76,6 +79,24 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
         .from("user_files")
         .select("*")
         .eq("user_id", profile.user_id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.user_id,
+  });
+
+  // Fetch profile settings to check visibility
+  const { data: profileSettings } = useQuery({
+    queryKey: ["profile-settings", profile?.user_id],
+    queryFn: async () => {
+      if (!profile?.user_id) return null;
+
+      const { data, error } = await supabase
+        .from("profile_settings")
+        .select("*")
+        .eq("maker_id", profile.user_id)
+        .single();
 
       if (error) throw error;
       return data;
@@ -190,6 +211,37 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             </p>
           </CardContent>
         </Card>
+
+        {/* Profile Visibility Alert */}
+        {profileSettings && !profileSettings.show_public_profile && (
+          <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <EyeOff className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <AlertDescription className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1">
+                  Profilen din er ikke synlig i Utforsk
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  Andre brukere kan ikke finne deg eller se profilen din. Aktiver synlighet for å bli oppdaget.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="default"
+                className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => {
+                  const currentPath = location.pathname;
+                  navigate(`${currentPath}?section=settings`, { 
+                    state: { scrollToVisibility: true } 
+                  });
+                }}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Aktiver synlighet
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* "Hva skjer nå?" tom-state seksjon */}
         {(!offerDrafts || offerDrafts.length === 0) && 
