@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ConceptTypeSelector } from '@/components/ConceptTypeSelector';
 import { TeachingConceptWizard } from '@/components/TeachingConceptWizard';
+import { ArrangørOfferWizard } from '@/components/ArrangørOfferWizard';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { conceptService } from '@/services/conceptService';
+import { useRoleData } from '@/hooks/useRole';
 
 interface ConceptData {
   id?: string;
@@ -39,6 +41,7 @@ interface ConceptData {
   is_indefinite: boolean;
   pricing_type: 'fixed' | 'door_deal' | 'by_agreement';
   door_percentage: string;
+  program_type?: string;
 }
 
 const STEPS = [
@@ -56,11 +59,12 @@ export default function CreateOffer() {
   const draftId = searchParams.get('edit');
   const { toast } = useToast();
   const { t } = useAppTranslation();
+  const { isOrganizer } = useRoleData();
   
   const { user, loading: userLoading } = useCurrentUser();
   const userId = user?.id || '';
   
-  const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | null>(null);
+  const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | 'arrangør_tilbud' | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!!draftId);
@@ -306,10 +310,21 @@ export default function CreateOffer() {
       return;
     }
 
+    // Tilgangskontroll for arrangør_tilbud
+    if (conceptType === 'arrangør_tilbud' && !isOrganizer) {
+      toast({
+        title: 'Tilgang nektet',
+        description: 'Kun arrangører kan opprette arrangør-tilbud',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {
         maker_id: userId,
+        concept_type: conceptType || 'session_musician',
         title: conceptData.title,
         description: conceptData.description || null,
         price: conceptData.pricing_type === 'fixed' && conceptData.price ? parseFloat(conceptData.price) : null,
@@ -320,6 +335,7 @@ export default function CreateOffer() {
         tech_spec: conceptData.tech_spec || null,
         tech_spec_reference: conceptData.selected_tech_spec_file || null,
         hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
+        program_type: conceptData.program_type || null,
         available_dates: conceptData.is_indefinite 
           ? JSON.stringify({ indefinite: true })
           : (conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null),
@@ -405,6 +421,16 @@ export default function CreateOffer() {
   };
 
   const handlePublish = async () => {
+    // Tilgangskontroll for arrangør_tilbud
+    if (conceptType === 'arrangør_tilbud' && !isOrganizer) {
+      toast({
+        title: 'Tilgang nektet',
+        description: 'Kun arrangører kan opprette arrangør-tilbud',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Validate all required fields
     if (!conceptData.title.trim()) {
       toast({
@@ -454,6 +480,7 @@ export default function CreateOffer() {
       if (!conceptId) {
         const payload = {
           maker_id: userId,
+          concept_type: conceptType || 'session_musician',
           title: conceptData.title,
           description: conceptData.description || null,
           price: conceptData.pricing_type === 'fixed' && conceptData.price ? parseFloat(conceptData.price) : null,
@@ -464,7 +491,8 @@ export default function CreateOffer() {
           tech_spec: conceptData.tech_spec || null,
           tech_spec_reference: conceptData.selected_tech_spec_file || null,
           hospitality_rider_reference: conceptData.selected_hospitality_rider_file || null,
-          available_dates: conceptData.is_indefinite 
+          program_type: conceptData.program_type || null,
+          available_dates: conceptData.is_indefinite
             ? JSON.stringify({ indefinite: true })
             : (conceptData.available_dates.length > 0 ? JSON.stringify(conceptData.available_dates) : null),
           is_published: false,
@@ -636,6 +664,15 @@ export default function CreateOffer() {
       case 0:
         return conceptData.title.trim().length > 0;
       case 1:
+        // For arrangør_tilbud, også sjekk program_type
+        if (conceptType === 'arrangør_tilbud') {
+          const programTypeValid = conceptData.program_type && conceptData.program_type.length > 0;
+          const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
+          const pricingValid = conceptData.pricing_type === 'by_agreement' || 
+                              (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0) ||
+                              (conceptData.pricing_type === 'door_deal' && conceptData.door_percentage.length > 0);
+          return programTypeValid && audienceValid && pricingValid;
+        }
         const audienceValid = conceptData.expected_audience.length > 0 && parseInt(conceptData.expected_audience) > 0;
         const pricingValid = conceptData.pricing_type === 'by_agreement' || 
                             (conceptData.pricing_type === 'fixed' && conceptData.price.length > 0) ||
@@ -684,6 +721,132 @@ export default function CreateOffer() {
             onBack={() => setConceptType(null)}
           />
         </div>
+      )}
+
+      {/* Show Arrangør Tilbud Wizard */}
+      {conceptType === 'arrangør_tilbud' && (
+        <>
+          {/* Sticky Header - samme som session_musician */}
+          <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (conceptType && !draftId) {
+                      setConceptType(null);
+                    } else {
+                      navigate('/dashboard');
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Tilbake
+                </Button>
+
+            {/* Progress indicator */}
+            <div className="hidden md:flex items-center gap-2">
+              {STEPS.map((step, index) => (
+                <div key={step.id} className="flex items-center">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                      index <= currentStep
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {index + 1}
+                  </div>
+                  {index < STEPS.length - 1 && (
+                    <div
+                      className={cn(
+                        "w-12 h-0.5 mx-1 transition-colors",
+                        index < currentStep ? "bg-primary" : "bg-muted"
+                      )}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {currentStep < STEPS.length - 1 && (
+                <Button
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  disabled={saving || !conceptData.title.trim()}
+                  className="gap-2"
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Lagre utkast
+                </Button>
+              )}
+            </div>
+          </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8 max-w-3xl">
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-sm font-medium mb-4">
+              📅 Arrangør Tilbud
+            </div>
+            <h1 className="text-3xl font-bold mb-2">{STEPS[currentStep].title}</h1>
+            <p className="text-muted-foreground">{STEPS[currentStep].description}</p>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6 space-y-6">
+            <ArrangørOfferWizard
+              currentStep={currentStep}
+              conceptData={conceptData}
+              updateConceptData={updateConceptData}
+              availableTechSpecs={availableTechSpecs}
+              availableHospitalityRiders={availableHospitalityRiders}
+              onOpenFilebankModal={() => setShowFilebankModal(true)}
+              onRemovePortfolioFile={removePortfolioFile}
+              userId={userId}
+              handleSaveDraft={handleSaveDraft}
+            />
+          </div>
+
+          <div className="flex justify-between mt-8">
+            {currentStep > 0 && (
+              <Button variant="outline" onClick={prevStep}>
+                Forrige
+              </Button>
+            )}
+            {currentStep < STEPS.length - 1 ? (
+              <Button 
+                onClick={nextStep} 
+                disabled={!isStepValid()}
+                className="ml-auto"
+              >
+                Neste
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePublish}
+                disabled={saving || !isStepValid()}
+                className="ml-auto gap-2"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
+                Publiser tilbud
+              </Button>
+            )}
+          </div>
+        </main>
+        </>
       )}
 
       {/* Show Session Musician Wizard (original flow) */}
