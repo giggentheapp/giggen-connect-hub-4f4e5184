@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { logger } from '@/utils/logger';
 export const useCurrentUser = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.profiles.current,
@@ -31,6 +32,8 @@ export const useCurrentUser = () => {
       logger.debug('Auth state changed', { event, hasSession: !!session });
       
       if (event === 'SIGNED_OUT') {
+        // Clear all cached user data when signing out
+        queryClient.removeQueries({ queryKey: queryKeys.profiles.current });
         navigate('/auth');
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         refetch();
@@ -40,7 +43,7 @@ export const useCurrentUser = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [navigate, refetch]);
+  }, [navigate, refetch, queryClient]);
 
   // Redirect to auth if not logged in - handle race condition for new signups
   useEffect(() => {
