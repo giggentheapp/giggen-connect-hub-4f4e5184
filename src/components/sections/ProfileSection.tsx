@@ -159,18 +159,18 @@ export const ProfileSection = ({
         </div>
         
         <div className="space-y-3 md:space-y-4">
-          <div className="animate-fade-in">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent hover:scale-105 transition-transform inline-block">
+          <div className="animate-fade-in flex flex-col items-center gap-2">
+            <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-accent-orange via-accent-pink to-accent-purple bg-clip-text text-transparent hover:scale-105 transition-transform inline-block text-center">
               {profile.display_name}
             </h1>
             <button
               onClick={handleCopyUsername}
-              className="inline-flex items-center gap-2 text-lg md:text-xl text-muted-foreground hover:text-foreground transition-all mb-2 group hover:scale-105 px-3 py-1 rounded-lg hover:bg-muted/50"
+              className="inline-flex items-center gap-2 text-base md:text-lg text-muted-foreground hover:text-foreground transition-all group hover:scale-105 px-3 py-1.5 rounded-lg hover:bg-muted/50"
             >
               <span>@{(profile as any).username}</span>
-              <Copy className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110" />
+              <Copy className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110" />
             </button>
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-muted-foreground mt-1">
               <span className="inline-block w-2 h-2 rounded-full bg-accent-orange animate-pulse shadow-lg shadow-accent-orange/50"></span>
               <span className="capitalize font-medium px-3 py-1 rounded-full bg-gradient-to-r from-accent-orange/10 to-accent-pink/10 border border-accent-orange/20">{profile.role}</span>
             </div>
