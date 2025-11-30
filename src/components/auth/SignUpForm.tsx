@@ -50,14 +50,28 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
 
     setCheckingUsername(true);
     try {
-      // Use supabase.functions.invoke with proper authentication
-      const { data, error } = await supabase.functions.invoke('validate-username', {
-        body: { username: value }
-      });
+      // Must use direct fetch because supabase.functions.invoke requires authentication
+      // and user is not logged in during signup
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+      const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/validate-username`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ username: value })
+        }
+      );
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
 
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
