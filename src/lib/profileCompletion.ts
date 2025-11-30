@@ -29,27 +29,6 @@ export function calculateProfileCompletion(
       field: "Bio",
       complete: !!profile.bio && profile.bio.length > 0,
     },
-    {
-      field: "Kontaktinformasjon",
-      complete: !!profile.contact_info && 
-        (profile.contact_info.email || profile.contact_info.phone),
-    },
-    {
-      field: "Sosiale medier",
-      complete: !!profile.social_media_links && 
-        Object.values(profile.social_media_links).some(v => v && v.length > 0),
-    },
-    {
-      field: "Musikkplattform",
-      complete: !!profile.social_media_links &&
-        (profile.social_media_links.spotify || 
-         profile.social_media_links.youtube || 
-         profile.social_media_links.soundcloud),
-    },
-    {
-      field: "Offentlige innstillinger",
-      complete: profile.is_address_public === true,
-    },
   ];
 
   const completedCount = checks.filter(c => c.complete).length;
