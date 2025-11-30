@@ -569,28 +569,44 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     }
   };
 
-  // Helper to check if field is missing
+  // Helper to check if field is actually missing based on current data
   const isFieldMissing = (fieldName: string) => {
-    return missingFields.some(f => f.toLowerCase().includes(fieldName.toLowerCase()));
+    const lowerFieldName = fieldName.toLowerCase();
+    
+    if (lowerFieldName.includes('profilbilde') || lowerFieldName.includes('avatar')) {
+      return !profileData.avatar_url;
+    }
+    if (lowerFieldName.includes('visningsnavn') || lowerFieldName.includes('display')) {
+      return !profileData.display_name || profileData.display_name.trim().length === 0;
+    }
+    if (lowerFieldName.includes('bio')) {
+      return !profileData.bio || profileData.bio.trim().length === 0;
+    }
+    if (lowerFieldName.includes('brukernavn') || lowerFieldName.includes('username')) {
+      return !newUsername || newUsername.trim().length === 0;
+    }
+    if (lowerFieldName.includes('kontaktinformasjon') || lowerFieldName.includes('contact')) {
+      return (!contactInfo.email || contactInfo.email.trim().length === 0) && 
+             (!contactInfo.phone || contactInfo.phone.trim().length === 0);
+    }
+    
+    return false;
   };
 
   return (
     <div className="max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-6 space-y-8">
-      {/* Missing Fields Alert */}
-      {missingFields.length > 0 && (
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          <AlertTitle className="text-base font-semibold mb-2 text-destructive">Fullfør profilen din</AlertTitle>
+      {/* Missing Fields Alert - Only show if any fields are actually missing */}
+      {missingFields.length > 0 && (isFieldMissing('profilbilde') || isFieldMissing('visningsnavn') || isFieldMissing('bio')) && (
+        <Alert className="border-orange-500/30 bg-orange-500/5">
+          <Info className="h-4 w-4 text-orange-600" />
+          <AlertTitle className="text-sm font-semibold mb-2">Fullfør profilen din</AlertTitle>
           <AlertDescription className="text-sm space-y-2">
-            <p className="font-medium">Følgende felt må fylles ut:</p>
-            <ul className="space-y-1 ml-4 list-disc">
-              {missingFields.map((field, index) => (
-                <li key={index} className="text-foreground">{field}</li>
-              ))}
+            <p>Fyll ut følgende for å bli synlig i Utforsk-seksjonen:</p>
+            <ul className="space-y-1 ml-4">
+              {isFieldMissing('profilbilde') && <li className="text-muted-foreground">• Profilbilde</li>}
+              {isFieldMissing('visningsnavn') && <li className="text-muted-foreground">• Visningsnavn</li>}
+              {isFieldMissing('bio') && <li className="text-muted-foreground">• Bio/Om meg tekst</li>}
             </ul>
-            <p className="text-muted-foreground text-xs mt-3">
-              Feltene som mangler er markert med rødt omriss nedenfor 👇
-            </p>
           </AlertDescription>
         </Alert>
       )}
@@ -641,7 +657,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           <div 
             id="avatar" 
             className={`flex items-center gap-4 transition-all duration-200 rounded-lg p-2 ${
-              isFieldMissing('profilbilde') ? 'ring-2 ring-destructive bg-destructive/5' : ''
+              isFieldMissing('profilbilde') ? 'border border-orange-500/40' : ''
             }`}
           >
             <Avatar className="h-16 w-16 md:h-20 md:w-20 shrink-0">
@@ -654,7 +670,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-medium mb-1">{t("profilePicture")}</h3>
                 {isFieldMissing('profilbilde') && (
-                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                  <Info className="h-4 w-4 text-orange-600 shrink-0" />
                 )}
               </div>
               <Button variant="outline" size="sm" onClick={() => setShowFilebankModal(true)} className="h-8 text-xs">
@@ -669,13 +685,13 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             <div 
               id="display-name" 
               className={`transition-all duration-200 rounded-lg p-2 ${
-                isFieldMissing('visningsnavn') ? 'ring-2 ring-destructive bg-destructive/5' : ''
+                isFieldMissing('visningsnavn') ? 'border border-orange-500/40' : ''
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Label htmlFor="display_name">{t("displayName")}</Label>
                 {isFieldMissing('visningsnavn') && (
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <Info className="h-4 w-4 text-orange-600" />
                 )}
               </div>
               <Input
@@ -703,13 +719,13 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             <div 
               id="username" 
               className={`space-y-3 transition-all duration-200 rounded-lg p-2 ${
-                isFieldMissing('brukernavn') ? 'ring-2 ring-destructive bg-destructive/5' : ''
+                isFieldMissing('brukernavn') ? 'border border-orange-500/40' : ''
               }`}
             >
               <div className="flex items-center gap-2">
                 <Label htmlFor="username">Brukernavn</Label>
                 {isFieldMissing('brukernavn') && (
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <Info className="h-4 w-4 text-orange-600" />
                 )}
               </div>
               <div className="flex gap-2">
@@ -767,13 +783,13 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
                 <div 
                   id="bio" 
                   className={`transition-all duration-200 rounded-lg p-2 ${
-                    isFieldMissing('bio') ? 'ring-2 ring-destructive bg-destructive/5' : ''
+                    isFieldMissing('bio') ? 'border border-orange-500/40' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Label htmlFor="bio">{t("biography")}</Label>
                     {isFieldMissing('bio') && (
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      <Info className="h-4 w-4 text-orange-600" />
                     )}
                   </div>
                   <Textarea
@@ -816,13 +832,13 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
                 <div 
                   id="contact" 
                   className={`space-y-3 transition-all duration-200 rounded-lg p-2 ${
-                    isFieldMissing('kontaktinformasjon') ? 'ring-2 ring-destructive bg-destructive/5' : ''
+                    isFieldMissing('kontaktinformasjon') ? 'border border-orange-500/40' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-medium">{t("contactInformation")}</h3>
                     {isFieldMissing('kontaktinformasjon') && (
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      <Info className="h-4 w-4 text-orange-600" />
                     )}
                   </div>
 
@@ -915,19 +931,12 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       <>
         <div 
           id="social-links" 
-          className={`space-y-6 transition-all duration-200 rounded-lg p-2 ${
-            (isFieldMissing('sosiale medier') || isFieldMissing('musikkplattform')) 
-              ? 'ring-2 ring-destructive bg-destructive/5' 
-              : ''
-          }`}
+          className="space-y-6"
         >
-          <div className="flex items-center gap-2">
+          <div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">Sosiale medier</h2>
-            {(isFieldMissing('sosiale medier') || isFieldMissing('musikkplattform')) && (
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-            )}
+            <p className="text-sm text-muted-foreground">Administrer dine sosiale medier</p>
           </div>
-          <p className="text-sm text-muted-foreground -mt-4">Administrer dine sosiale medier</p>
 
           <SocialMusicLinksManager
             title="Sosiale medier"
@@ -1120,17 +1129,12 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       {/* Simplified Privacy Settings for ALL USERS */}
       <div 
         id="visibility" 
-        className={`space-y-6 transition-all duration-200 rounded-lg p-2 ${
-          isFieldMissing('offentlige innstillinger') ? 'ring-2 ring-destructive bg-destructive/5' : ''
-        }`}
+        className="space-y-6"
       >
-        <div className="flex items-center gap-2">
+        <div>
           <h2 className="text-xl md:text-2xl font-bold mb-2">Synlighetsinnstillinger</h2>
-          {isFieldMissing('offentlige innstillinger') && (
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-          )}
+          <p className="text-sm text-muted-foreground">Kontroller hva som er synlig for andre</p>
         </div>
-        <p className="text-sm text-muted-foreground -mt-4">Kontroller hva som er synlig for andre</p>
 
         <div className="space-y-3">
           {/* Public Profile Toggle */}
