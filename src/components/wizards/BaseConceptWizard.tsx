@@ -1,4 +1,4 @@
-import { useState, useEffect, ComponentType } from 'react';
+import { useState, useRef, ComponentType } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -61,7 +61,11 @@ interface BaseConceptWizardProps {
 export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [data, setData] = useState(config.defaultData);
+  
+  // Use ref to store initial data and prevent re-initialization on config changes
+  const initialDataRef = useRef(config.defaultData);
+  const [data, setData] = useState(initialDataRef.current);
+  
   const { toast } = useToast();
   
   // Load tech specs and hospitality riders for all types
