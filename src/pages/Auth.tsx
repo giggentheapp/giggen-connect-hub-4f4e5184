@@ -57,13 +57,13 @@ const Auth = () => {
           setIsResettingPassword(false);
           setIsForgotPassword(false);
           
-          // Wait a bit for profile to be created by database trigger
+          // Wait briefly for profile to be created by database trigger
           const checkProfileAndNavigate = async () => {
             let profile = null;
             let retries = 0;
-            const maxRetries = 5;
+            const maxRetries = 3;
             
-            // Retry fetching profile (database trigger might need time)
+            // Retry fetching profile (database trigger is usually instant)
             while (!profile && retries < maxRetries) {
               const { data: profileData } = await supabase
                 .from('profiles')
@@ -76,8 +76,7 @@ const Auth = () => {
                 break;
               }
               
-              // Wait 500ms before retry
-              await new Promise(resolve => setTimeout(resolve, 500));
+              await new Promise(resolve => setTimeout(resolve, 400));
               retries++;
             }
             
