@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ export const TechnicalStep = React.memo(({
   const [showHospitalityModal, setShowHospitalityModal] = useState(false);
   const { toast } = useToast();
 
-  const handleTechSpecFileSelected = (file: any) => {
+  const handleTechSpecFileSelected = useCallback((file: any) => {
     updateData('selected_tech_spec_file', file.id);
     updateData('_techSpecFileData', file); // Store full file data for display
     toast({
@@ -30,9 +30,9 @@ export const TechnicalStep = React.memo(({
       description: `${file.filename} vil bli lagt til når tilbudet publiseres`,
     });
     setShowTechSpecModal(false);
-  };
+  }, [updateData, toast]);
 
-  const handleHospitalityFileSelected = (file: any) => {
+  const handleHospitalityFileSelected = useCallback((file: any) => {
     updateData('selected_hospitality_rider_file', file.id);
     updateData('_hospitalityFileData', file); // Store full file data for display
     toast({
@@ -40,7 +40,17 @@ export const TechnicalStep = React.memo(({
       description: `${file.filename} vil bli lagt til når tilbudet publiseres`,
     });
     setShowHospitalityModal(false);
-  };
+  }, [updateData, toast]);
+
+  const handleRemoveTechSpec = useCallback(() => {
+    updateData('selected_tech_spec_file', '');
+    updateData('_techSpecFileData', null);
+  }, [updateData]);
+
+  const handleRemoveHospitality = useCallback(() => {
+    updateData('selected_hospitality_rider_file', '');
+    updateData('_hospitalityFileData', null);
+  }, [updateData]);
 
   const techSpecFile = data._techSpecFileData || availableTechSpecs?.find(
     (f: any) => f.id === data.selected_tech_spec_file
@@ -95,10 +105,7 @@ export const TechnicalStep = React.memo(({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        updateData('selected_tech_spec_file', '');
-                        updateData('_techSpecFileData', null);
-                      }}
+                      onClick={handleRemoveTechSpec}
                     >
                       Fjern
                     </Button>
@@ -160,10 +167,7 @@ export const TechnicalStep = React.memo(({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        updateData('selected_hospitality_rider_file', '');
-                        updateData('_hospitalityFileData', null);
-                      }}
+                      onClick={handleRemoveHospitality}
                     >
                       Fjern
                     </Button>
