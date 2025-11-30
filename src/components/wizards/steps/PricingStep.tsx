@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,6 +9,25 @@ import { WizardStepProps } from '../BaseConceptWizard';
  * Supports fixed price, door deal, and by agreement
  */
 export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) => {
+  const handlePricingTypeChange = useCallback((value: 'fixed' | 'door_deal' | 'by_agreement') => {
+    updateData('pricing_type', value);
+    // Clear related fields when switching types
+    if (value !== 'fixed') updateData('price', '');
+    if (value !== 'door_deal') updateData('door_percentage', '');
+  }, [updateData]);
+
+  const handlePriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateData('price', e.target.value);
+  }, [updateData]);
+
+  const handleDoorPercentageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateData('door_percentage', e.target.value);
+  }, [updateData]);
+
+  const handleAudienceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateData('expected_audience', e.target.value);
+  }, [updateData]);
+
   return (
     <div className="space-y-6">
       {/* Pricing Model */}
@@ -16,12 +35,7 @@ export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) =>
         <Label className="text-base font-semibold">Prismodell</Label>
         <RadioGroup
           value={data.pricing_type || 'fixed'}
-          onValueChange={(value: 'fixed' | 'door_deal' | 'by_agreement') => {
-            updateData('pricing_type', value);
-            // Clear related fields when switching types
-            if (value !== 'fixed') updateData('price', '');
-            if (value !== 'door_deal') updateData('door_percentage', '');
-          }}
+          onValueChange={handlePricingTypeChange}
           className="space-y-3"
         >
           <div className="flex items-center space-x-2">
@@ -55,7 +69,7 @@ export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) =>
               type="number"
               placeholder="5000"
               value={data.price || ''}
-              onChange={(e) => updateData('price', e.target.value)}
+              onChange={handlePriceChange}
               className="mt-1"
             />
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">
@@ -73,7 +87,7 @@ export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) =>
               type="number"
               placeholder="70"
               value={data.door_percentage || ''}
-              onChange={(e) => updateData('door_percentage', e.target.value)}
+              onChange={handleDoorPercentageChange}
               className="mt-1"
             />
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -100,7 +114,7 @@ export const PricingStep = React.memo(({ data, updateData }: WizardStepProps) =>
           type="number"
           placeholder="100"
           value={data.expected_audience || ''}
-          onChange={(e) => updateData('expected_audience', e.target.value)}
+          onChange={handleAudienceChange}
         />
         <p className="text-xs text-muted-foreground mt-1">
           Estimert antall publikummere

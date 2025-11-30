@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
@@ -13,9 +13,16 @@ export const DatesStep = React.memo(({ data, updateData }: WizardStepProps) => {
   const selectedDates = data.available_dates || [];
   const isIndefinite = data.is_indefinite || false;
 
-  const handleDateSelect = (dates: Date[] | undefined) => {
+  const handleDateSelect = useCallback((dates: Date[] | undefined) => {
     updateData('available_dates', dates || []);
-  };
+  }, [updateData]);
+
+  const handleIndefiniteChange = useCallback((checked: boolean) => {
+    updateData('is_indefinite', checked);
+    if (checked) {
+      updateData('available_dates', []);
+    }
+  }, [updateData]);
 
   return (
     <div className="space-y-6">
@@ -28,12 +35,7 @@ export const DatesStep = React.memo(({ data, updateData }: WizardStepProps) => {
         </div>
         <Switch
           checked={isIndefinite}
-          onCheckedChange={(checked) => {
-            updateData('is_indefinite', checked);
-            if (checked) {
-              updateData('available_dates', []);
-            }
-          }}
+          onCheckedChange={handleIndefiniteChange}
         />
       </div>
 
