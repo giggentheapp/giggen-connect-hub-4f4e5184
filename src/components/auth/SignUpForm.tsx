@@ -138,24 +138,61 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
       }
 
       if (data.user) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for database trigger to create profile
+        let profile = null;
+        let retries = 0;
+        const maxRetries = 8;
         
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
-
-        if (!profile) {
-          await supabase
+        while (!profile && retries < maxRetries) {
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .insert([{
-              user_id: data.user.id,
-              display_name: displayName || email.split('@')[0],
-              role: roleMapping[role] as any,
-              username: username.toLowerCase(),
-              username_changed: false
-            }]);
+            .select('id')
+            .eq('user_id', data.user.id)
+            .maybeSingle();
+          
+          if (profileData) {
+            profile = profileData;
+            break;
+          }
+          
+          // If last retry and still no profile, try to create manually
+          if (retries === maxRetries - 1 && !profileData) {
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{
+                user_id: data.user.id,
+                display_name: displayName || email.split('@')[0],
+                role: roleMapping[role] as any,
+                username: username.toLowerCase(),
+                username_changed: false
+              }]);
+            
+            if (insertError) {
+              console.error('Failed to create profile:', insertError);
+              // Sign out the user if profile creation fails
+              await supabase.auth.signOut();
+              toast({
+                title: t('signupError'),
+                description: 'Kunne ikke opprette brukerprofil. Vennligst prøv igjen.',
+                variant: "destructive",
+              });
+              return;
+            }
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retries++;
+        }
+        
+        if (!profile) {
+          // Sign out if profile was never created
+          await supabase.auth.signOut();
+          toast({
+            title: t('signupError'),
+            description: 'Kunne ikke opprette brukerprofil. Vennligst prøv igjen.',
+            variant: "destructive",
+          });
+          return;
         }
         
         toast({
