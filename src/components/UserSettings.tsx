@@ -938,6 +938,15 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             <p className="text-sm text-muted-foreground">Administrer dine sosiale medier</p>
           </div>
 
+          {(!socialLinks.instagram && !socialLinks.facebook && !socialLinks.youtube && !socialLinks.twitter && !socialLinks.tiktok && !socialLinks.website) && (
+            <Alert className="border-blue-500/30 bg-blue-500/5">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-sm">
+                Legg til sosiale medier for å gjøre det lettere for andre å finne deg
+              </AlertDescription>
+            </Alert>
+          )}
+
           <SocialMusicLinksManager
             title="Sosiale medier"
             platforms={[
@@ -1045,6 +1054,15 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
             <h2 className="text-xl md:text-2xl font-bold mb-2">Musikkplattformer</h2>
             <p className="text-sm text-muted-foreground mb-4">Legg til lenker til din musikk</p>
 
+            {(!socialLinks.spotify && !socialLinks.soundcloud && !socialLinks.appleMusic && !socialLinks.bandcamp) && (
+              <Alert className="border-blue-500/30 bg-blue-500/5 mb-4">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm">
+                  Del musikklenker for å la andre høre din musikk
+                </AlertDescription>
+              </Alert>
+            )}
+
             <SocialMusicLinksManager
               title="Musikklenker"
               platforms={[
@@ -1135,6 +1153,15 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           <h2 className="text-xl md:text-2xl font-bold mb-2">Synlighetsinnstillinger</h2>
           <p className="text-sm text-muted-foreground">Kontroller hva som er synlig for andre</p>
         </div>
+
+        {!profileSettings?.show_public_profile && (
+          <Alert className="border-blue-500/30 bg-blue-500/5">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-sm">
+              Aktiver offentlig profil for å bli synlig i Utforsk-seksjonen
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-3">
           {/* Public Profile Toggle */}
