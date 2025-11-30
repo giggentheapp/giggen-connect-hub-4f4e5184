@@ -50,28 +50,17 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
 
     setCheckingUsername(true);
     try {
-      // Must use direct fetch because supabase.functions.invoke requires authentication
-      // and user is not logged in during signup
-      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-      const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      const response = await fetch(
-        `${SUPABASE_URL}/functions/v1/validate-username`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ username: value })
-        }
-      );
+      // Use supabase.functions.invoke() instead of fetch() to avoid CSP issues
+      // Edge Functions can be called with anon key without authentication
+      const { data, error } = await supabase.functions.invoke('validate-username', {
+        body: { username: value }
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Username check error:', error);
+        setUsernameError(t('usernameCheckFailed') || "Could not check availability");
+        return false;
       }
-
-      const data = await response.json();
 
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
