@@ -1,7 +1,6 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfileRetry } from './useProfileRetry';
 
 /**
  * Custom hook to handle post-authentication navigation
@@ -10,56 +9,79 @@ import { useProfileRetry } from './useProfileRetry';
  * - Navigation to dashboard after successful login
  * - First-login feedback flow
  * - Profile creation waiting/retry logic
+ * - Loading state during navigation
  * 
- * @returns {Object} Navigation functions
+ * @returns {Object} Navigation functions and state
  * @returns {Function} navigateToDashboard - Navigate to user dashboard
- * @returns {Function} shouldShowFeedback - Check if feedback form should be shown
+ * @returns {Function} completeFeedbackAndNavigate - Complete feedback and navigate to dashboard
+ * @returns {boolean} isNavigating - Whether navigation is in progress
  */
 export const useAuthNavigation = () => {
   const navigate = useNavigate();
-  const { fetchProfileWithRetry } = useProfileRetry();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   /**
-   * Check if the first-login feedback form should be shown
+   * Check for profile with retry logic
    * 
-   * @returns {boolean} True if feedback should be shown
+   * Waits for profile to be created by database trigger if needed.
+   * Retries up to 3 times with 400ms delay between attempts.
+   * 
+   * @param {string} userId - The user ID to fetch profile for
+   * @returns {Promise<{ user_id: string } | null>} The profile or null
    */
-  const shouldShowFeedback = useCallback((): boolean => {
-    const feedbackSubmitted = localStorage.getItem('feedback_submitted');
-    const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+  const checkProfileWithRetry = useCallback(async (userId: string) => {
+    let profile = null;
+    let retries = 0;
+    const maxRetries = 3;
     
-    return hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true';
+    while (!profile && retries < maxRetries) {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (profileData) {
+        profile = profileData;
+        break;
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 400));
+      retries++;
+    }
+    
+    return profile;
   }, []);
 
   /**
    * Navigate to user dashboard after successful authentication
    * 
-   * Waits for profile to be created by database trigger if needed,
-   * then navigates to the appropriate dashboard URL.
-   * 
    * @param {string} userId - The authenticated user's ID
-   * @returns {Promise<boolean>} True if should show feedback, false otherwise
+   * @returns {Promise<boolean>} True if should show feedback, false if already navigated
    */
-  const navigateToDashboard = useCallback(
-    async (userId: string): Promise<boolean> => {
-      // Wait for profile to be created by database trigger
-      const profile = await fetchProfileWithRetry(userId);
-      
+  const navigateToDashboard = useCallback(async (userId: string): Promise<boolean> => {
+    setIsNavigating(true);
+    
+    try {
+      const profile = await checkProfileWithRetry(userId);
       const dashboardUrl = profile 
         ? `/profile/${profile.user_id}?section=dashboard` 
         : '/auth';
-
-      // Check if first login feedback should be shown
-      if (shouldShowFeedback()) {
-        return true; // Signal that feedback should be shown
+      
+      const feedbackSubmitted = localStorage.getItem('feedback_submitted');
+      const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
+      
+      // Return true if we should show feedback, false if we should navigate
+      if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
+        return true; // Show feedback
+      } else {
+        navigate(dashboardUrl, { replace: true });
+        return false; // Already navigated
       }
-
-      // Navigate directly to dashboard
-      navigate(dashboardUrl, { replace: true });
-      return false;
-    },
-    [navigate, fetchProfileWithRetry, shouldShowFeedback]
-  );
+    } finally {
+      setIsNavigating(false);
+    }
+  }, [navigate, checkProfileWithRetry]);
 
   /**
    * Complete feedback and navigate to dashboard
@@ -67,26 +89,30 @@ export const useAuthNavigation = () => {
    * Called after user submits first-login feedback.
    */
   const completeFeedbackAndNavigate = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    setIsNavigating(true);
     
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .single();
-      
-      const dashboardUrl = profile 
-        ? `/profile/${profile.user_id}?section=dashboard` 
-        : '/auth';
-      
-      navigate(dashboardUrl);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .single();
+        
+        const dashboardUrl = profile 
+          ? `/profile/${profile.user_id}?section=dashboard` 
+          : '/auth';
+        navigate(dashboardUrl);
+      }
+    } finally {
+      setIsNavigating(false);
     }
   }, [navigate]);
 
-  return {
-    navigateToDashboard,
-    shouldShowFeedback,
+  return { 
+    navigateToDashboard, 
     completeFeedbackAndNavigate,
+    isNavigating 
   };
 };

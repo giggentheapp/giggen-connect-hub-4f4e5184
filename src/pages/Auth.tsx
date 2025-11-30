@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useAuthMode } from '@/hooks/useAuthMode';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useAuthNavigation } from '@/hooks/useAuthNavigation';
+import { useAuthEvents } from '@/hooks/useAuthEvents';
 import giggenLogo from '@/assets/giggen-logo.png';
 import FirstLoginFeedback from '@/components/FirstLoginFeedback';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -15,55 +14,27 @@ import { PasswordResetForm } from '@/components/auth/PasswordResetForm';
 const Auth = () => {
   const { t } = useAppTranslation();
   const { authMode, goToLogin, goToSignup, goToForgotPassword, goToResetPassword, goToFeedback } = useAuthMode();
-  const { user, session, loading } = useAuthSession();
-  const { navigateToDashboard, completeFeedbackAndNavigate } = useAuthNavigation();
-  const [isNavigating, setIsNavigating] = useState(false);
+  const { loading } = useAuthSession();
+  const { navigateToDashboard, completeFeedbackAndNavigate, isNavigating } = useAuthNavigation();
 
-  // Handle auth state changes and mode transitions
-  useEffect(() => {
-    if (!session) return;
-
-    let mounted = true;
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        // Handle password recovery - show reset form
-        if (event === 'PASSWORD_RECOVERY') {
-          goToResetPassword();
-          return;
-        }
-
-        // Handle sign out - return to login
-        if (event === 'SIGNED_OUT') {
-          goToLogin();
-          return;
-        }
-
-        // Handle successful sign in - navigate to dashboard
-        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-          goToLogin(); // Reset any password recovery state
-          setIsNavigating(true);
-          
-          const shouldShowFeedback = await navigateToDashboard(session.user.id);
-          
-          if (shouldShowFeedback && mounted) {
-            goToFeedback();
-          }
-          
-          setIsNavigating(false);
-        }
+  // Handle all auth state changes in one place
+  useAuthEvents({
+    onPasswordRecovery: () => {
+      goToResetPassword();
+    },
+    onSignOut: () => {
+      goToLogin();
+    },
+    onSignIn: async (userId: string) => {
+      goToLogin(); // Reset any password recovery state
+      const shouldShowFeedback = await navigateToDashboard(userId);
+      if (shouldShowFeedback) {
+        goToFeedback();
       }
-    );
+    }
+  });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [session, goToLogin, goToResetPassword, goToFeedback, navigateToDashboard]);
-
-  // Loading state
+  // Show loading state while checking auth or navigating
   if (loading || isNavigating) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -79,9 +50,7 @@ const Auth = () => {
   if (authMode === 'feedback') {
     return (
       <FirstLoginFeedback 
-        onComplete={async () => {
-          await completeFeedbackAndNavigate();
-        }} 
+        onComplete={completeFeedbackAndNavigate} 
       />
     );
   }
