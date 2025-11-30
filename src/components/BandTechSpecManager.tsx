@@ -214,6 +214,7 @@ const BandTechSpecManager = ({ userId, bandId, title, description }: BandTechSpe
         allowedTypes={['document', 'pdf', 'tech_spec', 'technical', 'application']}
         onFilesSelected={(files) => files[0] && handleFileSelected(files[0])}
         title={t('selectFromFileBank')}
+        userId={userId}
       />
 
       {loading ? (

@@ -1507,6 +1507,7 @@ export default function CreateOffer() {
         allowedTypes={['document']}
         onFilesSelected={handleTechSpecFileSelected}
         title="Velg Tech Spec"
+        userId={userId}
       />
 
       {/* Hospitality Rider Selection Modal */}
@@ -1517,6 +1518,7 @@ export default function CreateOffer() {
         allowedTypes={['document']}
         onFilesSelected={handleHospitalityFileSelected}
         title="Velg Hospitality Rider"
+        userId={userId}
       />
     </div>
   );
