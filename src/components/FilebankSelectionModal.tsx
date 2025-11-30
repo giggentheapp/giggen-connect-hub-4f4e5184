@@ -38,6 +38,7 @@ interface FilebankSelectionModalProps {
   fileTypes?: string[]; // e.g., ['image'], ['image', 'video', 'audio']
   title?: string;
   description?: string;
+  onNavigateToFilbank?: () => Promise<void>; // Callback to save draft before navigating
   allowClear?: boolean; // Allow clearing/removing selection
 }
 
@@ -50,6 +51,7 @@ export const FilebankSelectionModal = ({
   fileTypes,
   title = 'Velg fra Filbank',
   description = 'Velg en fil fra din filbank',
+  onNavigateToFilbank,
   allowClear = false
 }: FilebankSelectionModalProps) => {
   const navigate = useNavigate();
@@ -181,7 +183,10 @@ export const FilebankSelectionModal = ({
                 <p className="text-sm text-muted-foreground">Last opp filer til filbanken for å velge dem her</p>
               </div>
               <Button
-                onClick={() => {
+                onClick={async () => {
+                  if (onNavigateToFilbank) {
+                    await onNavigateToFilbank();
+                  }
                   onClose();
                   navigate(`/profile/${userId}?section=filbank`);
                 }}

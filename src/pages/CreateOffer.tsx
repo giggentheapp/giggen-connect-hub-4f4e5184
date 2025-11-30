@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image, Video, File as FileIcon } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle, Loader2, Music, FileText, Plus, X, Image, Video, File as FileIcon, Download } from 'lucide-react';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -71,6 +71,8 @@ export default function CreateOffer() {
   const [showFilebankModal, setShowFilebankModal] = useState(false);
   const [showTechSpecModal, setShowTechSpecModal] = useState(false);
   const [showHospitalityModal, setShowHospitalityModal] = useState(false);
+  const [selectedTechSpecFile, setSelectedTechSpecFile] = useState<any>(null);
+  const [selectedHospitalityFile, setSelectedHospitalityFile] = useState<any>(null);
   const [loadedTeachingConcept, setLoadedTeachingConcept] = useState<any>(null);
 
   const [conceptData, setConceptData] = useState<ConceptData>({
@@ -285,136 +287,56 @@ export default function CreateOffer() {
     setHasChanges(true);
   };
 
-  const handleTechSpecFileSelected = async (file: any) => {
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        toast({
-          title: "Ikke innlogget",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Generate public URL if file_url is missing
-      let fileUrl = file.file_url;
-      if (!fileUrl) {
-        const bucket = file.file_path.split('/')[0];
-        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
-        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-        fileUrl = data.publicUrl;
-      }
-
-      // Add to profile_tech_specs
-      const techSpecData = {
-        profile_id: userId,
-        filename: file.filename,
-        file_path: file.file_path,
-        file_type: file.file_type,
-        file_url: fileUrl,
-        mime_type: file.mime_type,
-        file_size: file.file_size
-      };
-
-      const { data: newTechSpec, error: createError } = await supabase
-        .from('profile_tech_specs')
-        .insert(techSpecData)
-        .select()
-        .single();
-
-      if (createError) throw createError;
-
-      // Add to file_usage
-      await supabase
-        .from('file_usage')
-        .insert({
-          file_id: file.id,
-          usage_type: 'tech_spec',
-          reference_id: newTechSpec.id
-        });
-
-      toast({
-        title: 'Tech spec lagt til',
-        description: `${file.filename} er lagt til`,
-      });
-
-      // Refresh tech specs list (this will trigger a re-fetch)
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error adding tech spec:', error);
-      toast({
-        title: 'Feil',
-        description: 'Kunne ikke legge til tech spec',
-        variant: 'destructive',
-      });
+  const handleTechSpecFileSelected = (file: any) => {
+    // Generate public URL if file_url is missing
+    let fileUrl = file.file_url;
+    if (!fileUrl) {
+      const bucket = file.file_path.split('/')[0];
+      const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      fileUrl = data.publicUrl;
     }
+
+    // Store file metadata in state for display
+    setSelectedTechSpecFile({
+      ...file,
+      file_url: fileUrl
+    });
+
+    // Update conceptData with file reference
+    updateConceptData('selected_tech_spec_file', file.id);
+
+    toast({
+      title: 'Tech spec valgt',
+      description: `${file.filename} vil bli lagt til når tilbudet publiseres`,
+    });
     
     setShowTechSpecModal(false);
   };
 
-  const handleHospitalityFileSelected = async (file: any) => {
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        toast({
-          title: "Ikke innlogget",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Generate public URL if file_url is missing
-      let fileUrl = file.file_url;
-      if (!fileUrl) {
-        const bucket = file.file_path.split('/')[0];
-        const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
-        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-        fileUrl = data.publicUrl;
-      }
-
-      // Add to hospitality_riders
-      const riderData = {
-        user_id: userId,
-        filename: file.filename,
-        file_path: file.file_path,
-        file_type: file.file_type,
-        file_url: fileUrl,
-        mime_type: file.mime_type,
-        file_size: file.file_size
-      };
-
-      const { data: newRider, error: createError } = await supabase
-        .from('hospitality_riders')
-        .insert(riderData)
-        .select()
-        .single();
-
-      if (createError) throw createError;
-
-      // Add to file_usage
-      await supabase
-        .from('file_usage')
-        .insert({
-          file_id: file.id,
-          usage_type: 'hospitality_rider',
-          reference_id: newRider.id
-        });
-
-      toast({
-        title: 'Hospitality rider lagt til',
-        description: `${file.filename} er lagt til`,
-      });
-
-      // Refresh hospitality riders list
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error adding hospitality rider:', error);
-      toast({
-        title: 'Feil',
-        description: 'Kunne ikke legge til hospitality rider',
-        variant: 'destructive',
-      });
+  const handleHospitalityFileSelected = (file: any) => {
+    // Generate public URL if file_url is missing
+    let fileUrl = file.file_url;
+    if (!fileUrl) {
+      const bucket = file.file_path.split('/')[0];
+      const path = file.file_path.substring(file.file_path.indexOf('/') + 1);
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      fileUrl = data.publicUrl;
     }
+
+    // Store file metadata in state for display
+    setSelectedHospitalityFile({
+      ...file,
+      file_url: fileUrl
+    });
+
+    // Update conceptData with file reference
+    updateConceptData('selected_hospitality_rider_file', file.id);
+
+    toast({
+      title: 'Hospitality rider valgt',
+      description: `${file.filename} vil bli lagt til når tilbudet publiseres`,
+    });
     
     setShowHospitalityModal(false);
   };
@@ -1249,6 +1171,45 @@ export default function CreateOffer() {
                   <FileText className="h-4 w-4 mr-2" />
                   Velg fra Filbank
                 </Button>
+
+                {selectedTechSpecFile && (
+                  <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {selectedTechSpecFile.filename}
+                          </p>
+                          {selectedTechSpecFile.file_size && (
+                            <p className="text-xs text-muted-foreground">
+                              {formatFileSize(selectedTechSpecFile.file_size)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(selectedTechSpecFile.file_url, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTechSpecFile(null);
+                            updateConceptData('selected_tech_spec_file', '');
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1262,6 +1223,45 @@ export default function CreateOffer() {
                   <FileText className="h-4 w-4 mr-2" />
                   Velg fra Filbank
                 </Button>
+
+                {selectedHospitalityFile && (
+                  <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {selectedHospitalityFile.filename}
+                          </p>
+                          {selectedHospitalityFile.file_size && (
+                            <p className="text-xs text-muted-foreground">
+                              {formatFileSize(selectedHospitalityFile.file_size)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(selectedHospitalityFile.file_url, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedHospitalityFile(null);
+                            updateConceptData('selected_hospitality_rider_file', '');
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1449,6 +1449,9 @@ export default function CreateOffer() {
         fileTypes={['document']}
         title="Velg Tech Spec"
         description="Velg en tech spec fil fra din filbank"
+        onNavigateToFilbank={async () => {
+          await handleSaveDraft();
+        }}
       />
 
       {/* Hospitality Rider Selection Modal */}
@@ -1460,6 +1463,9 @@ export default function CreateOffer() {
         fileTypes={['document']}
         title="Velg Hospitality Rider"
         description="Velg en hospitality rider fil fra din filbank"
+        onNavigateToFilbank={async () => {
+          await handleSaveDraft();
+        }}
       />
     </div>
   );
