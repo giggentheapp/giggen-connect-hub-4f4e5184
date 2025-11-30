@@ -126,8 +126,8 @@ export const ConceptViewModal = ({
         setConceptFiles(filesData || []);
       }
 
-      // Load tech spec file ONLY if viewMode is 'owner'
-      if (viewMode === 'owner' && conceptData.tech_spec_reference) {
+      // Load tech spec file - ALWAYS (public)
+      if (conceptData.tech_spec_reference) {
         const {
           data: techSpecData,
           error: techSpecError
@@ -381,46 +381,57 @@ export const ConceptViewModal = ({
                 </CardContent>
               </Card>}
 
-            {/* Tech Spec and Hospitality Rider Files - Only in owner mode */}
-            {viewMode === 'owner' && (techSpecFile || hospitalityRiderFile) && <Card>
+            {/* Tech Spec File - Always visible (public) */}
+            {techSpecFile && <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Vedlegg
+                    Teknisk spesifikasjon
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {techSpecFile && <div className="bg-muted/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-8 w-8 text-primary" />
-                          <div>
-                            <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
-                            <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
-                          </div>
+                <CardContent>
+                  <div className="bg-muted/30 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-8 w-8 text-primary" />
+                        <div>
+                          <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
+                          <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => window.open(techSpecFile.file_url, '_blank')}>
-                          <Download className="h-3 w-3 mr-1" />
-                          Last ned
-                        </Button>
                       </div>
-                    </div>}
-                  
-                  {hospitalityRiderFile && <div className="bg-muted/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-8 w-8 text-primary" />
-                          <div>
-                            <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
-                            <p className="text-xs text-muted-foreground">Hospitality Rider</p>
-                          </div>
+                      <Button variant="outline" size="sm" onClick={() => window.open(techSpecFile.file_url, '_blank')}>
+                        <Download className="h-3 w-3 mr-1" />
+                        Last ned
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>}
+
+            {/* Hospitality Rider File - Only in owner mode (private) */}
+            {viewMode === 'owner' && hospitalityRiderFile && <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Hospitality Rider
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/30 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-8 w-8 text-primary" />
+                        <div>
+                          <h5 className="font-medium text-sm">{hospitalityRiderFile.filename}</h5>
+                          <p className="text-xs text-muted-foreground">Hospitality Rider</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}>
-                          <Download className="h-3 w-3 mr-1" />
-                          Last ned
-                        </Button>
                       </div>
-                    </div>}
+                      <Button variant="outline" size="sm" onClick={() => window.open(hospitalityRiderFile.file_url, '_blank')}>
+                        <Download className="h-3 w-3 mr-1" />
+                        Last ned
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>}
 
