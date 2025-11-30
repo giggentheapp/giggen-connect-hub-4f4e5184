@@ -6,7 +6,15 @@ import { getSecurityHeaders, getRateLimitHeaders } from '../_shared/securityHead
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const securityHeaders = getSecurityHeaders(origin);
+  
+  // Create CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+  
+  const securityHeaders = { ...getSecurityHeaders(origin), ...corsHeaders };
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {

@@ -36,13 +36,23 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
 
     setCheckingUsername(true);
     try {
-      const response = await supabase.functions.invoke('validate-username', {
-        body: { username: value }
-      });
+      const response = await fetch(
+        'https://hkcdyqghfqyrlwjcsrnx.supabase.co/functions/v1/validate-username',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrY2R5cWdoZnF5cmx3amNzcm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MzAxNzcsImV4cCI6MjA3MTMwNjE3N30.zvNq7yhyyMMmbLE9trLxvCqd5HNoJ9JjokHOWGAJwWI`
+          },
+          body: JSON.stringify({ username: value })
+        }
+      );
 
-      if (response.error) throw response.error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      const data = response.data;
+      const data = await response.json();
       setUsernameAvailable(data.available);
       setUsernameError(data.error || "");
       return data.available;
