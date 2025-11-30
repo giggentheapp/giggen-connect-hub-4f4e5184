@@ -214,6 +214,7 @@ const BandHospitalityManager = ({ userId, bandId, title, description }: BandHosp
         allowedTypes={['document', 'pdf', 'hospitality', 'rider', 'application']}
         onFilesSelected={(files) => files[0] && handleFileSelected(files[0])}
         title={t('selectFromFileBank')}
+        userId={userId}
       />
 
       {loading ? (

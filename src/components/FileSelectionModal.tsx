@@ -14,6 +14,7 @@ interface FileSelectionModalProps {
   allowedTypes?: string[]; // e.g., ['image', 'video'] for portfolio, ['document'] for tech specs
   onFilesSelected: (files: FileWithUsage[]) => void;
   title?: string;
+  userId?: string; // For navigation to filbank
 }
 
 export const FileSelectionModal = ({
@@ -22,7 +23,8 @@ export const FileSelectionModal = ({
   files,
   allowedTypes,
   onFilesSelected,
-  title = 'Velg fra Filbank'
+  title = 'Velg fra Filbank',
+  userId
 }: FileSelectionModalProps) => {
   const [search, setSearch] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
@@ -145,8 +147,30 @@ export const FileSelectionModal = ({
           </div>
           
           {filteredFiles.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              Ingen filer funnet
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <File className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div className="text-center space-y-2">
+                <h3 className="font-semibold text-lg">Ingen filer funnet i filbanken</h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Last opp filer til filbanken for å velge dem her
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  onOpenChange(false);
+                  const targetUserId = userId || files[0]?.user_id || '';
+                  if (targetUserId) {
+                    window.location.href = `/profile/${targetUserId}?section=filbank`;
+                  }
+                }}
+                className="gap-2"
+                disabled={!userId && files.length === 0}
+              >
+                <File className="h-4 w-4" />
+                Gå til Filbank
+              </Button>
             </div>
           )}
         </div>
