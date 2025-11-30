@@ -494,6 +494,7 @@ export type Database = {
           end_time: string | null
           event_admin_id: string | null
           event_date: string | null
+          event_id: string | null
           hospitality_rider: string | null
           hospitality_rider_status: string | null
           id: string
@@ -555,6 +556,7 @@ export type Database = {
           end_time?: string | null
           event_admin_id?: string | null
           event_date?: string | null
+          event_id?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
           id?: string
@@ -616,6 +618,7 @@ export type Database = {
           end_time?: string | null
           event_admin_id?: string | null
           event_date?: string | null
+          event_id?: string | null
           hospitality_rider?: string | null
           hospitality_rider_status?: string | null
           id?: string
@@ -654,6 +657,13 @@ export type Database = {
           venue?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_market"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_receiver_id_fkey"
             columns: ["receiver_id"]
@@ -884,6 +894,7 @@ export type Database = {
         Row: {
           address: string | null
           banner_url: string | null
+          booking_id: string | null
           created_at: string | null
           created_by: string | null
           date: string
@@ -906,6 +917,7 @@ export type Database = {
         Insert: {
           address?: string | null
           banner_url?: string | null
+          booking_id?: string | null
           created_at?: string | null
           created_by?: string | null
           date: string
@@ -928,6 +940,7 @@ export type Database = {
         Update: {
           address?: string | null
           banner_url?: string | null
+          booking_id?: string | null
           created_at?: string | null
           created_by?: string | null
           date?: string
@@ -948,6 +961,13 @@ export type Database = {
           venue?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "events_market_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_market_created_by_fkey"
             columns: ["created_by"]
