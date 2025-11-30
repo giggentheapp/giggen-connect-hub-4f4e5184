@@ -27,8 +27,7 @@ export const useConcepts = (userId: string | undefined, includeDrafts: boolean =
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    // Return empty array as default to ensure stable reference
-    placeholderData: [],
+    placeholderData: [], // Ensure stable array reference
   });
 
   // Use useMemo to ensure stable array reference
