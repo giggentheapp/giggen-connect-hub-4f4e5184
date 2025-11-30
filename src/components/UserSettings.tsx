@@ -279,6 +279,12 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
       if (error) throw error;
 
       setProfileSettings(newSettings);
+      
+      // Invalidate queries to update dashboard and other components
+      queryClient.invalidateQueries({ queryKey: ['profile-settings', profile.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
       toast({
         title: "Lagret!",
         description: "Synlighetsinnstillingene ble oppdatert",

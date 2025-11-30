@@ -96,7 +96,7 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
         .from("profile_settings")
         .select("*")
         .eq("maker_id", profile.user_id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
