@@ -42,9 +42,9 @@ export const useCurrentUser = () => {
     };
   }, [navigate, refetch]);
 
-  // Redirect to auth if not logged in (but not if we're already on auth page)
+  // Redirect to auth if not logged in - handle race condition for new signups
   useEffect(() => {
-    // Skip all redirect logic if we're on the auth page
+    // Don't redirect if we're already on auth page
     if (window.location.pathname === '/auth') {
       return;
     }
@@ -54,12 +54,25 @@ export const useCurrentUser = () => {
       return;
     }
     
-    // Only redirect if no user at all
+    // If user exists but profile doesn't, wait and retry (for new signups)
+    // Database trigger might need time to create profile
+    if (data?.user && !data?.profile) {
+      logger.debug('User exists but profile missing, waiting for trigger...');
+      // Wait 2 seconds and retry once for new signups
+      const retryTimer = setTimeout(() => {
+        logger.debug('Retrying profile fetch after delay');
+        refetch();
+      }, 2000);
+      
+      return () => clearTimeout(retryTimer);
+    }
+    
+    // Only redirect if no user at all (not authenticated)
     if (!data?.user) {
       logger.debug('No user found, redirecting to auth');
       navigate('/auth');
     }
-  }, [data?.user, isLoading, navigate]);
+  }, [data?.user, data?.profile, isLoading, navigate, refetch]);
 
   // Show error toast if there's an error
   useEffect(() => {
