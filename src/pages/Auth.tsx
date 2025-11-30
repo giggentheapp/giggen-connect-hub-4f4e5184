@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
-import { User, Session } from '@supabase/supabase-js';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useAuthMode } from '@/hooks/useAuthMode';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { useAuthNavigation } from '@/hooks/useAuthNavigation';
 import giggenLogo from '@/assets/giggen-logo.png';
 import FirstLoginFeedback from '@/components/FirstLoginFeedback';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -12,110 +13,58 @@ import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 import { PasswordResetForm } from '@/components/auth/PasswordResetForm';
 
 const Auth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isLogin, setIsLogin] = useState(true);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const navigate = useNavigate();
   const { t } = useAppTranslation();
+  const { authMode, goToLogin, goToSignup, goToForgotPassword, goToResetPassword, goToFeedback } = useAuthMode();
+  const { user, session, loading } = useAuthSession();
+  const { navigateToDashboard, completeFeedbackAndNavigate } = useAuthNavigation();
+  const [isNavigating, setIsNavigating] = useState(false);
 
+  // Handle auth state changes and mode transitions
   useEffect(() => {
+    if (!session) return;
+
     let mounted = true;
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
-        
-        console.log('🔄 Auth state changed:', event, session ? 'has session' : 'no session');
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Handle password recovery - ONLY show reset form
+
+        // Handle password recovery - show reset form
         if (event === 'PASSWORD_RECOVERY') {
-          setIsResettingPassword(true);
-          setIsForgotPassword(false);
-          setIsLogin(false);
-          setLoading(false);
+          goToResetPassword();
           return;
         }
-        
-        // Handle sign out
+
+        // Handle sign out - return to login
         if (event === 'SIGNED_OUT') {
-          setIsResettingPassword(false);
-          setIsForgotPassword(false);
-          setIsLogin(true);
-          setLoading(false);
+          goToLogin();
           return;
         }
-        
-        // Handle successful sign in - Navigate to dashboard
+
+        // Handle successful sign in - navigate to dashboard
         if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-          // Reset password recovery mode
-          setIsResettingPassword(false);
-          setIsForgotPassword(false);
+          goToLogin(); // Reset any password recovery state
+          setIsNavigating(true);
           
-          // Wait briefly for profile to be created by database trigger
-          const checkProfileAndNavigate = async () => {
-            let profile = null;
-            let retries = 0;
-            const maxRetries = 3;
-            
-            // Retry fetching profile (database trigger is usually instant)
-            while (!profile && retries < maxRetries) {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('user_id')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-              
-              if (profileData) {
-                profile = profileData;
-                break;
-              }
-              
-              await new Promise(resolve => setTimeout(resolve, 400));
-              retries++;
-            }
-            
-            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-            
-            // Check if first login
-            const feedbackSubmitted = localStorage.getItem('feedback_submitted');
-            const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
-            
-            if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
-              setShowFeedback(true);
-              setLoading(false);
-            } else {
-              navigate(dashboardUrl, { replace: true });
-            }
-          };
+          const shouldShowFeedback = await navigateToDashboard(session.user.id);
           
-          checkProfileAndNavigate();
-        } else {
-          setLoading(false);
+          if (shouldShowFeedback && mounted) {
+            goToFeedback();
+          }
+          
+          setIsNavigating(false);
         }
       }
     );
-
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [session, goToLogin, goToResetPassword, goToFeedback, navigateToDashboard]);
 
-  if (loading) {
+  // Loading state
+  if (loading || isNavigating) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -127,29 +76,17 @@ const Auth = () => {
   }
 
   // Show feedback form after first login
-  if (showFeedback) {
+  if (authMode === 'feedback') {
     return (
       <FirstLoginFeedback 
         onComplete={async () => {
-          setShowFeedback(false);
-          
-          // Get user profile to navigate to correct URL
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('user_id')
-              .eq('user_id', user.id)
-              .single();
-            
-            const dashboardUrl = profile ? `/profile/${profile.user_id}?section=dashboard` : '/auth';
-            navigate(dashboardUrl);
-          }
+          await completeFeedbackAndNavigate();
         }} 
       />
     );
   }
 
+  // Render appropriate form based on auth mode
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md mobile-optimized">
@@ -162,29 +99,29 @@ const Auth = () => {
             />
           </div>
           <CardDescription className="text-base md:text-sm">
-            {isLogin ? t('loginToAccount') : t('createNewAccount')}
+            {authMode === 'login' ? t('loginToAccount') : t('createNewAccount')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isResettingPassword ? (
+          {authMode === 'reset-password' ? (
             <PasswordResetForm 
-              onSuccess={() => setIsResettingPassword(false)}
+              onSuccess={goToLogin}
             />
-          ) : isForgotPassword ? (
+          ) : authMode === 'forgot-password' ? (
             <ForgotPasswordForm 
-              onSuccess={() => setIsForgotPassword(false)}
-              onCancel={() => setIsForgotPassword(false)}
+              onSuccess={goToLogin}
+              onCancel={goToLogin}
             />
-          ) : isLogin ? (
+          ) : authMode === 'login' ? (
             <LoginForm 
               onSuccess={() => {}}
-              onSwitchToSignup={() => setIsLogin(false)}
-              onForgotPassword={() => setIsForgotPassword(true)}
+              onSwitchToSignup={goToSignup}
+              onForgotPassword={goToForgotPassword}
             />
           ) : (
             <SignUpForm 
               onSuccess={() => {}}
-              onSwitchToLogin={() => setIsLogin(true)}
+              onSwitchToLogin={goToLogin}
             />
           )}
         </CardContent>
