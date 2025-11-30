@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Image, File, Check, X } from 'lucide-react';
+import { Image, File, Check, X, FolderOpen } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -49,6 +50,7 @@ export const FilebankSelectionModal = ({
   title = 'Velg fra Filbank',
   description = 'Velg en fil fra din filbank'
 }: FilebankSelectionModalProps) => {
+  const navigate = useNavigate();
   const [files, setFiles] = useState<FilebankFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<FilebankFile | null>(null);
@@ -163,8 +165,22 @@ export const FilebankSelectionModal = ({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : files.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Ingen filer funnet i filbanken</p>
+            <div className="text-center py-12 space-y-4">
+              <FolderOpen className="h-16 w-16 text-muted-foreground mx-auto" />
+              <div className="space-y-2">
+                <p className="text-lg font-medium">Ingen filer funnet i filbanken</p>
+                <p className="text-sm text-muted-foreground">Last opp filer til filbanken for å velge dem her</p>
+              </div>
+              <Button
+                onClick={() => {
+                  onClose();
+                  navigate('/filebank');
+                }}
+                className="mt-4"
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Gå til Filbank
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
