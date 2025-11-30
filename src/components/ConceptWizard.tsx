@@ -466,9 +466,22 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   </SelectContent>
                 </Select>
                 {availableTechSpecs.length === 0 && !techSpecsLoading && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {t('conceptWizard.technical.techSpecUploadTip')}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('conceptWizard.technical.techSpecUploadTip')}
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        await handleSave(false);
+                        window.location.href = `/profile/${userId}?section=filbank`;
+                      }}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Last opp tech spec i filbank
+                    </Button>
+                  </div>
                 )}
               </div>
               
@@ -503,9 +516,22 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                   </SelectContent>
                 </Select>
                 {availableHospitalityRiders.length === 0 && !hospitalityRidersLoading && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {t('conceptWizard.technical.hospitalityRiderUploadTip')}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('conceptWizard.technical.hospitalityRiderUploadTip')}
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        await handleSave(false);
+                        window.location.href = `/profile/${userId}?section=filbank`;
+                      }}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Last opp hospitality rider i filbank
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

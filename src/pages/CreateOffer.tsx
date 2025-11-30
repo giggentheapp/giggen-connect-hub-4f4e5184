@@ -661,7 +661,10 @@ export default function CreateOffer() {
       {/* Show type selector if no type selected */}
       {!conceptType && !draftId && (
         <div className="container mx-auto px-4 py-16">
-          <ConceptTypeSelector onSelect={setConceptType} />
+          <ConceptTypeSelector 
+            onSelect={setConceptType}
+            onBack={() => navigate(-1)}
+          />
         </div>
       )}
 
@@ -957,6 +960,24 @@ export default function CreateOffer() {
                     ))}
                   </SelectContent>
                 </Select>
+                {availableTechSpecs.length === 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Du har ingen tech specs. Last opp i filbank for å velge.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        await handleSaveDraft();
+                        window.location.href = `/profile/${userId}?section=filbank`;
+                      }}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Last opp tech spec i filbank
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -976,6 +997,24 @@ export default function CreateOffer() {
                     ))}
                   </SelectContent>
                 </Select>
+                {availableHospitalityRiders.length === 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Du har ingen hospitality riders. Last opp i filbank for å velge.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        await handleSaveDraft();
+                        window.location.href = `/profile/${userId}?section=filbank`;
+                      }}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Last opp hospitality rider i filbank
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div>
