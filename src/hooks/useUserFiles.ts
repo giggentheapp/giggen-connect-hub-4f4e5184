@@ -134,6 +134,33 @@ export const useUserFiles = (userId: string | undefined) => {
         }
       }
 
+      // Remove reference from profile avatar if this file is used as avatar
+      const { data: allProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, avatar_url');
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+      } else if (allProfiles) {
+        console.log('Checking', allProfiles.length, 'profiles for file usage');
+        for (const profile of allProfiles) {
+          // Check if avatar_url contains the file path
+          if (profile.avatar_url && (profile.avatar_url === fileUrl || profile.avatar_url.includes(filePath))) {
+            console.log('Removing avatar from profile:', profile.user_id);
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ avatar_url: null })
+              .eq('user_id', profile.user_id);
+              
+            if (updateError) {
+              console.error('Error updating profile:', updateError);
+            } else {
+              console.log('Successfully removed avatar from profile:', profile.user_id);
+            }
+          }
+        }
+      }
+
       // Get all usages of this file from file_usage table
       const { data: usages } = await supabase
         .from('file_usage')
