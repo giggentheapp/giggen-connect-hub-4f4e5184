@@ -107,6 +107,19 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
     fetchUserSettings();
   }, [profile.user_id]);
 
+  // Scroll to visibility section if requested
+  useEffect(() => {
+    if ((location.state as { scrollToVisibility?: boolean })?.scrollToVisibility) {
+      // Wait for DOM to render
+      setTimeout(() => {
+        const element = document.getElementById('visibility');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }
+  }, [location.state]);
+
   const fetchUserSettings = async () => {
     try {
       // Fetch current profile data
