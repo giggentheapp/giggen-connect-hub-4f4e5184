@@ -120,13 +120,14 @@ export const ArrangørTilbudWizard = ({
         }
       }
 
-      // Ensure tech_spec_reference and hospitality_rider_reference are null if empty/invalid
-      const techSpecRef = data.selected_tech_spec_file && data.selected_tech_spec_file.length === 36 
-        ? data.selected_tech_spec_file 
-        : null;
-      const hospitalityRef = data.selected_hospitality_rider_file && data.selected_hospitality_rider_file.length === 36 
-        ? data.selected_hospitality_rider_file 
-        : null;
+      // Ensure tech_spec_reference and hospitality_rider_reference are null if empty/invalid UUID
+      // Must be valid UUID (36 chars with dashes) to avoid FK constraint errors
+      const isValidUUID = (val: any): boolean => {
+        if (!val || typeof val !== 'string') return false;
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      };
+      const techSpecRef = isValidUUID(data.selected_tech_spec_file) ? data.selected_tech_spec_file : null;
+      const hospitalityRef = isValidUUID(data.selected_hospitality_rider_file) ? data.selected_hospitality_rider_file : null;
 
       const payload = {
         maker_id: userId,
