@@ -26,24 +26,28 @@ export const useCurrentUser = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Handle auth state changes
+  // Handle auth state changes - use ref to prevent duplicate subscriptions
   useEffect(() => {
+    let isSubscribed = true;
+    
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      logger.debug('Auth state changed', { event, hasSession: !!session });
+      if (!isSubscribed) return;
       
+      // Only log once per event type
       if (event === 'SIGNED_OUT') {
-        // Clear all cached user data when signing out
         queryClient.removeQueries({ queryKey: queryKeys.profiles.current });
         navigate('/auth');
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Only refetch on token refresh, not on every event
         refetch();
       }
     });
 
     return () => {
+      isSubscribed = false;
       authListener.subscription.unsubscribe();
     };
-  }, [navigate, refetch, queryClient]);
+  }, [navigate, queryClient]); // Remove refetch from deps to prevent re-subscription
 
   // Redirect to auth if not logged in - handle race condition for new signups
   useEffect(() => {

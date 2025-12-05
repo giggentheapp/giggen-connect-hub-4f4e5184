@@ -27,22 +27,30 @@ export const useAuthSession = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Subscribe to auth state changes - ONLY update state, no navigation logic
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-      }
-    );
-
-    // Check for existing session on mount
+    // Get initial session FIRST before subscribing
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
+
+    // Subscribe to auth state changes - ONLY update state, no navigation logic
+    // Use a ref to prevent duplicate event handling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!mounted) return;
+        // Only update if session actually changed
+        setSession(prev => {
+          if (prev?.access_token === session?.access_token) return prev;
+          return session;
+        });
+        setUser(prev => {
+          if (prev?.id === session?.user?.id) return prev;
+          return session?.user ?? null;
+        });
+      }
+    );
 
     return () => {
       mounted = false;

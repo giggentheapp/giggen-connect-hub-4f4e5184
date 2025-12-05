@@ -7,6 +7,7 @@ export const queryKeys = {
   profiles: {
     current: ['profiles', 'current'] as const,
     detail: (id: string) => ['profiles', 'detail', id] as const,
+    role: ['profiles', 'role'] as const,
   },
   concepts: {
     all: ['concepts'] as const,

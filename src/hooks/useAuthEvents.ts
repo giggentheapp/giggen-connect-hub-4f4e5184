@@ -33,35 +33,36 @@ export const useAuthEvents = (callbacks: AuthEventCallbacks) => {
       async (event, session) => {
         if (!mounted) return;
 
-        console.log('🔄 Auth event:', event, session ? 'has session' : 'no session');
-
-        // Guard against duplicate INITIAL_SESSION events to prevent throttling
+        // Guard against duplicate events with debouncing
         const now = Date.now();
         const lastEvent = lastProcessedEventRef.current;
+        
+        // Skip if same event type and user within 2 seconds
         if (
-          event === 'INITIAL_SESSION' &&
-          lastEvent?.event === 'INITIAL_SESSION' &&
-          lastEvent?.userId === session?.user?.id &&
-          now - lastEvent.timestamp < 1000
+          lastEvent &&
+          lastEvent.event === event &&
+          lastEvent.userId === session?.user?.id &&
+          now - lastEvent.timestamp < 2000
         ) {
-          console.log('⏭️ Skipping duplicate INITIAL_SESSION event');
           return;
         }
 
         // Handle password recovery - show reset form
         if (event === 'PASSWORD_RECOVERY') {
+          lastProcessedEventRef.current = { event, userId: undefined, timestamp: now };
           onPasswordRecovery();
           return;
         }
 
         // Handle sign out - return to login
         if (event === 'SIGNED_OUT') {
+          lastProcessedEventRef.current = { event, userId: undefined, timestamp: now };
           onSignOut();
           return;
         }
 
-        // Handle successful sign in - navigate to dashboard
-        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        // Handle successful sign in - navigate to dashboard (only SIGNED_IN, not INITIAL_SESSION)
+        if (session?.user && event === 'SIGNED_IN') {
           lastProcessedEventRef.current = {
             event,
             userId: session.user.id,
