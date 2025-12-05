@@ -7,6 +7,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, X, ArrowRight, Eye, Settings, Archive, Trash2 } from 'lucide-react';
+import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
 interface BookingActionsProps {
   booking: any;
   currentUserId: string;
@@ -20,6 +21,7 @@ export const BookingActions = ({
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const [showPublishPreview, setShowPublishPreview] = useState(false);
   const {
     updateBooking,
     deleteBookingSecurely,
@@ -163,7 +165,7 @@ export const BookingActions = ({
     return "Dette vil PERMANENT slette bookingen fra systemet. Handlingen kan ikke angres.";
   };
   const showPublishingSummary = () => {
-    navigate(`/booking/${booking.id}/publish-preview`);
+    setShowPublishPreview(true);
   };
   return <>
       <div className="flex gap-1.5 items-center flex-wrap">
@@ -379,5 +381,14 @@ export const BookingActions = ({
         )}
 
       </div>
+      
+      {showPublishPreview && (
+        <BookingPublishPreviewModal
+          bookingId={booking.id}
+          isOpen={showPublishPreview}
+          onClose={() => setShowPublishPreview(false)}
+          currentUserId={currentUserId}
+        />
+      )}
     </>;
 };
