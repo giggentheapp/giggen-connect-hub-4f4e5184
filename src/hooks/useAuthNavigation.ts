@@ -55,11 +55,18 @@ export const useAuthNavigation = () => {
 
   /**
    * Navigate to user dashboard after successful authentication
+   * Only navigates if user is on /auth page - preserves current location otherwise
    * 
    * @param {string} userId - The authenticated user's ID
    * @returns {Promise<boolean>} True if should show feedback, false if already navigated
    */
   const navigateToDashboard = useCallback(async (userId: string): Promise<boolean> => {
+    // Only redirect if user is currently on auth page
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/auth' && currentPath !== '/') {
+      return false; // User is already on a valid page, don't redirect
+    }
+    
     setIsNavigating(true);
     
     try {
