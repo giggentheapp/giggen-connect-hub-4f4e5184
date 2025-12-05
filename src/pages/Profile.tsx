@@ -7,7 +7,15 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useProfile } from '@/hooks/useProfile';
 
 const Profile = () => {
-  const { userId } = useParams();
+  const { userId: rawUserId } = useParams();
+  
+  // Clean userId - remove query parameters and hash fragments
+  // Fixes bug where userId contains "?section=dashboard" causing 400 errors
+  const userId = useMemo(() => {
+    if (!rawUserId) return undefined;
+    return rawUserId.split('?')[0].split('#')[0].trim();
+  }, [rawUserId]);
+  
   const { user: currentUser, profile: currentUserProfile } = useCurrentUser();
   const { profile, loading } = useProfile(userId);
 
