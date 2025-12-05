@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { User, Search, Ticket, Home, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +43,12 @@ export const UnifiedSidePanel = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Extract clean userId from profile - never from URL to avoid corruption
+  const cleanProfileUserId = useMemo(() => {
+    return profile.user_id?.split('?')[0].split('#')[0].trim();
+  }, [profile.user_id]);
+  
   // For other people's profiles, always show profile section by default
   const initialSection = isOwnProfile 
     ? (searchParams.get('section') || location.state?.section || 'dashboard')
@@ -63,9 +69,8 @@ export const UnifiedSidePanel = ({
     if (!isOwnProfile) {
       if (section !== 'profile') {
         setActiveSection('profile');
-        // Update URL to reflect profile section
-        const currentPath = location.pathname;
-        navigate(`${currentPath}?section=profile`, { replace: true });
+        // Update URL to reflect profile section - use clean userId
+        navigate(`/profile/${cleanProfileUserId}?section=profile`, { replace: true });
       }
       return;
     }
@@ -73,7 +78,7 @@ export const UnifiedSidePanel = ({
     if (section && section !== activeSection) {
       setActiveSection(section);
     }
-  }, [searchParams, location.state, isOwnProfile]);
+  }, [searchParams, location.state, isOwnProfile, cleanProfileUserId]);
 
   const handleSignOut = async () => {
     const {
@@ -90,20 +95,18 @@ export const UnifiedSidePanel = ({
     }
   };
   const handleNavigation = (section: string) => {
+    // Clean the currentUserId if provided
+    const cleanCurrentUserId = currentUserId?.split('?')[0].split('#')[0].trim();
+    
     // If viewing someone else's profile, navigate to own profile with the selected section
-    if (!isOwnProfile && currentUserId) {
-      navigate(`/profile/${currentUserId}?section=${section}`);
+    if (!isOwnProfile && cleanCurrentUserId) {
+      navigate(`/profile/${cleanCurrentUserId}?section=${section}`);
       return;
     }
     
-    // If on own profile, just change section
+    // If on own profile, just change section - always use clean userId
     setActiveSection(section);
-    const currentPath = location.pathname;
-    if (currentPath.startsWith('/profile/')) {
-      navigate(`${currentPath}?section=${section}`);
-    } else {
-      navigate(`/profile/${profile.user_id}?section=${section}`);
-    }
+    navigate(`/profile/${cleanProfileUserId}?section=${section}`);
   };
 
   // Unified navigation items - always show full navigation
