@@ -201,7 +201,7 @@ export const SessionMusicianWizard = ({
       }
     },
     onBack,
-  }), [existingConcept, userId, toast, onSuccess, onBack]);
+  }), [existingConcept, userId, onSuccess, onBack]);
 
   return <BaseConceptWizard config={config} userId={userId} />;
 };

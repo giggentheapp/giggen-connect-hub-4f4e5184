@@ -76,7 +76,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
     setData((prev: any) => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = useCallback(async () => {
     setSaving(true);
     try {
       await config.onSave(data, false);
@@ -93,11 +93,11 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
     } finally {
       setSaving(false);
     }
-  };
+  }, [config, data, toast]);
 
-  const handlePublish = async () => {
+  const handlePublish = useCallback(async () => {
     // Validate all steps before publishing
-    const invalidStep = config.steps.findIndex((step, index) => {
+    const invalidStep = config.steps.findIndex((step) => {
       if (step.validation && !step.validation(data)) {
         return true;
       }
@@ -130,9 +130,9 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
     } finally {
       setSaving(false);
     }
-  };
+  }, [config, data, toast]);
 
-  const nextStep = () => {
+  const nextStep = useCallback(() => {
     const currentStepConfig = config.steps[currentStep];
     if (currentStepConfig.validation && !currentStepConfig.validation(data)) {
       toast({
@@ -145,28 +145,27 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
     if (currentStep < config.steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
-  };
+  }, [config.steps, currentStep, data, toast]);
 
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
     }
-  };
+  }, [currentStep]);
 
   // Memoize the current step component to prevent unnecessary re-renders
   const CurrentStepComponent = useMemo(() => {
     return config.steps[currentStep].component;
   }, [config.steps, currentStep]);
 
-  // Render based on layout type
-  if (config.layout === 'card') {
-    return <CardLayout />;
-  }
-
-  return <StickyHeaderLayout />;
+  const currentStepId = config.steps[currentStep].id;
+  const currentStepTitle = config.steps[currentStep].title;
+  const currentStepDescription = config.steps[currentStep].description;
+  const isLastStep = currentStep === config.steps.length - 1;
+  const isFirstStep = currentStep === 0;
 
   // Card layout (for teaching)
-  function CardLayout() {
+  if (config.layout === 'card') {
     return (
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
@@ -174,7 +173,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
             {config.conceptType === 'teaching' ? 'Opprett Undervisningsavtale' : 'Opprett Tilbud'}
           </CardTitle>
           <CardDescription>
-            {config.steps[currentStep].title} - {config.steps[currentStep].description}
+            {currentStepTitle} - {currentStepDescription}
           </CardDescription>
         </CardHeader>
 
@@ -208,7 +207,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
           {/* Step content */}
           <div className="min-h-[400px]">
             <CurrentStepComponent
-              key={config.steps[currentStep].id}
+              key={currentStepId}
               data={data}
               updateData={updateData}
               userId={userId}
@@ -221,15 +220,15 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
           <div className="flex justify-between items-center pt-6 border-t">
             <Button
               variant="outline"
-              onClick={currentStep === 0 ? config.onBack : prevStep}
+              onClick={isFirstStep ? config.onBack : prevStep}
               disabled={saving}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
-              {currentStep === 0 ? 'Tilbake' : 'Forrige'}
+              {isFirstStep ? 'Tilbake' : 'Forrige'}
             </Button>
 
             <div className="flex gap-2">
-              {currentStep === config.steps.length - 1 ? (
+              {isLastStep ? (
                 <>
                   <Button
                     variant="outline"
@@ -273,119 +272,117 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
   }
 
   // Sticky header layout (for session_musician)
-  function StickyHeaderLayout() {
-    return (
-      <>
-        {/* Sticky header */}
-        <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                variant="ghost"
-                onClick={config.onBack}
-                disabled={saving}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tilbake
-              </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Lagrer...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Lagre utkast
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Progress indicator */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {config.steps.map((step, index) => (
-                <button
-                  key={step.id}
-                  onClick={() => setCurrentStep(index)}
-                  disabled={saving}
-                  className={cn(
-                    'flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                    index === currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : index < currentStep
-                      ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  )}
-                >
-                  <span className="hidden sm:inline">{step.title}</span>
-                  <span className="sm:hidden">{index + 1}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
-
-        {/* Main content */}
-        <main className="container mx-auto px-4 py-8 max-w-3xl">
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">
-                {config.steps[currentStep].title}
-              </h2>
-              <p className="text-muted-foreground">
-                {config.steps[currentStep].description}
-              </p>
-            </div>
-
-            <CurrentStepComponent
-              key={config.steps[currentStep].id}
-              data={data}
-              updateData={updateData}
-              userId={userId}
-              availableTechSpecs={availableTechSpecs}
-              availableHospitalityRiders={availableHospitalityRiders}
-            />
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center pt-6 border-t">
+  return (
+    <>
+      {/* Sticky header */}
+      <header className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              onClick={config.onBack}
+              disabled={saving}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake
+            </Button>
+            <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={prevStep}
-                disabled={currentStep === 0 || saving}
+                onClick={handleSaveDraft}
+                disabled={saving}
               >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Forrige
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Lagrer...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Lagre utkast
+                  </>
+                )}
               </Button>
-
-              {currentStep === config.steps.length - 1 ? (
-                <Button onClick={handlePublish} disabled={saving} size="lg">
-                  {saving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Publiserer...
-                    </>
-                  ) : (
-                    '🎉 Publiser tilbud'
-                  )}
-                </Button>
-              ) : (
-                <Button onClick={nextStep} disabled={saving}>
-                  Neste
-                  <ChevronRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
             </div>
           </div>
-        </main>
-      </>
-    );
-  }
+
+          {/* Progress indicator */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {config.steps.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => setCurrentStep(index)}
+                disabled={saving}
+                className={cn(
+                  'flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                  index === currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : index < currentStep
+                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                )}
+              >
+                <span className="hidden sm:inline">{step.title}</span>
+                <span className="sm:hidden">{index + 1}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">
+              {currentStepTitle}
+            </h2>
+            <p className="text-muted-foreground">
+              {currentStepDescription}
+            </p>
+          </div>
+
+          <CurrentStepComponent
+            key={currentStepId}
+            data={data}
+            updateData={updateData}
+            userId={userId}
+            availableTechSpecs={availableTechSpecs}
+            availableHospitalityRiders={availableHospitalityRiders}
+          />
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={prevStep}
+              disabled={isFirstStep || saving}
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Forrige
+            </Button>
+
+            {isLastStep ? (
+              <Button onClick={handlePublish} disabled={saving} size="lg">
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Publiserer...
+                  </>
+                ) : (
+                  '🎉 Publiser tilbud'
+                )}
+              </Button>
+            ) : (
+              <Button onClick={nextStep} disabled={saving}>
+                Neste
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </main>
+    </>
+  );
 };
