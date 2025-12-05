@@ -11,10 +11,14 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
 import { BookingCardStep2 } from '@/components/BookingCardStep2';
 import { BookingCardStep3 } from '@/components/BookingCardStep3';
+import { BookingEditModal } from '@/components/BookingEditModal';
+import { BookingConfirmation } from '@/components/BookingConfirmation';
+import { BookingAgreement } from '@/components/BookingAgreement';
 import { format } from 'date-fns';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserProfile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 interface BookingsSectionProps {
   profile: UserProfile;
@@ -34,6 +38,11 @@ export const BookingsSection = ({
     sent: 0,
     ongoing: 0
   });
+  
+  // Modal states
+  const [editModalBookingId, setEditModalBookingId] = useState<string | null>(null);
+  const [confirmModalBookingId, setConfirmModalBookingId] = useState<string | null>(null);
+  const [agreementModalBookingId, setAgreementModalBookingId] = useState<string | null>(null);
 
   // Handle URL tab parameter
   useEffect(() => {
@@ -206,7 +215,7 @@ export const BookingsSection = ({
     };
 
     const handleEditClick = () => {
-      navigate(`/booking/${booking.id}/edit`);
+      setEditModalBookingId(booking.id);
     };
 
     const handleConceptClick = () => {
@@ -217,11 +226,11 @@ export const BookingsSection = ({
     };
 
     const handleConfirmationClick = () => {
-      navigate(`/booking/${booking.id}/confirm`);
+      setConfirmModalBookingId(booking.id);
     };
 
     const handleAgreementClick = () => {
-      navigate(`/booking/${booking.id}/agreement`);
+      setAgreementModalBookingId(booking.id);
     };
 
     // Use different card components based on booking status
@@ -423,6 +432,47 @@ export const BookingsSection = ({
           </div>
 
       </div>
+      
+      {/* Edit Modal */}
+      <Sheet open={!!editModalBookingId} onOpenChange={(open) => !open && setEditModalBookingId(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Rediger booking</SheetTitle>
+          </SheetHeader>
+          {editModalBookingId && bookings.find(b => b.id === editModalBookingId) && (
+            <div className="mt-4">
+              <BookingEditModal
+                booking={bookings.find(b => b.id === editModalBookingId)}
+                currentUserId={profile.user_id}
+                onSaved={() => {
+                  setEditModalBookingId(null);
+                  refetch();
+                }}
+              />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+      
+      {/* Confirmation Modal */}
+      {confirmModalBookingId && bookings.find(b => b.id === confirmModalBookingId) && (
+        <BookingConfirmation
+          booking={bookings.find(b => b.id === confirmModalBookingId)}
+          isOpen={!!confirmModalBookingId}
+          onClose={() => setConfirmModalBookingId(null)}
+          currentUserId={profile.user_id}
+        />
+      )}
+      
+      {/* Agreement Modal */}
+      {agreementModalBookingId && bookings.find(b => b.id === agreementModalBookingId) && (
+        <BookingAgreement
+          booking={bookings.find(b => b.id === agreementModalBookingId)}
+          isOpen={!!agreementModalBookingId}
+          onClose={() => setAgreementModalBookingId(null)}
+          currentUserId={profile.user_id}
+        />
+      )}
     </BookingErrorBoundary>
   );
 };

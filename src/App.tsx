@@ -20,12 +20,8 @@ import FeedbackButton from "./components/FeedbackButton";
 import ConceptOwnerView from "./pages/ConceptOwnerView";
 import ProfileConceptView from "./pages/ProfileConceptView";
 import CreateOffer from "./pages/CreateOffer";
-import BookingEdit from "./pages/BookingEdit";
-import BookingConfirmationPage from "./pages/BookingConfirmationPage";
-import BookingAgreementPage from "./pages/BookingAgreementPage";
 import BookingRequestPage from "./pages/BookingRequestPage";
 import BookingAgreementReview from "./pages/BookingAgreementReview";
-import BookingPublishPreview from "./pages/BookingPublishPreview";
 import BookingAgreementView from "./pages/BookingAgreementView";
 import TeachingAgreementView from "./pages/TeachingAgreementView";
 import PublicEventView from "./pages/PublicEventView";
@@ -85,11 +81,7 @@ const App = () => {
               <Route path="/bookings" element={<Navigate to="/auth" replace />} />
               
               <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
-              <Route path="/booking/:bookingId/edit" element={<BookingEdit />} />
               <Route path="/booking/:bookingId/review" element={<BookingAgreementReview />} />
-              <Route path="/booking/:bookingId/publish-preview" element={<BookingPublishPreview />} />
-              <Route path="/booking/:bookingId/confirm" element={<BookingConfirmationPage />} />
-              <Route path="/booking/:bookingId/agreement" element={<BookingAgreementPage />} />
               <Route path="/booking/:bookingId/view" element={<BookingAgreementView />} />
               <Route path="/booking/:bookingId/teaching-agreement" element={<TeachingAgreementView />} />
               
