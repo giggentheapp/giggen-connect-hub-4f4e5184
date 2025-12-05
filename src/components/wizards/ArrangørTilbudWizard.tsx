@@ -179,7 +179,10 @@ export const ArrangørTilbudWizard = ({
             creator_id: userId,
             filename: file.filename,
             file_path: file.file_path,
-            file_url: file.publicUrl,
+            file_url:
+              file.publicUrl ||
+              file.file_url ||
+              `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${file.file_path}`,
             file_type: file.file_type,
             mime_type: file.mime_type,
             file_size: file.file_size,
