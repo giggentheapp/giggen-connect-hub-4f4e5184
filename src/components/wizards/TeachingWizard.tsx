@@ -180,8 +180,8 @@ export const TeachingWizard = ({
         concept_type: 'teaching',
         teaching_data: data.sections as any,
         available_dates: data.is_indefinite 
-          ? JSON.stringify({ indefinite: true })
-          : (data.available_dates?.length > 0 ? JSON.stringify(data.available_dates) : null),
+          ? { indefinite: true }
+          : (data.available_dates?.length > 0 ? data.available_dates : null),
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft',
         public_visibility_settings: data.visibilitySettings,

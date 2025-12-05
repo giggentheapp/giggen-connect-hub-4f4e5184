@@ -140,9 +140,9 @@ export const SessionMusicianWizard = ({
         hospitality_rider_reference: hospitalityRef,
         program_type: data.program_type || null,
         available_dates: data.is_indefinite
-          ? JSON.stringify({ indefinite: true })
+          ? { indefinite: true }
           : data.available_dates.length > 0
-          ? JSON.stringify(data.available_dates)
+          ? data.available_dates
           : null,
         is_published: isPublished,
         status: isPublished ? 'published' : 'draft',
