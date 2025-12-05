@@ -79,6 +79,7 @@ export const PasswordStrengthValidator: React.FC<PasswordStrengthValidatorProps>
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
           placeholder={placeholder}
+          autoComplete="new-password"
           className="w-full px-3 py-2 pr-10 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
         />
         <Button

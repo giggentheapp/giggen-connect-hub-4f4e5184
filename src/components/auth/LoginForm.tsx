@@ -76,6 +76,7 @@ export const LoginForm = ({ onSuccess, onSwitchToSignup, onForgotPassword }: Log
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={isSubmitting}
+          autoComplete="email"
         />
       </div>
       
@@ -90,6 +91,7 @@ export const LoginForm = ({ onSuccess, onSwitchToSignup, onForgotPassword }: Log
             required
             disabled={isSubmitting}
             className="pr-10"
+            autoComplete="current-password"
           />
           <Button
             type="button"

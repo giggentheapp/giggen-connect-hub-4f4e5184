@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -24,6 +24,7 @@ interface AuthEventCallbacks {
  */
 export const useAuthEvents = (callbacks: AuthEventCallbacks) => {
   const { onPasswordRecovery, onSignOut, onSignIn } = callbacks;
+  const lastProcessedEventRef = useRef<{ event: string; userId?: string; timestamp: number } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +34,19 @@ export const useAuthEvents = (callbacks: AuthEventCallbacks) => {
         if (!mounted) return;
 
         console.log('🔄 Auth event:', event, session ? 'has session' : 'no session');
+
+        // Guard against duplicate INITIAL_SESSION events to prevent throttling
+        const now = Date.now();
+        const lastEvent = lastProcessedEventRef.current;
+        if (
+          event === 'INITIAL_SESSION' &&
+          lastEvent?.event === 'INITIAL_SESSION' &&
+          lastEvent?.userId === session?.user?.id &&
+          now - lastEvent.timestamp < 1000
+        ) {
+          console.log('⏭️ Skipping duplicate INITIAL_SESSION event');
+          return;
+        }
 
         // Handle password recovery - show reset form
         if (event === 'PASSWORD_RECOVERY') {
@@ -48,6 +62,11 @@ export const useAuthEvents = (callbacks: AuthEventCallbacks) => {
 
         // Handle successful sign in - navigate to dashboard
         if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          lastProcessedEventRef.current = {
+            event,
+            userId: session.user.id,
+            timestamp: now
+          };
           await onSignIn(session.user.id);
         }
       }

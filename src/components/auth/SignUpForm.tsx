@@ -226,6 +226,7 @@ export const SignUpForm = ({ onSuccess, onSwitchToLogin }: SignUpFormProps) => {
           maxLength={255}
           required
           disabled={isSubmitting}
+          autoComplete="email"
         />
       </div>
       
