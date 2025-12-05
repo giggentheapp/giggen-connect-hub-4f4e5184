@@ -50,10 +50,13 @@ export const UnifiedSidePanel = ({
   }, [profile.user_id]);
   
   // For other people's profiles, always show profile section by default
-  const initialSection = isOwnProfile 
-    ? (searchParams.get('section') || location.state?.section || 'dashboard')
-    : 'profile';
-  const [activeSection, setActiveSection] = useState(initialSection);
+  // Use a ref to track if we've already initialized to prevent re-defaulting to dashboard
+  const [activeSection, setActiveSection] = useState(() => {
+    if (!isOwnProfile) return 'profile';
+    // Read directly from URL on mount - don't default to dashboard if section exists
+    const urlSection = new URL(window.location.href).searchParams.get('section');
+    return urlSection || location.state?.section || 'dashboard';
+  });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
   const isMobile = useIsMobile();
@@ -67,7 +70,7 @@ export const UnifiedSidePanel = ({
     const section = searchParams.get('section') || location.state?.section;
     // If viewing someone else's profile, restrict to profile section only
     if (!isOwnProfile) {
-      if (section !== 'profile') {
+      if (section !== 'profile' && activeSection !== 'profile') {
         setActiveSection('profile');
         // Update URL to reflect profile section - use clean userId
         navigate(`/profile/${cleanProfileUserId}?section=profile`, { replace: true });
@@ -75,10 +78,11 @@ export const UnifiedSidePanel = ({
       return;
     }
     
+    // Only update if section exists and differs from current
     if (section && section !== activeSection) {
       setActiveSection(section);
     }
-  }, [searchParams, location.state, isOwnProfile, cleanProfileUserId]);
+  }, [searchParams, location.state, isOwnProfile, cleanProfileUserId, activeSection, navigate]);
 
   const handleSignOut = async () => {
     const {
