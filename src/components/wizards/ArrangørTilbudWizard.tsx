@@ -120,6 +120,14 @@ export const ArrangørTilbudWizard = ({
         }
       }
 
+      // Ensure tech_spec_reference and hospitality_rider_reference are null if empty/invalid
+      const techSpecRef = data.selected_tech_spec_file && data.selected_tech_spec_file.length === 36 
+        ? data.selected_tech_spec_file 
+        : null;
+      const hospitalityRef = data.selected_hospitality_rider_file && data.selected_hospitality_rider_file.length === 36 
+        ? data.selected_hospitality_rider_file 
+        : null;
+
       const payload = {
         maker_id: userId,
         concept_type: 'arrangør_tilbud',
@@ -132,8 +140,8 @@ export const ArrangørTilbudWizard = ({
         price_by_agreement: data.pricing_type === 'by_agreement',
         expected_audience: data.expected_audience ? parseInt(data.expected_audience) : null,
         tech_spec: data.tech_spec || null,
-        tech_spec_reference: data.selected_tech_spec_file || null,
-        hospitality_rider_reference: data.selected_hospitality_rider_file || null,
+        tech_spec_reference: techSpecRef,
+        hospitality_rider_reference: hospitalityRef,
         available_dates: data.is_indefinite 
           ? JSON.stringify({ indefinite: true })
           : (data.available_dates.length > 0 ? JSON.stringify(data.available_dates) : null),
