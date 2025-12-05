@@ -144,8 +144,8 @@ export const ArrangørTilbudWizard = ({
         tech_spec_reference: techSpecRef,
         hospitality_rider_reference: hospitalityRef,
         available_dates: data.is_indefinite 
-          ? JSON.stringify({ indefinite: true })
-          : (data.available_dates.length > 0 ? JSON.stringify(data.available_dates) : null),
+          ? { indefinite: true }
+          : (data.available_dates.length > 0 ? data.available_dates : null),
         is_published: isPublished,
         status: isPublished ? 'active' : 'draft',
         updated_at: new Date().toISOString(),
