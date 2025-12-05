@@ -110,6 +110,14 @@ export const SessionMusicianWizard = ({
       program_type: existingConcept?.program_type || '',
     },
     onSave: async (data, isPublished) => {
+      // Ensure tech_spec_reference and hospitality_rider_reference are null if empty/invalid
+      const techSpecRef = data.selected_tech_spec_file && data.selected_tech_spec_file.length === 36 
+        ? data.selected_tech_spec_file 
+        : null;
+      const hospitalityRef = data.selected_hospitality_rider_file && data.selected_hospitality_rider_file.length === 36 
+        ? data.selected_hospitality_rider_file 
+        : null;
+
       const payload = {
         maker_id: userId,
         concept_type: 'session_musician',
@@ -127,8 +135,8 @@ export const SessionMusicianWizard = ({
           ? parseInt(data.expected_audience)
           : null,
         tech_spec: data.tech_spec || null,
-        tech_spec_reference: data.selected_tech_spec_file || null,
-        hospitality_rider_reference: data.selected_hospitality_rider_file || null,
+        tech_spec_reference: techSpecRef,
+        hospitality_rider_reference: hospitalityRef,
         program_type: data.program_type || null,
         available_dates: data.is_indefinite
           ? JSON.stringify({ indefinite: true })
