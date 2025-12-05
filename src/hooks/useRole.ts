@@ -1,24 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { queryKeys } from '@/lib/queryKeys';
 
 export type UserRole = 'musician' | 'organizer' | 'artist' | 'audience';
 
 export const useRoleData = () => {
-  const [role, setRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRole = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
+  const queryClient = useQueryClient();
+  
+  const { data: role, isLoading: loading, error } = useQuery({
+    queryKey: queryKeys.profiles.role,
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setRole(null);
-        return;
+        return null;
       }
 
       const { data: profile, error: profileError } = await supabase
@@ -28,40 +23,25 @@ export const useRoleData = () => {
         .maybeSingle();
 
       if (profileError) {
-        logger.error('Failed to fetch user profile', profileError);
         throw profileError;
       }
 
-      setRole(profile?.role as UserRole || 'musician');
-      logger.debug('User role loaded', { userId: user.id, role: profile?.role });
-    } catch (err: unknown) {
-      logger.error('Error fetching user role', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setRole(null);
-    } finally {
-      setLoading(false);
-    }
+      return (profile?.role as UserRole) || 'musician';
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    retry: 1,
+  });
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.profiles.role });
   };
 
-  useEffect(() => {
-    fetchRole();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-        fetchRole();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   return { 
-    role, 
+    role: role ?? null, 
     loading, 
-    error, 
+    error: error instanceof Error ? error.message : null, 
     isOrganizer: role === 'organizer',
     isMusician: role === 'musician',
-    refresh: fetchRole 
+    refresh,
   };
 };
