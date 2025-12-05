@@ -27,6 +27,7 @@ export interface WizardStepProps {
   userId: string;
   availableTechSpecs?: any[];
   availableHospitalityRiders?: any[];
+  onSaveDraft?: () => Promise<void>;
   [key: string]: any;
 }
 
@@ -213,6 +214,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
               userId={userId}
               availableTechSpecs={availableTechSpecs}
               availableHospitalityRiders={availableHospitalityRiders}
+              onSaveDraft={handleSaveDraft}
             />
           </div>
 
@@ -350,6 +352,7 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
             userId={userId}
             availableTechSpecs={availableTechSpecs}
             availableHospitalityRiders={availableHospitalityRiders}
+            onSaveDraft={handleSaveDraft}
           />
 
           {/* Navigation */}

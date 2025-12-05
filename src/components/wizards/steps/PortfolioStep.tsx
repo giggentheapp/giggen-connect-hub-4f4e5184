@@ -1,20 +1,29 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Image, Video, Music, File as FileIcon, Check } from 'lucide-react';
-import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { X, Image, Video, Music, File as FileIcon, Check, FolderOpen } from 'lucide-react';
 import { WizardStepProps } from '../BaseConceptWizard';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserFiles } from '@/hooks/useUserFiles';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 /**
  * PortfolioStep - Common portfolio file selection
  * Shows files from filbank directly and allows selection
  */
-export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardStepProps) => {
-  const [showFilebankModal, setShowFilebankModal] = useState(false);
+export const PortfolioStep = React.memo(({ data, updateData, userId, onSaveDraft }: WizardStepProps) => {
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -75,8 +84,47 @@ export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardSte
     });
   }, [data.portfolio_files, updateData, toast]);
 
+  const handleNavigateToFilbank = useCallback(async (saveFirst: boolean) => {
+    if (saveFirst && onSaveDraft) {
+      try {
+        await onSaveDraft();
+        toast({
+          title: '✓ Utkast lagret',
+          description: 'Dine endringer er trygt lagret',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Kunne ikke lagre',
+          description: error.message || 'En feil oppstod',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    
+    if (userId) {
+      navigate(`/profile/${userId}?section=filbank`);
+    }
+  }, [onSaveDraft, userId, navigate, toast]);
+
+  const handleGoToFilbankClick = useCallback(() => {
+    const hasData = Object.keys(data).some(key => {
+      const value = data[key];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+      return value !== '' && value !== null && value !== undefined;
+    });
+
+    if (hasData) {
+      setShowSaveDialog(true);
+    } else {
+      if (userId) {
+        navigate(`/profile/${userId}?section=filbank`);
+      }
+    }
+  }, [data, userId, navigate]);
+
   const removePortfolioFile = useCallback(async (fileData: any) => {
-    // If file has a conceptFileId, delete it from the database
     if (fileData.conceptFileId) {
       try {
         const { error } = await supabase
@@ -150,12 +198,6 @@ export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardSte
     [portfolioFiles]
   );
 
-  const handleNavigateToFilbank = useCallback(() => {
-    if (userId) {
-      navigate(`/profile/${userId}?section=filbank`);
-    }
-  }, [userId, navigate]);
-
   return (
     <>
       <div className="space-y-4">
@@ -163,9 +205,9 @@ export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardSte
           <p className="text-sm text-muted-foreground">
             Velg filer fra filbanken eller last opp nye filer
           </p>
-          <Button onClick={() => setShowFilebankModal(true)} variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Last opp nye filer
+          <Button onClick={handleGoToFilbankClick} variant="outline" size="sm">
+            <FolderOpen className="h-4 w-4 mr-2" />
+            Gå til Filbank
           </Button>
         </div>
 
@@ -259,14 +301,13 @@ export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardSte
             </div>
           </div>
         ) : (
-          // Only show CTA when filbank is actually empty
           <Card className="border-dashed">
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground mb-4">
                 Ingen filer i filbanken. Last opp filer for å velge dem her.
               </p>
-              <Button onClick={handleNavigateToFilbank}>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button onClick={handleGoToFilbankClick}>
+                <FolderOpen className="h-4 w-4 mr-2" />
                 Gå til Filbank
               </Button>
             </CardContent>
@@ -274,13 +315,36 @@ export const PortfolioStep = React.memo(({ data, updateData, userId }: WizardSte
         )}
       </div>
 
-      <FilebankSelectionModal
-        isOpen={showFilebankModal}
-        onClose={() => setShowFilebankModal(false)}
-        onSelect={(file) => file && handleFileSelected(file)}
-        userId={userId}
-        category="portfolio"
-      />
+      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Lagre utkast først?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du har ulagrede endringer. Vil du lagre utkastet før du går til filbanken? Dette sikrer at du ikke mister arbeidet ditt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setShowSaveDialog(false);
+                await handleNavigateToFilbank(false);
+              }}
+            >
+              Fortsett uten å lagre
+            </Button>
+            <AlertDialogAction
+              onClick={async () => {
+                setShowSaveDialog(false);
+                await handleNavigateToFilbank(true);
+              }}
+            >
+              Lagre og fortsett
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 });
