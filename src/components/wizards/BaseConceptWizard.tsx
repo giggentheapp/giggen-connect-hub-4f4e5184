@@ -1,4 +1,4 @@
-import { useState, useRef, ComponentType, useCallback } from 'react';
+import { useState, useRef, ComponentType, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -153,7 +153,10 @@ export const BaseConceptWizard = ({ config, userId }: BaseConceptWizardProps) =>
     }
   };
 
-  const CurrentStepComponent = config.steps[currentStep].component;
+  // Memoize the current step component to prevent unnecessary re-renders
+  const CurrentStepComponent = useMemo(() => {
+    return config.steps[currentStep].component;
+  }, [config.steps, currentStep]);
 
   // Render based on layout type
   if (config.layout === 'card') {
