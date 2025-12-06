@@ -8,9 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useConcepts } from '@/hooks/useConcepts';
 import { conceptService } from '@/services/conceptService';
 import { useUpdateConcept } from '@/hooks/useConceptMutations';
+import { handleError } from '@/lib/errorHandler';
 
 interface ConceptFile {
   id: string;
@@ -30,21 +30,43 @@ export default function ConceptOwnerView() {
   const { toast } = useToast();
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
+  const [concept, setConcept] = useState<any>(null);
+  const [conceptLoading, setConceptLoading] = useState(true);
 
   const { user, loading: userLoading } = useCurrentUser();
-  const { concepts, loading: conceptsLoading } = useConcepts(user?.id, true); // Include drafts
   const updateConceptMutation = useUpdateConcept();
 
-  const concept = concepts.find(c => c.id === conceptId);
   const currentUserId = user?.id || null;
   const isOwner = currentUserId === concept?.maker_id;
-  const loading = userLoading || conceptsLoading;
+  const loading = userLoading || conceptLoading;
+
+  // Fetch concept directly by ID (allows viewing concepts from any user)
+  useEffect(() => {
+    const loadConcept = async () => {
+      if (!conceptId) {
+        setConceptLoading(false);
+        return;
+      }
+      
+      try {
+        setConceptLoading(true);
+        const fetchedConcept = await conceptService.getById(conceptId, true);
+        setConcept(fetchedConcept);
+      } catch (error) {
+        handleError(error, 'Kunne ikke laste tilbudet');
+      } finally {
+        setConceptLoading(false);
+      }
+    };
+    
+    loadConcept();
+  }, [conceptId]);
 
   useEffect(() => {
-    if (conceptId && !loading) {
-      loadConceptFiles(conceptId);
+    if (concept?.id) {
+      loadConceptFiles(concept.id);
     }
-  }, [conceptId, loading]);
+  }, [concept?.id]);
 
   const loadConceptFiles = async (id: string) => {
     try {
