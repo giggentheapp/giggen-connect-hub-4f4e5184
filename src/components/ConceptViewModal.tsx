@@ -38,6 +38,7 @@ interface Concept {
   door_deal?: boolean;
   door_percentage?: number | null;
   price_by_agreement?: boolean;
+  ticket_price?: number | null;
 }
 interface ConceptFile {
   id: string;
@@ -299,6 +300,10 @@ export const ConceptViewModal = ({
                   {concept.expected_audience && <div className="flex items-center gap-2">
                       <span className="font-medium">Publikum:</span>
                       <span>{concept.expected_audience} personer</span>
+                    </div>}
+                  {concept.ticket_price && <div className="flex items-center gap-2">
+                      <span className="font-medium">Billettpris:</span>
+                      <span>{concept.ticket_price} kr</span>
                     </div>}
                 </div>
 

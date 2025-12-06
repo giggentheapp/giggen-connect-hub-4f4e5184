@@ -26,6 +26,7 @@ export interface UserConcept {
   concept_type?: 'session_musician' | 'teaching' | 'arrangør_tilbud';
   program_type?: string;
   teaching_data?: Record<string, any>;
+  ticket_price?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -79,6 +80,7 @@ export interface CreateConceptRequest {
   door_deal?: boolean;
   door_percentage?: number;
   price_by_agreement?: boolean;
+  ticket_price?: number | null;
 }
 
 /**

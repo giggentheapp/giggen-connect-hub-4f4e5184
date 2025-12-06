@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Banknote, Calendar, Users } from 'lucide-react';
+import { ArrowLeft, Banknote, Calendar, Users, Ticket, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { conceptService } from '@/services/conceptService';
 import { handleError } from '@/lib/errorHandler';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 
 
 const ProfileConceptView = () => {
@@ -56,6 +57,18 @@ const ProfileConceptView = () => {
       return { dates: [], isIndefinite: false };
     }
   };
+
+  const calculations = useMemo(() => {
+    if (!concept) return null;
+    
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(revenue, pricingType, concept.price, concept.door_percentage);
+
+    return { revenue, artistEarnings, pricingType };
+  }, [concept]);
 
   if (loading) {
     return (
@@ -130,6 +143,16 @@ const ProfileConceptView = () => {
             </div>
           )}
 
+          {concept.ticket_price && (
+            <div className="flex items-start gap-3">
+              <Ticket className="h-5 w-5 text-accent-orange mt-1" />
+              <div>
+                <p className="font-medium">Billettpris</p>
+                <p className="text-muted-foreground">{concept.ticket_price} kr</p>
+              </div>
+            </div>
+          )}
+
           {(availableDates.length > 0 || isIndefinite) && (
             <div className="flex items-start gap-3">
               <Calendar className="h-5 w-5 text-accent-orange mt-1" />
@@ -161,6 +184,31 @@ const ProfileConceptView = () => {
             </div>
           )}
         </div>
+
+        {/* Revenue Calculation */}
+        {calculations && (
+          <div className="bg-muted/30 p-4 rounded-lg border mb-8">
+            <div className="flex items-center gap-2 text-sm font-medium mb-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Beregnet inntekt
+            </div>
+            <div className="space-y-1 text-sm">
+              <p>
+                Forventet dørsalg: {formatCurrency(concept.expected_audience)} × {formatCurrency(concept.ticket_price)} kr = <strong>{formatCurrency(calculations.revenue)} kr</strong>
+              </p>
+              {calculations.pricingType === 'fixed' && concept.price && (
+                <p className="text-muted-foreground">
+                  Betaling til artist: <strong>{formatCurrency(concept.price)} kr</strong> (fast)
+                </p>
+              )}
+              {calculations.pricingType === 'door_deal' && concept.door_percentage && calculations.artistEarnings && (
+                <p className="text-muted-foreground">
+                  Betaling til artist: {concept.door_percentage}% = <strong>{formatCurrency(calculations.artistEarnings)} kr</strong>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Portfolio Gallery */}
         {conceptId && (

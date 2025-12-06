@@ -94,6 +94,8 @@ export const ArrangørTilbudWizard = ({
       is_indefinite: false,
       pricing_type: 'fixed',
       door_percentage: '',
+      ticket_price: '',
+      ticket_price_mode: 'suggested',
       ...existingConcept, // Merge existing data if editing
     },
     onSave: async (data, isPublished) => {
@@ -140,6 +142,7 @@ export const ArrangørTilbudWizard = ({
         door_percentage: data.pricing_type === 'door_deal' && data.door_percentage ? parseFloat(data.door_percentage) : null,
         price_by_agreement: data.pricing_type === 'by_agreement',
         expected_audience: data.expected_audience ? parseInt(data.expected_audience) : null,
+        ticket_price: data.ticket_price ? parseFloat(data.ticket_price) : null,
         tech_spec: data.tech_spec || null,
         tech_spec_reference: techSpecRef,
         hospitality_rider_reference: hospitalityRef,

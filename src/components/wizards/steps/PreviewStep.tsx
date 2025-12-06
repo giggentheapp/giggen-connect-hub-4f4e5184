@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { WizardStepProps } from '../BaseConceptWizard';
-import { CheckCircle, Calendar, Users, DollarSign, FileText } from 'lucide-react';
+import { CheckCircle, Calendar, Users, DollarSign, FileText, TrendingUp, Ticket } from 'lucide-react';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 
 /**
  * PreviewStep - Summary of all entered data before publishing
  */
 export const PreviewStep = React.memo(({ data }: WizardStepProps) => {
+  // Calculate revenue and earnings
+  const calculations = useMemo(() => {
+    const audience = data.expected_audience ? parseInt(data.expected_audience) : null;
+    const ticketPrice = data.ticket_price ? parseFloat(data.ticket_price) : null;
+    const fixedPrice = data.price ? parseFloat(data.price) : null;
+    const doorPercentage = data.door_percentage ? parseFloat(data.door_percentage) : null;
+    
+    const revenue = calculateExpectedRevenue(audience, ticketPrice);
+    const pricingType = data.pricing_type || 'fixed';
+    const artistEarnings = calculateArtistEarnings(revenue, pricingType, fixedPrice, doorPercentage);
+    
+    return { audience, ticketPrice, revenue, artistEarnings, pricingType, fixedPrice, doorPercentage };
+  }, [data.expected_audience, data.ticket_price, data.price, data.door_percentage, data.pricing_type]);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -39,7 +54,7 @@ export const PreviewStep = React.memo(({ data }: WizardStepProps) => {
             Pris og publikum
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Prismodell</p>
             <div className="mt-1">
@@ -56,6 +71,7 @@ export const PreviewStep = React.memo(({ data }: WizardStepProps) => {
               )}
             </div>
           </div>
+
           {data.expected_audience && (
             <div>
               <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -63,6 +79,41 @@ export const PreviewStep = React.memo(({ data }: WizardStepProps) => {
                 Forventet publikum
               </p>
               <p className="text-sm">{data.expected_audience} personer</p>
+            </div>
+          )}
+
+          {data.ticket_price && (
+            <div>
+              <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Ticket className="h-4 w-4" />
+                Billettpris
+              </p>
+              <p className="text-sm">{data.ticket_price} kr</p>
+            </div>
+          )}
+
+          {/* Revenue Calculation */}
+          {calculations.revenue && (
+            <div className="bg-muted/30 p-3 rounded-lg border mt-3">
+              <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Beregnet inntekt
+              </div>
+              <div className="space-y-1 text-sm">
+                <p>
+                  Forventet dørsalg: {formatCurrency(calculations.audience!)} × {formatCurrency(calculations.ticketPrice!)} kr = <strong>{formatCurrency(calculations.revenue)} kr</strong>
+                </p>
+                {calculations.pricingType === 'fixed' && calculations.fixedPrice && (
+                  <p className="text-muted-foreground">
+                    Betaling til artist: <strong>{formatCurrency(calculations.fixedPrice)} kr</strong> (fast)
+                  </p>
+                )}
+                {calculations.pricingType === 'door_deal' && calculations.doorPercentage && calculations.artistEarnings && (
+                  <p className="text-muted-foreground">
+                    Betaling til artist: {calculations.doorPercentage}% = <strong>{formatCurrency(calculations.artistEarnings)} kr</strong>
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </CardContent>

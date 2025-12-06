@@ -1,13 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { WizardStepProps } from '../BaseConceptWizard';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
+import { TrendingUp, Calculator } from 'lucide-react';
+
+const TICKET_PRICE_SUGGESTIONS = [150, 200, 250, 300, 350];
 
 /**
  * ProgramTypeStep - For arrangør_tilbud
- * Combines program type selection with pricing and audience
+ * Combines program type selection with pricing, audience, and ticket price
  */
 export const ProgramTypeStep = React.memo(({ data, updateData }: WizardStepProps) => {
   const handleProgramTypeChange = useCallback((value: string) => {
@@ -31,6 +35,37 @@ export const ProgramTypeStep = React.memo(({ data, updateData }: WizardStepProps
   const handleAudienceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     updateData('expected_audience', e.target.value);
   }, [updateData]);
+
+  const handleTicketPriceSuggestionChange = useCallback((value: string) => {
+    if (value === 'custom') {
+      updateData('ticket_price_mode', 'custom');
+      updateData('ticket_price', '');
+    } else {
+      updateData('ticket_price_mode', 'suggested');
+      updateData('ticket_price', value);
+    }
+  }, [updateData]);
+
+  const handleTicketPriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateData('ticket_price', e.target.value);
+  }, [updateData]);
+
+  // Calculate revenue and earnings
+  const calculations = useMemo(() => {
+    const audience = data.expected_audience ? parseInt(data.expected_audience) : null;
+    const ticketPrice = data.ticket_price ? parseFloat(data.ticket_price) : null;
+    const fixedPrice = data.price ? parseFloat(data.price) : null;
+    const doorPercentage = data.door_percentage ? parseFloat(data.door_percentage) : null;
+    
+    const revenue = calculateExpectedRevenue(audience, ticketPrice);
+    const pricingType = data.pricing_type || 'fixed';
+    const artistEarnings = calculateArtistEarnings(revenue, pricingType, fixedPrice, doorPercentage);
+    
+    return { audience, ticketPrice, revenue, artistEarnings, pricingType, fixedPrice, doorPercentage };
+  }, [data.expected_audience, data.ticket_price, data.price, data.door_percentage, data.pricing_type]);
+
+  const showCustomTicketInput = data.ticket_price_mode === 'custom' || 
+    (data.ticket_price && !TICKET_PRICE_SUGGESTIONS.includes(parseInt(data.ticket_price)));
 
   return (
     <div className="space-y-6">
@@ -135,6 +170,78 @@ export const ProgramTypeStep = React.memo(({ data, updateData }: WizardStepProps
           Estimert antall publikummere
         </p>
       </div>
+
+      {/* Billettpris */}
+      <div className="space-y-3">
+        <Label>Billettpris (frivillig)</Label>
+        <p className="text-xs text-muted-foreground">
+          Anslå billettpris for å beregne forventet inntekt
+        </p>
+        
+        <Select
+          value={
+            showCustomTicketInput 
+              ? 'custom' 
+              : data.ticket_price 
+                ? data.ticket_price.toString() 
+                : ''
+          }
+          onValueChange={handleTicketPriceSuggestionChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Velg billettpris..." />
+          </SelectTrigger>
+          <SelectContent>
+            {TICKET_PRICE_SUGGESTIONS.map((price) => (
+              <SelectItem key={price} value={price.toString()}>
+                {price} kr
+              </SelectItem>
+            ))}
+            <SelectItem value="custom">Egen pris</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {showCustomTicketInput && (
+          <Input
+            type="number"
+            placeholder="200"
+            value={data.ticket_price || ''}
+            onChange={handleTicketPriceChange}
+            className="mt-2"
+          />
+        )}
+      </div>
+
+      {/* Revenue Calculation Display */}
+      {calculations.revenue && (
+        <div className="bg-muted/30 p-4 rounded-lg border space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Calculator className="h-4 w-4 text-primary" />
+            Beregnet inntekt
+          </div>
+          
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span>
+                Forventet dørsalg: {formatCurrency(calculations.audience!)} personer × {formatCurrency(calculations.ticketPrice!)} kr = <strong>{formatCurrency(calculations.revenue)} kr</strong>
+              </span>
+            </div>
+            
+            {calculations.pricingType === 'fixed' && calculations.fixedPrice && (
+              <div className="text-muted-foreground pl-6">
+                Betaling til artist: <strong>{formatCurrency(calculations.fixedPrice)} kr</strong> (fast)
+              </div>
+            )}
+            
+            {calculations.pricingType === 'door_deal' && calculations.doorPercentage && calculations.artistEarnings && (
+              <div className="text-muted-foreground pl-6">
+                Betaling til artist: {calculations.doorPercentage}% av {formatCurrency(calculations.revenue)} kr = <strong>{formatCurrency(calculations.artistEarnings)} kr</strong>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 });
