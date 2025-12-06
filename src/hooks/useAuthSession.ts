@@ -28,8 +28,19 @@ export const useAuthSession = () => {
     let mounted = true;
 
     // Get initial session FIRST before subscribing
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (!mounted) return;
+      
+      // If there's an auth error (like invalid refresh token), clear the session
+      if (error) {
+        console.warn('Session error, clearing invalid session:', error.message);
+        supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
