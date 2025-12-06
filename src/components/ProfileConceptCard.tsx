@@ -1,7 +1,8 @@
 import { Card } from '@/components/ui/card';
-import { CalendarIcon, Banknote } from 'lucide-react';
+import { CalendarIcon, Banknote, Ticket } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 
 interface ProfileConceptCardProps {
   concept: {
@@ -13,6 +14,8 @@ interface ProfileConceptCardProps {
     door_deal?: boolean;
     door_percentage?: number | null;
     price_by_agreement?: boolean;
+    expected_audience?: number | null;
+    ticket_price?: number | null;
     maker_id: string;
   };
 }
@@ -65,6 +68,18 @@ export const ProfileConceptCard = ({ concept }: ProfileConceptCardProps) => {
     return 'Ikke spesifisert';
   };
 
+  const getRevenueCalculation = () => {
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(revenue, pricingType, concept.price, concept.door_percentage);
+
+    return { revenue, artistEarnings, pricingType };
+  };
+
+  const calculation = getRevenueCalculation();
+
   const handleClick = () => {
     navigate(`/profile/${concept.maker_id}/concept/${concept.id}`);
   };
@@ -89,6 +104,13 @@ export const ProfileConceptCard = ({ concept }: ProfileConceptCardProps) => {
             <span>{formatPriceDisplay()}</span>
           </div>
           
+          {concept.ticket_price && (
+            <div className="flex items-center gap-1.5">
+              <Ticket className="h-4 w-4 text-muted-foreground" />
+              <span>{concept.ticket_price} kr billett</span>
+            </div>
+          )}
+          
           {formatDateDisplay() && (
             <div className="flex items-center gap-1.5">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
@@ -96,6 +118,13 @@ export const ProfileConceptCard = ({ concept }: ProfileConceptCardProps) => {
             </div>
           )}
         </div>
+
+        {calculation && (
+          <div className="text-xs text-muted-foreground pt-1 border-t mt-2">
+            Forventet dørsalg: {formatCurrency(calculation.revenue)} kr
+            {calculation.artistEarnings && ` • Artist: ${formatCurrency(calculation.artistEarnings)} kr`}
+          </div>
+        )}
       </div>
     </Card>
   );

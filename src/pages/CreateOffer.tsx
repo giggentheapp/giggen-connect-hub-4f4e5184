@@ -93,6 +93,7 @@ export default function CreateOffer() {
               is_indefinite: isIndefinite,
               pricing_type: data.door_deal ? 'door_deal' : data.price_by_agreement ? 'by_agreement' : 'fixed',
               door_percentage: data.door_percentage?.toString() || '',
+              ticket_price: data.ticket_price?.toString() || '',
             });
           }
 

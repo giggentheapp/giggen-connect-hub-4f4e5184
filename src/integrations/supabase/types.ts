@@ -770,6 +770,7 @@ export type Database = {
           teaching_data: Json | null
           tech_spec: string | null
           tech_spec_reference: string | null
+          ticket_price: number | null
           title: string
           updated_at: string
         }
@@ -793,6 +794,7 @@ export type Database = {
           teaching_data?: Json | null
           tech_spec?: string | null
           tech_spec_reference?: string | null
+          ticket_price?: number | null
           title: string
           updated_at?: string
         }
@@ -816,6 +818,7 @@ export type Database = {
           teaching_data?: Json | null
           tech_spec?: string | null
           tech_spec_reference?: string | null
+          ticket_price?: number | null
           title?: string
           updated_at?: string
         }
