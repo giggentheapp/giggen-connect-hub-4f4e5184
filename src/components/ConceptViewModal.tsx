@@ -218,7 +218,13 @@ export const ConceptViewModal = ({
       };
     }
   };
-  // Revenue calculation
+
+  const {
+    dates: availableDates,
+    isIndefinite
+  } = parseAvailableDates(concept?.available_dates);
+
+  // Revenue calculation - MUST be before any early returns to follow hooks rules
   const revenueCalculation = useMemo(() => {
     if (!concept || !concept.expected_audience || !concept.ticket_price) return null;
     
@@ -237,10 +243,7 @@ export const ConceptViewModal = ({
   }, [concept]);
 
   if (!concept && !loading) return null;
-  const {
-    dates: availableDates,
-    isIndefinite
-  } = parseAvailableDates(concept?.available_dates);
+
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
