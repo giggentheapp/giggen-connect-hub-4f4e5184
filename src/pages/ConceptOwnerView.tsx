@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon, Ticket, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -11,6 +11,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { conceptService } from '@/services/conceptService';
 import { useUpdateConcept } from '@/hooks/useConceptMutations';
 import { handleError } from '@/lib/errorHandler';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 
 interface ConceptFile {
   id: string;
@@ -310,6 +311,24 @@ export default function ConceptOwnerView() {
 
   const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
 
+  // Revenue calculation
+  const revenueCalculation = useMemo(() => {
+    if (!concept.expected_audience || !concept.ticket_price) return null;
+    
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(
+      revenue, 
+      pricingType, 
+      concept.price, 
+      concept.door_percentage
+    );
+
+    return { revenue, artistEarnings, pricingType };
+  }, [concept]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -393,6 +412,17 @@ export default function ConceptOwnerView() {
                 </div>
               )}
 
+              {/* Ticket Price */}
+              {concept.ticket_price && (
+                <div className="bg-background/60 backdrop-blur-sm rounded-lg p-4 border">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <Ticket className="h-4 w-4" />
+                    <span className="text-sm">Billettpris</span>
+                  </div>
+                  <p className="text-lg font-semibold">{concept.ticket_price} kr</p>
+                </div>
+              )}
+
               {/* Dates */}
               {(availableDates.length > 0 || isIndefinite) && (
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-4 border">
@@ -408,6 +438,31 @@ export default function ConceptOwnerView() {
                 </div>
               )}
             </div>
+
+            {/* Revenue Calculation */}
+            {revenueCalculation && (
+              <div className="bg-muted/30 p-4 rounded-lg border mt-4">
+                <div className="flex items-center gap-2 font-medium mb-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  Beregnet inntekt
+                </div>
+                <div className="space-y-1 text-sm">
+                  <p>
+                    Forventet dørsalg: {formatCurrency(concept.expected_audience || 0)} × {formatCurrency(concept.ticket_price || 0)} kr = <strong>{formatCurrency(revenueCalculation.revenue)} kr</strong>
+                  </p>
+                  {revenueCalculation.pricingType === 'fixed' && concept.price && (
+                    <p className="text-muted-foreground">
+                      Betaling til artist: <strong>{formatCurrency(concept.price)} kr</strong> (fast)
+                    </p>
+                  )}
+                  {revenueCalculation.pricingType === 'door_deal' && concept.door_percentage && revenueCalculation.artistEarnings && (
+                    <p className="text-muted-foreground">
+                      Betaling til artist: {concept.door_percentage}% = <strong>{formatCurrency(revenueCalculation.artistEarnings)} kr</strong>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
