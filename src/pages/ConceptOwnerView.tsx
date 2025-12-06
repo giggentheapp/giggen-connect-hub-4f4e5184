@@ -287,6 +287,24 @@ export default function ConceptOwnerView() {
     return null;
   };
 
+  // Revenue calculation - MUST be before any early returns to follow hooks rules
+  const revenueCalculation = useMemo(() => {
+    if (!concept || !concept.expected_audience || !concept.ticket_price) return null;
+    
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(
+      revenue, 
+      pricingType, 
+      concept.price, 
+      concept.door_percentage
+    );
+
+    return { revenue, artistEarnings, pricingType };
+  }, [concept]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -310,24 +328,6 @@ export default function ConceptOwnerView() {
   }
 
   const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
-
-  // Revenue calculation
-  const revenueCalculation = useMemo(() => {
-    if (!concept.expected_audience || !concept.ticket_price) return null;
-    
-    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
-    if (!revenue) return null;
-
-    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
-    const artistEarnings = calculateArtistEarnings(
-      revenue, 
-      pricingType, 
-      concept.price, 
-      concept.door_percentage
-    );
-
-    return { revenue, artistEarnings, pricingType };
-  }, [concept]);
 
   return (
     <div className="min-h-screen bg-background">
