@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X, MoreVertical, Trash2 } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, ChevronLeft, ChevronRight, X, MoreVertical, Trash2, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
 import { useConceptActions } from '@/hooks/useConceptActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { BookingRequest } from '@/components/BookingRequest';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 interface ConceptViewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -217,6 +218,24 @@ export const ConceptViewModal = ({
       };
     }
   };
+  // Revenue calculation
+  const revenueCalculation = useMemo(() => {
+    if (!concept || !concept.expected_audience || !concept.ticket_price) return null;
+    
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(
+      revenue, 
+      pricingType, 
+      concept.price, 
+      concept.door_percentage
+    );
+
+    return { revenue, artistEarnings, pricingType };
+  }, [concept]);
+
   if (!concept && !loading) return null;
   const {
     dates: availableDates,
@@ -306,6 +325,31 @@ export const ConceptViewModal = ({
                       <span>{concept.ticket_price} kr</span>
                     </div>}
                 </div>
+
+                {/* Revenue Calculation */}
+                {revenueCalculation && (
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <div className="flex items-center gap-2 font-medium mb-2">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      Beregnet inntekt
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <p>
+                        Forventet dørsalg: {formatCurrency(concept.expected_audience || 0)} × {formatCurrency(concept.ticket_price || 0)} kr = <strong>{formatCurrency(revenueCalculation.revenue)} kr</strong>
+                      </p>
+                      {revenueCalculation.pricingType === 'fixed' && concept.price && (
+                        <p className="text-muted-foreground">
+                          Betaling til artist: <strong>{formatCurrency(concept.price)} kr</strong> (fast)
+                        </p>
+                      )}
+                      {revenueCalculation.pricingType === 'door_deal' && concept.door_percentage && revenueCalculation.artistEarnings && (
+                        <p className="text-muted-foreground">
+                          Betaling til artist: {concept.door_percentage}% = <strong>{formatCurrency(revenueCalculation.artistEarnings)} kr</strong>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Available Dates */}
                 {(availableDates.length > 0 || isIndefinite) && <div>

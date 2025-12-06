@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical } from 'lucide-react';
+import { CalendarIcon, FileText, Image, Video, Music, Download, MoreVertical, Ticket, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ConceptActionsDialog } from '@/components/ConceptActionsDialog';
@@ -10,6 +10,7 @@ import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { useConceptActions } from '@/hooks/useConceptActions';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { toast } from 'sonner';
+import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ interface ConceptCardProps {
     door_deal?: boolean;
     door_percentage?: number | null;
     price_by_agreement?: boolean;
+    ticket_price?: number | null;
   };
   showActions?: boolean;
   showConceptActions?: boolean;
@@ -191,6 +193,24 @@ const ConceptCard = ({
 
   const { dates: availableDates, isIndefinite } = parseAvailableDates(concept.available_dates);
 
+  // Revenue calculation
+  const revenueCalculation = useMemo(() => {
+    if (!concept.expected_audience || !concept.ticket_price) return null;
+    
+    const revenue = calculateExpectedRevenue(concept.expected_audience, concept.ticket_price);
+    if (!revenue) return null;
+
+    const pricingType = concept.door_deal ? 'door_deal' : concept.price_by_agreement ? 'by_agreement' : 'fixed';
+    const artistEarnings = calculateArtistEarnings(
+      revenue, 
+      pricingType, 
+      concept.price, 
+      concept.door_percentage
+    );
+
+    return { revenue, artistEarnings, pricingType };
+  }, [concept.expected_audience, concept.ticket_price, concept.door_deal, concept.price_by_agreement, concept.price, concept.door_percentage]);
+
   return (
     <Card className="w-full">
       <CardHeader className="px-3 md:px-6 py-3 md:py-6 pb-2 md:pb-6">
@@ -270,7 +290,39 @@ const ConceptCard = ({
               <span>{concept.expected_audience} {t('conceptCard.people')}</span>
             </div>
           )}
+          {concept.ticket_price && (
+            <div className="flex items-center gap-2">
+              <Ticket className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Billettpris:</span>
+              <span>{concept.ticket_price} kr</span>
+            </div>
+          )}
         </div>
+
+        {/* Revenue Calculation */}
+        {revenueCalculation && (
+          <div className="bg-muted/30 p-3 rounded-lg border text-sm">
+            <div className="flex items-center gap-2 font-medium mb-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Beregnet inntekt
+            </div>
+            <div className="space-y-1">
+              <p>
+                Forventet dørsalg: {formatCurrency(concept.expected_audience || 0)} × {formatCurrency(concept.ticket_price || 0)} kr = <strong>{formatCurrency(revenueCalculation.revenue)} kr</strong>
+              </p>
+              {revenueCalculation.pricingType === 'fixed' && concept.price && (
+                <p className="text-muted-foreground">
+                  Betaling til artist: <strong>{formatCurrency(concept.price)} kr</strong> (fast)
+                </p>
+              )}
+              {revenueCalculation.pricingType === 'door_deal' && concept.door_percentage && revenueCalculation.artistEarnings && (
+                <p className="text-muted-foreground">
+                  Betaling til artist: {concept.door_percentage}% = <strong>{formatCurrency(revenueCalculation.artistEarnings)} kr</strong>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Available Dates */}
         {(availableDates.length > 0 || isIndefinite) && (
