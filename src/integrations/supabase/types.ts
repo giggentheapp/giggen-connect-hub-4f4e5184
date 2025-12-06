@@ -827,13 +827,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "concepts_tech_spec_reference_fkey"
-            columns: ["tech_spec_reference"]
-            isOneToOne: false
-            referencedRelation: "profile_tech_specs"
-            referencedColumns: ["id"]
-          },
         ]
       }
       concepts_history: {

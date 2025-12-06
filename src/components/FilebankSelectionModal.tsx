@@ -34,7 +34,7 @@ interface FilebankSelectionModalProps {
   onClose: () => void;
   onSelect: (file: FilebankFile | null) => void; // Allow null to clear selection
   userId: string;
-  category?: 'portfolio' | 'avatars' | 'all';
+  category?: 'portfolio' | 'avatars' | 'tech_spec' | 'hospitality_rider' | 'all';
   fileTypes?: string[]; // e.g., ['image'], ['image', 'video', 'audio']
   title?: string;
   description?: string;
@@ -84,7 +84,7 @@ export const FilebankSelectionModal = ({
 
       // Filter by category if specified
       if (category !== 'all') {
-        query = query.ilike('file_path', `${category}/%`);
+        query = query.eq('category', category);
       }
 
       // Filter by file types if specified
@@ -111,7 +111,13 @@ export const FilebankSelectionModal = ({
   const handleSelect = () => {
     if (selectedFile) {
       console.log('✅ File selected, calling onSelect');
-      onSelect(selectedFile);
+      // Add publicUrl to the file object
+      const fileWithUrl = {
+        ...selectedFile,
+        publicUrl: getPublicUrl(selectedFile.file_path),
+        file_url: getPublicUrl(selectedFile.file_path),
+      };
+      onSelect(fileWithUrl);
       setSelectedFile(null); // Reset selection
       console.log('🔘 Closing modal after selection');
       onClose();
