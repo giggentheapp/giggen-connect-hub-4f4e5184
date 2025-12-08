@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BandWithMembers } from '@/types/band';
-import { Users, Music, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Music, ChevronLeft, ChevronRight, Play, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BandViewModal } from './BandViewModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,9 +34,17 @@ export const BandCard = ({
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [hoveredImage, setHoveredImage] = useState(false);
 
-  const imageFiles = portfolioFiles.filter(file => 
-    file.file_type === 'image' || file.mime_type?.startsWith('image/')
-  );
+  // File type detection helpers
+  const isImageFile = (file: any) => 
+    file.file_type === 'image' || file.mime_type?.startsWith('image/');
+  
+  const isVideoFile = (file: any) => 
+    file.file_type === 'video' || file.mime_type?.startsWith('video/');
+  
+  const isAudioFile = (file: any) => 
+    file.file_type === 'audio' || file.mime_type?.startsWith('audio/');
+
+  const imageFiles = portfolioFiles.filter(isImageFile);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -108,10 +116,22 @@ export const BandCard = ({
     }
   };
 
-  // All images including banner and portfolio
-  const allImages = [
-    ...(band.banner_url ? [{ url: band.banner_url, title: 'Banner' }] : []),
-    ...imageFiles.map(file => ({ url: getPublicUrl(file.file_path), title: file.title || file.filename }))
+  // All media files including banner, in order: banner first, then all portfolio files
+  const allMediaFiles = [
+    ...(band.banner_url ? [{ 
+      type: 'banner' as const, 
+      url: band.banner_url, 
+      title: 'Banner',
+      file: null as any
+    }] : []),
+    ...portfolioFiles.map(file => ({
+      type: isImageFile(file) ? 'image' as const : 
+            isVideoFile(file) ? 'video' as const : 
+            isAudioFile(file) ? 'audio' as const : 'document' as const,
+      url: file.file_path ? getPublicUrl(file.file_path) : file.file_url,
+      title: file.title || file.filename,
+      file: file
+    }))
   ];
 
   return (
@@ -121,7 +141,7 @@ export const BandCard = ({
         onClick={handleCardClick}
       >
         {/* Image Gallery - Banner + Portfolio */}
-        {allImages.length > 0 && !loading && (
+        {allMediaFiles.length > 0 && !loading && (
           <div 
             className="relative w-full aspect-[4/3] bg-muted overflow-hidden rounded-t-lg"
             onMouseEnter={() => setHoveredImage(true)}
@@ -129,29 +149,72 @@ export const BandCard = ({
           >
             <div className="embla w-full h-full" ref={emblaRef}>
               <div className="embla__container h-full flex">
-                {allImages.map((image, index) => (
+                {allMediaFiles.map((media, index) => (
                   <div 
                     key={index} 
                     className="embla__slide flex-[0_0_100%] min-w-0 relative"
                   >
-                    <img
-                      src={image.url}
-                      alt={image.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {/* Banner or Image */}
+                    {media.type === 'banner' || media.type === 'image' ? (
+                      <img
+                        src={media.url}
+                        alt={media.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : media.type === 'video' ? (
+                      /* Video thumbnail with play icon */
+                      <div className="w-full h-full relative bg-black">
+                        <video
+                          src={media.url + '#t=0.5'}
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                          muted
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                            <Play className="w-6 h-6 text-black ml-1" fill="black" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                          <p className="text-white text-xs font-medium truncate">
+                            {media.title}
+                          </p>
+                        </div>
+                      </div>
+                    ) : media.type === 'audio' ? (
+                      /* Audio file preview */
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-accent-blue/10 to-accent-purple/10">
+                        <Music className="w-12 h-12 text-accent-blue mb-2" />
+                        <p className="text-sm font-medium text-center px-4 line-clamp-2">
+                          {media.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Lydfil</p>
+                      </div>
+                    ) : (
+                      /* Document file preview */
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-accent-purple/10 to-accent-pink/10">
+                        <FileText className="w-12 h-12 text-accent-purple mb-2" />
+                        <p className="text-sm font-medium text-center px-4 line-clamp-2">
+                          {media.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {media.file?.file_type || 'Dokument'}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Navigation Arrows */}
-            {allImages.length > 1 && hoveredImage && (
+            {allMediaFiles.length > 1 && hoveredImage && (
               <div className="gallery-controls">
                 {canScrollPrev && (
                   <button
                     onClick={scrollPrev}
                     className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 hover:bg-background flex items-center justify-center shadow-lg transition-all duration-200 z-10"
-                    aria-label="Previous image"
+                    aria-label="Forrige"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -160,7 +223,7 @@ export const BandCard = ({
                   <button
                     onClick={scrollNext}
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 hover:bg-background flex items-center justify-center shadow-lg transition-all duration-200 z-10"
-                    aria-label="Next image"
+                    aria-label="Neste"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -168,17 +231,17 @@ export const BandCard = ({
               </div>
             )}
 
-            {/* Image Counter */}
-            {allImages.length > 1 && (
+            {/* Counter */}
+            {allMediaFiles.length > 1 && (
               <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-background/90 text-xs font-medium shadow-md z-10">
-                {selectedIndex + 1}/{allImages.length}
+                {selectedIndex + 1}/{allMediaFiles.length}
               </div>
             )}
 
             {/* Dot Indicators */}
-            {allImages.length > 1 && allImages.length <= 5 && (
+            {allMediaFiles.length > 1 && allMediaFiles.length <= 5 && (
               <div className="gallery-controls absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                {allImages.map((_, index) => (
+                {allMediaFiles.map((_, index) => (
                   <button
                     key={index}
                     onClick={(e) => scrollTo(index, e)}
@@ -187,7 +250,7 @@ export const BandCard = ({
                         ? 'bg-background w-4' 
                         : 'bg-background/60 hover:bg-background/80'
                     }`}
-                    aria-label={`Go to image ${index + 1}`}
+                    aria-label={`Gå til ${index + 1}`}
                   />
                 ))}
               </div>
