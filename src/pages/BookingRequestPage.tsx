@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, User, MapPin, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { navigateBack } from '@/lib/navigation';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCreateBooking } from '@/hooks/useBookingMutations';
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils';
 const BookingRequestPage = () => {
   const { makerId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const { t } = useAppTranslation();
@@ -150,7 +152,7 @@ const BookingRequestPage = () => {
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={() => navigateBack(navigate, location, user ? `/profile/${user.id}?section=dashboard` : '/auth')}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { ConceptTypeSelector } from '@/components/ConceptTypeSelector';
 import { TeachingWizard } from '@/components/wizards/TeachingWizard';
 import { ArrangørTilbudWizard } from '@/components/wizards/ArrangørTilbudWizard';
@@ -8,9 +8,11 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { conceptService } from '@/services/conceptService';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { navigateBack } from '@/lib/navigation';
 
 export default function CreateOffer() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('edit');
   const { toast } = useToast();
@@ -191,7 +193,7 @@ export default function CreateOffer() {
               console.log('CreateOffer: Setting concept type to:', type);
               setConceptType(type);
             }}
-            onBack={() => navigate(-1)}
+            onBack={() => navigateBack(navigate, location, `/profile/${userId}?section=dashboard`)}
           />
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,6 +48,7 @@ interface BookingEditModalProps {
 }
 
 export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEditModalProps) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [startDateOpen, setStartDateOpen] = useState(false);
@@ -192,8 +194,8 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: "Booking-detaljene har blitt lagret",
       });
 
-      // Navigate back to bookings page
-      window.history.replaceState(null, '', '/bookings');
+      // Navigate back to bookings page - use replace: true since this is a URL correction after save
+      navigate('/bookings', { replace: true });
       onSaved();
     } catch (error) {
       if (error instanceof z.ZodError) {
