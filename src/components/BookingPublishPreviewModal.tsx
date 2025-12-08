@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useBookings } from '@/hooks/useBookings';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
+import { bookingService } from '@/services/bookingService';
+import { Booking } from '@/types/booking';
 
 interface BookingPublishPreviewModalProps {
   bookingId: string;
@@ -25,7 +27,7 @@ export const BookingPublishPreviewModal = ({
   currentUserId
 }: BookingPublishPreviewModalProps) => {
   const navigate = useNavigate();
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,71 +47,21 @@ export const BookingPublishPreviewModal = ({
       
       console.log('🔄 Fetching fresh data for booking:', bookingId);
 
-      // Fetch fresh booking data
-      const { data: bookingData, error: bookingError } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('id', bookingId)
-        .single();
-
-      if (bookingError) throw bookingError;
-      
-      console.log('📋 Booking data:', {
-        id: bookingData.id,
-        title: bookingData.title,
-        status: bookingData.status,
-        updated_at: bookingData.updated_at
-      });
+      // Use service layer
+      const bookingData = await bookingService.getById(bookingId);
+      if (!bookingData) throw new Error('Booking not found');
       
       setBooking(bookingData);
 
-      // Fetch maker profile
       if (bookingData.receiver_id) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('display_name, avatar_url, bio')
-          .eq('user_id', bookingData.receiver_id)
-          .maybeSingle();
-        
+        const profileData = await bookingService.getMakerProfile(bookingData.receiver_id);
         if (profileData) {
           setMakerProfile(profileData);
         }
       }
 
-      // Fetch ONLY portfolio attachments from booking_portfolio_attachments table
-      // This ensures we only show files explicitly attached during negotiations
-      const { data: attachmentsData, error: attachmentsError } = await supabase
-        .from('booking_portfolio_attachments')
-        .select(`
-          id,
-          booking_id,
-          portfolio_file_id,
-          attached_by,
-          created_at,
-          portfolio_file:profile_portfolio(
-            id,
-            filename,
-            file_path,
-            file_type,
-            file_url,
-            mime_type,
-            title,
-            description,
-            user_id
-          )
-        `)
-        .eq('booking_id', bookingId)
-        .order('created_at', { ascending: false });
-
-      if (attachmentsError) {
-        console.error('❌ Error fetching attachments:', attachmentsError);
-      } else {
-        console.log('📎 Portfolio attachments:', {
-          count: attachmentsData?.length || 0,
-          files: attachmentsData?.map(a => a.portfolio_file?.title || a.portfolio_file?.filename)
-        });
-        setPortfolioAttachments(attachmentsData || []);
-      }
+      const attachmentsData = await bookingService.getPortfolioAttachments(bookingId);
+      setPortfolioAttachments(attachmentsData);
 
     } catch (error) {
       console.error('❌ Error fetching preview data:', error);
@@ -130,7 +82,6 @@ export const BookingPublishPreviewModal = ({
       const userEmail = user?.email;
 
       // Check if current user is in admin whitelist
-      // Note: Ideally both parties should be checked, but we need user emails which require admin access
       let hasPaidTickets = false;
       if (userEmail) {
         const { data: currentUserWhitelist } = await supabase
@@ -220,7 +171,7 @@ export const BookingPublishPreviewModal = ({
   if (!booking) return null;
 
   // Get visibility settings from booking, with defaults
-  const visibilitySettings = booking.public_visibility_settings || {};
+  const visibilitySettings = (booking as any).public_visibility_settings || {};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

@@ -192,3 +192,12 @@ export interface UpdateBookingRequest {
   approved_by_receiver?: boolean;
   sender_contact_info?: ContactInfo;
 }
+
+/**
+ * Props interface for booking action components
+ */
+export interface BookingActionProps {
+  booking: Booking;
+  currentUserId: string;
+  onAction?: () => void;
+}

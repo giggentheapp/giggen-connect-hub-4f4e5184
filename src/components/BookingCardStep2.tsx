@@ -2,24 +2,13 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Banknote, MessageCircle, Eye, Edit3 } from 'lucide-react';
-import { format } from 'date-fns';
 import { BookingActions } from './BookingActions';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
-
-const formatSafeDate = (dateString: string) => {
-  try {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Ugyldig dato';
-    return format(date, 'dd.MM.yyyy');
-  } catch (error) {
-    console.warn('Date formatting error:', error);
-    return 'Ugyldig dato';
-  }
-};
+import { formatSafeDate, getPaymentDisplayText } from '@/utils/bookingUtils';
+import { Booking } from '@/types/booking';
 
 interface BookingCardStep2Props {
-  booking: any;
+  booking: Booking;
   currentUserId: string;
   onDetailsClick: () => void;
   onEditClick: () => void;
@@ -85,15 +74,7 @@ export const BookingCardStep2 = ({
           
           <div className="flex items-center gap-1.5">
             <Banknote className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {booking.door_deal ? (
-                `${booking.door_percentage || 50}% av dør`
-              ) : booking.by_agreement ? (
-                'Etter avtale'
-              ) : (
-                `${booking.artist_fee || booking.price_musician || '0'} kr`
-              )}
-            </span>
+            <span>{getPaymentDisplayText(booking)}</span>
           </div>
         </div>
 

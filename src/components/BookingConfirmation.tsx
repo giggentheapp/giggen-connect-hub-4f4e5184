@@ -8,26 +8,36 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Calendar, MapPin, Banknote, Users, FileText, Music, Eye } from 'lucide-react';
+import { Check, Calendar, MapPin, Banknote, Users, FileText, Music, Eye } from 'lucide-react';
 import { format } from 'date-fns';
+import { useBookingRealtime } from '@/hooks/useBookingRealtime';
+import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
+import { Booking } from '@/types/booking';
 
 interface BookingConfirmationProps {
-  booking: any;
+  booking: Booking;
   isOpen: boolean;
   onClose: () => void;
   currentUserId: string;
 }
 
-import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
-
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
   const [hasReadAgreement, setHasReadAgreement] = useState(false);
-  const [realtimeBooking, setRealtimeBooking] = useState(booking);
   const [showPublicPreview, setShowPublicPreview] = useState(false);
-  const [makerProfile, setMakerProfile] = useState(null);
+  const [makerProfile, setMakerProfile] = useState<any>(null);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
+
+  // Use realtime hook for booking updates
+  const realtimeBooking = useBookingRealtime(booking, currentUserId, {
+    onReceiverApproved: () => {
+      // Optional: Add custom logic here if needed
+    },
+    onSenderApproved: () => {
+      // Optional: Add custom logic here if needed
+    }
+  });
 
   // Use realtime booking data
   const currentBooking = realtimeBooking || booking;
@@ -36,12 +46,10 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
   const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
   const userReadField = isSender ? 'sender_read_agreement' : 'receiver_read_agreement';
   const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
-  const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
 
   useEffect(() => {
     if (isOpen) {
       setHasReadAgreement(false);
-      setRealtimeBooking(booking);
       
       // Load maker profile
       const loadMakerProfile = async () => {
@@ -64,68 +72,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
       loadMakerProfile();
     }
   }, [isOpen, booking]);
-
-  // Enhanced real-time subscription with better error handling for mobile
-  useEffect(() => {
-    if (!booking?.id) return;
-    
-    const isMobileOrSafari = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                           /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    
-    // Skip real-time subscriptions on mobile/Safari to prevent crashes
-    if (isMobileOrSafari) {
-      return;
-    }
-
-    const channel = supabase
-      .channel('booking-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `id=eq.${booking.id}`
-        },
-        (payload) => {
-          try {
-            const updatedBooking = payload.new;
-            setRealtimeBooking(prev => ({ ...prev, ...updatedBooking }));
-            
-            // Show notification when other party confirms
-            const isSender = currentUserId === booking.sender_id;
-            const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
-            const otherUserReadField = isSender ? 'receiver_read_agreement' : 'sender_read_agreement';
-            
-            if (updatedBooking[otherUserConfirmedField] && !booking[otherUserConfirmedField]) {
-              toast({
-                title: "Booking bekreftet! 🎉",
-                description: "Den andre parten har bekreftet bookingen",
-              });
-            }
-            
-            if (updatedBooking[otherUserReadField] && !booking[otherUserReadField]) {
-              toast({
-                title: "Avtale lest! 📋",
-                description: "Den andre parten har lest avtalen",
-              });
-            }
-          } catch (error) {
-            console.warn('Error handling real-time update:', error);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      try {
-        supabase.removeChannel(channel);
-      } catch (error) {
-        console.warn('Error removing channel:', error);
-      }
-    };
-  }, [booking?.id, currentUserId, booking?.sender_confirmed, booking?.receiver_confirmed, booking?.sender_read_agreement, booking?.receiver_read_agreement, toast]);
-
 
   const handleConfirmBooking = async () => {
     if (!hasReadAgreement) {
