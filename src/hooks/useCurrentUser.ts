@@ -51,12 +51,13 @@ export const useCurrentUser = () => {
 
   // Redirect to auth if not logged in - handle race condition for new signups
   useEffect(() => {
-    // Don't redirect if we're already on auth page
-    if (window.location.pathname === '/auth') {
+    // Don't redirect if we're on auth, onboarding, or root
+    const pathname = window.location.pathname;
+    if (pathname === '/auth' || pathname === '/onboarding' || pathname === '/') {
       return;
     }
     
-    // If loading, wait
+    // If loading, wait - don't redirect prematurely
     if (isLoading) {
       return;
     }
@@ -74,8 +75,8 @@ export const useCurrentUser = () => {
       return () => clearTimeout(retryTimer);
     }
     
-    // Only redirect if no user at all (not authenticated)
-    if (!data?.user) {
+    // Only redirect if no user at all (not authenticated) AND we're done loading
+    if (!data?.user && !isLoading) {
       logger.debug('No user found, redirecting to auth');
       navigate('/auth');
     }

@@ -27,8 +27,22 @@ export const useAuthSession = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session FIRST before subscribing
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    // Subscribe to auth state changes FIRST - this ensures we catch any auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        if (!mounted) return;
+        
+        // Update state on any auth change
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        // If we get any event, we're no longer loading
+        setLoading(false);
+      }
+    );
+
+    // Then get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
       if (!mounted) return;
       
       // If there's an auth error (like invalid refresh token), clear the session
@@ -41,27 +55,10 @@ export const useAuthSession = () => {
         return;
       }
       
-      setSession(session);
-      setUser(session?.user ?? null);
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
       setLoading(false);
     });
-
-    // Subscribe to auth state changes - ONLY update state, no navigation logic
-    // Use a ref to prevent duplicate event handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted) return;
-        // Only update if session actually changed
-        setSession(prev => {
-          if (prev?.access_token === session?.access_token) return prev;
-          return session;
-        });
-        setUser(prev => {
-          if (prev?.id === session?.user?.id) return prev;
-          return session?.user ?? null;
-        });
-      }
-    );
 
     return () => {
       mounted = false;
