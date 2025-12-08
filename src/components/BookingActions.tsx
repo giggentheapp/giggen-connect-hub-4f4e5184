@@ -7,7 +7,8 @@ import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, ArrowRight, Archive, Trash2 } from 'lucide-react';
 import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
-import { Booking, BookingActionProps } from '@/types/booking';
+import { BookingActionProps } from '@/types/booking';
+import { isSender as checkIsSender, isReceiver as checkIsReceiver } from '@/utils/bookingUtils';
 
 export const BookingActions = ({
   booking,
@@ -24,8 +25,8 @@ export const BookingActions = ({
   } = useBookings(currentUserId);
   const { toast } = useToast();
   
-  const isSender = currentUserId === booking.sender_id;
-  const isReceiver = currentUserId === booking.receiver_id;
+  const isSender = checkIsSender(currentUserId, booking);
+  const isReceiver = checkIsReceiver(currentUserId, booking);
 
   // Step 1: Allow booking (receiver only)
   const handleAllowBooking = async () => {
