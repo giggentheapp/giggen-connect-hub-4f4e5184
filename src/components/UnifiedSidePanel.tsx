@@ -53,8 +53,8 @@ export const UnifiedSidePanel = ({
   // Use a ref to track if we've already initialized to prevent re-defaulting to dashboard
   const [activeSection, setActiveSection] = useState(() => {
     if (!isOwnProfile) return 'profile';
-    // Read directly from URL on mount - don't default to dashboard if section exists
-    const urlSection = new URL(window.location.href).searchParams.get('section');
+    // Read from searchParams on mount - use React Router's hook instead of window.location
+    const urlSection = searchParams.get('section');
     return urlSection || location.state?.section || 'dashboard';
   });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX

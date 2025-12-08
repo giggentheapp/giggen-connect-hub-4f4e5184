@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
 import jsQR from "jsqr";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { useCheckInTicket } from "@/hooks/useTickets";
 import { useIsAdmin, useIsOrganizer } from "@/hooks/useUserRole";
 
 export function AdminCheckIn() {
+  const navigate = useNavigate();
   const isAdmin = useIsAdmin();
   const isOrganizer = useIsOrganizer();
   const hasAccess = isAdmin || isOrganizer;
@@ -40,7 +42,7 @@ export function AdminCheckIn() {
                 Du har ikke tilgang til innsjekk-funksjonen. Kun administratorer og arrangører kan sjekke inn billetter.
               </p>
               <Button
-                onClick={() => window.location.href = '/admin-setup'}
+                onClick={() => navigate('/admin-setup')}
                 variant="outline"
                 size="sm"
               >

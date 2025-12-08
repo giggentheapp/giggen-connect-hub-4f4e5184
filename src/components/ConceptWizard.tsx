@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,7 @@ const STEPS = [
 ];
 
 export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWizardProps) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -474,7 +476,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       variant="outline"
                       onClick={async () => {
                         await handleSave(false);
-                        window.location.href = `/profile/${userId}?section=filbank`;
+                        navigate(`/profile/${userId}?section=filbank`);
                       }}
                       className="w-full"
                     >
@@ -524,7 +526,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       variant="outline"
                       onClick={async () => {
                         await handleSave(false);
-                        window.location.href = `/profile/${userId}?section=filbank`;
+                        navigate(`/profile/${userId}?section=filbank`);
                       }}
                       className="w-full"
                     >

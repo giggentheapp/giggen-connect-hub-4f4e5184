@@ -141,8 +141,8 @@ export const ArtistExploreSection = ({
   }, [allOrganizers, debouncedSearchTerm]);
   // Memoized handlers to prevent unnecessary re-renders
   const handleViewEvent = useCallback((eventId: string) => {
-    window.location.href = `/arrangement/${eventId}`;
-  }, []);
+    navigate(`/arrangement/${eventId}`);
+  }, [navigate]);
 
   const handleViewProfile = useCallback((userId: string) => {
     // Save current state for back navigation
