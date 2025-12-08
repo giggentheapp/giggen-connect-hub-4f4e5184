@@ -68,13 +68,20 @@ export const UnifiedSidePanel = ({
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
     const section = searchParams.get('section') || location.state?.section;
+    
     // If viewing someone else's profile, restrict to profile section only
     if (!isOwnProfile) {
       if (section !== 'profile' && activeSection !== 'profile') {
         setActiveSection('profile');
-        // Update URL to reflect profile section - use clean userId
         navigate(`/profile/${cleanProfileUserId}?section=profile`, { replace: true });
       }
+      return;
+    }
+    
+    // For own profile: if no section specified, default to dashboard
+    if (!section && isOwnProfile && cleanProfileUserId) {
+      setActiveSection('dashboard');
+      navigate(`/profile/${cleanProfileUserId}?section=dashboard`, { replace: true });
       return;
     }
     
