@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,7 +23,14 @@ const BookingRequestPage = () => {
   const { t } = useAppTranslation();
   const isMobile = useIsMobile();
   
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!userLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, userLoading, navigate]);
   const createBookingMutation = useCreateBooking();
   
   const [formData, setFormData] = useState({

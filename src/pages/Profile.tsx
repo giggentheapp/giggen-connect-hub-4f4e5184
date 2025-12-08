@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useMemo, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { User } from 'lucide-react';
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
@@ -8,6 +8,7 @@ import { useProfile } from '@/hooks/useProfile';
 
 const Profile = () => {
   const { userId: rawUserId } = useParams();
+  const navigate = useNavigate();
   
   // Clean userId - remove query parameters and hash fragments
   // Fixes bug where userId contains "?section=dashboard" causing 400 errors
@@ -16,8 +17,15 @@ const Profile = () => {
     return rawUserId.split('?')[0].split('#')[0].trim();
   }, [rawUserId]);
   
-  const { user: currentUser, profile: currentUserProfile } = useCurrentUser();
+  const { user: currentUser, profile: currentUserProfile, loading: userLoading } = useCurrentUser();
   const { profile, loading } = useProfile(userId);
+
+  // Redirect to auth if not logged in and trying to access own profile
+  useEffect(() => {
+    if (!userLoading && !currentUser && !userId) {
+      navigate('/auth', { replace: true });
+    }
+  }, [currentUser, userLoading, userId, navigate]);
 
   const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
   const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
