@@ -36,12 +36,19 @@ const BookingAgreementReview = () => {
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
   const [fetchingFreshData, setFetchingFreshData] = useState(false);
   
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
   const { booking, loading: bookingLoading, refetch } = useBooking(bookingId);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
   
   const currentUserId = user?.id || null;
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!userLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, userLoading, navigate]);
 
   const isSender = currentUserId === booking?.sender_id;
   const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';

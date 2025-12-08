@@ -14,8 +14,15 @@ export default function CreateOffer() {
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('edit');
   const { toast } = useToast();
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
   const userId = user?.id || '';
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!userLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, userLoading, navigate]);
   const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | 'arrangør_tilbud' | null>(null);
   const [loading, setLoading] = useState(!!draftId);
   const [loadedConcept, setLoadedConcept] = useState<any>(null);

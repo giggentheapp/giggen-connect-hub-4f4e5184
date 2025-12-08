@@ -13,6 +13,9 @@ import { useUpdateConcept } from '@/hooks/useConceptMutations';
 import { handleError } from '@/lib/errorHandler';
 import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 
+// Note: This page allows viewing concepts from any user (for booking requests)
+// so we don't redirect if not logged in - the concept might be shared
+
 interface ConceptFile {
   id: string;
   filename: string;

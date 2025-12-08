@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useConcepts } from '@/hooks/useConcepts';
@@ -20,6 +20,13 @@ const BookingAgreementView = () => {
 
   const { user, loading: userLoading } = useCurrentUser();
   const { booking, loading: bookingLoading } = useBooking(bookingId);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!userLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, userLoading, navigate]);
   
   const currentUserId = user?.id || '';
   const makerId = booking?.receiver_id;
