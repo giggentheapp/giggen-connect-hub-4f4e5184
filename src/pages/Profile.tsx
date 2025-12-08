@@ -34,7 +34,8 @@ const Profile = () => {
   const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
   const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
 
-  if (loading) {
+  // Wait for session check before showing anything
+  if (sessionLoading || loading) {
     return (
       <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

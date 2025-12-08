@@ -14,12 +14,25 @@ export interface UserProfile {
 export const profileService = {
   /**
    * Get the currently authenticated user and their profile
+   * Returns null for both user and profile if no session exists (not an error)
    */
   async getCurrentUser(): Promise<UserProfile> {
     try {
+      // First check if there's a session - prevents AuthSessionMissingError
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // No session is not an error - just return nulls
+        return { user: null, profile: null };
+      }
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError) {
+        // AuthSessionMissingError means user is logged out - not an error
+        if (authError.name === 'AuthSessionMissingError') {
+          return { user: null, profile: null };
+        }
         logger.error('Failed to get current user', { error: authError });
         throw authError;
       }
@@ -41,7 +54,11 @@ export const profileService = {
       }
 
       return { user, profile };
-    } catch (error) {
+    } catch (error: any) {
+      // AuthSessionMissingError means user is logged out - not an error
+      if (error?.name === 'AuthSessionMissingError') {
+        return { user: null, profile: null };
+      }
       logger.error('Error in getCurrentUser', { error });
       return { user: null, profile: null };
     }
