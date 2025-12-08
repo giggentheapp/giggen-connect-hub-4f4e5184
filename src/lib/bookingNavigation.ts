@@ -1,89 +1,117 @@
+import { NavigateFunction, Location } from 'react-router-dom';
+import { navigateBack as baseNavigateBack } from './navigation';
+
 /**
  * Smart navigation helper that remembers where user came from
+ * 
+ * Now uses centralized navigation logic
  */
-export const navigateBack = (navigate: any, fallback: string = '/dashboard') => {
-  // Check if we have navigation state
-  const hasHistory = window.history.length > 2;
-  
-  if (hasHistory) {
-    navigate(-1);
-  } else {
-    navigate(fallback);
-  }
+export const navigateBack = (
+  navigate: NavigateFunction,
+  location: Location,
+  fallback: string = '/'
+): void => {
+  baseNavigateBack(navigate, location, fallback);
 };
 
 /**
  * Get the correct navigation target based on booking status
+ * 
+ * Returns profile URL with bookings section and appropriate tab
+ * 
+ * @param booking - Booking object with status
+ * @param userId - Current user ID (for generating profile URL)
+ * @returns Profile URL with bookings section and tab
  */
-export const getBookingNavigationTarget = (booking: any): string => {
+export const getBookingNavigationTarget = (
+  booking: any,
+  userId?: string
+): string => {
   if (!booking || !booking.status) {
-    return '/bookings';
+    // If we have userId, return profile URL, otherwise return old format for compatibility
+    return userId ? `/profile/${userId}?section=bookings` : '/bookings';
   }
 
-  const { status, sender_id, receiver_id } = booking;
-  
-  // Get current user to determine if they're sender or receiver
-  // This will be used to determine correct tab
+  const { status } = booking;
+  let tab = 'incoming';
   
   switch (status) {
     case 'pending':
-      // Pending bookings go to incoming (if receiver) or sent (if sender)
-      // Default to incoming for now
-      return '/bookings?tab=incoming';
+      tab = 'incoming';
+      break;
     
     case 'allowed':
     case 'approved_by_sender':
     case 'approved_by_receiver':
     case 'approved_by_both':
-      // Ongoing negotiations
-      return '/bookings?tab=ongoing';
+      tab = 'ongoing';
+      break;
     
     case 'upcoming':
-      // Published/confirmed events
-      return '/bookings?tab=upcoming';
+      tab = 'upcoming';
+      break;
     
     default:
-      return '/bookings';
+      tab = 'incoming';
   }
+  
+  // If we have userId, return profile URL, otherwise return old format
+  if (userId) {
+    return `/profile/${userId}?section=bookings&tab=${tab}`;
+  }
+  
+  return `/bookings?tab=${tab}`;
 };
 
 /**
  * Get navigation target with user context
+ * 
+ * Returns profile URL with bookings section and appropriate tab based on user role
+ * 
+ * @param booking - Booking object with status
+ * @param currentUserId - Current user ID
+ * @returns Profile URL with bookings section and tab
  */
 export const getBookingNavigationTargetWithUser = (
   booking: any, 
   currentUserId: string
 ): string => {
   if (!booking || !booking.status) {
-    return '/bookings';
+    return `/profile/${currentUserId}?section=bookings`;
   }
 
   const { status, sender_id, receiver_id } = booking;
   const isSender = currentUserId === sender_id;
   const isReceiver = currentUserId === receiver_id;
   
+  let tab = 'incoming';
+  
   switch (status) {
     case 'pending':
       // Route to correct tab based on user role
       if (isReceiver) {
-        return '/bookings?tab=incoming';
+        tab = 'incoming';
       } else if (isSender) {
-        return '/bookings?tab=sent';
+        tab = 'sent';
+      } else {
+        tab = 'incoming';
       }
-      return '/bookings?tab=incoming';
+      break;
     
     case 'allowed':
     case 'approved_by_sender':
     case 'approved_by_receiver':
     case 'approved_by_both':
-      // Ongoing negotiations
-      return '/bookings?tab=ongoing';
+      tab = 'ongoing';
+      break;
     
     case 'upcoming':
-      // Published/confirmed events
-      return '/bookings?tab=upcoming';
+      tab = 'upcoming';
+      break;
     
     default:
-      return '/bookings';
+      tab = 'incoming';
   }
+  
+  return `/profile/${currentUserId}?section=bookings&tab=${tab}`;
 };
