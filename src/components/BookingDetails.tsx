@@ -17,35 +17,14 @@ import { format } from 'date-fns';
 import { CalendarIcon, AlertTriangle, Check, X, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { canBeEditedByParties, BookingStatus } from '@/lib/bookingStatus';
-
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
+import { bookingService } from '@/services/bookingService';
+import { Booking } from '@/types/booking';
+import { isSender as checkIsSender, isReceiver as checkIsReceiver } from '@/utils/bookingUtils';
 
 interface BookingDetailsProps {
   bookingId: string;
   onClose?: () => void;
-}
-
-interface Booking {
-  id: string;
-  sender_id: string;
-  receiver_id: string;
-  concept_ids: string[];
-  selected_concept_id: string | null;
-  title: string;
-  description: string | null;
-  price_musician: string | null;
-  price_ticket: string | null;
-  event_date: string | null;
-  venue: string | null;
-  hospitality_rider: string | null;
-  tech_spec: string | null;
-  status: string;
-  sender_confirmed: boolean;
-  receiver_confirmed: boolean;
-  sender_read_agreement: boolean;
-  receiver_read_agreement: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
@@ -70,15 +49,10 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('id', bookingId)
-          .maybeSingle();
-
-        if (error) throw error;
+        // Use service layer instead of direct Supabase query
+        const bookingData = await bookingService.getById(bookingId);
         
-        if (!data) {
+        if (!bookingData) {
           toast({
             title: "Ikke funnet",
             description: "Fant ikke bookingen",
@@ -87,14 +61,14 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
           return;
         }
         
-        setBooking(data);
+        setBooking(bookingData as any);
         
         // Fetch concepts
-        if (data.concept_ids && data.concept_ids.length > 0) {
+        if (bookingData.concept_ids && bookingData.concept_ids.length > 0) {
           const { data: conceptsData } = await supabase
             .from('concepts')
             .select('*')
-            .in('id', data.concept_ids);
+            .in('id', bookingData.concept_ids);
           
           setConcepts(conceptsData || []);
         }
@@ -321,8 +295,8 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
     return <div className="p-6 text-center">Booking ikke funnet</div>;
   }
 
-  const isSender = currentUserId === booking.sender_id;
-  const isReceiver = currentUserId === booking.receiver_id;
+  const isSender = currentUserId ? checkIsSender(currentUserId, booking as Booking) : false;
+  const isReceiver = currentUserId ? checkIsReceiver(currentUserId, booking as Booking) : false;
   const canEdit = canBeEditedByParties(booking.status as BookingStatus) || booking.status === 'approved_by_both' || booking.status === 'upcoming';
   const isNegotiationPhase = booking.status === 'approved_by_both';
   const isConfirmationPhase = booking.status === 'upcoming';
@@ -477,9 +451,9 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
             
             <div>
               <EditableField 
-                fieldName="price_ticket"
+                fieldName="ticket_price"
                 label="Billettpris"
-                value={booking.price_ticket}
+                value={(booking as any).ticket_price}
                 placeholder="200 eller 'gratis'"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -496,7 +470,7 @@ export const BookingDetails = ({ bookingId, onClose }: BookingDetailsProps) => {
         techSpec={booking.tech_spec}
         hospitalityRider={booking.hospitality_rider}
       bookingStatus={booking.status}
-      isVisible={booking.status === 'approved_by_both' || booking.status === 'upcoming' || booking.status === 'published'}
+      isVisible={booking.status === 'approved_by_both' || booking.status === 'upcoming'}
       />
 
       {/* Status and Actions */}

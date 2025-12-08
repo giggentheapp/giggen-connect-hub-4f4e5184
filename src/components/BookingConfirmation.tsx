@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,8 @@ import { useBookingRealtime } from '@/hooks/useBookingRealtime';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
 import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
 import { Booking } from '@/types/booking';
+import { bookingService } from '@/services/bookingService';
+import { isSender as checkIsSender, isReceiver as checkIsReceiver, bothPartiesApproved, bothPartiesReadAgreement } from '@/utils/bookingUtils';
 
 interface BookingConfirmationProps {
   booking: Booking;
@@ -41,8 +42,8 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   // Use realtime booking data
   const currentBooking = realtimeBooking || booking;
-  const isSender = currentUserId === currentBooking?.sender_id;
-  const isReceiver = currentUserId === currentBooking?.receiver_id;
+  const isSender = currentBooking ? checkIsSender(currentUserId, currentBooking) : false;
+  const isReceiver = currentBooking ? checkIsReceiver(currentUserId, currentBooking) : false;
   const userConfirmedField = isSender ? 'approved_by_sender' : 'approved_by_receiver';
   const userReadField = isSender ? 'sender_read_agreement' : 'receiver_read_agreement';
   const otherUserConfirmedField = isSender ? 'approved_by_receiver' : 'approved_by_sender';
@@ -51,17 +52,13 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
     if (isOpen) {
       setHasReadAgreement(false);
       
-      // Load maker profile
+      // Load maker profile using service layer
       const loadMakerProfile = async () => {
         if (booking?.receiver_id) {
           try {
-            const { data } = await supabase
-              .from('profiles')
-              .select('display_name, avatar_url, bio')
-              .eq('user_id', booking.receiver_id)
-              .maybeSingle();
-            if (data) {
-              setMakerProfile(data);
+            const profileData = await bookingService.getMakerProfile(booking.receiver_id);
+            if (profileData) {
+              setMakerProfile(profileData);
             }
           } catch (error) {
             console.error('Error loading maker profile:', error);
@@ -116,9 +113,9 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
 
   if (!currentBooking) return null;
 
-  const bothConfirmed = currentBooking.approved_by_sender && currentBooking.approved_by_receiver;
-  const bothReadAgreement = currentBooking.sender_read_agreement && currentBooking.receiver_read_agreement;
-  const canShowPreview = bothConfirmed && bothReadAgreement;
+  const bothConfirmed = bothPartiesApproved(currentBooking);
+  const bothRead = bothPartiesReadAgreement(currentBooking);
+  const canShowPreview = bothConfirmed && bothRead;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

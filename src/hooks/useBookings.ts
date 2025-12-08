@@ -31,15 +31,10 @@ export const useBookings = (userId?: string) => {
   const rejectBookingMutation = useRejectBooking();
   const permanentlyDeleteBookingMutation = usePermanentlyDeleteBooking();
 
-  // Safari detection
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
   // Set up realtime subscription for booking updates
+  // Real-time now works on all platforms including Safari
   useEffect(() => {
-    if (!userId || isSafari) {
-      if (isSafari) {
-        logger.debug('Skipping realtime for Safari browser');
-      }
+    if (!userId) {
       return;
     }
 
@@ -76,7 +71,7 @@ export const useBookings = (userId?: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, isSafari, refetch]);
+  }, [userId, refetch]);
 
   return {
     bookings,
