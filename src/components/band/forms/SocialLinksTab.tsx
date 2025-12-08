@@ -52,9 +52,11 @@ export const SocialLinksTab = ({ socialLinks, onChange }: SocialLinksTabProps) =
             },
           ]}
           links={socialLinks}
-          onChange={(links) => {
-            Object.entries(links).forEach(([platform, url]) => {
-              onChange(platform, url || '');
+          onChange={(newLinks) => {
+            // Update each platform - set empty string for removed links
+            const allPlatforms = ['instagram', 'facebook', 'tiktok', 'twitter', 'website'];
+            allPlatforms.forEach(platform => {
+              onChange(platform, newLinks[platform] || '');
             });
           }}
         />
