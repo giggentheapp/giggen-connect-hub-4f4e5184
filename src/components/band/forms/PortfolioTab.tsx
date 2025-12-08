@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import BandPortfolioManager from '@/components/BandPortfolioManager';
+import BandFileManager from '@/components/BandFileManager';
 import { Info } from 'lucide-react';
 
 interface PortfolioTabProps {
@@ -19,9 +19,10 @@ export const PortfolioTab = ({ bandId, userId }: PortfolioTabProps) => {
           </AlertDescription>
         </Alert>
       )}
-      <BandPortfolioManager
+      <BandFileManager
         bandId={bandId || ''}
         userId={userId}
+        type="portfolio"
         title="Portfolio"
         description="Last opp bilder, videoer og annet materiale"
       />

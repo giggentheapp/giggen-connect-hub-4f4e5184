@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import BandTechSpecManager from '@/components/BandTechSpecManager';
+import BandFileManager from '@/components/BandFileManager';
 import { Info } from 'lucide-react';
 
 interface TechSpecTabProps {
@@ -19,9 +19,10 @@ export const TechSpecTab = ({ bandId, userId }: TechSpecTabProps) => {
           </AlertDescription>
         </Alert>
       )}
-      <BandTechSpecManager
+      <BandFileManager
         bandId={bandId || ''}
         userId={userId}
+        type="tech_spec"
         title="Tekniske spesifikasjoner"
         description="Last opp tekniske spesifikasjoner for bandet"
       />
