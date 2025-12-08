@@ -1,17 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Band, BandWithMembers } from '@/types/band';
-import { useToast } from '@/hooks/use-toast';
+import { BandWithMembers } from '@/types/band';
+import { queryKeys } from '@/lib/queryKeys';
+import { logger } from '@/utils/logger';
 
 export const useBands = () => {
-  const [bands, setBands] = useState<BandWithMembers[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  const fetchBands = async () => {
-    try {
-      setLoading(true);
-      // Fetch only bands with complete profiles (image_url, banner_url, and description/bio required)
+  const { data: bands = [], isLoading: loading, error, refetch } = useQuery({
+    queryKey: queryKeys.bands.public,
+    queryFn: async () => {
+      // Fetch only bands with complete profiles
       const { data, error } = await supabase
         .from('bands')
         .select(`
@@ -37,12 +35,12 @@ export const useBands = () => {
         (band.bio && band.bio.length > 0)
       );
 
-      // ✅ OPTIMIZED: Collect ALL member IDs from ALL bands first
+      // Collect ALL member IDs from ALL bands first (deduplication)
       const allMemberIds = completeBands
         .flatMap(band => band.band_members?.map(m => m.user_id) || [])
-        .filter((id, index, arr) => arr.indexOf(id) === index); // Remove duplicates
+        .filter((id, index, arr) => arr.indexOf(id) === index);
 
-      // ✅ OPTIMIZED: Fetch ALL profiles in ONE query
+      // Fetch ALL profiles in ONE query
       let allProfiles: any[] = [];
       if (allMemberIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
@@ -51,18 +49,15 @@ export const useBands = () => {
           .in('user_id', allMemberIds);
         
         if (profilesError) {
-          console.warn('Error fetching profiles:', profilesError);
-          // Don't throw - continue without profiles
+          logger.warn('Error fetching profiles:', profilesError);
         } else {
           allProfiles = profilesData || [];
         }
       }
 
-      // ✅ OPTIMIZED: Map profiles in memory (fast, no queries)
+      // Map profiles in memory
       const bandsWithCounts = completeBands.map((band) => {
         const memberIds = band.band_members?.map(m => m.user_id) || [];
-        
-        // Find profiles for this band's members (in-memory lookup)
         const profiles = allProfiles.filter(p => memberIds.includes(p.user_id));
 
         const membersWithProfiles = band.band_members?.map(member => ({
@@ -77,32 +72,28 @@ export const useBands = () => {
         };
       });
 
-      setBands(bandsWithCounts as BandWithMembers[]);
-    } catch (error: any) {
-      toast({
-        title: 'Feil ved lasting av band',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return bandsWithCounts as BandWithMembers[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
+  // Real-time subscription
   useEffect(() => {
-    fetchBands();
-
-    // Subscribe to real-time changes
     const channel = supabase
       .channel('bands-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bands' }, () => {
-        fetchBands();
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'bands' 
+      }, () => {
+        logger.debug('Band changed, invalidating cache');
+        refetch();
       })
       .subscribe();
 
-    // Listen for manual band visibility changes
     const handleVisibilityChange = () => {
-      fetchBands();
+      refetch();
     };
     
     window.addEventListener('band-visibility-changed', handleVisibilityChange);
@@ -111,25 +102,17 @@ export const useBands = () => {
       supabase.removeChannel(channel);
       window.removeEventListener('band-visibility-changed', handleVisibilityChange);
     };
-  }, []);
+  }, [refetch]);
 
-  return { bands, loading, refetch: fetchBands };
+  return { bands, loading, error, refetch };
 };
 
 export const useUserBands = (userId: string | undefined) => {
-  const [bands, setBands] = useState<BandWithMembers[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const { data: bands = [], isLoading: loading, error, refetch } = useQuery({
+    queryKey: queryKeys.bands.user(userId || ''),
+    queryFn: async () => {
+      if (!userId) return [];
 
-  const fetchUserBands = async () => {
-    if (!userId) {
-      setBands([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('band_members')
         .select(`
@@ -170,21 +153,12 @@ export const useUserBands = (userId: string | undefined) => {
           member_count: item.band.band_members?.length || 0,
         }));
 
-      setBands(userBands as any);
-    } catch (error: any) {
-      toast({
-        title: 'Feil ved lasting av band',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return userBands as unknown as BandWithMembers[];
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchUserBands();
-  }, [userId, toast]);
-
-  return { bands, loading, refetch: fetchUserBands };
+  return { bands, loading, error, refetch };
 };

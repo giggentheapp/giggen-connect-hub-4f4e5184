@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useCreateBand, useUpdateBand } from './useBandMutations';
 import { supabase } from '@/integrations/supabase/client';
-import { Band } from '@/types/band';
 import { useToast } from '@/hooks/use-toast';
 
 interface MusicLinks {
@@ -43,9 +42,14 @@ interface SubmissionData {
   };
 }
 
+/**
+ * Wrapper hook that uses React Query mutations
+ * Provides backward-compatible API for useBandForm
+ */
 export const useBandSubmission = () => {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createMutation = useCreateBand();
+  const updateMutation = useUpdateBand();
 
   const submit = async (
     data: SubmissionData,
@@ -53,7 +57,7 @@ export const useBandSubmission = () => {
     bandId?: string,
     selectedLogoFileId?: string | null,
     selectedBannerFileId?: string | null
-  ): Promise<Band | null> => {
+  ): Promise<any> => {
     // Validate
     if (!data.basicInfo.name.trim()) {
       toast({
@@ -64,105 +68,61 @@ export const useBandSubmission = () => {
       return null;
     }
 
-    setIsSubmitting(true);
+    const bandData = {
+      name: data.basicInfo.name.trim(),
+      genre: data.basicInfo.genre.trim() || null,
+      description: data.basicInfo.description.trim() || null,
+      bio: data.basicInfo.bio.trim() || null,
+      founded_year: data.basicInfo.foundedYear ? parseInt(data.basicInfo.foundedYear) : null,
+      image_url: data.images.logo,
+      banner_url: data.images.banner,
+      music_links: {
+        spotify: data.musicLinks.spotify?.trim() || undefined,
+        youtube: data.musicLinks.youtube?.trim() || undefined,
+        soundcloud: data.musicLinks.soundcloud?.trim() || undefined,
+        appleMusic: data.musicLinks.appleMusic?.trim() || undefined,
+        bandcamp: data.musicLinks.bandcamp?.trim() || undefined,
+      },
+      social_media_links: {
+        instagram: data.socialLinks.instagram?.trim() || undefined,
+        facebook: data.socialLinks.facebook?.trim() || undefined,
+        tiktok: data.socialLinks.tiktok?.trim() || undefined,
+        twitter: data.socialLinks.twitter?.trim() || undefined,
+        website: data.socialLinks.website?.trim() || undefined,
+      },
+      contact_info: {
+        email: data.contactInfo.email?.trim() || undefined,
+        phone: data.contactInfo.phone?.trim() || undefined,
+        booking_email: data.contactInfo.bookingEmail?.trim() || undefined,
+      },
+      discography: data.discography.length > 0 ? data.discography : null,
+    };
+
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        throw new Error('Du må være logget inn for å opprette eller redigere band');
-      }
-
-      const bandData = {
-        name: data.basicInfo.name.trim(),
-        genre: data.basicInfo.genre.trim() || null,
-        description: data.basicInfo.description.trim() || null,
-        bio: data.basicInfo.bio.trim() || null,
-        founded_year: data.basicInfo.foundedYear ? parseInt(data.basicInfo.foundedYear) : null,
-        image_url: data.images.logo,
-        banner_url: data.images.banner,
-        music_links: {
-          spotify: data.musicLinks.spotify?.trim() || undefined,
-          youtube: data.musicLinks.youtube?.trim() || undefined,
-          soundcloud: data.musicLinks.soundcloud?.trim() || undefined,
-          appleMusic: data.musicLinks.appleMusic?.trim() || undefined,
-          bandcamp: data.musicLinks.bandcamp?.trim() || undefined,
-        },
-        social_media_links: {
-          instagram: data.socialLinks.instagram?.trim() || undefined,
-          facebook: data.socialLinks.facebook?.trim() || undefined,
-          tiktok: data.socialLinks.tiktok?.trim() || undefined,
-          twitter: data.socialLinks.twitter?.trim() || undefined,
-          website: data.socialLinks.website?.trim() || undefined,
-        },
-        contact_info: {
-          email: data.contactInfo.email?.trim() || undefined,
-          phone: data.contactInfo.phone?.trim() || undefined,
-          booking_email: data.contactInfo.bookingEmail?.trim() || undefined,
-        },
-        discography: data.discography.length > 0 ? data.discography : null,
-      };
-
       if (mode === 'create') {
-        const { data: newBand, error: bandError } = await supabase
-          .from('bands')
-          .insert({
-            ...bandData,
-            created_by: user.id,
-            is_public: false
-          })
-          .select()
-          .single();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Du må være logget inn');
 
-        if (bandError) throw bandError;
-
-        // Track file usage
-        if (selectedLogoFileId) {
-          await supabase.from('file_usage').insert({
-            file_id: selectedLogoFileId,
-            usage_type: 'band_logo',
-            reference_id: newBand.id,
-          });
-        }
-        if (selectedBannerFileId) {
-          await supabase.from('file_usage').insert({
-            file_id: selectedBannerFileId,
-            usage_type: 'band_banner',
-            reference_id: newBand.id,
-          });
-        }
-
-        toast({ 
-          title: 'Band opprettet!', 
-          description: `${data.basicInfo.name} er nå opprettet` 
+        return await createMutation.mutateAsync({
+          ...bandData,
+          userId: user.id,
+          selectedLogoFileId,
+          selectedBannerFileId,
         });
-        return newBand as Band;
       } else {
-        await supabase
-          .from('bands')
-          .update({ ...bandData, updated_at: new Date().toISOString() })
-          .eq('id', bandId!)
-          .throwOnError();
-
-        toast({ 
-          title: 'Band oppdatert!', 
-          description: 'Endringene har blitt lagret' 
+        return await updateMutation.mutateAsync({
+          bandId: bandId!,
+          data: bandData,
         });
-        return null;
       }
-    } catch (error: any) {
-      toast({
-        title: mode === 'create' ? 'Feil ved oppretting' : 'Feil ved oppdatering',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      // Errors are already handled by mutations
       return null;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return {
     submit,
-    isSubmitting,
+    isSubmitting: createMutation.isPending || updateMutation.isPending,
   };
 };

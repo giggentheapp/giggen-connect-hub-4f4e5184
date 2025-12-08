@@ -27,4 +27,11 @@ export const queryKeys = {
         : ['files', 'profile', userId] as const,
     concept: (conceptId: string) => ['files', 'concept', conceptId] as const,
   },
+  bands: {
+    all: ['bands'] as const,
+    public: ['bands', 'public'] as const,
+    user: (userId: string) => ['bands', 'user', userId] as const,
+    detail: (id: string) => ['bands', 'detail', id] as const,
+    portfolios: (bandIds: string[]) => ['bands', 'portfolios', 'batch', ...bandIds.sort()] as const,
+  },
 } as const;
