@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
+import DashboardRedirect from "@/components/redirects/DashboardRedirect";
+import BookingsRedirect from "@/components/redirects/BookingsRedirect";
 import { queryClient } from "@/lib/queryClient";
 import { AppLanguageProvider } from "@/contexts/AppLanguageContext";
 import { RoleProvider } from "@/contexts/RoleProvider";
@@ -67,7 +69,7 @@ const App = () => {
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/getting-started" element={<Onboarding mode="menu" />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Navigate to="/auth" replace />} />
+              <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/profile/:userId/concept/:conceptId" element={<ProfileConceptView />} />
               <Route path="/map" element={<Map />} />
@@ -78,7 +80,7 @@ const App = () => {
               <Route path="/create-offer" element={<CreateOffer />} />
               <Route path="/create-event" element={<CreateEvent />} />
               <Route path="/arrangement/:id" element={<PublicEventView />} />
-              <Route path="/bookings" element={<Navigate to="/auth" replace />} />
+              <Route path="/bookings" element={<BookingsRedirect />} />
               
               <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
               <Route path="/booking/:bookingId/review" element={<BookingAgreementReview />} />

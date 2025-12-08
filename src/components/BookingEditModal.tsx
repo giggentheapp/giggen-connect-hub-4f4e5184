@@ -194,7 +194,7 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: "Booking-detaljene har blitt lagret",
       });
 
-      // Navigate back to bookings page - use replace: true since this is a URL correction after save
+      // Navigate back to bookings page - uses '/bookings' which will redirect to profile if logged in
       navigate('/bookings', { replace: true });
       onSaved();
     } catch (error) {

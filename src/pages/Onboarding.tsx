@@ -7,6 +7,8 @@ import giggenLogo from '@/assets/giggen-logo.png';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { navigateToDashboard } from '@/lib/navigation';
 
 interface OnboardingProps {
   mode?: 'first-time' | 'menu';
@@ -17,6 +19,7 @@ type OnboardingScreen = 'role' | 'slides';
 const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const navigate = useNavigate();
   const { t, language } = useAppTranslation();
+  const { user } = useCurrentUser();
   const [currentScreen, setCurrentScreen] = useState<OnboardingScreen>(mode === 'menu' ? 'slides' : 'role');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedRole, setSelectedRole] = useState<string>('');
@@ -48,7 +51,12 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
         localStorage.setItem('onboarding_role', selectedRole);
         navigate('/auth');
       } else {
-        navigate('/dashboard');
+        // Menu mode - navigate to dashboard with user context
+        if (user) {
+          navigateToDashboard(navigate, user.id, 'dashboard', false);
+        } else {
+          navigate('/auth');
+        }
       }
     }
   };
@@ -58,12 +66,21 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
       localStorage.setItem('has_seen_onboarding', 'true');
       navigate('/auth');
     } else {
-      navigate('/dashboard');
+      // Menu mode - navigate to dashboard with user context
+      if (user) {
+        navigateToDashboard(navigate, user.id, 'dashboard', false);
+      } else {
+        navigate('/auth');
+      }
     }
   };
 
   const handleClose = () => {
-    navigate('/dashboard');
+    if (user) {
+      navigateToDashboard(navigate, user.id, 'dashboard', false);
+    } else {
+      navigate('/auth');
+    }
   };
 
   const slides = [

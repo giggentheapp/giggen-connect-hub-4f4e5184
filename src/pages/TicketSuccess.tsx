@@ -4,10 +4,13 @@ import { useCompleteTicketPurchase } from "@/hooks/useTickets";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getProfileUrl } from "@/lib/navigation";
 
 export default function TicketSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
   const sessionId = searchParams.get("session_id");
   
   const { mutate: completeTicketPurchase, isPending, isSuccess } = useCompleteTicketPurchase();
@@ -17,6 +20,14 @@ export default function TicketSuccess() {
       completeTicketPurchase(sessionId);
     }
   }, [sessionId, completeTicketPurchase, isSuccess]);
+
+  const handleViewTickets = () => {
+    if (user) {
+      navigate(getProfileUrl(user.id, 'tickets'));
+    } else {
+      navigate('/dashboard?section=tickets');
+    }
+  };
 
   if (isPending) {
     return (
@@ -52,7 +63,7 @@ export default function TicketSuccess() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
-            onClick={() => navigate("/dashboard?section=tickets")}
+            onClick={handleViewTickets}
             className="w-full"
           >
             Se mine billetter

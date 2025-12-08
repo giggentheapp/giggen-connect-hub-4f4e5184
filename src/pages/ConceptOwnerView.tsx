@@ -12,6 +12,7 @@ import { conceptService } from '@/services/conceptService';
 import { useUpdateConcept } from '@/hooks/useConceptMutations';
 import { handleError } from '@/lib/errorHandler';
 import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
+import { navigateToProfile } from '@/lib/navigation';
 
 // Note: This page allows viewing concepts from any user (for booking requests)
 // so we don't redirect if not logged in - the concept might be shared
@@ -321,7 +322,13 @@ export default function ConceptOwnerView() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Fant ikke tilbudet</p>
-          <Button onClick={() => navigate('/dashboard?section=admin-concepts')}>
+          <Button onClick={() => {
+            if (user) {
+              navigateToProfile(navigate, user.id, 'admin-concepts', false);
+            } else {
+              navigate('/auth');
+            }
+          }}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake til Mine tilbud
           </Button>
@@ -340,7 +347,13 @@ export default function ConceptOwnerView() {
           {/* Back Button */}
           <Button
             variant="ghost"
-            onClick={() => navigate(isOwner ? '/dashboard?section=admin-concepts' : '/dashboard?section=bookings')}
+            onClick={() => {
+              if (user) {
+                navigateToProfile(navigate, user.id, isOwner ? 'admin-concepts' : 'bookings', false);
+              } else {
+                navigate('/auth');
+              }
+            }}
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

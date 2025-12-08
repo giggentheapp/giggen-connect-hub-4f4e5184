@@ -9,13 +9,15 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { BandEditForm } from '@/components/band/BandEditForm';
 import { BandCreateForm } from '@/components/band/BandCreateForm';
 import { BandView } from '@/components/band/BandView';
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, navigateToProfile } from '@/lib/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { getParam } = useQueryParams();
+  const { user } = useCurrentUser();
 
   const isCreateMode = bandId === 'new';
   const { band, members, loading, refetch } = useBandData(isCreateMode ? undefined : bandId);
@@ -29,17 +31,32 @@ const BandProfile = () => {
 
   const handleBack = () => {
     const fromSection = location.state?.fromSection;
-    if (fromSection) {
-      navigate('/dashboard', { state: { section: fromSection } });
+    if (user) {
+      if (fromSection) {
+        navigateToProfile(navigate, user.id, fromSection, false);
+      } else {
+        navigateToProfile(navigate, user.id, 'admin-bands', false);
+      }
     } else {
-      navigate('/dashboard?section=admin-bands');
+      navigate('/auth');
     }
   };
 
   // Public view for non-admins
   if (!loading && band && (forcePublicView || (isMember && !isAdmin))) {
     return (
-      <BandViewModal open={true} onClose={() => navigateBack(navigate, location, '/dashboard?section=admin-bands')} band={band} showContactInfo={false} />
+      <BandViewModal 
+        open={true} 
+        onClose={() => {
+          if (user) {
+            navigateToProfile(navigate, user.id, 'admin-bands', false);
+          } else {
+            navigateBack(navigate, location, '/');
+          }
+        }} 
+        band={band} 
+        showContactInfo={false} 
+      />
     );
   }
 
@@ -70,7 +87,13 @@ const BandProfile = () => {
   if (isCreateMode) {
     return (
       <BandCreateForm
-        onSuccess={() => navigate('/dashboard?section=admin-bands')}
+        onSuccess={() => {
+          if (user) {
+            navigateToProfile(navigate, user.id, 'admin-bands', false);
+          } else {
+            navigate('/auth');
+          }
+        }}
         onCancel={handleBack}
       />
     );
