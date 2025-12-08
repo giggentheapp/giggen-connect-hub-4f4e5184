@@ -11,6 +11,7 @@ import { UserProfile } from '@/types/auth';
 import { GlobalQuickActionButton } from '@/components/GlobalQuickActionButton';
 import { GlobalQuickCreateModal } from '@/components/GlobalQuickCreateModal';
 import { FileUploadModal } from '@/components/FileUploadModal';
+import { navigateToAuth } from '@/lib/navigation';
 
 // Import sections
 import { DashboardSection } from "@/components/sections/DashboardSection";
@@ -102,7 +103,7 @@ export const UnifiedSidePanel = ({
         variant: "destructive"
       });
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User signed out');
     }
   };
   const handleNavigation = (section: string) => {

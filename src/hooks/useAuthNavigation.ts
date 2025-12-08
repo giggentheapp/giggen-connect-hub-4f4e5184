@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { navigateToDashboard as baseNavigateToDashboard } from '@/lib/navigation';
 
 /**
  * Custom hook to handle post-authentication navigation
@@ -83,7 +84,7 @@ export const useAuthNavigation = () => {
       if (hasSeenOnboarding === 'true' && feedbackSubmitted !== 'true') {
         return true; // Show feedback
       } else {
-        navigate(dashboardUrl, { replace: true });
+        baseNavigateToDashboard(navigate, userId, 'dashboard', true);
         return false; // Already navigated
       }
     } finally {

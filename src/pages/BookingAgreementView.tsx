@@ -12,6 +12,7 @@ import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Eye } f
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
+import { navigateToAuth } from '@/lib/navigation';
 
 const BookingAgreementView = () => {
   const { bookingId } = useParams();
@@ -24,7 +25,7 @@ const BookingAgreementView = () => {
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!userLoading && !user) {
-      navigate('/auth', { replace: true });
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from booking agreement');
     }
   }, [user, userLoading, navigate]);
   

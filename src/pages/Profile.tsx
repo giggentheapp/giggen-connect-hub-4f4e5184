@@ -6,6 +6,7 @@ import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuthSession } from '@/hooks/useAuthSession';
+import { navigateToAuth } from '@/lib/navigation';
 
 const Profile = () => {
   const { userId: rawUserId } = useParams();
@@ -27,7 +28,7 @@ const Profile = () => {
   useEffect(() => {
     if (sessionLoading) return; // Wait for session check
     if (!session) {
-      navigate('/auth', { replace: true });
+      navigateToAuth(navigate, true, 'No session - redirecting from profile');
     }
   }, [session, sessionLoading, navigate]);
 

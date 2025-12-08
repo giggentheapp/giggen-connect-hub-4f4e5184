@@ -6,6 +6,7 @@ import { profileService } from '@/services/profileService';
 import { queryKeys } from '@/lib/queryKeys';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
+import { navigateToAuth } from '@/lib/navigation';
 
 export const useCurrentUser = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export const useCurrentUser = () => {
       // Only log once per event type
       if (event === 'SIGNED_OUT') {
         queryClient.removeQueries({ queryKey: queryKeys.profiles.current });
-        navigate('/auth');
+        navigateToAuth(navigate, true, 'User signed out');
       } else if (event === 'TOKEN_REFRESHED') {
         // Only refetch on token refresh, not on every event
         refetch();

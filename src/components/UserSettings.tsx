@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Bell, Globe, Shield, Camera, Save, Phone, Mail, LogOut, Key, Trash2, Share2, FolderOpen, Info, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { navigateToAuth } from '@/lib/navigation';
 import { AvatarCropModal } from "@/components/AvatarCropModal";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { UserProfile } from "@/types/auth";
@@ -459,7 +460,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         description: "Du har blitt logget ut av kontoen din",
       });
 
-      navigate("/auth");
+      navigateToAuth(navigate, true, 'User logged out from settings');
     } catch (error: any) {
       toast({
         title: "Feil ved utlogging",
