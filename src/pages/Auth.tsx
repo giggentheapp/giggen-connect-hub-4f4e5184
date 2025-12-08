@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useAuthMode } from '@/hooks/useAuthMode';
@@ -14,7 +15,7 @@ import { PasswordResetForm } from '@/components/auth/PasswordResetForm';
 const Auth = () => {
   const { t } = useAppTranslation();
   const { authMode, goToLogin, goToSignup, goToForgotPassword, goToResetPassword, goToFeedback } = useAuthMode();
-  const { loading } = useAuthSession();
+  const { session, loading } = useAuthSession();
   const { navigateToDashboard, completeFeedbackAndNavigate, isNavigating } = useAuthNavigation();
 
   // Handle all auth state changes in one place
@@ -33,6 +34,14 @@ const Auth = () => {
       }
     }
   });
+
+  // If already logged in when visiting /auth, redirect to dashboard
+  // This handles page refresh when already authenticated (INITIAL_SESSION)
+  useEffect(() => {
+    if (!loading && session?.user) {
+      navigateToDashboard(session.user.id);
+    }
+  }, [loading, session, navigateToDashboard]);
 
   // Show loading state while checking auth or navigating
   if (loading || isNavigating) {
