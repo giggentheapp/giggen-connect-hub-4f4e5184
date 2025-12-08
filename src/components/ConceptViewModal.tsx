@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +72,7 @@ export const ConceptViewModal = ({
   onConceptAction,
   viewMode = 'public'
 }: ConceptViewModalProps) => {
+  const navigate = useNavigate();
   const [currentConceptIndex, setCurrentConceptIndex] = useState(initialConceptIndex);
   const [concept, setConcept] = useState<Concept | null>(null);
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
@@ -183,8 +185,8 @@ export const ConceptViewModal = ({
     const result = await rejectConcept(concept.id, reason);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'rejected');
-      // Navigate back to bookings page
-      window.history.replaceState(null, '', '/bookings');
+      // Navigate back to bookings page - use replace: true since this is a URL correction after action
+      navigate('/bookings', { replace: true });
       onClose();
     }
   };
@@ -193,8 +195,8 @@ export const ConceptViewModal = ({
     const result = await deleteConcept(concept.id);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'deleted');
-      // Navigate back to bookings page
-      window.history.replaceState(null, '', '/bookings');
+      // Navigate back to bookings page - use replace: true since this is a URL correction after action
+      navigate('/bookings', { replace: true });
       onClose();
     }
   };

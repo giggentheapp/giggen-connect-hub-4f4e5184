@@ -9,6 +9,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { BandEditForm } from '@/components/band/BandEditForm';
 import { BandCreateForm } from '@/components/band/BandCreateForm';
 import { BandView } from '@/components/band/BandView';
+import { navigateBack } from '@/lib/navigation';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
@@ -38,7 +39,7 @@ const BandProfile = () => {
   // Public view for non-admins
   if (!loading && band && (forcePublicView || (isMember && !isAdmin))) {
     return (
-      <BandViewModal open={true} onClose={() => navigate(-1)} band={band} showContactInfo={false} />
+      <BandViewModal open={true} onClose={() => navigateBack(navigate, location, '/dashboard?section=admin-bands')} band={band} showContactInfo={false} />
     );
   }
 

@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
+import { navigateBack } from '@/lib/navigation';
 
 interface ProfileSectionProps {
   profile: UserProfile;
@@ -109,8 +110,8 @@ export const ProfileSection = ({
         }
       });
     } else {
-      // Fallback to generic navigation
-      navigate(-1);
+      // Fallback to smart back navigation
+      navigateBack(navigate, location, `/profile/${profile.user_id}?section=explore`);
     }
   };
 
