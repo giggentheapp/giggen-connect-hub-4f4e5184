@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -12,6 +13,20 @@ interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<{ error?: Error; resetError: () => void }>;
 }
+
+// Wrapper component to use navigate hook
+const AuthButton = () => {
+  const navigate = useNavigate();
+  return (
+    <Button 
+      variant="outline" 
+      onClick={() => navigate('/auth', { replace: true })}
+      className="flex-1"
+    >
+      Tilbake til innlogging
+    </Button>
+  );
+};
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
@@ -70,13 +85,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Prøv igjen
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.href = '/auth'}
-                  className="flex-1"
-                >
-                  Tilbake til innlogging
-                </Button>
+                <AuthButton />
               </div>
             </CardContent>
           </Card>

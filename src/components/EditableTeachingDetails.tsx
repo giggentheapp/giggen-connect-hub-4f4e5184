@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +8,6 @@ import { GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle } from 'lucid
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 
 interface EditableTeachingDetailsProps {
   booking: any;
@@ -27,6 +27,7 @@ export const EditableTeachingDetails = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isOwner = currentUserId === conceptData?.maker_id;
   const canEdit = isOwner;
@@ -90,8 +91,8 @@ export const EditableTeachingDetails = ({
         description: "Avtalen er nå klar for godkjenning fra begge parter",
       });
 
-      // Refresh to show approval view
-      window.location.reload();
+      // Navigate to same page to refresh data (use replace: true to avoid adding to history)
+      navigate(location.pathname + location.search, { replace: true });
     } catch (error) {
       console.error('Error:', error);
       toast({

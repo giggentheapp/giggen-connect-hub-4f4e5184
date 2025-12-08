@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface BookingErrorBoundaryState {
   hasError: boolean;
@@ -12,6 +13,23 @@ interface BookingErrorBoundaryState {
 interface BookingErrorBoundaryProps {
   children: React.ReactNode;
 }
+
+// Wrapper component to use navigate hook for refresh
+const RefreshButton = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  return (
+    <Button 
+      variant="outline"
+      onClick={() => navigate(location.pathname + location.search, { replace: true })}
+      className="flex items-center gap-2"
+    >
+      <RefreshCw className="h-4 w-4" />
+      Last siden på nytt
+    </Button>
+  );
+};
 
 export class BookingErrorBoundary extends React.Component<
   BookingErrorBoundaryProps,
@@ -93,14 +111,7 @@ export class BookingErrorBoundary extends React.Component<
                 Prøv igjen
               </Button>
               
-              <Button 
-                variant="outline"
-                onClick={() => window.location.reload()}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Last siden på nytt
-              </Button>
+              <RefreshButton />
             </div>
           </CardContent>
         </Card>
