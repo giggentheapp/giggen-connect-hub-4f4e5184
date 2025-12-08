@@ -5,6 +5,7 @@ import { User } from 'lucide-react';
 import { UnifiedSidePanel } from '@/components/UnifiedSidePanel';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useProfile } from '@/hooks/useProfile';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 const Profile = () => {
   const { userId: rawUserId } = useParams();
@@ -18,15 +19,17 @@ const Profile = () => {
   }, [rawUserId]);
   
   const { user: currentUser, profile: currentUserProfile, loading: userLoading } = useCurrentUser();
+  const { session, loading: sessionLoading } = useAuthSession();
   const { profile, loading } = useProfile(userId);
 
   // Redirect to auth if not logged in
-  // Handles both: accessing profile without login, and logging out while on profile page
+  // Check session first (source of truth) - prevents redirect loops during login
   useEffect(() => {
-    if (!userLoading && !currentUser) {
+    if (sessionLoading) return; // Wait for session check
+    if (!session) {
       navigate('/auth', { replace: true });
     }
-  }, [currentUser, userLoading, navigate]);
+  }, [session, sessionLoading, navigate]);
 
   const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
   const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
