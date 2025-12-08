@@ -161,3 +161,44 @@ export const getSectionFromUrl = (
   const params = new URLSearchParams(location.search);
   return params.get('section') || defaultSection;
 };
+
+/**
+ * Check if user should be redirected to auth
+ * 
+ * Standardized pattern for checking auth state before redirecting
+ * 
+ * @param session - Current session from useAuthSession
+ * @param sessionLoading - Loading state from useAuthSession
+ * @param user - Current user from useCurrentUser (optional, for additional check)
+ * @param userLoading - Loading state from useCurrentUser (optional)
+ * @returns boolean indicating if redirect should happen
+ */
+export const shouldRedirectToAuth = (
+  session: any,
+  sessionLoading: boolean,
+  user?: any,
+  userLoading?: boolean
+): boolean => {
+  // Wait for loading to complete
+  if (sessionLoading || (userLoading !== undefined && userLoading)) {
+    return false; // Still loading, don't redirect yet
+  }
+  
+  // If no session, definitely redirect
+  if (!session) {
+    return true;
+  }
+  
+  // If session exists but user query failed after loading, consider redirect
+  if (user === undefined) {
+    return false; // User check not provided, rely on session only
+  }
+  
+  if (session && !user && !userLoading) {
+    // Session exists but user query returned null - wait a bit before redirecting
+    // This handles race conditions during login
+    return false; // Don't redirect immediately, let component handle retry
+  }
+  
+  return false; // User is authenticated
+};

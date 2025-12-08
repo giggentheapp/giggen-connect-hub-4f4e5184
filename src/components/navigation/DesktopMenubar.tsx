@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import giggenLogo from '@/assets/giggen-logo.png';
+import { navigateToAuth } from '@/lib/navigation';
 
 interface UserProfile {
   id: string;
@@ -45,7 +46,7 @@ export const DesktopMenubar = ({ activeSection, onSectionChange, profile }: Desk
         variant: "destructive",
       });
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User signed out from menu');
     }
   };
 

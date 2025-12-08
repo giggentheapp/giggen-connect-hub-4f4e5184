@@ -8,7 +8,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { conceptService } from '@/services/conceptService';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, navigateToAuth } from '@/lib/navigation';
 
 export default function CreateOffer() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function CreateOffer() {
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!userLoading && !user) {
-      navigate('/auth', { replace: true });
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from create offer');
     }
   }, [user, userLoading, navigate]);
   const [conceptType, setConceptType] = useState<'session_musician' | 'teaching' | 'arrangør_tilbud' | null>(null);
