@@ -11,41 +11,28 @@ import useEmblaCarousel from 'embla-carousel-react';
 interface BandCardProps {
   band: BandWithMembers;
   userRole?: string;
+  portfolioFiles?: any[]; // ✅ NEW: Receive from parent (batched fetch)
+  portfolioLoading?: boolean; // ✅ NEW: Loading state from parent
 }
 
-export const BandCard = ({ band, userRole }: BandCardProps) => {
+export const BandCard = ({ 
+  band, 
+  userRole,
+  portfolioFiles: propsPortfolioFiles,
+  portfolioLoading: propsPortfolioLoading = false
+}: BandCardProps) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-  const [portfolioFiles, setPortfolioFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // ✅ Use props from parent (batched fetch) instead of local fetch
+  const portfolioFiles = propsPortfolioFiles || [];
+  const loading = propsPortfolioLoading;
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, skipSnaps: false });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [hoveredImage, setHoveredImage] = useState(false);
-
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('band_portfolio')
-          .select('*')
-          .eq('band_id', band.id)
-          .eq('is_public', true)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setPortfolioFiles(data || []);
-      } catch (error) {
-        console.error('Error fetching band portfolio:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPortfolio();
-  }, [band.id]);
 
   const imageFiles = portfolioFiles.filter(file => 
     file.file_type === 'image' || file.mime_type?.startsWith('image/')

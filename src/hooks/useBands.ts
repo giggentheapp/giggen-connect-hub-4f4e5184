@@ -37,19 +37,33 @@ export const useBands = () => {
         (band.bio && band.bio.length > 0)
       );
 
-      // Fetch profiles separately for members
-      const bandsWithCounts = await Promise.all(completeBands.map(async (band) => {
+      // ✅ OPTIMIZED: Collect ALL member IDs from ALL bands first
+      const allMemberIds = completeBands
+        .flatMap(band => band.band_members?.map(m => m.user_id) || [])
+        .filter((id, index, arr) => arr.indexOf(id) === index); // Remove duplicates
+
+      // ✅ OPTIMIZED: Fetch ALL profiles in ONE query
+      let allProfiles: any[] = [];
+      if (allMemberIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, username, avatar_url, role')
+          .in('user_id', allMemberIds);
+        
+        if (profilesError) {
+          console.warn('Error fetching profiles:', profilesError);
+          // Don't throw - continue without profiles
+        } else {
+          allProfiles = profilesData || [];
+        }
+      }
+
+      // ✅ OPTIMIZED: Map profiles in memory (fast, no queries)
+      const bandsWithCounts = completeBands.map((band) => {
         const memberIds = band.band_members?.map(m => m.user_id) || [];
         
-        let profiles: any[] = [];
-        if (memberIds.length > 0) {
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, username, avatar_url, role')
-            .in('user_id', memberIds);
-          
-          profiles = profilesData || [];
-        }
+        // Find profiles for this band's members (in-memory lookup)
+        const profiles = allProfiles.filter(p => memberIds.includes(p.user_id));
 
         const membersWithProfiles = band.band_members?.map(member => ({
           ...member,
@@ -61,7 +75,7 @@ export const useBands = () => {
           members: membersWithProfiles,
           member_count: band.band_members?.length || 0
         };
-      }));
+      });
 
       setBands(bandsWithCounts as BandWithMembers[]);
     } catch (error: any) {
