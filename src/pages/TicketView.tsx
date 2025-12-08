@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import QRCode from 'react-qr-code';
 import { useToast } from '@/hooks/use-toast';
+import { getProfileUrl } from '@/lib/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,15 @@ const TicketView = () => {
   const [ticket, setTicket] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const navigateToTickets = () => {
+    if (currentUserId) {
+      navigate(getProfileUrl(currentUserId, 'tickets'));
+    } else {
+      navigate('/dashboard?section=tickets');
+    }
+  };
 
   useEffect(() => {
     if (ticketId) {
@@ -56,6 +66,7 @@ const TicketView = () => {
         navigate('/auth');
         return;
       }
+      setCurrentUserId(user.id);
 
       const { data, error } = await supabase
         .from('tickets')
@@ -81,7 +92,7 @@ const TicketView = () => {
           description: "Kunne ikke finne billetten",
           variant: "destructive"
         });
-        navigate('/dashboard?section=tickets');
+        navigateToTickets();
         return;
       }
 
@@ -93,7 +104,7 @@ const TicketView = () => {
         description: "Kunne ikke laste billett",
         variant: "destructive"
       });
-      navigate('/dashboard?section=tickets');
+      navigateToTickets();
     } finally {
       setLoading(false);
     }
@@ -142,7 +153,7 @@ const TicketView = () => {
         description: "Billetten har blitt permanent slettet"
       });
 
-      navigate('/dashboard?section=tickets');
+      navigateToTickets();
     } catch (error: any) {
       console.error('Error deleting ticket:', error);
       toast({
@@ -171,7 +182,7 @@ const TicketView = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Billett ikke funnet</p>
-          <Button onClick={() => navigate('/dashboard?section=tickets')}>
+          <Button onClick={navigateToTickets}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake
           </Button>
@@ -193,7 +204,7 @@ const TicketView = () => {
         {/* Back button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/dashboard?section=tickets')}
+          onClick={navigateToTickets}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

@@ -5,20 +5,35 @@ import { useRole } from '@/contexts/RoleProvider';
 import { User, MapPin, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
 import giggenLogo from '@/assets/giggen-logo.png';
 import { cn } from '@/lib/utils';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { getProfileUrl } from '@/lib/navigation';
 
 export default function Map() {
   const navigate = useNavigate();
   const { t } = useAppTranslation();
   const isMobile = useIsMobile();
+  const { user } = useCurrentUser();
 
   const getNavigationItems = () => {
+    const userId = user?.id;
+    if (!userId) {
+      // Return paths that redirect to auth if not logged in
+      return [
+        { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
+        { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
+        { id: 'admin-files', label: 'Filer', icon: FileText, path: '/dashboard?section=admin-files' },
+        { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/dashboard?section=admin-concepts' },
+        { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/dashboard?section=bookings' },
+        { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
+      ];
+    }
     return [
-      { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
-      { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
-      { id: 'admin-files', label: 'Filer', icon: FileText, path: '/dashboard?section=admin-files' },
-      { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/dashboard?section=admin-concepts' },
-      { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/dashboard?section=bookings' },
-      { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
+      { id: 'profile', label: t('profile'), icon: User, path: getProfileUrl(userId, 'profile') },
+      { id: 'explore', label: t('explore'), icon: MapPin, path: getProfileUrl(userId, 'explore') },
+      { id: 'admin-files', label: 'Filer', icon: FileText, path: getProfileUrl(userId, 'admin-files') },
+      { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: getProfileUrl(userId, 'admin-concepts') },
+      { id: 'bookings', label: t('bookings'), icon: Briefcase, path: getProfileUrl(userId, 'bookings') },
+      { id: 'settings', label: t('settings'), icon: Settings, path: getProfileUrl(userId, 'settings') }
     ];
   };
 

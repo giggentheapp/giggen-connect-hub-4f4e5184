@@ -44,8 +44,10 @@ const BookingAgreementView = () => {
     if (booking && currentUserId) {
       const target = getBookingNavigationTargetWithUser(booking, currentUserId);
       navigate(target);
+    } else if (user) {
+      navigate(`/profile/${user.id}?section=bookings`);
     } else {
-      navigate('/bookings');
+      navigate('/auth');
     }
   };
 
@@ -62,7 +64,13 @@ const BookingAgreementView = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="mb-4">Booking ikke funnet</p>
-          <Button onClick={() => navigate('/bookings')}>
+          <Button onClick={() => {
+            if (user) {
+              navigate(`/profile/${user.id}?section=bookings`);
+            } else {
+              navigate('/auth');
+            }
+          }}>
             Tilbake til bookinger
           </Button>
         </div>

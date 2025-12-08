@@ -138,7 +138,12 @@ const BookingAgreementReview = () => {
           : "Du har godkjent avtalen"
       });
 
-      navigate('/bookings');
+      // Navigate to bookings using profile URL if user exists
+      if (user) {
+        navigate(`/profile/${user.id}?section=bookings`);
+      } else {
+        navigate('/auth');
+      }
     } catch (error: any) {
       toast({
         title: "Feil ved godkjenning",
@@ -370,7 +375,13 @@ const BookingAgreementReview = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/bookings')}
+              onClick={() => {
+                if (user) {
+                  navigate(`/profile/${user.id}?section=bookings`);
+                } else {
+                  navigate('/auth');
+                }
+              }}
               className="gap-2"
             >
               <ArrowLeft className="h-4 w-4" />

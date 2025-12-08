@@ -10,6 +10,8 @@ import { nb } from 'date-fns/locale';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { usePurchaseTicket } from '@/hooks/useTickets';
 import { TicketQRModal } from '@/components/TicketQRModal';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { navigateToDashboard, navigateToProfile } from '@/lib/navigation';
 
 interface PublicEventData {
   id: string;
@@ -33,6 +35,7 @@ const PublicEventView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useCurrentUser();
   const [event, setEvent] = useState<PublicEventData | null>(null);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
@@ -42,6 +45,26 @@ const PublicEventView = () => {
   const [userTicket, setUserTicket] = useState<any>(null);
   const [showQR, setShowQR] = useState(false);
   const purchaseTicket = usePurchaseTicket();
+
+  const handleNavigateToDashboard = () => {
+    if (user) {
+      navigateToDashboard(navigate, user.id, 'dashboard', false);
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const handleNavigateToBookings = (tab?: string) => {
+    if (user) {
+      if (tab) {
+        navigate(`/profile/${user.id}?section=bookings&tab=${tab}`);
+      } else {
+        navigateToProfile(navigate, user.id, 'bookings', false);
+      }
+    } else {
+      navigate('/auth');
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -108,7 +131,7 @@ const PublicEventView = () => {
             description: "Dette arrangementet er ikke offentlig tilgjengelig",
             variant: "destructive"
           });
-          navigate('/dashboard');
+          handleNavigateToDashboard();
           return;
         }
 
@@ -166,7 +189,7 @@ const PublicEventView = () => {
           description: "Dette arrangementet eksisterer ikke",
           variant: "destructive"
         });
-        navigate('/dashboard');
+        handleNavigateToDashboard();
         return;
       }
 
@@ -180,7 +203,7 @@ const PublicEventView = () => {
           description: "Dette arrangementet er ikke offentlig tilgjengelig",
           variant: "destructive"
         });
-        navigate('/dashboard');
+        handleNavigateToDashboard();
         return;
       }
 
@@ -231,13 +254,13 @@ const PublicEventView = () => {
 
     } catch (error: any) {
       console.error('Error fetching public event:', error);
-      toast({
-        title: "Feil ved lasting",
-        description: "Kunne ikke laste arrangementdetaljer",
-        variant: "destructive"
-      });
-      navigate('/dashboard');
-    } finally {
+        toast({
+          title: "Feil ved lasting",
+          description: "Kunne ikke laste arrangementdetaljer",
+          variant: "destructive"
+        });
+        handleNavigateToDashboard();
+      } finally {
       setLoading(false);
     }
   };
@@ -263,7 +286,7 @@ const PublicEventView = () => {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Arrangement ikke funnet</p>
-            <Button onClick={() => navigate('/dashboard?section=bookings&tab=upcoming')}>
+            <Button onClick={() => handleNavigateToBookings('upcoming')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tilbake
             </Button>
@@ -282,7 +305,7 @@ const PublicEventView = () => {
         {/* Back button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/dashboard?section=bookings&tab=upcoming')}
+          onClick={() => handleNavigateToBookings('upcoming')}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
