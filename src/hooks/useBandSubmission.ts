@@ -76,20 +76,24 @@ export const useBandSubmission = () => {
       founded_year: data.basicInfo.foundedYear ? parseInt(data.basicInfo.foundedYear) : null,
       image_url: data.images.logo,
       banner_url: data.images.banner,
-      music_links: {
-        spotify: data.musicLinks.spotify?.trim() || undefined,
-        youtube: data.musicLinks.youtube?.trim() || undefined,
-        soundcloud: data.musicLinks.soundcloud?.trim() || undefined,
-        appleMusic: data.musicLinks.appleMusic?.trim() || undefined,
-        bandcamp: data.musicLinks.bandcamp?.trim() || undefined,
-      },
-      social_media_links: {
-        instagram: data.socialLinks.instagram?.trim() || undefined,
-        facebook: data.socialLinks.facebook?.trim() || undefined,
-        tiktok: data.socialLinks.tiktok?.trim() || undefined,
-        twitter: data.socialLinks.twitter?.trim() || undefined,
-        website: data.socialLinks.website?.trim() || undefined,
-      },
+      music_links: Object.fromEntries(
+        Object.entries({
+          spotify: data.musicLinks.spotify?.trim(),
+          youtube: data.musicLinks.youtube?.trim(),
+          soundcloud: data.musicLinks.soundcloud?.trim(),
+          appleMusic: data.musicLinks.appleMusic?.trim(),
+          bandcamp: data.musicLinks.bandcamp?.trim(),
+        }).filter(([_, value]) => value && value.length > 0)
+      ),
+      social_media_links: Object.fromEntries(
+        Object.entries({
+          instagram: data.socialLinks.instagram?.trim(),
+          facebook: data.socialLinks.facebook?.trim(),
+          tiktok: data.socialLinks.tiktok?.trim(),
+          twitter: data.socialLinks.twitter?.trim(),
+          website: data.socialLinks.website?.trim(),
+        }).filter(([_, value]) => value && value.length > 0)
+      ),
       contact_info: {
         email: data.contactInfo.email?.trim() || undefined,
         phone: data.contactInfo.phone?.trim() || undefined,
