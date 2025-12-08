@@ -52,9 +52,11 @@ export const MusicLinksTab = ({ musicLinks, onChange }: MusicLinksTabProps) => {
             },
           ]}
           links={musicLinks}
-          onChange={(links) => {
-            Object.entries(links).forEach(([platform, url]) => {
-              onChange(platform, url || '');
+          onChange={(newLinks) => {
+            // Update each platform - set empty string for removed links
+            const allPlatforms = ['spotify', 'youtube', 'soundcloud', 'appleMusic', 'bandcamp'];
+            allPlatforms.forEach(platform => {
+              onChange(platform, newLinks[platform] || '');
             });
           }}
         />
