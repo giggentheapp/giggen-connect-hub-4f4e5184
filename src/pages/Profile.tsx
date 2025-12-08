@@ -20,12 +20,13 @@ const Profile = () => {
   const { user: currentUser, profile: currentUserProfile, loading: userLoading } = useCurrentUser();
   const { profile, loading } = useProfile(userId);
 
-  // Redirect to auth if not logged in and trying to access own profile
+  // Redirect to auth if not logged in
+  // Handles both: accessing profile without login, and logging out while on profile page
   useEffect(() => {
-    if (!userLoading && !currentUser && !userId) {
+    if (!userLoading && !currentUser) {
       navigate('/auth', { replace: true });
     }
-  }, [currentUser, userLoading, userId, navigate]);
+  }, [currentUser, userLoading, navigate]);
 
   const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
   const isOwnProfile = useMemo(() => currentUserId === userId, [currentUserId, userId]);
