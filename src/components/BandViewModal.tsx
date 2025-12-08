@@ -3,12 +3,13 @@ import { Band } from '@/types/band';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Beer, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Music, Calendar, Mail, Phone, X, FileText, ExternalLink, Info, Disc, Share2, Settings, Beer, Image as ImageIcon, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialMediaLinks } from './SocialMediaLinks';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface BandViewModalProps {
@@ -65,10 +66,17 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
     }
   }, [band.id, open]);
 
-  // Get image files for gallery
-  const imageFiles = portfolioFiles.filter(file => 
-    file.file_type === 'image' || file.mime_type?.startsWith('image/')
-  );
+  // Helper functions for file type detection
+  const isImageFile = (file: any) => 
+    file.file_type === 'image' || file.mime_type?.startsWith('image/');
+  
+  const isVideoFile = (file: any) => 
+    file.file_type === 'video' || file.mime_type?.startsWith('video/');
+
+  // Get media files for gallery
+  const imageFiles = portfolioFiles.filter(isImageFile);
+  const videoFiles = portfolioFiles.filter(isVideoFile);
+  const mediaFiles = [...imageFiles, ...videoFiles];
 
   // Keyboard navigation for modal
   useEffect(() => {
@@ -86,10 +94,16 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [modalOpen, imageFiles.length]);
 
+  // Helper to check if any link in an object has a truthy non-empty value
+  const hasAnyLink = (links: Record<string, any> | null | undefined) => {
+    if (!links) return false;
+    return Object.values(links).some(link => link && String(link).trim().length > 0);
+  };
+
   // When showContactInfo is true (admin), show all tabs even if empty
   // When false (public), only show tabs with data
-  const hasMusicLinks = showContactInfo || (band.music_links && Object.values(band.music_links).some(link => link));
-  const hasSocialLinks = showContactInfo || (band.social_media_links && Object.values(band.social_media_links).some(link => link));
+  const hasMusicLinks = showContactInfo || hasAnyLink(band.music_links);
+  const hasSocialLinks = showContactInfo || hasAnyLink(band.social_media_links);
   const hasDiscography = showContactInfo || (band.discography && band.discography.length > 0);
   const hasContactInfo = showContactInfo;
   const hasTechSpecs = showContactInfo || techSpecs.length > 0;
@@ -222,8 +236,9 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                 ) : portfolioFiles.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {portfolioFiles.map((file, index) => {
-                      const isImage = file.file_type === 'image' || file.mime_type?.startsWith('image/');
-                      const imageUrl = file.file_path ? 
+                      const isImage = isImageFile(file);
+                      const isVideo = isVideoFile(file);
+                      const fileUrl = file.file_path ? 
                         supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl : 
                         file.file_url;
 
@@ -244,7 +259,7 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                           {isImage ? (
                             <>
                               <img 
-                                src={imageUrl}
+                                src={fileUrl}
                                 alt={file.title || file.filename}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
@@ -261,6 +276,19 @@ export const BandViewModal = ({ open, onClose, band, showContactInfo = false }: 
                                 </div>
                               </div>
                             </>
+                          ) : isVideo ? (
+                            <div className="w-full h-full" onClick={(e) => e.stopPropagation()}>
+                              <VideoPlayer
+                                publicUrl={fileUrl}
+                                filename={file.title || file.filename}
+                                mimeType={file.mime_type}
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                                <p className="text-white text-xs font-medium truncate">
+                                  {file.title || file.filename}
+                                </p>
+                              </div>
+                            </div>
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-accent-purple/10 to-accent-pink/10">
                               <FileText className="h-8 w-8 text-accent-purple mb-2" />
