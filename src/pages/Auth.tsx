@@ -26,7 +26,7 @@ const Auth = () => {
       goToLogin();
     },
     onSignIn: async (userId: string) => {
-      goToLogin(); // Reset any password recovery state
+      // Don't call goToLogin() here - it causes re-render before navigation
       const shouldShowFeedback = await navigateToDashboard(userId);
       if (shouldShowFeedback) {
         goToFeedback();

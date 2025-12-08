@@ -71,9 +71,10 @@ export const useAuthNavigation = () => {
     
     try {
       const profile = await checkProfileWithRetry(userId);
-      const dashboardUrl = profile 
-        ? `/profile/${profile.user_id}?section=dashboard` 
-        : '/auth';
+      
+      // Always navigate to dashboard with userId - even if profile doesn't exist yet
+      // The profile will be created by database trigger and useCurrentUser will handle retry
+      const dashboardUrl = `/profile/${userId}?section=dashboard`;
       
       const feedbackSubmitted = localStorage.getItem('feedback_submitted');
       const hasSeenOnboarding = localStorage.getItem('has_seen_onboarding');
