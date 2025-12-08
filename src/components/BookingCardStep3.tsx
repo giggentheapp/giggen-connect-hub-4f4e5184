@@ -1,29 +1,17 @@
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Calendar, MapPin, Eye, EyeOff } from 'lucide-react';
-import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { BookingActions } from '@/components/BookingActions';
-
-const formatSafeDate = (dateString: string) => {
-  try {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Ugyldig dato';
-    return format(date, 'dd.MM.yyyy');
-  } catch (error) {
-    console.warn('Date formatting error:', error);
-    return 'Ugyldig dato';
-  }
-};
+import { formatSafeDate } from '@/utils/bookingUtils';
+import { Booking } from '@/types/booking';
 
 interface BookingCardStep3Props {
-  booking: any;
+  booking: Booking;
   currentUserId: string;
   onDetailsClick: () => void;
   onEditClick: () => void;

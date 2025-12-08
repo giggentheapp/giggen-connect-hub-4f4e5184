@@ -241,4 +241,92 @@ export const bookingService = {
       throw error;
     }
   },
+
+  /**
+   * Fetches maker profile for a booking
+   */
+  async getMakerProfile(receiverId: string) {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url, bio')
+        .eq('user_id', receiverId)
+        .maybeSingle();
+
+      return data;
+    } catch (error) {
+      logger.error('Failed to fetch maker profile', { receiverId, error });
+      throw error;
+    }
+  },
+
+  /**
+   * Fetches portfolio attachments for a booking
+   */
+  async getPortfolioAttachments(bookingId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('booking_portfolio_attachments')
+        .select(`
+          id,
+          booking_id,
+          portfolio_file_id,
+          attached_by,
+          created_at,
+          portfolio_file:profile_portfolio(
+            id,
+            filename,
+            file_path,
+            file_type,
+            file_url,
+            mime_type,
+            title,
+            description,
+            user_id
+          )
+        `)
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      logger.error('Failed to fetch portfolio attachments', { bookingId, error });
+      throw error;
+    }
+  },
+
+  /**
+   * Checks if both parties have approved the booking
+   */
+  bothPartiesApproved(booking: Booking): boolean {
+    return booking.approved_by_sender && booking.approved_by_receiver;
+  },
+
+  /**
+   * Checks if both parties have read the agreement
+   */
+  bothPartiesReadAgreement(booking: Booking): boolean {
+    return Boolean(booking.sender_read_agreement && booking.receiver_read_agreement);
+  },
+
+  /**
+   * Determines if booking can be published
+   */
+  canBePublished(booking: Booking): boolean {
+    return this.bothPartiesApproved(booking) && this.bothPartiesReadAgreement(booking);
+  },
+
+  /**
+   * Gets the display text for payment type
+   */
+  getPaymentDisplayText(booking: Booking): string {
+    if (booking.door_deal) {
+      return `${booking.door_percentage || 50}% av dør`;
+    }
+    if (booking.by_agreement) {
+      return 'Etter avtale';
+    }
+    return `${booking.artist_fee || booking.price_musician || '0'} kr`;
+  }
 };
