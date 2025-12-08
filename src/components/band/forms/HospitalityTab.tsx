@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import BandHospitalityManager from '@/components/BandHospitalityManager';
+import BandFileManager from '@/components/BandFileManager';
 import { Info } from 'lucide-react';
 
 interface HospitalityTabProps {
@@ -19,9 +19,10 @@ export const HospitalityTab = ({ bandId, userId }: HospitalityTabProps) => {
           </AlertDescription>
         </Alert>
       )}
-      <BandHospitalityManager
+      <BandFileManager
         bandId={bandId || ''}
         userId={userId}
+        type="hospitality"
         title="Hospitality Rider"
         description="Last opp hospitality rider for bandet"
       />
