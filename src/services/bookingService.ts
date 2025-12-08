@@ -6,6 +6,12 @@ import type {
   CreateBookingRequest, 
   UpdateBookingRequest 
 } from "@/types/booking";
+import { 
+  bothPartiesApproved as utilsBothPartiesApproved,
+  bothPartiesReadAgreement as utilsBothPartiesReadAgreement,
+  canBePublished as utilsCanBePublished,
+  getPaymentDisplayText as utilsGetPaymentDisplayText
+} from "@/utils/bookingUtils";
 
 type BookingRow = Database['public']['Tables']['bookings']['Row'];
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
@@ -300,33 +306,27 @@ export const bookingService = {
    * Checks if both parties have approved the booking
    */
   bothPartiesApproved(booking: Booking): boolean {
-    return booking.approved_by_sender && booking.approved_by_receiver;
+    return utilsBothPartiesApproved(booking);
   },
 
   /**
    * Checks if both parties have read the agreement
    */
   bothPartiesReadAgreement(booking: Booking): boolean {
-    return Boolean(booking.sender_read_agreement && booking.receiver_read_agreement);
+    return utilsBothPartiesReadAgreement(booking);
   },
 
   /**
    * Determines if booking can be published
    */
   canBePublished(booking: Booking): boolean {
-    return this.bothPartiesApproved(booking) && this.bothPartiesReadAgreement(booking);
+    return utilsCanBePublished(booking);
   },
 
   /**
    * Gets the display text for payment type
    */
   getPaymentDisplayText(booking: Booking): string {
-    if (booking.door_deal) {
-      return `${booking.door_percentage || 50}% av dør`;
-    }
-    if (booking.by_agreement) {
-      return 'Etter avtale';
-    }
-    return `${booking.artist_fee || booking.price_musician || '0'} kr`;
+    return utilsGetPaymentDisplayText(booking);
   }
 };
