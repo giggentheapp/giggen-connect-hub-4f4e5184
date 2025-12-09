@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { navigateToAuth } from '@/lib/navigation';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -20,7 +21,7 @@ const AuthButton = () => {
   return (
     <Button 
       variant="outline" 
-      onClick={() => navigate('/auth', { replace: true })}
+      onClick={() => navigateToAuth(navigate, true, 'Error boundary redirect')}
       className="flex-1"
     >
       Tilbake til innlogging

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { getProfileUrl } from "@/lib/navigation";
+import { getProfileUrl, navigateToAuth, navigateToProfile } from "@/lib/navigation";
 
 export default function TicketSuccess() {
   const [searchParams] = useSearchParams();
@@ -23,9 +23,9 @@ export default function TicketSuccess() {
 
   const handleViewTickets = () => {
     if (user) {
-      navigate(getProfileUrl(user.id, 'tickets'));
+      navigateToProfile(navigate, user.id, 'tickets', false);
     } else {
-      navigate('/dashboard?section=tickets');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from ticket success');
     }
   };
 

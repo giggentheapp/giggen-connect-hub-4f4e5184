@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import QRCode from 'react-qr-code';
 import { useToast } from '@/hooks/use-toast';
-import { getProfileUrl } from '@/lib/navigation';
+import { getProfileUrl, navigateToAuth, navigateToProfile } from '@/lib/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,9 +47,9 @@ const TicketView = () => {
 
   const navigateToTickets = () => {
     if (currentUserId) {
-      navigate(getProfileUrl(currentUserId, 'tickets'));
+      navigateToProfile(navigate, currentUserId, 'tickets', false);
     } else {
-      navigate('/dashboard?section=tickets');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting to tickets');
     }
   };
 
@@ -63,7 +63,7 @@ const TicketView = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/auth');
+        navigateToAuth(navigate, true, 'User not logged in - redirecting from ticket view');
         return;
       }
       setCurrentUserId(user.id);

@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Music, Users, MapPin, Target, Heart } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, navigateToAuth } from '@/lib/navigation';
 
 const About = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const About = () => {
               {t('back')}
             </Button>
             <div className="text-2xl font-bold text-primary">GIGGEN</div>
-            <Button onClick={() => navigate('/auth')} variant="outline">
+            <Button onClick={() => navigateToAuth(navigate, false)} variant="outline">
               {t('signIn')}
             </Button>
           </div>
@@ -130,14 +130,14 @@ const About = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigateToAuth(navigate, false)}
                 size="lg"
                 className="bg-gradient-to-r from-primary to-primary-dark hover:opacity-90"
               >
                 {t('registerAsMusician')}
               </Button>
               <Button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigateToAuth(navigate, false)}
                 variant="outline"
                 size="lg"
                 className="border-2 hover:bg-primary hover:text-primary-foreground"

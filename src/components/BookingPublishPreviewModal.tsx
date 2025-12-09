@@ -12,6 +12,8 @@ import { useBookings } from '@/hooks/useBookings';
 import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { bookingService } from '@/services/bookingService';
 import { Booking } from '@/types/booking';
+import { navigateToProfile } from '@/lib/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface BookingPublishPreviewModalProps {
   bookingId: string;
@@ -34,6 +36,7 @@ export const BookingPublishPreviewModal = ({
   const [isPublishing, setIsPublishing] = useState(false);
   const { toast } = useToast();
   const { updateBooking } = useBookings();
+  const { user } = useCurrentUser();
 
   useEffect(() => {
     if (isOpen && bookingId) {
@@ -137,7 +140,10 @@ export const BookingPublishPreviewModal = ({
         });
       }
 
-      navigate('/dashboard?section=bookings&tab=upcoming');
+      // Navigate to bookings using profile URL if user exists
+      if (user) {
+        navigateToProfile(navigate, user.id, 'bookings', false);
+      }
     } catch (error) {
       console.error('Publish error:', error);
       toast({
