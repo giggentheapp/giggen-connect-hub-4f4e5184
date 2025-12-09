@@ -12,7 +12,7 @@ import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Eye } f
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
-import { navigateToAuth } from '@/lib/navigation';
+import { navigateToAuth, navigateToProfile } from '@/lib/navigation';
 
 const BookingAgreementView = () => {
   const { bookingId } = useParams();
@@ -45,9 +45,9 @@ const BookingAgreementView = () => {
       const target = getBookingNavigationTargetWithUser(booking, currentUserId);
       navigate(target);
     } else if (user) {
-      navigate(`/profile/${user.id}?section=bookings`);
+      navigateToProfile(navigate, user.id, 'bookings', false);
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from booking agreement view');
     }
   };
 
@@ -66,9 +66,9 @@ const BookingAgreementView = () => {
           <p className="mb-4">Booking ikke funnet</p>
           <Button onClick={() => {
             if (user) {
-              navigate(`/profile/${user.id}?section=bookings`);
+              navigateToProfile(navigate, user.id, 'bookings', false);
             } else {
-              navigate('/auth');
+              navigateToAuth(navigate, true, 'User not logged in - redirecting from booking agreement view');
             }
           }}>
             Tilbake til bookinger

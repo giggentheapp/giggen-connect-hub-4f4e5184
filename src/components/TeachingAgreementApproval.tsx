@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { navigateToProfile } from '@/lib/navigation';
 
 interface TeachingAgreementApprovalProps {
   booking: any;
@@ -100,7 +101,7 @@ export const TeachingAgreementApproval = ({
           : "Din godkjenning er registrert. Venter på den andre parten.",
       });
 
-      navigate('/bookings');
+      navigateToProfile(navigate, currentUserId, 'bookings', false);
     } catch (error) {
       console.error('Error approving:', error);
       toast({
@@ -374,7 +375,7 @@ export const TeachingAgreementApproval = ({
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/bookings')}
+                onClick={() => navigateToProfile(navigate, currentUserId, 'bookings', false)}
                 disabled={loading}
               >
                 Avbryt
@@ -395,7 +396,7 @@ export const TeachingAgreementApproval = ({
                   ? 'Avtalen er nå godkjent av begge parter!' 
                   : 'Venter på at den andre parten godkjenner avtalen.'}
               </p>
-              <Button onClick={() => navigate('/bookings')}>
+              <Button onClick={() => navigateToProfile(navigate, currentUserId, 'bookings', false)}>
                 Tilbake til bookinger
               </Button>
             </div>

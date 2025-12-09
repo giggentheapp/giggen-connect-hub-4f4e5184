@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { navigateToProfile } from '@/lib/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,6 +75,7 @@ export const ConceptViewModal = ({
   viewMode = 'public'
 }: ConceptViewModalProps) => {
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
   const [currentConceptIndex, setCurrentConceptIndex] = useState(initialConceptIndex);
   const [concept, setConcept] = useState<Concept | null>(null);
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
@@ -185,8 +188,9 @@ export const ConceptViewModal = ({
     const result = await rejectConcept(concept.id, reason);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'rejected');
-      // Navigate back to bookings page - uses '/bookings' which will redirect to profile if logged in
-      navigate('/bookings', { replace: true });
+      if (user) {
+        navigateToProfile(navigate, user.id, 'bookings', true);
+      }
       onClose();
     }
   };
@@ -195,8 +199,9 @@ export const ConceptViewModal = ({
     const result = await deleteConcept(concept.id);
     if (result.success && onConceptAction) {
       onConceptAction(concept.id, 'deleted');
-      // Navigate back to bookings page - uses '/bookings' which will redirect to profile if logged in
-      navigate('/bookings', { replace: true });
+      if (user) {
+        navigateToProfile(navigate, user.id, 'bookings', true);
+      }
       onClose();
     }
   };

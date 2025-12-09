@@ -11,7 +11,7 @@ import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
-import { navigateToAuth } from '@/lib/navigation';
+import { navigateToAuth, navigateToProfile } from '@/lib/navigation';
 
 const SECTIONS = [
   {
@@ -140,9 +140,9 @@ const BookingAgreementReview = () => {
 
       // Navigate to bookings using profile URL if user exists
       if (user) {
-        navigate(`/profile/${user.id}?section=bookings`);
+        navigateToProfile(navigate, user.id, 'bookings', false);
       } else {
-        navigate('/auth');
+        navigateToAuth(navigate, true, 'User not logged in - redirecting from booking agreement review');
       }
     } catch (error: any) {
       toast({
@@ -377,9 +377,9 @@ const BookingAgreementReview = () => {
               size="sm"
               onClick={() => {
                 if (user) {
-                  navigate(`/profile/${user.id}?section=bookings`);
+                  navigateToProfile(navigate, user.id, 'bookings', false);
                 } else {
-                  navigate('/auth');
+                  navigateToAuth(navigate, true, 'User not logged in - redirecting from booking agreement review');
                 }
               }}
               className="gap-2"

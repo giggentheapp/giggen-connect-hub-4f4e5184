@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { navigateToProfile, navigateToAuth } from '@/lib/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,6 +51,7 @@ interface BookingEditModalProps {
 
 export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEditModalProps) => {
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [startDateOpen, setStartDateOpen] = useState(false);
@@ -194,8 +197,12 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         description: "Booking-detaljene har blitt lagret",
       });
 
-      // Navigate back to bookings page - uses '/bookings' which will redirect to profile if logged in
-      navigate('/bookings', { replace: true });
+      // Navigate back to bookings page
+      if (user) {
+        navigateToProfile(navigate, user.id, 'bookings', true);
+      } else {
+        navigateToAuth(navigate, true, 'User not logged in - redirecting from booking edit');
+      }
       onSaved();
     } catch (error) {
       if (error instanceof z.ZodError) {

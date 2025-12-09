@@ -11,7 +11,7 @@ import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { usePurchaseTicket } from '@/hooks/useTickets';
 import { TicketQRModal } from '@/components/TicketQRModal';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { navigateToDashboard, navigateToProfile } from '@/lib/navigation';
+import { navigateToDashboard, navigateToProfile, navigateToAuth } from '@/lib/navigation';
 
 interface PublicEventData {
   id: string;
@@ -50,7 +50,7 @@ const PublicEventView = () => {
     if (user) {
       navigateToDashboard(navigate, user.id, 'dashboard', false);
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from public event view');
     }
   };
 
@@ -62,7 +62,7 @@ const PublicEventView = () => {
         navigateToProfile(navigate, user.id, 'bookings', false);
       }
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from public event view');
     }
   };
 
