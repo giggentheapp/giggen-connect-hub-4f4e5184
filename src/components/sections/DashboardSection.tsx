@@ -178,16 +178,16 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
             </div>
           </div>
           
-          {/* Getting Started Button */}
+          {/* Getting Started Button - smaller on mobile */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/getting-started')}
-            className="gap-2 shrink-0"
+            className="gap-1.5 md:gap-2 shrink-0 px-2.5 md:px-3"
             title="Kom i gang guide"
           >
             <Rocket className="h-4 w-4" />
-            Kom i gang
+            <span className="hidden sm:inline">Kom i gang</span>
           </Button>
         </div>
 
