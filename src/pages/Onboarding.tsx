@@ -7,7 +7,7 @@ import giggenLogo from '@/assets/giggen-logo.png';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuthSession } from '@/hooks/useAuthSession';
 import { navigateToDashboard, navigateToAuth } from '@/lib/navigation';
 
 interface OnboardingProps {
@@ -19,7 +19,7 @@ type OnboardingScreen = 'role' | 'slides';
 const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const navigate = useNavigate();
   const { t, language } = useAppTranslation();
-  const { user } = useCurrentUser();
+  const { session } = useAuthSession();
   const [currentScreen, setCurrentScreen] = useState<OnboardingScreen>(mode === 'menu' ? 'slides' : 'role');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedRole, setSelectedRole] = useState<string>('');
@@ -52,8 +52,8 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
         navigateToAuth(navigate, false);
       } else {
         // Menu mode - navigate to dashboard with user context
-        if (user) {
-          navigateToDashboard(navigate, user.id, 'dashboard', false);
+        if (session?.user) {
+          navigateToDashboard(navigate, session.user.id, 'dashboard', false);
         } else {
           navigateToAuth(navigate, false);
         }
@@ -67,8 +67,8 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
       navigateToAuth(navigate, false);
     } else {
       // Menu mode - navigate to dashboard with user context
-      if (user) {
-        navigateToDashboard(navigate, user.id, 'dashboard', false);
+      if (session?.user) {
+        navigateToDashboard(navigate, session.user.id, 'dashboard', false);
       } else {
         navigateToAuth(navigate, false);
       }
@@ -76,8 +76,8 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   };
 
   const handleClose = () => {
-    if (user) {
-      navigateToDashboard(navigate, user.id, 'dashboard', false);
+    if (session?.user) {
+      navigateToDashboard(navigate, session.user.id, 'dashboard', false);
     } else {
       navigateToAuth(navigate, false);
     }
@@ -155,12 +155,12 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
 
         {/* Content */}
         <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8 animate-in fade-in duration-700">
-          {/* Logo */}
+          {/* Logo - with white filter for contrast */}
           <div className="mb-8">
             <img 
               src={giggenLogo} 
               alt="GIGGEN" 
-              className="h-24 w-auto mx-auto drop-shadow-2xl"
+              className="h-24 w-auto mx-auto drop-shadow-2xl brightness-0 invert"
             />
           </div>
 
@@ -264,13 +264,13 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center" style={{ minHeight: 'calc(100vh - 8rem)' }}>
         {/* Content area with flexible height */}
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-700 py-8">
-          {/* Logo - only on first slide */}
+          {/* Logo - only on first slide, with white filter for contrast */}
           {currentSlide === 0 && (
             <div className="mb-4">
               <img 
                 src={giggenLogo} 
                 alt="GIGGEN" 
-                className="h-24 w-auto mx-auto drop-shadow-2xl"
+                className="h-24 w-auto mx-auto drop-shadow-2xl brightness-0 invert"
               />
             </div>
           )}
