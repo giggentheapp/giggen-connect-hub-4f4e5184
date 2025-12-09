@@ -1975,6 +1975,14 @@ export type Database = {
       is_artist: { Args: { user_uuid: string }; Returns: boolean }
       is_booking_public: { Args: { booking_uuid: string }; Returns: boolean }
       is_file_in_portfolio: { Args: { file_uuid: string }; Returns: boolean }
+      is_portfolio_file_in_user_booking: {
+        Args: { p_portfolio_file_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_user_booking_party: {
+        Args: { p_booking_id: string; p_user_id: string }
+        Returns: boolean
+      }
       log_sensitive_access: {
         Args: {
           p_action: string
