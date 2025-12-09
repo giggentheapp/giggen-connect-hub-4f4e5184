@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Users, Banknote, Clock, Music, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Clock, Music, Calendar as CalendarIcon, Loader2, Video, Image as ImageIcon } from 'lucide-react';
 import { EventFormData } from '@/hooks/useCreateEvent';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
@@ -53,6 +53,30 @@ export const EventCreateModalC = ({
         </div>
       )}
 
+      {/* Profile Images */}
+      {(eventData.sender_profile_image || eventData.receiver_profile_image) && (
+        <div className="flex items-center gap-4">
+          {eventData.sender_profile_image && (
+            <div className="flex flex-col items-center gap-1">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={eventData.sender_profile_image} />
+                <AvatarFallback>S</AvatarFallback>
+              </Avatar>
+              <span className="text-xs text-muted-foreground">Arrangør</span>
+            </div>
+          )}
+          {eventData.receiver_profile_image && (
+            <div className="flex flex-col items-center gap-1">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={eventData.receiver_profile_image} />
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+              <span className="text-xs text-muted-foreground">Artist</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Title and Description */}
       <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight">{eventData.title}</h1>
@@ -62,6 +86,29 @@ export const EventCreateModalC = ({
           </p>
         )}
       </div>
+
+      {/* Gallery Preview */}
+      {((eventData.gallery_images && eventData.gallery_images.length > 0) || 
+        (eventData.gallery_videos && eventData.gallery_videos.length > 0)) && (
+        <div className="space-y-2">
+          <h3 className="font-medium flex items-center gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Galleri ({(eventData.gallery_images?.length || 0) + (eventData.gallery_videos?.length || 0)} filer)
+          </h3>
+          <div className="grid grid-cols-4 gap-2">
+            {eventData.gallery_images?.slice(0, 4).map((imageUrl, index) => (
+              <div key={`img-${index}`} className="relative aspect-square rounded overflow-hidden">
+                <img src={imageUrl} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+            {eventData.gallery_videos?.slice(0, Math.max(0, 4 - (eventData.gallery_images?.length || 0))).map((_, index) => (
+              <div key={`vid-${index}`} className="relative aspect-square rounded overflow-hidden bg-muted flex items-center justify-center">
+                <Video className="h-8 w-8 text-muted-foreground" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Separator />
 
@@ -103,12 +150,15 @@ export const EventCreateModalC = ({
             </div>
           )}
 
-          {/* Ticket Price */}
-          {eventData.has_paid_tickets && eventData.ticket_price && (
+          {/* Ticket Price - show if ticket_price is set, regardless of has_paid_tickets */}
+          {eventData.ticket_price && (
             <div className="flex items-center gap-3">
               <Banknote className="h-5 w-5 text-primary" />
               <p className="text-muted-foreground">
                 Billett: {eventData.ticket_price} NOK
+                {eventData.has_paid_tickets && (
+                  <span className="ml-2 text-xs text-green-600">(Stripe-betaling aktivert)</span>
+                )}
               </p>
             </div>
           )}

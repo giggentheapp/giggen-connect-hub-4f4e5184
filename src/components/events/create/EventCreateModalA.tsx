@@ -115,10 +115,17 @@ export const EventCreateModalA = ({
         setGalleryImages(images);
         setGalleryVideos(videos);
         
-        // Hvis det ikke er valgt banner, bruk første bilde som forslag
+        // Save to eventData so it persists to database
+        setEventData((prev) => ({
+          ...prev,
+          gallery_images: images,
+          gallery_videos: videos,
+          // If no banner selected, use first image
+          banner_url: prev.banner_url || images[0] || prev.banner_url,
+        }));
+        
         if (images.length > 0 && !eventData.banner_url) {
           setSelectedBannerFromGallery(images[0]);
-          setEventData((prev) => ({ ...prev, banner_url: images[0] }));
           setBannerPreview(images[0]);
         }
       }
@@ -146,8 +153,37 @@ export const EventCreateModalA = ({
         autoFillFromBooking(booking);
         onBookingSelected?.(booking.id);
         
-        // Last portfolio attachments fra booking
+        // Load portfolio attachments from booking
         await loadPortfolioAttachments(bookingId);
+        
+        // Load profile images for sender and receiver
+        if (booking.sender_id) {
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('user_id', booking.sender_id)
+            .single();
+          if (senderProfile?.avatar_url) {
+            setEventData((prev) => ({
+              ...prev,
+              sender_profile_image: senderProfile.avatar_url,
+            }));
+          }
+        }
+        
+        if (booking.receiver_id) {
+          const { data: receiverProfile } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('user_id', booking.receiver_id)
+            .single();
+          if (receiverProfile?.avatar_url) {
+            setEventData((prev) => ({
+              ...prev,
+              receiver_profile_image: receiverProfile.avatar_url,
+            }));
+          }
+        }
         
         toast({
           title: 'Booking lastet',
@@ -204,13 +240,12 @@ export const EventCreateModalA = ({
         ? (booking.audience_estimate?.toString() || eventData.expected_audience) 
         : eventData.expected_audience,
       
-      // Billettpris - autofill hvis visibility tillater
+      // Billettpris - autofill hvis visibility tillater (men IKKE has_paid_tickets uten whitelist)
       ticket_price: visibilitySettings.show_ticket_price !== false 
         ? (booking.ticket_price?.toString() || eventData.ticket_price) 
         : eventData.ticket_price,
-      has_paid_tickets: visibilitySettings.show_ticket_price !== false && booking.ticket_price 
-        ? true 
-        : eventData.has_paid_tickets,
+      // has_paid_tickets should NOT be auto-enabled - requires whitelist check
+      has_paid_tickets: false,
     };
     
     // Oppdater selected date for kalender

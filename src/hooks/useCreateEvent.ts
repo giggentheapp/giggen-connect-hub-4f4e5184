@@ -33,6 +33,11 @@ export interface EventFormData {
     organizers: EventParticipant[];
   };
   booking_id?: string | null;
+  // Image fields
+  sender_profile_image?: string;
+  receiver_profile_image?: string;
+  gallery_images?: string[];
+  gallery_videos?: string[];
 }
 
 export const useCreateEvent = () => {
@@ -59,18 +64,27 @@ export const useCreateEvent = () => {
         end_time: eventData.end_time || null,
         venue: eventData.venue,
         address: eventData.address || null,
-        ticket_price: eventData.has_paid_tickets && eventData.ticket_price 
+        ticket_price: eventData.ticket_price 
           ? parseFloat(eventData.ticket_price) 
           : null,
         has_paid_tickets: eventData.has_paid_tickets || false,
         expected_audience: eventData.expected_audience 
           ? parseInt(eventData.expected_audience) 
           : null,
-        participants: eventData.participants as any, // Cast to Json type
+        participants: eventData.participants as any,
         booking_id: eventData.booking_id || null,
         status: status,
         is_public: status === 'published',
         created_by: userId,
+        // Image fields
+        sender_profile_image: eventData.sender_profile_image || null,
+        receiver_profile_image: eventData.receiver_profile_image || null,
+        gallery_images: eventData.gallery_images && eventData.gallery_images.length > 0 
+          ? eventData.gallery_images 
+          : null,
+        gallery_videos: eventData.gallery_videos && eventData.gallery_videos.length > 0 
+          ? eventData.gallery_videos 
+          : null,
       };
 
       const { data, error } = await supabase
@@ -139,17 +153,26 @@ export const useCreateEvent = () => {
         end_time: eventData.end_time || null,
         venue: eventData.venue,
         address: eventData.address || null,
-        ticket_price: eventData.has_paid_tickets && eventData.ticket_price 
+        ticket_price: eventData.ticket_price 
           ? parseFloat(eventData.ticket_price) 
           : null,
         has_paid_tickets: eventData.has_paid_tickets || false,
         expected_audience: eventData.expected_audience 
           ? parseInt(eventData.expected_audience) 
           : null,
-        participants: eventData.participants as any, // Cast to Json type
+        participants: eventData.participants as any,
         booking_id: eventData.booking_id || null,
         status: status,
         is_public: status === 'published',
+        // Image fields
+        sender_profile_image: eventData.sender_profile_image || null,
+        receiver_profile_image: eventData.receiver_profile_image || null,
+        gallery_images: eventData.gallery_images && eventData.gallery_images.length > 0 
+          ? eventData.gallery_images 
+          : null,
+        gallery_videos: eventData.gallery_videos && eventData.gallery_videos.length > 0 
+          ? eventData.gallery_videos 
+          : null,
       };
 
       const { error } = await supabase

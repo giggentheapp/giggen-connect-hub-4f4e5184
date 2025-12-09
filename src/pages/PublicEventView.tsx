@@ -29,6 +29,11 @@ interface PublicEventData {
   is_public_after_approval: boolean | null;
   has_paid_tickets?: boolean;
   public_visibility_settings?: Record<string, boolean>;
+  // Image fields
+  sender_profile_image?: string | null;
+  receiver_profile_image?: string | null;
+  gallery_images?: string[];
+  gallery_videos?: string[];
 }
 
 const PublicEventView = () => {
@@ -135,7 +140,10 @@ const PublicEventView = () => {
           return;
         }
 
-        // Convert events_market format to booking format for display
+        // Convert events_market format to PublicEventData
+        const galleryImages = (marketEventData.gallery_images as string[]) || [];
+        const galleryVideos = (marketEventData.gallery_videos as string[]) || [];
+        
         setEvent({
           id: marketEventData.id,
           title: marketEventData.title,
@@ -143,14 +151,38 @@ const PublicEventView = () => {
           event_date: marketEventData.event_datetime || marketEventData.date,
           time: marketEventData.time ? marketEventData.time.toString() : null,
           venue: marketEventData.venue,
-          address: null,
+          address: marketEventData.address,
           ticket_price: marketEventData.ticket_price,
           audience_estimate: marketEventData.expected_audience,
           sender_id: marketEventData.created_by || '',
           receiver_id: marketEventData.created_by || '',
           selected_concept_id: null,
           is_public_after_approval: true,
+          sender_profile_image: marketEventData.sender_profile_image,
+          receiver_profile_image: marketEventData.receiver_profile_image,
+          gallery_images: galleryImages,
+          gallery_videos: galleryVideos,
         });
+        
+        // Convert to portfolio attachments format for BookingPortfolioGallery
+        const portfolioFromEvent = [
+          ...galleryImages.map((url) => ({
+            portfolio_file: {
+              file_url: url,
+              mime_type: 'image/jpeg',
+              file_type: 'image',
+            }
+          })),
+          ...galleryVideos.map((url) => ({
+            portfolio_file: {
+              file_url: url,
+              mime_type: 'video/mp4',
+              file_type: 'video',
+            }
+          }))
+        ];
+        
+        setPortfolioAttachments(portfolioFromEvent);
 
         setHasPaidTickets(marketEventData.has_paid_tickets || false);
         setMarketEventId(marketEventData.id); // Use this ID for ticket purchase
@@ -320,6 +352,32 @@ const PublicEventView = () => {
               Arrangement
             </Badge>
           </div>
+
+          {/* Profile Images */}
+          {(event.sender_profile_image || event.receiver_profile_image) && (
+            <div className="flex items-center gap-4">
+              {event.sender_profile_image && (
+                <div className="flex flex-col items-center gap-1">
+                  <img 
+                    src={event.sender_profile_image} 
+                    alt="Arrangør" 
+                    className="h-14 w-14 rounded-full object-cover border-2 border-border"
+                  />
+                  <span className="text-xs text-muted-foreground">Arrangør</span>
+                </div>
+              )}
+              {event.receiver_profile_image && (
+                <div className="flex flex-col items-center gap-1">
+                  <img 
+                    src={event.receiver_profile_image} 
+                    alt="Artist" 
+                    className="h-14 w-14 rounded-full object-cover border-2 border-border"
+                  />
+                  <span className="text-xs text-muted-foreground">Artist</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {makerProfile?.display_name && (
             <p className="text-xl text-muted-foreground">
