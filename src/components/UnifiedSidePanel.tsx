@@ -52,10 +52,15 @@ export const UnifiedSidePanel = ({
   }, [profile.user_id]);
   
   // For other people's profiles, always show profile section by default
-  // For own profile, always default to dashboard
+  // For own profile, read from URL or default to dashboard
   const [activeSection, setActiveSection] = useState<string>(() => {
     if (!isOwnProfile) return 'profile';
-    // Always default to dashboard for own profile
+    // Read section from URL on initial load
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSection = urlParams.get('section');
+    if (urlSection && isValidSection(urlSection)) {
+      return urlSection;
+    }
     return 'dashboard';
   });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
