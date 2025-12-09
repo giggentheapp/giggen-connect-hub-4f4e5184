@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Inbox, Clock, Eye } from 'lucide-react';
+import { Send, Inbox, Clock, Eye, CheckCircle } from 'lucide-react';
 import { BookingActions } from '@/components/BookingActions';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { BookingCardStep1 } from '@/components/BookingCardStep1';
@@ -32,11 +32,12 @@ export const BookingsSection = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useAppTranslation();
-  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing'>('incoming');
+  const [activeTab, setActiveTab] = useState<'incoming' | 'sent' | 'ongoing' | 'approved'>('incoming');
   const [tabCounts, setTabCounts] = useState({
     incoming: 0,
     sent: 0,
-    ongoing: 0
+    ongoing: 0,
+    approved: 0
   });
   
   // Modal states
@@ -48,7 +49,7 @@ export const BookingsSection = ({
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab') || params.get('section');
-    if (tab && ['incoming', 'sent', 'ongoing'].includes(tab)) {
+    if (tab && ['incoming', 'sent', 'ongoing', 'approved'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -67,6 +68,7 @@ export const BookingsSection = ({
   let incomingRequests: any[] = [];
   let sentRequests: any[] = [];
   let ongoingAgreements: any[] = [];
+  let approvedAgreements: any[] = [];
   
   try {
     if (Array.isArray(bookings)) {
@@ -80,9 +82,16 @@ export const BookingsSection = ({
         b?.status === 'pending'
       );
       
+      // Ongoing: in negotiation phase (allowed, approved_by_sender, approved_by_receiver)
       ongoingAgreements = bookings.filter(b => 
         (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
-        (b?.status === 'allowed' || b?.status === 'approved_by_sender' || b?.status === 'approved_by_receiver' || b?.status === 'approved_by_both')
+        (b?.status === 'allowed' || b?.status === 'approved_by_sender' || b?.status === 'approved_by_receiver')
+      );
+      
+      // Approved: both parties approved, ready for event creation
+      approvedAgreements = bookings.filter(b => 
+        (b?.sender_id === profile.user_id || b?.receiver_id === profile.user_id) && 
+        b?.status === 'approved_by_both'
       );
     }
   } catch (error) {
@@ -94,7 +103,8 @@ export const BookingsSection = ({
     setTabCounts({
       incoming: incomingRequests.length,
       sent: sentRequests.length,
-      ongoing: ongoingAgreements.length
+      ongoing: ongoingAgreements.length,
+      approved: approvedAgreements.length
     });
   }, [bookings, profile.user_id]);
 
@@ -303,7 +313,7 @@ export const BookingsSection = ({
           <div className="p-2 md:p-3 bg-background border-b border-border/10 shrink-0 mobile-sticky-header">
             <div className="max-w-4xl mx-auto">
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 max-w-[600px]">
+                <TabsList className="grid w-full grid-cols-4 max-w-[700px]">
                   <TabsTrigger value="incoming" className="flex items-center justify-center gap-1">
                     <Inbox className="w-4 h-4" />
                     {tabCounts.incoming > 0 && (
@@ -325,6 +335,14 @@ export const BookingsSection = ({
                     {tabCounts.ongoing > 0 && (
                       <Badge variant="secondary" className="h-5 min-w-[20px] px-1 text-xs">
                         {tabCounts.ongoing}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="approved" className="flex items-center justify-center gap-1">
+                    <CheckCircle className="w-4 h-4" />
+                    {tabCounts.approved > 0 && (
+                      <Badge variant="default" className="h-5 min-w-[20px] px-1 text-xs bg-green-600">
+                        {tabCounts.approved}
                       </Badge>
                     )}
                   </TabsTrigger>
@@ -421,6 +439,38 @@ export const BookingsSection = ({
                          </div>
                       ) : (
                         ongoingAgreements.map((booking) => (
+                          <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Approved Tab Content */}
+              <TabsContent value="approved" className="flex-1 flex flex-col m-0 min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
+                  {/* List Header */}
+                  <div className="px-3 md:px-4 py-2 bg-background border-b border-border/10 shrink-0">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                      <h2 className="text-base md:text-lg font-semibold text-foreground">Godkjente avtaler</h2>
+                      <Badge variant="secondary" className="text-xs">
+                        {approvedAgreements.length}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Main Content Area */}
+                  <div className="flex-1 overflow-auto p-3 md:p-4 pb-24 md:pb-4 min-h-0">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                      {approvedAgreements.length === 0 ? (
+                         <div className="text-center py-8">
+                           <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                           <p className="text-muted-foreground">Ingen godkjente avtaler ennå</p>
+                           <p className="text-sm text-muted-foreground mt-2">Avtaler som er godkjent av begge parter vises her</p>
+                         </div>
+                      ) : (
+                        approvedAgreements.map((booking) => (
                           <BookingCard key={`${booking.id}-${booking.updated_at}`} booking={booking} />
                         ))
                       )}

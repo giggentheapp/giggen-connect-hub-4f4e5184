@@ -81,65 +81,11 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
     }
   };
 
-  const handlePublishAgreement = async () => {
-    try {
-      // Determine event admin - default to sender if not set
-      const eventAdminId = (booking as any).event_admin_id || booking.sender_id;
-      
-      // Update booking status to published AND set public visibility + admin
-      await updateBooking(booking.id, { 
-        status: 'upcoming',
-        is_public_after_approval: true,
-        event_admin_id: eventAdminId
-      });
-
-      // Create event in events_market
-      const eventDate = booking.event_date ? new Date(booking.event_date) : new Date();
-      const eventData = {
-        title: booking.title,
-        description: booking.description,
-        portfolio_id: booking.selected_concept_id,
-        ticket_price: booking.price_ticket ? parseFloat(booking.price_ticket.replace(/[^\d.]/g, '')) || null : null,
-        venue: booking.venue,
-        date: eventDate.toISOString().split('T')[0],
-        time: eventDate.toTimeString().split(' ')[0],
-        event_datetime: eventDate.toISOString(),
-        expected_audience: selectedConcept?.expected_audience || null,
-        created_by: currentUserId,
-        is_public: true // Make public by default
-      };
-
-      const { error: eventError } = await supabase
-        .from("events_market")
-        .insert([eventData]);
-
-      if (eventError) {
-        console.error('Error creating event in market:', eventError);
-        toast({
-          title: "Arrangement publisert",
-          description: "Arrangementet er publisert, men kunne ikke legges til i markedet automatisk",
-        });
-      } else {
-        toast({
-          title: "Arrangement publisert",
-          description: "Arrangementet er nå publisert og tilgjengelig for alle!",
-        });
-      }
-
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Feil ved publisering",
-        description: "Kunne ikke publisere arrangementet",
-        variant: "destructive",
-      });
-    }
-  };
+  // Removed handlePublishAgreement - event creation is now handled separately via /create-event
 
   if (!booking) return null;
 
   const bothReadAgreement = booking.sender_read_agreement && booking.receiver_read_agreement;
-  const canPublish = bothReadAgreement;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -413,14 +359,11 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
             <Badge variant="outline">Venter på at den andre parten leser avtalen</Badge>
           )}
 
-          {canPublish && (
-            <Button 
-              onClick={handlePublishAgreement} 
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Publiser arrangement
-            </Button>
+          {bothReadAgreement && (
+            <Badge variant="default" className="bg-green-600">
+              <Check className="h-3 w-3 mr-1" />
+              Begge har lest avtalen
+            </Badge>
           )}
           
           <Button variant="outline" onClick={onClose}>

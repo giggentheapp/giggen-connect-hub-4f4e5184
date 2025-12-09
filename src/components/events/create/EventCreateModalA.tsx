@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Image as ImageIcon, Loader2, Info } from 'lucide-react';
+import { CalendarIcon, Image as ImageIcon, Loader2, Info, FileText, Video, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ import { EventFormData } from '@/hooks/useCreateEvent';
 import { useToast } from '@/hooks/use-toast';
 import { BookingSelector } from './BookingSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BookingAgreementModal } from '@/components/BookingAgreementModal';
 
 interface EventCreateModalAProps {
   onNext: () => void;
@@ -51,6 +52,10 @@ export const EventCreateModalA = ({
   );
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [autoFilled, setAutoFilled] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [galleryVideos, setGalleryVideos] = useState<string[]>([]);
+  const [selectedBannerFromGallery, setSelectedBannerFromGallery] = useState<string | null>(null);
 
   useEffect(() => {
     checkTicketingAccess();
@@ -68,6 +73,59 @@ export const EventCreateModalA = ({
       loadBookingFromUrl(bookingIdFromUrl);
     }
   }, [bookingIdFromUrl, userId]);
+
+  const loadPortfolioAttachments = async (bookingId: string) => {
+    try {
+      const { data: attachments, error } = await supabase
+        .from('booking_portfolio_attachments')
+        .select(`
+          id,
+          portfolio_file:profile_portfolio(
+            id,
+            filename,
+            file_path,
+            file_url,
+            mime_type,
+            file_type,
+            title
+          )
+        `)
+        .eq('booking_id', bookingId);
+
+      if (error) throw error;
+
+      if (attachments && attachments.length > 0) {
+        const images: string[] = [];
+        const videos: string[] = [];
+
+        attachments.forEach((attachment: any) => {
+          if (attachment.portfolio_file) {
+            const file = attachment.portfolio_file;
+            const publicUrl = file.file_url || 
+              supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+
+            if (file.mime_type?.startsWith('image/')) {
+              images.push(publicUrl);
+            } else if (file.mime_type?.startsWith('video/')) {
+              videos.push(publicUrl);
+            }
+          }
+        });
+
+        setGalleryImages(images);
+        setGalleryVideos(videos);
+        
+        // Hvis det ikke er valgt banner, bruk første bilde som forslag
+        if (images.length > 0 && !eventData.banner_url) {
+          setSelectedBannerFromGallery(images[0]);
+          setEventData((prev) => ({ ...prev, banner_url: images[0] }));
+          setBannerPreview(images[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading portfolio attachments:', error);
+    }
+  };
 
   const loadBookingFromUrl = async (bookingId: string) => {
     try {
@@ -87,6 +145,9 @@ export const EventCreateModalA = ({
         setSelectedBooking(booking);
         autoFillFromBooking(booking);
         onBookingSelected?.(booking.id);
+        
+        // Last portfolio attachments fra booking
+        await loadPortfolioAttachments(bookingId);
         
         toast({
           title: 'Booking lastet',
@@ -276,14 +337,90 @@ export const EventCreateModalA = ({
           />
           
           {selectedBooking && (
-            <Alert className="mt-2">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-xs">
-                Arrangementet er koblet til booking-avtale. Kun publikumsrelevante felter er autofylt basert på synlighetsinnstillinger.
-              </AlertDescription>
-            </Alert>
+            <div className="space-y-2 mt-2">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Arrangementet er koblet til booking-avtale. Kun publikumsrelevante felter er autofylt basert på synlighetsinnstillinger.
+                </AlertDescription>
+              </Alert>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAgreementModal(true)}
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Se booking-avtale
+              </Button>
+            </div>
           )}
         </div>
+
+        {/* Portfolio Images from Booking */}
+        {selectedBooking && (galleryImages.length > 0 || galleryVideos.length > 0) && (
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+            <Label>Bilder og videoer fra booking-avtale</Label>
+            
+            {/* Banner Selection from Gallery */}
+            {galleryImages.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm">Velg bannerbilde</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {galleryImages.map((imageUrl, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBannerFromGallery(imageUrl);
+                        setEventData((prev) => ({ ...prev, banner_url: imageUrl }));
+                        setBannerPreview(imageUrl);
+                      }}
+                      className={cn(
+                        "relative aspect-video rounded-lg overflow-hidden border-2 transition-all",
+                        selectedBannerFromGallery === imageUrl 
+                          ? "border-primary ring-2 ring-primary" 
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <img 
+                        src={imageUrl} 
+                        alt={`Banner ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {selectedBannerFromGallery === imageUrl && (
+                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                          <Check className="h-6 w-6 text-primary" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Klikk på et bilde for å velge det som banner
+                </p>
+              </div>
+            )}
+            
+            {/* Gallery Preview */}
+            <div className="space-y-2">
+              <Label className="text-sm">Galleri ({galleryImages.length} bilder, {galleryVideos.length} videoer)</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {galleryImages.slice(0, 4).map((imageUrl, index) => (
+                  <div key={`img-${index}`} className="relative aspect-square rounded overflow-hidden">
+                    <img src={imageUrl} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {galleryVideos.slice(0, 4 - Math.min(galleryImages.length, 4)).map((videoUrl, index) => (
+                  <div key={`vid-${index}`} className="relative aspect-square rounded overflow-hidden bg-muted flex items-center justify-center">
+                    <Video className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Banner Image */}
         <div className="space-y-2">
@@ -422,61 +559,56 @@ export const EventCreateModalA = ({
               />
             </div>
 
-            {/* Ticketing Section */}
-            <div className="space-y-4 pt-4 border-t">
-              <Label className="text-base font-semibold">Billettfunksjon</Label>
-              
-              {checkingAccess ? (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Sjekker tilgang...
-                </div>
-              ) : hasTicketingAccess ? (
-                <div className="space-y-4">
-                  {!eventData.has_paid_tickets ? (
-                    <Button
-                      variant="outline"
-                      onClick={() => updateField('has_paid_tickets', true)}
-                      className="w-full"
-                    >
-                      Sett opp billettsalg
-                    </Button>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Billettsalg aktivert</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            updateField('has_paid_tickets', false);
-                            updateField('ticket_price', undefined);
-                          }}
-                        >
-                          Fjern
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="ticket_price">Billettpris (NOK) *</Label>
-                        <Input
-                          id="ticket_price"
-                          type="number"
-                          placeholder="F.eks. 250"
-                          value={eventData.ticket_price || ''}
-                          onChange={(e) => updateField('ticket_price', e.target.value)}
-                          min="0"
-                          step="10"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Billettkjøp i appen er ikke tilgjengelig for denne brukeren.
-                </p>
-              )}
+            {/* Ticket Price - always available */}
+            <div className="space-y-2">
+              <Label htmlFor="ticket_price">Billettpris (NOK) (valgfri)</Label>
+              <Input
+                id="ticket_price"
+                type="number"
+                min="0"
+                step="10"
+                value={eventData.ticket_price || ''}
+                onChange={(e) => updateField('ticket_price', e.target.value)}
+                placeholder="F.eks. 150"
+              />
+              <p className="text-xs text-muted-foreground">
+                Billettpris kan settes uavhengig av betalingsmetode
+              </p>
             </div>
+
+            {/* Stripe Ticketing Section - only for whitelisted users */}
+            {checkingAccess ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sjekker tilgang...
+              </div>
+            ) : hasTicketingAccess && (
+              <div className="space-y-2 p-4 border rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-medium">Aktiver Stripe-betaling</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Tillat billettkjøp gjennom appen med Stripe
+                    </p>
+                  </div>
+                  <Button
+                    variant={eventData.has_paid_tickets ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={() => updateField('has_paid_tickets', !eventData.has_paid_tickets)}
+                  >
+                    {eventData.has_paid_tickets ? 'Deaktiver' : 'Aktiver'}
+                  </Button>
+                </div>
+                {eventData.has_paid_tickets && (
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      Stripe-betaling er aktivert. Billetter kan kjøpes gjennom appen. Billettpris må være satt.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
 
             {/* Next Button */}
             <div className="flex justify-end pt-6">
@@ -497,6 +629,13 @@ export const EventCreateModalA = ({
         userId={userId}
         fileTypes={['image']}
         category="all"
+      />
+
+      <BookingAgreementModal
+        bookingId={selectedBooking?.id || null}
+        isOpen={showAgreementModal}
+        onClose={() => setShowAgreementModal(false)}
+        currentUserId={userId}
       />
     </>
   );
