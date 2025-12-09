@@ -35,12 +35,12 @@ export const BookingSelector = ({
 
   useEffect(() => {
     if (!bookingsLoading) {
-      // Filtrer: both_parties_approved eller upcoming, og ikke allerede koblet til arrangement
+      // Filtrer: approved_by_both eller upcoming, og ikke allerede koblet til arrangement
       const availableBookings = allBookings.filter(
         (b: any) => 
           (b.sender_id === userId || b.receiver_id === userId) &&
-          (b.status === 'both_parties_approved' || b.status === 'upcoming') &&
-          !b.event_id // Ikke vis bookings som allerede har arrangement
+          (b.status === 'approved_by_both' || b.status === 'both_parties_approved' || b.status === 'upcoming') &&
+          !b.event_admin_id // Ikke vis bookings som allerede har arrangement (sjekk event_admin_id)
       );
       
       setBookings(availableBookings);
