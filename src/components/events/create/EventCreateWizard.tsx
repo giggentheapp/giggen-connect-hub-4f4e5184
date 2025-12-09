@@ -29,6 +29,7 @@ export const EventCreateWizard = () => {
   const { createEvent, updateEvent, isCreating, isUpdating } = useCreateEvent();
   const [currentModal, setCurrentModal] = useState<'A' | 'B' | 'C'>('A');
   const [userId, setUserId] = useState<string>('');
+  const [userIdLoading, setUserIdLoading] = useState(true);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const [isDraft, setIsDraft] = useState(false);
@@ -56,6 +57,7 @@ export const EventCreateWizard = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
+        setUserIdLoading(true);
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) {
           console.error('Error getting user:', error);
@@ -81,6 +83,8 @@ export const EventCreateWizard = () => {
           variant: 'destructive',
         });
         navigate('/auth', { replace: true });
+      } finally {
+        setUserIdLoading(false);
       }
     };
     getUser();
@@ -273,6 +277,15 @@ export const EventCreateWizard = () => {
       navigate(`/arrangement/${createdEventId}`);
     }
   };
+
+  // Show loading state while fetching userId
+  if (userIdLoading || !userId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <>
