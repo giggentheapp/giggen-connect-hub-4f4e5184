@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, ArrowRight, Archive, Trash2 } from 'lucide-react';
-import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
+import { Check, X, Plus, Archive, Trash2 } from 'lucide-react';
 import { BookingActionProps } from '@/types/booking';
 import { isSender as checkIsSender, isReceiver as checkIsReceiver } from '@/utils/bookingUtils';
 
@@ -17,7 +16,6 @@ export const BookingActions = ({
 }: BookingActionProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [showPublishPreview, setShowPublishPreview] = useState(false);
   const {
     updateBooking,
     rejectBooking,
@@ -129,10 +127,6 @@ export const BookingActions = ({
     return "Dette vil PERMANENT slette bookingen fra systemet. Handlingen kan ikke angres.";
   };
 
-  const showPublishingSummary = () => {
-    setShowPublishPreview(true);
-  };
-
   // Render functions for different states
   const renderPendingActions = () => {
     if (!isReceiver) {
@@ -229,26 +223,25 @@ export const BookingActions = ({
     return null;
   };
 
-  const renderPublishActions = () => {
-    const userPublishedField = isSender ? 'published_by_sender' : 'published_by_receiver';
-    
-    if ((booking as any)[userPublishedField]) {
+  const renderCreateEventAction = () => {
+    // Check if event is already created
+    if ((booking as any).event_admin_id || (booking as any).event_id) {
       return (
-        <Badge variant="secondary" className="text-xs text-blue-700 bg-blue-50 border-blue-200">
-          ✓ Publisert
+        <Badge variant="secondary" className="text-xs text-green-700 bg-green-50 border-green-200">
+          ✓ Arrangement opprettet
         </Badge>
       );
     }
 
     return (
       <Button 
-        onClick={showPublishingSummary} 
+        onClick={() => navigate(`/create-event?bookingId=${booking.id}`)}
         disabled={loading} 
         size="sm"
         className="h-7 px-2 text-xs bg-blue-600 hover:bg-blue-700"
       >
-        <ArrowRight className="h-3 w-3 mr-1" />
-        Publiser
+        <Plus className="h-3 w-3 mr-1" />
+        Opprett arrangement
       </Button>
     );
   };
@@ -368,25 +361,14 @@ export const BookingActions = ({
   };
 
   return (
-    <>
-      <div className="flex gap-1.5 items-center flex-wrap">
-        {booking.status === 'pending' && renderPendingActions()}
-        {booking.status === 'allowed' && renderAllowedActions()}
-        {(booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') && renderProgressiveApprovalActions()}
-        {booking.status === 'approved_by_both' && renderPublishActions()}
-        {renderArchiveButton()}
-        {renderDeleteButton()}
-        {renderCancelButton()}
-      </div>
-      
-      {showPublishPreview && (
-        <BookingPublishPreviewModal
-          bookingId={booking.id}
-          isOpen={showPublishPreview}
-          onClose={() => setShowPublishPreview(false)}
-          currentUserId={currentUserId}
-        />
-      )}
-    </>
+    <div className="flex gap-1.5 items-center flex-wrap">
+      {booking.status === 'pending' && renderPendingActions()}
+      {booking.status === 'allowed' && renderAllowedActions()}
+      {(booking.status === 'approved_by_sender' || booking.status === 'approved_by_receiver') && renderProgressiveApprovalActions()}
+      {booking.status === 'approved_by_both' && renderCreateEventAction()}
+      {renderArchiveButton()}
+      {renderDeleteButton()}
+      {renderCancelButton()}
+    </div>
   );
 };

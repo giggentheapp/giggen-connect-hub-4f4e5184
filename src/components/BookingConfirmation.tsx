@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +8,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Calendar, MapPin, Banknote, Users, FileText, Music, Eye } from 'lucide-react';
+import { Check, Calendar, MapPin, Banknote, Users, FileText, Music, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useBookingRealtime } from '@/hooks/useBookingRealtime';
 import { BookingDocumentViewer } from '@/components/BookingDocumentViewer';
-import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
 import { Booking } from '@/types/booking';
 import { bookingService } from '@/services/bookingService';
 import { isSender as checkIsSender, isReceiver as checkIsReceiver, bothPartiesApproved, bothPartiesReadAgreement } from '@/utils/bookingUtils';
@@ -24,8 +24,8 @@ interface BookingConfirmationProps {
 }
 
 export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }: BookingConfirmationProps) => {
+  const navigate = useNavigate();
   const [hasReadAgreement, setHasReadAgreement] = useState(false);
-  const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const { updateBooking } = useBookings();
   const { toast } = useToast();
@@ -97,25 +97,16 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
         title: "Avtale godkjent",
         description: "Du har godkjent bookingavtalen",
       });
-
-      // If both have now confirmed, show preview with fresh data
-      if (currentBooking[otherUserConfirmedField]) {
-        await handleShowPublicPreview();
-      }
     } catch (error) {
       // Error handled in hook
     }
-  };
-
-  const handleShowPublicPreview = () => {
-    setShowPublicPreview(true);
   };
 
   if (!currentBooking) return null;
 
   const bothConfirmed = bothPartiesApproved(currentBooking);
   const bothRead = bothPartiesReadAgreement(currentBooking);
-  const canShowPreview = bothConfirmed && bothRead;
+  const canCreateEvent = bothConfirmed && bothRead && !(currentBooking as any).event_admin_id && !(currentBooking as any).event_id;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -277,13 +268,13 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
               </Badge>
             )}
 
-            {canShowPreview && !showPublicPreview && (
+            {canCreateEvent && (
               <Button 
-                onClick={handleShowPublicPreview}
-                className="bg-green-600 hover:bg-green-700"
+                onClick={() => navigate(`/create-event?bookingId=${currentBooking.id}`)}
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                <Eye className="h-4 w-4 mr-2" />
-                Forhåndsvis og publiser
+                <Plus className="h-4 w-4 mr-2" />
+                Opprett arrangement
               </Button>
             )}
             
@@ -293,14 +284,6 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
           </div>
         </div>
       </DialogContent>
-
-      {/* Publish Preview Dialog */}
-      <BookingPublishPreviewModal
-        bookingId={currentBooking.id}
-        isOpen={showPublicPreview}
-        onClose={() => setShowPublicPreview(false)}
-        currentUserId={currentUserId}
-      />
     </Dialog>
   );
 };
