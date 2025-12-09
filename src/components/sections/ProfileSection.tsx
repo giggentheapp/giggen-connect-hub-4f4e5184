@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, getProfileUrl } from '@/lib/navigation';
 
 interface ProfileSectionProps {
   profile: UserProfile;
@@ -230,7 +230,7 @@ export const ProfileSection = ({
         {isOwnProfile && (
           <div className="flex justify-start">
             <Button asChild variant="outline" size="sm" className="hover:scale-105 transition-transform">
-              <Link to="/dashboard?section=filbank">
+              <Link to={getProfileUrl(profile.user_id, 'filbank')}>
                 Administrer portefølje i Filbank
               </Link>
             </Button>

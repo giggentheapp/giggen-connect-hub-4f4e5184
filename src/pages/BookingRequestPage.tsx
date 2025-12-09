@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, User, MapPin, Settings, Briefcase, FileText, Lightbulb } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, navigateToAuth, navigateToProfile, getProfileUrl } from '@/lib/navigation';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCreateBooking } from '@/hooks/useBookingMutations';
@@ -30,7 +30,7 @@ const BookingRequestPage = () => {
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!userLoading && !user) {
-      navigate('/auth', { replace: true });
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from booking request');
     }
   }, [user, userLoading, navigate]);
   const createBookingMutation = useCreateBooking();
@@ -45,13 +45,14 @@ const BookingRequestPage = () => {
   });
 
   const getNavigationItems = () => {
+    if (!user) return [];
     return [
-      { id: 'profile', label: t('profile'), icon: User, path: '/dashboard?section=profile' },
-      { id: 'explore', label: t('explore'), icon: MapPin, path: '/dashboard?section=explore' },
-      { id: 'admin-files', label: 'Filer', icon: FileText, path: '/dashboard?section=admin-files' },
-      { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: '/dashboard?section=admin-concepts' },
-      { id: 'bookings', label: t('bookings'), icon: Briefcase, path: '/dashboard?section=bookings' },
-      { id: 'settings', label: t('settings'), icon: Settings, path: '/dashboard?section=settings' }
+      { id: 'profile', label: t('profile'), icon: User, path: getProfileUrl(user.id, 'profile') },
+      { id: 'explore', label: t('explore'), icon: MapPin, path: getProfileUrl(user.id, 'explore') },
+      { id: 'admin-files', label: 'Filer', icon: FileText, path: getProfileUrl(user.id, 'admin-files') },
+      { id: 'admin-concepts', label: t('My Offers'), icon: Lightbulb, path: getProfileUrl(user.id, 'admin-concepts') },
+      { id: 'bookings', label: t('bookings'), icon: Briefcase, path: getProfileUrl(user.id, 'bookings') },
+      { id: 'settings', label: t('settings'), icon: Settings, path: getProfileUrl(user.id, 'settings') }
     ];
   };
 
@@ -90,7 +91,9 @@ const BookingRequestPage = () => {
       });
 
       // Navigate back to bookings
-      navigate('/bookings');
+      if (user) {
+        navigateToProfile(navigate, user.id, 'bookings', false);
+      }
       
     } catch (err) {
       console.error('Booking request error:', err);
@@ -141,7 +144,11 @@ const BookingRequestPage = () => {
               </nav>
             )}
             
-            <Button onClick={() => navigate('/dashboard')} variant="outline" size="sm">
+            <Button 
+              onClick={() => user ? navigateToProfile(navigate, user.id, 'dashboard', false) : navigateToAuth(navigate, false)} 
+              variant="outline" 
+              size="sm"
+            >
               Gå til dashboard
             </Button>
           </div>
