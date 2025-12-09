@@ -8,7 +8,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { navigateToDashboard } from '@/lib/navigation';
+import { navigateToDashboard, navigateToAuth } from '@/lib/navigation';
 
 interface OnboardingProps {
   mode?: 'first-time' | 'menu';
@@ -49,13 +49,13 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
         localStorage.setItem('has_seen_onboarding', 'true');
         // Store the selected role for later feedback
         localStorage.setItem('onboarding_role', selectedRole);
-        navigate('/auth');
+        navigateToAuth(navigate, false);
       } else {
         // Menu mode - navigate to dashboard with user context
         if (user) {
           navigateToDashboard(navigate, user.id, 'dashboard', false);
         } else {
-          navigate('/auth');
+          navigateToAuth(navigate, false);
         }
       }
     }
@@ -64,13 +64,13 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
   const handleSkip = () => {
     if (mode === 'first-time') {
       localStorage.setItem('has_seen_onboarding', 'true');
-      navigate('/auth');
+      navigateToAuth(navigate, false);
     } else {
       // Menu mode - navigate to dashboard with user context
       if (user) {
         navigateToDashboard(navigate, user.id, 'dashboard', false);
       } else {
-        navigate('/auth');
+        navigateToAuth(navigate, false);
       }
     }
   };
@@ -79,7 +79,7 @@ const Onboarding = ({ mode = 'first-time' }: OnboardingProps) => {
     if (user) {
       navigateToDashboard(navigate, user.id, 'dashboard', false);
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, false);
     }
   };
 

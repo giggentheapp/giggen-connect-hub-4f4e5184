@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { navigateToAuth } from '@/lib/navigation';
 import { toast } from "sonner";
 
 interface AuditLog {
@@ -41,7 +42,7 @@ export default function SecurityDashboard() {
     
     if (!user) {
       toast.error("Du må være logget inn");
-      navigate("/auth");
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from security dashboard');
       return;
     }
 

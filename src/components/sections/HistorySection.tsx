@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { UserProfile } from '@/types/auth';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { navigateToProfile } from '@/lib/navigation';
 
 interface HistorySectionProps {
   profile: UserProfile;
@@ -58,7 +59,7 @@ export const HistorySection = ({ profile }: HistorySectionProps) => {
               Fullførte arrangementer vil vises her
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => navigate('/dashboard?section=upcoming-events')}>
+              <Button onClick={() => navigateToProfile(navigate, profile.user_id, 'upcoming-events', false)}>
                 Se kommende arrangementer
               </Button>
             </div>

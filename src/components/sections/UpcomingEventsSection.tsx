@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { UserProfile } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { navigateToProfile } from '@/lib/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -152,7 +153,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
               Publiserte bookinger og events vil vises her
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => navigate('/dashboard?section=bookings')}>
+              <Button onClick={() => navigateToProfile(navigate, profile.user_id, 'bookings', false)}>
                 Gå til bookinger
               </Button>
               <Button variant="outline" onClick={() => navigate('/create-event')}>

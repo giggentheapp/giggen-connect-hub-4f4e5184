@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Shield, Eye, Users, FileText } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { navigateBack } from '@/lib/navigation';
+import { navigateBack, navigateToAuth } from '@/lib/navigation';
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Privacy = () => {
               {t("back")}
             </Button>
             <div className="text-2xl font-bold text-primary">GIGGEN</div>
-            <Button onClick={() => navigate("/auth")} variant="outline">
+            <Button onClick={() => navigateToAuth(navigate, false)} variant="outline">
               {t("signIn")}
             </Button>
           </div>

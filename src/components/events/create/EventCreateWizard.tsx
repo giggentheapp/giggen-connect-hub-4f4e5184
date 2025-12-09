@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { navigateToAuth, navigateToProfile } from '@/lib/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,14 +67,14 @@ export const EventCreateWizard = () => {
             description: 'Kunne ikke verifisere bruker. Vennligst logg inn på nytt.',
             variant: 'destructive',
           });
-          navigate('/auth', { replace: true });
+          navigateToAuth(navigate, true, 'Auth error - redirecting from event create wizard');
           return;
         }
         if (user) {
           setUserId(user.id);
         } else {
           // No user - redirect to auth
-          navigate('/auth', { replace: true });
+          navigateToAuth(navigate, true, 'User not logged in - redirecting from event create wizard');
         }
       } catch (error: any) {
         console.error('Error in getUser:', error);
@@ -82,7 +83,7 @@ export const EventCreateWizard = () => {
           description: 'En uventet feil oppstod. Vennligst prøv igjen.',
           variant: 'destructive',
         });
-        navigate('/auth', { replace: true });
+        navigateToAuth(navigate, true, 'Error in getUser - redirecting from event create wizard');
       } finally {
         setUserIdLoading(false);
       }
@@ -272,7 +273,7 @@ export const EventCreateWizard = () => {
   const handleSuccessDialogAction = () => {
     setShowSuccessDialog(false);
     if (isDraft) {
-      navigate(`/profile/${userId}?section=dashboard`);
+      navigateToProfile(navigate, userId, 'dashboard', false);
     } else if (createdEventId) {
       navigate(`/arrangement/${createdEventId}`);
     }
