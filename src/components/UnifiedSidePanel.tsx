@@ -151,7 +151,7 @@ export const UnifiedSidePanel = ({
     // Full access for own profile
     switch (activeSection) {
       case 'dashboard':
-        return <DashboardSection profile={profile} />;
+        return <DashboardSection profile={profile} onOpenQuickModal={() => setShowQuickModal(true)} />;
       
       case 'explore':
         return <ArtistExploreSection profile={profile} />;
