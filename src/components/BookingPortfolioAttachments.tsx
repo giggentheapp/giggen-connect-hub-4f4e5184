@@ -12,13 +12,17 @@ interface BookingPortfolioAttachmentsProps {
   bookingId: string;
   currentUserId: string;
   canEdit: boolean;
+  bookingStatus?: string;
 }
 
 export const BookingPortfolioAttachments = ({
   bookingId,
   currentUserId,
   canEdit,
+  bookingStatus,
 }: BookingPortfolioAttachmentsProps) => {
+  // Portfolio attachments can be edited in allowed, approved_by_sender, approved_by_receiver, and approved_by_both
+  const canEditAttachments = canEdit || bookingStatus === 'approved_by_both';
   const [isFilebankOpen, setIsFilebankOpen] = useState(false);
   
   const { attachments, loading, attachPortfolioFile, removeAttachment } = useBookingPortfolio(bookingId);
@@ -158,7 +162,7 @@ export const BookingPortfolioAttachments = ({
                 {attachments.length > 0 && ` (${attachments.length} ${attachments.length === 1 ? 'fil' : 'filer'} valgt)`}
               </CardDescription>
             </div>
-            {canEdit && (
+            {canEditAttachments && (
               <Button 
                 type="button" 
                 size="sm" 
@@ -198,7 +202,7 @@ export const BookingPortfolioAttachments = ({
                           {attachment.portfolio_file.file_type}
                         </Badge>
                       </div>
-                      {canEdit && attachment.attached_by === currentUserId && (
+                      {canEditAttachments && attachment.attached_by === currentUserId && (
                         <Button
                           size="sm"
                           variant="destructive"

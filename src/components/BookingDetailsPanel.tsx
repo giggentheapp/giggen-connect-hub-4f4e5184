@@ -883,7 +883,8 @@ export const BookingDetailsPanel = ({
     <BookingPortfolioAttachments 
       bookingId={booking.id} 
       currentUserId={currentUserId} 
-      canEdit={canEdit} 
+      canEdit={canEdit}
+      bookingStatus={booking.status}
     />
 
     {/* Documents */}
