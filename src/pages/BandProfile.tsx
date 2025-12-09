@@ -9,7 +9,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { BandEditForm } from '@/components/band/BandEditForm';
 import { BandCreateForm } from '@/components/band/BandCreateForm';
 import { BandView } from '@/components/band/BandView';
-import { navigateBack, navigateToProfile } from '@/lib/navigation';
+import { navigateBack, navigateToProfile, navigateToAuth } from '@/lib/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 const BandProfile = () => {
@@ -38,7 +38,7 @@ const BandProfile = () => {
         navigateToProfile(navigate, user.id, 'admin-bands', false);
       }
     } else {
-      navigate('/auth');
+      navigateToAuth(navigate, true, 'User not logged in - redirecting from band profile');
     }
   };
 
@@ -91,7 +91,7 @@ const BandProfile = () => {
           if (user) {
             navigateToProfile(navigate, user.id, 'admin-bands', false);
           } else {
-            navigate('/auth');
+            navigateToAuth(navigate, true, 'User not logged in - redirecting from band profile');
           }
         }}
         onCancel={handleBack}

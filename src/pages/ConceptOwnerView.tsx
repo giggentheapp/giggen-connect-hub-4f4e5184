@@ -12,7 +12,7 @@ import { conceptService } from '@/services/conceptService';
 import { useUpdateConcept } from '@/hooks/useConceptMutations';
 import { handleError } from '@/lib/errorHandler';
 import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
-import { navigateToProfile } from '@/lib/navigation';
+import { navigateToProfile, navigateToAuth } from '@/lib/navigation';
 
 // Note: This page allows viewing concepts from any user (for booking requests)
 // so we don't redirect if not logged in - the concept might be shared
@@ -326,7 +326,7 @@ export default function ConceptOwnerView() {
             if (user) {
               navigateToProfile(navigate, user.id, 'admin-concepts', false);
             } else {
-              navigate('/auth');
+              navigateToAuth(navigate, true, 'User not logged in - redirecting from concept owner view');
             }
           }}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -351,7 +351,7 @@ export default function ConceptOwnerView() {
               if (user) {
                 navigateToProfile(navigate, user.id, isOwner ? 'admin-concepts' : 'bookings', false);
               } else {
-                navigate('/auth');
+                navigateToAuth(navigate, true, 'User not logged in - redirecting from concept owner view');
               }
             }}
             className="mb-6"
