@@ -35,15 +35,14 @@ const Profile = () => {
   const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
   
   // Wait for user data to load before determining isOwnProfile
-  // This prevents showing public view while currentUserId is still loading
+  // After loading completes, compare IDs - undefined === userId is false (correct behavior)
   const isOwnProfile = useMemo(() => {
-    if (userLoading || !currentUserId) return undefined; // Still loading
+    if (userLoading) return undefined; // Still loading
     return currentUserId === userId;
   }, [currentUserId, userId, userLoading]);
 
-  // Wait for session check AND user loading before showing anything
-  // This prevents flashing public view while determining ownership
-  if (sessionLoading || loading || userLoading || isOwnProfile === undefined) {
+  // Wait for session, profile, and user loading before rendering
+  if (sessionLoading || loading || userLoading) {
     return (
       <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
