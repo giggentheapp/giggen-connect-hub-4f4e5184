@@ -91,9 +91,9 @@ export const BookingSelector = ({
             </SelectTrigger>
             <SelectContent>
               {bookings.length === 0 ? (
-                <SelectItem value="" disabled>
+                <div className="py-6 text-center text-sm text-muted-foreground">
                   Ingen godkjente avtaler tilgjengelig
-                </SelectItem>
+                </div>
               ) : (
                 bookings.map((booking) => (
                   <SelectItem key={booking.id} value={booking.id}>
