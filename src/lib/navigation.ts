@@ -39,6 +39,12 @@ export const navigateToProfile = (
   section: string = 'profile',
   replace: boolean = false
 ): void => {
+  // Guard: Don't navigate if userId is empty or undefined
+  if (!userId || userId.trim() === '') {
+    console.error('Cannot navigate to profile: userId is empty or undefined');
+    return;
+  }
+  
   const url = `/profile/${userId}?section=${section}`;
   navigate(url, { replace });
 };
@@ -128,6 +134,11 @@ export const shouldUseReplace = (
  * @returns Formatted URL string
  */
 export const getProfileUrl = (userId: string, section: string = 'dashboard'): string => {
+  // Guard: Return empty string if userId is invalid
+  if (!userId || userId.trim() === '') {
+    console.error('Cannot generate profile URL: userId is empty or undefined');
+    return '';
+  }
   return `/profile/${userId}?section=${section}`;
 };
 
