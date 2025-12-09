@@ -11,7 +11,7 @@ import { UserProfile } from '@/types/auth';
 import { GlobalQuickActionButton } from '@/components/GlobalQuickActionButton';
 import { GlobalQuickCreateModal } from '@/components/GlobalQuickCreateModal';
 import { FileUploadModal } from '@/components/FileUploadModal';
-import { navigateToAuth } from '@/lib/navigation';
+import { navigateToAuth, navigateToProfile, getValidSectionFromUrl, getProfileUrl } from '@/lib/navigation';
 
 // Import sections
 import { DashboardSection } from "@/components/sections/DashboardSection";
@@ -51,12 +51,10 @@ export const UnifiedSidePanel = ({
   }, [profile.user_id]);
   
   // For other people's profiles, always show profile section by default
-  // Use a ref to track if we've already initialized to prevent re-defaulting to dashboard
-  const [activeSection, setActiveSection] = useState(() => {
+  // Use centralized function to get valid section from URL
+  const [activeSection, setActiveSection] = useState<string>(() => {
     if (!isOwnProfile) return 'profile';
-    // Read from searchParams on mount - use React Router's hook instead of window.location
-    const urlSection = searchParams.get('section');
-    return urlSection || location.state?.section || 'dashboard';
+    return getValidSectionFromUrl(location, 'dashboard');
   });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
@@ -68,13 +66,15 @@ export const UnifiedSidePanel = ({
 
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
-    const section = searchParams.get('section') || location.state?.section;
+    const urlSection = searchParams.get('section');
+    const stateSection = location.state?.section;
+    const section = urlSection || stateSection;
     
     // If viewing someone else's profile, restrict to profile section only
     if (!isOwnProfile) {
       if (section !== 'profile' && activeSection !== 'profile') {
         setActiveSection('profile');
-        navigate(`/profile/${cleanProfileUserId}?section=profile`, { replace: true });
+        navigate(getProfileUrl(cleanProfileUserId, 'profile'), { replace: true });
       }
       return;
     }
@@ -82,7 +82,7 @@ export const UnifiedSidePanel = ({
     // For own profile: if no section specified, default to dashboard
     if (!section && isOwnProfile && cleanProfileUserId) {
       setActiveSection('dashboard');
-      navigate(`/profile/${cleanProfileUserId}?section=dashboard`, { replace: true });
+      navigate(getProfileUrl(cleanProfileUserId, 'dashboard'), { replace: true });
       return;
     }
     
@@ -112,13 +112,13 @@ export const UnifiedSidePanel = ({
     
     // If viewing someone else's profile, navigate to own profile with the selected section
     if (!isOwnProfile && cleanCurrentUserId) {
-      navigate(`/profile/${cleanCurrentUserId}?section=${section}`);
+      navigateToProfile(navigate, cleanCurrentUserId, section, false);
       return;
     }
     
     // If on own profile, just change section - always use clean userId
     setActiveSection(section);
-    navigate(`/profile/${cleanProfileUserId}?section=${section}`);
+    navigateToProfile(navigate, cleanProfileUserId, section, false);
   };
 
   // Unified navigation items - always show full navigation

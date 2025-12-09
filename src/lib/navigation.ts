@@ -163,6 +163,53 @@ export const getSectionFromUrl = (
 };
 
 /**
+ * Valid section names for profile pages
+ */
+export const VALID_SECTIONS = [
+  'dashboard',
+  'profile',
+  'explore',
+  'bookings',
+  'tickets',
+  'upcoming-events',
+  'history',
+  'admin-files',
+  'filbank',
+  'admin-concepts',
+  'admin-bands',
+  'admin-events',
+  'settings'
+] as const;
+
+export type ProfileSection = typeof VALID_SECTIONS[number];
+
+/**
+ * Validate if a section name is valid
+ * 
+ * @param section - Section name to validate
+ * @returns boolean indicating if section is valid
+ */
+export const isValidSection = (section: string | null | undefined): section is ProfileSection => {
+  if (!section) return false;
+  return VALID_SECTIONS.includes(section as ProfileSection);
+};
+
+/**
+ * Get valid section from URL or return default
+ * 
+ * @param location - React Router location object
+ * @param defaultSection - Default section if not found or invalid (default: 'dashboard')
+ * @returns Valid section name
+ */
+export const getValidSectionFromUrl = (
+  location: Location,
+  defaultSection: ProfileSection = 'dashboard'
+): ProfileSection => {
+  const section = getSectionFromUrl(location, defaultSection);
+  return isValidSection(section) ? section : defaultSection;
+};
+
+/**
  * Check if user should be redirected to auth
  * 
  * Standardized pattern for checking auth state before redirecting
