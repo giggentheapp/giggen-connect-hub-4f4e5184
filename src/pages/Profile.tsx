@@ -32,17 +32,20 @@ const Profile = () => {
     }
   }, [session, sessionLoading, navigate]);
 
-  const currentUserId = useMemo(() => currentUser?.id, [currentUser?.id]);
+  // Use session.user.id as the source of truth for current user
+  // This is more reliable than useCurrentUser during login transitions
+  const currentUserId = useMemo(() => session?.user?.id, [session?.user?.id]);
   
-  // Wait for user data to load before determining isOwnProfile
-  // After loading completes, compare IDs - undefined === userId is false (correct behavior)
+  // Determine if viewing own profile
+  // Use session as source of truth - it's updated immediately on login
   const isOwnProfile = useMemo(() => {
-    if (userLoading) return undefined; // Still loading
-    return currentUserId === userId;
-  }, [currentUserId, userId, userLoading]);
+    if (sessionLoading) return undefined; // Still loading session
+    if (!session?.user?.id) return false; // No session = not own profile
+    return session.user.id === userId;
+  }, [session?.user?.id, userId, sessionLoading]);
 
-  // Wait for session, profile, and user loading before rendering
-  if (sessionLoading || loading || userLoading) {
+  // Wait for session and profile loading before rendering
+  if (sessionLoading || loading) {
     return (
       <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
