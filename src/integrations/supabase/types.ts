@@ -898,11 +898,15 @@ export type Database = {
           end_time: string | null
           event_datetime: string | null
           expected_audience: number | null
+          gallery_images: Json | null
+          gallery_videos: Json | null
           has_paid_tickets: boolean | null
           id: string
           is_public: boolean | null
           participants: Json | null
           portfolio_id: string | null
+          receiver_profile_image: string | null
+          sender_profile_image: string | null
           start_time: string | null
           status: string | null
           ticket_price: number | null
@@ -921,11 +925,15 @@ export type Database = {
           end_time?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
+          gallery_images?: Json | null
+          gallery_videos?: Json | null
           has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
           participants?: Json | null
           portfolio_id?: string | null
+          receiver_profile_image?: string | null
+          sender_profile_image?: string | null
           start_time?: string | null
           status?: string | null
           ticket_price?: number | null
@@ -944,11 +952,15 @@ export type Database = {
           end_time?: string | null
           event_datetime?: string | null
           expected_audience?: number | null
+          gallery_images?: Json | null
+          gallery_videos?: Json | null
           has_paid_tickets?: boolean | null
           id?: string
           is_public?: boolean | null
           participants?: Json | null
           portfolio_id?: string | null
+          receiver_profile_image?: string | null
+          sender_profile_image?: string | null
           start_time?: string | null
           status?: string | null
           ticket_price?: number | null
