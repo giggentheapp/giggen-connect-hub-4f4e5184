@@ -39,9 +39,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DashboardSectionProps {
   profile: UserProfile;
+  onOpenQuickModal?: () => void;
 }
 
-export const DashboardSection = ({ profile }: DashboardSectionProps) => {
+export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSectionProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -466,7 +467,13 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
 
             {/* Opprett nytt arrangement - Secondary CTA */}
             <button
-              onClick={() => navigate('/create-event')}
+              onClick={() => {
+                if (onOpenQuickModal) {
+                  onOpenQuickModal();
+                } else {
+                  navigate('/create-event');
+                }
+              }}
               className="w-full bg-white text-orange-500 py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-orange-500/60 hover:ring-orange-500"
             >
               <Plus className="h-6 w-6 md:h-7 md:w-7" />
@@ -509,7 +516,13 @@ export const DashboardSection = ({ profile }: DashboardSectionProps) => {
             <Button
               variant="outline"
               className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
-              onClick={() => navigate('/create-event')}
+              onClick={() => {
+                if (onOpenQuickModal) {
+                  onOpenQuickModal();
+                } else {
+                  navigate('/create-event');
+                }
+              }}
             >
               <Plus className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Nytt arrangement</span>

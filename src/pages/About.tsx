@@ -1,11 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Music, Users, MapPin, Target, Heart } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { navigateBack } from '@/lib/navigation';
 
 const About = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useAppTranslation();
 
   return (
@@ -16,7 +18,7 @@ const About = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/')}
+              onClick={() => navigateBack(navigate, location, '/')}
               className="flex items-center"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

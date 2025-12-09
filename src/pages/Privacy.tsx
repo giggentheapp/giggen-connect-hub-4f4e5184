@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Shield, Eye, Users, FileText } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { navigateBack } from '@/lib/navigation';
 
 const Privacy = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useAppTranslation();
 
   return (
@@ -14,7 +16,7 @@ const Privacy = () => {
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate("/")} className="flex items-center">
+            <Button variant="ghost" onClick={() => navigateBack(navigate, location, "/")} className="flex items-center">
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t("back")}
             </Button>
