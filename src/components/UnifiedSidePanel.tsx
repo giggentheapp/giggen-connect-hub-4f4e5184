@@ -11,7 +11,7 @@ import { UserProfile } from '@/types/auth';
 import { GlobalQuickActionButton } from '@/components/GlobalQuickActionButton';
 import { GlobalQuickCreateModal } from '@/components/GlobalQuickCreateModal';
 import { FileUploadModal } from '@/components/FileUploadModal';
-import { navigateToAuth, navigateToProfile, getValidSectionFromUrl, getProfileUrl } from '@/lib/navigation';
+import { navigateToAuth, navigateToProfile, getValidSectionFromUrl, getProfileUrl, isValidSection } from '@/lib/navigation';
 
 // Import sections
 import { DashboardSection } from "@/components/sections/DashboardSection";
@@ -47,14 +47,16 @@ export const UnifiedSidePanel = ({
   
   // Extract clean userId from profile - never from URL to avoid corruption
   const cleanProfileUserId = useMemo(() => {
-    return profile.user_id?.split('?')[0].split('#')[0].trim();
+    const userId = profile.user_id?.split('?')[0].split('#')[0].trim();
+    return userId || '';
   }, [profile.user_id]);
   
   // For other people's profiles, always show profile section by default
-  // Use centralized function to get valid section from URL
+  // For own profile, always default to dashboard
   const [activeSection, setActiveSection] = useState<string>(() => {
     if (!isOwnProfile) return 'profile';
-    return getValidSectionFromUrl(location, 'dashboard');
+    // Always default to dashboard for own profile
+    return 'dashboard';
   });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list'); // Default to list for better UX
   const [exploreType, setExploreType] = useState<'makers' | 'events'>('makers');
@@ -66,6 +68,11 @@ export const UnifiedSidePanel = ({
 
   // Update activeSection when URL changes or location state changes
   useEffect(() => {
+    // Guard: Don't process if cleanProfileUserId is not available
+    if (!cleanProfileUserId) {
+      return;
+    }
+
     const urlSection = searchParams.get('section');
     const stateSection = location.state?.section;
     const section = urlSection || stateSection;
@@ -74,21 +81,37 @@ export const UnifiedSidePanel = ({
     if (!isOwnProfile) {
       if (section !== 'profile' && activeSection !== 'profile') {
         setActiveSection('profile');
-        navigate(getProfileUrl(cleanProfileUserId, 'profile'), { replace: true });
+        const profileUrl = getProfileUrl(cleanProfileUserId, 'profile');
+        if (profileUrl) {
+          navigate(profileUrl, { replace: true });
+        }
       }
       return;
     }
     
     // For own profile: if no section specified, default to dashboard
-    if (!section && isOwnProfile && cleanProfileUserId) {
-      setActiveSection('dashboard');
-      navigate(getProfileUrl(cleanProfileUserId, 'dashboard'), { replace: true });
+    if (!section && isOwnProfile) {
+      // Only navigate if we're not already on dashboard
+      if (activeSection !== 'dashboard') {
+        setActiveSection('dashboard');
+        const dashboardUrl = getProfileUrl(cleanProfileUserId, 'dashboard');
+        if (dashboardUrl) {
+          navigate(dashboardUrl, { replace: true });
+        }
+      }
       return;
     }
     
-    // Only update if section exists and differs from current
-    if (section && section !== activeSection) {
+    // If section is specified and valid, update activeSection
+    if (section && isValidSection(section) && section !== activeSection) {
       setActiveSection(section);
+    } else if (section && !isValidSection(section)) {
+      // Invalid section - redirect to dashboard
+      setActiveSection('dashboard');
+      const dashboardUrl = getProfileUrl(cleanProfileUserId, 'dashboard');
+      if (dashboardUrl) {
+        navigate(dashboardUrl, { replace: true });
+      }
     }
   }, [searchParams, location.state, isOwnProfile, cleanProfileUserId, activeSection, navigate]);
 
@@ -107,6 +130,23 @@ export const UnifiedSidePanel = ({
     }
   };
   const handleNavigation = (section: string) => {
+    // Guard: Don't navigate if cleanProfileUserId is not available
+    if (!cleanProfileUserId || cleanProfileUserId.trim() === '') {
+      console.error('Cannot navigate: cleanProfileUserId is not available');
+      toast({
+        title: t('error') || 'Error',
+        description: 'Cannot navigate: User ID is missing',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Validate section
+    if (!isValidSection(section)) {
+      console.error(`Invalid section: ${section}`);
+      return;
+    }
+
     // Clean the currentUserId if provided
     const cleanCurrentUserId = currentUserId?.split('?')[0].split('#')[0].trim();
     
