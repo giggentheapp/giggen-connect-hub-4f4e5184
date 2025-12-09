@@ -79,9 +79,25 @@ export const EventCreateModalA = ({
 
       if (error) throw error;
 
-      if (booking && (booking.status === 'both_parties_approved' || booking.status === 'upcoming')) {
+      if (booking && (
+        booking.status === 'approved_by_both' || 
+        booking.status === 'both_parties_approved' || 
+        booking.status === 'upcoming'
+      )) {
         setSelectedBooking(booking);
         autoFillFromBooking(booking);
+        onBookingSelected?.(booking.id);
+        
+        toast({
+          title: 'Booking lastet',
+          description: 'Arrangement-detaljer er fylt ut fra booking-avtalen',
+        });
+      } else if (booking) {
+        toast({
+          title: 'Booking ikke klar',
+          description: 'Booking-avtalen må være godkjent av begge parter før arrangement kan opprettes',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error loading booking:', error);

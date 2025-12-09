@@ -81,11 +81,15 @@ export const useCreateEvent = () => {
 
       if (error) throw error;
 
-      // If booking_id is set, update booking with event_id
+      // If booking_id is set, update booking with event_id and mark as linked
       if (eventData.booking_id) {
         await supabase
           .from('bookings')
-          .update({ event_id: data.id })
+          .update({ 
+            event_id: data.id,
+            event_admin_id: userId,
+            is_public_after_approval: true
+          })
           .eq('id', eventData.booking_id);
       }
 
@@ -155,11 +159,17 @@ export const useCreateEvent = () => {
 
       if (error) throw error;
 
-      // If booking_id is set, update booking with event_id
+      // If booking_id is set, update booking with event_id and mark as linked
       if (eventData.booking_id) {
+        // Get current user for event_admin_id
+        const { data: { user } } = await supabase.auth.getUser();
         await supabase
           .from('bookings')
-          .update({ event_id: eventId })
+          .update({ 
+            event_id: eventId,
+            event_admin_id: user?.id,
+            is_public_after_approval: true
+          })
           .eq('id', eventData.booking_id);
       }
 

@@ -7,8 +7,7 @@ import { useHospitalityRiders } from '@/hooks/useHospitalityRiders';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useBooking } from '@/hooks/useBooking';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
-import { BookingPublishPreviewModal } from '@/components/BookingPublishPreviewModal';
-import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Eye } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Banknote, Users, FileText, Music2, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { getBookingNavigationTargetWithUser } from '@/lib/bookingNavigation';
@@ -17,7 +16,6 @@ import { navigateToAuth, navigateToProfile } from '@/lib/navigation';
 const BookingAgreementView = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const [showPublishPreview, setShowPublishPreview] = useState(false);
 
   const { user, loading: userLoading } = useCurrentUser();
   const { booking, loading: bookingLoading } = useBooking(bookingId);
@@ -38,6 +36,7 @@ const BookingAgreementView = () => {
 
   const selectedConcept = concepts.find(c => c.id === booking?.selected_concept_id);
   const isBothApproved = booking?.status === 'approved_by_both' || booking?.status === 'upcoming';
+  const canCreateEvent = isBothApproved && !(booking as any)?.event_admin_id && !(booking as any)?.event_id;
   const loading = userLoading || bookingLoading;
 
   const handleBack = () => {
@@ -88,13 +87,13 @@ const BookingAgreementView = () => {
             Tilbake
           </Button>
           
-          {isBothApproved && booking?.status === 'approved_by_both' && (
+          {canCreateEvent && (
             <Button 
-              onClick={() => setShowPublishPreview(true)}
-              className="bg-green-600 hover:bg-green-700"
+              onClick={() => navigate(`/create-event?bookingId=${booking.id}`)}
+              className="bg-blue-600 hover:bg-blue-700"
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Forhåndsvis og publiser
+              <Plus className="h-4 w-4 mr-2" />
+              Opprett arrangement
             </Button>
           )}
         </div>
@@ -274,16 +273,6 @@ const BookingAgreementView = () => {
           <p>Ved publisering blir tittel, beskrivelse, dato, sted og billettpris synlig for allmennheten. Musiker honorar, tech spec og hospitality rider forblir privat.</p>
         </div>
       </main>
-      
-      {/* Publish Preview Modal */}
-      {bookingId && currentUserId && isBothApproved && (
-        <BookingPublishPreviewModal
-          bookingId={bookingId}
-          isOpen={showPublishPreview}
-          onClose={() => setShowPublishPreview(false)}
-          currentUserId={currentUserId}
-        />
-      )}
     </div>
   );
 };
