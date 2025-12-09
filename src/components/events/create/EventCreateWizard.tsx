@@ -55,13 +55,36 @@ export const EventCreateWizard = () => {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error getting user:', error);
+          toast({
+            title: 'Autentiseringsfeil',
+            description: 'Kunne ikke verifisere bruker. Vennligst logg inn på nytt.',
+            variant: 'destructive',
+          });
+          navigate('/auth', { replace: true });
+          return;
+        }
+        if (user) {
+          setUserId(user.id);
+        } else {
+          // No user - redirect to auth
+          navigate('/auth', { replace: true });
+        }
+      } catch (error: any) {
+        console.error('Error in getUser:', error);
+        toast({
+          title: 'Feil',
+          description: 'En uventet feil oppstod. Vennligst prøv igjen.',
+          variant: 'destructive',
+        });
+        navigate('/auth', { replace: true });
       }
     };
     getUser();
-  }, []);
+  }, [navigate, toast]);
 
   useEffect(() => {
     if (draftId && userId) {
