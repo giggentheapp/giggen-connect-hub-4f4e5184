@@ -16,6 +16,12 @@ export const BookingPortfolioGallery = ({ portfolioAttachments }: BookingPortfol
   }
 
   const getPublicUrl = (file: any) => {
+    if (!file) {
+      return '';
+    }
+    if (!file.file_path) {
+      return file.file_url || '';
+    }
     return file.file_url || supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
   };
 
@@ -31,6 +37,16 @@ export const BookingPortfolioGallery = ({ portfolioAttachments }: BookingPortfol
   };
 
   const renderGridItem = (file: any) => {
+    if (!file) {
+      return (
+        <div className="relative w-full aspect-square overflow-hidden bg-muted">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <File className="w-12 h-12 text-muted-foreground/60" />
+          </div>
+        </div>
+      );
+    }
+    
     const publicUrl = getPublicUrl(file);
 
     // Image
@@ -105,6 +121,10 @@ export const BookingPortfolioGallery = ({ portfolioAttachments }: BookingPortfol
   };
 
   const renderModalContent = (file: any) => {
+    if (!file) {
+      return null;
+    }
+    
     const publicUrl = getPublicUrl(file);
 
     if (file.file_type?.includes('image') || file.mime_type?.includes('image')) {

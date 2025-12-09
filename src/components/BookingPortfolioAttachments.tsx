@@ -90,6 +90,16 @@ export const BookingPortfolioAttachments = ({
   };
 
   const renderFilePreview = (file: any) => {
+    // Null-sjekk for å unngå JavaScript-feil
+    if (!file) {
+      return (
+        <div className="w-full h-32 rounded bg-muted flex items-center justify-center">
+          <File className="h-4 w-4 text-muted-foreground" />
+          <span className="ml-2 text-xs text-muted-foreground">Fil ikke tilgjengelig</span>
+        </div>
+      );
+    }
+    
     const publicUrl = file.file_url || getPublicUrl(file.file_path);
     
     if (file.mime_type?.startsWith('video/')) {
@@ -170,31 +180,38 @@ export const BookingPortfolioAttachments = ({
             </p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {attachments.map((attachment) => (
-                <Card key={attachment.id} className="relative group">
-                  <CardContent className="p-3 space-y-2">
-                    {renderFilePreview(attachment.portfolio_file)}
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium truncate">
-                        {attachment.portfolio_file.title || attachment.portfolio_file.filename}
-                      </p>
-                      <Badge variant="secondary" className="text-xs">
-                        {attachment.portfolio_file.file_type}
-                      </Badge>
-                    </div>
-                    {canEdit && attachment.attached_by === currentUserId && (
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeAttachment(attachment.id)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+              {attachments.map((attachment) => {
+                // Hopp over attachments hvor portfolio_file er null
+                if (!attachment.portfolio_file) {
+                  return null;
+                }
+                
+                return (
+                  <Card key={attachment.id} className="relative group">
+                    <CardContent className="p-3 space-y-2">
+                      {renderFilePreview(attachment.portfolio_file)}
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium truncate">
+                          {attachment.portfolio_file.title || attachment.portfolio_file.filename}
+                        </p>
+                        <Badge variant="secondary" className="text-xs">
+                          {attachment.portfolio_file.file_type}
+                        </Badge>
+                      </div>
+                      {canEdit && attachment.attached_by === currentUserId && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeAttachment(attachment.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </CardContent>
