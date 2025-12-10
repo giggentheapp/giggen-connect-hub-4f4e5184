@@ -33,6 +33,8 @@ import { SocialMusicLinksManager } from "@/components/SocialMusicLinksManager";
 import { InstrumentManager } from "@/components/InstrumentManager";
 import { useQueryClient } from "@tanstack/react-query";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
+import { SelectBackgroundImagesModal } from "@/components/SelectBackgroundImagesModal";
+import { ImageIcon } from "lucide-react";
 
 interface ProfileSettings {
   show_public_profile: boolean;
@@ -103,6 +105,7 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
   const [instruments, setInstruments] = useState<Array<{ instrument: string; details: string }>>([]);
   const [showIncompleteProfileDialog, setShowIncompleteProfileDialog] = useState(false);
   const [incompleteProfileFields, setIncompleteProfileFields] = useState<string[]>([]);
+  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -1315,6 +1318,49 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
           </div>
         </div>
       </div>
+
+      {/* Background Images Settings */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">Bakgrunnsbilder</h2>
+          <p className="text-sm text-muted-foreground">Velg personlige bakgrunnsbilder for dashboard og profil</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex-1 pr-4">
+              <Label className="text-sm font-medium cursor-pointer">Dashboard-bakgrunn</Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                {(profileData as any).dashboard_background_images?.length || 0} bilder valgt
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowBackgroundModal(true)}
+              className="gap-2"
+            >
+              <ImageIcon className="h-4 w-4" />
+              Rediger
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex-1 pr-4">
+              <Label className="text-sm font-medium cursor-pointer">Bytt bakgrunn automatisk</Label>
+              <p className="text-xs text-muted-foreground mt-1">Vis tilfeldige bilder ved hver sidevisning</p>
+            </div>
+            <Switch
+              checked={(profileData as any).randomize_backgrounds || false}
+              onCheckedChange={async (checked) => {
+                await updateProfile({ randomize_backgrounds: checked } as any);
+              }}
+              disabled={loading}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-6">
         <div>
           <h2 className="text-xl md:text-2xl font-bold mb-2">{t("changePassword")}</h2>
@@ -1454,6 +1500,17 @@ export const UserSettings = ({ profile, onProfileUpdate }: UserSettingsProps) =>
         title="Velg profilbilde fra Filbank"
         description="Velg et bilde fra din filbank for å bruke som profilbilde"
         allowClear={true}
+      />
+
+      {/* Background Images Selection Modal */}
+      <SelectBackgroundImagesModal
+        isOpen={showBackgroundModal}
+        onClose={() => setShowBackgroundModal(false)}
+        onSave={async (selectedPaths) => {
+          await updateProfile({ dashboard_background_images: selectedPaths } as any);
+        }}
+        userId={profileData.user_id}
+        currentSelection={(profileData as any).dashboard_background_images}
       />
 
       {/* Incomplete Profile Dialog */}

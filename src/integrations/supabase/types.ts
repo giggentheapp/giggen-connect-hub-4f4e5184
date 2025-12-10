@@ -1260,6 +1260,7 @@ export type Database = {
           bio: string | null
           contact_info: Json | null
           created_at: string
+          dashboard_background_images: string[] | null
           display_name: string
           id: string
           instruments: Json | null
@@ -1267,6 +1268,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           privacy_settings: Json | null
+          randomize_backgrounds: boolean | null
           role: Database["public"]["Enums"]["user_role"]
           social_media_links: Json | null
           updated_at: string
@@ -1280,6 +1282,7 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
+          dashboard_background_images?: string[] | null
           display_name: string
           id?: string
           instruments?: Json | null
@@ -1287,6 +1290,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           privacy_settings?: Json | null
+          randomize_backgrounds?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           social_media_links?: Json | null
           updated_at?: string
@@ -1300,6 +1304,7 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
+          dashboard_background_images?: string[] | null
           display_name?: string
           id?: string
           instruments?: Json | null
@@ -1307,6 +1312,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           privacy_settings?: Json | null
+          randomize_backgrounds?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           social_media_links?: Json | null
           updated_at?: string

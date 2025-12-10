@@ -36,6 +36,7 @@ import { nb } from "date-fns/locale";
 import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BackgroundArtwork } from "@/components/BackgroundArtwork";
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -161,8 +162,14 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
   const displaySuggestions = suggestions.slice(0, 3);
 
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="max-w-4xl md:max-w-[1280px] mx-auto px-5 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4">
+    <div className="flex-1 overflow-auto relative">
+      {/* Background Artwork */}
+      <BackgroundArtwork 
+        imagePaths={(profile as any).dashboard_background_images} 
+        randomize={(profile as any).randomize_backgrounds}
+      />
+      
+      <div className="max-w-4xl md:max-w-[1280px] mx-auto px-5 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4 relative z-10">
         {/* Header */}
         <div className="flex items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
