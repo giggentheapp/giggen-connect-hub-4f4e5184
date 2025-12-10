@@ -55,6 +55,7 @@ export interface Booking {
   by_agreement?: boolean;
   personal_message?: string;
   sender_contact_info?: ContactInfo;
+  receiver_contact_info?: ContactInfo;
   hospitality_rider?: string;
   hospitality_rider_status?: string;
   tech_spec?: string;
@@ -191,6 +192,7 @@ export interface UpdateBookingRequest {
   approved_by_sender?: boolean;
   approved_by_receiver?: boolean;
   sender_contact_info?: ContactInfo;
+  receiver_contact_info?: ContactInfo;
 }
 
 /**

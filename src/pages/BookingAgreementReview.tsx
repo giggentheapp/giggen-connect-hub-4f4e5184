@@ -215,23 +215,56 @@ const BookingAgreementReview = () => {
               </div>
             )}
 
-            {booking.sender_contact_info && (
-              <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-medium mb-3">Kontaktinformasjon</h4>
-                <div className="space-y-2">
-                  {booking.sender_contact_info.email && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">E-post:</span>
-                      <span className="text-sm">{booking.sender_contact_info.email}</span>
-                    </div>
-                  )}
-                  {booking.sender_contact_info.phone && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Telefon:</span>
-                      <span className="text-sm">{booking.sender_contact_info.phone}</span>
-                    </div>
-                  )}
-                </div>
+            {/* Contact Info - Show both parties */}
+            {(booking.sender_contact_info || booking.receiver_contact_info) && (
+              <div className="bg-muted p-4 rounded-lg space-y-4">
+                <h4 className="font-medium">Kontaktinformasjon</h4>
+                
+                {/* Sender contact info - visible to receiver */}
+                {!isSender && booking.sender_contact_info && (
+                  <div className="space-y-2">
+                    <h5 className="text-sm font-medium text-muted-foreground">Fra arrangør:</h5>
+                    {booking.sender_contact_info.email && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">E-post:</span>
+                        <a href={`mailto:${booking.sender_contact_info.email}`} className="text-sm text-primary hover:underline">
+                          {booking.sender_contact_info.email}
+                        </a>
+                      </div>
+                    )}
+                    {booking.sender_contact_info.phone && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Telefon:</span>
+                        <a href={`tel:${booking.sender_contact_info.phone}`} className="text-sm text-primary hover:underline">
+                          {booking.sender_contact_info.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Receiver contact info - visible to sender */}
+                {isSender && booking.receiver_contact_info && (
+                  <div className="space-y-2">
+                    <h5 className="text-sm font-medium text-muted-foreground">Fra musiker:</h5>
+                    {booking.receiver_contact_info.email && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">E-post:</span>
+                        <a href={`mailto:${booking.receiver_contact_info.email}`} className="text-sm text-primary hover:underline">
+                          {booking.receiver_contact_info.email}
+                        </a>
+                      </div>
+                    )}
+                    {booking.receiver_contact_info.phone && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Telefon:</span>
+                        <a href={`tel:${booking.receiver_contact_info.phone}`} className="text-sm text-primary hover:underline">
+                          {booking.receiver_contact_info.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
