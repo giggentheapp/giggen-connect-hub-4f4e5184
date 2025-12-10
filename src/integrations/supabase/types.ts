@@ -1765,11 +1765,11 @@ export type Database = {
       }
       delete_auth_user: { Args: never; Returns: undefined }
       delete_band_permanently:
+        | { Args: { band_uuid: string }; Returns: undefined }
         | {
             Args: { band_uuid: string; requesting_user_id: string }
             Returns: undefined
           }
-        | { Args: { band_uuid: string }; Returns: undefined }
       delete_cancelled_booking: {
         Args: { booking_uuid: string }
         Returns: undefined
@@ -1782,11 +1782,11 @@ export type Database = {
       delete_portfolio_file: { Args: { file_id: string }; Returns: undefined }
       delete_tech_spec_file: { Args: { file_id: string }; Returns: undefined }
       delete_user_data:
+        | { Args: { user_uuid: string }; Returns: undefined }
         | {
             Args: { requesting_user_id: string; user_uuid: string }
             Returns: undefined
           }
-        | { Args: { user_uuid: string }; Returns: undefined }
       get_all_visible_artists: {
         Args: never
         Returns: {
@@ -1988,6 +1988,10 @@ export type Database = {
       is_booking_public: { Args: { booking_uuid: string }; Returns: boolean }
       is_file_in_portfolio: { Args: { file_uuid: string }; Returns: boolean }
       is_portfolio_file_in_user_booking: {
+        Args: { p_portfolio_file_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_portfolio_file_owned_by_user: {
         Args: { p_portfolio_file_id: string; p_user_id: string }
         Returns: boolean
       }
