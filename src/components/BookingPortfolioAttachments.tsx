@@ -39,10 +39,28 @@ export const BookingPortfolioAttachments = ({
         .eq('usage_type', 'profile_portfolio')
         .maybeSingle();
 
-      let portfolioFileId = file.id;
+      let portfolioFileId: string | null = null;
 
-      // Hvis filen ikke er i porteføljen, legg den til først
-      if (!existingUsage) {
+      // Hvis filen har en eksisterende usage entry, verifiser at portfolio-filen eksisterer
+      if (existingUsage?.reference_id) {
+        // Verifiser at portfolio-filen eksisterer og tilhører brukeren
+        const { data: portfolioFile, error: portfolioCheckError } = await supabase
+          .from('profile_portfolio')
+          .select('id, user_id')
+          .eq('id', existingUsage.reference_id)
+          .eq('user_id', currentUserId)
+          .maybeSingle();
+
+        if (!portfolioCheckError && portfolioFile) {
+          // Portfolio-filen eksisterer og tilhører brukeren
+          portfolioFileId = portfolioFile.id;
+        }
+        // Hvis portfolio-filen ikke eksisterer eller ikke tilhører brukeren,
+        // vil vi opprette en ny nedenfor
+      }
+
+      // Hvis vi ikke har en gyldig portfolioFileId, opprett en ny portfolio entry
+      if (!portfolioFileId) {
         const { data: portfolioEntry, error: portfolioError } = await supabase
           .from('profile_portfolio')
           .insert({
@@ -60,17 +78,37 @@ export const BookingPortfolioAttachments = ({
 
         if (portfolioError) throw portfolioError;
 
-        // Registrer at filen er i bruk i porteføljen
-        await supabase.from('file_usage').insert({
-          file_id: file.id,
-          usage_type: 'profile_portfolio',
-          reference_id: portfolioEntry.id,
-        });
+        // Oppdater eller opprett file_usage entry
+        if (existingUsage) {
+          // Oppdater eksisterende entry med riktig reference_id
+          const { error: updateError } = await supabase
+            .from('file_usage')
+            .update({ reference_id: portfolioEntry.id })
+            .eq('id', existingUsage.id);
+
+          if (updateError) {
+            console.warn('Failed to update file_usage, but continuing:', updateError);
+          }
+        } else {
+          // Opprett ny file_usage entry
+          const { error: insertError } = await supabase
+            .from('file_usage')
+            .insert({
+              file_id: file.id,
+              usage_type: 'profile_portfolio',
+              reference_id: portfolioEntry.id,
+            });
+
+          if (insertError) {
+            console.warn('Failed to insert file_usage, but continuing:', insertError);
+          }
+        }
 
         portfolioFileId = portfolioEntry.id;
-      } else {
-        // Finn portfolio_file_id fra file_usage
-        portfolioFileId = existingUsage.reference_id;
+      }
+
+      if (!portfolioFileId) {
+        throw new Error('Kunne ikke opprette eller finne portfolio-fil');
       }
 
       // Nå kan vi legge ved porteføljefilen til bookingen
