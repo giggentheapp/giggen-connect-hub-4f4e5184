@@ -9,7 +9,7 @@ interface BackgroundArtworkProps {
 
 export const BackgroundArtwork = ({ 
   imagePaths, 
-  intensity = 0.12,
+  intensity = 0.25,
   randomize = false 
 }: BackgroundArtworkProps) => {
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
@@ -20,11 +20,9 @@ export const BackgroundArtwork = ({
     if (!imagePaths || imagePaths.length === 0) return [];
     
     if (randomize) {
-      // Shuffle and pick 1-2 random images
       const shuffled = [...imagePaths].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, Math.min(2, shuffled.length));
     } else {
-      // Take first 1-2 images
       return imagePaths.slice(0, Math.min(2, imagePaths.length));
     }
   }, [imagePaths, randomize]);
@@ -58,6 +56,7 @@ export const BackgroundArtwork = ({
         }
       };
       img.onerror = () => {
+        console.warn('Failed to load background image:', url);
         loadedCount++;
         if (loadedCount === urls.length) {
           setLoadedImages(successfulUrls.filter(Boolean));
@@ -68,19 +67,17 @@ export const BackgroundArtwork = ({
     });
   }, [selectedImages]);
 
-  // Don't render if no images or not loaded
   if (!imagePaths || imagePaths.length === 0 || loadedImages.length === 0) {
     return null;
   }
 
   return (
     <div 
-      className="fixed inset-0 pointer-events-none overflow-hidden"
-      style={{ zIndex: -10 }}
+      className="absolute inset-0 pointer-events-none overflow-hidden"
+      style={{ zIndex: 0 }}
     >
-      {/* Images container */}
       <div 
-        className={`absolute inset-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className="absolute inset-0 transition-opacity duration-1000"
         style={{ opacity: isLoaded ? intensity : 0 }}
       >
         {loadedImages.map((url, index) => (
@@ -88,30 +85,33 @@ export const BackgroundArtwork = ({
             key={url}
             className="absolute"
             style={{
-              // Position images in corners or scattered
-              top: index === 0 ? '-10%' : 'auto',
-              bottom: index === 1 ? '-10%' : 'auto',
-              left: index === 0 ? '-5%' : 'auto',
-              right: index === 1 ? '-5%' : 'auto',
-              width: '70%',
-              height: '70%',
+              top: index === 0 ? '0%' : 'auto',
+              bottom: index === 1 ? '0%' : 'auto',
+              left: index === 0 ? '0%' : 'auto',
+              right: index === 1 ? '0%' : 'auto',
+              width: index === 0 ? '60%' : '55%',
+              height: index === 0 ? '70%' : '65%',
+              transform: `rotate(${index === 0 ? '2deg' : '-2deg'}) scale(1.1)`,
             }}
           >
             <img
               src={url}
               alt=""
-              className="w-full h-full object-cover blur-[12px]"
+              className="w-full h-full object-cover"
               style={{
-                transform: index === 1 ? 'rotate(180deg)' : 'none',
+                filter: 'blur(12px)',
+                userSelect: 'none',
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           </div>
         ))}
       </div>
 
-      {/* Gradient overlay for text contrast */}
       <div 
-        className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90"
+        className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-background/30 pointer-events-none"
       />
     </div>
   );
