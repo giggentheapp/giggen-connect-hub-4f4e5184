@@ -9,13 +9,12 @@ interface BackgroundArtworkProps {
 
 export const BackgroundArtwork = ({ 
   imagePaths, 
-  intensity = 0.25,
+  intensity = 0.5,
   randomize = false 
 }: BackgroundArtworkProps) => {
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Select 1-2 images from the array
   const selectedImages = useMemo(() => {
     if (!imagePaths || imagePaths.length === 0) return [];
     
@@ -27,13 +26,11 @@ export const BackgroundArtwork = ({
     }
   }, [imagePaths, randomize]);
 
-  // Convert file_path to public URL
   const getPublicUrl = (filePath: string) => {
     const { data } = supabase.storage.from('filbank').getPublicUrl(filePath);
     return data.publicUrl;
   };
 
-  // Preload images
   useEffect(() => {
     if (selectedImages.length === 0) {
       setLoadedImages([]);
@@ -56,7 +53,6 @@ export const BackgroundArtwork = ({
         }
       };
       img.onerror = () => {
-        console.warn('Failed to load background image:', url);
         loadedCount++;
         if (loadedCount === urls.length) {
           setLoadedImages(successfulUrls.filter(Boolean));
@@ -85,21 +81,21 @@ export const BackgroundArtwork = ({
             key={url}
             className="absolute"
             style={{
-              top: index === 0 ? '0%' : 'auto',
-              bottom: index === 1 ? '0%' : 'auto',
-              left: index === 0 ? '0%' : 'auto',
-              right: index === 1 ? '0%' : 'auto',
-              width: index === 0 ? '60%' : '55%',
-              height: index === 0 ? '70%' : '65%',
-              transform: `rotate(${index === 0 ? '2deg' : '-2deg'}) scale(1.1)`,
+              top: index === 0 ? '10%' : 'auto',
+              bottom: index === 1 ? '10%' : 'auto',
+              left: index === 0 ? '5%' : 'auto',
+              right: index === 1 ? '5%' : 'auto',
+              width: index === 0 ? '50%' : '45%',
+              height: index === 0 ? '60%' : '55%',
+              transform: `rotate(${index === 0 ? '3deg' : '-3deg'}) scale(1.05)`,
             }}
           >
             <img
               src={url}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
               style={{
-                filter: 'blur(12px)',
+                filter: 'blur(6px)',
                 userSelect: 'none',
               }}
               onError={(e) => {
@@ -111,7 +107,7 @@ export const BackgroundArtwork = ({
       </div>
 
       <div 
-        className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-background/30 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-t from-background/15 via-transparent to-background/10 pointer-events-none"
       />
     </div>
   );
