@@ -298,34 +298,70 @@ export const TeachingAgreementApproval = ({
           </div>
         )}
 
-        {/* Contact Info - Show all details when agreed */}
-        {booking.sender_contact_info && (
+        {/* Contact Info - Show both parties' details when agreed */}
+        {(booking.sender_contact_info || booking.receiver_contact_info) && (
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold mb-3">Kontaktinformasjon</h2>
-            <div className="space-y-2">
-              {booking.sender_contact_info.email && (
-                <div>
-                  <span className="font-medium">E-post:</span> {booking.sender_contact_info.email}
+            <div className="space-y-4">
+              {/* Sender contact info - visible to receiver */}
+              {isReceiver && booking.sender_contact_info && (
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm text-muted-foreground">Fra avsender:</h5>
+                  {booking.sender_contact_info.email && (
+                    <div>
+                      <span className="font-medium">E-post:</span>{' '}
+                      <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
+                        {booking.sender_contact_info.email}
+                      </a>
+                    </div>
+                  )}
+                  {booking.sender_contact_info.phone && (
+                    <div>
+                      <span className="font-medium">Telefon:</span>{' '}
+                      <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                        {booking.sender_contact_info.phone}
+                      </a>
+                    </div>
+                  )}
+                  {booking.sender_contact_info.website && (
+                    <div>
+                      <span className="font-medium">Nettside:</span>{' '}
+                      <a href={booking.sender_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        {booking.sender_contact_info.website}
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
-              {booking.sender_contact_info.phone && (
-                <div>
-                  <span className="font-medium">Telefon:</span> {booking.sender_contact_info.phone}
-                </div>
-              )}
-              {booking.sender_contact_info.website && (
-                <div>
-                  <span className="font-medium">Nettside:</span> {booking.sender_contact_info.website}
-                </div>
-              )}
-              {booking.sender_contact_info.instagram && (
-                <div>
-                  <span className="font-medium">Instagram:</span> @{booking.sender_contact_info.instagram.replace('@', '')}
-                </div>
-              )}
-              {booking.sender_contact_info.facebook && (
-                <div>
-                  <span className="font-medium">Facebook:</span> {booking.sender_contact_info.facebook}
+
+              {/* Receiver contact info - visible to sender */}
+              {isSender && booking.receiver_contact_info && (
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm text-muted-foreground">Fra mottaker:</h5>
+                  {booking.receiver_contact_info.email && (
+                    <div>
+                      <span className="font-medium">E-post:</span>{' '}
+                      <a href={`mailto:${booking.receiver_contact_info.email}`} className="text-primary hover:underline">
+                        {booking.receiver_contact_info.email}
+                      </a>
+                    </div>
+                  )}
+                  {booking.receiver_contact_info.phone && (
+                    <div>
+                      <span className="font-medium">Telefon:</span>{' '}
+                      <a href={`tel:${booking.receiver_contact_info.phone}`} className="text-primary hover:underline">
+                        {booking.receiver_contact_info.phone}
+                      </a>
+                    </div>
+                  )}
+                  {booking.receiver_contact_info.website && (
+                    <div>
+                      <span className="font-medium">Nettside:</span>{' '}
+                      <a href={booking.receiver_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        {booking.receiver_contact_info.website}
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

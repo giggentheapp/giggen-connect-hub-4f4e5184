@@ -291,27 +291,56 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           </div>
         </div>
 
-        {/* Delt kontaktinfo */}
-        {showContactInfo && booking.sender_contact_info && (
+        {/* Delt kontaktinfo - vis begge parter */}
+        {showContactInfo && (booking.sender_contact_info || booking.receiver_contact_info) && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-lg">Delt kontaktinformasjon</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {booking.sender_contact_info.email && (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium min-w-[80px]">E-post:</span>
-                  <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
-                    {booking.sender_contact_info.email}
-                  </a>
+            <CardContent className="space-y-4">
+              {/* Sender contact info - visible to receiver */}
+              {!isSender && booking.sender_contact_info && (
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm text-muted-foreground">Fra arrangør:</h5>
+                  {booking.sender_contact_info.email && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium min-w-[80px]">E-post:</span>
+                      <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
+                        {booking.sender_contact_info.email}
+                      </a>
+                    </div>
+                  )}
+                  {booking.sender_contact_info.phone && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium min-w-[80px]">Telefon:</span>
+                      <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                        {booking.sender_contact_info.phone}
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
-              {booking.sender_contact_info.phone && (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium min-w-[80px]">Telefon:</span>
-                  <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
-                    {booking.sender_contact_info.phone}
-                  </a>
+              
+              {/* Receiver contact info - visible to sender */}
+              {isSender && booking.receiver_contact_info && (
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm text-muted-foreground">Fra musiker:</h5>
+                  {booking.receiver_contact_info.email && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium min-w-[80px]">E-post:</span>
+                      <a href={`mailto:${booking.receiver_contact_info.email}`} className="text-primary hover:underline">
+                        {booking.receiver_contact_info.email}
+                      </a>
+                    </div>
+                  )}
+                  {booking.receiver_contact_info.phone && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium min-w-[80px]">Telefon:</span>
+                      <a href={`tel:${booking.receiver_contact_info.phone}`} className="text-primary hover:underline">
+                        {booking.receiver_contact_info.phone}
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -344,51 +373,72 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
         </div>
       </div>
 
-      {/* Delt kontaktinfo - vises i forhandlingsfasen */}
-      {showContactInfo && booking.sender_contact_info && (
+      {/* Delt kontaktinfo - vises i forhandlingsfasen - begge parter */}
+      {showContactInfo && (booking.sender_contact_info || booking.receiver_contact_info) && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-lg">Delt kontaktinformasjon</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {booking.sender_contact_info.email && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium min-w-[80px]">E-post:</span>
-                <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
-                  {booking.sender_contact_info.email}
-                </a>
+          <CardContent className="space-y-4">
+            {/* Sender contact info - visible to receiver */}
+            {!isSender && booking.sender_contact_info && (
+              <div className="space-y-2">
+                <h5 className="font-medium text-sm text-muted-foreground">Fra arrangør:</h5>
+                {booking.sender_contact_info.email && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">E-post:</span>
+                    <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
+                      {booking.sender_contact_info.email}
+                    </a>
+                  </div>
+                )}
+                {booking.sender_contact_info.phone && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">Telefon:</span>
+                    <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                      {booking.sender_contact_info.phone}
+                    </a>
+                  </div>
+                )}
+                {booking.sender_contact_info.website && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">Nettside:</span>
+                    <a href={booking.sender_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      {booking.sender_contact_info.website}
+                    </a>
+                  </div>
+                )}
               </div>
             )}
-            {booking.sender_contact_info.phone && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium min-w-[80px]">Telefon:</span>
-                <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
-                  {booking.sender_contact_info.phone}
-                </a>
-              </div>
-            )}
-            {booking.sender_contact_info.website && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium min-w-[80px]">Nettside:</span>
-                <a href={booking.sender_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {booking.sender_contact_info.website}
-                </a>
-              </div>
-            )}
-            {booking.sender_contact_info.instagram && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium min-w-[80px]">Instagram:</span>
-                <a href={`https://instagram.com/${booking.sender_contact_info.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  @{booking.sender_contact_info.instagram.replace('@', '')}
-                </a>
-              </div>
-            )}
-            {booking.sender_contact_info.facebook && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium min-w-[80px]">Facebook:</span>
-                <a href={booking.sender_contact_info.facebook} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {booking.sender_contact_info.facebook}
-                </a>
+            
+            {/* Receiver contact info - visible to sender */}
+            {isSender && booking.receiver_contact_info && (
+              <div className="space-y-2">
+                <h5 className="font-medium text-sm text-muted-foreground">Fra musiker:</h5>
+                {booking.receiver_contact_info.email && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">E-post:</span>
+                    <a href={`mailto:${booking.receiver_contact_info.email}`} className="text-primary hover:underline">
+                      {booking.receiver_contact_info.email}
+                    </a>
+                  </div>
+                )}
+                {booking.receiver_contact_info.phone && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">Telefon:</span>
+                    <a href={`tel:${booking.receiver_contact_info.phone}`} className="text-primary hover:underline">
+                      {booking.receiver_contact_info.phone}
+                    </a>
+                  </div>
+                )}
+                {booking.receiver_contact_info.website && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium min-w-[80px]">Nettside:</span>
+                    <a href={booking.receiver_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      {booking.receiver_contact_info.website}
+                    </a>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -702,47 +752,13 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           </CardContent>
         </Card>
 
-        {/* Public Visibility Settings - ONLY SENDER CAN EDIT */}
-        {isInNegotiation && isSender && (
+        {/* Public Visibility Settings - BOTH PARTIES CAN EDIT */}
+        {isInNegotiation && (
           <PublicVisibilitySettings
             value={formData.public_visibility_settings}
             onChange={(settings) => updateFormField('public_visibility_settings', settings)}
             mode="booking"
           />
-        )}
-
-        {/* Public Preview for Receiver - READ ONLY */}
-        {isInNegotiation && !isSender && (
-          <Card>
-            <CardHeader>
-              <CardTitle>📋 Slik vil arrangementet vises offentlig</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Arrangøren kontrollerer hva som er synlig for publikum. Dette er hva som vil vises når arrangementet publiseres:
-              </p>
-              <div className="bg-muted/30 rounded-lg p-4 space-y-2 text-sm">
-                {Object.entries(formData.public_visibility_settings).map(([key, visible]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <div className={cn(
-                      "h-4 w-4 rounded border-2 flex items-center justify-center",
-                      visible ? "bg-primary border-primary" : "border-muted-foreground"
-                    )}>
-                      {visible && <Check className="h-3 w-3 text-primary-foreground" />}
-                    </div>
-                    <span className={visible ? "text-foreground" : "text-muted-foreground"}>
-                      {key === 'showDate' && 'Dato'}
-                      {key === 'showTime' && 'Tidspunkt'}
-                      {key === 'showVenue' && 'Spillested'}
-                      {key === 'showAddress' && 'Adresse'}
-                      {key === 'showTicketPrice' && 'Billettpris'}
-                      {key === 'showAudienceEstimate' && 'Publikumsestimat'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         )}
 
         {/* Portfolio Attachments */}

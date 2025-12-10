@@ -204,29 +204,68 @@ export const BookingConfirmation = ({ booking, isOpen, onClose, currentUserId }:
               </CardContent>
             </Card>
 
-            {/* Contact Info (for receivers) */}
-            {isReceiver && currentBooking.sender_contact_info && (
+            {/* Contact Info - Show both parties' contact info */}
+            {((isReceiver && currentBooking.sender_contact_info) || (isSender && currentBooking.receiver_contact_info)) && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Kontaktinformasjon fra arrangør</CardTitle>
+                  <CardTitle>Kontaktinformasjon</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {currentBooking.sender_contact_info.name && (
-                    <div>
-                      <span className="font-medium">Navn: </span>
-                      {currentBooking.sender_contact_info.name}
+                <CardContent className="space-y-4">
+                  {/* Sender Contact Info - visible to receiver */}
+                  {isReceiver && currentBooking.sender_contact_info && (
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm text-muted-foreground">Fra arrangør:</h5>
+                      {currentBooking.sender_contact_info.name && (
+                        <div>
+                          <span className="font-medium">Navn: </span>
+                          {currentBooking.sender_contact_info.name}
+                        </div>
+                      )}
+                      {currentBooking.sender_contact_info.email && (
+                        <div>
+                          <span className="font-medium">E-post: </span>
+                          <a href={`mailto:${currentBooking.sender_contact_info.email}`} className="text-primary hover:underline">
+                            {currentBooking.sender_contact_info.email}
+                          </a>
+                        </div>
+                      )}
+                      {currentBooking.sender_contact_info.phone && (
+                        <div>
+                          <span className="font-medium">Telefon: </span>
+                          <a href={`tel:${currentBooking.sender_contact_info.phone}`} className="text-primary hover:underline">
+                            {currentBooking.sender_contact_info.phone}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
-                  {currentBooking.sender_contact_info.email && (
-                    <div>
-                      <span className="font-medium">E-post: </span>
-                      {currentBooking.sender_contact_info.email}
-                    </div>
-                  )}
-                  {currentBooking.sender_contact_info.phone && (
-                    <div>
-                      <span className="font-medium">Telefon: </span>
-                      {currentBooking.sender_contact_info.phone}
+
+                  {/* Receiver Contact Info - visible to sender */}
+                  {isSender && currentBooking.receiver_contact_info && (
+                    <div className="space-y-2 border-t pt-4">
+                      <h5 className="font-medium text-sm text-muted-foreground">Fra musiker:</h5>
+                      {currentBooking.receiver_contact_info.name && (
+                        <div>
+                          <span className="font-medium">Navn: </span>
+                          {currentBooking.receiver_contact_info.name}
+                        </div>
+                      )}
+                      {currentBooking.receiver_contact_info.email && (
+                        <div>
+                          <span className="font-medium">E-post: </span>
+                          <a href={`mailto:${currentBooking.receiver_contact_info.email}`} className="text-primary hover:underline">
+                            {currentBooking.receiver_contact_info.email}
+                          </a>
+                        </div>
+                      )}
+                      {currentBooking.receiver_contact_info.phone && (
+                        <div>
+                          <span className="font-medium">Telefon: </span>
+                          <a href={`tel:${currentBooking.receiver_contact_info.phone}`} className="text-primary hover:underline">
+                            {currentBooking.receiver_contact_info.phone}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>

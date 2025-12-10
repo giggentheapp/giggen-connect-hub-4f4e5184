@@ -513,6 +513,7 @@ export type Database = {
           receiver_allowed_at: string | null
           receiver_approved_at: string | null
           receiver_confirmed: boolean | null
+          receiver_contact_info: Json | null
           receiver_id: string
           receiver_read_agreement: boolean | null
           rejected_at: string | null
@@ -575,6 +576,7 @@ export type Database = {
           receiver_allowed_at?: string | null
           receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
+          receiver_contact_info?: Json | null
           receiver_id: string
           receiver_read_agreement?: boolean | null
           rejected_at?: string | null
@@ -637,6 +639,7 @@ export type Database = {
           receiver_allowed_at?: string | null
           receiver_approved_at?: string | null
           receiver_confirmed?: boolean | null
+          receiver_contact_info?: Json | null
           receiver_id?: string
           receiver_read_agreement?: boolean | null
           rejected_at?: string | null
