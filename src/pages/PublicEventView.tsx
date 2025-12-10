@@ -11,7 +11,9 @@ import { BookingPortfolioGallery } from '@/components/BookingPortfolioGallery';
 import { usePurchaseTicket } from '@/hooks/useTickets';
 import { TicketQRModal } from '@/components/TicketQRModal';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useProfile } from '@/hooks/useProfile';
 import { navigateToDashboard, navigateToProfile, navigateToAuth } from '@/lib/navigation';
+import { BackgroundArtwork } from '@/components/BackgroundArtwork';
 
 interface PublicEventData {
   id: string;
@@ -41,6 +43,7 @@ const PublicEventView = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useCurrentUser();
+  const { profile } = useProfile(user?.id);
   const [event, setEvent] = useState<PublicEventData | null>(null);
   const [makerProfile, setMakerProfile] = useState<any>(null);
   const [portfolioAttachments, setPortfolioAttachments] = useState<any[]>([]);
@@ -332,8 +335,9 @@ const PublicEventView = () => {
   const visibilitySettings = event.public_visibility_settings || {};
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-background relative">
+      <BackgroundArtwork imagePaths={(profile as any)?.dashboard_background_images} />
+      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
         {/* Back button */}
         <Button 
           variant="ghost" 

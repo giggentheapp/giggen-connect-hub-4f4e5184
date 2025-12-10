@@ -164,10 +164,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
   return (
     <div className="flex-1 overflow-auto relative">
       {/* Background Artwork */}
-      <BackgroundArtwork 
-        imagePaths={(profile as any).dashboard_background_images} 
-        randomize={(profile as any).randomize_backgrounds}
-      />
+      <BackgroundArtwork imagePaths={(profile as any).dashboard_background_images} />
       
       <div className="max-w-4xl md:max-w-[1280px] mx-auto px-5 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4 relative z-10">
         {/* Header */}

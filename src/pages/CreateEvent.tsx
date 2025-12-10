@@ -2,20 +2,21 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventCreateWizard } from '@/components/events/create/EventCreateWizard';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useProfile } from '@/hooks/useProfile';
 import { navigateToAuth } from '@/lib/navigation';
+import { BackgroundArtwork } from '@/components/BackgroundArtwork';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { user, loading: userLoading } = useCurrentUser();
+  const { profile } = useProfile(user?.id);
 
-  // Redirect to auth if not logged in
   useEffect(() => {
     if (!userLoading && !user) {
       navigateToAuth(navigate, true, 'User not logged in - redirecting from create event');
     }
   }, [user, userLoading, navigate]);
 
-  // Show loading state while checking auth
   if (userLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -24,14 +25,16 @@ const CreateEvent = () => {
     );
   }
 
-  // Don't render wizard if user is not authenticated
   if (!user) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <EventCreateWizard />
+    <div className="min-h-screen bg-background relative">
+      <BackgroundArtwork imagePaths={(profile as any)?.dashboard_background_images} />
+      <div className="relative z-10">
+        <EventCreateWizard />
+      </div>
     </div>
   );
 };

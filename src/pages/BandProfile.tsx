@@ -11,6 +11,8 @@ import { BandCreateForm } from '@/components/band/BandCreateForm';
 import { BandView } from '@/components/band/BandView';
 import { navigateBack, navigateToProfile, navigateToAuth } from '@/lib/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useProfile } from '@/hooks/useProfile';
+import { BackgroundArtwork } from '@/components/BackgroundArtwork';
 
 const BandProfile = () => {
   const { bandId } = useParams<{ bandId: string }>();
@@ -18,6 +20,7 @@ const BandProfile = () => {
   const location = useLocation();
   const { getParam } = useQueryParams();
   const { user } = useCurrentUser();
+  const { profile } = useProfile(user?.id);
 
   const isCreateMode = bandId === 'new';
   const { band, members, loading, refetch } = useBandData(isCreateMode ? undefined : bandId);
@@ -115,17 +118,22 @@ const BandProfile = () => {
 
   // View mode
   return (
-    <BandView
-      band={band!}
-      members={members}
-      currentUserRole={currentUserRole}
-      isAdmin={isAdmin}
-      isMember={isMember}
-      currentUserId={currentUserId}
-      onEdit={() => setIsEditing(true)}
-      onBack={handleBack}
-      onRefetch={refetch}
-    />
+    <div className="min-h-screen relative">
+      <BackgroundArtwork imagePaths={(profile as any)?.dashboard_background_images} />
+      <div className="relative z-10">
+        <BandView
+          band={band!}
+          members={members}
+          currentUserRole={currentUserRole}
+          isAdmin={isAdmin}
+          isMember={isMember}
+          currentUserId={currentUserId}
+          onEdit={() => setIsEditing(true)}
+          onBack={handleBack}
+          onRefetch={refetch}
+        />
+      </div>
+    </div>
   );
 };
 
