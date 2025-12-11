@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { navigateToAuth } from '@/lib/navigation';
+import { BackgroundArtwork } from '@/components/BackgroundArtwork';
 
 const Profile = () => {
   const { userId: rawUserId } = useParams();
@@ -68,7 +69,14 @@ const Profile = () => {
     );
   }
 
-  return <UnifiedSidePanel profile={profile as any} isOwnProfile={isOwnProfile} currentUserId={currentUserId} />;
+  return (
+    <div className="relative min-h-screen">
+      <BackgroundArtwork imagePaths={(profile as any).dashboard_background_images} />
+      <div className="relative z-10">
+        <UnifiedSidePanel profile={profile as any} isOwnProfile={isOwnProfile} currentUserId={currentUserId} />
+      </div>
+    </div>
+  );
 };
 
 export default Profile;

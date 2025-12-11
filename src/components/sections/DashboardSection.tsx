@@ -36,7 +36,7 @@ import { nb } from "date-fns/locale";
 import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { BackgroundArtwork } from "@/components/BackgroundArtwork";
+
 
 interface DashboardSectionProps {
   profile: UserProfile;
@@ -163,9 +163,6 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
   return (
     <div className="flex-1 overflow-auto relative">
-      {/* Background Artwork */}
-      <BackgroundArtwork imagePaths={(profile as any).dashboard_background_images} />
-      
       <div className="max-w-4xl md:max-w-[1280px] mx-auto px-5 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4 relative z-10">
         {/* Header */}
         <div className="flex items-start md:items-center justify-between gap-4">
@@ -196,7 +193,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
         </div>
 
         {/* Profile Completion */}
-        <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20 md:shadow-md">
+        <Card className="border-border/40 bg-card md:shadow-md">
           <CardHeader className="pb-3 md:pb-4 md:px-6 md:pt-6">
             <CardTitle className="text-base md:text-lg flex items-center justify-between">
               Fullfør profil
@@ -254,7 +251,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
          (!upcomingEventsData || upcomingEventsData.length === 0) && 
          pendingRequests === 0 && 
          activeBookings === 0 && (
-          <Card className="border-border/40 bg-gradient-to-br from-background to-muted/20 rounded-2xl md:rounded-lg p-5 md:p-0 bg-white md:bg-transparent shadow-sm md:shadow-none">
+          <Card className="border-border/40 bg-card rounded-2xl md:rounded-lg p-5 md:p-0 shadow-sm md:shadow-none">
             <CardHeader className="p-0 md:p-6">
               <CardTitle className="text-base md:text-lg">Hva skjer nå?</CardTitle>
             </CardHeader>
@@ -404,7 +401,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
           <h2 className="text-sm md:text-xl font-semibold px-1 text-muted-foreground">Hurtigstatus</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4">
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-sm"
+              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
               <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
@@ -417,7 +414,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-sm"
+              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
               onClick={() => navigate('/bookings?tab=requests')}
             >
               <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
@@ -430,7 +427,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-sm"
+              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=history`)}
             >
               <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
@@ -443,7 +440,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
             </Card>
 
             <Card 
-              className="border-border/40 bg-gradient-to-br from-background to-muted/20 cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-sm"
+              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
               <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
@@ -492,7 +489,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4">
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=bookings`)}
             >
               <Calendar className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -501,7 +498,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=admin-concepts`)}
             >
               <BriefcaseIcon className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -510,7 +507,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=admin-bands`)}
             >
               <Users className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -519,7 +516,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => {
                 if (onOpenQuickModal) {
                   onOpenQuickModal();
@@ -534,7 +531,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=filbank`)}
             >
               <Upload className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -543,7 +540,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=settings`)}
             >
               <Settings className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -552,7 +549,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
             >
               <div className="flex flex-col items-center gap-2 md:gap-3">
@@ -568,7 +565,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
 
             <Button
               variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-white md:bg-transparent shadow-sm md:shadow-none"
+              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
               onClick={() => navigate(`${location.pathname}?section=history`)}
             >
               <div className="flex flex-col items-center gap-2 md:gap-3">
