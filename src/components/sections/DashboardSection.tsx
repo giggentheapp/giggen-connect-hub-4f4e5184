@@ -4,22 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Calendar, 
-  Users, 
-  Settings, 
-  Upload,
-  MessageSquare,
-  BriefcaseIcon,
-  Plus,
-  Clock,
-  ChevronDown,
-  Rocket,
-  MapPin,
-  Archive,
-  EyeOff,
-  Eye
-} from "lucide-react";
+import { Calendar, Users, Settings, Upload, MessageSquare, BriefcaseIcon, Plus, Clock, ChevronDown, Rocket, MapPin, Archive, EyeOff, Eye } from "lucide-react";
 import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import { UserProfile } from "@/types/auth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -36,96 +21,101 @@ import { nb } from "date-fns/locale";
 import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-
 interface DashboardSectionProps {
   profile: UserProfile;
   onOpenQuickModal?: () => void;
 }
-
-export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSectionProps) => {
+export const DashboardSection = ({
+  profile,
+  onOpenQuickModal
+}: DashboardSectionProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-  
-  const { drafts: offerDrafts, loading: offerDraftsLoading } = useUserDrafts(profile.user_id);
-  const { drafts: eventDrafts, loading: eventDraftsLoading } = useUserEventDrafts(profile.user_id);
-  const { events: upcomingEventsData, loading: upcomingLoading } = useUpcomingEvents(profile.user_id);
-  const { events: completedEventsData, loading: completedLoading } = useCompletedEvents(profile.user_id);
+  const {
+    toast
+  } = useToast();
+  const {
+    drafts: offerDrafts,
+    loading: offerDraftsLoading
+  } = useUserDrafts(profile.user_id);
+  const {
+    drafts: eventDrafts,
+    loading: eventDraftsLoading
+  } = useUserEventDrafts(profile.user_id);
+  const {
+    events: upcomingEventsData,
+    loading: upcomingLoading
+  } = useUpcomingEvents(profile.user_id);
+  const {
+    events: completedEventsData,
+    loading: completedLoading
+  } = useCompletedEvents(profile.user_id);
 
   // Fetch bookings data
-  const { data: bookingsData } = useQuery({
+  const {
+    data: bookingsData
+  } = useQuery({
     queryKey: ["dashboard-bookings", profile?.user_id],
     queryFn: async () => {
       if (!profile?.user_id) return null;
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`);
-
+      const {
+        data,
+        error
+      } = await supabase.from("bookings").select("*").or(`sender_id.eq.${profile.user_id},receiver_id.eq.${profile.user_id}`);
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.user_id,
+    enabled: !!profile?.user_id
   });
 
   // Fetch files data
-  const { data: filesData } = useQuery({
+  const {
+    data: filesData
+  } = useQuery({
     queryKey: ["dashboard-files", profile?.user_id],
     queryFn: async () => {
       if (!profile?.user_id) return null;
-
-      const { data, error } = await supabase
-        .from("user_files")
-        .select("*")
-        .eq("user_id", profile.user_id);
-
+      const {
+        data,
+        error
+      } = await supabase.from("user_files").select("*").eq("user_id", profile.user_id);
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.user_id,
+    enabled: !!profile?.user_id
   });
 
   // Fetch profile settings to check visibility
-  const { data: profileSettings } = useQuery({
+  const {
+    data: profileSettings
+  } = useQuery({
     queryKey: ["profile-settings", profile?.user_id],
     queryFn: async () => {
       if (!profile?.user_id) return null;
-
-      const { data, error } = await supabase
-        .from("profile_settings")
-        .select("*")
-        .eq("maker_id", profile.user_id)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from("profile_settings").select("*").eq("maker_id", profile.user_id).maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.user_id,
+    enabled: !!profile?.user_id
   });
 
   // Calculate profile completion
-  const { percentage: profileCompletion, missingFields } = calculateProfileCompletion(profile);
+  const {
+    percentage: profileCompletion,
+    missingFields
+  } = calculateProfileCompletion(profile);
 
   // Calculate stats
-  const activeBookings = bookingsData?.filter(
-    b => b.status === "upcoming" || b.status === "both_parties_approved"
-  ).length || 0;
-
-  const pendingRequests = bookingsData?.filter(
-    b => b.status === "pending" && b.receiver_id === profile.user_id
-  ).length || 0;
+  const activeBookings = bookingsData?.filter(b => b.status === "upcoming" || b.status === "both_parties_approved").length || 0;
+  const pendingRequests = bookingsData?.filter(b => b.status === "pending" && b.receiver_id === profile.user_id).length || 0;
 
   // Use completed events from combined hook (bookings + events_market)
   const completedJobs = completedEventsData?.length || 0;
-
-  const upcomingEvents = bookingsData?.filter(
-    b => b.status === "upcoming" && b.event_date && new Date(b.event_date) > new Date()
-  ).sort((a, b) => 
-    new Date(a.event_date!).getTime() - new Date(b.event_date!).getTime()
-  ).slice(0, 5) || [];
+  const upcomingEvents = bookingsData?.filter(b => b.status === "upcoming" && b.event_date && new Date(b.event_date) > new Date()).sort((a, b) => new Date(a.event_date!).getTime() - new Date(b.event_date!).getTime()).slice(0, 5) || [];
 
   // Generate "Continue where you left off" suggestions
   const suggestions = [];
@@ -136,10 +126,13 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
       description: `${missingFields.length} felt mangler`,
       action: () => {
         const currentPath = location.pathname;
-        navigate(`${currentPath}?section=settings`, { 
-          state: { missingFields, scrollToMissing: true } 
+        navigate(`${currentPath}?section=settings`, {
+          state: {
+            missingFields,
+            scrollToMissing: true
+          }
         });
-      },
+      }
     });
   }
   if (!filesData || filesData.length === 0) {
@@ -147,7 +140,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
       icon: Upload,
       title: "Last opp en fil til Filbank",
       description: "Organiser dine filer",
-      action: () => navigate(`${location.pathname}?section=filbank`),
+      action: () => navigate(`${location.pathname}?section=filbank`)
     });
   }
   if (pendingRequests > 0) {
@@ -155,14 +148,11 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
       icon: MessageSquare,
       title: "Svar på forespørsel",
       description: `${pendingRequests} ventende`,
-      action: () => navigate(`${location.pathname}?section=bookings`),
+      action: () => navigate(`${location.pathname}?section=bookings`)
     });
   }
-
   const displaySuggestions = suggestions.slice(0, 3);
-
-  return (
-    <div className="flex-1 overflow-auto relative">
+  return <div className="flex-1 overflow-auto relative">
       <div className="max-w-4xl md:max-w-[1280px] mx-auto px-5 md:px-8 py-4 md:py-6 space-y-6 md:space-y-4 relative z-10">
         {/* Header */}
         <div className="flex items-start md:items-center justify-between gap-4">
@@ -180,13 +170,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
           </div>
           
           {/* Getting Started Button - smaller on mobile */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/getting-started')}
-            className="gap-1.5 md:gap-2 shrink-0 px-2.5 md:px-3"
-            title="Kom i gang guide"
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate('/getting-started')} className="gap-1.5 md:gap-2 shrink-0 px-2.5 md:px-3" title="Kom i gang guide">
             <Rocket className="h-4 w-4" />
             <span className="hidden sm:inline">Kom i gang</span>
           </Button>
@@ -205,18 +189,13 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
           <CardContent className="space-y-3 md:space-y-4 md:px-6 md:pb-6">
             <Progress value={profileCompletion} className="h-2 md:h-3" />
             <p className="text-xs md:text-sm text-muted-foreground">
-              {profileCompletion === 100 
-                ? "🎉 Profilen din er fullstendig!" 
-                : missingFields.length > 0 
-                  ? `Mangler: ${missingFields.join(", ")}`
-                  : "Nesten ferdig!"}
+              {profileCompletion === 100 ? "🎉 Profilen din er fullstendig!" : missingFields.length > 0 ? `Mangler: ${missingFields.join(", ")}` : "Nesten ferdig!"}
             </p>
           </CardContent>
         </Card>
 
         {/* Profile Visibility Alert */}
-        {profileSettings?.show_public_profile === false && (
-          <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+        {profileSettings?.show_public_profile === false && <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
             <EyeOff className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="flex items-center justify-between gap-4">
               <div className="flex-1">
@@ -227,31 +206,22 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
                   Andre brukere kan ikke finne deg eller se profilen din. Aktiver synlighet for å bli oppdaget.
                 </p>
               </div>
-              <Button
-                size="sm"
-                variant="default"
-                className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
-                onClick={() => {
-                  const currentPath = location.pathname;
-                  navigate(`${currentPath}?section=settings`, { 
-                    state: { scrollToVisibility: true } 
-                  });
-                }}
-              >
+              <Button size="sm" variant="default" className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white" onClick={() => {
+            const currentPath = location.pathname;
+            navigate(`${currentPath}?section=settings`, {
+              state: {
+                scrollToVisibility: true
+              }
+            });
+          }}>
                 <Eye className="h-4 w-4 mr-2" />
                 Aktiver synlighet
               </Button>
             </AlertDescription>
-          </Alert>
-        )}
+          </Alert>}
 
         {/* "Hva skjer nå?" tom-state seksjon */}
-        {(!offerDrafts || offerDrafts.length === 0) && 
-         (!eventDrafts || eventDrafts.length === 0) && 
-         (!upcomingEventsData || upcomingEventsData.length === 0) && 
-         pendingRequests === 0 && 
-         activeBookings === 0 && (
-          <Card className="border-border/40 bg-card rounded-2xl md:rounded-lg p-5 md:p-0 shadow-sm md:shadow-none">
+        {(!offerDrafts || offerDrafts.length === 0) && (!eventDrafts || eventDrafts.length === 0) && (!upcomingEventsData || upcomingEventsData.length === 0) && pendingRequests === 0 && activeBookings === 0 && <Card className="border-border/40 bg-card rounded-2xl md:rounded-lg p-5 md:p-0 shadow-sm md:shadow-none">
             <CardHeader className="p-0 md:p-6">
               <CardTitle className="text-base md:text-lg">Hva skjer nå?</CardTitle>
             </CardHeader>
@@ -275,12 +245,10 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
                 </li>
               </ul>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Continue where you left off - Drafts Section */}
-        {(offerDrafts.length > 0 || eventDrafts.length > 0 || displaySuggestions.length > 0) && (
-          <div className="space-y-3">
+        {(offerDrafts.length > 0 || eventDrafts.length > 0 || displaySuggestions.length > 0) && <div className="space-y-3">
             <Collapsible defaultOpen={true}>
               <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-2">
@@ -295,90 +263,78 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
               <CollapsibleContent>
                 <div className="space-y-2 pt-2">
                   {/* Event Drafts - Show first */}
-                  {eventDraftsLoading ? (
-                    <div className="text-center py-4">
+                  {eventDraftsLoading ? <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                    </div>
-                  ) : (
-                    eventDrafts.map(event => (
-                      <DraftEventCard
-                        key={event.id}
-                        event={event}
-                        onContinue={() => navigate(`/create-event?draft=${event.id}`)}
-                        onDelete={async () => {
-                          const { error } = await supabase.from('events_market').delete().eq('id', event.id);
-                          if (error) {
-                            toast({
-                              title: 'Kunne ikke slette utkast',
-                              description: error.message,
-                              variant: 'destructive',
-                            });
-                            return;
-                          }
-                          toast({ title: 'Utkast slettet', description: 'Arrangement-utkastet er permanent fjernet' });
-                          queryClient.invalidateQueries({ queryKey: ['user-event-drafts'] });
-                        }}
-                      />
-                    ))
-                  )}
+                    </div> : eventDrafts.map(event => <DraftEventCard key={event.id} event={event} onContinue={() => navigate(`/create-event?draft=${event.id}`)} onDelete={async () => {
+                const {
+                  error
+                } = await supabase.from('events_market').delete().eq('id', event.id);
+                if (error) {
+                  toast({
+                    title: 'Kunne ikke slette utkast',
+                    description: error.message,
+                    variant: 'destructive'
+                  });
+                  return;
+                }
+                toast({
+                  title: 'Utkast slettet',
+                  description: 'Arrangement-utkastet er permanent fjernet'
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ['user-event-drafts']
+                });
+              }} />)}
 
                   {/* Offer Drafts */}
-                  {offerDraftsLoading ? (
-                    <div className="text-center py-4">
+                  {offerDraftsLoading ? <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                    </div>
-                  ) : (
-                    offerDrafts.map(draft => (
-                      <DraftOfferCard
-                        key={draft.id}
-                        draft={draft}
-                        onContinue={() => navigate(`/create-offer?edit=${draft.id}`)}
-                        onDelete={async () => {
-                          const { data: files } = await supabase
-                            .from('concept_files')
-                            .select('id')
-                            .eq('concept_id', draft.id);
-
-                          if (files && files.length > 0) {
-                            for (const file of files) {
-                              await supabase.rpc('delete_concept_file', { file_id: file.id });
-                            }
-                          }
-
-                          const { error } = await supabase.from('concepts').delete().eq('id', draft.id);
-                          if (error) {
-                            toast({
-                              title: 'Kunne ikke slette utkast',
-                              description: error.message,
-                              variant: 'destructive',
-                            });
-                            return;
-                          }
-                          toast({ title: 'Utkast slettet', description: 'Utkastet og alle filer er permanent fjernet' });
-                          queryClient.invalidateQueries({ queryKey: ['user-concepts'] });
-                        }}
-                        calculateProgress={(d) => {
-                          let completed = 0;
-                          const total = 6;
-                          if (d.title) completed++;
-                          if (d.expected_audience && (d.price || d.door_percentage || d.price_by_agreement)) completed++;
-                          completed++; // Portfolio
-                          completed++; // Tech specs
-                          if (d.available_dates) completed++;
-                          if (d.is_published) completed++;
-                          return { completed, total };
-                        }}
-                      />
-                    ))
-                  )}
+                    </div> : offerDrafts.map(draft => <DraftOfferCard key={draft.id} draft={draft} onContinue={() => navigate(`/create-offer?edit=${draft.id}`)} onDelete={async () => {
+                const {
+                  data: files
+                } = await supabase.from('concept_files').select('id').eq('concept_id', draft.id);
+                if (files && files.length > 0) {
+                  for (const file of files) {
+                    await supabase.rpc('delete_concept_file', {
+                      file_id: file.id
+                    });
+                  }
+                }
+                const {
+                  error
+                } = await supabase.from('concepts').delete().eq('id', draft.id);
+                if (error) {
+                  toast({
+                    title: 'Kunne ikke slette utkast',
+                    description: error.message,
+                    variant: 'destructive'
+                  });
+                  return;
+                }
+                toast({
+                  title: 'Utkast slettet',
+                  description: 'Utkastet og alle filer er permanent fjernet'
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ['user-concepts']
+                });
+              }} calculateProgress={d => {
+                let completed = 0;
+                const total = 6;
+                if (d.title) completed++;
+                if (d.expected_audience && (d.price || d.door_percentage || d.price_by_agreement)) completed++;
+                completed++; // Portfolio
+                completed++; // Tech specs
+                if (d.available_dates) completed++;
+                if (d.is_published) completed++;
+                return {
+                  completed,
+                  total
+                };
+              }} />)}
 
                   {/* Original suggestions */}
-                  {displaySuggestions.map((suggestion, idx) => (
-                    <Card
-                      key={idx}
-                      className="border-border/40 hover:border-primary/50 transition-all cursor-pointer"
-                      onClick={suggestion.action}
-                    >
+                  {displaySuggestions.map((suggestion, idx) => <Card key={idx} className="border-border/40 hover:border-primary/50 transition-all cursor-pointer" onClick={suggestion.action}>
                       <CardContent className="flex items-center gap-4 p-4">
                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <suggestion.icon className="h-5 w-5 text-primary" />
@@ -388,22 +344,17 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
                           <p className="text-xs text-muted-foreground">{suggestion.description}</p>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
+                    </Card>)}
                 </div>
               </CollapsibleContent>
             </Collapsible>
-          </div>
-        )}
+          </div>}
 
         {/* Quick Stats */}
         <div className="space-y-3">
           <h2 className="text-sm md:text-xl font-semibold px-1 text-muted-foreground">Hurtigstatus</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4">
-            <Card 
-              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=bookings`)}
-            >
+            <Card className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm" onClick={() => navigate(`${location.pathname}?section=bookings`)}>
               <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
                 <Calendar className={cn("h-5 w-5 md:h-5 md:w-5 mb-1", activeBookings > 0 ? "text-orange-500" : "text-[#A1A1AA]")} />
                 <div className={cn("text-2xl md:text-[28px] font-bold", activeBookings > 0 ? "text-primary" : "text-[#A1A1AA]")}>
@@ -413,11 +364,8 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
               </CardContent>
             </Card>
 
-            <Card 
-              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
-              onClick={() => navigate('/bookings?tab=requests')}
-            >
-              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+            <Card className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm" onClick={() => navigate('/bookings?tab=requests')}>
+              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1 shadow-md">
                 <MessageSquare className={cn("h-5 w-5 md:h-5 md:w-5 mb-1", pendingRequests > 0 ? "text-orange-500" : "text-[#A1A1AA]")} />
                 <div className={cn("text-2xl md:text-[28px] font-bold", pendingRequests > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {pendingRequests}
@@ -426,11 +374,8 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
               </CardContent>
             </Card>
 
-            <Card 
-              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=history`)}
-            >
-              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+            <Card className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm" onClick={() => navigate(`${location.pathname}?section=history`)}>
+              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1 shadow-md">
                 <Archive className={cn("h-5 w-5 md:h-5 md:w-5 mb-1", completedJobs > 0 ? "text-orange-500" : "text-[#A1A1AA]")} />
                 <div className={cn("text-2xl md:text-[28px] font-bold", completedJobs > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {completedJobs}
@@ -439,11 +384,8 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
               </CardContent>
             </Card>
 
-            <Card 
-              className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
-            >
-              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1">
+            <Card className="border-border/40 bg-card cursor-pointer hover:border-primary/50 transition-colors md:shadow-sm rounded-2xl md:rounded-lg shadow-sm" onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}>
+              <CardContent className="py-5 md:py-5 px-4 md:px-6 flex flex-col items-center gap-1 shadow-md">
                 <Clock className={cn("h-5 w-5 md:h-5 md:w-5 mb-1", upcomingEvents.length > 0 ? "text-orange-500" : "text-[#A1A1AA]")} />
                 <div className={cn("text-2xl md:text-[28px] font-bold", upcomingEvents.length > 0 ? "text-primary" : "text-[#A1A1AA]")}>
                   {upcomingEvents.length}
@@ -458,25 +400,19 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
         <div className="py-2 md:py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Opprett nytt tilbud - Primary CTA */}
-            <button
-              onClick={() => navigate(`${location.pathname}?section=admin-concepts`)}
-              className="w-full bg-gradient-to-r from-primary to-primary/90 text-white py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-primary/20 hover:ring-primary/40"
-            >
+            <button onClick={() => navigate(`${location.pathname}?section=admin-concepts`)} className="w-full bg-gradient-to-r from-primary to-primary/90 text-white py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-primary/20 hover:ring-primary/40">
               <BriefcaseIcon className="h-6 w-6 md:h-7 md:w-7" />
               Opprett nytt tilbud
             </button>
 
             {/* Opprett nytt arrangement - Secondary CTA */}
-            <button
-              onClick={() => {
-                if (onOpenQuickModal) {
-                  onOpenQuickModal();
-                } else {
-                  navigate('/create-event');
-                }
-              }}
-              className="w-full bg-white text-orange-500 py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-orange-500/60 hover:ring-orange-500"
-            >
+            <button onClick={() => {
+            if (onOpenQuickModal) {
+              onOpenQuickModal();
+            } else {
+              navigate('/create-event');
+            }
+          }} className="w-full bg-white text-orange-500 py-4 md:py-5 rounded-2xl md:rounded-lg text-lg md:text-xl font-bold flex items-center justify-center gap-3 shadow-xl md:shadow-lg hover:shadow-2xl md:hover:shadow-xl active:scale-[0.98] transition-all md:h-auto ring-2 ring-orange-500/60 hover:ring-orange-500">
               <Plus className="h-6 w-6 md:h-7 md:w-7" />
               Opprett arrangement
             </button>
@@ -487,71 +423,43 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
         <div className="space-y-3">
           <h2 className="text-xl md:text-xl font-semibold px-1 text-muted-foreground">Verktøy</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4">
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=bookings`)}
-            >
+            <Button variant="outline" onClick={() => navigate(`${location.pathname}?section=bookings`)} className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-md">
               <Calendar className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Booking</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=admin-concepts`)}
-            >
+            <Button variant="outline" onClick={() => navigate(`${location.pathname}?section=admin-concepts`)} className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-md">
               <BriefcaseIcon className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Mine tilbud</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=admin-bands`)}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => navigate(`${location.pathname}?section=admin-bands`)}>
               <Users className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Mine band</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => {
-                if (onOpenQuickModal) {
-                  onOpenQuickModal();
-                } else {
-                  navigate('/create-event');
-                }
-              }}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => {
+            if (onOpenQuickModal) {
+              onOpenQuickModal();
+            } else {
+              navigate('/create-event');
+            }
+          }}>
               <Plus className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Nytt arrangement</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=filbank`)}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => navigate(`${location.pathname}?section=filbank`)}>
               <Upload className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Filbank</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=settings`)}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => navigate(`${location.pathname}?section=settings`)}>
               <Settings className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
               <span className="text-base md:text-sm font-medium">Innstillinger</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => navigate(`${location.pathname}?section=upcoming-events`)}>
               <div className="flex flex-col items-center gap-2 md:gap-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -563,11 +471,7 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
               </div>
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm"
-              onClick={() => navigate(`${location.pathname}?section=history`)}
-            >
+            <Button variant="outline" className="h-auto md:h-32 md:min-h-[120px] p-6 md:p-0 flex flex-col items-center justify-center gap-2 md:gap-3 border-border/40 hover:border-primary/50 hover:bg-primary/5 rounded-2xl md:rounded-lg bg-card shadow-sm" onClick={() => navigate(`${location.pathname}?section=history`)}>
               <div className="flex flex-col items-center gap-2 md:gap-3">
                 <div className="flex items-center gap-2">
                   <Archive className="h-7 w-7 md:h-8 md:w-8 text-orange-500 md:text-primary" />
@@ -581,6 +485,5 @@ export const DashboardSection = ({ profile, onOpenQuickModal }: DashboardSection
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
