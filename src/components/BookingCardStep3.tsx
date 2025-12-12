@@ -1,14 +1,16 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, MapPin, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { BookingActions } from '@/components/BookingActions';
 import { formatSafeDate } from '@/utils/bookingUtils';
 import { Booking } from '@/types/booking';
+import { bookingService } from '@/services/bookingService';
 
 interface BookingCardStep3Props {
   booking: Booking;
@@ -33,6 +35,37 @@ export const BookingCardStep3 = ({
 }: BookingCardStep3Props) => {
   const navigate = useNavigate();
   const [isPublic, setIsPublic] = useState(booking.is_public_after_approval ?? false);
+  const isReceiver = currentUserId === booking.receiver_id;
+  const [senderProfile, setSenderProfile] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
+
+  // Load sender profile for receivers
+  useEffect(() => {
+    if (isReceiver && booking.sender_id) {
+      const loadSenderProfile = async () => {
+        try {
+          const profile = await bookingService.getMakerProfile(booking.sender_id);
+          if (profile) {
+            setSenderProfile({
+              display_name: profile.display_name || 'Ukjent',
+              avatar_url: profile.avatar_url || null
+            });
+          }
+        } catch (error) {
+          console.error('Error loading sender profile:', error);
+        }
+      };
+      loadSenderProfile();
+    }
+  }, [isReceiver, booking.sender_id]);
+
+  const handleSenderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (booking.sender_id) {
+      navigate(`/profile/${booking.sender_id}`, { 
+        state: { fromSection: 'bookings' } 
+      });
+    }
+  };
 
   const toggleVisibility = async () => {
     try {
@@ -105,6 +138,24 @@ export const BookingCardStep3 = ({
             />
           </div>
         </div>
+
+        {/* Sender profile - only show for receivers */}
+        {isReceiver && senderProfile && (
+          <div 
+            className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer w-fit"
+            onClick={handleSenderClick}
+          >
+            <Avatar className="h-8 w-8 cursor-pointer">
+              <AvatarImage src={senderProfile.avatar_url || undefined} />
+              <AvatarFallback className="text-xs">
+                {senderProfile.display_name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-muted-foreground">
+              fra {senderProfile.display_name}
+            </span>
+          </div>
+        )}
         
         {booking.description && (
           <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-2">
