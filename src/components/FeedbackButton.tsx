@@ -14,7 +14,7 @@ const FeedbackButton = () => {
       data-tally-open={tallyId}
       data-tally-emoji-text="👋" 
       data-tally-emoji-animation="wave"
-      className="floating-feedback-btn-mobile"
+      className="floating-feedback-btn-mobile print:hidden"
       title={t('feedback')}
       aria-label={t('feedback')}
     >
