@@ -231,7 +231,14 @@ export const BookingsSection = ({
     const handleConceptClick = () => {
       if (booking.concept_ids?.length > 0) {
         const firstConceptId = booking.concept_ids[0];
-        navigate(`/concept/${firstConceptId}`, { state: { from: 'bookings' } });
+        const isReceiver = profile?.user_id === booking.receiver_id;
+        
+        // Receivers see public view, senders/owners see admin view
+        if (isReceiver) {
+          navigate(`/profile/${booking.sender_id}/concept/${firstConceptId}`, { state: { from: 'bookings' } });
+        } else {
+          navigate(`/concept/${firstConceptId}`, { state: { from: 'bookings' } });
+        }
       }
     };
 
