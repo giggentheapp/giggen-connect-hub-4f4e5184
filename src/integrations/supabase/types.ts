@@ -516,6 +516,8 @@ export type Database = {
           receiver_contact_info: Json | null
           receiver_id: string
           receiver_read_agreement: boolean | null
+          receiver_signature: string | null
+          receiver_signed_at: string | null
           rejected_at: string | null
           requires_approval: boolean | null
           selected_concept_id: string | null
@@ -524,6 +526,8 @@ export type Database = {
           sender_contact_info: Json | null
           sender_id: string
           sender_read_agreement: boolean | null
+          sender_signature: string | null
+          sender_signed_at: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["booking_status"]
           tech_spec: string | null
@@ -579,6 +583,8 @@ export type Database = {
           receiver_contact_info?: Json | null
           receiver_id: string
           receiver_read_agreement?: boolean | null
+          receiver_signature?: string | null
+          receiver_signed_at?: string | null
           rejected_at?: string | null
           requires_approval?: boolean | null
           selected_concept_id?: string | null
@@ -587,6 +593,8 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id: string
           sender_read_agreement?: boolean | null
+          sender_signature?: string | null
+          sender_signed_at?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
@@ -642,6 +650,8 @@ export type Database = {
           receiver_contact_info?: Json | null
           receiver_id?: string
           receiver_read_agreement?: boolean | null
+          receiver_signature?: string | null
+          receiver_signed_at?: string | null
           rejected_at?: string | null
           requires_approval?: boolean | null
           selected_concept_id?: string | null
@@ -650,6 +660,8 @@ export type Database = {
           sender_contact_info?: Json | null
           sender_id?: string
           sender_read_agreement?: boolean | null
+          sender_signature?: string | null
+          sender_signed_at?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           tech_spec?: string | null
