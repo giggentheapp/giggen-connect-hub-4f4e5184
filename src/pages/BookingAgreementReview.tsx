@@ -212,15 +212,17 @@ const BookingAgreementReview = () => {
 
   // Helper to render teaching field items
   const renderTeachingFields = (sectionData: any) => {
-    if (!sectionData?.fields) return null;
+    // sectionData is directly an array of fields, not { fields: [...] }
+    const fieldsArray = Array.isArray(sectionData) ? sectionData : sectionData?.fields;
+    if (!fieldsArray || !Array.isArray(fieldsArray)) return null;
     
-    const enabledFields = sectionData.fields.filter((f: any) => f.enabled && f.value?.trim());
+    const enabledFields = fieldsArray.filter((f: any) => f.enabled && f.value && String(f.value).trim());
     if (enabledFields.length === 0) return null;
     
     return (
       <div className="space-y-4">
         {enabledFields.map((field: any, index: number) => (
-          <div key={index} className="border-b pb-3 last:border-b-0">
+          <div key={field.id || index} className="border-b pb-3 last:border-b-0">
             <div className="font-medium text-sm mb-1">{field.label}</div>
             <div className="text-sm whitespace-pre-wrap text-muted-foreground">{field.value}</div>
           </div>
