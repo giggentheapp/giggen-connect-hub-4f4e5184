@@ -159,7 +159,7 @@ export default function TeachingAgreementView() {
 
   const teachingData = conceptData.teaching_data || {};
 
-  // Helper to render field items - only show if they have values
+  // Helper to render field items - only show if they have values (compact for print)
   const renderFieldItems = (value: any) => {
     if (!value || !Array.isArray(value)) return null;
     
@@ -167,11 +167,11 @@ export default function TeachingAgreementView() {
     if (items.length === 0) return null;
     
     return (
-      <div className="space-y-3">
+      <div className="space-y-1">
         {items.map((item: any, index: number) => (
-          <div key={index}>
-            <div className="font-medium text-sm mb-1">{item.label}</div>
-            <div className="text-sm whitespace-pre-wrap text-muted-foreground">{item.value}</div>
+          <div key={index} className="flex gap-2 text-sm">
+            <span className="font-medium shrink-0">{item.label}:</span>
+            <span className="text-muted-foreground">{item.value}</span>
           </div>
         ))}
       </div>
@@ -179,8 +179,8 @@ export default function TeachingAgreementView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Print Styles */}
+    <div className="max-w-3xl mx-auto p-4 print:p-2 print:max-w-full">
+      {/* Print Styles - Compact layout for 2 pages max */}
       <style>{`
         @media print {
           .no-print {
@@ -189,421 +189,346 @@ export default function TeachingAgreementView() {
           body {
             print-color-adjust: exact;
             -webkit-print-color-adjust: exact;
+            font-size: 11px;
+            line-height: 1.3;
           }
+          @page {
+            margin: 1cm;
+            size: A4;
+          }
+          h1 { font-size: 16px !important; margin-bottom: 4px !important; }
+          h2 { font-size: 12px !important; margin-bottom: 2px !important; }
+          .print-compact { padding: 4px 0 !important; margin: 0 !important; }
+          .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         }
       `}</style>
 
       {/* Header - No print */}
-      <div className="mb-6 no-print flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className="mb-4 no-print flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Tilbake
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Undervisningsavtale</h1>
-            <p className="text-muted-foreground">Fullstendig oversikt</p>
+            <h1 className="text-xl font-bold">Undervisningsavtale</h1>
+            <p className="text-sm text-muted-foreground">Kompakt utskriftsversjon</p>
           </div>
         </div>
-        <Button variant="outline" onClick={handlePrint}>
-          <Printer className="h-4 w-4 mr-2" />
-          Skriv ut / PDF
+        <Button variant="outline" size="sm" onClick={handlePrint}>
+          <Printer className="h-4 w-4 mr-1" />
+          Skriv ut
         </Button>
       </div>
 
-      {/* Print Header */}
-      <div className="hidden print:block mb-6">
-        <h1 className="text-2xl font-bold">Undervisningsavtale</h1>
-        <p className="text-sm text-muted-foreground">
-          Generert: {format(new Date(), 'dd.MM.yyyy HH:mm')}
+      {/* Print Header - Compact */}
+      <div className="hidden print:block mb-2 border-b pb-2">
+        <h1 className="text-lg font-bold">Undervisningsavtale</h1>
+        <p className="text-xs text-muted-foreground">
+          Generert: {format(new Date(), 'dd.MM.yyyy')} | {booking.title}
         </p>
       </div>
 
-      {/* Agreement Details */}
-      <div className="space-y-6">
-        {/* Basic Info */}
-        <div className="border-b pb-4">
-          <h2 className="text-lg font-semibold mb-3">Grunnleggende informasjon</h2>
-          <div className="space-y-2">
-            <div>
-              <span className="font-medium">Tittel:</span> {booking.title}
-            </div>
+      {/* Agreement Details - Compact grid layout */}
+      <div className="space-y-2 print:space-y-1">
+        {/* Basic Info - Inline */}
+        <div className="border-b pb-2 print:pb-1 print-compact">
+          <h2 className="text-base font-semibold mb-1 print:text-sm">Grunnleggende</h2>
+          <div className="text-sm space-y-0.5">
             {booking.description && booking.description.trim() && (
-              <div>
-                <span className="font-medium">Beskrivelse:</span> {booking.description}
-              </div>
+              <p className="text-muted-foreground">{booking.description}</p>
             )}
             {booking.personal_message && booking.personal_message.trim() && (
-              <div>
-                <span className="font-medium">Personlig melding:</span> {booking.personal_message}
-              </div>
+              <p className="text-muted-foreground italic text-xs">"{booking.personal_message}"</p>
             )}
           </div>
         </div>
 
-        {/* Schedule */}
-        {teachingData.schedule && renderFieldItems(teachingData.schedule) && (
-          <div className="border-b pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Undervisningstider</h2>
+        {/* Two-column grid for compact sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 print:print-grid">
+          {/* Schedule */}
+          {teachingData.schedule && renderFieldItems(teachingData.schedule) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1 flex items-center gap-1">
+                <Clock className="h-3 w-3" /> Tider
+              </h2>
+              {renderFieldItems(teachingData.schedule)}
             </div>
-            {renderFieldItems(teachingData.schedule)}
-          </div>
-        )}
+          )}
 
-        {/* Start Date */}
-        {teachingData.start_date && (
-          <div className="border-b pb-4">
-            <span className="font-medium">Startdato:</span> {
-              (() => {
-                try {
-                  return format(new Date(teachingData.start_date), 'dd.MM.yyyy');
-                } catch (error) {
-                  return teachingData.start_date;
-                }
-              })()
-            }
-          </div>
-        )}
-
-        {/* Duration */}
-        {teachingData.duration && renderFieldItems(teachingData.duration) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Varighet</h2>
-            {renderFieldItems(teachingData.duration)}
-          </div>
-        )}
-
-        {/* Location */}
-        {teachingData.location && renderFieldItems(teachingData.location) && (
-          <div className="border-b pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Sted</h2>
+          {/* Start Date + Duration combined */}
+          {(teachingData.start_date || (teachingData.duration && renderFieldItems(teachingData.duration))) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1">Varighet</h2>
+              <div className="text-sm space-y-0.5">
+                {teachingData.start_date && (
+                  <div className="flex gap-2">
+                    <span className="font-medium shrink-0">Start:</span>
+                    <span className="text-muted-foreground">
+                      {(() => {
+                        try { return format(new Date(teachingData.start_date), 'dd.MM.yyyy'); } 
+                        catch { return teachingData.start_date; }
+                      })()}
+                    </span>
+                  </div>
+                )}
+                {renderFieldItems(teachingData.duration)}
+              </div>
             </div>
-            {renderFieldItems(teachingData.location)}
-          </div>
-        )}
+          )}
 
-        {/* Payment */}
-        {teachingData.payment && renderFieldItems(teachingData.payment) && (
-          <div className="border-b pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Banknote className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Betaling</h2>
+          {/* Location */}
+          {teachingData.location && renderFieldItems(teachingData.location) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1 flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> Sted
+              </h2>
+              {renderFieldItems(teachingData.location)}
             </div>
-            {renderFieldItems(teachingData.payment)}
-          </div>
-        )}
+          )}
 
-        {/* Responsibilities */}
+          {/* Payment */}
+          {teachingData.payment && renderFieldItems(teachingData.payment) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1 flex items-center gap-1">
+                <Banknote className="h-3 w-3" /> Betaling
+              </h2>
+              {renderFieldItems(teachingData.payment)}
+            </div>
+          )}
+        </div>
+
+        {/* Full-width sections for longer content */}
         {teachingData.responsibilities && renderFieldItems(teachingData.responsibilities) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Ansvar og forventninger</h2>
+          <div className="border-b pb-2 print:pb-1 print-compact">
+            <h2 className="text-sm font-semibold mb-1">Ansvar og forventninger</h2>
             {renderFieldItems(teachingData.responsibilities)}
           </div>
         )}
 
-        {/* Focus */}
         {teachingData.focus && renderFieldItems(teachingData.focus) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Fokus og innhold</h2>
+          <div className="border-b pb-2 print:pb-1 print-compact">
+            <h2 className="text-sm font-semibold mb-1">Fokus og innhold</h2>
             {renderFieldItems(teachingData.focus)}
           </div>
         )}
 
-        {/* Termination */}
-        {teachingData.termination && renderFieldItems(teachingData.termination) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Oppsigelsesvilkår</h2>
-            {renderFieldItems(teachingData.termination)}
-          </div>
-        )}
+        {/* Grid for shorter terms */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 print:print-grid">
+          {teachingData.termination && renderFieldItems(teachingData.termination) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1">Oppsigelse</h2>
+              {renderFieldItems(teachingData.termination)}
+            </div>
+          )}
 
-        {/* Liability */}
-        {teachingData.liability && renderFieldItems(teachingData.liability) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Forsikring og ansvar</h2>
-            {renderFieldItems(teachingData.liability)}
-          </div>
-        )}
+          {teachingData.liability && renderFieldItems(teachingData.liability) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1">Forsikring/ansvar</h2>
+              {renderFieldItems(teachingData.liability)}
+            </div>
+          )}
 
-        {/* Communication */}
-        {teachingData.communication && renderFieldItems(teachingData.communication) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Kommunikasjon og avlysning</h2>
-            {renderFieldItems(teachingData.communication)}
-          </div>
-        )}
+          {teachingData.communication && renderFieldItems(teachingData.communication) && (
+            <div className="border-b pb-2 print:pb-1 print-compact">
+              <h2 className="text-sm font-semibold mb-1">Kommunikasjon</h2>
+              {renderFieldItems(teachingData.communication)}
+            </div>
+          )}
+        </div>
 
-        {/* Contact Info - Show both parties */}
+        {/* Contact Info - Compact two-column */}
         {(booking.sender_contact_info || booking.receiver_contact_info) && (
-          <div className="border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">Kontaktinformasjon</h2>
-            <div className="space-y-4">
-              {/* Sender contact info */}
+          <div className="border-b pb-2 print:pb-1 print-compact">
+            <h2 className="text-sm font-semibold mb-1">Kontaktinformasjon</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs print:print-grid">
               {booking.sender_contact_info && (
-                <div className="space-y-2">
-                  <h5 className="font-medium text-sm text-muted-foreground">Fra avsender (Lærer):</h5>
-                  {booking.sender_contact_info.email && (
-                    <div>
-                      <span className="font-medium">E-post:</span>{' '}
-                      <a href={`mailto:${booking.sender_contact_info.email}`} className="text-primary hover:underline">
-                        {booking.sender_contact_info.email}
-                      </a>
-                    </div>
-                  )}
-                  {booking.sender_contact_info.phone && (
-                    <div>
-                      <span className="font-medium">Telefon:</span>{' '}
-                      <a href={`tel:${booking.sender_contact_info.phone}`} className="text-primary hover:underline">
-                        {booking.sender_contact_info.phone}
-                      </a>
-                    </div>
-                  )}
-                  {booking.sender_contact_info.website && (
-                    <div>
-                      <span className="font-medium">Nettside:</span>{' '}
-                      <a href={booking.sender_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        {booking.sender_contact_info.website}
-                      </a>
-                    </div>
-                  )}
+                <div>
+                  <span className="font-medium">Lærer:</span>{' '}
+                  {booking.sender_contact_info.email && <span>{booking.sender_contact_info.email}</span>}
+                  {booking.sender_contact_info.phone && <span className="ml-2">• {booking.sender_contact_info.phone}</span>}
                 </div>
               )}
-
-              {/* Receiver contact info */}
               {booking.receiver_contact_info && (
-                <div className="space-y-2 border-t pt-4">
-                  <h5 className="font-medium text-sm text-muted-foreground">Fra mottaker (Elev):</h5>
-                  {booking.receiver_contact_info.email && (
-                    <div>
-                      <span className="font-medium">E-post:</span>{' '}
-                      <a href={`mailto:${booking.receiver_contact_info.email}`} className="text-primary hover:underline">
-                        {booking.receiver_contact_info.email}
-                      </a>
-                    </div>
-                  )}
-                  {booking.receiver_contact_info.phone && (
-                    <div>
-                      <span className="font-medium">Telefon:</span>{' '}
-                      <a href={`tel:${booking.receiver_contact_info.phone}`} className="text-primary hover:underline">
-                        {booking.receiver_contact_info.phone}
-                      </a>
-                    </div>
-                  )}
-                  {booking.receiver_contact_info.website && (
-                    <div>
-                      <span className="font-medium">Nettside:</span>{' '}
-                      <a href={booking.receiver_contact_info.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        {booking.receiver_contact_info.website}
-                      </a>
-                    </div>
-                  )}
+                <div>
+                  <span className="font-medium">Elev:</span>{' '}
+                  {booking.receiver_contact_info.email && <span>{booking.receiver_contact_info.email}</span>}
+                  {booking.receiver_contact_info.phone && <span className="ml-2">• {booking.receiver_contact_info.phone}</span>}
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Additional booking details */}
-        {booking.venue && booking.venue.trim() && (
-          <div className="border-b pb-4">
-            <span className="font-medium">Spillested:</span> {booking.venue}
-          </div>
-        )}
-        
-        {booking.address && booking.address.trim() && (
-          <div className="border-b pb-4">
-            <span className="font-medium">Adresse:</span> {booking.address}
+        {/* Additional details inline */}
+        {(booking.venue || booking.address) && (
+          <div className="text-xs text-muted-foreground">
+            {booking.venue && <span><strong>Sted:</strong> {booking.venue}</span>}
+            {booking.venue && booking.address && ' • '}
+            {booking.address && <span>{booking.address}</span>}
           </div>
         )}
 
-        {/* Party Information */}
-        <div className="border-t pt-4 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Parter</h2>
+        {/* Party Information - Compact signature section */}
+        <div className="border-t pt-3 mt-4 print:pt-2 print:mt-2">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold">Parter og signaturer</h2>
             {!isEditing && (
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setIsEditing(true)}
-                className="no-print"
+                className="no-print text-xs"
               >
-                <Edit2 className="h-4 w-4 mr-2" />
+                <Edit2 className="h-3 w-3 mr-1" />
                 Rediger
               </Button>
             )}
           </div>
 
           {isEditing ? (
-            <div className="space-y-6 no-print">
-              {/* Sender Editable */}
-              <div className="space-y-3">
-                <h3 className="font-medium">Avsender (Lærer)</h3>
-                <div className="grid gap-3">
-                  <div>
-                    <Label>Fullt navn</Label>
-                    <Input
-                      value={editedContacts.sender.name}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        sender: { ...prev.sender, name: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label>E-post</Label>
-                    <Input
-                      type="email"
-                      value={editedContacts.sender.email}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        sender: { ...prev.sender, email: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label>Telefon</Label>
-                    <Input
-                      type="tel"
-                      value={editedContacts.sender.phone}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        sender: { ...prev.sender, phone: e.target.value }
-                      }))}
-                    />
-                  </div>
+            <div className="space-y-4 no-print">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Sender Editable */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Lærer</h3>
+                  <Input
+                    placeholder="Navn"
+                    value={editedContacts.sender.name}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      sender: { ...prev.sender, name: e.target.value }
+                    }))}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="E-post"
+                    value={editedContacts.sender.email}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      sender: { ...prev.sender, email: e.target.value }
+                    }))}
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Telefon"
+                    value={editedContacts.sender.phone}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      sender: { ...prev.sender, phone: e.target.value }
+                    }))}
+                  />
                 </div>
-              </div>
 
-              {/* Receiver Editable */}
-              <div className="space-y-3">
-                <h3 className="font-medium">Mottaker (Elev)</h3>
-                <div className="grid gap-3">
-                  <div>
-                    <Label>Fullt navn</Label>
-                    <Input
-                      value={editedContacts.receiver.name}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        receiver: { ...prev.receiver, name: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label>E-post</Label>
-                    <Input
-                      type="email"
-                      value={editedContacts.receiver.email}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        receiver: { ...prev.receiver, email: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label>Telefon</Label>
-                    <Input
-                      type="tel"
-                      value={editedContacts.receiver.phone}
-                      onChange={(e) => setEditedContacts(prev => ({
-                        ...prev,
-                        receiver: { ...prev.receiver, phone: e.target.value }
-                      }))}
-                    />
-                  </div>
+                {/* Receiver Editable */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Elev</h3>
+                  <Input
+                    placeholder="Navn"
+                    value={editedContacts.receiver.name}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      receiver: { ...prev.receiver, name: e.target.value }
+                    }))}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="E-post"
+                    value={editedContacts.receiver.email}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      receiver: { ...prev.receiver, email: e.target.value }
+                    }))}
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Telefon"
+                    value={editedContacts.receiver.phone}
+                    onChange={(e) => setEditedContacts(prev => ({
+                      ...prev,
+                      receiver: { ...prev.receiver, phone: e.target.value }
+                    }))}
+                  />
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleSaveContacts}>
-                  <Save className="h-4 w-4 mr-2" />
+                <Button size="sm" onClick={handleSaveContacts}>
+                  <Save className="h-3 w-3 mr-1" />
                   Lagre
                 </Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  <X className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+                  <X className="h-3 w-3 mr-1" />
                   Avbryt
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4 print:gap-8">
               {/* Sender Display */}
-              <div className="space-y-2">
-                <h3 className="font-medium">Avsender (Lærer)</h3>
-                <div className="space-y-1 text-sm">
+              <div className="text-sm">
+                <h3 className="font-medium mb-1">Lærer</h3>
+                <div className="space-y-0.5 text-xs">
                   <div>
-                    <span className="font-medium">Navn:</span>{' '}
                     {senderProfile ? (
                       <Link 
                         to={`/profile/${senderProfile.user_id}`} 
-                        className="text-primary hover:underline no-print"
+                        className="text-primary hover:underline no-print font-medium"
                       >
                         {editedContacts.sender.name || senderProfile.display_name}
                       </Link>
                     ) : (
-                      editedContacts.sender.name
+                      <span className="font-medium">{editedContacts.sender.name}</span>
                     )}
-                    <span className="hidden print:inline">
+                    <span className="hidden print:inline font-medium">
                       {editedContacts.sender.name || senderProfile?.display_name}
                     </span>
                   </div>
-                  {editedContacts.sender.email && (
-                    <div>
-                      <span className="font-medium">E-post:</span> {editedContacts.sender.email}
-                    </div>
-                  )}
-                  {editedContacts.sender.phone && (
-                    <div>
-                      <span className="font-medium">Telefon:</span> {editedContacts.sender.phone}
-                    </div>
-                  )}
+                  {editedContacts.sender.email && <div>{editedContacts.sender.email}</div>}
+                  {editedContacts.sender.phone && <div>{editedContacts.sender.phone}</div>}
                 </div>
                 {booking.approved_by_sender && booking.sender_approved_at && (
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Godkjent: {format(new Date(booking.sender_approved_at), 'dd.MM.yyyy HH:mm')}
+                  <div className="text-xs text-green-600 mt-1">
+                    ✓ Godkjent {format(new Date(booking.sender_approved_at), 'dd.MM.yy')}
                   </div>
                 )}
+                {/* Signature line for print */}
+                <div className="hidden print:block mt-4 pt-2 border-t border-dashed">
+                  <div className="text-xs text-muted-foreground">Signatur / Dato</div>
+                </div>
               </div>
 
               {/* Receiver Display */}
-              <div className="space-y-2">
-                <h3 className="font-medium">Mottaker (Elev)</h3>
-                <div className="space-y-1 text-sm">
+              <div className="text-sm">
+                <h3 className="font-medium mb-1">Elev</h3>
+                <div className="space-y-0.5 text-xs">
                   <div>
-                    <span className="font-medium">Navn:</span>{' '}
                     {receiverProfile ? (
                       <Link 
                         to={`/profile/${receiverProfile.user_id}`} 
-                        className="text-primary hover:underline no-print"
+                        className="text-primary hover:underline no-print font-medium"
                       >
                         {editedContacts.receiver.name || receiverProfile.display_name}
                       </Link>
                     ) : (
-                      editedContacts.receiver.name
+                      <span className="font-medium">{editedContacts.receiver.name}</span>
                     )}
-                    <span className="hidden print:inline">
+                    <span className="hidden print:inline font-medium">
                       {editedContacts.receiver.name || receiverProfile?.display_name}
                     </span>
                   </div>
-                  {editedContacts.receiver.email && (
-                    <div>
-                      <span className="font-medium">E-post:</span> {editedContacts.receiver.email}
-                    </div>
-                  )}
-                  {editedContacts.receiver.phone && (
-                    <div>
-                      <span className="font-medium">Telefon:</span> {editedContacts.receiver.phone}
-                    </div>
-                  )}
+                  {editedContacts.receiver.email && <div>{editedContacts.receiver.email}</div>}
+                  {editedContacts.receiver.phone && <div>{editedContacts.receiver.phone}</div>}
                 </div>
                 {booking.approved_by_receiver && booking.receiver_approved_at && (
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Godkjent: {format(new Date(booking.receiver_approved_at), 'dd.MM.yyyy HH:mm')}
+                  <div className="text-xs text-green-600 mt-1">
+                    ✓ Godkjent {format(new Date(booking.receiver_approved_at), 'dd.MM.yy')}
                   </div>
                 )}
+                {/* Signature line for print */}
+                <div className="hidden print:block mt-4 pt-2 border-t border-dashed">
+                  <div className="text-xs text-muted-foreground">Signatur / Dato</div>
+                </div>
               </div>
             </div>
           )}
