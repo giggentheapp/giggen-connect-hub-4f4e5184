@@ -2,22 +2,26 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Printer, ArrowLeft, Clock, MapPin, Banknote, GraduationCap, Edit2, Save, X } from 'lucide-react';
+import { Printer, ArrowLeft, Clock, MapPin, Banknote, Edit2, Save, X, PenTool } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { SignatureCanvas } from '@/components/SignatureCanvas';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function TeachingAgreementView() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useCurrentUser();
   const [booking, setBooking] = useState<any>(null);
   const [conceptData, setConceptData] = useState<any>(null);
   const [senderProfile, setSenderProfile] = useState<any>(null);
   const [receiverProfile, setReceiverProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [editedContacts, setEditedContacts] = useState({
     sender: { name: '', email: '', phone: '' },
     receiver: { name: '', email: '', phone: '' }
@@ -97,6 +101,51 @@ export default function TeachingAgreementView() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const isSender = user?.id === booking?.sender_id;
+  const isReceiver = user?.id === booking?.receiver_id;
+  const currentSignature = isSender ? booking?.sender_signature : booking?.receiver_signature;
+  const currentSignedAt = isSender ? booking?.sender_signed_at : booking?.receiver_signed_at;
+
+  const handleSaveSignature = async (signatureDataUrl: string) => {
+    if (!bookingId || !user) return;
+
+    try {
+      const updateData = isSender
+        ? { sender_signature: signatureDataUrl, sender_signed_at: new Date().toISOString() }
+        : { receiver_signature: signatureDataUrl, receiver_signed_at: new Date().toISOString() };
+
+      const { error } = await supabase
+        .from('bookings')
+        .update(updateData)
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Signatur lagret",
+        description: "Din digitale signatur er registrert på avtalen"
+      });
+
+      setShowSignatureModal(false);
+
+      // Refresh booking data
+      const { data: updatedBooking } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
+      if (updatedBooking) setBooking(updatedBooking);
+    } catch (error) {
+      console.error('Error saving signature:', error);
+      toast({
+        title: "Feil ved lagring",
+        description: "Kunne ikke lagre signaturen",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSaveContacts = async () => {
@@ -492,10 +541,24 @@ export default function TeachingAgreementView() {
                     ✓ Godkjent {format(new Date(booking.sender_approved_at), 'dd.MM.yy')}
                   </div>
                 )}
-                {/* Signature line for print */}
-                <div className="hidden print:block mt-4 pt-2 border-t border-dashed">
-                  <div className="text-xs text-muted-foreground">Signatur / Dato</div>
-                </div>
+                {/* Digital Signature Display */}
+                {booking.sender_signature ? (
+                  <div className="mt-2">
+                    <img 
+                      src={booking.sender_signature} 
+                      alt="Lærer signatur" 
+                      className="h-12 max-w-full object-contain border-b border-muted"
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Signert {booking.sender_signed_at && format(new Date(booking.sender_signed_at), 'dd.MM.yy HH:mm')}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2 print:block">
+                    <div className="h-8 border-b border-dashed border-muted-foreground/50 print:h-12" />
+                    <div className="text-xs text-muted-foreground">Signatur</div>
+                  </div>
+                )}
               </div>
 
               {/* Receiver Display */}
@@ -525,15 +588,56 @@ export default function TeachingAgreementView() {
                     ✓ Godkjent {format(new Date(booking.receiver_approved_at), 'dd.MM.yy')}
                   </div>
                 )}
-                {/* Signature line for print */}
-                <div className="hidden print:block mt-4 pt-2 border-t border-dashed">
-                  <div className="text-xs text-muted-foreground">Signatur / Dato</div>
-                </div>
+                {/* Digital Signature Display */}
+                {booking.receiver_signature ? (
+                  <div className="mt-2">
+                    <img 
+                      src={booking.receiver_signature} 
+                      alt="Elev signatur" 
+                      className="h-12 max-w-full object-contain border-b border-muted"
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Signert {booking.receiver_signed_at && format(new Date(booking.receiver_signed_at), 'dd.MM.yy HH:mm')}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2 print:block">
+                    <div className="h-8 border-b border-dashed border-muted-foreground/50 print:h-12" />
+                    <div className="text-xs text-muted-foreground">Signatur</div>
+                  </div>
+                )}
               </div>
+            </div>
+          )}
+
+          {/* Sign Button - only show for party members who haven't signed */}
+          {(isSender || isReceiver) && !currentSignature && (
+            <div className="mt-4 no-print">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setShowSignatureModal(true)}
+              >
+                <PenTool className="h-3 w-3 mr-1" />
+                Signer avtalen
+              </Button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Signature Modal */}
+      <Dialog open={showSignatureModal} onOpenChange={setShowSignatureModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Digital signatur</DialogTitle>
+          </DialogHeader>
+          <SignatureCanvas 
+            onSave={handleSaveSignature}
+            onCancel={() => setShowSignatureModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
