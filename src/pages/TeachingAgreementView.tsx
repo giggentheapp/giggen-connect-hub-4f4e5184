@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { SignatureCanvas } from '@/components/SignatureCanvas';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export default function TeachingAgreementView() {
   const { bookingId } = useParams();
@@ -631,6 +631,9 @@ export default function TeachingAgreementView() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Digital signatur</DialogTitle>
+            <DialogDescription>
+              Tegn signaturen din i feltet under for å signere avtalen digitalt.
+            </DialogDescription>
           </DialogHeader>
           <SignatureCanvas 
             onSave={handleSaveSignature}
