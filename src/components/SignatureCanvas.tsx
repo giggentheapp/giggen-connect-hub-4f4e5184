@@ -29,13 +29,15 @@ export const SignatureCanvas = ({
       width,
       height,
       backgroundColor: '#ffffff',
-      isDrawingMode: true,
     });
+
+    // Enable drawing mode AFTER canvas creation (required for Fabric.js v6)
+    canvas.isDrawingMode = true;
 
     // Configure drawing brush
     if (canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.color = '#1a1a2e';
-      canvas.freeDrawingBrush.width = 2;
+      canvas.freeDrawingBrush.width = 3;
     }
 
     // Track when user draws
