@@ -42,7 +42,8 @@ export default function ConceptOwnerView() {
   const updateConceptMutation = useUpdateConcept();
 
   const currentUserId = user?.id || null;
-  const isOwner = currentUserId === concept?.maker_id;
+  // Only determine ownership when both user and concept are fully loaded
+  const isOwner = !userLoading && !conceptLoading && currentUserId !== null && currentUserId === concept?.maker_id;
   const loading = userLoading || conceptLoading;
 
   // Fetch concept directly by ID (allows viewing concepts from any user)
