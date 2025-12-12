@@ -5,15 +5,16 @@ import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useBooking } from '@/hooks/useBooking';
-import { Check, Calendar, MapPin, Banknote, Users, Eye, ChevronRight, Clock, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Check, Calendar, MapPin, Banknote, Users, Eye, ChevronRight, Clock, RefreshCw, ArrowLeft, Printer, GraduationCap } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
 import { navigateToAuth, navigateToProfile } from '@/lib/navigation';
+import { supabase } from '@/integrations/supabase/client';
 
-const SECTIONS = [
+const STANDARD_SECTIONS = [
   {
     id: 'basic',
     title: 'Grunnleggende informasjon',
@@ -23,6 +24,29 @@ const SECTIONS = [
     id: 'pricing',
     title: 'Publikum og prising',
     icon: Banknote
+  }
+];
+
+const TEACHING_SECTIONS = [
+  {
+    id: 'basic',
+    title: 'Grunnleggende informasjon',
+    icon: Eye
+  },
+  {
+    id: 'schedule',
+    title: 'Undervisningstider og varighet',
+    icon: Clock
+  },
+  {
+    id: 'payment',
+    title: 'Betaling og honorar',
+    icon: Banknote
+  },
+  {
+    id: 'responsibilities',
+    title: 'Ansvar og vilkår',
+    icon: GraduationCap
   }
 ];
 
@@ -36,6 +60,7 @@ const BookingAgreementReview = () => {
   const [loading, setLoading] = useState(false);
   const [hasChangedSinceLastApproval, setHasChangedSinceLastApproval] = useState(false);
   const [fetchingFreshData, setFetchingFreshData] = useState(false);
+  const [conceptData, setConceptData] = useState<any>(null);
   
   const { user, loading: userLoading } = useCurrentUser();
   const { booking, loading: bookingLoading, refetch } = useBooking(bookingId);
@@ -43,6 +68,36 @@ const BookingAgreementReview = () => {
   const { toast } = useToast();
   
   const currentUserId = user?.id || null;
+
+  // Fetch concept data if booking has selected_concept_id
+  useEffect(() => {
+    const fetchConceptData = async () => {
+      if (!booking?.selected_concept_id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('concepts')
+          .select('*')
+          .eq('id', booking.selected_concept_id)
+          .single();
+        
+        if (!error && data) {
+          setConceptData(data);
+        }
+      } catch (err) {
+        console.error('Error fetching concept:', err);
+      }
+    };
+    
+    fetchConceptData();
+  }, [booking?.selected_concept_id]);
+
+  // Determine if this is a teaching agreement
+  const isTeaching = conceptData?.concept_type === 'teaching';
+  const teachingData = conceptData?.teaching_data || {};
+  
+  // Use appropriate sections based on concept type
+  const SECTIONS = isTeaching ? TEACHING_SECTIONS : STANDARD_SECTIONS;
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -155,6 +210,25 @@ const BookingAgreementReview = () => {
     }
   };
 
+  // Helper to render teaching field items
+  const renderTeachingFields = (sectionData: any) => {
+    if (!sectionData?.fields) return null;
+    
+    const enabledFields = sectionData.fields.filter((f: any) => f.enabled && f.value?.trim());
+    if (enabledFields.length === 0) return null;
+    
+    return (
+      <div className="space-y-4">
+        {enabledFields.map((field: any, index: number) => (
+          <div key={index} className="border-b pb-3 last:border-b-0">
+            <div className="font-medium text-sm mb-1">{field.label}</div>
+            <div className="text-sm whitespace-pre-wrap text-muted-foreground">{field.value}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const renderSectionContent = () => {
     if (!booking) return null;
 
@@ -164,12 +238,20 @@ const BookingAgreementReview = () => {
       case 'basic':
         return (
           <div className="space-y-4">
+            {/* For teaching: show title and description from concept/booking */}
+            {isTeaching && (
+              <Badge variant="secondary" className="mb-4">
+                <GraduationCap className="h-3 w-3 mr-1" />
+                Undervisningsavtale
+              </Badge>
+            )}
+
             {/* Prominent Date/Time Section */}
             {(booking.event_date || booking.time) && (
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
                 <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
-                  Dato og tid for arrangementet
+                  {isTeaching ? 'Startdato' : 'Dato og tid for arrangementet'}
                 </h4>
                 <div className="text-2xl font-bold text-primary">
                   {booking.event_date && (
@@ -223,7 +305,7 @@ const BookingAgreementReview = () => {
                 {/* Sender contact info - visible to receiver */}
                 {!isSender && booking.sender_contact_info && (
                   <div className="space-y-2">
-                    <h5 className="text-sm font-medium text-muted-foreground">Fra arrangør:</h5>
+                    <h5 className="text-sm font-medium text-muted-foreground">{isTeaching ? 'Fra lærer:' : 'Fra arrangør:'}</h5>
                     {booking.sender_contact_info.email && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">E-post:</span>
@@ -246,7 +328,7 @@ const BookingAgreementReview = () => {
                 {/* Receiver contact info - visible to sender */}
                 {isSender && booking.receiver_contact_info && (
                   <div className="space-y-2">
-                    <h5 className="text-sm font-medium text-muted-foreground">Fra musiker:</h5>
+                    <h5 className="text-sm font-medium text-muted-foreground">{isTeaching ? 'Fra elev:' : 'Fra musiker:'}</h5>
                     {booking.receiver_contact_info.email && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">E-post:</span>
@@ -279,13 +361,93 @@ const BookingAgreementReview = () => {
 
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-sm">
-                Dette er grunnleggende informasjon om arrangementet. Les gjennom alle detaljer nøye før du fortsetter.
+                {isTeaching 
+                  ? 'Dette er grunnleggende informasjon om undervisningsavtalen. Les gjennom alle detaljer nøye før du fortsetter.'
+                  : 'Dette er grunnleggende informasjon om arrangementet. Les gjennom alle detaljer nøye før du fortsetter.'}
               </p>
             </div>
           </div>
         );
 
-      case 'pricing':
+      // Teaching-specific sections
+      case 'schedule':
+        return (
+          <div className="space-y-6">
+            {/* Schedule section from teaching_data */}
+            {teachingData.schedule && renderTeachingFields(teachingData.schedule) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
+                  Undervisningstider
+                </h4>
+                {renderTeachingFields(teachingData.schedule)}
+              </div>
+            )}
+            
+            {/* Duration section */}
+            {teachingData.duration && renderTeachingFields(teachingData.duration) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Varighet</h4>
+                {renderTeachingFields(teachingData.duration)}
+              </div>
+            )}
+
+            {/* Location section */}
+            {teachingData.location && renderTeachingFields(teachingData.location) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Sted
+                </h4>
+                {renderTeachingFields(teachingData.location)}
+              </div>
+            )}
+
+            {!teachingData.schedule && !teachingData.duration && !teachingData.location && (
+              <div className="text-muted-foreground text-center py-8">
+                Ingen tidsinfo er spesifisert for denne avtalen.
+              </div>
+            )}
+
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm">
+                Sørg for at du er enig i undervisningstidene og varigheten før du fortsetter.
+              </p>
+            </div>
+          </div>
+        );
+
+      case 'payment':
+        // Teaching payment from teaching_data
+        if (isTeaching) {
+          return (
+            <div className="space-y-6">
+              {teachingData.payment && renderTeachingFields(teachingData.payment) && (
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Banknote className="h-5 w-5 text-primary" />
+                    Betalingsvilkår
+                  </h4>
+                  {renderTeachingFields(teachingData.payment)}
+                </div>
+              )}
+
+              {!teachingData.payment && (
+                <div className="text-muted-foreground text-center py-8">
+                  Ingen betalingsinformasjon er spesifisert for denne avtalen.
+                </div>
+              )}
+
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm">
+                  Sørg for at du forstår og godtar alle betalingsvilkår.
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        // Standard pricing section for non-teaching
         const audienceEstimate = booking.audience_estimate || 0;
         const ticketPrice = booking.ticket_price || 0;
         const totalRevenue = audienceEstimate * ticketPrice;
@@ -381,6 +543,64 @@ const BookingAgreementReview = () => {
           </div>
         );
 
+      case 'responsibilities':
+        return (
+          <div className="space-y-6">
+            {/* Responsibilities */}
+            {teachingData.responsibilities && renderTeachingFields(teachingData.responsibilities) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Ansvar og forventninger</h4>
+                {renderTeachingFields(teachingData.responsibilities)}
+              </div>
+            )}
+
+            {/* Focus */}
+            {teachingData.focus && renderTeachingFields(teachingData.focus) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Fokus og innhold</h4>
+                {renderTeachingFields(teachingData.focus)}
+              </div>
+            )}
+
+            {/* Termination */}
+            {teachingData.termination && renderTeachingFields(teachingData.termination) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Oppsigelsesvilkår</h4>
+                {renderTeachingFields(teachingData.termination)}
+              </div>
+            )}
+
+            {/* Liability */}
+            {teachingData.liability && renderTeachingFields(teachingData.liability) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Forsikring og ansvar</h4>
+                {renderTeachingFields(teachingData.liability)}
+              </div>
+            )}
+
+            {/* Communication */}
+            {teachingData.communication && renderTeachingFields(teachingData.communication) && (
+              <div className="bg-muted/50 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg mb-4">Kommunikasjon og avlysning</h4>
+                {renderTeachingFields(teachingData.communication)}
+              </div>
+            )}
+
+            {!teachingData.responsibilities && !teachingData.focus && !teachingData.termination && 
+             !teachingData.liability && !teachingData.communication && (
+              <div className="text-muted-foreground text-center py-8">
+                Ingen vilkår er spesifisert for denne avtalen.
+              </div>
+            )}
+
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm">
+                Les gjennom alle vilkår og ansvarspunkter før du godkjenner avtalen.
+              </p>
+            </div>
+          </div>
+        );
+
       default:
         return <div>Ukjent seksjon</div>;
     }
@@ -420,14 +640,35 @@ const BookingAgreementReview = () => {
               <ArrowLeft className="h-4 w-4" />
               Tilbake
             </Button>
-            {fetchingFreshData && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                <span>Oppdaterer...</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {fetchingFreshData && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  <span>Oppdaterer...</span>
+                </div>
+              )}
+              {/* Print button - links to printable view */}
+              {isTeaching && bookingId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/teaching-agreement/${bookingId}`)}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Skriv ut / PDF</span>
+                </Button>
+              )}
+            </div>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Gjennomgå avtale før godkjenning</h1>
+          <div className="flex items-center gap-3 mb-2">
+            {isTeaching && (
+              <Badge variant="secondary">
+                <GraduationCap className="h-3 w-3 mr-1" />
+                Undervisningsavtale
+              </Badge>
+            )}
+            <h1 className="text-2xl font-bold">Gjennomgå avtale før godkjenning</h1>
+          </div>
           <p className="text-sm text-muted-foreground">
             Steg {currentStep + 1} av {SECTIONS.length}
           </p>
