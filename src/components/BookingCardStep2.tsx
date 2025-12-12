@@ -36,32 +36,34 @@ export const BookingCardStep2 = ({
   const isApprovedByBoth = booking.status === 'approved_by_both';
   const canEdit = canBeEditedByParties(booking.status as BookingStatus) && !isApprovedByBoth;
   const isReceiver = currentUserId === booking.receiver_id;
-  const [senderProfile, setSenderProfile] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
+  const [otherPartyProfile, setOtherPartyProfile] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
 
-  // Load sender profile for receivers
+  // Load other party's profile
   useEffect(() => {
-    if (isReceiver && booking.sender_id) {
-      const loadSenderProfile = async () => {
+    const otherPartyId = isReceiver ? booking.sender_id : booking.receiver_id;
+    if (otherPartyId) {
+      const loadProfile = async () => {
         try {
-          const profile = await bookingService.getMakerProfile(booking.sender_id);
+          const profile = await bookingService.getMakerProfile(otherPartyId);
           if (profile) {
-            setSenderProfile({
+            setOtherPartyProfile({
               display_name: profile.display_name || 'Ukjent',
               avatar_url: profile.avatar_url || null
             });
           }
         } catch (error) {
-          console.error('Error loading sender profile:', error);
+          console.error('Error loading profile:', error);
         }
       };
-      loadSenderProfile();
+      loadProfile();
     }
-  }, [isReceiver, booking.sender_id]);
+  }, [isReceiver, booking.sender_id, booking.receiver_id]);
 
-  const handleSenderClick = (e: React.MouseEvent) => {
+  const handleProfileClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (booking.sender_id) {
-      navigate(`/profile/${booking.sender_id}`, { 
+    const otherPartyId = isReceiver ? booking.sender_id : booking.receiver_id;
+    if (otherPartyId) {
+      navigate(`/profile/${otherPartyId}`, { 
         state: { fromSection: 'bookings' } 
       });
     }
@@ -83,20 +85,20 @@ export const BookingCardStep2 = ({
           )}
         </div>
 
-        {/* Sender profile - only show for receivers */}
-        {isReceiver && senderProfile && (
+        {/* Other party profile */}
+        {otherPartyProfile && (
           <div 
             className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer w-fit"
-            onClick={handleSenderClick}
+            onClick={handleProfileClick}
           >
             <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage src={senderProfile.avatar_url || undefined} />
+              <AvatarImage src={otherPartyProfile.avatar_url || undefined} />
               <AvatarFallback className="text-xs">
-                {senderProfile.display_name.substring(0, 2).toUpperCase()}
+                {otherPartyProfile.display_name.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <span className="text-sm text-muted-foreground">
-              fra {senderProfile.display_name}
+              {isReceiver ? 'fra' : 'til'} {otherPartyProfile.display_name}
             </span>
           </div>
         )}
