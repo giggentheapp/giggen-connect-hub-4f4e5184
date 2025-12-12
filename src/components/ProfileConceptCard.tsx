@@ -17,6 +17,8 @@ interface ProfileConceptCardProps {
     expected_audience?: number | null;
     ticket_price?: number | null;
     maker_id: string;
+    concept_type?: string;
+    teaching_data?: any;
   };
 }
 
@@ -56,6 +58,32 @@ export const ProfileConceptCard = ({ concept }: ProfileConceptCardProps) => {
   };
 
   const formatPriceDisplay = () => {
+    // For teaching concepts, get pricing from teaching_data.payment
+    if (concept.concept_type === 'teaching' && concept.teaching_data?.payment) {
+      const paymentData = concept.teaching_data.payment;
+      const enabledFields = paymentData.fields?.filter((f: any) => f.enabled) || [];
+      
+      // Look for rate/price fields
+      const rateField = enabledFields.find((f: any) => 
+        f.label?.toLowerCase().includes('timepris') || 
+        f.label?.toLowerCase().includes('pris') ||
+        f.label?.toLowerCase().includes('rate') ||
+        f.label?.toLowerCase().includes('honorar')
+      );
+      
+      if (rateField?.value) {
+        return rateField.value;
+      }
+      
+      // If no specific rate found, show first enabled field with value
+      const firstWithValue = enabledFields.find((f: any) => f.value);
+      if (firstWithValue?.value) {
+        return firstWithValue.value;
+      }
+      
+      return 'Se detaljer';
+    }
+    
     if (concept.door_deal && concept.door_percentage) {
       return `${concept.door_percentage}% av dørsalg`;
     }
