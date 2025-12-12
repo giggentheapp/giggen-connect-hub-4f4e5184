@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Canvas as FabricCanvas } from 'fabric';
+import { Canvas as FabricCanvas, PencilBrush } from 'fabric';
 import { Button } from '@/components/ui/button';
-import { Eraser, Check, RotateCcw } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 
 interface SignatureCanvasProps {
   onSave: (signatureDataUrl: string) => void;
@@ -15,72 +15,96 @@ export const SignatureCanvas = ({
   onSave,
   onCancel,
   existingSignature,
-  width = 400,
-  height = 150
+  width = 380,
+  height = 140
 }: SignatureCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    // Small delay to ensure DOM is ready in Dialog
+    const timer = setTimeout(() => {
+      if (!canvasRef.current || fabricCanvasRef.current) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width,
-      height,
-      backgroundColor: '#ffffff',
-    });
+      const canvas = new FabricCanvas(canvasRef.current, {
+        width,
+        height,
+        backgroundColor: '#ffffff',
+        selection: false,
+      });
 
-    // Enable drawing mode AFTER canvas creation (required for Fabric.js v6)
-    canvas.isDrawingMode = true;
+      // Create and configure brush
+      const brush = new PencilBrush(canvas);
+      brush.color = '#1a1a2e';
+      brush.width = 3;
+      canvas.freeDrawingBrush = brush;
+      
+      // Enable drawing mode
+      canvas.isDrawingMode = true;
 
-    // Configure drawing brush
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = '#1a1a2e';
-      canvas.freeDrawingBrush.width = 3;
-    }
+      // Track when user draws
+      canvas.on('path:created', () => {
+        setHasDrawn(true);
+      });
 
-    // Track when user draws
-    canvas.on('path:created', () => {
-      setHasDrawn(true);
-    });
-
-    setFabricCanvas(canvas);
+      fabricCanvasRef.current = canvas;
+      setIsReady(true);
+    }, 100);
 
     return () => {
-      canvas.dispose();
+      clearTimeout(timer);
+      if (fabricCanvasRef.current) {
+        fabricCanvasRef.current.dispose();
+        fabricCanvasRef.current = null;
+      }
     };
   }, [width, height]);
 
   const handleClear = useCallback(() => {
-    if (!fabricCanvas) return;
-    fabricCanvas.clear();
-    fabricCanvas.backgroundColor = '#ffffff';
-    fabricCanvas.renderAll();
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+    canvas.clear();
+    canvas.backgroundColor = '#ffffff';
+    canvas.renderAll();
     setHasDrawn(false);
-  }, [fabricCanvas]);
+  }, []);
 
   const handleSave = useCallback(() => {
-    if (!fabricCanvas || !hasDrawn) return;
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || !hasDrawn) return;
     
     // Export as data URL
-    const dataUrl = fabricCanvas.toDataURL({
+    const dataUrl = canvas.toDataURL({
       format: 'png',
       quality: 1,
-      multiplier: 2, // Higher resolution
+      multiplier: 2,
     });
     
     onSave(dataUrl);
-  }, [fabricCanvas, hasDrawn, onSave]);
+  }, [hasDrawn, onSave]);
 
   return (
     <div className="space-y-3">
-      <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden bg-white">
-        <canvas ref={canvasRef} className="touch-none" />
+      <div 
+        ref={containerRef}
+        className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden bg-white"
+        style={{ width: width + 4, height: height + 4 }}
+      >
+        <canvas 
+          ref={canvasRef} 
+          style={{ 
+            display: 'block',
+            touchAction: 'none',
+            cursor: 'crosshair'
+          }} 
+        />
       </div>
       
       <p className="text-xs text-muted-foreground text-center">
-        Tegn signaturen din med mus eller finger
+        {isReady ? 'Tegn signaturen din med mus eller finger' : 'Klargjør...'}
       </p>
       
       <div className="flex gap-2 justify-center">
@@ -89,7 +113,7 @@ export const SignatureCanvas = ({
           variant="outline"
           size="sm"
           onClick={handleClear}
-          disabled={!hasDrawn}
+          disabled={!hasDrawn || !isReady}
         >
           <RotateCcw className="h-3 w-3 mr-1" />
           Nullstill
@@ -110,7 +134,7 @@ export const SignatureCanvas = ({
           type="button"
           size="sm"
           onClick={handleSave}
-          disabled={!hasDrawn}
+          disabled={!hasDrawn || !isReady}
         >
           <Check className="h-3 w-3 mr-1" />
           Bekreft signatur
