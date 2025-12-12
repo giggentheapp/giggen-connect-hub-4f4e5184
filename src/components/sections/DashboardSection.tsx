@@ -109,8 +109,15 @@ export const DashboardSection = ({
     missingFields
   } = calculateProfileCompletion(profile);
 
-  // Calculate stats
-  const activeBookings = bookingsData?.filter(b => b.status === "upcoming" || b.status === "both_parties_approved").length || 0;
+  // Calculate stats - include all active/ongoing booking statuses
+  const activeBookings = bookingsData?.filter(b => 
+    b.status === "upcoming" || 
+    b.status === "both_parties_approved" || 
+    b.status === "approved_by_both" ||
+    b.status === "allowed" ||
+    b.status === "approved_by_sender" ||
+    b.status === "approved_by_receiver"
+  ).length || 0;
   const pendingRequests = bookingsData?.filter(b => b.status === "pending" && b.receiver_id === profile.user_id).length || 0;
 
   // Use completed events from combined hook (bookings + events_market)
