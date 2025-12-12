@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle, Plus, X, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,12 +27,67 @@ export const EditableTeachingDetails = ({
   const teachingData = conceptData?.teaching_data || {};
   const [formData, setFormData] = useState(teachingData);
   const [loading, setLoading] = useState(false);
+  const [showFieldManager, setShowFieldManager] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   const isOwner = currentUserId === conceptData?.maker_id;
   const canEdit = isOwner;
+
+  // Toggle field enabled status
+  const toggleFieldEnabled = (sectionKey: string, fieldId: string) => {
+    setFormData((prev: any) => {
+      const section = prev[sectionKey];
+      if (!Array.isArray(section)) return prev;
+
+      const updated = section.map((field: any) => 
+        field.id === fieldId ? { ...field, enabled: !field.enabled } : field
+      );
+
+      return { ...prev, [sectionKey]: updated };
+    });
+  };
+
+  // Add custom field to a section
+  const addCustomField = (sectionKey: string) => {
+    setFormData((prev: any) => {
+      const section = prev[sectionKey] || [];
+      const newField = {
+        id: `custom_${Date.now()}`,
+        label: '',
+        value: '',
+        isCustom: true,
+        enabled: true,
+      };
+
+      return { ...prev, [sectionKey]: [...section, newField] };
+    });
+  };
+
+  // Remove custom field from a section
+  const removeCustomField = (sectionKey: string, fieldId: string) => {
+    setFormData((prev: any) => {
+      const section = prev[sectionKey];
+      if (!Array.isArray(section)) return prev;
+
+      return { ...prev, [sectionKey]: section.filter((f: any) => f.id !== fieldId) };
+    });
+  };
+
+  // Update custom field label
+  const updateFieldLabel = (sectionKey: string, fieldId: string, newLabel: string) => {
+    setFormData((prev: any) => {
+      const section = prev[sectionKey];
+      if (!Array.isArray(section)) return prev;
+
+      const updated = section.map((field: any) => 
+        field.id === fieldId ? { ...field, label: newLabel } : field
+      );
+
+      return { ...prev, [sectionKey]: updated };
+    });
+  };
 
   // Helper to update field values
   const updateFieldValue = (sectionKey: string, fieldId: string, newValue: string) => {
@@ -105,13 +162,13 @@ export const EditableTeachingDetails = ({
     }
   };
 
-  // Render fields for a section
+  // Render section for editing (enabled fields with values)
   const renderSection = (sectionKey: string, sectionTitle: string, icon: any) => {
     const sectionData = formData[sectionKey];
     if (!sectionData || !Array.isArray(sectionData)) return null;
 
     const enabledFields = sectionData.filter((field: any) => field.enabled && field.value);
-    if (enabledFields.length === 0) return null;
+    if (enabledFields.length === 0 && !showFieldManager) return null;
 
     const Icon = icon;
 
@@ -124,7 +181,21 @@ export const EditableTeachingDetails = ({
         
         {enabledFields.map((field: any) => (
           <div key={field.id} className="space-y-2">
-            <Label>{field.label}</Label>
+            {field.isCustom && canEdit ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={field.label || ''}
+                  onChange={(e) => updateFieldLabel(sectionKey, field.id, e.target.value)}
+                  placeholder="Feltnavn"
+                  className="font-medium"
+                />
+                <Button variant="ghost" size="sm" onClick={() => removeCustomField(sectionKey, field.id)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Label>{field.label}</Label>
+            )}
             {canEdit ? (
               <Textarea
                 value={field.value || ''}
@@ -143,8 +214,86 @@ export const EditableTeachingDetails = ({
     );
   };
 
+  // Render field manager for a section (toggle fields on/off)
+  const renderFieldManager = (sectionKey: string, sectionTitle: string) => {
+    const sectionData = formData[sectionKey];
+    if (!sectionData || !Array.isArray(sectionData)) return null;
+
+    return (
+      <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+        <h4 className="text-sm font-semibold">{sectionTitle}</h4>
+        <div className="space-y-2">
+          {sectionData.map((field: any) => (
+            <div key={field.id} className="flex items-center gap-3 p-2 border rounded bg-background">
+              <Checkbox
+                checked={field.enabled}
+                onCheckedChange={() => toggleFieldEnabled(sectionKey, field.id)}
+              />
+              {field.isCustom ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <Input
+                    value={field.label || ''}
+                    onChange={(e) => updateFieldLabel(sectionKey, field.id, e.target.value)}
+                    placeholder="Feltnavn"
+                    className="text-sm"
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => removeCustomField(sectionKey, field.id)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <span className="text-sm">{field.label}</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => addCustomField(sectionKey)}
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Legg til eget felt
+        </Button>
+      </div>
+    );
+  };
+
+  // Section definitions for field manager
+  const sections = [
+    { key: 'schedule', title: 'Undervisningstider', icon: Clock },
+    { key: 'payment', title: 'Betaling', icon: Banknote },
+    { key: 'responsibilities', title: 'Ansvar og forventninger', icon: GraduationCap },
+    { key: 'focus', title: 'Fokus og innhold', icon: GraduationCap },
+    { key: 'termination', title: 'Oppsigelsesvilkår', icon: GraduationCap },
+    { key: 'liability', title: 'Forsikring og ansvar', icon: GraduationCap },
+    { key: 'communication', title: 'Kommunikasjon og avlysning', icon: GraduationCap },
+  ];
+
   return (
     <div className="space-y-8">
+      {/* Field Manager Toggle for Owner */}
+      {canEdit && (
+        <Collapsible open={showFieldManager} onOpenChange={setShowFieldManager}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Administrer felt
+              </div>
+              {showFieldManager ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4 space-y-4">
+            <div className="text-sm text-muted-foreground mb-4">
+              Her kan du aktivere/deaktivere felt eller legge til egne felt under forhandlingen.
+            </div>
+            {sections.map(section => renderFieldManager(section.key, section.title))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
       {/* Basic Info */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-3">
