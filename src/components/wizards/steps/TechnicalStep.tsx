@@ -15,6 +15,7 @@ export const TechnicalStep = React.memo(({
   data,
   updateData,
   userId,
+  onSaveDraft,
 }: WizardStepProps) => {
   const [showTechSpecModal, setShowTechSpecModal] = useState(false);
   const [showHospitalityModal, setShowHospitalityModal] = useState(false);
@@ -49,6 +50,13 @@ export const TechnicalStep = React.memo(({
     updateData('selected_hospitality_rider_file', '');
     updateData('_hospitalityFileData', null);
   }, [updateData]);
+
+  // Save draft before navigating to filebank
+  const handleNavigateToFilbank = useCallback(async () => {
+    if (onSaveDraft) {
+      await onSaveDraft();
+    }
+  }, [onSaveDraft]);
 
   const techSpecFile = data._techSpecFileData;
   const hospitalityFile = data._hospitalityFileData;
@@ -188,6 +196,7 @@ export const TechnicalStep = React.memo(({
         onSelect={(file) => file && handleTechSpecFileSelected(file)}
         userId={userId}
         category="tech_spec"
+        onNavigateToFilbank={handleNavigateToFilbank}
       />
 
       <FilebankSelectionModal
@@ -196,6 +205,7 @@ export const TechnicalStep = React.memo(({
         onSelect={(file) => file && handleHospitalityFileSelected(file)}
         userId={userId}
         category="hospitality_rider"
+        onNavigateToFilbank={handleNavigateToFilbank}
       />
     </>
   );
