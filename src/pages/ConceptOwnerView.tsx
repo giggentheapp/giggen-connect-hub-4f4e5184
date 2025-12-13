@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon, Ticket, TrendingUp, Download } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Ticket, TrendingUp, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { conceptService } from '@/services/conceptService';
@@ -15,6 +14,7 @@ import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } fro
 import { navigateToProfile, navigateToAuth } from '@/lib/navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
+import { UniversalGallery, GalleryFile } from '@/components/UniversalGallery';
 
 // Note: This page allows viewing concepts from any user (for booking requests)
 // so we don't redirect if not logged in - the concept might be shared
@@ -44,7 +44,6 @@ export default function ConceptOwnerView() {
   const { toast } = useToast();
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
   const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
-  const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
   const [concept, setConcept] = useState<any>(null);
   const [conceptLoading, setConceptLoading] = useState(true);
 
@@ -172,180 +171,17 @@ export default function ConceptOwnerView() {
     }
   };
 
-  const getPublicUrl = (filePath: string) => {
-    return `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${filePath}`;
-  };
-
-  const isVideoFile = (file: ConceptFile) => {
-    return file.file_type === 'video' || file.mime_type?.startsWith('video/');
-  };
-
-  const isAudioFile = (file: ConceptFile) => {
-    return file.file_type === 'audio' || file.mime_type?.startsWith('audio/');
-  };
-
-  const renderFilePreview = (file: ConceptFile) => {
-    const publicUrl = getPublicUrl(file.file_path);
-
-    // Image
-    if (file.file_type === 'image' || file.mime_type?.startsWith('image/')) {
-      return (
-        <div className="relative w-full h-full group">
-          <img
-            src={publicUrl}
-            alt={file.title || file.filename}
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-              <Expand className="w-4 h-4 text-white" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Video with thumbnail
-    if (isVideoFile(file) && file.thumbnail_path) {
-      const thumbnailUrl = getPublicUrl(file.thumbnail_path);
-      return (
-        <div className="relative w-full h-full group">
-          <img
-            src={thumbnailUrl}
-            alt={file.title || file.filename}
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-              <Play className="w-6 h-6 text-black ml-1" fill="black" />
-            </div>
-          </div>
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-              <Expand className="w-4 h-4 text-white" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Video without thumbnail
-    if (isVideoFile(file)) {
-      return (
-        <div className="relative w-full h-full group">
-          <video
-            src={publicUrl}
-            className="w-full h-full object-cover"
-            preload="metadata"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-              <Play className="w-6 h-6 text-black ml-1" fill="black" />
-            </div>
-          </div>
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-              <Expand className="w-4 h-4 text-white" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Audio with thumbnail
-    if (isAudioFile(file) && file.thumbnail_path) {
-      const thumbnailUrl = getPublicUrl(file.thumbnail_path);
-      return (
-        <div className="relative w-full h-full group">
-          <img
-            src={thumbnailUrl}
-            alt={file.title || file.filename}
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-              <MusicIcon className="w-6 h-6 text-accent-orange" />
-            </div>
-          </div>
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-              <Expand className="w-4 h-4 text-white" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Audio without thumbnail
-    if (isAudioFile(file)) {
-      return (
-        <div className="relative w-full h-full bg-gradient-to-br from-accent-orange/10 to-accent-pink/10 group flex flex-col items-center justify-center p-4">
-          <MusicIcon className="w-12 h-12 text-accent-orange mb-2" />
-          <p className="text-xs font-medium text-center truncate w-full px-2">
-            {file.title || file.filename}
-          </p>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-              <Play className="w-6 h-6 text-black ml-1" fill="black" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Fallback
-    return (
-      <div className="relative w-full h-full bg-muted flex items-center justify-center">
-        <FileText className="w-12 h-12 text-muted-foreground" />
-      </div>
-    );
-  };
-
-  const renderModalContent = (file: ConceptFile) => {
-    const publicUrl = getPublicUrl(file.file_path);
-
-    if (file.file_type === 'image' || file.mime_type?.startsWith('image/')) {
-      return (
-        <img
-          src={publicUrl}
-          alt={file.title || file.filename}
-          className="w-full h-auto max-h-[80vh] object-contain"
-        />
-      );
-    }
-
-    if (isVideoFile(file)) {
-      return (
-        <video
-          src={publicUrl}
-          controls
-          autoPlay
-          className="w-full h-auto max-h-[80vh]"
-        >
-          <source src={publicUrl} type={file.mime_type || 'video/mp4'} />
-        </video>
-      );
-    }
-
-    if (isAudioFile(file)) {
-      return (
-        <div className="flex flex-col items-center justify-center p-8 gap-6 bg-gradient-to-br from-background to-muted min-h-[300px]">
-          <MusicIcon className="w-16 h-16 text-accent-orange" />
-          <p className="text-lg font-medium text-center">{file.title || file.filename}</p>
-          <audio
-            controls
-            autoPlay
-            className="w-full max-w-md"
-            preload="metadata"
-          >
-            <source src={publicUrl} type={file.mime_type || 'audio/mpeg'} />
-          </audio>
-        </div>
-      );
-    }
-
-    return null;
-  };
+  // Convert concept files to GalleryFile format
+  const galleryFiles: GalleryFile[] = conceptFiles.map((file) => ({
+    id: file.id,
+    filename: file.filename,
+    file_path: file.file_path,
+    file_url: file.file_url,
+    file_type: file.file_type,
+    mime_type: file.mime_type,
+    title: file.title,
+    thumbnail_path: file.thumbnail_path,
+  }));
 
   // Revenue calculation - MUST be before any early returns to follow hooks rules
   const revenueCalculation = useMemo(() => {
@@ -554,20 +390,15 @@ export default function ConceptOwnerView() {
       )}
 
       {/* Portfolio Section */}
-      {conceptFiles.length > 0 && (
+      {galleryFiles.length > 0 && (
         <div className="container mx-auto px-4 py-8">
           <h2 className="text-2xl font-bold mb-4">Portfolio</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {conceptFiles.map((file) => (
-              <div
-                key={file.id}
-                onClick={() => setSelectedFile(file)}
-                className="aspect-square rounded-lg overflow-hidden cursor-pointer border hover:border-primary transition-colors"
-              >
-                {renderFilePreview(file)}
-              </div>
-            ))}
-          </div>
+          <UniversalGallery
+            files={galleryFiles}
+            gridCols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            gap="gap-4"
+            showEmptyMessage={false}
+          />
         </div>
       )}
 
@@ -603,13 +434,6 @@ export default function ConceptOwnerView() {
           </Card>
         </div>
       )}
-
-      {/* File Preview Modal */}
-      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-4xl">
-          {selectedFile && renderModalContent(selectedFile)}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
