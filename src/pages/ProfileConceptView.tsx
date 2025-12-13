@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Banknote, Calendar, Users, Ticket, TrendingUp } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Banknote, Calendar, Users, Ticket, TrendingUp, FileText, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ConceptPortfolioGallery } from '@/components/ConceptPortfolioGallery';
 import { format } from 'date-fns';
@@ -10,7 +11,14 @@ import { nb } from 'date-fns/locale';
 import { conceptService } from '@/services/conceptService';
 import { handleError } from '@/lib/errorHandler';
 import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
+import { supabase } from '@/integrations/supabase/client';
 
+interface TechSpecFile {
+  id: string;
+  filename: string;
+  file_url: string;
+  file_type: string;
+}
 
 const ProfileConceptView = () => {
   const { userId, conceptId } = useParams();
@@ -18,6 +26,7 @@ const ProfileConceptView = () => {
   const { toast } = useToast();
   const [concept, setConcept] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
 
   const handleBack = () => {
     navigate(`/profile/${userId}`);
@@ -44,6 +53,43 @@ const ProfileConceptView = () => {
 
     loadConcept();
   }, [conceptId, toast]);
+
+  // Load tech spec file
+  useEffect(() => {
+    const loadTechSpec = async () => {
+      if (!concept?.tech_spec_reference) {
+        setTechSpecFile(null);
+        return;
+      }
+      
+      try {
+        // Try user_files first (filebank)
+        const { data: userFileData } = await supabase
+          .from('user_files')
+          .select('id, filename, file_url, file_type')
+          .eq('id', concept.tech_spec_reference)
+          .maybeSingle();
+
+        if (userFileData) {
+          setTechSpecFile(userFileData);
+          return;
+        }
+
+        // Fallback to profile_tech_specs
+        const { data: techSpecData } = await supabase
+          .from('profile_tech_specs')
+          .select('id, filename, file_url, file_type')
+          .eq('id', concept.tech_spec_reference)
+          .maybeSingle();
+
+        setTechSpecFile(techSpecData);
+      } catch (error) {
+        console.error('Error loading tech spec:', error);
+      }
+    };
+    
+    loadTechSpec();
+  }, [concept?.tech_spec_reference]);
 
   const parseAvailableDates = (datesData: any) => {
     if (!datesData) return { dates: [], isIndefinite: false };
@@ -214,6 +260,39 @@ const ProfileConceptView = () => {
         {conceptId && (
           <div className="mt-8">
             <ConceptPortfolioGallery conceptId={conceptId} />
+          </div>
+        )}
+
+        {/* Tech Spec Section */}
+        {techSpecFile && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <FileText className="h-6 w-6" />
+              Teknisk spesifikasjon
+            </h2>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-8 w-8 text-primary" />
+                      <div>
+                        <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
+                        <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(techSpecFile.file_url, '_blank')}
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      Last ned
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
