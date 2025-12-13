@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Volume2, File, Expand, Play, Music } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Volume2, File, Expand, Play, Music, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export interface GalleryFile {
   id: string;
@@ -39,7 +40,45 @@ export const UniversalGallery = ({
   showEmptyMessage = true,
   className = ""
 }: UniversalGalleryProps) => {
-  const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selectedFile = selectedIndex !== null ? files[selectedIndex] : null;
+
+  const goToPrevious = useCallback(() => {
+    if (selectedIndex !== null && selectedIndex > 0) {
+      setSelectedIndex(selectedIndex - 1);
+    }
+  }, [selectedIndex]);
+
+  const goToNext = useCallback(() => {
+    if (selectedIndex !== null && selectedIndex < files.length - 1) {
+      setSelectedIndex(selectedIndex + 1);
+    }
+  }, [selectedIndex, files.length]);
+
+  const closeModal = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (selectedIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToPrevious();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIndex, goToPrevious, goToNext, closeModal]);
 
   const getPublicUrl = (file: GalleryFile): string => {
     if (file.file_url) {
@@ -218,6 +257,7 @@ export const UniversalGallery = ({
     if (isVideoFile(file)) {
       return (
         <video
+          key={file.id}
           src={publicUrl}
           controls
           autoPlay
@@ -234,6 +274,7 @@ export const UniversalGallery = ({
           <Volume2 className="w-16 h-16 text-accent-orange" />
           <p className="text-lg font-medium text-center">{file.title || file.filename}</p>
           <audio
+            key={file.id}
             controls
             autoPlay
             className="w-full max-w-md"
@@ -273,13 +314,16 @@ export const UniversalGallery = ({
     );
   }
 
+  const hasPrevious = selectedIndex !== null && selectedIndex > 0;
+  const hasNext = selectedIndex !== null && selectedIndex < files.length - 1;
+
   return (
     <ErrorBoundary>
       <div className={`grid ${gridCols} ${gap} ${className}`}>
-        {files.map((file) => (
+        {files.map((file, index) => (
           <div
             key={file.id}
-            onClick={() => setSelectedFile(file)}
+            onClick={() => setSelectedIndex(index)}
             className={`${aspectRatio} rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all`}
           >
             {renderGridItem(file)}
@@ -287,9 +331,59 @@ export const UniversalGallery = ({
         ))}
       </div>
 
-      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95">
-          {selectedFile && renderModalContent(selectedFile)}
+      <Dialog open={selectedIndex !== null} onOpenChange={() => setSelectedIndex(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none">
+          {/* Close button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 right-3 z-50 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white"
+            onClick={closeModal}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+
+          {/* Counter */}
+          {files.length > 1 && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium">
+              {(selectedIndex ?? 0) + 1} / {files.length}
+            </div>
+          )}
+
+          {/* Previous button */}
+          {hasPrevious && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
+              }}
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </Button>
+          )}
+
+          {/* Next button */}
+          {hasNext && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+            >
+              <ChevronRight className="h-8 w-8" />
+            </Button>
+          )}
+
+          {/* Content */}
+          <div className="flex items-center justify-center min-h-[300px]">
+            {selectedFile && renderModalContent(selectedFile)}
+          </div>
         </DialogContent>
       </Dialog>
     </ErrorBoundary>
