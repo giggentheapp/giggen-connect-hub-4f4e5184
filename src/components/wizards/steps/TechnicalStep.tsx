@@ -6,6 +6,17 @@ import { FileText, Plus, Download } from 'lucide-react';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
 import { WizardStepProps } from '../BaseConceptWizard';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 /**
  * TechnicalStep - Tech spec and hospitality rider selection
@@ -19,7 +30,10 @@ export const TechnicalStep = React.memo(({
 }: WizardStepProps) => {
   const [showTechSpecModal, setShowTechSpecModal] = useState(false);
   const [showHospitalityModal, setShowHospitalityModal] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState<'tech_spec' | 'hospitality_rider' | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleTechSpecFileSelected = useCallback((file: any) => {
     updateData('selected_tech_spec_file', file.id);
@@ -51,12 +65,52 @@ export const TechnicalStep = React.memo(({
     updateData('_hospitalityFileData', null);
   }, [updateData]);
 
-  // Save draft before navigating to filebank
-  const handleNavigateToFilbank = useCallback(async () => {
-    if (onSaveDraft) {
-      await onSaveDraft();
+  // Navigate to filebank with optional draft save
+  const handleNavigateToFilbank = useCallback(async (saveFirst: boolean) => {
+    if (saveFirst && onSaveDraft) {
+      try {
+        await onSaveDraft();
+        toast({
+          title: '✓ Utkast lagret',
+          description: 'Dine endringer er trygt lagret',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Kunne ikke lagre',
+          description: error.message || 'En feil oppstod',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
-  }, [onSaveDraft]);
+    
+    // Close any open modal
+    setShowTechSpecModal(false);
+    setShowHospitalityModal(false);
+    
+    if (userId) {
+      navigate(`/profile/${userId}?section=filbank`);
+    }
+  }, [onSaveDraft, userId, navigate, toast]);
+
+  // Handle "Gå til Filbank" button click - show dialog if there's data
+  const handleGoToFilbankClick = useCallback((category: 'tech_spec' | 'hospitality_rider') => {
+    const hasData = Object.keys(data).some(key => {
+      const value = data[key];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+      return value !== '' && value !== null && value !== undefined;
+    });
+
+    if (hasData) {
+      setPendingCategory(category);
+      setShowSaveDialog(true);
+    } else {
+      if (userId) {
+        navigate(`/profile/${userId}?section=filbank`);
+      }
+    }
+  }, [data, userId, navigate]);
 
   const techSpecFile = data._techSpecFileData;
   const hospitalityFile = data._hospitalityFileData;
@@ -196,7 +250,11 @@ export const TechnicalStep = React.memo(({
         onSelect={(file) => file && handleTechSpecFileSelected(file)}
         userId={userId}
         category="tech_spec"
-        onNavigateToFilbank={handleNavigateToFilbank}
+        onNavigateToFilbank={() => {
+          setShowTechSpecModal(false);
+          handleGoToFilbankClick('tech_spec');
+          return Promise.resolve();
+        }}
       />
 
       <FilebankSelectionModal
@@ -205,8 +263,45 @@ export const TechnicalStep = React.memo(({
         onSelect={(file) => file && handleHospitalityFileSelected(file)}
         userId={userId}
         category="hospitality_rider"
-        onNavigateToFilbank={handleNavigateToFilbank}
+        onNavigateToFilbank={() => {
+          setShowHospitalityModal(false);
+          handleGoToFilbankClick('hospitality_rider');
+          return Promise.resolve();
+        }}
       />
+
+      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Lagre utkast først?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du har ulagrede endringer. Vil du lagre utkastet før du går til filbanken? Dette sikrer at du ikke mister arbeidet ditt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setShowSaveDialog(false);
+                setPendingCategory(null);
+                await handleNavigateToFilbank(false);
+              }}
+            >
+              Fortsett uten å lagre
+            </Button>
+            <AlertDialogAction
+              onClick={async () => {
+                setShowSaveDialog(false);
+                setPendingCategory(null);
+                await handleNavigateToFilbank(true);
+              }}
+            >
+              Lagre og fortsett
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 });
