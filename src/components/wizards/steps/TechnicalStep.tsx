@@ -252,7 +252,8 @@ export const TechnicalStep = React.memo(({
         category="tech_spec"
         onNavigateToFilbank={() => {
           setShowTechSpecModal(false);
-          handleGoToFilbankClick('tech_spec');
+          setPendingCategory('tech_spec');
+          setShowSaveDialog(true);
           return Promise.resolve();
         }}
       />
@@ -265,7 +266,8 @@ export const TechnicalStep = React.memo(({
         category="hospitality_rider"
         onNavigateToFilbank={() => {
           setShowHospitalityModal(false);
-          handleGoToFilbankClick('hospitality_rider');
+          setPendingCategory('hospitality_rider');
+          setShowSaveDialog(true);
           return Promise.resolve();
         }}
       />

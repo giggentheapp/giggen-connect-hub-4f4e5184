@@ -191,10 +191,13 @@ export const FilebankSelectionModal = ({
               <Button
                 onClick={async () => {
                   if (onNavigateToFilbank) {
+                    // Let the callback handle everything (dialog + navigation)
                     await onNavigateToFilbank();
+                  } else {
+                    // No callback - navigate directly
+                    onClose();
+                    navigate(`/profile/${userId}?section=filbank`);
                   }
-                  onClose();
-                  navigate(`/profile/${userId}?section=filbank`);
                 }}
                 className="mt-4"
               >
