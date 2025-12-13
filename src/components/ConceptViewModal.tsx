@@ -133,16 +133,37 @@ export const ConceptViewModal = ({
         setConceptFiles(filesData || []);
       }
 
-      // Load tech spec file - ALWAYS (public)
+      // Load tech spec file - ALWAYS (public) - try user_files first, then profile_tech_specs
       if (conceptData.tech_spec_reference) {
-        const {
-          data: techSpecData,
-          error: techSpecError
-        } = await supabase.from('profile_tech_specs').select('id, filename, file_url, file_type').eq('id', conceptData.tech_spec_reference).maybeSingle();
-        if (techSpecError) {
-          console.error('Error loading tech spec file:', techSpecError);
+        // First try user_files (filebank)
+        const { data: userFileData } = await supabase
+          .from('user_files')
+          .select('id, filename, file_url, file_path, file_type')
+          .eq('id', conceptData.tech_spec_reference)
+          .maybeSingle();
+
+        if (userFileData) {
+          const publicUrl = userFileData.file_url || 
+            `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${userFileData.file_path}`;
+          setTechSpecFile({
+            id: userFileData.id,
+            filename: userFileData.filename,
+            file_url: publicUrl,
+            file_type: userFileData.file_type
+          });
         } else {
-          setTechSpecFile(techSpecData);
+          // Fallback to profile_tech_specs
+          const { data: techSpecData, error: techSpecError } = await supabase
+            .from('profile_tech_specs')
+            .select('id, filename, file_url, file_type')
+            .eq('id', conceptData.tech_spec_reference)
+            .maybeSingle();
+
+          if (techSpecError) {
+            console.error('Error loading tech spec file:', techSpecError);
+          } else {
+            setTechSpecFile(techSpecData);
+          }
         }
       } else {
         setTechSpecFile(null);
