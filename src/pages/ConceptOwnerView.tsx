@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon, Ticket, TrendingUp } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Users, DollarSign, FileText, Edit, Eye, EyeOff, Expand, Play, Music as MusicIcon, Ticket, TrendingUp, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -13,6 +13,8 @@ import { useUpdateConcept } from '@/hooks/useConceptMutations';
 import { handleError } from '@/lib/errorHandler';
 import { calculateExpectedRevenue, calculateArtistEarnings, formatCurrency } from '@/utils/conceptHelpers';
 import { navigateToProfile, navigateToAuth } from '@/lib/navigation';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
 
 // Note: This page allows viewing concepts from any user (for booking requests)
 // so we don't redirect if not logged in - the concept might be shared
@@ -29,11 +31,19 @@ interface ConceptFile {
   thumbnail_path?: string;
 }
 
+interface TechSpecFile {
+  id: string;
+  filename: string;
+  file_url: string;
+  file_type: string;
+}
+
 export default function ConceptOwnerView() {
   const { conceptId } = useParams<{ conceptId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [conceptFiles, setConceptFiles] = useState<ConceptFile[]>([]);
+  const [techSpecFile, setTechSpecFile] = useState<TechSpecFile | null>(null);
   const [selectedFile, setSelectedFile] = useState<ConceptFile | null>(null);
   const [concept, setConcept] = useState<any>(null);
   const [conceptLoading, setConceptLoading] = useState(true);
@@ -73,6 +83,32 @@ export default function ConceptOwnerView() {
       loadConceptFiles(concept.id);
     }
   }, [concept?.id]);
+
+  // Load tech spec when concept is loaded
+  useEffect(() => {
+    if (concept?.tech_spec_reference) {
+      const loadTechSpec = async () => {
+        try {
+          const { data: techSpecData, error: techSpecError } = await supabase
+            .from('profile_tech_specs')
+            .select('id, filename, file_url, file_type')
+            .eq('id', concept.tech_spec_reference)
+            .maybeSingle();
+
+          if (techSpecError) {
+            console.error('Error loading tech spec file:', techSpecError);
+          } else {
+            setTechSpecFile(techSpecData);
+          }
+        } catch (error) {
+          console.error('Error loading tech spec:', error);
+        }
+      };
+      loadTechSpec();
+    } else {
+      setTechSpecFile(null);
+    }
+  }, [concept?.tech_spec_reference]);
 
   const loadConceptFiles = async (id: string) => {
     try {
@@ -513,6 +549,39 @@ export default function ConceptOwnerView() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Tech Spec Section */}
+      {techSpecFile && (
+        <div className="container mx-auto px-4 py-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <FileText className="h-6 w-6" />
+            Teknisk spesifikasjon
+          </h2>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="bg-muted/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-8 w-8 text-primary" />
+                    <div>
+                      <h5 className="font-medium text-sm">{techSpecFile.filename}</h5>
+                      <p className="text-xs text-muted-foreground">Teknisk spesifikasjon</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(techSpecFile.file_url, '_blank')}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Last ned
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
