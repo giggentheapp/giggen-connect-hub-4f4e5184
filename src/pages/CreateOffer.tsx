@@ -95,6 +95,46 @@ export default function CreateOffer() {
             const isIndefinite = availableDates && typeof availableDates === 'object' && 'indefinite' in availableDates;
             const dateArray = Array.isArray(availableDates) ? availableDates : [];
 
+            // Load tech spec file data if reference exists
+            let techSpecFileData = null;
+            if (data.tech_spec_reference) {
+              try {
+                const { data: fileData } = await import('@/integrations/supabase/client').then(m => 
+                  m.supabase.from('user_files').select('*').eq('id', data.tech_spec_reference).single()
+                );
+                if (fileData) {
+                  const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${fileData.file_path}`;
+                  techSpecFileData = {
+                    ...fileData,
+                    publicUrl,
+                    file_url: publicUrl,
+                  };
+                }
+              } catch (e) {
+                console.error('Error loading tech spec file:', e);
+              }
+            }
+
+            // Load hospitality rider file data if reference exists
+            let hospitalityFileData = null;
+            if (data.hospitality_rider_reference) {
+              try {
+                const { data: fileData } = await import('@/integrations/supabase/client').then(m => 
+                  m.supabase.from('user_files').select('*').eq('id', data.hospitality_rider_reference).single()
+                );
+                if (fileData) {
+                  const publicUrl = `https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank/${fileData.file_path}`;
+                  hospitalityFileData = {
+                    ...fileData,
+                    publicUrl,
+                    file_url: publicUrl,
+                  };
+                }
+              } catch (e) {
+                console.error('Error loading hospitality file:', e);
+              }
+            }
+
             setLoadedConcept({
               ...data,
               available_dates: dateArray.map((d: any) => new Date(d)),
@@ -103,6 +143,9 @@ export default function CreateOffer() {
               pricing_type: data.door_deal ? 'door_deal' : data.price_by_agreement ? 'by_agreement' : 'fixed',
               door_percentage: data.door_percentage?.toString() || '',
               ticket_price: data.ticket_price?.toString() || '',
+              // Add file data for tech spec and hospitality
+              _techSpecFileData: techSpecFileData,
+              _hospitalityFileData: hospitalityFileData,
             });
           }
 
