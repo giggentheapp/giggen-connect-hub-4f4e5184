@@ -339,7 +339,7 @@ export const UniversalGallery = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+              className="absolute top-3 right-3 h-10 w-10 rounded-full bg-white/90 hover:bg-white text-black shadow-lg pointer-events-auto"
               onClick={closeModal}
             >
               <X className="h-5 w-5" />
@@ -347,7 +347,7 @@ export const UniversalGallery = ({
 
             {/* Counter */}
             {files.length > 1 && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/90 text-black text-sm font-semibold shadow-lg">
                 {(selectedIndex ?? 0) + 1} / {files.length}
               </div>
             )}
@@ -357,7 +357,7 @@ export const UniversalGallery = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/90 hover:bg-white text-black shadow-lg pointer-events-auto"
                 onClick={(e) => {
                   e.stopPropagation();
                   goToPrevious();
@@ -372,7 +372,7 @@ export const UniversalGallery = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/90 hover:bg-white text-black shadow-lg pointer-events-auto"
                 onClick={(e) => {
                   e.stopPropagation();
                   goToNext();
