@@ -332,12 +332,12 @@ export const UniversalGallery = ({
       </div>
 
       <Dialog open={selectedIndex !== null} onOpenChange={() => setSelectedIndex(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none [&>button]:hidden">
           {/* Close button */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-3 right-3 z-50 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white"
+            className="absolute top-3 right-3 z-[60] h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
             onClick={closeModal}
           >
             <X className="h-5 w-5" />
@@ -345,7 +345,7 @@ export const UniversalGallery = ({
 
           {/* Counter */}
           {files.length > 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium pointer-events-none">
               {(selectedIndex ?? 0) + 1} / {files.length}
             </div>
           )}
@@ -355,7 +355,7 @@ export const UniversalGallery = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-[60] h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
               onClick={(e) => {
                 e.stopPropagation();
                 goToPrevious();
@@ -370,7 +370,7 @@ export const UniversalGallery = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-[60] h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
               onClick={(e) => {
                 e.stopPropagation();
                 goToNext();
@@ -381,8 +381,10 @@ export const UniversalGallery = ({
           )}
 
           {/* Content */}
-          <div className="flex items-center justify-center min-h-[300px]">
-            {selectedFile && renderModalContent(selectedFile)}
+          <div className="flex items-center justify-center min-h-[300px] pointer-events-none">
+            <div className="pointer-events-auto">
+              {selectedFile && renderModalContent(selectedFile)}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
