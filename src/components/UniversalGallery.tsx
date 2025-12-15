@@ -332,59 +332,60 @@ export const UniversalGallery = ({
       </div>
 
       <Dialog open={selectedIndex !== null} onOpenChange={() => setSelectedIndex(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none [&>button]:hidden">
-          {/* Close button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-3 right-3 z-[60] h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
-            onClick={closeModal}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-
-          {/* Counter */}
-          {files.length > 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium pointer-events-none">
-              {(selectedIndex ?? 0) + 1} / {files.length}
-            </div>
-          )}
-
-          {/* Previous button */}
-          {hasPrevious && (
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none [&>button:first-child]:hidden">
+          {/* Navigation overlay - wrapped in div to avoid being hidden by [&>button]:hidden */}
+          <div className="absolute inset-0 z-[60] pointer-events-none">
+            {/* Close button */}
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-[60] h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToPrevious();
-              }}
+              className="absolute top-3 right-3 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+              onClick={closeModal}
             >
-              <ChevronLeft className="h-8 w-8" />
+              <X className="h-5 w-5" />
             </Button>
-          )}
 
-          {/* Next button */}
-          {hasNext && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-[60] h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNext();
-              }}
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
-          )}
+            {/* Counter */}
+            {files.length > 1 && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 text-white text-sm font-medium">
+                {(selectedIndex ?? 0) + 1} / {files.length}
+              </div>
+            )}
+
+            {/* Previous button */}
+            {hasPrevious && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
+              >
+                <ChevronLeft className="h-8 w-8" />
+              </Button>
+            )}
+
+            {/* Next button */}
+            {hasNext && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white pointer-events-auto"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+              >
+                <ChevronRight className="h-8 w-8" />
+              </Button>
+            )}
+          </div>
 
           {/* Content */}
-          <div className="flex items-center justify-center min-h-[300px] pointer-events-none">
-            <div className="pointer-events-auto">
-              {selectedFile && renderModalContent(selectedFile)}
-            </div>
+          <div className="flex items-center justify-center min-h-[300px]">
+            {selectedFile && renderModalContent(selectedFile)}
           </div>
         </DialogContent>
       </Dialog>
