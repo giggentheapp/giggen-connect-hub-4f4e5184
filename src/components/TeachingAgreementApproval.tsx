@@ -53,9 +53,6 @@ export const TeachingAgreementApproval = ({
     );
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
 
   const handleApprove = async () => {
     if (!hasRead) {
@@ -137,10 +134,12 @@ export const TeachingAgreementApproval = ({
               Les gjennom detaljene og godkjenn avtalen når du er klar
             </p>
           </div>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
-            Skriv ut / PDF
-          </Button>
+          {bothApproved && (
+            <Button variant="outline" onClick={() => navigate(`/booking/${booking.id}/teaching-agreement`)}>
+              <Printer className="h-4 w-4 mr-2" />
+              Skriv ut / PDF
+            </Button>
+          )}
         </div>
       </div>
 
