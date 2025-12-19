@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle, 
-  Plus, X, ChevronDown, ChevronUp, Settings, AlertTriangle, Loader2 
+  Plus, X, ChevronDown, ChevronUp, Settings, AlertTriangle, Loader2, AlertCircle, RefreshCw 
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -34,12 +35,55 @@ export const EditableTeachingDetails = ({
   const [showFieldManager, setShowFieldManager] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
+  const [otherPartyName, setOtherPartyName] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
   const initialDataRef = useRef(teachingData);
 
+  // Determine user roles and approval status
   const isOwner = currentUserId === conceptData?.maker_id;
-  const canEdit = isOwner;
+  const isSender = currentUserId === booking.sender_id;
+  const hasApproved = isSender ? booking.approved_by_sender : booking.approved_by_receiver;
+  const otherPartyApproved = isSender ? booking.approved_by_receiver : booking.approved_by_sender;
+  const bothApproved = booking.approved_by_sender && booking.approved_by_receiver;
+  
+  // Can edit only if owner AND neither party has approved yet
+  const canEdit = isOwner && !hasApproved && !otherPartyApproved;
+
+  // Check if other party made changes after user approved
+  const hasChangesFromOtherParty = 
+    booking.last_modified_by && 
+    booking.last_modified_by !== currentUserId &&
+    booking.last_modified_at &&
+    hasApproved === false && // User's approval was reset
+    otherPartyApproved === false; // Other party's approval was also reset (after changes)
+
+  // Fetch other party's name
+  useEffect(() => {
+    const fetchOtherPartyName = async () => {
+      const otherPartyId = isSender ? booking.receiver_id : booking.sender_id;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', otherPartyId)
+        .single();
+      
+      if (profile) setOtherPartyName(profile.display_name);
+    };
+    
+    fetchOtherPartyName();
+  }, [booking, isSender]);
+
+  // Notify when other party approves
+  useEffect(() => {
+    if (otherPartyApproved && !hasApproved && !bothApproved) {
+      const approverName = otherPartyName || (isSender ? 'Mottaker' : 'Avsender');
+      toast.success(`${approverName} har godkjent avtalen`, {
+        description: 'Du kan nå godkjenne for å fullføre.',
+        duration: 5000,
+      });
+    }
+  }, [otherPartyApproved, hasApproved, bothApproved, isSender, otherPartyName]);
 
   // Track changes from initial data
   useEffect(() => {
@@ -47,6 +91,23 @@ export const EditableTeachingDetails = ({
     setFormData(teachingData);
     setHasUnsavedChanges(false);
   }, [teachingData]);
+
+  // Helper to check if field was changed from initial
+  const isFieldChanged = (sectionKey: string, fieldId: string) => {
+    const originalSection = initialDataRef.current[sectionKey];
+    const currentSection = formData[sectionKey];
+    
+    if (!originalSection || !currentSection) return false;
+    
+    const originalField = originalSection.find((f: any) => f.id === fieldId);
+    const currentField = currentSection.find((f: any) => f.id === fieldId);
+    
+    if (!originalField || !currentField) return currentField ? true : false;
+    
+    return originalField.value !== currentField.value || 
+           originalField.enabled !== currentField.enabled ||
+           originalField.label !== currentField.label;
+  };
 
   // Auto-save function for field toggles
   const autoSaveToggle = useCallback(async (updatedData: any) => {
@@ -153,17 +214,67 @@ export const EditableTeachingDetails = ({
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // Update teaching_data on concept
+      const { error: conceptError } = await supabase
         .from('concepts')
         .update({ teaching_data: formData })
         .eq('id', conceptData.id);
 
-      if (error) throw error;
+      if (conceptError) throw conceptError;
 
-      toast.success('Endringer lagret');
+      // Check if either party has approved - if so, reset their approval
+      const bookingUpdates: any = {
+        last_modified_by: currentUserId,
+        last_modified_at: new Date().toISOString()
+      };
+
+      const anyPartyApproved = booking.approved_by_sender || booking.approved_by_receiver;
+
+      if (anyPartyApproved) {
+        // Reset approvals when changes are made
+        bookingUpdates.approved_by_sender = false;
+        bookingUpdates.approved_by_receiver = false;
+        bookingUpdates.sender_approved_at = null;
+        bookingUpdates.receiver_approved_at = null;
+        bookingUpdates.status = 'allowed'; // Reset to allowed status
+        
+        // Get the name of who made the change
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', currentUserId)
+          .single();
+        
+        const changerName = profile?.display_name || (isSender ? 'Avsender' : 'Mottaker');
+        
+        // Update booking with reset approvals
+        const { error: bookingError } = await supabase
+          .from('bookings')
+          .update(bookingUpdates)
+          .eq('id', booking.id);
+        
+        if (bookingError) throw bookingError;
+
+        toast.success('Endringer lagret', {
+          description: `${changerName} har gjort endringer. Begge parter må godkjenne på nytt.`,
+        });
+      } else {
+        // No approvals to reset, just update last_modified
+        const { error: bookingError } = await supabase
+          .from('bookings')
+          .update(bookingUpdates)
+          .eq('id', booking.id);
+        
+        if (bookingError) throw bookingError;
+
+        toast.success('Endringer lagret', {
+          description: 'Undervisningsdetaljer har blitt oppdatert',
+        });
+      }
+
       setHasUnsavedChanges(false);
       initialDataRef.current = formData;
-      onSaved();
+      onSaved(); // Refresh parent component
     } catch (error) {
       console.error('Error saving:', error);
       toast.error('Kunne ikke lagre endringene');
@@ -218,38 +329,56 @@ export const EditableTeachingDetails = ({
           <h3 className="text-lg font-semibold">{sectionTitle}</h3>
         </div>
         
-        {fieldsToShow.map((field: any) => (
-          <div key={field.id} className="space-y-2">
-            {field.isCustom && canEdit ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={field.label || ''}
-                  onChange={(e) => updateFieldLabel(sectionKey, field.id, e.target.value)}
-                  placeholder="Feltnavn"
-                  className="font-medium"
+        {fieldsToShow.map((field: any) => {
+          const changed = isFieldChanged(sectionKey, field.id);
+          
+          return (
+            <div key={field.id} className="space-y-2 relative">
+              {/* Changed indicator */}
+              {changed && (
+                <Badge variant="outline" className="absolute -top-2 -right-2 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-300">
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Endret
+                </Badge>
+              )}
+              
+              {field.isCustom && canEdit ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={field.label || ''}
+                    onChange={(e) => updateFieldLabel(sectionKey, field.id, e.target.value)}
+                    placeholder="Feltnavn"
+                    className="font-medium"
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => removeCustomField(sectionKey, field.id)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Label>{field.label}</Label>
+              )}
+              {canEdit ? (
+                <Textarea
+                  value={field.value || ''}
+                  onChange={(e) => updateFieldValue(sectionKey, field.id, e.target.value)}
+                  rows={3}
+                  className={cn(
+                    "w-full",
+                    changed && "border-yellow-400 dark:border-yellow-600"
+                  )}
+                  placeholder="Fyll inn..."
                 />
-                <Button variant="ghost" size="sm" onClick={() => removeCustomField(sectionKey, field.id)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <Label>{field.label}</Label>
-            )}
-            {canEdit ? (
-              <Textarea
-                value={field.value || ''}
-                onChange={(e) => updateFieldValue(sectionKey, field.id, e.target.value)}
-                rows={3}
-                className="w-full"
-                placeholder="Fyll inn..."
-              />
-            ) : (
-              <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-                {field.value || <span className="italic text-muted-foreground">Ikke utfylt</span>}
-              </div>
-            )}
-          </div>
-        ))}
+              ) : (
+                <div className={cn(
+                  "p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap",
+                  changed && "border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/10"
+                )}>
+                  {field.value || <span className="italic text-muted-foreground">Ikke utfylt</span>}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -336,6 +465,45 @@ export const EditableTeachingDetails = ({
 
   return (
     <div className="space-y-8">
+      {/* Banner: Changes from other party */}
+      {hasChangesFromOtherParty && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                Endringer gjort av {otherPartyName || (isSender ? 'mottaker' : 'avsender')}
+              </h4>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                {otherPartyName || (isSender ? 'Mottaker' : 'Avsender')} har gjort endringer i avtalen. 
+                Gå gjennom endringene og godkjenn på nytt når du er klar.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approval status banner */}
+      {(hasApproved || otherPartyApproved) && !bothApproved && (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div>
+              {hasApproved && !otherPartyApproved && (
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Du har godkjent avtalen. Venter på at {otherPartyName || (isSender ? 'mottaker' : 'avsender')} godkjenner.
+                </p>
+              )}
+              {!hasApproved && otherPartyApproved && (
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  {otherPartyName || (isSender ? 'Mottaker' : 'Avsender')} har godkjent avtalen. Du kan nå godkjenne for å fullføre.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Unsaved changes banner */}
       {hasUnsavedChanges && (
         <div className="flex items-center justify-between p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded-lg">
@@ -371,7 +539,7 @@ export const EditableTeachingDetails = ({
         </div>
       )}
 
-      {/* Field Manager Toggle for Owner */}
+      {/* Field Manager Toggle for Owner - ONLY if can edit */}
       {canEdit && (
         <Collapsible open={showFieldManager} onOpenChange={setShowFieldManager}>
           <CollapsibleTrigger asChild>
@@ -461,7 +629,7 @@ export const EditableTeachingDetails = ({
       {/* Communication */}
       {renderSection('communication', 'Kommunikasjon og avlysning', GraduationCap)}
 
-      {/* Save Button */}
+      {/* Save Button - ONLY if can edit */}
       {canEdit && (
         <div className="flex gap-3 justify-end pt-4 border-t">
           <Button 
@@ -479,9 +647,17 @@ export const EditableTeachingDetails = ({
         </div>
       )}
 
+      {/* Info for non-owner or when editing is locked */}
       {!canEdit && (
         <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-          💡 Kun eieren av tilbudet kan redigere disse detaljene.
+          {isOwner && (hasApproved || otherPartyApproved) ? (
+            <>
+              🔒 Redigering er låst fordi {hasApproved && otherPartyApproved ? 'begge parter har godkjent' : hasApproved ? 'du har godkjent' : 'motparten har godkjent'} avtalen.
+              {!bothApproved && ' For å gjøre endringer må godkjenningen trekkes tilbake.'}
+            </>
+          ) : (
+            <>💡 Kun eieren av tilbudet kan redigere disse detaljene.</>
+          )}
         </div>
       )}
     </div>
