@@ -352,8 +352,8 @@ const BookingAgreementReview = () => {
               </div>
             )}
 
-            {/* Portfolio Attachments */}
-            {booking.id && currentUserId && (
+            {/* Portfolio Attachments - Not shown for teaching agreements */}
+            {booking.id && currentUserId && !isTeaching && (
               <BookingPortfolioAttachments
                 bookingId={booking.id}
                 currentUserId={currentUserId}
@@ -649,12 +649,12 @@ const BookingAgreementReview = () => {
                   <span>Oppdaterer...</span>
                 </div>
               )}
-              {/* Print button - links to printable view */}
-              {isTeaching && bookingId && (
+              {/* Print button - only shown when both parties have approved */}
+              {isTeaching && bookingId && booking?.approved_by_sender && booking?.approved_by_receiver && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate(`/teaching-agreement/${bookingId}`)}
+                  onClick={() => navigate(`/booking/${bookingId}/teaching-agreement`)}
                 >
                   <Printer className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Skriv ut / PDF</span>
