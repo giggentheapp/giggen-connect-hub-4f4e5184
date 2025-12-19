@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,10 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle, Plus, X, ChevronDown, ChevronUp, Settings } from 'lucide-react';
+import { 
+  GraduationCap, Clock, MapPin, Banknote, Save, CheckCircle, 
+  Plus, X, ChevronDown, ChevronUp, Settings, AlertTriangle, Loader2 
+} from 'lucide-react';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface EditableTeachingDetailsProps {
   booking: any;
@@ -28,15 +32,47 @@ export const EditableTeachingDetails = ({
   const [formData, setFormData] = useState(teachingData);
   const [loading, setLoading] = useState(false);
   const [showFieldManager, setShowFieldManager] = useState(false);
-  const { toast } = useToast();
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const initialDataRef = useRef(teachingData);
 
   const isOwner = currentUserId === conceptData?.maker_id;
   const canEdit = isOwner;
 
-  // Toggle field enabled status
-  const toggleFieldEnabled = (sectionKey: string, fieldId: string) => {
+  // Track changes from initial data
+  useEffect(() => {
+    initialDataRef.current = teachingData;
+    setFormData(teachingData);
+    setHasUnsavedChanges(false);
+  }, [teachingData]);
+
+  // Auto-save function for field toggles
+  const autoSaveToggle = useCallback(async (updatedData: any) => {
+    if (!canEdit || !conceptData?.id) return;
+
+    setAutoSaving(true);
+    try {
+      const { error } = await supabase
+        .from('concepts')
+        .update({ teaching_data: updatedData })
+        .eq('id', conceptData.id);
+
+      if (error) throw error;
+      
+      toast.success('Felt-synlighet lagret', { duration: 1500 });
+      initialDataRef.current = updatedData;
+    } catch (error) {
+      console.error('Auto-save error:', error);
+      toast.error('Kunne ikke lagre endringen');
+    } finally {
+      setAutoSaving(false);
+    }
+  }, [canEdit, conceptData?.id]);
+
+  // Toggle field enabled status - with auto-save
+  const toggleFieldEnabled = useCallback((sectionKey: string, fieldId: string) => {
     setFormData((prev: any) => {
       const section = prev[sectionKey];
       if (!Array.isArray(section)) return prev;
@@ -45,9 +81,14 @@ export const EditableTeachingDetails = ({
         field.id === fieldId ? { ...field, enabled: !field.enabled } : field
       );
 
-      return { ...prev, [sectionKey]: updated };
+      const newData = { ...prev, [sectionKey]: updated };
+      
+      // Auto-save when toggling fields
+      autoSaveToggle(newData);
+      
+      return newData;
     });
-  };
+  }, [autoSaveToggle]);
 
   // Add custom field to a section
   const addCustomField = (sectionKey: string) => {
@@ -63,6 +104,7 @@ export const EditableTeachingDetails = ({
 
       return { ...prev, [sectionKey]: [...section, newField] };
     });
+    setHasUnsavedChanges(true);
   };
 
   // Remove custom field from a section
@@ -73,6 +115,7 @@ export const EditableTeachingDetails = ({
 
       return { ...prev, [sectionKey]: section.filter((f: any) => f.id !== fieldId) };
     });
+    setHasUnsavedChanges(true);
   };
 
   // Update custom field label
@@ -87,6 +130,7 @@ export const EditableTeachingDetails = ({
 
       return { ...prev, [sectionKey]: updated };
     });
+    setHasUnsavedChanges(true);
   };
 
   // Helper to update field values
@@ -101,6 +145,7 @@ export const EditableTeachingDetails = ({
 
       return { ...prev, [sectionKey]: updated };
     });
+    setHasUnsavedChanges(true);
   };
 
   const handleSave = async () => {
@@ -115,25 +160,24 @@ export const EditableTeachingDetails = ({
 
       if (error) throw error;
 
-      toast({
-        title: "Endringer lagret",
-        description: "Undervisningsdetaljer har blitt oppdatert",
-      });
-
+      toast.success('Endringer lagret');
+      setHasUnsavedChanges(false);
+      initialDataRef.current = formData;
       onSaved();
     } catch (error) {
       console.error('Error saving:', error);
-      toast({
-        title: "Feil ved lagring",
-        description: "Kunne ikke lagre endringene",
-        variant: "destructive"
-      });
+      toast.error('Kunne ikke lagre endringene');
     } finally {
       setLoading(false);
     }
   };
 
   const handleProceedToApproval = async () => {
+    // Save any pending changes first
+    if (hasUnsavedChanges) {
+      await handleSave();
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -143,32 +187,27 @@ export const EditableTeachingDetails = ({
 
       if (error) throw error;
 
-      toast({
-        title: "Klar for godkjenning",
-        description: "Avtalen er nå klar for godkjenning fra begge parter",
-      });
-
-      // Navigate to same page to refresh data (use replace: true to avoid adding to history)
+      toast.success('Avtalen er nå klar for godkjenning fra begge parter');
       navigate(location.pathname + location.search, { replace: true });
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: "Feil",
-        description: "Kunne ikke gå videre til godkjenning",
-        variant: "destructive"
-      });
+      toast.error('Kunne ikke gå videre til godkjenning');
     } finally {
       setLoading(false);
     }
   };
 
-  // Render section for editing (enabled fields with values)
+  // Render section for editing - show ALL enabled fields (including empty ones when editing)
   const renderSection = (sectionKey: string, sectionTitle: string, icon: any) => {
     const sectionData = formData[sectionKey];
     if (!sectionData || !Array.isArray(sectionData)) return null;
 
-    const enabledFields = sectionData.filter((field: any) => field.enabled && field.value);
-    if (enabledFields.length === 0 && !showFieldManager) return null;
+    // FIXED: Show all enabled fields when editing, only filled fields when read-only
+    const fieldsToShow = canEdit 
+      ? sectionData.filter((field: any) => field.enabled)
+      : sectionData.filter((field: any) => field.enabled && field.value);
+    
+    if (fieldsToShow.length === 0) return null;
 
     const Icon = icon;
 
@@ -179,7 +218,7 @@ export const EditableTeachingDetails = ({
           <h3 className="text-lg font-semibold">{sectionTitle}</h3>
         </div>
         
-        {enabledFields.map((field: any) => (
+        {fieldsToShow.map((field: any) => (
           <div key={field.id} className="space-y-2">
             {field.isCustom && canEdit ? (
               <div className="flex items-center gap-2">
@@ -202,10 +241,11 @@ export const EditableTeachingDetails = ({
                 onChange={(e) => updateFieldValue(sectionKey, field.id, e.target.value)}
                 rows={3}
                 className="w-full"
+                placeholder="Fyll inn..."
               />
             ) : (
               <div className="p-3 border rounded bg-muted/30 text-sm whitespace-pre-wrap">
-                {field.value}
+                {field.value || <span className="italic text-muted-foreground">Ikke utfylt</span>}
               </div>
             )}
           </div>
@@ -214,7 +254,7 @@ export const EditableTeachingDetails = ({
     );
   };
 
-  // Render field manager for a section (toggle fields on/off)
+  // Render field manager for a section - with visual feedback
   const renderFieldManager = (sectionKey: string, sectionTitle: string) => {
     const sectionData = formData[sectionKey];
     if (!sectionData || !Array.isArray(sectionData)) return null;
@@ -224,7 +264,13 @@ export const EditableTeachingDetails = ({
         <h4 className="text-sm font-semibold">{sectionTitle}</h4>
         <div className="space-y-2">
           {sectionData.map((field: any) => (
-            <div key={field.id} className="flex items-center gap-3 p-2 border rounded bg-background">
+            <div 
+              key={field.id} 
+              className={cn(
+                "flex items-center gap-3 p-2 border rounded bg-background transition-opacity",
+                !field.enabled && "opacity-60 bg-muted/50"
+              )}
+            >
               <Checkbox
                 checked={field.enabled}
                 onCheckedChange={() => toggleFieldEnabled(sectionKey, field.id)}
@@ -235,14 +281,31 @@ export const EditableTeachingDetails = ({
                     value={field.label || ''}
                     onChange={(e) => updateFieldLabel(sectionKey, field.id, e.target.value)}
                     placeholder="Feltnavn"
-                    className="text-sm"
+                    className={cn(
+                      "text-sm",
+                      !field.enabled && "opacity-50"
+                    )}
+                    disabled={!field.enabled}
                   />
                   <Button variant="ghost" size="sm" onClick={() => removeCustomField(sectionKey, field.id)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
-                <span className="text-sm">{field.label}</span>
+                <div className="flex-1 flex items-center gap-2 min-w-0">
+                  <span className={cn(
+                    "text-sm",
+                    !field.enabled && "line-through text-muted-foreground"
+                  )}>
+                    {field.label}
+                  </span>
+                  {/* Value preview */}
+                  {field.value && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                      ({field.value.substring(0, 30)}{field.value.length > 30 ? '...' : ''})
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -273,6 +336,41 @@ export const EditableTeachingDetails = ({
 
   return (
     <div className="space-y-8">
+      {/* Unsaved changes banner */}
+      {hasUnsavedChanges && (
+        <div className="flex items-center justify-between p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+          <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm font-medium">Du har ulagrede endringer</span>
+          </div>
+          <Button 
+            size="sm" 
+            onClick={handleSave}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                Lagrer...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-1" />
+                Lagre nå
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Auto-saving indicator */}
+      {autoSaving && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Auto-lagrer felt-synlighet...
+        </div>
+      )}
+
       {/* Field Manager Toggle for Owner */}
       {canEdit && (
         <Collapsible open={showFieldManager} onOpenChange={setShowFieldManager}>
@@ -288,6 +386,8 @@ export const EditableTeachingDetails = ({
           <CollapsibleContent className="pt-4 space-y-4">
             <div className="text-sm text-muted-foreground mb-4">
               Her kan du aktivere/deaktivere felt eller legge til egne felt under forhandlingen.
+              <br />
+              <span className="text-xs">Felt-synlighet lagres automatisk.</span>
             </div>
             {sections.map(section => renderFieldManager(section.key, section.title))}
           </CollapsibleContent>
@@ -364,7 +464,11 @@ export const EditableTeachingDetails = ({
       {/* Save Button */}
       {canEdit && (
         <div className="flex gap-3 justify-end pt-4 border-t">
-          <Button onClick={handleSave} disabled={loading} variant="outline">
+          <Button 
+            onClick={handleSave} 
+            disabled={loading || !hasUnsavedChanges} 
+            variant="outline"
+          >
             <Save className="h-4 w-4 mr-2" />
             {loading ? 'Lagrer...' : 'Lagre endringer'}
           </Button>
