@@ -494,8 +494,16 @@ const BookingAgreementReview = () => {
             </div>
           );
         }
+        // If not teaching, fall through to 'pricing' case
+        return null;
 
-        // Standard pricing section for non-teaching
+      case 'pricing':
+        // Standard pricing section for non-teaching bookings
+        if (isTeaching) {
+          // Teaching bookings should use 'payment' case instead
+          return null;
+        }
+        
         const audienceEstimate = booking.audience_estimate || 0;
         const ticketPrice = booking.ticket_price || 0;
         const totalRevenue = audienceEstimate * ticketPrice;
