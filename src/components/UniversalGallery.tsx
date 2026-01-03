@@ -25,6 +25,7 @@ interface UniversalGalleryProps {
   aspectRatio?: string;
   showEmptyMessage?: boolean;
   className?: string;
+  showFilename?: boolean;
 }
 
 const SUPABASE_URL = 'https://hkcdyqghfqyrlwjcsrnx.supabase.co/storage/v1/object/public/filbank';
@@ -38,7 +39,8 @@ export const UniversalGallery = ({
   gap = "gap-1",
   aspectRatio = "aspect-square",
   showEmptyMessage = true,
-  className = ""
+  className = "",
+  showFilename = false
 }: UniversalGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const selectedFile = selectedIndex !== null ? files[selectedIndex] : null;
@@ -321,12 +323,18 @@ export const UniversalGallery = ({
     <ErrorBoundary>
       <div className={`grid ${gridCols} ${gap} ${className}`}>
         {files.map((file, index) => (
-          <div
-            key={file.id}
-            onClick={() => setSelectedIndex(index)}
-            className={`${aspectRatio} rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all`}
-          >
-            {renderGridItem(file)}
+          <div key={file.id} className="space-y-2">
+            <div
+              onClick={() => setSelectedIndex(index)}
+              className={`${aspectRatio} rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-accent-orange transition-all`}
+            >
+              {renderGridItem(file)}
+            </div>
+            {showFilename && (
+              <p className="text-xs text-muted-foreground truncate text-center px-1">
+                {file.title || file.filename}
+              </p>
+            )}
           </div>
         ))}
       </div>
