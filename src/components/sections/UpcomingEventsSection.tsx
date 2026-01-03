@@ -167,8 +167,9 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4 pb-4">
             {events.map((event) => {
             const isUpdating = updatingIds.has(event.id);
-            const isFromMarket = !event.is_sender && !event.is_receiver;
-            const currentVisibility = isFromMarket ? event.is_public_after_approval : event.is_public_after_approval;
+            const isFromMarket = !event.is_from_booking;
+            const currentVisibility = event.is_public_after_approval;
+            
             
             return (
               <Card key={event.id} className="hover:border-primary/50 transition-all group">
@@ -236,7 +237,8 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                       <span>
                         {event.is_sender && 'Du er sender'}
-                        {event.is_receiver && 'Du er mottaker'}
+                        {event.is_receiver && !event.is_sender && 'Du er mottaker'}
+                        {event.is_event_admin && !event.is_sender && !event.is_receiver && 'Du er event-admin'}
                         {isFromMarket && 'Admin-opprettet'}
                       </span>
                       <Badge variant="outline" className="text-xs">
@@ -267,7 +269,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2">
-                        {!isFromMarket && (
+                        {event.is_from_booking && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -282,7 +284,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         <Button
                           variant="outline"
                           size="sm"
-                          className={!isFromMarket ? "w-full text-xs" : "col-span-2 text-xs"}
+                          className={event.is_from_booking ? "w-full text-xs" : "col-span-2 text-xs"}
                           onClick={() => navigate(`/arrangement/${event.id}`)}
                           disabled={isUpdating}
                         >
