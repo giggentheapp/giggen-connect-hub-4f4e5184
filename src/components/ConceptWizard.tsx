@@ -340,6 +340,21 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
               {/* Pricing Section */}
               <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
                 <Label className="text-base font-semibold">{t('conceptWizard.details.pricingModel')}</Label>
+                
+                {/* Important disclaimer about GIGGEN's role */}
+                <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                    Viktig om økonomi i GIGGEN
+                  </h4>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    GIGGEN håndterer per i dag <strong>ikke økonomisk oppgjør eller betaling</strong>.
+                    Alle avtaler i GIGGEN fungerer som en <strong>ikke-bindende avtalemal</strong> og et felles utgangspunkt for samarbeid.
+                  </p>
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mt-2">
+                    Eventuelle betalinger, kontrakter og oppgjør skjer <strong>utenfor GIGGEN</strong>, mellom artist og arrangør.
+                  </p>
+                </div>
+                
                 <RadioGroup
                   value={conceptData.pricing_type}
                   onValueChange={(value: 'fixed' | 'door_deal' | 'by_agreement') => {
@@ -356,7 +371,7 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       <Label htmlFor="fixed-price" className="cursor-pointer font-medium">{t('conceptWizard.details.fixedPrice')}</Label>
                     </div>
                     <p className="text-xs text-muted-foreground pl-6">
-                      Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                      Fast honorar betyr at arrangør har til hensikt å betale et fast avtalt beløp, uavhengig av billettsalg, antall gjester eller arrangementets totale inntekter. Dette gir forutsigbarhet for artist/band, men beløpet utbetales utenfor GIGGEN og avtalen er ikke juridisk bindende.
                     </p>
                   </div>
                   
@@ -366,17 +381,17 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                       <Label htmlFor="door-deal" className="cursor-pointer font-medium">{t('conceptWizard.details.doorDeal')}</Label>
                     </div>
                     <p className="text-xs text-muted-foreground pl-6">
-                      Utestedet tar inntekter for ølsalg osv, mens musikeren/bandet tar inngangspenger.
+                      Dette alternativet beskriver en klassisk døravtale, hvor artist/band mottar inntekter fra inngangsbilletter. Typisk forståelse: Artist/band tar inngang, arrangør/utested beholder bar- og omsetningsinntekter, endelig inntekt avhenger av oppmøte. Merk: Selv om modellen beskrives her, skjer ingen økonomisk håndtering i GIGGEN. Avtalen er ikke juridisk bindende og fungerer kun som en felles forståelse.
                     </p>
                   </div>
                   
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="by_agreement" id="by-agreement" />
-                      <Label htmlFor="by-agreement" className="cursor-pointer font-medium">{t('conceptWizard.details.byAgreement')}</Label>
+                      <Label htmlFor="by-agreement" className="cursor-pointer font-medium">Avtale utenfor GIGGEN</Label>
                     </div>
                     <p className="text-xs text-muted-foreground pl-6">
-                      Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                      Dette alternativet brukes når partene ønsker å avtale honorar helt utenfor GIGGEN, uten å vise eller spesifisere økonomi i appen. GIGGEN dokumenterer ikke honorar eller betalingsmodell. Økonomiske vilkår avtales separat (muntlig eller skriftlig). GIGGEN fungerer kun som en strukturert avtalemal, ikke kontrakt.
                     </p>
                   </div>
                 </RadioGroup>

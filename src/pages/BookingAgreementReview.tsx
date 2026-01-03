@@ -440,16 +440,22 @@ const BookingAgreementReview = () => {
                   <h4 className="font-semibold">Prisingsmodell</h4>
                   {conceptData.price_by_agreement ? (
                     <div className="space-y-2">
-                      <p className="font-medium text-amber-700 dark:text-amber-400">Avtale mellom partene</p>
+                      <p className="font-medium text-amber-700 dark:text-amber-400">Avtale utenfor GIGGEN</p>
                       <p className="text-sm text-muted-foreground">
-                        Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                        Partene har valgt å avtale økonomi utenfor GIGGEN. Ingen honorar eller betalingsvilkår er registrert i appen.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        GIGGEN er per i dag kun en ikke-bindende avtalemal og er ikke part i økonomisk oppgjør.
                       </p>
                     </div>
                   ) : conceptData.door_deal ? (
                     <div className="space-y-2">
-                      <p className="font-medium text-blue-700 dark:text-blue-400">Spiller for døra</p>
+                      <p className="font-medium text-blue-700 dark:text-blue-400">Spiller for døra (andel av inngang)</p>
                       <p className="text-sm text-muted-foreground">
-                        Utestedet/arrangøren tar inntekter fra ølsalg og annen salg, mens musikeren/bandet tar inngangspenger fra publikum.
+                        Partene har valgt en døravtale (spille for døra). Honoraret er avhengig av billettsalg og avklares mellom partene utenfor GIGGEN.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        GIGGEN håndterer ikke betaling og fungerer kun som avtalemal.
                       </p>
                       {conceptData.door_percentage && (
                         <p className="text-sm font-medium">
@@ -459,9 +465,12 @@ const BookingAgreementReview = () => {
                     </div>
                   ) : conceptData.price ? (
                     <div className="space-y-2">
-                      <p className="font-medium text-green-700 dark:text-green-400">Fast inntekt</p>
+                      <p className="font-medium text-green-700 dark:text-green-400">Fast honorar (garantert beløp)</p>
                       <p className="text-sm text-muted-foreground">
-                        Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                        Partene har angitt et fast honorar som felles utgangspunkt. Utbetaling og eventuell kontrakt håndteres utenfor GIGGEN.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        GIGGEN fungerer per i dag kun som en ikke-bindende avtalemal.
                       </p>
                       <p className="text-sm font-medium">
                         Beløp: {conceptData.price} kr

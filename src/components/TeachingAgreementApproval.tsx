@@ -258,17 +258,23 @@ export const TeachingAgreementApproval = ({
             {/* Show pricing type explanation */}
             {conceptData && conceptData.price_by_agreement && (
               <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                <p className="font-medium text-amber-700 dark:text-amber-400 mb-2">Avtale mellom partene</p>
+                <p className="font-medium text-amber-700 dark:text-amber-400 mb-2">Avtale utenfor GIGGEN</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Partene har valgt å avtale økonomi utenfor GIGGEN. Ingen honorar eller betalingsvilkår er registrert i appen.
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                  GIGGEN er per i dag kun en ikke-bindende avtalemal og er ikke part i økonomisk oppgjør.
                 </p>
               </div>
             )}
             {conceptData && conceptData.door_deal && (
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="font-medium text-blue-700 dark:text-blue-400 mb-2">Spiller for døra</p>
+                <p className="font-medium text-blue-700 dark:text-blue-400 mb-2">Spiller for døra (andel av inngang)</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Partene har valgt en døravtale (spille for døra). Honoraret er avhengig av billettsalg og avklares mellom partene utenfor GIGGEN.
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Utestedet/arrangøren tar inntekter fra ølsalg og annen salg, mens musikeren/bandet tar inngangspenger fra publikum.
+                  GIGGEN håndterer ikke betaling og fungerer kun som avtalemal.
                 </p>
                 {conceptData.door_percentage && (
                   <p className="text-sm font-medium mt-2">
@@ -279,9 +285,12 @@ export const TeachingAgreementApproval = ({
             )}
             {conceptData && !conceptData.price_by_agreement && !conceptData.door_deal && conceptData.price && (
               <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="font-medium text-green-700 dark:text-green-400 mb-2">Fast inntekt</p>
+                <p className="font-medium text-green-700 dark:text-green-400 mb-2">Fast honorar (garantert beløp)</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Partene har angitt et fast honorar som felles utgangspunkt. Utbetaling og eventuell kontrakt håndteres utenfor GIGGEN.
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                  GIGGEN fungerer per i dag kun som en ikke-bindende avtalemal.
                 </p>
                 <p className="text-sm font-medium mt-2">
                   Beløp: {conceptData.price} kr

@@ -713,6 +713,20 @@ export const BookingDetailsPanel = ({
               <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
                 <Label className="text-base font-semibold">Artist honorar</Label>
                 
+                {/* Important disclaimer about GIGGEN's role */}
+                <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                    Viktig om økonomi i GIGGEN
+                  </h4>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    GIGGEN håndterer per i dag <strong>ikke økonomisk oppgjør eller betaling</strong>.
+                    Alle avtaler i GIGGEN fungerer som en <strong>ikke-bindende avtalemal</strong> og et felles utgangspunkt for samarbeid.
+                  </p>
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mt-2">
+                    Eventuelle betalinger, kontrakter og oppgjør skjer <strong>utenfor GIGGEN</strong>, mellom artist og arrangør.
+                  </p>
+                </div>
+                
                 <div className="space-y-3">
                   {/* Payment Type Selection */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -751,7 +765,7 @@ export const BookingDetailsPanel = ({
                     >
                       <span className="font-medium">Fast honorar</span>
                       <span className="text-xs opacity-70">
-                        Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                        Fast honorar betyr at arrangør har til hensikt å betale et fast avtalt beløp, uavhengig av billettsalg, antall gjester eller arrangementets totale inntekter. Dette gir forutsigbarhet for artist/band, men beløpet utbetales utenfor GIGGEN og avtalen er ikke juridisk bindende.
                       </span>
                     </Button>
                     
@@ -790,7 +804,7 @@ export const BookingDetailsPanel = ({
                     >
                       <span className="font-medium">Spiller for døra</span>
                       <span className="text-xs opacity-70">
-                        Utestedet tar inntekter for ølsalg osv, mens musikeren/bandet tar inngangspenger.
+                        Dette alternativet beskriver en klassisk døravtale, hvor artist/band mottar inntekter fra inngangsbilletter. Typisk forståelse: Artist/band tar inngang, arrangør/utested beholder bar- og omsetningsinntekter, endelig inntekt avhenger av oppmøte. Merk: Selv om modellen beskrives her, skjer ingen økonomisk håndtering i GIGGEN. Avtalen er ikke juridisk bindende og fungerer kun som en felles forståelse.
                       </span>
                     </Button>
                     
@@ -827,11 +841,22 @@ export const BookingDetailsPanel = ({
                       disabled={!canEdit}
                       className="h-auto p-3 flex flex-col items-start gap-2 text-left"
                     >
-                      <span className="font-medium">Avtale mellom partene</span>
+                      <span className="font-medium">Avtale utenfor GIGGEN</span>
                       <span className="text-xs opacity-70">
-                        Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                        Dette alternativet brukes når partene ønsker å avtale honorar helt utenfor GIGGEN, uten å vise eller spesifisere økonomi i appen. GIGGEN dokumenterer ikke honorar eller betalingsmodell. Økonomiske vilkår avtales separat (muntlig eller skriftlig). GIGGEN fungerer kun som en strukturert avtalemal, ikke kontrakt.
                       </span>
                     </Button>
+                  </div>
+                  
+                  {/* Micro-text disclaimer */}
+                  <div className="mt-4 p-3 bg-muted/50 rounded-md border border-muted">
+                    <p className="text-xs text-muted-foreground flex items-start gap-2">
+                      <span className="text-base">ℹ️</span>
+                      <span>
+                        GIGGEN håndterer per i dag ikke betaling, fakturering eller juridisk bindende kontrakter.
+                        Avtalen brukes som et felles utgangspunkt og forventningsavklaring.
+                      </span>
+                    </p>
                   </div>
 
                   {/* Payment Details */}
