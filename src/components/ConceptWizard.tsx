@@ -348,21 +348,36 @@ export const ConceptWizard = ({ isOpen, onClose, onSuccess, userId }: ConceptWiz
                     if (value !== 'fixed') updateConceptData('price', '');
                     if (value !== 'door_deal') updateConceptData('door_percentage', '');
                   }}
-                  className="space-y-3"
+                  className="space-y-4"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="fixed" id="fixed-price" />
-                    <Label htmlFor="fixed-price" className="cursor-pointer">{t('conceptWizard.details.fixedPrice')}</Label>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="fixed" id="fixed-price" />
+                      <Label htmlFor="fixed-price" className="cursor-pointer font-medium">{t('conceptWizard.details.fixedPrice')}</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground pl-6">
+                      Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                    </p>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="door_deal" id="door-deal" />
-                    <Label htmlFor="door-deal" className="cursor-pointer">{t('conceptWizard.details.doorDeal')}</Label>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="door_deal" id="door-deal" />
+                      <Label htmlFor="door-deal" className="cursor-pointer font-medium">{t('conceptWizard.details.doorDeal')}</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground pl-6">
+                      Utestedet tar inntekter for ølsalg osv, mens musikeren/bandet tar inngangspenger.
+                    </p>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="by_agreement" id="by-agreement" />
-                    <Label htmlFor="by-agreement" className="cursor-pointer">{t('conceptWizard.details.byAgreement')}</Label>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="by_agreement" id="by-agreement" />
+                      <Label htmlFor="by-agreement" className="cursor-pointer font-medium">{t('conceptWizard.details.byAgreement')}</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground pl-6">
+                      Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                    </p>
                   </div>
                 </RadioGroup>
 

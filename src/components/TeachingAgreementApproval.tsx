@@ -247,15 +247,49 @@ export const TeachingAgreementApproval = ({
         )}
 
         {/* Payment */}
-        {teachingData.payment && renderFieldItems(teachingData.payment) && (
+        {(teachingData.payment && renderFieldItems(teachingData.payment)) || conceptData?.price_by_agreement || conceptData?.door_deal || conceptData?.price ? (
           <div className="border-b pb-4">
             <div className="flex items-center gap-2 mb-3">
               <Banknote className="h-5 w-5" />
               <h2 className="text-lg font-semibold">Betaling</h2>
             </div>
             {renderFieldItems(teachingData.payment)}
+            
+            {/* Show pricing type explanation */}
+            {conceptData && conceptData.price_by_agreement && (
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="font-medium text-amber-700 dark:text-amber-400 mb-2">Avtale mellom partene</p>
+                <p className="text-sm text-muted-foreground">
+                  Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
+                </p>
+              </div>
+            )}
+            {conceptData && conceptData.door_deal && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="font-medium text-blue-700 dark:text-blue-400 mb-2">Spiller for døra</p>
+                <p className="text-sm text-muted-foreground">
+                  Utestedet/arrangøren tar inntekter fra ølsalg og annen salg, mens musikeren/bandet tar inngangspenger fra publikum.
+                </p>
+                {conceptData.door_percentage && (
+                  <p className="text-sm font-medium mt-2">
+                    Prosentandel: {conceptData.door_percentage}% av dørinntekt
+                  </p>
+                )}
+              </div>
+            )}
+            {conceptData && !conceptData.price_by_agreement && !conceptData.door_deal && conceptData.price && (
+              <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="font-medium text-green-700 dark:text-green-400 mb-2">Fast inntekt</p>
+                <p className="text-sm text-muted-foreground">
+                  Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                </p>
+                <p className="text-sm font-medium mt-2">
+                  Beløp: {conceptData.price} kr
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        ) : null}
 
         {/* Responsibilities */}
         {teachingData.responsibilities && renderFieldItems(teachingData.responsibilities) && (
