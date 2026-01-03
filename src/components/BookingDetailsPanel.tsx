@@ -715,7 +715,7 @@ export const BookingDetailsPanel = ({
                 
                 <div className="space-y-3">
                   {/* Payment Type Selection */}
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <Button
                       variant={!booking.door_deal && !booking.by_agreement ? "default" : "outline"}
                       size="sm"
@@ -747,10 +747,12 @@ export const BookingDetailsPanel = ({
                         }
                       }}
                       disabled={!canEdit}
-                      className="h-auto p-3 flex flex-col items-center gap-1"
+                      className="h-auto p-3 flex flex-col items-start gap-2 text-left"
                     >
                       <span className="font-medium">Fast honorar</span>
-                      <span className="text-xs opacity-70">Garantert beløp</span>
+                      <span className="text-xs opacity-70">
+                        Utestedet/arrangøren lover en fast pris uansett publikumstall eller inntekter.
+                      </span>
                     </Button>
                     
                     <Button
@@ -784,10 +786,12 @@ export const BookingDetailsPanel = ({
                         }
                       }}
                       disabled={!canEdit}
-                      className="h-auto p-3 flex flex-col items-center gap-1"
+                      className="h-auto p-3 flex flex-col items-start gap-2 text-left"
                     >
                       <span className="font-medium">Spiller for døra</span>
-                      <span className="text-xs opacity-70">Andel av inntekt</span>
+                      <span className="text-xs opacity-70">
+                        Utestedet tar inntekter for ølsalg osv, mens musikeren/bandet tar inngangspenger.
+                      </span>
                     </Button>
                     
                     <Button
@@ -821,10 +825,12 @@ export const BookingDetailsPanel = ({
                         }
                       }}
                       disabled={!canEdit}
-                      className="h-auto p-3 flex flex-col items-center gap-1"
+                      className="h-auto p-3 flex flex-col items-start gap-2 text-left"
                     >
-                      <span className="font-medium">Ved avtale</span>
-                      <span className="text-xs opacity-70">Avtales utenfor GIGGEN</span>
+                      <span className="font-medium">Avtale mellom partene</span>
+                      <span className="text-xs opacity-70">
+                        Partene blir enige utenfor Giggen. Ikke dokumentert i Giggen.
+                      </span>
                     </Button>
                   </div>
 
