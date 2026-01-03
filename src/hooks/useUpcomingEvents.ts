@@ -16,6 +16,8 @@ interface UpcomingEvent {
   // For identifying user role in the event
   is_sender: boolean;
   is_receiver: boolean;
+  is_event_admin: boolean;
+  is_from_booking: boolean; // True if this is from a booking (has agreement)
   is_public_after_approval?: boolean;
   has_paid_tickets?: boolean;
 }
@@ -76,6 +78,8 @@ export const useUpcomingEvents = (userId: string) => {
         created_at: booking.created_at,
         is_sender: booking.sender_id === userId,
         is_receiver: booking.receiver_id === userId,
+        is_event_admin: booking.event_admin_id === userId,
+        is_from_booking: true, // All bookings have agreements
         is_public_after_approval: booking.is_public_after_approval,
         has_paid_tickets: false
       }));
@@ -95,6 +99,8 @@ export const useUpcomingEvents = (userId: string) => {
         created_at: event.created_at,
         is_sender: false,
         is_receiver: false,
+        is_event_admin: false,
+        is_from_booking: false, // Market events don't have booking agreements
         is_public_after_approval: event.is_public,
         has_paid_tickets: event.has_paid_tickets || false
       }));
