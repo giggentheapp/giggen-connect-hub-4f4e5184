@@ -69,11 +69,11 @@ export default function TicketSuccess() {
             Se mine billetter
           </Button>
           <Button
-            onClick={() => navigate("/events")}
+            onClick={() => navigate("/")}
             variant="outline"
             className="w-full"
           >
-            Tilbake til arrangementer
+            Tilbake til forsiden
           </Button>
         </CardContent>
       </Card>
