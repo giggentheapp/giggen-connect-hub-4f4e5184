@@ -691,63 +691,113 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
             </div>
 
             <div className="space-y-4">
-              <Label className="text-base font-medium">Artist honorar</Label>
+              <Label className="text-base font-semibold">Artist honorar</Label>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="by_agreement"
-                  checked={formData.by_agreement}
-                  onCheckedChange={(checked) => updateFormField('by_agreement', checked)}
-                  disabled={!canEdit || loading}
-                />
-                <Label htmlFor="by_agreement">Avtales direkte mellom partene</Label>
+              {/* Important disclaimer about GIGGEN's role */}
+              <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                  Viktig om økonomi i GIGGEN
+                </h4>
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  GIGGEN håndterer per i dag <strong>ikke økonomisk oppgjør eller betaling</strong>.
+                  Alle avtaler i GIGGEN fungerer som en <strong>ikke-bindende avtalemal</strong> og et felles utgangspunkt for samarbeid.
+                </p>
+                <p className="text-sm text-amber-800 dark:text-amber-200 mt-2">
+                  Eventuelle betalinger, kontrakter og oppgjør skjer <strong>utenfor GIGGEN</strong>, mellom artist og arrangør.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="by_agreement"
+                    checked={formData.by_agreement}
+                    onCheckedChange={(checked) => {
+                      updateFormField('by_agreement', checked);
+                      if (checked) {
+                        updateFormField('door_deal', false);
+                      }
+                    }}
+                    disabled={!canEdit || loading}
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="by_agreement" className="cursor-pointer font-medium">Avtale utenfor GIGGEN</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Dette alternativet brukes når partene ønsker å avtale honorar helt utenfor GIGGEN, uten å vise eller spesifisere økonomi i appen. GIGGEN dokumenterer ikke honorar eller betalingsmodell. Økonomiske vilkår avtales separat (muntlig eller skriftlig). GIGGEN fungerer kun som en strukturert avtalemal, ikke kontrakt. Dette passer for deg som ikke ønsker å dele økonomiske detaljer i appen, allerede har en etablert relasjon, eller bruker egen kontrakt eller løsning utenfor GIGGEN.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="door_deal"
+                    checked={formData.door_deal}
+                    onCheckedChange={(checked) => {
+                      updateFormField('door_deal', checked);
+                      if (checked) {
+                        updateFormField('by_agreement', false);
+                      }
+                    }}
+                    disabled={!canEdit || loading}
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="door_deal" className="cursor-pointer font-medium">Spiller for døra</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Dette alternativet beskriver en klassisk døravtale, hvor artist/band mottar inntekter fra inngangsbilletter. Typisk forståelse: Artist/band tar inngang, arrangør/utested beholder bar- og omsetningsinntekter, endelig inntekt avhenger av oppmøte. Merk: Selv om modellen beskrives her, skjer ingen økonomisk håndtering i GIGGEN. Avtalen er ikke juridisk bindende og fungerer kun som en felles forståelse.
+                    </p>
+                  </div>
+                </div>
+
+                {formData.door_deal && (
+                  <div className="ml-6">
+                    <Label htmlFor="door_percentage">Prosent av dørinntekter (%)</Label>
+                    <Input
+                      id="door_percentage"
+                      type="number"
+                      value={formData.door_percentage}
+                      onChange={(e) => updateFormField('door_percentage', e.target.value)}
+                      disabled={!canEdit || loading}
+                      placeholder="F.eks. 70"
+                      min="0"
+                      max="100"
+                      className={errors.door_percentage ? "border-red-500" : ""}
+                    />
+                    {errors.door_percentage && <p className="text-sm text-red-500 mt-1">{errors.door_percentage}</p>}
+                  </div>
+                )}
+
+                {!formData.by_agreement && !formData.door_deal && (
+                  <div className="ml-6">
+                    <Label htmlFor="artist_fee">Fast honorar (Kr)</Label>
+                    <Input
+                      id="artist_fee"
+                      type="number"
+                      value={formData.artist_fee}
+                      onChange={(e) => updateFormField('artist_fee', e.target.value)}
+                      disabled={!canEdit || loading}
+                      placeholder="F.eks. 15000"
+                      min="0"
+                      step="0.01"
+                      className={errors.artist_fee ? "border-red-500" : ""}
+                    />
+                    {errors.artist_fee && <p className="text-sm text-red-500 mt-1">{errors.artist_fee}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Fast honorar betyr at arrangør har til hensikt å betale et fast avtalt beløp, uavhengig av billettsalg, antall gjester eller arrangementets totale inntekter. Dette gir forutsigbarhet for artist/band, men beløpet utbetales utenfor GIGGEN og avtalen er ikke juridisk bindende.
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="door_deal"
-                  checked={formData.door_deal}
-                  onCheckedChange={(checked) => updateFormField('door_deal', checked)}
-                  disabled={!canEdit || loading}
-                />
-                <Label htmlFor="door_deal">Døravtale (prosent av inntekter)</Label>
+              {/* Micro-text disclaimer */}
+              <div className="mt-4 p-3 bg-muted/50 rounded-md border border-muted">
+                <p className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="text-base">ℹ️</span>
+                  <span>
+                    GIGGEN håndterer per i dag ikke betaling, fakturering eller juridisk bindende kontrakter.
+                    Avtalen brukes som et felles utgangspunkt og forventningsavklaring.
+                  </span>
+                </p>
               </div>
-
-              {formData.door_deal && (
-                <div>
-                  <Label htmlFor="door_percentage">Prosent av dørinntekter (%)</Label>
-                  <Input
-                    id="door_percentage"
-                    type="number"
-                    value={formData.door_percentage}
-                    onChange={(e) => updateFormField('door_percentage', e.target.value)}
-                    disabled={!canEdit || loading}
-                    placeholder="F.eks. 70"
-                    min="0"
-                    max="100"
-                    className={errors.door_percentage ? "border-red-500" : ""}
-                  />
-                  {errors.door_percentage && <p className="text-sm text-red-500 mt-1">{errors.door_percentage}</p>}
-                </div>
-              )}
-
-              {!formData.by_agreement && !formData.door_deal && (
-                <div>
-                  <Label htmlFor="artist_fee">Fast honorar (Kr)</Label>
-                  <Input
-                    id="artist_fee"
-                    type="number"
-                    value={formData.artist_fee}
-                    onChange={(e) => updateFormField('artist_fee', e.target.value)}
-                    disabled={!canEdit || loading}
-                    placeholder="F.eks. 15000"
-                    min="0"
-                    step="0.01"
-                    className={errors.artist_fee ? "border-red-500" : ""}
-                  />
-                  {errors.artist_fee && <p className="text-sm text-red-500 mt-1">{errors.artist_fee}</p>}
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>

@@ -554,10 +554,18 @@ const BookingAgreementReview = () => {
 
             <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-lg border border-green-200 dark:border-green-800">
               <h4 className="font-semibold text-lg mb-3">Artist honorar</h4>
+              
               {booking.door_deal ? (
-                <>
+                <div className="space-y-2">
+                  <p className="font-medium text-blue-700 dark:text-blue-400">Spiller for døra (andel av inngang)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har valgt en døravtale (spille for døra). Honoraret er avhengig av billettsalg og avklares mellom partene utenfor GIGGEN.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    GIGGEN håndterer ikke betaling og fungerer kun som avtalemal.
+                  </p>
                   <p className="text-lg mb-2">
-                    Spiller for døra: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt
+                    Prosentandel: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt
                   </p>
                   {hasRevenueData && (
                     <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
@@ -569,23 +577,41 @@ const BookingAgreementReview = () => {
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               ) : booking.by_agreement ? (
-                <>
-                  <p className="text-lg">Honorar avtales direkte mellom partene</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-lg mb-2">
-                    Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong>
+                <div className="space-y-2">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">Avtale utenfor GIGGEN</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har valgt å avtale økonomi utenfor GIGGEN. Ingen honorar eller betalingsvilkår er registrert i appen.
                   </p>
-                </>
+                  <p className="text-sm text-muted-foreground">
+                    GIGGEN er per i dag kun en ikke-bindende avtalemal og er ikke part i økonomisk oppgjør.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="font-medium text-green-700 dark:text-green-400">Fast honorar (garantert beløp)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har angitt et fast honorar som felles utgangspunkt. Utbetaling og eventuell kontrakt håndteres utenfor GIGGEN.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    GIGGEN fungerer per i dag kun som en ikke-bindende avtalemal.
+                  </p>
+                  <p className="text-lg mb-2">
+                    Beløp: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong>
+                  </p>
+                </div>
               )}
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm">
-                Sørg for at du forstår og godtar alle priser og honorarordninger.
+            {/* Micro-text disclaimer */}
+            <div className="mt-4 p-3 bg-muted/50 rounded-md border border-muted">
+              <p className="text-xs text-muted-foreground flex items-start gap-2">
+                <span className="text-base">ℹ️</span>
+                <span>
+                  GIGGEN håndterer per i dag ikke betaling, fakturering eller juridisk bindende kontrakter.
+                  Avtalen brukes som et felles utgangspunkt og forventningsavklaring.
+                </span>
               </p>
             </div>
           </div>
