@@ -19,6 +19,7 @@ interface PortfolioAttachment {
     title?: string;
     description?: string;
     user_id: string;
+    thumbnail_path?: string | null;
   };
 }
 
@@ -49,7 +50,8 @@ export const useBookingPortfolio = (bookingId: string | undefined) => {
             mime_type,
             title,
             description,
-            user_id
+            user_id,
+            thumbnail_path
           )
         `)
         .eq('booking_id', bookingId)

@@ -77,6 +77,7 @@ export const BookingPortfolioAttachments = ({
             file_size: file.file_size,
             is_public: false, // Default til privat for booking-vedlegg
             title: file.filename,
+            thumbnail_path: file.thumbnail_path || null,
           })
           .select()
           .single();
@@ -143,7 +144,7 @@ export const BookingPortfolioAttachments = ({
         file_type: file.file_type,
         mime_type: file.mime_type,
         title: file.title || file.filename,
-        thumbnail_path: (file as any).thumbnail_path || null,
+        thumbnail_path: file.thumbnail_path || null,
         // Store attachment info for removal
         _attachmentId: attachment.id,
         _attachedBy: attachment.attached_by,
