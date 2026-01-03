@@ -13,7 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { BookingPortfolioAttachments } from '@/components/BookingPortfolioAttachments';
-import { PublicVisibilitySettings } from '@/components/PublicVisibilitySettings';
+
 import { TeachingBookingDetailsPanel } from '@/components/TeachingBookingDetailsPanel';
 import { EditableTeachingDetails } from '@/components/EditableTeachingDetails';
 import { TeachingAgreementApproval } from '@/components/TeachingAgreementApproval';
@@ -752,13 +752,47 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
           </CardContent>
         </Card>
 
-        {/* Public Visibility Settings - BOTH PARTIES CAN EDIT */}
+        {/* Information about booking vs event - booking is private */}
         {isInNegotiation && (
-          <PublicVisibilitySettings
-            value={formData.public_visibility_settings}
-            onChange={(settings) => updateFormField('public_visibility_settings', settings)}
-            mode="booking"
-          />
+          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Check className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                Booking vs Arrangement
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <div className="h-2 w-2 rounded-full bg-blue-600 mt-1.5" />
+                  <div>
+                    <p className="font-medium text-sm">Booking/Avtale (privat)</p>
+                    <p className="text-sm text-muted-foreground">
+                      Denne bookingavtalen er privat mellom dere to parter. Ingen annen informasjon enn det som er delt mellom dere vil være synlig.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5" />
+                  <div>
+                    <p className="font-medium text-sm">Arrangement (offentlig)</p>
+                    <p className="text-sm text-muted-foreground">
+                      Når begge parter har godkjent avtalen, kan dere opprette et offentlig arrangement. 
+                      Da kan dere velge hva som skal vises offentlig (tittel, beskrivelse, dato, sted, osv.).
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {booking.approved_by_sender && booking.approved_by_receiver && (
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <p className="text-sm text-green-800 dark:text-green-200">
+                    <strong>Klar for arrangement:</strong> Begge parter har godkjent. 
+                    Du kan nå opprette et offentlig arrangement fra avtalen.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {/* Portfolio Attachments */}
