@@ -24,8 +24,7 @@ import ProfileConceptView from "./pages/ProfileConceptView";
 import CreateOffer from "./pages/CreateOffer";
 import BookingRequestPage from "./pages/BookingRequestPage";
 import BookingAgreementReview from "./pages/BookingAgreementReview";
-import BookingAgreementView from "./pages/BookingAgreementView";
-import TeachingAgreementView from "./pages/TeachingAgreementView";
+import UniversalAgreementView from "./components/UniversalAgreementView";
 import PublicEventView from "./pages/PublicEventView";
 import Events from "./pages/Events";
 import CheckIn from "./pages/CheckIn";
@@ -84,8 +83,7 @@ const App = () => {
               
               <Route path="/booking/create/:makerId" element={<BookingRequestPage />} />
               <Route path="/booking/:bookingId/review" element={<BookingAgreementReview />} />
-              <Route path="/booking/:bookingId/view" element={<BookingAgreementView />} />
-              <Route path="/booking/:bookingId/teaching-agreement" element={<TeachingAgreementView />} />
+              <Route path="/booking/:bookingId/view" element={<UniversalAgreementView />} />
               
               {/* Ticket System Routes */}
               <Route path="/events" element={<Events />} />
