@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useAuthMode } from '@/hooks/useAuthMode';
@@ -17,13 +17,15 @@ const Auth = () => {
   const { authMode, goToLogin, goToSignup, goToForgotPassword, goToResetPassword, goToFeedback } = useAuthMode();
   const { session, loading } = useAuthSession();
   const { navigateToDashboard, completeFeedbackAndNavigate, isNavigating } = useAuthNavigation();
+  
+  // Track if we've already started navigation to prevent duplicate calls
+  const hasStartedNavigation = useRef(false);
 
   // Check for password reset token in URL hash
   const checkPasswordResetToken = useCallback(() => {
     const hash = window.location.hash;
     if (hash) {
-      // Supabase password reset links have format: #access_token=...&type=recovery&...
-      const params = new URLSearchParams(hash.substring(1)); // Remove #
+      const params = new URLSearchParams(hash.substring(1));
       const type = params.get('type');
       const accessToken = params.get('access_token');
       
@@ -47,14 +49,20 @@ const Auth = () => {
       goToResetPassword();
     },
     onSignOut: () => {
+      hasStartedNavigation.current = false; // Reset on sign out
       goToLogin();
     },
     onSignIn: async (userId: string) => {
+      // Prevent duplicate navigation
+      if (hasStartedNavigation.current) return;
+      
       // Don't redirect if this is a password reset flow
       if (checkPasswordResetToken()) {
         goToResetPassword();
         return;
       }
+      
+      hasStartedNavigation.current = true;
       const shouldShowFeedback = await navigateToDashboard(userId);
       if (shouldShowFeedback) {
         goToFeedback();
@@ -62,18 +70,19 @@ const Auth = () => {
     }
   });
 
-  // If already logged in when visiting /auth, redirect to dashboard
-  // BUT: Don't redirect if there's a password reset token in the URL
+  // Handle page refresh when already logged in (INITIAL_SESSION)
+  // useAuthEvents only handles SIGNED_IN, not INITIAL_SESSION
   useEffect(() => {
-    if (loading || isNavigating) return;
+    if (loading || isNavigating || hasStartedNavigation.current) return;
     
     // Don't redirect if there's a password reset token
     if (checkPasswordResetToken()) {
-      return; // Let the password reset form show
+      return;
     }
     
-    // Only redirect to dashboard if user is logged in and no password reset token
+    // Only redirect if user is logged in
     if (session?.user) {
+      hasStartedNavigation.current = true;
       navigateToDashboard(session.user.id);
     }
   }, [loading, session, navigateToDashboard, isNavigating, checkPasswordResetToken]);
