@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Plus, X, Image, Video, Music, File } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useBookingPortfolio } from '@/hooks/useBookingPortfolio';
-import { VideoPlayer } from '@/components/VideoPlayer';
 import { supabase } from '@/integrations/supabase/client';
 import { FilebankSelectionModal } from '@/components/FilebankSelectionModal';
+import { UniversalGallery, GalleryFile } from '@/components/UniversalGallery';
 
 interface BookingPortfolioAttachmentsProps {
   bookingId: string;
   currentUserId: string;
   canEdit: boolean;
   bookingStatus?: string;
+}
+
+// Extended type for gallery files with attachment metadata
+interface AttachmentGalleryFile extends GalleryFile {
+  _attachmentId: string;
+  _attachedBy: string;
 }
 
 export const BookingPortfolioAttachments = ({
@@ -119,74 +124,32 @@ export const BookingPortfolioAttachments = ({
     }
   };
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
-    if (fileType.startsWith('video/')) return <Video className="h-4 w-4" />;
-    if (fileType.startsWith('audio/')) return <Music className="h-4 w-4" />;
-    return <File className="h-4 w-4" />;
-  };
-
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from('filbank').getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
-  const renderFilePreview = (file: any) => {
-    // Null-sjekk for å unngå JavaScript-feil
-    if (!file) {
-      return (
-        <div className="w-full h-32 rounded bg-muted flex items-center justify-center">
-          <File className="h-4 w-4 text-muted-foreground" />
-          <span className="ml-2 text-xs text-muted-foreground">Fil ikke tilgjengelig</span>
-        </div>
-      );
-    }
-    
-    const publicUrl = file.file_url || getPublicUrl(file.file_path);
-    
-    if (file.mime_type?.startsWith('video/')) {
-      return (
-        <VideoPlayer
-          publicUrl={publicUrl}
-          filename={file.title || file.filename}
-          mimeType={file.mime_type}
-        />
-      );
-    }
-    
-    if (file.mime_type?.startsWith('audio/')) {
-      return (
-        <div className="w-full h-32 rounded bg-muted flex flex-col items-center justify-center gap-2 p-3">
-          <Music className="h-8 w-8 text-primary" />
-          <audio
-            controls
-            className="w-full"
-            preload="metadata"
-          >
-            <source src={publicUrl} type={file.mime_type} />
-            Nettleseren din støtter ikke lydavspilling.
-          </audio>
-        </div>
-      );
-    }
-    
-    if (file.mime_type?.startsWith('image/')) {
-      return (
-        <img
-          src={publicUrl}
-          alt={file.title || file.filename}
-          className="w-full h-32 rounded object-cover"
-        />
-      );
-    }
-    
-    return (
-      <div className="w-full h-32 rounded bg-muted flex items-center justify-center">
-        {getFileIcon(file.mime_type || '')}
-      </div>
-    );
-  };
-
+  // Convert attachments to GalleryFile format
+  const galleryFiles: AttachmentGalleryFile[] = attachments
+    .map((attachment) => {
+      if (!attachment.portfolio_file) return null;
+      
+      const file = attachment.portfolio_file;
+      let fileUrl = file.file_url;
+      if (!fileUrl && file.file_path) {
+        fileUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+      }
+      
+      return {
+        id: file.id || attachment.id,
+        filename: file.filename,
+        file_path: file.file_path,
+        file_url: fileUrl,
+        file_type: file.file_type,
+        mime_type: file.mime_type,
+        title: file.title || file.filename,
+        thumbnail_path: (file as any).thumbnail_path || null,
+        // Store attachment info for removal
+        _attachmentId: attachment.id,
+        _attachedBy: attachment.attached_by,
+      } as AttachmentGalleryFile;
+    })
+    .filter((file): file is AttachmentGalleryFile => file !== null);
 
   return (
     <>
@@ -221,39 +184,33 @@ export const BookingPortfolioAttachments = ({
               Ingen porteføljeefiler lagt ved ennå
             </p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {attachments.map((attachment) => {
-                // Hopp over attachments hvor portfolio_file er null
-                if (!attachment.portfolio_file) {
-                  return null;
-                }
-                
-                return (
-                  <Card key={attachment.id} className="relative group">
-                    <CardContent className="p-3 space-y-2">
-                      {renderFilePreview(attachment.portfolio_file)}
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium truncate">
-                          {attachment.portfolio_file.title || attachment.portfolio_file.filename}
-                        </p>
-                        <Badge variant="secondary" className="text-xs">
-                          {attachment.portfolio_file.file_type}
-                        </Badge>
-                      </div>
-                      {canEditAttachments && attachment.attached_by === currentUserId && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeAttachment(attachment.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <div className="space-y-4">
+              <UniversalGallery
+                files={galleryFiles}
+                gridCols="grid-cols-2 md:grid-cols-3"
+                gap="gap-4"
+                showEmptyMessage={false}
+                showFilename={true}
+              />
+              {/* Remove buttons for files the user attached */}
+              {canEditAttachments && (
+                <div className="flex flex-wrap gap-2">
+                  {galleryFiles
+                    .filter((file) => file._attachedBy === currentUserId)
+                    .map((file) => (
+                      <Button
+                        key={file._attachmentId}
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => removeAttachment(file._attachmentId)}
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Fjern {file.title || file.filename}
+                      </Button>
+                    ))}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
