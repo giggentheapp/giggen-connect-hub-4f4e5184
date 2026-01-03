@@ -18,9 +18,20 @@ const CSP_HEADER = [
   "frame-ancestors 'none'"
 ].join('; ');
 
+// Helper to check if origin is a Lovable domain
+function isLovableDomain(origin: string): boolean {
+  if (!origin) return false;
+  return (
+    origin.includes('.lovableproject.com') ||
+    origin.includes('.lovable.app') ||
+    origin.includes('lovable.dev') ||
+    origin.includes('id-preview--')
+  );
+}
+
 export function getSecurityHeaders(requestOrigin: string) {
   // Check if origin is allowed or is a Lovable preview domain
-  const isLovablePreview = requestOrigin.includes('.lovableproject.com');
+  const isLovablePreview = isLovableDomain(requestOrigin);
   const isAllowedOrigin = allowedOrigins.includes(requestOrigin) || isLovablePreview;
   
   const origin = isAllowedOrigin ? requestOrigin : allowedOrigins[0];
