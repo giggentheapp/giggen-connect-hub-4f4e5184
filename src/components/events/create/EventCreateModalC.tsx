@@ -1,12 +1,14 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Users, Banknote, Clock, Music, Calendar as CalendarIcon, Loader2, Video, Image as ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, Clock, Music, Calendar as CalendarIcon, Loader2, Image as ImageIcon } from 'lucide-react';
 import { EventFormData } from '@/hooks/useCreateEvent';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
+import { UniversalGallery, GalleryFile } from '@/components/UniversalGallery';
 
 interface EventCreateModalCProps {
   onBack: () => void;
@@ -39,6 +41,37 @@ export const EventCreateModalC = ({
     eventData.participants.musicians.length + 
     eventData.participants.bands.length + 
     eventData.participants.organizers.length;
+
+  // Convert gallery images and videos to GalleryFile format
+  const [galleryFiles, setGalleryFiles] = useState<GalleryFile[]>([]);
+  
+  useEffect(() => {
+    const files: GalleryFile[] = [];
+    
+    eventData.gallery_images?.forEach((imageUrl, index) => {
+      files.push({
+        id: `img-${index}`,
+        filename: `image-${index + 1}.jpg`,
+        file_url: imageUrl,
+        file_type: 'image',
+        mime_type: 'image/jpeg',
+        title: `Bilde ${index + 1}`,
+      } as GalleryFile);
+    });
+    
+    eventData.gallery_videos?.forEach((videoUrl, index) => {
+      files.push({
+        id: `vid-${index}`,
+        filename: `video-${index + 1}.mp4`,
+        file_url: videoUrl,
+        file_type: 'video',
+        mime_type: 'video/mp4',
+        title: `Video ${index + 1}`,
+      } as GalleryFile);
+    });
+    
+    setGalleryFiles(files);
+  }, [eventData.gallery_images, eventData.gallery_videos]);
 
   return (
     <div className="space-y-6 pb-48">
@@ -88,25 +121,18 @@ export const EventCreateModalC = ({
       </div>
 
       {/* Gallery Preview */}
-      {((eventData.gallery_images && eventData.gallery_images.length > 0) || 
-        (eventData.gallery_videos && eventData.gallery_videos.length > 0)) && (
+      {galleryFiles.length > 0 && (
         <div className="space-y-2">
           <h3 className="font-medium flex items-center gap-2">
             <ImageIcon className="h-4 w-4" />
-            Galleri ({(eventData.gallery_images?.length || 0) + (eventData.gallery_videos?.length || 0)} filer)
+            Galleri ({galleryFiles.length} {galleryFiles.length === 1 ? 'fil' : 'filer'})
           </h3>
-          <div className="grid grid-cols-4 gap-2">
-            {eventData.gallery_images?.slice(0, 4).map((imageUrl, index) => (
-              <div key={`img-${index}`} className="relative aspect-square rounded overflow-hidden">
-                <img src={imageUrl} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
-            {eventData.gallery_videos?.slice(0, Math.max(0, 4 - (eventData.gallery_images?.length || 0))).map((_, index) => (
-              <div key={`vid-${index}`} className="relative aspect-square rounded overflow-hidden bg-muted flex items-center justify-center">
-                <Video className="h-8 w-8 text-muted-foreground" />
-              </div>
-            ))}
-          </div>
+          <UniversalGallery
+            files={galleryFiles}
+            gridCols="grid-cols-4"
+            gap="gap-2"
+            showFilename={true}
+          />
         </div>
       )}
 

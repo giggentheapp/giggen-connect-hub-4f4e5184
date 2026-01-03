@@ -1,5 +1,5 @@
 import { useState, useEffect, SetStateAction, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +17,7 @@ import { EventFormData } from '@/hooks/useCreateEvent';
 import { useToast } from '@/hooks/use-toast';
 import { BookingSelector } from './BookingSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BookingAgreementModal } from '@/components/BookingAgreementModal';
+
 import { UniversalGallery, GalleryFile } from '@/components/UniversalGallery';
 
 interface EventCreateModalAProps {
@@ -36,6 +36,7 @@ export const EventCreateModalA = ({
   onBookingSelected 
 }: EventCreateModalAProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Stable update function to prevent re-renders
   const updateField = useCallback((field: keyof EventFormData, value: any) => {
@@ -53,7 +54,6 @@ export const EventCreateModalA = ({
   );
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [autoFilled, setAutoFilled] = useState(false);
-  const [showAgreementModal, setShowAgreementModal] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [galleryVideos, setGalleryVideos] = useState<string[]>([]);
   const [selectedBannerFromGallery, setSelectedBannerFromGallery] = useState<string | null>(null);
@@ -411,7 +411,11 @@ export const EventCreateModalA = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setShowAgreementModal(true)}
+                onClick={() => {
+                  if (selectedBooking?.id) {
+                    navigate(`/booking/${selectedBooking.id}/view`);
+                  }
+                }}
                 className="flex items-center gap-2"
               >
                 <FileText className="h-4 w-4" />
@@ -690,12 +694,6 @@ export const EventCreateModalA = ({
         category="all"
       />
 
-      <BookingAgreementModal
-        bookingId={selectedBooking?.id || null}
-        isOpen={showAgreementModal}
-        onClose={() => setShowAgreementModal(false)}
-        currentUserId={userId}
-      />
     </>
   );
 };
