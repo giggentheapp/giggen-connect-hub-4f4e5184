@@ -26,7 +26,6 @@ import BookingRequestPage from "./pages/BookingRequestPage";
 import BookingAgreementReview from "./pages/BookingAgreementReview";
 import UniversalAgreementView from "./components/UniversalAgreementView";
 import PublicEventView from "./pages/PublicEventView";
-import Events from "./pages/Events";
 import CheckIn from "./pages/CheckIn";
 import TicketSuccess from "./pages/TicketSuccess";
 import TicketView from "./pages/TicketView";
@@ -86,7 +85,6 @@ const App = () => {
               <Route path="/booking/:bookingId/view" element={<UniversalAgreementView />} />
               
               {/* Ticket System Routes */}
-              <Route path="/events" element={<Events />} />
               <Route path="/check-in" element={<CheckIn />} />
               <Route path="/ticket-success" element={<TicketSuccess />} />
               <Route path="/billett/:ticketId" element={<TicketView />} />
