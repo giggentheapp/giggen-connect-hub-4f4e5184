@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { navigateToProfile, navigateToAuth } from '@/lib/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -19,7 +21,7 @@ import { EditableTeachingDetails } from '@/components/EditableTeachingDetails';
 import { TeachingAgreementApproval } from '@/components/TeachingAgreementApproval';
 import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Save, Clock, Check } from 'lucide-react';
+import { CalendarIcon, Save, Clock, Check, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { z } from 'zod';
@@ -722,9 +724,18 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                   />
                   <div className="flex-1">
                     <Label htmlFor="by_agreement" className="cursor-pointer font-medium">Avtale utenfor GIGGEN</Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Dette alternativet brukes når partene ønsker å avtale honorar helt utenfor GIGGEN, uten å vise eller spesifisere økonomi i appen. GIGGEN dokumenterer ikke honorar eller betalingsmodell. Økonomiske vilkår avtales separat (muntlig eller skriftlig). GIGGEN fungerer kun som en strukturert avtalemal, ikke kontrakt. Dette passer for deg som ikke ønsker å dele økonomiske detaljer i appen, allerede har en etablert relasjon, eller bruker egen kontrakt eller løsning utenfor GIGGEN.
-                    </p>
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
+                        <Info className="h-3 w-3" />
+                        Lær mer
+                        <ChevronDown className="h-3 w-3" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <p className="text-xs text-muted-foreground mt-2 p-2 bg-muted/50 rounded">
+                          Dette alternativet brukes når partene ønsker å avtale honorar helt utenfor GIGGEN, uten å vise eller spesifisere økonomi i appen. GIGGEN dokumenterer ikke honorar eller betalingsmodell. Økonomiske vilkår avtales separat (muntlig eller skriftlig). GIGGEN fungerer kun som en strukturert avtalemal, ikke kontrakt.
+                        </p>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </div>
 
@@ -742,9 +753,18 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                   />
                   <div className="flex-1">
                     <Label htmlFor="door_deal" className="cursor-pointer font-medium">Spiller for døra</Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Dette alternativet beskriver en klassisk døravtale, hvor artist/band mottar inntekter fra inngangsbilletter. Typisk forståelse: Artist/band tar inngang, arrangør/utested beholder bar- og omsetningsinntekter, endelig inntekt avhenger av oppmøte. Merk: Selv om modellen beskrives her, skjer ingen økonomisk håndtering i GIGGEN. Avtalen er ikke juridisk bindende og fungerer kun som en felles forståelse.
-                    </p>
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
+                        <Info className="h-3 w-3" />
+                        Lær mer
+                        <ChevronDown className="h-3 w-3" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <p className="text-xs text-muted-foreground mt-2 p-2 bg-muted/50 rounded">
+                          Dette alternativet beskriver en klassisk døravtale, hvor artist/band mottar inntekter fra inngangsbilletter. Typisk: Artist/band tar inngang, arrangør beholder bar-inntekter, endelig inntekt avhenger av oppmøte. GIGGEN håndterer ikke økonomien.
+                        </p>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </div>
 
@@ -781,9 +801,18 @@ export const BookingEditModal = ({ booking, currentUserId, onSaved }: BookingEdi
                       className={errors.artist_fee ? "border-red-500" : ""}
                     />
                     {errors.artist_fee && <p className="text-sm text-red-500 mt-1">{errors.artist_fee}</p>}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Fast honorar betyr at arrangør har til hensikt å betale et fast avtalt beløp, uavhengig av billettsalg, antall gjester eller arrangementets totale inntekter. Dette gir forutsigbarhet for artist/band, men beløpet utbetales utenfor GIGGEN og avtalen er ikke juridisk bindende.
-                    </p>
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
+                        <Info className="h-3 w-3" />
+                        Lær mer
+                        <ChevronDown className="h-3 w-3" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <p className="text-xs text-muted-foreground mt-2 p-2 bg-muted/50 rounded">
+                          Fast honorar betyr at arrangør har til hensikt å betale et fast avtalt beløp, uavhengig av billettsalg eller antall gjester. Beløpet utbetales utenfor GIGGEN og avtalen er ikke juridisk bindende.
+                        </p>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 )}
               </div>

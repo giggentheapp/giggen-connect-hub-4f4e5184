@@ -318,31 +318,63 @@ export const ComprehensiveAgreementReview = ({
 
             <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-lg border border-green-200 dark:border-green-800">
               <h4 className="font-semibold text-lg mb-3">Artist honorar</h4>
-              {booking.door_deal ? <>
-                  <p className="text-lg mb-2">Spiller for døra: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt</p>
-                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+              {booking.door_deal ? (
+                <div className="space-y-2">
+                  <p className="font-medium text-blue-700 dark:text-blue-400">Spiller for døra (andel av inngang)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har valgt en døravtale. Honoraret er avhengig av billettsalg og avklares mellom partene utenfor GIGGEN.
+                  </p>
+                  <p className="text-lg mt-2">Prosentandel: <strong>{booking.door_percentage || 'X'}%</strong> av total dørinntekt</p>
+                  {hasRevenueData && (
+                    <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">Artist får ({booking.door_percentage}%):</span>
                         <span className="text-xl font-bold text-green-700 dark:text-green-400">
                           {artistEarnings.toLocaleString('no-NO')} kr
                         </span>
                       </div>
-                    </div>}
-                </> : booking.by_agreement ? <>
-                  <p className="text-lg">Honorar avtales direkte mellom partene</p>
-                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
+                    </div>
+                  )}
+                </div>
+              ) : booking.by_agreement ? (
+                <div className="space-y-2">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">Avtale utenfor GIGGEN</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har valgt å avtale økonomi utenfor GIGGEN. Ingen honorar eller betalingsvilkår er registrert i appen.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    GIGGEN er kun en ikke-bindende avtalemal og er ikke part i økonomisk oppgjør.
+                  </p>
+                  {hasRevenueData && (
+                    <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
                       <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
-                    </div>}
-                </> : <>
-                  <p className="text-lg mb-2">Fast honorar: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong></p>
-                  {hasRevenueData && <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="font-medium text-green-700 dark:text-green-400">Fast honorar (garantert beløp)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Partene har angitt et fast honorar som felles utgangspunkt. Utbetaling håndteres utenfor GIGGEN.
+                  </p>
+                  <p className="text-lg mt-2">Beløp: <strong>{booking.artist_fee || 'Ikke spesifisert'} kr</strong></p>
+                  {hasRevenueData && (
+                    <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700 text-sm text-muted-foreground">
                       <p>Estimert total inntekt: <strong>{totalRevenue.toLocaleString('no-NO')} kr</strong></p>
-                    </div>}
-                </>}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <p className="text-sm">Sørg for at du forstår og godtar alle priser og honorarordninger.</p>
+            <div className="p-3 bg-muted/50 rounded-md border border-muted">
+              <p className="text-xs text-muted-foreground flex items-start gap-2">
+                <span className="text-base">ℹ️</span>
+                <span>
+                  GIGGEN håndterer per i dag ikke betaling eller juridisk bindende kontrakter.
+                  Avtalen brukes som et felles utgangspunkt og forventningsavklaring.
+                </span>
+              </p>
             </div>
           </div>;
       default:
