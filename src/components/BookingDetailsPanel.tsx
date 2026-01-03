@@ -829,7 +829,7 @@ export const BookingDetailsPanel = ({
                     >
                       <span className="font-medium">Avtale mellom partene</span>
                       <span className="text-xs opacity-70">
-                        Partene blir enige utenfor Giggen. Ikke dokumentert i Giggen.
+                        Partene blir enige om honorar utenfor Giggen. Avtalen dokumenteres ikke i Giggen, men bruker en annen løsning (f.eks. kontrakt, e-post, muntlig avtale).
                       </span>
                     </Button>
                   </div>

@@ -641,7 +641,12 @@ const BookingAgreementReview = () => {
         );
 
       default:
-        return <div>Ukjent seksjon</div>;
+        console.warn('Unknown sectionId in BookingAgreementReview:', sectionId);
+        return (
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-sm">Denne seksjonen er ikke tilgjengelig for denne avtalen.</p>
+          </div>
+        );
     }
   };
 
