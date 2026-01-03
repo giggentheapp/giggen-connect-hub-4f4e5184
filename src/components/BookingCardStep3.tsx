@@ -94,25 +94,7 @@ export const BookingCardStep3 = ({
     }
   };
 
-  const handleViewAgreement = async () => {
-    // Check if this is a teaching booking
-    if (booking.selected_concept_id) {
-      try {
-        const { data: conceptData } = await supabase
-          .from('concepts')
-          .select('concept_type')
-          .eq('id', booking.selected_concept_id)
-          .single();
-        
-        if (conceptData?.concept_type === 'teaching') {
-          navigate(`/booking/${booking.id}/teaching-agreement`);
-          return;
-        }
-      } catch (error) {
-        console.error('Error checking concept type:', error);
-      }
-    }
-    
+  const handleViewAgreement = () => {
     navigate(`/booking/${booking.id}/view`);
   };
 
