@@ -36,12 +36,15 @@ const Auth = () => {
     return false;
   }, []);
 
-  // Handle password reset token on mount
+  // Check for password reset token immediately (before any async operations)
+  const isPasswordResetFlow = checkPasswordResetToken();
+
+  // Handle password reset token on mount - set mode immediately
   useEffect(() => {
-    if (checkPasswordResetToken()) {
+    if (isPasswordResetFlow && authMode !== 'reset-password') {
       goToResetPassword();
     }
-  }, [checkPasswordResetToken, goToResetPassword]);
+  }, [isPasswordResetFlow, authMode, goToResetPassword]);
 
   // Handle all auth state changes in one place
   useAuthEvents({
@@ -88,7 +91,8 @@ const Auth = () => {
   }, [loading, session, navigateToDashboard, isNavigating, checkPasswordResetToken]);
 
   // Show loading state while checking auth or navigating
-  if (loading || isNavigating) {
+  // BUT: Don't show loading if this is a password reset flow - show the form immediately
+  if ((loading || isNavigating) && !isPasswordResetFlow) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
