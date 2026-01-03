@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Image as ImageIcon, Loader2, Info, FileText, Video, Check } from 'lucide-react';
+import { CalendarIcon, Image as ImageIcon, Loader2, Info, FileText, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BookingSelector } from './BookingSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BookingAgreementModal } from '@/components/BookingAgreementModal';
+import { UniversalGallery, GalleryFile } from '@/components/UniversalGallery';
 
 interface EventCreateModalAProps {
   onNext: () => void;
@@ -56,6 +57,7 @@ export const EventCreateModalA = ({
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [galleryVideos, setGalleryVideos] = useState<string[]>([]);
   const [selectedBannerFromGallery, setSelectedBannerFromGallery] = useState<string | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<GalleryFile[]>([]);
 
   useEffect(() => {
     checkTicketingAccess();
@@ -87,7 +89,8 @@ export const EventCreateModalA = ({
             file_url,
             mime_type,
             file_type,
-            title
+            title,
+            thumbnail_path
           )
         `)
         .eq('booking_id', bookingId);
@@ -95,20 +98,45 @@ export const EventCreateModalA = ({
       if (error) throw error;
 
       if (attachments && attachments.length > 0) {
+        // Convert to GalleryFile format
+        const files: GalleryFile[] = attachments
+          .map((attachment: any) => {
+            if (!attachment.portfolio_file) return null;
+            
+            const file = attachment.portfolio_file;
+            let fileUrl = file.file_url;
+            if (!fileUrl && file.file_path) {
+              fileUrl = supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
+            }
+            
+            return {
+              id: file.id || attachment.id,
+              filename: file.filename,
+              file_path: file.file_path,
+              file_url: fileUrl,
+              file_type: file.file_type,
+              mime_type: file.mime_type,
+              title: file.title || file.filename,
+              thumbnail_path: file.thumbnail_path || null,
+            } as GalleryFile;
+          })
+          .filter((file): file is GalleryFile => file !== null);
+
+        // Save gallery files to state
+        setGalleryFiles(files);
+
+        // Separate images and videos for banner selection
         const images: string[] = [];
         const videos: string[] = [];
 
-        attachments.forEach((attachment: any) => {
-          if (attachment.portfolio_file) {
-            const file = attachment.portfolio_file;
-            const publicUrl = file.file_url || 
-              supabase.storage.from('filbank').getPublicUrl(file.file_path).data.publicUrl;
-
-            if (file.mime_type?.startsWith('image/')) {
-              images.push(publicUrl);
-            } else if (file.mime_type?.startsWith('video/')) {
-              videos.push(publicUrl);
-            }
+        files.forEach((file) => {
+          const publicUrl = file.file_url || 
+            supabase.storage.from('filbank').getPublicUrl(file.file_path || '').data.publicUrl;
+          
+          if (file.mime_type?.startsWith('image/')) {
+            images.push(publicUrl);
+          } else if (file.mime_type?.startsWith('video/')) {
+            videos.push(publicUrl);
           }
         });
 
@@ -394,11 +422,11 @@ export const EventCreateModalA = ({
         </div>
 
         {/* Portfolio Images from Booking */}
-        {selectedBooking && (galleryImages.length > 0 || galleryVideos.length > 0) && (
+        {selectedBooking && galleryFiles.length > 0 && (
           <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
             <Label>Bilder og videoer fra booking-avtale</Label>
             
-            {/* Banner Selection from Gallery */}
+            {/* Banner Selection from Gallery - Only show images */}
             {galleryImages.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-sm">Velg bannerbilde</Label>
@@ -438,21 +466,17 @@ export const EventCreateModalA = ({
               </div>
             )}
             
-            {/* Gallery Preview */}
+            {/* Universal Gallery - Shows all files with clickable modal */}
             <div className="space-y-2">
-              <Label className="text-sm">Galleri ({galleryImages.length} bilder, {galleryVideos.length} videoer)</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {galleryImages.slice(0, 4).map((imageUrl, index) => (
-                  <div key={`img-${index}`} className="relative aspect-square rounded overflow-hidden">
-                    <img src={imageUrl} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                {galleryVideos.slice(0, 4 - Math.min(galleryImages.length, 4)).map((videoUrl, index) => (
-                  <div key={`vid-${index}`} className="relative aspect-square rounded overflow-hidden bg-muted flex items-center justify-center">
-                    <Video className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                ))}
-              </div>
+              <Label className="text-sm">
+                Galleri ({galleryFiles.length} {galleryFiles.length === 1 ? 'fil' : 'filer'})
+              </Label>
+              <UniversalGallery
+                files={galleryFiles}
+                gridCols="grid-cols-4"
+                gap="gap-2"
+                showFilename={true}
+              />
             </div>
           </div>
         )}
