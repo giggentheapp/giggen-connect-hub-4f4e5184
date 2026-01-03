@@ -309,19 +309,19 @@ export const BookingAgreement = ({ booking, isOpen, onClose, currentUserId }: Bo
                     <p>• Eventuell kansellering må skje i rimelig tid og i samsvar med gjeldende lover og regler.</p>
                     <p>• Alle priser er inkludert mva der det er aktuelt.</p>
                     <p>• Tekniske spesifikasjoner og hospitality rider må overholdes av arrangør.</p>
-                    <p>• Ved publisering blir arrangementet synlig for allmennheten med offentlig informasjon.</p>
+                    <p>• Bookingavtalen er privat mellom dere to parter.</p>
+                    <p>• Når begge har godkjent, kan dere opprette et offentlig arrangement hvor dere velger hva som skal vises.</p>
                   </div>
                 </div>
                 
-                <div className="p-4 border rounded bg-orange-50 dark:bg-orange-950/20">
-                  <h4 className="font-medium mb-2 text-orange-800 dark:text-orange-200">Viktig informasjon</h4>
-                  <div className="space-y-2 text-sm text-orange-700 dark:text-orange-300">
-                    <p>• Når arrangementet publiseres, vil følgende informasjon bli synlig for allmennheten:</p>
-                    <p className="ml-4">- Tittel og beskrivelse</p>
-                    <p className="ml-4">- Dato, klokkeslett og sted</p>
-                    <p className="ml-4">- Billettpris (hvis satt)</p>
-                    <p className="ml-4">- Portefølje og forventet publikum</p>
-                    <p>• Sensitiv informasjon som musiker honorar, tech spec og hospitality rider forblir privat.</p>
+                <div className="p-4 border rounded bg-blue-50 dark:bg-blue-950/20">
+                  <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">Viktig informasjon</h4>
+                  <div className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                    <p><strong>Bookingavtalen er privat:</strong> Denne avtalen er kun synlig for dere to parter.</p>
+                    <p><strong>Arrangement er offentlig:</strong> Når begge har godkjent, kan dere opprette et offentlig arrangement. 
+                    Da kan dere velge hva som skal vises offentlig (tittel, beskrivelse, dato, sted, billettpris, portefølje, osv.).</p>
+                    <p><strong>Privat informasjon:</strong> Honorar, tech spec, hospitality rider og kontaktinfo forblir alltid privat, 
+                    selv i offentlige arrangementer.</p>
                   </div>
                 </div>
               </CardContent>

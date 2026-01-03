@@ -57,7 +57,7 @@ export const PublicVisibilitySettings = ({ value, onChange, mode = 'booking' }: 
           Offentlig synlighet
         </CardTitle>
         <CardDescription>
-          Velg hva som skal vises i offentlig visning. Det som ikke er krysset av vises kun i forhandlingsfasen mellom dere.
+          Velg hva som skal vises i det offentlige arrangementet. Bookingavtalen forblir privat mellom dere to parter.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
