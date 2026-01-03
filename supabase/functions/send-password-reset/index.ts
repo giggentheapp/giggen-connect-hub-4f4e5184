@@ -111,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Always use production URL for password reset redirects
     // This ensures links work for all users regardless of where they request reset
-    const PRODUCTION_URL = 'https://giggen.no';
+    const PRODUCTION_URL = 'https://giggen.org';
     const redirectTo = `${PRODUCTION_URL}/auth`;
     
     console.log("Sending password reset email with redirectTo:", redirectTo);
