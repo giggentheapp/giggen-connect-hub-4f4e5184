@@ -13,11 +13,13 @@ interface UpcomingEvent {
   audience_estimate?: number;
   status: string;
   created_at: string;
+  source: 'booking' | 'market';
+  agreement_booking_id?: string | null;
   // For identifying user role in the event
   is_sender: boolean;
   is_receiver: boolean;
   is_event_admin: boolean;
-  is_from_booking: boolean; // True if this is from a booking (has agreement)
+  is_from_booking: boolean; // True if this event has a booking agreement
   is_public_after_approval?: boolean;
   has_paid_tickets?: boolean;
 }
@@ -76,12 +78,14 @@ export const useUpcomingEvents = (userId: string) => {
         audience_estimate: booking.audience_estimate,
         status: booking.status,
         created_at: booking.created_at,
+        source: 'booking' as const,
+        agreement_booking_id: booking.id,
         is_sender: booking.sender_id === userId,
         is_receiver: booking.receiver_id === userId,
         is_event_admin: booking.event_admin_id === userId,
-        is_from_booking: true, // All bookings have agreements
-        is_public_after_approval: booking.is_public_after_approval,
-        has_paid_tickets: false
+        is_from_booking: true,
+        is_public_after_approval: Boolean(booking.is_public_after_approval),
+        has_paid_tickets: false,
       }));
 
       // Transform market events to upcoming events format
@@ -97,12 +101,14 @@ export const useUpcomingEvents = (userId: string) => {
         audience_estimate: event.expected_audience,
         status: 'upcoming',
         created_at: event.created_at,
+        source: 'market' as const,
+        agreement_booking_id: event.booking_id ?? null,
         is_sender: false,
         is_receiver: false,
         is_event_admin: false,
-        is_from_booking: false, // Market events don't have booking agreements
-        is_public_after_approval: event.is_public,
-        has_paid_tickets: event.has_paid_tickets || false
+        is_from_booking: Boolean(event.booking_id),
+        is_public_after_approval: Boolean(event.is_public),
+        has_paid_tickets: event.has_paid_tickets || false,
       }));
 
       // Combine and sort by date

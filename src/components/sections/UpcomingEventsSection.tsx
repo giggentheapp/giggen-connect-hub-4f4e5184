@@ -167,9 +167,9 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4 pb-4">
             {events.map((event) => {
             const isUpdating = updatingIds.has(event.id);
-            const isFromMarket = !event.is_from_booking;
-            const currentVisibility = event.is_public_after_approval;
-            
+            const isMarketEvent = event.source === 'market';
+            const hasAgreement = Boolean(event.agreement_booking_id);
+            const currentVisibility = Boolean(event.is_public_after_approval);
             
             return (
               <Card key={event.id} className="hover:border-primary/50 transition-all group">
@@ -239,7 +239,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         {event.is_sender && 'Du er sender'}
                         {event.is_receiver && !event.is_sender && 'Du er mottaker'}
                         {event.is_event_admin && !event.is_sender && !event.is_receiver && 'Du er event-admin'}
-                        {isFromMarket && 'Admin-opprettet'}
+                        {isMarketEvent && 'Admin-opprettet'}
                       </span>
                       <Badge variant="outline" className="text-xs">
                         Kommende
@@ -262,19 +262,19 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         </div>
                         <Switch
                           checked={currentVisibility}
-                          onCheckedChange={() => handleToggleVisibility(event.id, currentVisibility, isFromMarket)}
+                          onCheckedChange={() => handleToggleVisibility(event.id, currentVisibility, isMarketEvent)}
                           disabled={isUpdating}
                         />
                       </div>
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2">
-                        {event.is_from_booking && (
+                        {hasAgreement && event.agreement_booking_id && (
                           <Button
                             variant="outline"
                             size="sm"
                             className="w-full text-xs"
-                            onClick={() => navigate(`/booking/${event.id}/view`)}
+                            onClick={() => navigate(`/booking/${event.agreement_booking_id}/view`)}
                             disabled={isUpdating}
                           >
                             <FileText className="h-3 w-3 mr-1" />
@@ -284,7 +284,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         <Button
                           variant="outline"
                           size="sm"
-                          className={event.is_from_booking ? "w-full text-xs" : "col-span-2 text-xs"}
+                          className={hasAgreement ? "w-full text-xs" : "col-span-2 text-xs"}
                           onClick={() => navigate(`/arrangement/${event.id}`)}
                           disabled={isUpdating}
                         >
@@ -298,7 +298,7 @@ export const UpcomingEventsSection = ({ profile }: UpcomingEventsSectionProps) =
                         variant="outline"
                         size="sm"
                         className="w-full text-xs"
-                        onClick={() => handleMoveToHistory(event.id, event.title, isFromMarket)}
+                        onClick={() => handleMoveToHistory(event.id, event.title, isMarketEvent)}
                         disabled={isUpdating}
                       >
                         <Archive className="h-3 w-3 mr-1" />
