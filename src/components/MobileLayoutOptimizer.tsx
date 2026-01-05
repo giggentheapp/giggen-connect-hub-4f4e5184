@@ -22,9 +22,31 @@ export const MobileLayoutOptimizer = ({ children }: MobileLayoutOptimizerProps) 
 
       // Add mobile-specific classes to body
       document.body.classList.add('mobile-optimized');
+      document.documentElement.classList.add('mobile-optimized');
+      
+      // Add theme-color meta for status bar
+      let themeColor = document.querySelector('meta[name="theme-color"]');
+      if (!themeColor) {
+        themeColor = document.createElement('meta');
+        themeColor.setAttribute('name', 'theme-color');
+        document.getElementsByTagName('head')[0].appendChild(themeColor);
+      }
+      themeColor.setAttribute('content', '#ffffff');
+      themeColor.setAttribute('media', '(prefers-color-scheme: light)');
+      
+      // Dark mode theme color
+      let themeColorDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
+      if (!themeColorDark) {
+        themeColorDark = document.createElement('meta');
+        themeColorDark.setAttribute('name', 'theme-color');
+        themeColorDark.setAttribute('media', '(prefers-color-scheme: dark)');
+        document.getElementsByTagName('head')[0].appendChild(themeColorDark);
+      }
+      themeColorDark.setAttribute('content', '#171717');
       
       // Prevent zoom on input focus for iOS
       const style = document.createElement('style');
+      style.id = 'mobile-optimizer-styles';
       style.innerHTML = `
         @media screen and (max-width: 768px) {
           /* Use dynamic viewport height to adapt to address bar */
@@ -37,15 +59,41 @@ export const MobileLayoutOptimizer = ({ children }: MobileLayoutOptimizerProps) 
             height: 100dvh;
             overflow: auto;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
           }
           
+          /* Prevent zoom on input focus */
           input[type="text"], 
           input[type="email"], 
           input[type="password"], 
-          input[type="tel"], 
-          textarea {
+          input[type="tel"],
+          input[type="number"],
+          input[type="search"],
+          input[type="url"],
+          textarea,
+          select {
             font-size: 16px !important;
             transform: scale(1) !important;
+          }
+          
+          /* Ensure proper safe area handling */
+          .safe-area-top {
+            padding-top: env(safe-area-inset-top);
+          }
+          
+          .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+          
+          /* Smooth scrolling */
+          * {
+            scroll-behavior: smooth;
+          }
+          
+          /* Better touch scrolling */
+          .scroll-container {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
           }
         }
       `;
@@ -53,7 +101,11 @@ export const MobileLayoutOptimizer = ({ children }: MobileLayoutOptimizerProps) 
 
       return () => {
         document.body.classList.remove('mobile-optimized');
-        document.head.removeChild(style);
+        document.documentElement.classList.remove('mobile-optimized');
+        const existingStyle = document.getElementById('mobile-optimizer-styles');
+        if (existingStyle) {
+          document.head.removeChild(existingStyle);
+        }
       };
     }
   }, [isMobile]);

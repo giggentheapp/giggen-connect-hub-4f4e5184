@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { User, Search, Ticket, Home, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -320,38 +321,83 @@ export const UnifiedSidePanel = ({
         </div>
       </main>
 
-      {/* Mobile Navigation */}
-      {isMobile && <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+      {/* Mobile Navigation - Industry Standard */}
+      {isMobile && (
+        <nav className="mobile-nav">
           <div className="flex items-center justify-around h-16 px-2">
-            {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
-          const showPlusButton = item.id === 'profile';
-          
-          return (
-            <Fragment key={item.id}>
-              <div className="relative flex-1">
-                <button onClick={() => handleNavigation(item.id)} className={cn('flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-0 w-full', isActive ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50')}>
-                  <Icon className="h-5 w-5" />
-                </button>
-              </div>
-              {showPlusButton && (
-                <div className="relative flex-shrink-0 mx-1">
-                  <button
-                    onClick={() => setShowQuickModal(true)}
-                    className="h-12 w-12 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition"
-                    title="Opprett nytt"
-                    aria-label="Opprett nytt"
+            {navItems.map((item, index) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              const showPlusButton = item.id === 'profile';
+              
+              return (
+                <Fragment key={item.id}>
+                  <motion.button
+                    onClick={() => handleNavigation(item.id)}
+                    className={cn(
+                      'relative flex flex-col items-center justify-center',
+                      'flex-1 py-2 px-1 min-h-[52px]',
+                      'touch-manipulation'
+                    )}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    <Plus className="h-6 w-6" />
-                  </button>
-                </div>
-              )}
-            </Fragment>
-          );
-        })}
+                    <motion.div
+                      className={cn(
+                        'relative flex items-center justify-center',
+                        'w-12 h-8 rounded-2xl'
+                      )}
+                      animate={{
+                        backgroundColor: isActive ? 'hsl(var(--primary) / 0.12)' : 'transparent'
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Icon 
+                        className={cn(
+                          "h-6 w-6 transition-colors duration-200",
+                          isActive ? "text-primary" : "text-muted-foreground"
+                        )} 
+                      />
+                    </motion.div>
+                    
+                    {/* Active indicator pill - Material Design 3 style */}
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          className="absolute bottom-1 w-1 h-1 rounded-full bg-primary"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          layoutId="mobileNavIndicator"
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                  
+                  {showPlusButton && (
+                    <motion.button
+                      onClick={() => setShowQuickModal(true)}
+                      className={cn(
+                        "relative flex-shrink-0 mx-1",
+                        "h-14 w-14 rounded-full",
+                        "bg-primary text-primary-foreground",
+                        "flex items-center justify-center",
+                        "shadow-lg shadow-primary/30",
+                        "touch-manipulation"
+                      )}
+                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      aria-label="Opprett nytt"
+                    >
+                      <Plus className="h-7 w-7" />
+                    </motion.button>
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
-        </nav>}
+        </nav>
+      )}
 
       {/* Modals */}
       <GlobalQuickCreateModal

@@ -638,3 +638,250 @@ All colors MUST be HSL.
     margin-bottom: 12px;
   }
 }
+
+/* =============================================
+   INDUSTRY STANDARD MOBILE OPTIMIZATIONS
+   ============================================= */
+
+/* Safe area insets for notched devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+/* Touch target optimization - minimum 44x44px (Apple HIG) / 48x48dp (Material) */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements meet minimum touch target */
+  button, 
+  a, 
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Larger touch targets for common actions */
+  .touch-target-lg {
+    min-height: 52px;
+    min-width: 52px;
+  }
+  
+  /* Remove tap highlight on iOS */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improve touch responsiveness */
+  .touch-action-none {
+    touch-action: none;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Prevent text selection during swipe */
+  .no-select-swipe {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* Momentum scrolling containers */
+.scroll-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.scroll-container-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+.scroll-container-x > * {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbars while maintaining functionality */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pull-to-refresh styling */
+.pull-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+/* Bottom navigation safe area */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: hsl(var(--card) / 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid hsl(var(--border));
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Content padding for mobile nav */
+.has-mobile-nav {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0));
+}
+
+/* Swipeable drawer handle */
+.drawer-handle {
+  width: 36px;
+  height: 4px;
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 2px;
+  margin: 8px auto 4px;
+}
+
+/* Active state animations */
+@media (max-width: 768px) {
+  .active-scale {
+    transition: transform 0.1s ease-out;
+  }
+  
+  .active-scale:active {
+    transform: scale(0.97);
+  }
+  
+  /* Smooth page transitions */
+  .page-transition {
+    animation: page-enter 0.3s ease-out;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Improved form inputs for mobile */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  textarea,
+  select {
+    /* Prevent zoom on focus (iOS) */
+    font-size: 16px !important;
+    
+    /* Larger touch target */
+    min-height: 48px;
+    padding: 12px 16px;
+    
+    /* Better visual appearance */
+    border-radius: 12px;
+    
+    /* Remove iOS styling */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Date/time inputs */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+}
+
+/* Card touch feedback */
+.card-touch {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+@media (max-width: 768px) {
+  .card-touch:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px hsl(var(--foreground) / 0.1);
+  }
+}
+
+/* Floating action button positioning */
+.fab {
+  position: fixed;
+  z-index: 40;
+  right: 16px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0));
+}
+
+/* Status bar area awareness */
+.status-bar-aware {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Keyboard avoiding view helper */
+.keyboard-avoid {
+  transition: transform 0.25s ease-out;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-nav {
+    border-top-width: 2px;
+  }
+  
+  button,
+  a {
+    outline: 2px solid transparent;
+  }
+  
+  button:focus,
+  a:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
