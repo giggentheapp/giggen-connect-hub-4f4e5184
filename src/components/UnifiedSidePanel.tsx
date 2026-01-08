@@ -323,8 +323,8 @@ export const UnifiedSidePanel = ({
 
       {/* Mobile Navigation - Industry Standard */}
       {isMobile && (
-        <nav className="mobile-nav">
-          <div className="flex items-center justify-around h-16 px-2">
+        <nav className="mobile-nav mobile-safe-bottom">
+          <div className="flex items-center justify-around h-16 px-2 mobile-safe-x">
             {navItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
