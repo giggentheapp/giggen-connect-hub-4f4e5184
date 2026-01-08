@@ -549,6 +549,36 @@ All colors MUST be HSL.
   }
 }
 
+/* Hide scrollbar but allow scroll */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Explore cards compact mobile styling */
+.explore-card-compact {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 768px) {
+  .explore-card-compact {
+    border-radius: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Better image aspect ratio for explore cards */
+.explore-image {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
 /* Safari and mobile compatibility fixes */
 .safari-compatible {
   /* Fix Safari flexbox issues */
